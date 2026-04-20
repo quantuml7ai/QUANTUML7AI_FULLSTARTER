@@ -1,129 +1,129 @@
 {
-  "file": "C:\\Users\\staro\\Downloads\\Heap-20260419T225243.heapsnapshot",
-  "generatedAt": "2026-04-19T19:55:02.042Z",
+  "file": "C:\\Users\\staro\\Downloads\\Heap-20260417T035410.heapsnapshot",
+  "generatedAt": "2026-04-18T03:00:37.456Z",
   "snapshot": {
-    "nodeCount": 2446399,
-    "edgeCount": 12711571,
-    "extraNativeBytesMB": 11.12
+    "nodeCount": 1344181,
+    "edgeCount": 6580387,
+    "extraNativeBytesMB": 6.46
   },
-  "fileSizeMB": 252.19,
+  "fileSizeMB": 129.73,
   "heapDiscipline": {
-    "totalSelfSizeMB": 338.81,
-    "detachedNodes": 3234,
-    "detachedSelfSizeMB": 0.58,
+    "totalSelfSizeMB": 75.92,
+    "detachedNodes": 712,
+    "detachedSelfSizeMB": 0.13,
     "ratios": {
-      "nativeToSelfRatio": 0.6409,
-      "detachedToSelfRatio": 0.0017,
-      "detachedToNativeRatio": 0.0027
+      "nativeToSelfRatio": 0.3045,
+      "detachedToSelfRatio": 0.0018,
+      "detachedToNativeRatio": 0.0058
     },
     "topTypesBySelfSize": [
       {
         "type": "native",
-        "count": 112263,
-        "selfSize": 227688702,
-        "detachedCount": 3234,
-        "detachedSelfSize": 608568,
-        "maxSelfSize": 35352224,
-        "selfSizeMB": 217.14,
-        "detachedSelfSizeMB": 0.58,
-        "maxSelfSizeKB": 34523.66
-      },
-      {
-        "type": "string",
-        "count": 183528,
-        "selfSize": 36392972,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 5406008,
-        "selfSizeMB": 34.71,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 5279.3
+        "count": 54038,
+        "selfSize": 24236479,
+        "detachedCount": 712,
+        "detachedSelfSize": 141056,
+        "maxSelfSize": 4954534,
+        "selfSizeMB": 23.11,
+        "detachedSelfSizeMB": 0.13,
+        "maxSelfSizeKB": 4838.41
       },
       {
         "type": "code",
-        "count": 305473,
-        "selfSize": 24352976,
+        "count": 205778,
+        "selfSize": 14675616,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 154496,
-        "selfSizeMB": 23.22,
+        "selfSizeMB": 14,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 150.88
       },
       {
         "type": "closure",
-        "count": 818036,
-        "selfSize": 22208716,
+        "count": 537473,
+        "selfSize": 13562960,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 32,
-        "selfSizeMB": 21.18,
+        "selfSizeMB": 12.93,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.03
       },
       {
-        "type": "array",
-        "count": 51822,
-        "selfSize": 15818444,
+        "type": "string",
+        "count": 130809,
+        "selfSize": 7904252,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 131092,
-        "selfSizeMB": 15.09,
+        "maxSelfSize": 381176,
+        "selfSizeMB": 7.54,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 128.02
+        "maxSelfSizeKB": 372.24
+      },
+      {
+        "type": "array",
+        "count": 23923,
+        "selfSize": 5770512,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 98336,
+        "selfSizeMB": 5.5,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 96.03
       },
       {
         "type": "object",
-        "count": 341150,
-        "selfSize": 9843404,
+        "count": 164453,
+        "selfSize": 5656568,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 10056,
-        "selfSizeMB": 9.39,
+        "selfSizeMB": 5.39,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 9.82
       },
       {
         "type": "object shape",
-        "count": 150550,
-        "selfSize": 9253724,
+        "count": 72184,
+        "selfSize": 4087336,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 12316,
-        "selfSizeMB": 8.83,
+        "maxSelfSize": 10712,
+        "selfSizeMB": 3.9,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 12.03
+        "maxSelfSizeKB": 10.46
       },
       {
         "type": "hidden",
-        "count": 409422,
-        "selfSize": 8569372,
+        "count": 115482,
+        "selfSize": 3043348,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 49160,
-        "selfSizeMB": 8.17,
+        "selfSizeMB": 2.9,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 48.01
       },
       {
         "type": "concatenated string",
-        "count": 46187,
-        "selfSize": 923740,
+        "count": 27940,
+        "selfSize": 558800,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 20,
-        "selfSizeMB": 0.88,
+        "selfSizeMB": 0.53,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.02
       },
       {
         "type": "number",
-        "count": 25247,
-        "selfSize": 155016,
+        "count": 9777,
+        "selfSize": 56964,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 12,
-        "selfSizeMB": 0.15,
+        "selfSizeMB": 0.05,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.01
       }
@@ -131,48 +131,48 @@
     "topTypesByDetachedSize": [
       {
         "type": "native",
-        "count": 112263,
-        "selfSize": 227688702,
-        "detachedCount": 3234,
-        "detachedSelfSize": 608568,
-        "maxSelfSize": 35352224,
-        "selfSizeMB": 217.14,
-        "detachedSelfSizeMB": 0.58,
-        "maxSelfSizeKB": 34523.66
+        "count": 54038,
+        "selfSize": 24236479,
+        "detachedCount": 712,
+        "detachedSelfSize": 141056,
+        "maxSelfSize": 4954534,
+        "selfSizeMB": 23.11,
+        "detachedSelfSizeMB": 0.13,
+        "maxSelfSizeKB": 4838.41
       }
     ]
   },
   "runtimeGroups": {
     "mediaDom": {
-      "total": 436,
+      "total": 100,
       "counts": {
-        "htmlvideoelement": 95,
-        "htmlaudioelement": 23,
-        "htmliframeelement": 318
+        "htmlvideoelement": 24,
+        "htmlaudioelement": 19,
+        "htmliframeelement": 57
       }
     },
     "observers": {
-      "total": 45,
+      "total": 39,
       "counts": {
-        "intersectionobserver": 27,
-        "resizeobserver": 18
+        "intersectionobserver": 22,
+        "resizeobserver": 17
       }
     },
     "forumRuntime": {
-      "total": 118,
+      "total": 21,
       "counts": {
-        "__forum": 29,
-        "forumads": 68,
-        "useforummediacoordinator": 21
+        "__forum": 17,
+        "forumads": 4,
+        "useforummediacoordinator": 0
       }
     },
     "sdkRuntimes": {
-      "total": 5006,
+      "total": 137,
       "counts": {
-        "web3modal": 2914,
-        "wagmi": 1789,
-        "youtube": 258,
-        "tiktok": 45
+        "web3modal": 14,
+        "wagmi": 23,
+        "youtube": 73,
+        "tiktok": 27
       }
     }
   },
@@ -184,13 +184,13 @@
     "detachedLeakElevated": false
   },
   "calibrationSignals": {
-    "nodeCount": 2446399,
-    "edgeCount": 12711571,
-    "htmlVideoKeywordHits": 95,
-    "htmlAudioKeywordHits": 23,
-    "htmlIframeKeywordHits": 318,
-    "youtubeKeywordHits": 258,
-    "wagmiKeywordHits": 1789,
-    "web3modalKeywordHits": 2914
+    "nodeCount": 1344181,
+    "edgeCount": 6580387,
+    "htmlVideoKeywordHits": 24,
+    "htmlAudioKeywordHits": 19,
+    "htmlIframeKeywordHits": 57,
+    "youtubeKeywordHits": 73,
+    "wagmiKeywordHits": 23,
+    "web3modalKeywordHits": 14
   }
 }

@@ -1068,7 +1068,6 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
-  const mutedRef = useRef(true);
   const adPlayEventTsRef = useRef(0);
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if (!isBrowser()) return;
@@ -1112,10 +1111,6 @@ const slotCssVars = {
   useEffect(() => {
     shouldPlayRef.current = shouldPlay;
   }, [shouldPlay]);
-
-  useEffect(() => {
-    mutedRef.current = !!muted;
-  }, [muted]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1538,7 +1533,6 @@ const slotCssVars = {
     if (media.kind !== 'youtube' || !media.src) return;
 
     let cancelled = false;
-    let localPlayer = null;
 
     function createPlayer() {
       if (cancelled) return;
@@ -1550,7 +1544,7 @@ const slotCssVars = {
           playerVars: {
             autoplay: 0,
             controls: 0,
-            mute: mutedRef.current ? 1 : 0,
+            mute: muted ? 1 : 0,
             rel: 0,
             fs: 0,
             modestbranding: 1,
@@ -1563,7 +1557,7 @@ const slotCssVars = {
               if (cancelled) return;
               ytPlayerRef.current = ev.target;
               try {
-                if (mutedRef.current) ev.target.mute?.();
+                if (muted) ev.target.mute?.();
                 else ev.target.unMute?.();
                 // Играем только если реально в фокусе внимания
                 if (shouldPlayRef.current) ev.target.playVideo?.();
@@ -1573,7 +1567,6 @@ const slotCssVars = {
           },
         });
 
-        localPlayer = player;
         ytPlayerRef.current = player;
       } catch {}
     }
@@ -1596,12 +1589,8 @@ const slotCssVars = {
 
     return () => {
       cancelled = true;
-      try { localPlayer?.destroy?.(); } catch {}
-      try {
-        if (ytPlayerRef.current === localPlayer) ytPlayerRef.current = null;
-      } catch {}
     };
-  }, [media.kind, media.src]);
+  }, [media, muted]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video

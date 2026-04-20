@@ -8,27 +8,14 @@ import { createEnableVideoControlsOnTap } from './videoControls'
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
 export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-const MEDIA_BOOT_MUTED_SENTINEL = '__forumMediaBootMutedApplied'
-
-export function ensureBootMutedPref() {
-  try {
-    if (typeof window === 'undefined') return false
-    if (window[MEDIA_BOOT_MUTED_SENTINEL]) return false
-    window[MEDIA_BOOT_MUTED_SENTINEL] = true
-    const defaultMutedPref = String(1)
-    localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
-    return true
-  } catch {
-    return false
-  }
-}
-
 ;(() => {
   // На каждый новый перезапуск страницы стартуем в muted,
   // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
-    ensureBootMutedPref()
+    if (typeof window === 'undefined') return
+    const defaultMutedPref = String(1)
+    if (localStorage.getItem(MEDIA_MUTED_KEY) == null) localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
+    if (localStorage.getItem(MEDIA_VIDEO_MUTED_KEY) == null) localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
   } catch {}
 })()
 
@@ -332,7 +319,6 @@ const canRestoreLoad = () => {
         typeof HTMLMediaElement !== 'undefined' &&
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
       if (readyStateNow === 0 || isNetworkEmpty) {
-        if (isPostFeedVideo) return
         if (!canRestoreLoad()) return
         el.dataset.__loadPending = '1'
         el.dataset.__warmReady = '0'
@@ -360,7 +346,6 @@ try {
   try {
     el.dataset.__loadPending = '1'
     el.dataset.__warmReady = '0'
-    el.dataset.__loadPendingSince = String(nowTs)
     el.setAttribute('src', src)
   } catch {}
   try {
@@ -389,9 +374,20 @@ try {
   const isLoading =
     typeof HTMLMediaElement !== 'undefined' &&
     networkState === HTMLMediaElement.NETWORK_LOADING
- 
+
+  const shouldKickPostRestore =
+    isPostFeedVideo &&
+    (
+      String(el.dataset?.__prewarm || '') === '1' ||
+      String(el.dataset?.__active || '') === '1' ||
+      String(el.dataset?.__resident || '') === '1'
+    )
+
   if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
-} catch {} 
+  if (shouldKickPostRestore && !isLoading && canRestoreLoad()) {
+    el.load?.()
+  }
+} catch {}
 }
 
 export function __hasLazyVideoSourceWithoutSrc(el) {

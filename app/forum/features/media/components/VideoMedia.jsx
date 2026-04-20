@@ -536,7 +536,7 @@ React.useLayoutEffect(() => {
 
     const effectivePreload =
       isPostVideo
-        ? (wantsWarm ? 'auto' : preloadMode)
+        ? 'auto'
         : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
 
     el.preload = effectivePreload
@@ -583,8 +583,34 @@ React.useLayoutEffect(() => {
       delete el.dataset.__skipMutePersistUntil
       delete el.dataset.__persistMuteUntil
       delete el.dataset.__lastManualMuteTs
+      delete el.dataset.__bootAttachedSrc
+      delete el.dataset.__bootMetadataPrimed
     } catch {}
   }
+
+  try {
+    const shouldBootstrapAttach = isPostVideo && !!s
+    const currentSrcAttr = String(el.getAttribute('src') || '')
+
+    if (shouldBootstrapAttach && currentSrcAttr !== s) {
+      el.setAttribute('src', s)
+      el.dataset.__bootAttachedSrc = s
+      el.dataset.__prewarm = '1'
+      el.dataset.__resident = '1'
+      el.preload = 'auto'
+
+      if (
+        Number(el.readyState || 0) === 0 &&
+        String(el.dataset?.__loadPending || '') !== '1'
+      ) {
+        el.dataset.__bootMetadataPrimed = '1'
+        el.dataset.__loadPending = '1'
+        el.dataset.__warmReady = '0'
+        el.dataset.__loadPendingSince = String(Date.now())
+        el.load?.()
+      }
+    }
+  } catch {}
 }, [
   autoPlay,
   clearNativeControlsForPost,
@@ -1110,7 +1136,8 @@ const onVideoLoaded = React.useCallback(() => {
   ref={ref}
   data-forum-media={dataForumMedia}
   data-forum-video={dataForumVideo}
-  playsInline={playsInline} 
+  playsInline={playsInline}
+  defaultMuted={typeof defaultMutedProp === 'boolean' ? defaultMutedProp : (isPostVideo ? true : !!autoPlay)}
   preload={renderPreload}
   controls={isPostVideo ? undefined : renderControls}
   autoPlay={autoPlay}
