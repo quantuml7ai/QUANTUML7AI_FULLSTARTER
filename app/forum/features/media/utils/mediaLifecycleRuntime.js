@@ -13,9 +13,9 @@ export const MEDIA_MUTED_EVENT = 'forum:media-mute'
   // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
     if (typeof window === 'undefined') return
-    const defaultMutedPref = String(1)
-    if (localStorage.getItem(MEDIA_MUTED_KEY) == null) localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
-    if (localStorage.getItem(MEDIA_VIDEO_MUTED_KEY) == null) localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
+const defaultMutedPref = String(1)
+localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
+localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
   } catch {}
 })()
 
