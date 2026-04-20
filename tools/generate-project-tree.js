@@ -6,7 +6,7 @@ const path = require('path')
 const repoRoot = process.cwd()
 const outputPath = path.join(repoRoot, 'PROJECT_TREE.md')
 const ignoredTopDirs = ['.git', '.next', 'node_modules']
-const sourceExts = new Set(['.js', '.jsx', '.mjs', '.cjs', '.json', '.ts', '.tsx'])
+const sourceExts = new Set(['.js', '.jsx', '.mjs', '.cjs', '.json'])
 const assetExts = new Set([
   '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.mp3', '.wav', '.ogg', '.mp4', '.webm', '.ico', '.glb',
   '.gltf', '.bin', '.txt', '.json', '.woff', '.woff2', '.ttf', '.otf', '.pdf',
@@ -48,7 +48,7 @@ function resolveLocalImport(fromFile, specifier, fileSet) {
     base = path.posix.normalize(path.posix.join(fromDir, specifier))
   } else if (specifier.startsWith('@/')) {
     base = path.posix.normalize(specifier.slice(2))
-  } else if (/^(app|components|lib|tools|public|src|config)\//.test(specifier)) {
+  } else if (/^(app|components|lib|tools|public)\//.test(specifier)) {
     base = path.posix.normalize(specifier)
   } else {
     return null

@@ -42,11 +42,8 @@
     "components/**/*.js",
     "components/**/*.jsx",
     "lib/**/*.js",
-    "src/**/*.js",
-    "src/**/*.jsx",
     "tests/**/*.js",
     "tests/**/*.jsx",
-    "tools/**/*.js",
     "tools/**/*.mjs",
     "vitest.config.mjs",
     ".next/types/**/*.ts"

@@ -561,8 +561,6 @@ export default function UserRecommendationsRail({
       className: 'forumDividerRail forumDividerRail--gold recommendationsRailDivider',
       'aria-hidden': 'true',
     }),
-    React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: styles },
-    }),
+    React.createElement('style', { jsx: true }, styles),
   )
 }

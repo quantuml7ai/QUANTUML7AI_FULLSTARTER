@@ -7,15 +7,16 @@ const normalizedRootDir = rootDir.replace(/\\/g, '/')
 
 export default defineConfig({
   resolve: {
-    alias: {
-      '@': normalizedRootDir,
-      '@/': `${normalizedRootDir}/`,
-    },
+    alias: [
+      {
+        find: /^@\//,
+        replacement: `${normalizedRootDir}/`,
+      },
+    ],
   },
   test: {
     alias: {
       '@': normalizedRootDir,
-      '@/': `${normalizedRootDir}/`,
     },
     css: false,
     pool: 'threads',

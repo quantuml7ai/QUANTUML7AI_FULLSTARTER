@@ -330,7 +330,8 @@ export default function VideoMedia({
   const isPostVideo = String(dataForumVideo || '') === 'post'
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
   const renderControls = isPostVideo ? false : controls
-  const renderPreload = dataForumVideo === 'post' ? undefined : preload 
+  const renderPreload = dataForumVideo === 'post' ? undefined : preload
+  const renderPoster = dataForumVideo === 'post' ? undefined : poster
 
   const readMuted = React.useCallback(() => {
     try {
@@ -511,116 +512,79 @@ export default function VideoMedia({
     })
   }, [])
 
-React.useLayoutEffect(() => {
-  const el = ref.current
-  if (!el) return
-
-  const s = String(src || '')
-  const mediaKey = s
-  const prevMediaKey = String(mediaKeyRef.current || '')
-  const isNewMediaNode = prevMediaKey !== mediaKey
-
-  mediaKeyRef.current = mediaKey
-  el.dataset.__src = s
-
-  try {
-    if (s) el.setAttribute('data-src', s)
-    else el.removeAttribute('data-src')
-  } catch {}
-
-  try {
-    const wantsWarm =
-      el.dataset?.__prewarm === '1' ||
-      el.dataset?.__active === '1' ||
-      el.dataset?.__resident === '1'
-
-    const effectivePreload =
-      isPostVideo
-        ? 'auto'
-        : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
-
-    el.preload = effectivePreload
-  } catch {}
-
-  clearNativeControlsForPost()
-
-  try {
-    if (playsInline) {
-      el.setAttribute('playsinline', '')
-      el.setAttribute('webkit-playsinline', '')
-    }
-  } catch {}
-
-  try {
-    const initialMuted = readMuted()
-    const fallbackMuted =
-      typeof defaultMutedProp === 'boolean'
-        ? defaultMutedProp
-        : (isPostVideo ? true : !!autoPlay)
-
-    const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : fallbackMuted
-
-    el.muted = !!nextMuted
-    el.defaultMuted = !!nextMuted
-    if (nextMuted) el.setAttribute('muted', '')
-    else el.removeAttribute('muted')
-    setMutedState(!!nextMuted)
-  } catch {}
-
-  if (isNewMediaNode) {
+  React.useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const s = String(src || '')
+    const mediaKey = s || String(poster || '')
+    const prevMediaKey = String(mediaKeyRef.current || '')
+    const isNewMediaNode = prevMediaKey !== mediaKey
+    mediaKeyRef.current = mediaKey
+    el.dataset.__src = s
     try {
-      delete el.dataset.__resumeTime
-      delete el.dataset.__candidateBoostTs
-      delete el.dataset.__recoverTry
-      delete el.dataset.__readyRetryCount
-      delete el.dataset.__loadPendingSince
-      delete el.dataset.__userPaused
-      delete el.dataset.__userPausedAt
-      delete el.dataset.__suppressedPlayUntil
-      delete el.dataset.__manualLeaseUntil
-      delete el.dataset.__userGestureUntil
-      delete el.dataset.__autoplayFallbackMuted
-      delete el.dataset.__skipMutePersistUntil
-      delete el.dataset.__persistMuteUntil
-      delete el.dataset.__lastManualMuteTs
-      delete el.dataset.__bootAttachedSrc
-      delete el.dataset.__bootMetadataPrimed
+      if (s) el.setAttribute('data-src', s)
+      else el.removeAttribute('data-src')
     } catch {}
-  }
-
-  try {
-    const shouldBootstrapAttach = isPostVideo && !!s
-    const currentSrcAttr = String(el.getAttribute('src') || '')
-
-    if (shouldBootstrapAttach && currentSrcAttr !== s) {
-      el.setAttribute('src', s)
-      el.dataset.__bootAttachedSrc = s
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
-      el.preload = 'auto'
-
-      if (
-        Number(el.readyState || 0) === 0 &&
-        String(el.dataset?.__loadPending || '') !== '1'
-      ) {
-        el.dataset.__bootMetadataPrimed = '1'
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
-        el.dataset.__loadPendingSince = String(Date.now())
-        el.load?.()
+    try {
+      const wantsWarm = el.dataset?.__prewarm === '1' || el.dataset?.__active === '1'
+      const effectivePreload = wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode
+      el.preload = effectivePreload
+    } catch {}
+    clearNativeControlsForPost()
+    try {
+      if (playsInline) {
+        el.setAttribute('playsinline', '')
+        el.setAttribute('webkit-playsinline', '')
       }
+    } catch {}
+    try {
+      const initialMuted = readMuted()
+      const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay
+      const nextMuted = typeof initialMuted === 'boolean' ? initialMuted : fallbackMuted
+      el.muted = !!nextMuted
+      el.defaultMuted = !!nextMuted
+      if (nextMuted) el.setAttribute('muted', '')
+      else el.removeAttribute('muted')
+      setMutedState(!!nextMuted)
+    } catch {}
+    if (isNewMediaNode) {
+      try {
+        delete el.dataset.__resumeTime
+        delete el.dataset.__candidateBoostTs
+        delete el.dataset.__recoverTry
+        delete el.dataset.__readyRetryCount
+        delete el.dataset.__loadPendingSince
+        delete el.dataset.__userPaused
+        delete el.dataset.__userPausedAt
+        delete el.dataset.__suppressedPlayUntil
+        delete el.dataset.__manualLeaseUntil
+        delete el.dataset.__userGestureUntil
+        delete el.dataset.__autoplayFallbackMuted
+        delete el.dataset.__skipMutePersistUntil
+        delete el.dataset.__persistMuteUntil
+        delete el.dataset.__lastManualMuteTs
+      } catch {}
     }
-  } catch {}
-}, [
-  autoPlay,
-  clearNativeControlsForPost,
-  defaultMutedProp,
-  isPostVideo,
-  playsInline,
-  preloadMode,
-  readMuted,
-  src,
-])
+    if (poster) {
+      try {
+        const nextPoster = String(poster)
+        const prevPosterMediaKey = String(el.dataset.__posterMediaKey || '')
+        const isNewMedia = prevPosterMediaKey !== mediaKey
+        el.dataset.__posterOriginal = nextPoster
+        if (isNewMedia) {
+          el.dataset.__posterMediaKey = mediaKey
+          el.dataset.__posterRevealed = '0'
+          el.dataset.__needsPosterRestore = '1'
+          delete el.dataset.__resumeTime
+          delete el.dataset.__candidateBoostTs
+          el.setAttribute('poster', nextPoster)
+        } else if (el.dataset?.__posterRevealed !== '1' && !el.getAttribute('poster')) {
+          el.setAttribute('poster', nextPoster)
+        }
+      } catch {}
+    }
+  }, [autoPlay, clearNativeControlsForPost, defaultMutedProp, playsInline, poster, preloadMode, readMuted, src])
+
   React.useEffect(() => {
     const el = ref.current
     if (!el) return undefined
@@ -634,25 +598,12 @@ React.useLayoutEffect(() => {
         setCenterGlyph('')
       }
     }
-const onPlay = () => {
-  clearNativeControlsForPost()
-
-  try {
-    touchActiveVideoFn(el)
-    enforceActiveVideoCapFn(el)
-    el.dataset.__active = '1'
-    el.dataset.__prewarm = '1'
-    el.dataset.__resident = '1'
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '1'
-    delete el.dataset.__loadPendingSince
-    el.preload = 'auto'
-  } catch {}
-
-  setPausedState(false)
-  showCenterGlyph('pause', 620)
-  revealHud(1800)
-}
+    const onPlay = () => {
+      clearNativeControlsForPost()
+      setPausedState(false)
+      showCenterGlyph('pause', 620)
+      revealHud(1800)
+    }
     const onPause = () => {
       clearNativeControlsForPost()
       setPausedState(true)
@@ -673,25 +624,15 @@ const onPlay = () => {
       try { el.removeEventListener('pause', onPause) } catch {}
       try { el.removeEventListener('ended', onEnded) } catch {}
     }
-  }, [
-  clearNativeControlsForPost,
-  enforceActiveVideoCapFn,
-  hudVisible,
-  revealHud,
-  showCenterGlyph,
-  touchActiveVideoFn,
-])
+  }, [clearNativeControlsForPost, hudVisible, revealHud, showCenterGlyph])
 
   React.useEffect(() => {
     const el = ref.current
     if (!el || typeof window === 'undefined') return
 
-const initial = readMuted()
-const fallbackMuted =
-  typeof defaultMutedProp === 'boolean'
-    ? defaultMutedProp
-    : (isPostVideo ? true : !!autoPlay)
-const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
+    const initial = readMuted()
+    const fallbackMuted = typeof defaultMutedProp === 'boolean' ? defaultMutedProp : !!autoPlay
+    const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
     try {
       el.muted = !!nextMuted
       el.defaultMuted = !!nextMuted
@@ -747,7 +688,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       } catch {}
       window.removeEventListener(mutedEvent, onMutedEvent)
     }
-  }, [autoPlay, defaultMutedProp, isPostVideo, mutedEvent, readMuted, writeMuted])
+  }, [autoPlay, defaultMutedProp, mutedEvent, readMuted, writeMuted])
 
   React.useEffect(() => {
     const el = ref.current
@@ -991,7 +932,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       }
       // Для пост-видео восстановление делает единый coordinator.
       // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
-      if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle) {
+      if (String(dataForumVideo || '') === 'post') {
         try {
           onErrorProp?.(e)
         } catch {}
@@ -1030,36 +971,36 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         onErrorProp?.(e)
       } catch {}
     },
-    [coordinatorOwnsLifecycle, dataForumVideo, onErrorProp],
+    [dataForumVideo, onErrorProp],
   )
 
-const onVideoLoaded = React.useCallback(() => {
-  try {
-    const el = ref.current
-    if (!el) return
-
-    clearNativeControlsForPost()
-
+  const onVideoLoaded = React.useCallback(() => {
     try {
-      touchActiveVideoFn(el)
-      enforceActiveVideoCapFn(el)
-    } catch {}
-
-    try {
+      const el = ref.current
+      if (!el) return
+      clearNativeControlsForPost()
       el.dataset.__recoverTry = '0'
-      el.dataset.__active = '1'
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
-      el.dataset.__loadPending = '0'
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__loadPendingSince
+      const revealPoster = () => {
+        try {
+          if (!el.isConnected) return
+          if ((el.readyState || 0) < 2) return
+          if (el.dataset?.__posterRevealed === '1') return
+          el.dataset.__posterRevealed = '1'
+          el.dataset.__needsPosterRestore = '0'
+          el.removeAttribute('poster')
+        } catch {}
+      }
+      try {
+        if (typeof el.requestVideoFrameCallback === 'function') {
+          el.requestVideoFrameCallback(() => revealPoster())
+        } else {
+          requestAnimationFrame(() => revealPoster())
+        }
+      } catch {
+        revealPoster()
+      }
     } catch {}
-
-    try {
-      el.preload = 'auto'
-    } catch {}
-  } catch {}
-}, [clearNativeControlsForPost, enforceActiveVideoCapFn, touchActiveVideoFn])
+  }, [clearNativeControlsForPost])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}
@@ -1132,16 +1073,16 @@ const onVideoLoaded = React.useCallback(() => {
   }, [armUserIntentLease, revealHud, spawnEmojiBurst])
 
   const videoNode = (
-<video
-  ref={ref}
-  data-forum-media={dataForumMedia}
-  data-forum-video={dataForumVideo}
-  playsInline={playsInline}
-  defaultMuted={typeof defaultMutedProp === 'boolean' ? defaultMutedProp : (isPostVideo ? true : !!autoPlay)}
-  preload={renderPreload}
-  controls={isPostVideo ? undefined : renderControls}
-  autoPlay={autoPlay}
-  loop={loop}
+    <video
+      ref={ref}
+      data-forum-media={dataForumMedia}
+      data-forum-video={dataForumVideo}
+      playsInline={playsInline}
+      poster={renderPoster}
+      preload={renderPreload}
+      controls={isPostVideo ? undefined : renderControls}
+      autoPlay={autoPlay}
+      loop={loop}
       controlsList={controlsList}
       disablePictureInPicture={disablePictureInPicture}
       referrerPolicy="no-referrer"

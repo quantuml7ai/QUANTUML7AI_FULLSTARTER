@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
- 
+
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
 }
@@ -16,7 +16,7 @@ export default function useVideoFeedWindowing({
   emitDiag,
   videoFeedHardResetRef,
   isBrowserFn = defaultIsBrowser,
-}) { 
+}) {
   const runtimeCfg = readForumRuntimeConfig()
   const recommendationsEnabled = !!runtimeCfg?.userRecommendations?.enabled
   const recommendationsEvery = Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
@@ -79,7 +79,7 @@ export default function useVideoFeedWindowing({
   const noopMeasureNode = useCallback(() => {}, [])
   const vfMeasureRef = useCallback(() => noopMeasureNode, [noopMeasureNode])
 
-  useEffect(() => { 
+  useEffect(() => {
     videoFeedHardResetRef.current = () => {
       try {
         emitDiag?.('video_feed_hard_reset', {
@@ -90,7 +90,7 @@ export default function useVideoFeedWindowing({
       } catch {}
     }
 
-    return () => { 
+    return () => {
       try { videoFeedHardResetRef.current = null } catch {}
     }
   }, [emitDiag, videoFeedHardResetRef, vfSlots.length])

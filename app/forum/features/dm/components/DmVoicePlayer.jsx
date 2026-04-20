@@ -114,11 +114,6 @@ export default function DmVoicePlayer({ src }) {
     draggingRef.current = false
     stopRaf()
     stopDurationPoll()
-  try {
-    const pollId = durationPollRef.current
-    durationPollRef.current = 0
-    if (pollId) clearInterval(pollId)
-  } catch {}
 
     try {
       a.pause?.()
@@ -156,10 +151,6 @@ export default function DmVoicePlayer({ src }) {
     a.addEventListener('play', onPlay)
     a.addEventListener('pause', onPause)
     a.addEventListener('ended', onEnded)
-  try {
-    const pollId = durationPollRef.current
-    if (pollId) clearInterval(pollId)
-  } catch {}    
     durationPollRef.current = window.setInterval(() => syncAudioMetrics(a), 350)
     syncAudioMetrics(a)
 
@@ -173,11 +164,6 @@ export default function DmVoicePlayer({ src }) {
       a.removeEventListener('play', onPlay)
       a.removeEventListener('pause', onPause)
       a.removeEventListener('ended', onEnded)
-    try {
-      const pollId = durationPollRef.current
-      durationPollRef.current = 0
-      if (pollId) clearInterval(pollId)
-    } catch {}      
       stopRaf()
       stopDurationPoll()
     }

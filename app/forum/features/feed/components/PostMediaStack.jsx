@@ -199,6 +199,138 @@ function ImageCarousel({
   )
 }
 
+function IframeTouchShield({ href }) {
+  const [interactive, setInteractive] = React.useState(false)
+  const unlockTimerRef = React.useRef(null)
+  const pointerStateRef = React.useRef({
+    id: null,
+    startX: 0,
+    startY: 0,
+    moved: false,
+    startedAt: 0,
+  })
+
+  const clearUnlockTimer = React.useCallback(() => {
+    try {
+      if (unlockTimerRef.current) clearTimeout(unlockTimerRef.current)
+    } catch {}
+    unlockTimerRef.current = null
+  }, [])
+
+  const unlockInteract = React.useCallback((ttlMs = 2600) => {
+    clearUnlockTimer()
+    setInteractive(true)
+    unlockTimerRef.current = setTimeout(() => {
+      setInteractive(false)
+      unlockTimerRef.current = null
+    }, Math.max(800, Number(ttlMs || 0)))
+  }, [clearUnlockTimer])
+
+  const resetPointerState = React.useCallback(() => {
+    pointerStateRef.current = {
+      id: null,
+      startX: 0,
+      startY: 0,
+      moved: false,
+      startedAt: 0,
+    }
+  }, [])
+
+  React.useEffect(() => {
+    return () => clearUnlockTimer()
+  }, [clearUnlockTimer])
+
+  const handlePointerDown = React.useCallback((event) => {
+    const pointerType = String(event?.pointerType || '')
+    if (pointerType && pointerType !== 'touch' && pointerType !== 'pen') return
+    pointerStateRef.current = {
+      id: event?.pointerId ?? null,
+      startX: Number(event?.clientX || 0),
+      startY: Number(event?.clientY || 0),
+      moved: false,
+      startedAt: Date.now(),
+    }
+  }, [])
+
+  const handlePointerMove = React.useCallback((event) => {
+    const state = pointerStateRef.current
+    if (state.id == null) return
+    if (event?.pointerId != null && state.id !== event.pointerId) return
+    const dx = Math.abs(Number(event?.clientX || 0) - Number(state.startX || 0))
+    const dy = Math.abs(Number(event?.clientY || 0) - Number(state.startY || 0))
+    if (dx > 10 || dy > 10) {
+      pointerStateRef.current = { ...state, moved: true }
+    }
+  }, [])
+
+  const handlePointerUp = React.useCallback((event) => {
+    const state = pointerStateRef.current
+    if (state.id == null) return
+    if (event?.pointerId != null && state.id !== event.pointerId) return
+    const dx = Math.abs(Number(event?.clientX || 0) - Number(state.startX || 0))
+    const dy = Math.abs(Number(event?.clientY || 0) - Number(state.startY || 0))
+    const elapsed = Date.now() - Number(state.startedAt || 0)
+    const isTap = !state.moved && dx < 12 && dy < 12 && elapsed < 420
+    resetPointerState()
+    if (isTap) unlockInteract()
+  }, [resetPointerState, unlockInteract])
+
+  const handlePointerCancel = React.useCallback(() => {
+    resetPointerState()
+  }, [resetPointerState])
+
+  return (
+    <div className={`iframeTouchShield${interactive ? ' isInteractive' : ''}`}>
+      <div
+        className={`iframeTouchShieldGesture${interactive ? ' isInteractive' : ''}`}
+        aria-hidden="true"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerCancel}
+      />
+      {href ? (
+        <a
+          className="iframeTouchShieldAction"
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => event.stopPropagation()}
+          aria-label="Open media source"
+          title="Open media source"
+        >
+          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <path
+              d="M14 5h5v5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 14 19 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </a>
+      ) : null}
+    </div>
+  )
+}
+
 export default function PostMediaStack({
   imgLines,
   videoLines,
@@ -215,8 +347,6 @@ export default function PostMediaStack({
 }) {
   const mediaKeyBase = String(postId || 'post')
   const stableEmbedKey = String(postId || mediaKeyBase || '').trim()
-  const ownerId = `post-media:${mediaKeyBase}`
-  const lifecycleState = 'shell'
   const [stableEmbeds, setStableEmbeds] = React.useState(() => {
     const cached = POST_MEDIA_EMBED_CACHE.get(stableEmbedKey) || {}
     const nextYt = uniqList(ytLines).length ? uniqList(ytLines) : uniqList(cached.yt || [])
@@ -260,27 +390,13 @@ export default function PostMediaStack({
       {videoLines.length > 0 && (
         <div className="postVideo" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {videoLines.map((src, i) => (
-            <div
-              key={`video:${mediaKeyBase}:${src}:${i}`}
-              className="videoCard mediaBox"
-              data-kind="video"
-              data-owner-id={ownerId}
-              data-forum-embed-kind="native-video"
-              data-lifecycle-state={lifecycleState}
-              data-stable-shell="1"
-              style={{ margin: 0 }}
-            >
+            <div key={`video:${mediaKeyBase}:${src}:${i}`} className="videoCard mediaBox" data-kind="video" style={{ margin: 0 }}>
               <VideoMediaComponent
                 key={`video-media:${mediaKeyBase}:${src}:${i}`}
                 data-forum-video="post"
                 data-forum-media="video"
-                data-owner-id={ownerId}
-                data-forum-embed-kind="native-video"
-                data-lifecycle-state={lifecycleState}
-                data-stable-shell="1"
                 src={src}
-
-                loading="eager"
+                poster={i === 0 && posterUrl ? posterUrl : undefined}
                 playsInline
                 controls={false}
                 controlsList="nodownload noplaybackrate noremoteplayback"
@@ -311,10 +427,6 @@ export default function PostMediaStack({
                 className="videoCard mediaBox"
                 data-kind="iframe"
                 data-subkind="youtube"
-                data-owner-id={ownerId}
-                data-forum-embed-kind="youtube"
-                data-lifecycle-state={lifecycleState}
-                data-stable-shell="1"
                 style={{ margin: 0 }}
               >
                 <iframe
@@ -323,17 +435,13 @@ export default function PostMediaStack({
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
                   data-forum-media="youtube"
-                  data-owner-id={ownerId}
-                  data-forum-embed-kind="youtube"
-                  data-lifecycle-state={lifecycleState}
-                  data-stable-shell="1"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
                 />
-
+                <IframeTouchShield href={src} />
               </div>
             )
           })}
@@ -399,31 +507,18 @@ export default function PostMediaStack({
             }
 
             return (
-              <div
-                key={`tt:${mediaKeyBase}:${videoId}:${i}`}
-                className="videoCard mediaBox"
-                data-kind="iframe"
-                data-owner-id={ownerId}
-                data-forum-embed-kind="tiktok"
-                data-lifecycle-state={lifecycleState}
-                data-stable-shell="1"
-                style={{ margin: 0 }}
-              >
+              <div key={`tt:${mediaKeyBase}:${videoId}:${i}`} className="videoCard mediaBox" data-kind="iframe" style={{ margin: 0 }}>
                 <iframe
                   title="TikTok video"
                   data-forum-media="tiktok"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  data-owner-id={ownerId}
-                  data-forum-embed-kind="tiktok"
-                  data-lifecycle-state={lifecycleState}
-                  data-stable-shell="1"
                   loading="eager"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
                 />
-
+                <IframeTouchShield href={src} />
               </div>
             )
           })}
@@ -433,22 +528,8 @@ export default function PostMediaStack({
       {audioLines.length > 0 && (
         <div className="postAudio" style={{ display: 'grid', gap: 8, marginTop: 8 }}>
           {audioLines.map((src, i) => (
-            <div
-              key={`audio:${mediaKeyBase}:${src}:${i}`}
-              className="audioCard mediaBox"
-              data-kind="qcast"
-              data-owner-id={ownerId}
-              data-forum-embed-kind="qcast"
-              data-lifecycle-state={lifecycleState}
-              data-stable-shell="1"
-            >
-              <QCastPlayerComponent
-                src={src}
-                data-owner-id={ownerId}
-                data-forum-embed-kind="qcast"
-                data-lifecycle-state={lifecycleState}
-                data-stable-shell="1"
-              />
+            <div key={`audio:${mediaKeyBase}:${src}:${i}`} className="audioCard mediaBox" data-kind="qcast">
+              <QCastPlayerComponent src={src} />
             </div>
           ))}
         </div>
