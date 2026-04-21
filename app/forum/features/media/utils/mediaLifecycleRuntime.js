@@ -134,6 +134,14 @@ export function __enforceActiveVideoCap(exceptEl) {
         __activeVideoLRU.push(victim)
         continue
       }
+      if (
+        String(victim?.dataset?.__playRequested || '') === '1' ||
+        String(victim?.dataset?.__loadPending || '') === '1'
+      ) {
+        __activeVideoLRU.shift()
+        __activeVideoLRU.push(victim)
+        continue
+      }      
       if (__isVideoNearViewport(victim, 140)) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
@@ -193,6 +201,7 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
+    el.dataset.__playRequested = '0'
     el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
@@ -224,7 +233,7 @@ const shouldKeepResidentPostVideo =
 if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
-    el.dataset.__prewarm = isPostFeedVideo ? '1' : '0'
+    el.dataset.__prewarm = '0'
     el.preload = 'metadata'
   } catch {}
   return
@@ -328,8 +337,7 @@ const burstLimit = fastRestore ? 4 : 5
     return
   }
 try {
-  const shouldAutoPreload =
-    isPostFeedVideo ||
+  const shouldAutoPreload = 
     String(el.dataset?.__prewarm || '') === '1' ||
     String(el.dataset?.__active || '') === '1' ||
     String(el.dataset?.__resident || '') === '1'

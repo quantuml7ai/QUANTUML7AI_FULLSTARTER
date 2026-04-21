@@ -536,7 +536,7 @@ React.useLayoutEffect(() => {
 
     const effectivePreload =
       isPostVideo
-        ? 'auto'
+        ? (wantsWarm ? 'auto' : 'metadata')
         : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
 
     el.preload = effectivePreload
@@ -589,26 +589,19 @@ React.useLayoutEffect(() => {
   }
 
   try {
-    const shouldBootstrapAttach = isPostVideo && !!s
-    const currentSrcAttr = String(el.getAttribute('src') || '')
-
-    if (shouldBootstrapAttach && currentSrcAttr !== s) {
-      el.setAttribute('src', s)
-      el.dataset.__bootAttachedSrc = s
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
-      el.preload = 'auto'
-
-      if (
-        Number(el.readyState || 0) === 0 &&
-        String(el.dataset?.__loadPending || '') !== '1'
-      ) {
-        el.dataset.__bootMetadataPrimed = '1'
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
-        el.dataset.__loadPendingSince = String(Date.now())
-        el.load?.()
-      }
+    // Для post-video больше НЕ делаем eager attach/load на mount.
+    // Единственный владелец lifecycle — coordinator.
+    if (isNewMediaNode && isPostVideo) {
+      try { el.removeAttribute('src') } catch {}
+      try { delete el.dataset.__bootAttachedSrc } catch {}
+      try { delete el.dataset.__bootMetadataPrimed } catch {}
+      try { el.dataset.__loadPending = '0' } catch {}
+      try { el.dataset.__warmReady = '0' } catch {}
+      try { el.dataset.__active = '0' } catch {}
+      try { el.dataset.__prewarm = '0' } catch {}
+      try { el.dataset.__resident = '0' } catch {}
+      try { delete el.dataset.__loadPendingSince } catch {}
+      try { el.preload = 'metadata' } catch {}
     }
   } catch {}
 }, [
@@ -637,17 +630,22 @@ React.useLayoutEffect(() => {
 const onPlay = () => {
   clearNativeControlsForPost()
 
-  try {
-    touchActiveVideoFn(el)
-    enforceActiveVideoCapFn(el)
-    el.dataset.__active = '1'
-    el.dataset.__prewarm = '1'
-    el.dataset.__resident = '1'
+  try { 
     el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '1'
     delete el.dataset.__loadPendingSince
-    el.preload = 'auto'
   } catch {}
+
+  if (!coordinatorOwnsLifecycle) {
+    try { touchActiveVideoFn(el) } catch {}
+    try { enforceActiveVideoCapFn(el) } catch {}
+    try {
+      el.dataset.__active = '1'
+      el.dataset.__prewarm = '1'
+      el.dataset.__resident = '1'
+      el.preload = 'auto'
+    } catch {}
+  }
 
   setPausedState(false)
   showCenterGlyph('pause', 620)
@@ -675,6 +673,7 @@ const onPlay = () => {
     }
   }, [
   clearNativeControlsForPost,
+  coordinatorOwnsLifecycle,
   enforceActiveVideoCapFn,
   hudVisible,
   revealHud,
@@ -1039,27 +1038,30 @@ const onVideoLoaded = React.useCallback(() => {
     if (!el) return
 
     clearNativeControlsForPost()
-
-    try {
-      touchActiveVideoFn(el)
-      enforceActiveVideoCapFn(el)
-    } catch {}
-
+ 
     try {
       el.dataset.__recoverTry = '0'
-      el.dataset.__active = '1'
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
+
       el.dataset.__loadPending = '0'
       el.dataset.__warmReady = '1'
       delete el.dataset.__loadPendingSince
     } catch {}
 
-    try {
-      el.preload = 'auto'
-    } catch {}
+    // ВАЖНО:
+    // loaded/canplay ≠ confirmed active playback.
+    // active/touch/cap теперь ставит только coordinator после play_started.
+    if (!coordinatorOwnsLifecycle) {
+      try { touchActiveVideoFn(el) } catch {}
+      try { enforceActiveVideoCapFn(el) } catch {}
+      try {
+        el.dataset.__active = '1'
+        el.dataset.__prewarm = '1'
+        el.dataset.__resident = '1'
+        el.preload = 'auto'
+      } catch {}
+    }
   } catch {}
-}, [clearNativeControlsForPost, enforceActiveVideoCapFn, touchActiveVideoFn])
+}, [clearNativeControlsForPost, coordinatorOwnsLifecycle, enforceActiveVideoCapFn, touchActiveVideoFn])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}
@@ -1137,6 +1139,7 @@ const onVideoLoaded = React.useCallback(() => {
   data-forum-media={dataForumMedia}
   data-forum-video={dataForumVideo}
   playsInline={playsInline} 
+  disableRemotePlayback
   preload={renderPreload}
   controls={isPostVideo ? undefined : renderControls}
   autoPlay={autoPlay}
