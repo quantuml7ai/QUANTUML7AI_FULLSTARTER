@@ -1,29 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/components/i18n";
 
 // =====================
 // Конфиг таймингов (значения НЕ МЕНЯЕМ)
-// =====================
-// Первый показ после загрузки страницы: 60 секунд
-const RB_FIRST_SHOW_DELAY_MS = 1 * 60 * 1000; // 60 сек до первого показа
-
-// Повторный показ при полном бездействии: 15 минут (только после успешного прохождения)
-const RB_IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 мин без действий до повторного показа
-
-// Таймаут на прохождение проверки: 60 секунд
+// ===================== 
 const RB_CHECK_TIMEOUT_MS = 60 * 1000; // 60 сек на выбор правильной монеты
+const RB_DEFAULT_REDIRECT_URL = "https://www.google.com"; 
 
-// Ключи в sessionStorage (НЕ МЕНЯЕМ)
-const RB_FIRST_COMPLETED_KEY = "notRobot_firstCheckCompleted";
-
-// Куда выкидываем с сайта при фейле
-const RB_DEFAULT_REDIRECT_URL = "https://www.google.com";
-
-// Список монет (можешь подправить коды и пути)
-const RB_COINS = [
+const RB_COINS = [ 
   { id: 1, code: "BTC", imagePath: "/robot/1.png" },
   { id: 2, code: "ETH", imagePath: "/robot/2.png" },
   { id: 3, code: "QCOIN", imagePath: "/robot/3.png" },
@@ -64,54 +51,23 @@ function shuffleArray(arr) {
   return copy;
 }
 
-export default function NotRobot() {
+export default function NotRobot({ onDone }) {
   const { t } = useI18n();
   const router = useRouter();
-  const pathname = usePathname();
-
-  const [rbIsOverlayOpen, setRbIsOverlayOpen] = useState(false);
-  const [rbFirstCheckCompleted, setRbFirstCheckCompleted] = useState(false);
+ 
+  const [rbIsOverlayOpen, setRbIsOverlayOpen] = useState(true);
   const [rbRemainingSeconds, setRbRemainingSeconds] = useState(
     RB_CHECK_TIMEOUT_MS / 1000
   );
   const [rbStatus, setRbStatus] = useState("idle"); // idle | running | success | failed
   const [rbErrorKey, setRbErrorKey] = useState(null);
-
-  const [rbTargetCoin, setRbTargetCoin] = useState(null);
+  const [rbTargetCoin, setRbTargetCoin] = useState(null); 
   const [rbVisibleCoins, setRbVisibleCoins] = useState([]);
-
-  // таймеры и трекинг активности
-  const rbFirstShowTimeoutRef = useRef(null);
-  const rbIdleTimeoutRef = useRef(null);
+ 
   const rbCountdownIntervalRef = useRef(null);
   const rbRedirectTimeoutRef = useRef(null);
   const rbCloseOverlayTimeoutRef = useRef(null);
-
-  // ✅ учитываем активность ТОЛЬКО по кликам/тачам/клаве и переходам страниц (скролл не считается)
-  const rbLastActivityRef = useRef(Date.now());
-
-  // ✅ троттлим рескейджул idle-таймера (меньше clearTimeout/setTimeout)
-  const rbLastIdleRescheduleRef = useRef(0);
-  const RB_ACTIVITY_THROTTLE_MS = 500;
-
-  // ✅ прогрев картинок — 1 раз на маунт
-  const rbPreloadedRef = useRef(false);
-
-  // рефы для актуальных значений (чтобы не ловить stale state в обработчиках)
-  const rbFirstCompletedRef = useRef(false);
-  const rbOverlayOpenRef = useRef(false);
-
-  // синхронизация рефов с состоянием
-  useEffect(() => {
-    rbFirstCompletedRef.current = rbFirstCheckCompleted;
-  }, [rbFirstCheckCompleted]);
-
-  useEffect(() => {
-    rbOverlayOpenRef.current = rbIsOverlayOpen;
-  }, [rbIsOverlayOpen]);
-
-  // ====== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ======
-
+ 
   const rbRedirectOut = useCallback(() => {
     if (typeof window !== "undefined") {
       window.location.href = RB_DEFAULT_REDIRECT_URL;
@@ -126,21 +82,7 @@ export default function NotRobot() {
       rbCountdownIntervalRef.current = null;
     }
   }, []);
-
-  const rbClearIdleTimeout = useCallback(() => {
-    if (rbIdleTimeoutRef.current) {
-      clearTimeout(rbIdleTimeoutRef.current);
-      rbIdleTimeoutRef.current = null;
-    }
-  }, []);
-
-  const rbClearFirstShowTimeout = useCallback(() => {
-    if (rbFirstShowTimeoutRef.current) {
-      clearTimeout(rbFirstShowTimeoutRef.current);
-      rbFirstShowTimeoutRef.current = null;
-    }
-  }, []);
-
+ 
   const rbClearRedirectTimeout = useCallback(() => {
     if (rbRedirectTimeoutRef.current) {
       clearTimeout(rbRedirectTimeoutRef.current);
@@ -154,22 +96,7 @@ export default function NotRobot() {
       rbCloseOverlayTimeoutRef.current = null;
     }
   }, []);
-
-  // ✅ прогрев всех картинок (фон + монеты) в "свободное" время
-  // НЕ влияет на тайминги показа — только греет кэш, чтобы оверлей был мгновенным.
-  const rbPreloadImages = useCallback(() => {
-    if (rbPreloadedRef.current) return;
-    rbPreloadedRef.current = true;
-
-    const paths = ["/robot/robot.png", ...RB_COINS.map((c) => c.imagePath)];
-    for (const src of paths) {
-      const img = new Image();
-      img.decoding = "async";
-      img.loading = "eager";
-      img.src = src;
-    }
-  }, []);
-
+ 
   const rbStartCheckTimer = useCallback(() => {
     rbClearCountdown();
     setRbRemainingSeconds(RB_CHECK_TIMEOUT_MS / 1000);
@@ -188,6 +115,7 @@ export default function NotRobot() {
 
           return 0;
         }
+
         return prev - 1;
       });
     }, 1000);
@@ -198,8 +126,7 @@ export default function NotRobot() {
 
     const targetIndex = getRandomInt(RB_COINS.length);
     const target = RB_COINS[targetIndex];
-
-    // ✅ оптимизация: выбираем N-1 случайных без полного shuffle всего массива
+ 
     const othersPool = RB_COINS.filter((c) => c.id !== target.id);
     const need = RB_VISIBLE_COINS_PER_ROUND - 1;
     const picked = [];
@@ -213,18 +140,16 @@ export default function NotRobot() {
     }
 
     const combined = shuffleArray([target, ...picked]);
-
-    // 🔥 Разносим монеты подальше друг от друга
+ 
     const positions = [];
-    const MIN_DIST = 22; // минимальная дистанция между центрами монет в процентах
+    const MIN_DIST = 22;
 
     const withPositions = combined.map((coin) => {
       let top;
       let left;
       let attempts = 0;
 
-      do {
-        // Чуть шире поле: 15–85% по обеим осям
+      do { 
         top = 15 + Math.random() * 70;
         left = 15 + Math.random() * 70;
         attempts += 1;
@@ -252,83 +177,27 @@ export default function NotRobot() {
     setRbErrorKey(null);
     setRbStatus("running");
   }, []);
-
-  const rbOpenOverlay = useCallback(() => {
-    // ✅ фиксируем ref сразу (на случай быстрых событий между setState)
-    rbOverlayOpenRef.current = true;
-
-    setRbErrorKey(null);
-    setRbStatus("running");
-    setRbIsOverlayOpen(true);
-
-    rbStartCheckTimer();
-    rbGenerateRound();
-  }, [rbGenerateRound, rbStartCheckTimer]);
-
-  const rbScheduleIdleCheck = useCallback(() => {
-    rbClearIdleTimeout();
-
-    rbIdleTimeoutRef.current = setTimeout(() => {
-      // перед запуском ещё раз проверим актуальное состояние
-      if (!rbFirstCompletedRef.current) return;
-      if (rbOverlayOpenRef.current) return;
-
-      rbOpenOverlay();
-    }, RB_IDLE_TIMEOUT_MS);
-  }, [rbClearIdleTimeout, rbOpenOverlay]);
-
-  // ✅ активность: только если проверка уже пройдена и оверлей закрыт
-  const rbMarkActivity = useCallback(() => {
-    const now = Date.now();
-    rbLastActivityRef.current = now;
  
-    if (!rbFirstCompletedRef.current) return;
-    if (rbOverlayOpenRef.current) return;
-
-    // ✅ троттлинг рескейджула
-    if (now - rbLastIdleRescheduleRef.current < RB_ACTIVITY_THROTTLE_MS) return;
-    rbLastIdleRescheduleRef.current = now;
-
-    rbScheduleIdleCheck();
-  }, [rbScheduleIdleCheck]);
-
   const rbHandleCoinClick = useCallback(
-    (coin) => {
-      // rbStatus/rbTargetCoin используются как state — это нормально, обработчик пересоздастся при изменениях
-      // eslint/exhaustive-deps соблюдаем через зависимости useCallback.
+    (coin) => { 
       if (rbStatus !== "running" || !rbTargetCoin) return;
 
       if (coin.id === rbTargetCoin.id) {
         rbClearCountdown();
         setRbStatus("success");
         setRbErrorKey(null);
-
-        try {
-          if (typeof window !== "undefined" && window.sessionStorage) {
-            window.sessionStorage.setItem(RB_FIRST_COMPLETED_KEY, "1");
-          }
-        } catch (e) {
-          // ignore
-        }
-
-        // ✅ сначала ref, потом state
-        rbFirstCompletedRef.current = true;
-        setRbFirstCheckCompleted(true);
-
+ 
         rbClearCloseOverlayTimeout();
-        rbCloseOverlayTimeoutRef.current = setTimeout(() => {
-          // закрываем оверлей
+        rbCloseOverlayTimeoutRef.current = setTimeout(() => { 
           setRbIsOverlayOpen(false);
           setRbStatus("idle");
           setRbVisibleCoins([]);
           setRbTargetCoin(null);
           setRbErrorKey(null);
 
-          rbOverlayOpenRef.current = false;
-
-          // ✅ момент закрытия = старт idle-отсчёта
-          rbLastActivityRef.current = Date.now();
-          rbScheduleIdleCheck();
+          if (typeof onDone === "function") {
+            onDone();
+          }
         }, 800);
       } else {
         setRbErrorKey("not_robot_error_wrong_coin");
@@ -336,114 +205,40 @@ export default function NotRobot() {
       }
     },
     [
-      rbClearCountdown,
+      onDone,
       rbClearCloseOverlayTimeout,
-      rbGenerateRound,
-      rbScheduleIdleCheck,
+      rbClearCountdown,
+      rbGenerateRound, 
       rbStatus,
       rbTargetCoin,
     ]
-  );
-
-  // ====== INITIAL MOUNT / UNMOUNT ======
+  ); 
 
   useEffect(() => {
-    console.log("[NotRobot] mount");
-
-    // читаем ключ (не меняем), но по твоему ТЗ: перезагрузка = новый вход
-    // => первый показ ВСЕГДА планируем через 60 секунд на каждый mount.
-    let firstCompleted = false;
-    try {
-      if (typeof window !== "undefined" && window.sessionStorage) {
-        firstCompleted =
-          window.sessionStorage.getItem(RB_FIRST_COMPLETED_KEY) === "1";
-      }
-    } catch (e) {
-      // ignore
-    }
-
-    // состояние отображаем как есть (чтобы логика внутри оверлея/успеха не ломалась),
-    // но первый показ планируем всё равно на каждый вход.
-    setRbFirstCheckCompleted(firstCompleted);
-    rbFirstCompletedRef.current = firstCompleted;
-
-    rbLastActivityRef.current = Date.now();
-
-    // ✅ прогрев изображений (в idle, чтобы не мешать UI)
-    if (typeof window !== "undefined") {
-      const ric = window.requestIdleCallback;
-      if (ric) ric(() => rbPreloadImages(), { timeout: 1500 });
-      else setTimeout(() => rbPreloadImages(), 300);
-    }
-
-    // ✅ ПЕРВЫЙ ПОКАЗ: строго через 60 сек на каждый mount/перезагрузку
-    rbClearFirstShowTimeout();
-    rbFirstShowTimeoutRef.current = setTimeout(() => {
-      if (rbOverlayOpenRef.current) return;
-      rbOpenOverlay();
-    }, RB_FIRST_SHOW_DELAY_MS);
-
-    // ✅ Idle-повтор (15 минут) включаем ТОЛЬКО если пользователь уже проходил проверку
-    // (и дальше он будет работать после успеха в текущей сессии тоже).
-    if (firstCompleted) {
-      rbScheduleIdleCheck();
-    }
-
-    // ✅ ВАЖНО: скролл НЕ слушаем. Только клики/тачи/клава.
-    const activityEvents = [
-      "click", // мышь/тап
-      "keydown", // клавиатура
-      "touchstart", // тач
-      "pointerdown", // мышь/перо/тач
-    ]; 
-
-    const activityHandler = () => {
-      rbMarkActivity();
-    }; 
-
-    if (typeof window !== "undefined") {
-      activityEvents.forEach((evt) =>
-        window.addEventListener(evt, activityHandler, { passive: true })
-      );
-    }
+    // console.log('[NotRobot] mount');
+    setRbIsOverlayOpen(true);
+    rbGenerateRound();
+    rbStartCheckTimer();
 
     return () => {
-      console.log("[NotRobot] unmount");
-
-      if (typeof window !== "undefined") {
-        activityEvents.forEach((evt) =>
-          window.removeEventListener(evt, activityHandler)
-        );
-      }
-
-      rbClearCountdown();
-      rbClearIdleTimeout();
-      rbClearFirstShowTimeout();
+      // console.log('[NotRobot] unmount');
+      rbClearCountdown(); 
       rbClearRedirectTimeout();
       rbClearCloseOverlayTimeout();
     };
   }, [
     rbClearCloseOverlayTimeout,
-    rbClearCountdown,
-    rbClearFirstShowTimeout,
-    rbClearIdleTimeout,
+    rbClearCountdown, 
     rbClearRedirectTimeout,
-    rbMarkActivity,
-    rbOpenOverlay,
-    rbPreloadImages,
-    rbScheduleIdleCheck,
+    rbGenerateRound,
+    rbStartCheckTimer,
   ]);
 
-  // ✅ Переходы между страницами считаются активностью (скроллы — нет)
-  useEffect(() => {
-    rbMarkActivity();
-  }, [pathname, rbMarkActivity]);
-
-  // Блокируем скролл body при открытом оверлее (это не считается активностью)
-  useEffect(() => {
+  useEffect(() => { 
     if (typeof document === "undefined") return;
 
     const originalOverflow = document.body.style.overflow;
+
     if (rbIsOverlayOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -453,9 +248,7 @@ export default function NotRobot() {
     return () => {
       document.body.style.overflow = originalOverflow || "";
     };
-  }, [rbIsOverlayOpen]);
-
-  // ====== РЕНДЕР ======
+  }, [rbIsOverlayOpen]); 
 
   if (!rbIsOverlayOpen) {
     return null;
@@ -578,7 +371,7 @@ export default function NotRobot() {
           .rb-backdrop {
             backdrop-filter: none;
           }
-        } 
+        }
 
         .rb-container {
           position: relative;
@@ -690,13 +483,10 @@ export default function NotRobot() {
           position: relative;
           margin-top: 8px;
           border-radius: 16px;
-          overflow: hidden;
-
-          /* ✅ поле под фон 16:9, всегда целиком влазит */
+          overflow: hidden; 
           width: 100%;
           aspect-ratio: 9 / 16;
-          max-width: 100%;
-
+          max-width: 100%; 
           border: 1px solid rgba(255, 255, 255, 0.12);
           background: radial-gradient(
             circle at center,
@@ -707,9 +497,7 @@ export default function NotRobot() {
 
         .rb-field-bg {
           position: absolute;
-          inset: 0;
-
-          /* ✅ не режем изображение, а ужимаем целиком */
+          inset: 0; 
           background-image: url("/robot/robot.png");
           background-size: contain;
           background-repeat: no-repeat;
@@ -846,4 +634,4 @@ export default function NotRobot() {
       `}</style>
     </>
   );
-}
+} 

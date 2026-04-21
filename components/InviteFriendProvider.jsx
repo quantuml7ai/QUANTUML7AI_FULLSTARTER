@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import InviteFriendPopup from './InviteFriendPopup'
-
-// Простейшая проверка браузера
+ 
 const isBrowser = () => typeof window !== 'undefined'
 
 function readUnifiedAccountId() {
@@ -23,20 +22,10 @@ function readUnifiedAccountId() {
   if (fromLs) return String(fromLs)
   return null
 }
-
-const FIRST_DELAY_MS = 7 * 60 * 1000      // 5 минут после авторизации
-const INTERVAL_MS = 60 * 60 * 1000        // каждый час
-const ACTIVE_WINDOW_MS = 10 * 60 * 1000   // пользователь активен в последние 10 минут
-
-const LS_LAST_AUTH = 'invite:lastAuthAt'
+ 
 const LS_LAST_POPUP = 'invite:lastPopupAt'
-const LS_LAST_ACTIVITY = 'invite:lastActivityAt'
-
-const INVITE_TEST_MODE =
-  process.env.NEXT_PUBLIC_INVITE_TEST_MODE === '1'
-
-export default function InviteFriendProvider() {
-  const [uid, setUid] = useState(null)
+ 
+export default function InviteFriendProvider({ accountId, mode = 'manual', onDispose }) {
   const [open, setOpen] = useState(false)
   const [referralUrl, setReferralUrl] = useState('')
   const [rewardQcoin, setRewardQcoin] = useState(0)
@@ -45,32 +34,36 @@ export default function InviteFriendProvider() {
   const [vipGoalReached, setVipGoalReached] = useState(false)
   const [vipGranted, setVipGranted] = useState(false)
 
-  const [lastAuthAt, setLastAuthAt] = useState(() => {
-    if (!isBrowser()) return 0
-    const raw = window.localStorage.getItem(LS_LAST_AUTH)
-    return raw ? Number(raw) || 0 : 0
-  })
+  const disposeTimerRef = useRef(null)
 
-  const [lastPopupAt, setLastPopupAt] = useState(() => {
-    if (!isBrowser()) return 0
-    const raw = window.localStorage.getItem(LS_LAST_POPUP)
-    return raw ? Number(raw) || 0 : 0
-  })
+  const closePopup = useCallback(() => {
+    setOpen(false)
 
-  const [lastActivityAt, setLastActivityAt] = useState(() => {
-    if (!isBrowser()) return 0
-    const raw = window.localStorage.getItem(LS_LAST_ACTIVITY)
-    return raw ? Number(raw) || 0 : 0
-  })
+    const now = Date.now()
+    if (isBrowser()) {
+      window.localStorage.setItem(LS_LAST_POPUP, String(now))
+    }
 
-  // --- Функции открытия / закрытия поповера ---
+    if (disposeTimerRef.current) {
+      clearTimeout(disposeTimerRef.current)
+      disposeTimerRef.current = null
+    }
 
-  // ВАЖНО: даём возможность передать accountId напрямую,
-  // чтобы не зависеть от того, успел ли обновиться стейт uid.
-  const openPopup = useCallback(
-    async (accountOverride) => {
-      const effectiveUid = accountOverride || uid
-      if (!effectiveUid) return
+    disposeTimerRef.current = setTimeout(() => {
+      onDispose?.()
+    }, 0)
+  }, [onDispose])
+
+  useEffect(() => {
+    // console.log('[InviteFriendProvider] mount', { accountId, mode });
+    let cancelled = false
+
+    const boot = async () => {
+      const effectiveUid = accountId || readUnifiedAccountId()
+      if (!effectiveUid) {
+        onDispose?.()
+        return
+      }
 
       try {
         const res = await fetch('/api/referral/link', {
@@ -82,149 +75,48 @@ export default function InviteFriendProvider() {
         })
 
         if (!res.ok) {
+          onDispose?.()
           return
         }
 
         const data = await res.json()
-        if (!data.ok) return
+        if (!data?.ok) {
+          onDispose?.()
+          return
+        }
 
-        setReferralUrl(data.url)
+        if (cancelled) return
+
+        setReferralUrl(data.url || '')
         setRewardQcoin(data.rewardQcoin || 0)
         setInvitedCount(data.invitedCount || 0)
         setVipThreshold(data.vipThreshold || 50)
         setVipGoalReached(!!data.vipGoalReached)
         setVipGranted(!!data.vipGranted)
-
-        const now = Date.now()
-        setLastPopupAt(now)
+ 
         if (isBrowser()) {
-          window.localStorage.setItem(LS_LAST_POPUP, String(now))
+          window.localStorage.setItem(LS_LAST_POPUP, String(Date.now()))
         }
 
         setOpen(true)
       } catch {
-        // тишина
-      }
-    },
-    [uid],
-  )
-
-  const closePopup = useCallback(() => {
-    setOpen(false)
-    const now = Date.now()
-    setLastPopupAt(now)
-    if (isBrowser()) {
-      window.localStorage.setItem(LS_LAST_POPUP, String(now))
-    }
-  }, [])
-
-  // --- Инициализация uid при загрузке ---
-
-  useEffect(() => {
-    if (!isBrowser()) return
-    const initial = readUnifiedAccountId()
-    if (initial) {
-      setUid(initial)
-
-      // В тестовом режиме можно сразу открыть поповер при наличии uid
-      if (INVITE_TEST_MODE) {
-        openPopup(initial)
-      }
-    }
-  }, [openPopup])
-
-  // --- Слушаем события авторизации ---
-
-  useEffect(() => {
-    if (!isBrowser()) return
-
-    const handleAuth = () => {
-      const acc = readUnifiedAccountId()
-      if (!acc) return
-      const now = Date.now()
-      setUid(acc)
-      setLastAuthAt(now)
-      window.localStorage.setItem(LS_LAST_AUTH, String(now))
-
-      if (INVITE_TEST_MODE) {
-        // В тестовом режиме сразу открываем поповер, не ждём 5 минут
-        openPopup(acc)
+        if (!cancelled) {
+          onDispose?.()
+        }
       }
     }
 
-    window.addEventListener('auth:ok', handleAuth)
-    window.addEventListener('auth:success', handleAuth)
+    boot()
 
     return () => {
-      window.removeEventListener('auth:ok', handleAuth)
-      window.removeEventListener('auth:success', handleAuth)
-    }
-  }, [openPopup])
-  // --- Принудительное открытие попапа по глобальному событию --- 
-  useEffect(() => {
-    if (!isBrowser()) return
-
-    const handler = (e) => {
-      // можем поддерживать detail.accountId, если захочешь дергать с явным uid
-      const override = e?.detail?.accountId
-      const effectiveUid = override || uid
-      if (!effectiveUid) return
-
-      openPopup(effectiveUid)
-    }
-
-    window.addEventListener('invite:open', handler)
-    return () => {
-      window.removeEventListener('invite:open', handler)
-    }
-  }, [uid, openPopup])
-
-  // --- Отслеживаем активность пользователя ---
-
-  useEffect(() => {
-    if (!isBrowser()) return
-
-    const onActivity = () => {
-      const now = Date.now()
-      setLastActivityAt(now)
-      window.localStorage.setItem(LS_LAST_ACTIVITY, String(now))
-    }
-
-    const events = ['pointerdown', 'keydown', 'wheel', 'touchstart', 'focus', 'scroll', 'visibilitychange']
-
-    events.forEach((ev) => window.addEventListener(ev, onActivity))
-    return () => {
-      events.forEach((ev) => window.removeEventListener(ev, onActivity))
-    }
-  }, [])
-
-  // --- Основной интервал для нормального режима (не тест) ---
-
-  useEffect(() => {
-    if (!isBrowser()) return
-    if (INVITE_TEST_MODE) return
-
-    const id = window.setInterval(() => {
-      if (!uid) return
-      const now = Date.now()
-      const activeRecently = now - lastActivityAt < ACTIVE_WINDOW_MS
-
-      // первый показ после авторизации
-      if (!lastPopupAt && lastAuthAt && now - lastAuthAt >= FIRST_DELAY_MS && activeRecently) {
-        openPopup()
-        return
+      // console.log('[InviteFriendProvider] unmount', { accountId, mode });
+      cancelled = true
+      if (disposeTimerRef.current) {
+        clearTimeout(disposeTimerRef.current)
+        disposeTimerRef.current = null
       }
-
-      // регулярный показ каждый час активного присутствия
-      if (lastPopupAt && now - lastPopupAt >= INTERVAL_MS && activeRecently) {
-        openPopup()
-      }
-    }, 60 * 1000)
-
-    return () => {
-      window.clearInterval(id)
     }
-  }, [uid, lastAuthAt, lastPopupAt, lastActivityAt, openPopup])
+  }, [accountId, mode, onDispose])
 
   return (
     <InviteFriendPopup
@@ -243,4 +135,4 @@ export default function InviteFriendProvider() {
       }}
     />
   )
-}
+} 

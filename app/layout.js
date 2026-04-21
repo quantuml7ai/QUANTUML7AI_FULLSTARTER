@@ -393,11 +393,11 @@ const forumEarlyDiagBootstrap = `(function () {
 
 
 // Рендерим тяжёлые/интерактивные вещи только на клиенте 
-const NotRobot = dynamic(() => import('../components/NotRobot'), { ssr: false })
-const InviteFriendProvider = dynamic(() => import('../components/InviteFriendProvider'), { ssr: false })
-const QCoinDropFX = dynamic(() => import('../components/QCoinDropFX'), { ssr: false })
-const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
+const NotRobotHost = dynamic(() => import('../components/NotRobotHost'), { ssr: false })
+const InviteFriendHost = dynamic(() => import('../components/InviteFriendHost'), { ssr: false })
+const QCoinDropFX = dynamic(() => import('../components/QCoinDropFX'), { ssr: false }) 
 const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
+// const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
 
 export const metadata = {
   // чуть более строгий base (как ты пишешь ссылки)
@@ -533,20 +533,13 @@ export default function RootLayout({ children }) {
               <TopBar />
               {children}
             </div>
-            <ForumShellGate label="not_robot" delayMs={2600} idleTimeoutMs={2200}>
-            <NotRobot 
-         
-            /> {/* <- сюда вставляем компонент-оверлей */}
-            {/* фон. аудио (кнопка снизу — «Выключить аудио») */}
-            </ForumShellGate>
-            <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
-              <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
-            </ForumShellGate>
 
+            <NotRobotHost />
+            {/* <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
+              <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
+            </ForumShellGate> */}
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
-            <ForumShellGate label="invite_friend" delayMs={3600} idleTimeoutMs={3000}>
-              <InviteFriendProvider />
-            </ForumShellGate>
+           <InviteFriendHost />
            <ForumShellGate label="scroll_top_pulse" delayMs={2200} idleTimeoutMs={1800}>
              <ScrollTopPulse />
            </ForumShellGate>

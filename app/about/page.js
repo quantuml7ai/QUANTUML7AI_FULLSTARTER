@@ -54,12 +54,7 @@ export default function AboutPage() {
               : []),
       }))
     : [{ title: '', paras: parasAll }]
-  // Варианты путей к короткому 16:9-видео под заголовком страницы
-  const videoSources = [
-    '/branding/about-loop.mp4',
-    '/about-loop.mp4',
-    '/video_2025-09-18_01-19-40.mp4',
-  ] 
+
   // ---- Распознавание заголовков на разных языках
   const hasAny = (s, needles) => {
     const x = (s || '').toLowerCase()
@@ -177,22 +172,15 @@ export default function AboutPage() {
         <section className="panel">
           <h1>{title}</h1>
 
-          {/* Адаптивное видео 16:9 сразу под заголовком (как в рабочей версии) */}
+          {/* Статичный poster 16:9 сразу под заголовком — без видео */}
           <div className="about-hero" aria-hidden="true">
-            <video
-              className="about-hero-video"
-              playsInline
-              autoPlay
-              muted
-              loop
-              preload="metadata"
-              poster="/branding/about-poster.jpg"
-              onError={(e) => console.warn('[about] video error', e)}
-            >
-              {videoSources.map((src) => (
-                <source key={src} src={src} type="video/mp4" />
-              ))}
-            </video>
+            <img
+              className="about-hero-poster"
+              src="/branding/about-poster.jpg"
+              alt="About — Quantum L7 AI"
+              loading="eager"
+              decoding="async"
+            />
           </div>
 
           {/* Контент секций */}
@@ -241,7 +229,7 @@ export default function AboutPage() {
             overflow: hidden;
             margin: .75rem 0 1rem;
           }
-          .about-hero-video {
+          .about-hero-poster {
             width: 100%;
             height: 100%;
             display: block;
