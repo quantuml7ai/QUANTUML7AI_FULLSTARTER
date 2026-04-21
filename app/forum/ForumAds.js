@@ -1164,7 +1164,7 @@ useEffect(() => {
     try { node?.removeAttribute?.('src'); } catch {}
     try { node?.load?.(); } catch {}
     setAttachedVideoSrc('');
-  }, 450);
+  }, 220);
 
   return () => {
     if (detachVideoTimerRef.current) {
@@ -1203,7 +1203,7 @@ useEffect(() => {
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '450px 0px', threshold: 0 }
+      { rootMargin: '240px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
