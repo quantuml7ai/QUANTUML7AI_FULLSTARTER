@@ -1027,13 +1027,9 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
 const rootRef = useRef(null);
 const videoRef = useRef(null);
 const detachVideoTimerRef = useRef(null);
-const detachIframeTimerRef = useRef(null);
 const [attachedVideoSrc, setAttachedVideoSrc] = useState('');
-const [attachedYouTubeSrc, setAttachedYouTubeSrc] = useState('');
-const [attachedTikTokSrc, setAttachedTikTokSrc] = useState('');
 const ytIframeRef = useRef(null);
 const ytPlayerRef = useRef(null);
-const ytApiReadyPrevRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
   const isVideoSrcTemporarilyBlocked = (src) => {
     const key = String(src || '').trim();
@@ -1174,59 +1170,6 @@ useEffect(() => {
     }
   };
 }, [isNear, media.kind, media.src, shouldPlay]);
-
-useEffect(() => {
-  if (detachIframeTimerRef.current) {
-    clearTimeout(detachIframeTimerRef.current);
-    detachIframeTimerRef.current = null;
-  }
-
-  const isYoutube = media.kind === 'youtube';
-  const isTiktok = media.kind === 'tiktok';
-  const nextSrc = String(media.src || '').trim();
-
-  if ((!isYoutube && !isTiktok) || !nextSrc) {
-    setAttachedYouTubeSrc('');
-    setAttachedTikTokSrc('');
-    const frame = ytIframeRef.current;
-    if (frame instanceof HTMLIFrameElement) {
-      try { frame.removeAttribute('src'); } catch {}
-    }
-    return undefined;
-  }
-
-  const wantAttached = shouldPlay || isNear;
-  if (wantAttached) {
-    if (isYoutube) {
-      const nextYouTubeSrc = `https://www.youtube.com/embed/${nextSrc}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`;
-      setAttachedYouTubeSrc((prev) => (prev === nextYouTubeSrc ? prev : nextYouTubeSrc));
-      setAttachedTikTokSrc('');
-    } else {
-      const nextTikTokSrc = `https://www.tiktok.com/embed/v2/${nextSrc}`;
-      setAttachedTikTokSrc((prev) => (prev === nextTikTokSrc ? prev : nextTikTokSrc));
-      setAttachedYouTubeSrc('');
-    }
-    return undefined;
-  }
-
-  detachIframeTimerRef.current = setTimeout(() => {
-    detachIframeTimerRef.current = null;
-    setAttachedYouTubeSrc('');
-    setAttachedTikTokSrc('');
-    const frame = ytIframeRef.current;
-    if (frame instanceof HTMLIFrameElement) {
-      try { frame.removeAttribute('src'); } catch {}
-    }
-  }, isNear ? 1600 : 350);
-
-  return () => {
-    if (detachIframeTimerRef.current) {
-      clearTimeout(detachIframeTimerRef.current);
-      detachIframeTimerRef.current = null;
-    }
-  };
-}, [isNear, media.kind, media.src, shouldPlay]);
-
   // Page visibility + focus/blur
   useEffect(() => {
     if (!isBrowser()) return;
@@ -1645,15 +1588,11 @@ useEffect(() => {
   // YouTube Iframe API для управления звуком
 useEffect(() => {
   if (!isBrowser()) return;
-  if (media.kind !== 'youtube' || !media.src || !attachedYouTubeSrc) {
+  if (media.kind !== 'youtube' || !media.src) {
     const existing = ytPlayerRef.current;
     if (existing) {
       try { existing.destroy?.(); } catch {}
       ytPlayerRef.current = null;
-    }
-    const frame = ytIframeRef.current;
-    if (frame instanceof HTMLIFrameElement) {
-      try { frame.removeAttribute('src'); } catch {}
     }
     return;
   }
@@ -1710,7 +1649,6 @@ useEffect(() => {
     createPlayer();
   } else {
     const prev = window.onYouTubeIframeAPIReady;
-    ytApiReadyPrevRef.current = prev;
     window.onYouTubeIframeAPIReady = function () {
       if (typeof prev === 'function') prev();
       createPlayer();
@@ -1726,11 +1664,8 @@ useEffect(() => {
   return () => {
     cancelled = true;
     cleanupPlayer();
-    if (window.onYouTubeIframeAPIReady && ytApiReadyPrevRef.current) {
-      window.onYouTubeIframeAPIReady = ytApiReadyPrevRef.current;
-    }
   };
-}, [attachedYouTubeSrc, media.kind, media.src]);
+}, [media.kind, media.src]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
@@ -2301,14 +2236,14 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
 
 
-{media.kind === 'youtube' && media.src && (
+            {media.kind === 'youtube' && media.src && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
 >
   <iframe
     ref={ytIframeRef}
-    src={attachedYouTubeSrc || undefined}
+    src={`https://www.youtube.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
     frameBorder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -2326,13 +2261,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-{media.kind === 'tiktok' && media.src && attachedTikTokSrc && (
+            {media.kind === 'tiktok' && media.src && shouldPlay && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
 >
   <iframe
-    src={attachedTikTokSrc}
+    src={`https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
     frameBorder="0"
     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
