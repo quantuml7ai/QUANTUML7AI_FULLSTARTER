@@ -14,9 +14,9 @@ const SURFACE_CASES = [
   ['components/TopBar.js', ['AuthNavClient', 'LanguageSwitcher', 'nav-orbit']],
   ['components/ScrollTopPulse.js', ['requestAnimationFrame', 'passive: true', 'SCROLL_PX_PER_SEC']],
   ['components/BgAudio.js', ['site-media-play', 'touchmove', 'preload="metadata"']],
-  ['components/InviteFriendProvider.jsx', ['auth:ok', 'auth:success', 'invite:open']],
+  ['components/InviteFriendProvider.jsx', ['InviteFriendPopup', 'readUnifiedAccountId', '/api/referral/link']],
   ['components/QCoinDropFX.jsx', ['requestAnimationFrame', 'auth:ok', '/api/qcoin/drop']],
-  ['app/about/page.js', ['about-hero-video', '<video', 'autoPlay']],
+  ['app/about/page.js', ['about-hero-poster', '/branding/about-poster.jpg', 'data-anim="1"']],
   ['app/ads/home.js', ['checkVideoDuration', 'MAX_VIDEO_SECONDS', 'ads-chart-container']],
 ];
 

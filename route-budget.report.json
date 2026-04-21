@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:02:44.894Z",
+  "generatedAt": "2026-04-21T20:31:53.324Z",
   "profiles": {
     "forum-feed-mobile": {
       "description": "Strict mobile forum feed profile with one-owner media discipline and single iframe allowance.",
@@ -710,7 +710,7 @@
         "wallet": 0,
         "analytics": 8,
         "topBar": 3,
-        "forumShellGate": 12,
+        "forumShellGate": 8,
         "widgets": 6,
         "autoplay": 0,
         "iframe": 1,
@@ -774,9 +774,9 @@
         "topBar": 0,
         "forumShellGate": 0,
         "widgets": 0,
-        "autoplay": 3,
+        "autoplay": 0,
         "iframe": 0,
-        "video": 1
+        "video": 0
       }
     },
     {
@@ -915,9 +915,9 @@
     "decorativeRouteBaselinePolicy": [
       {
         "file": "app/about/page.js",
-        "autoplaySignals": 3,
+        "autoplaySignals": 0,
         "iframeSignals": 0,
-        "videoSignals": 1
+        "videoSignals": 0
       },
       {
         "file": "app/ads/home.js",

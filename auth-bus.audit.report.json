@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-18T03:02:42.886Z",
+  "generatedAt": "2026-04-21T20:31:50.513Z",
   "summary": [
     {
       "event": "auth:ok",
@@ -18,10 +18,10 @@
     },
     {
       "event": "auth:logout",
-      "add": 4,
-      "remove": 3,
+      "add": 5,
+      "remove": 4,
       "dispatch": 3,
-      "fileCount": 4
+      "fileCount": 5
     },
     {
       "event": "open-auth",
@@ -310,6 +310,48 @@
       ]
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendHost.jsx",
+      "totalHits": 6,
+      "hits": [
+        {
+          "event": "auth:ok",
+          "kind": "add",
+          "line": 120,
+          "text": "window.addEventListener('auth:ok', handleAuth)"
+        },
+        {
+          "event": "auth:success",
+          "kind": "add",
+          "line": 121,
+          "text": "window.addEventListener('auth:success', handleAuth)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "add",
+          "line": 122,
+          "text": "window.addEventListener('auth:logout', handleLogout)"
+        },
+        {
+          "event": "auth:ok",
+          "kind": "remove",
+          "line": 125,
+          "text": "window.removeEventListener('auth:ok', handleAuth)"
+        },
+        {
+          "event": "auth:success",
+          "kind": "remove",
+          "line": 126,
+          "text": "window.removeEventListener('auth:success', handleAuth)"
+        },
+        {
+          "event": "auth:logout",
+          "kind": "remove",
+          "line": 127,
+          "text": "window.removeEventListener('auth:logout', handleLogout)"
+        }
+      ]
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\openAuth.js",
       "totalHits": 5,
       "hits": [
@@ -402,36 +444,6 @@
           "kind": "remove",
           "line": 75,
           "text": "window.removeEventListener('auth:logout', upd)"
-        }
-      ]
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
-      "totalHits": 4,
-      "hits": [
-        {
-          "event": "auth:ok",
-          "kind": "add",
-          "line": 155,
-          "text": "window.addEventListener('auth:ok', handleAuth)"
-        },
-        {
-          "event": "auth:success",
-          "kind": "add",
-          "line": 156,
-          "text": "window.addEventListener('auth:success', handleAuth)"
-        },
-        {
-          "event": "auth:ok",
-          "kind": "remove",
-          "line": 159,
-          "text": "window.removeEventListener('auth:ok', handleAuth)"
-        },
-        {
-          "event": "auth:success",
-          "kind": "remove",
-          "line": 160,
-          "text": "window.removeEventListener('auth:success', handleAuth)"
         }
       ]
     },

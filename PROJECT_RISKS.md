@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-18T03:02:06.900Z
-Исходных файлов в анализе: 792
+Сгенерировано автоматически: 2026-04-21T20:30:44.530Z
+Исходных файлов в анализе: 805
 Route-aware файлов: 96
 
 ## Что Считается Риском
@@ -118,7 +118,7 @@ Route-aware файлов: 96
 
 - `app/api/forum/_utils.js` — используют 33 локальных модулей
 - `app/api/forum/_db.js` — используют 32 локальных модулей
-- `components/i18n.js` — используют 30 локальных модулей
+- `components/i18n.js` — используют 31 локальных модулей
 - `tools/runtime-governance.js` — используют 25 локальных модулей
 - `app/forum/features/profile/utils/profileCache.js` — используют 18 локальных модулей
 - `app/forum/shared/utils/classnames.js` — используют 17 локальных модулей
@@ -154,9 +154,11 @@ Route-aware файлов: 96
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
 - `app/forum/ForumHeaderPanel.jsx` — импортирует 9 локальных модулей
 - `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx` — импортирует 9 локальных модулей
+- `tests/unit/i18n/i18nDictionaries.test.js` — импортирует 9 локальных модулей
 - `tests/unit/runtime/runtimeGovernance.test.js` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 8 локальных модулей
 - `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — импортирует 8 локальных модулей
+- `components/i18n.js` — импортирует 8 локальных модулей
 - `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
@@ -167,8 +169,6 @@ Route-aware файлов: 96
 - `app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js` — импортирует 6 локальных модулей
 - `app/forum/ForumLayout.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 5 локальных модулей
-- `app/forum/features/feed/components/TopicsOrPanelsSwitch.jsx` — импортирует 5 локальных модулей
-- `app/forum/features/moderation/hooks/useForumModerationRuntime.js` — импортирует 5 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 

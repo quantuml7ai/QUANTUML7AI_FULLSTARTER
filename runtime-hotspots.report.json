@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-18T03:02:12.919Z",
+  "generatedAt": "2026-04-21T20:30:55.655Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -657,7 +657,7 @@
       "score": 16
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.source.js",
       "counts": {
         "for-loop": 2,
         "while-loop": 0,
@@ -942,7 +942,7 @@
         "filter-map": 0,
         "layout-read": 3,
         "sync-json": 0,
-        "local-storage": 8,
+        "local-storage": 6,
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
@@ -952,21 +952,556 @@
       "score": 12
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ar.js",
       "counts": {
-        "for-loop": 2,
-        "while-loop": 2,
+        "for-loop": 0,
+        "while-loop": 0,
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 0,
         "sync-json": 0,
         "local-storage": 0,
-        "session-storage": 2,
+        "session-storage": 0,
         "network-call": 0,
         "raf": 0,
-        "interval": 1
+        "interval": 0
       },
-      "longLines": [],
+      "longLines": [
+        {
+          "i": 49,
+          "len": 774,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI ليست مجرد منصة، بل هي كون سيبراني متكامل لاتخاذ القرار: بيانات متعددة السلاسل بمستوى مؤسساتي، عملاء L7 مستقلون، خطوط معالجة على السلسلة وتوجيه تداول يعمل كوحدة رقمية واحدة. نحن ندمج Web-MiniApp و Telegram MiniApp و QL7 AI Bot ومنتدى باقتصاد QCoin وبورصة عالمية (النواة في المرحلة النهائية) لتقديم إشارات Alpha فورية، ونوافذ دخول/خروج منضبطة، وتنفيذ آلي، وهيكل شفاف لإدارة المخاطر. يتم تسجيل الدخول عبر محافظ غير وصائية (المفاتيح لديك)، مع دعم مستويات PRO/VIP، وحدود أولوية وإلغاء الحصص. الأساس هو هيكل Web3 قانوني محكم، وتراكم سيولة عبر البورصات، ونماذج سلوكية وميكروهيكلية، إضافةً إلى خطوط بحث قابلة للتكرار مع سجل فرضية → اختبار → أدلة. إنها بنية تحتية من الجيل الجديد لأولئك الذين يعملون وفق إيقاع السوق ويطلبون الإثبات والسرعة والدقة.\","
+        },
+        {
+          "i": 52,
+          "len": 267,
+          "text": "\"marquee\": \"الذكاء الاصطناعي • العوامل الكمّية • تحليلات Onchain • بورصة التشفير (النواة) • المنتدى • الأكاديمية • QCoin التعدين • التنفيذ التلقائي • محيط المخاطر • توجيه السيولة • ميتافيرس Web3 • الألعاب • API/SDK • المؤسسة • جميع الحقوق محفوظة • Quantum L7 AI ©\","
+        },
+        {
+          "i": 57,
+          "len": 287,
+          "text": "\"Quantum L7 AI هو نظام بيئي متعدد المنصات: نواة ذكاء اصطناعي، عملاء L7 مستقلون، مراقبة على السلسلة، خلاصات سوقية موحدة، شبكة اجتماعية للمنتدى واقتصاد QCoin مدمجة في نسيج حسابي واحد. كل أثر — معاملة، سرد خبري، منشور، مخطط سيولة — يدخل في دائرة البيانات العامة ويصبح إشارة للعمل.\","
+        },
+        {
+          "i": 58,
+          "len": 310,
+          "text": "\"عملاء L7 يقرؤون المستندات وواجهات API بشكل مستقل، ويراقبون سلاسل الكتل ودفاتر الأوامر، ويصنفون الأنماط السلوكية، ويقيّمون أوضاع السوق ويستنتجون فرضيات قابلة للتحقق. النتيجة ليست \\\"صندوقًا أسود\\\"، بل بطاقة قابلة للتفسير: احتمال السيناريو، السعة، الآفاق، SL/TP، عوامل الثقة وروابط إلى المصادر الأصلية.\","
+        },
+        {
+          "i": 59,
+          "len": 230,
+          "text": "\"تسجيل الدخول عبر محافظ غير وصائية: لا نخزن المفاتيح الخاصة بل نتحقق من ملكية العنوان. يتم مزامنة حقوق الوصول والحصص بين Telegram MiniApp وواجهة الويب وروبوت QL7، حالة VIP تحدد حدود القيود وتمنح أولوية في قنوات المعالجة.\","
+        },
+        {
+          "i": 60,
+          "len": 235,
+          "text": "\"نواة السوق مبنية على تراكم عبر البورصات، وتوحيد الرموز/العقود، ومعالجة خلاصات مدركة للكمون. ندمج البيانات المؤسسية التاريخية مع التدفقات الآنية لتتبع تشتت الفروق، الأحجام الصادمة، توازن الطلبات، مخاطر MEV وتأثير نبض الأخبار.\","
+        },
+        {
+          "i": 61,
+          "len": 244,
+          "text": "\"مبدأ المنصة هو الإثبات: فرضية → اختبار → أدلة. كل عملية حسابية يتم تسجيلها، المقاييس قابلة لإعادة الإنتاج، ويتم استبعاد \\\"ضوضاء\\\" المراجحة عبر مرشحات الأوضاع. وهكذا نحول البيانات الخام إلى قرارات منضبطة، والحدس إلى تكتيك قابل للتحقق.\","
+        },
+        {
+          "i": 62,
+          "len": 257,
+          "text": "\"المنتدى جزء من الحلقة: المحتوى يخضع لتقييم ذكاء اصطناعي (جودة، تفاعل، مكافحة البريد المزعج/anti-sybil)، والنشاط يُرسم على اقتصاد QCoin. إنها ليست \\\"شبكة اجتماعية من أجل الإعجابات\\\"، بل حافلة معرفية موجهة حيث تتحول المعرفة والمساهمة إلى قيمة رمزية.\""
+        },
+        {
+          "i": 88,
+          "len": 250,
+          "text": "\"بيانات السوق: نجمع الخلاصات التاريخية والفورية من CEX/DEX، نوحدها ضمن مخطط عام، نغلق الفجوات، نأخذ بعين الاعتبار التقسيمات وخصائص المشتقات. في الأعلى — مؤشرات جماعية (RSI/ADX/ATR/VWAP/OBV/Ichimoku/عناقيد الحجم)، مرشحات أوضاع وسياق السيولة.\","
+        },
+        {
+          "i": 89,
+          "len": 230,
+          "text": "\"الطبقة على السلسلة: رسوم العناوين، تحركات السيولة، تركّز الحاملين، أحداث الجسور، مخاطر MEV الأساسية. سلاسل الكتل العامة ليست بيانات شخصية، لكننا نسجل الطلبات ومعرّفات التصحيح بعناية من أجل الموثوقية والتحقيق في الحوادث.\","
+        },
+        {
+          "i": 90,
+          "len": 210,
+          "text": "\"السرديات والأخبار: فهرسة متعددة اللغات، ترجمة، إزالة التكرار، تقييم المصادر، تقدير الحداثة والتغاير مع السعر؛ النتيجة — طبقة رقمية خفيفة بجانب السعر والحجم تساعد على التمييز بين الضوضاء والنبض المهم.\","
+        },
+        {
+          "i": 91,
+          "len": 226,
+          "text": "\"التخزين والذاكرة المؤقتة: تقسيم التدفقات إلى ساخنة/دافئة، تدهور تدريجي دون فقدان الوظائف الحرجة، أولوية القنوات لـ VIP والمهام النظامية. جميع مراحل الحساب تتمتع بتتبع، تحكم في نسخ القطع الأثرية وقابلية إعادة الإنتاج.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\en.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 47,
+          "len": 972,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI is not just a platform but an entire cybernetic universe of decision-making: institutional-grade multichain data, autonomous L7 agents, on-chain pipelines, and trading routing operate as a single digital organism. We connect the Web-MiniApp, Telegram MiniApp and QL7 AI Bot, a forum with the QCoin economy, and a global exchange ( core in the final stage ) to provide instant alpha signals, disciplined entry/exit windows, automated execution, and a transparent risk perimeter. Authorization is via non-custodial wallets (keys stay with you), support for PRO/VIP tiers, priority limits, and quota removal. At the core is a legally vetted Web3 architecture, cross-exchange liquidity aggregation, behavioral and microstructural models, as well as replicable research pipelines with the log hypothesis → test → evidence. This is next-generation infrastructure for those who work at market pace and require provability, speed, and accuracy.\","
+        },
+        {
+          "i": 50,
+          "len": 253,
+          "text": "\"marquee\": \"AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©\","
+        },
+        {
+          "i": 55,
+          "len": 369,
+          "text": "\"Quantum L7 AI is a cross-platform ecosystem: the AI core, autonomous L7 agents, on-chain monitoring, normalized market feeds, the forum social network, and the QCoin economy are combined into a single computational fabric. Every artifact — a transaction, a news narrative, a post, a liquidity chart — enters the common data loop and becomes a call to action.\","
+        },
+        {
+          "i": 56,
+          "len": 340,
+          "text": "\"L7 agents autonomously read documents and APIs, observe blockchains and order books, classify behavioral patterns, assess market regimes, and produce verifiable hypotheses. The result is not a “black box” but an explainable card: scenario probability, amplitude, horizons, SL/TP, confidence factors, and links to primary sources.\","
+        },
+        {
+          "i": 57,
+          "len": 324,
+          "text": "\"Authorization is via non-custodial wallets: we do not store private keys and only confirm ownership of the address. Access rights and quotas are synchronized between the Telegram MiniApp, the web interface, and the QL7 bot; VIP status marks the boundaries of limits and lets you into priority processing channels.\","
+        },
+        {
+          "i": 58,
+          "len": 302,
+          "text": "\"The market core is built on cross-exchange aggregation, unification of symbols/contracts, and latency-aware feed processing. We combine institution-level histories with real-time streams to track spread dispersion, shock volumes, order balance, MEV risks, and the effect of the news impulse.\","
+        },
+        {
+          "i": 59,
+          "len": 281,
+          "text": "\"The platform principle is provability: hypothesis → test → evidence. Every computation is logged, metrics are reproducible, and “noise” arbitrage is cut off by regime filters. This is how we turn raw data into disciplined decisions and intuition into verifiable tactics.\","
+        },
+        {
+          "i": 60,
+          "len": 303,
+          "text": "\"The forum is embedded into the loop: content passes AI scoring (quality, engagement, anti-spam/anti-sybil), and activity is mapped into the QCoin economy. This is not a “social network for likes” but a targeted cognitive bus where knowledge and contribution are converted into tokenized value.\""
+        },
+        {
+          "i": 86,
+          "len": 283,
+          "text": "\"Market data: we combine historical and streaming CEX/DEX feeds, bring them to a common schema, close gaps, and account for splits and derivative specifics. On top — ensemble indicators (RSI/ADX/ATR/VWAP/OBV/Ichimoku/volume clusters), regime filters, and liquidity context.\","
+        },
+        {
+          "i": 87,
+          "len": 248,
+          "text": "\"On-chain layer: address graphs, liquidity movements, holder concentrations, bridge events, basic MEV risks. Public blockchains are not personal data, but we carefully log requests and debug IDs for reliability and incident investigation.\","
+        },
+        {
+          "i": 88,
+          "len": 270,
+          "text": "\"Narratives and news: multilingual indexing, translation, deduplication, source scoring, assessment of novelty and covariations with price; the result is a light numerical overlay next to price and volume that helps distinguish noise from a meaningful impulse.\","
+        },
+        {
+          "i": 89,
+          "len": 260,
+          "text": "\"Storage and cache: splitting streams into hot/warm, graceful degradation without loss of critical functions, prioritization of channels for VIP and system tasks. All computation stages have traceability, artifact version control, and reproducibility.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\es.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 47,
+          "len": 1069,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI no es solo una plataforma, sino todo un universo cibernético de toma de decisiones: datos multichain de clase institucional, agentes L7 autónomos, pipelines on-chain y enrutamiento de trading funcionan como un único organismo digital. Acoplamos Web-MiniApp, Telegram MiniApp y QL7 AI Bot, el foro con la economía de QCoin y la bolsa global ( núcleo en fase final ), para ofrecer señales alfa instantáneas, ventanas disciplinadas de entrada/salida, ejecución automatizada y un contorno de riesgo transparente. La autorización es a través de carteras no custodiales (las llaves son tuyas), soporte de niveles PRO/VIP, límites prioritarios y eliminación de cuotas. En la base hay una arquitectura Web3 jurídicamente afinada, agregación de liquidez entre exchanges, modelos de comportamiento y microestructurales, así como pipelines de research replicables con registro hipótesis → prueba → evidencias. Es una infraestructura de nueva generación para quienes trabajan al ritmo del mercado y exigen demostrabilidad, velocidad y precisión.\","
+        },
+        {
+          "i": 50,
+          "len": 282,
+          "text": "\"marquee\": \"IA • Agentes Cuánticos • Analítica Onchain • Criptobolsa (núcleo) • Foro • Academia • QCoin Minería • Ejecución Automática • Contorno de Riesgo • Enrutamiento de Liquidez • Metaverso Web3 • Juegos • API/SDK • Empresa • Todos los derechos reservados • Quantum L7 AI ©\","
+        },
+        {
+          "i": 55,
+          "len": 392,
+          "text": "\"Quantum L7 AI es un ecosistema multiplataforma: núcleo de IA, agentes L7 autónomos, monitoreo on-chain, feeds de mercado normalizados, red social del foro y economía de QCoin unidos en un único tejido computacional. Cada artefacto —transacción, narrativa de noticias, publicación, gráfico de liquidez— entra en el contorno común de datos y se convierte en una señal para la acción.\","
+        },
+        {
+          "i": 56,
+          "len": 381,
+          "text": "\"Los agentes L7 leen de forma autónoma documentos y API, observan blockchains y order books, clasifican patrones de comportamiento, evalúan regímenes de mercado y producen hipótesis verificables. El resultado no es una «caja negra», sino una tarjeta explicable: probabilidad del escenario, amplitud, horizontes, SL/TP, factores de confianza y enlaces a fuentes primarias.\","
+        },
+        {
+          "i": 57,
+          "len": 342,
+          "text": "\"La autorización es a través de carteras no custodiales: no almacenamos claves privadas, sino que confirmamos la titularidad de la dirección. Los derechos de acceso y las cuotas se sincronizan entre Telegram MiniApp, la interfaz web y el bot QL7, el estado VIP delimita los límites y da paso a canales de procesamiento prioritarios.\","
+        },
+        {
+          "i": 58,
+          "len": 382,
+          "text": "\"El núcleo de mercado se construye sobre agregación entre exchanges, unificación de símbolos/contratos y procesamiento de feeds con conciencia de latencia (latency-aware). Combinamos historiales de nivel institucional con flujos en tiempo real para seguir la dispersión del spread, volúmenes de impacto, balance de órdenes, riesgos MEV y el efecto del impulso de noticias.\","
+        },
+        {
+          "i": 59,
+          "len": 314,
+          "text": "\"El principio de la plataforma es la demostrabilidad: hipótesis → prueba → evidencias. Cada cálculo se registra, las métricas son reproducibles y el arbitraje del «ruido» se recorta con filtros de régimen. Así convertimos datos en bruto en decisiones disciplinadas, y la intuición en táctica verificable.\","
+        },
+        {
+          "i": 60,
+          "len": 330,
+          "text": "\"El foro se integra en el contorno: el contenido pasa por scoring de IA (calidad, engagement, anti-spam/anti-sybil), y la actividad se mapea a la economía de QCoin. No es una «red social por los likes», sino un bus cognitivo orientado a objetivos donde el conocimiento y la contribución se convierten en valor tokenizado.\""
+        },
+        {
+          "i": 86,
+          "len": 318,
+          "text": "\"Datos de mercado: unimos feeds históricos y en streaming de CEX/DEX, los llevamos a un esquema común, cerramos brechas y consideramos splits y particularidades de los derivados. Encima — indicadores en ensemble (RSI/ADX/ATR/VWAP/OBV/Ichimoku/clusteres de volumen), filtros de régimen y contexto de liquidez.\","
+        },
+        {
+          "i": 87,
+          "len": 302,
+          "text": "\"Capa on-chain: grafos de direcciones, movimientos de liquidez, concentraciones de holders, eventos de puentes, riesgos MEV básicos. Las blockchains públicas no son datos personales, pero registramos cuidadosamente solicitudes e ID de depuración para fiabilidad e investigación de incidentes.\","
+        },
+        {
+          "i": 88,
+          "len": 297,
+          "text": "\"Narrativas y noticias: indexación multilingüe, traducción, deduplicación, scoring de fuentes, evaluación de novedad y covariaciones con el precio; el resultado es una ligera sobreestructura numérica junto al precio y el volumen que ayuda a distinguir el ruido del impulso significativo.\","
+        },
+        {
+          "i": 89,
+          "len": 289,
+          "text": "\"Almacenamiento y caché: separación de flujos en calientes/templados, degradación sin pérdida de funciones críticas, priorización de canales para VIP y tareas del sistema. Todas las etapas computacionales tienen trazabilidad, control de versiones de artefactos y reproducibilidad.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ru.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 47,
+          "len": 970,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI — это не просто платформа, а целая кибернетическая вселенная принятия решений: мультичейн-данные институционального класса, автономные L7-агенты, ончейн-пайплайны и торговая маршрутизация работают как единый цифровой организм. Мы стыкуем Web-MiniApp, Telegram MiniApp и QL7 AI Bot, форум с экономикой QCoin и глобальную биржу ( ядро в финальной стадии ), чтобы дать мгновочные альфа-сигналы, дисциплинированные окна входа/выхода, автоматизированное исполнение и прозрачный риск-контур. Авторизация — через некостодиальные кошельки (ключи у вас), поддержка PRO/VIP-уровней, приоритетные лимиты и снятие квот. В основе — юридически выверенная архитектура Web3, кросс-эксчендж-агрегация ликвидности, поведенческие и микроструктурные модели, а также реплицируемые ресёрч-пайплайны с логом гипотеза → тест → свидетельства. Это инфраструктура нового поколения для тех, кто работает в темпе рынка и требует доказуемости, скорости и точности.\","
+        },
+        {
+          "i": 50,
+          "len": 262,
+          "text": "\"marquee\": \"ИИ • Квантовые агенты • Ончейн-аналитика • Криптобиржа (ядро) • Форум • Академия • QCoin Майнинг • Автоисполнение • Риск-контур • Маршрутизация ликвидности • Метавселенная Web3 • Игры • API/SDK • Предприятие • Все права защищены • Quantum L7 AI ©\","
+        },
+        {
+          "i": 55,
+          "len": 362,
+          "text": "\"Quantum L7 AI — кросс-платформенная экосистема: ИИ-ядро, автономные L7-агенты, ончейн-мониторинг, нормализованные маркет-фиды, социальная сеть форума и экономика QCoin объединены в единую вычислительную ткань. Каждый артефакт — транзакция, новостной нарратив, пост, график ликвидности — попадает в общий контур данных и становится сигналом к действию.\","
+        },
+        {
+          "i": 56,
+          "len": 331,
+          "text": "\"Агенты L7 автономно читают документы и API, наблюдают блокчейны и стаканы, классифицируют поведенческие паттерны, оценивают режимы рынка и выводят проверяемые гипотезы. Результат — не «чёрный ящик», а объяснимая карточка: вероятность сценария, амплитуда, горизонты, SL/TP, факторы уверенности и ссылки на первоисточники.\","
+        },
+        {
+          "i": 57,
+          "len": 294,
+          "text": "\"Авторизация — через некостодиальные кошельки: мы не храним приватные ключи, а подтверждаем владение адресом. Права доступа и квоты синхронизируются между Telegram MiniApp, веб-интерфейсом и ботом QL7, статус VIP размечает границы лимитов и пропускает в приоритетные каналы обработки.\","
+        },
+        {
+          "i": 58,
+          "len": 299,
+          "text": "\"Маркет-ядро строится на кросс-биржевой агрегации, унификации символов/контрактов и latency-aware обработке фидов. Мы совмещаем институт-уровень историй с потоками реального времени, чтобы отслеживать дисперсию спреда, ударные объёмы, баланс заявок, MEV-риски и эффект новостного импульса.\","
+        },
+        {
+          "i": 59,
+          "len": 272,
+          "text": "\"Принцип платформы — доказуемость: гипотеза → тест → свидетельства. Каждый расчёт логируется, метрики воспроизводимы, а арбитраж «шума» отсекается фильтрами режимов. Так мы превращаем сырые данные в дисциплинированные решения, а интуицию — в проверяемую тактику.\","
+        },
+        {
+          "i": 60,
+          "len": 277,
+          "text": "\"Форум встраивается в контур: контент проходит AI-скоринг (качество, вовлечённость, анти-спам/anti-sybil), а активность маппится в экономику QCoin. Это не «соцсеть ради лайков», а целевая когнитивная шина, где знания и вклад конвертируются в токенизированную ценность.\""
+        },
+        {
+          "i": 86,
+          "len": 285,
+          "text": "\"Маркет-данные: объединяем исторические и потоковые фиды CEX/DEX, приводим к общей схеме, закрываем разрывы, учитываем сплиты и особенности деривативов. Поверх — ансамблевые индикаторы (RSI/ADX/ATR/VWAP/OBV/Ichimoku/объёмные кластеры), фильтры режимов и контекст ликвидности.\","
+        },
+        {
+          "i": 87,
+          "len": 264,
+          "text": "\"Ончейн-слой: адресные графы, перемещения ликвидности, концентрации держателей, мостовые события, базовые MEV-риски. Публичные блокчейны — не персональные данные, но мы аккуратно логируем запросы и отладочные ID для надёжности и расследования инцидентов.\","
+        },
+        {
+          "i": 88,
+          "len": 254,
+          "text": "\"Нарративы и новости: мультиязычная индексация, перевод, дедупликация, скоринг источников, оценка новизны и ковариаций с ценой; результат — лёгкая числовая надстройка рядом с ценой и объёмом, которая помогает отличить шум от значимого импульса.\","
+        },
+        {
+          "i": 89,
+          "len": 246,
+          "text": "\"Хранилища и кэш: разделение потоков на горячие/тёплые, деградация без потери критичных функций, приоритизация каналов для VIP и системных задач. Все вычислительные этапы имеют трассировку, контроль версий артефактов и воспроизводимость.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\tr.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 49,
+          "len": 990,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI sadece bir platform değil, baştan sona bir karar alma siber evrenidir: kurumsal sınıf çok zincirli veriler, otonom L7 ajanları, on-chain hatlar ve ticaret yönlendirmesi tek bir dijital organizma gibi çalışır. Web-MiniApp, Telegram MiniApp ve QL7 AI Bot’u, QCoin ekonomisine sahip forumu ve küresel borsayı ( çekirdek son aşamada ) birbirine bağlıyoruz; böylece anlık alfa sinyalleri, disiplinli giriş/çıkış pencereleri, otomatikleştirilmiş icra ve şeffaf bir risk konturu sağlıyoruz. Yetkilendirme — saklama yapmayan cüzdanlar üzerinden (anahtarlar sizde), PRO/VIP seviyeleri desteği, öncelikli limitler ve kota kaldırma. Temelde — hukuken titizlikle doğrulanmış bir Web3 mimarisi, borsalar arası likidite agregasyonu, davranışsal ve mikro-yapısal modeller ile hipotez → test → kanıt günlüklerine sahip tekrarlanabilir araştırma hatları. Bu, piyasanın temposunda çalışan ve ispatlanabilirlik, hız ve doğruluk talep edenler için yeni nesil bir altyapıdır.\","
+        },
+        {
+          "i": 52,
+          "len": 269,
+          "text": "\"marquee\": \"YZ • Kuantum Ajanları • Onchain Analitiği • Kripto Borsası (çekirdek) • Forum • Akademi • QCoin Madenciliği • Otomatik Yürütme • Risk Konturu • Likidite Yönlendirme • Web3 Metaverse • Oyunlar • API/SDK • Kurumsal • Tüm hakları saklıdır • Quantum L7 AI ©\","
+        },
+        {
+          "i": 57,
+          "len": 356,
+          "text": "\"Quantum L7 AI — çok platformlu bir ekosistemdir: YZ çekirdeği, otonom L7 ajanları, on-chain izleme, normalize edilmiş piyasa feed’leri, forumun sosyal ağı ve QCoin ekonomisi tek bir hesaplama dokusunda birleştirilmiştir. Her bir artefakt — işlem, haber anlatısı, gönderi, likidite grafiği — ortak veri çevrimine girer ve eylem sinyaline dönüşür.\","
+        },
+        {
+          "i": 58,
+          "len": 368,
+          "text": "\"L7 ajanları belgeleri ve API’leri otonom olarak okur, blokzincirleri ve emir defterlerini gözlemler, davranış kalıplarını sınıflandırır, piyasa rejimlerini değerlendirir ve doğrulanabilir hipotezler çıkarır. Sonuç — “kara kutu” değil, açıklanabilir bir karttır: senaryo olasılığı, genlik, ufuklar, SL/TP, güven faktörleri ve birincil kaynaklara bağlantılar.\","
+        },
+        {
+          "i": 59,
+          "len": 299,
+          "text": "\"Yetkilendirme — saklama yapmayan cüzdanlar üzerinden: özel anahtarları saklamayız, adres sahipliğini doğrularız. Erişim hakları ve kotalar Telegram MiniApp, web arayüzü ve QL7 botu arasında senkronize edilir; VIP durumu limit sınırlarını işaretler ve öncelikli işleme kanallarına geçirir.\","
+        },
+        {
+          "i": 60,
+          "len": 317,
+          "text": "\"Piyasa çekirdeği borsalar arası agregasyon, sembol/kontrat birliği ve gecikme-duyarlı (latency-aware) feed işleme üzerine kuruludur. Spread dağılımını, şok hacimleri, emir dengesi, MEV riskleri ve haber impulsu etkisini izlemek için kurum seviyesindeki tarihçeleri gerçek zamanlı akışlarla birleştiriyoruz.\","
+        },
+        {
+          "i": 61,
+          "len": 273,
+          "text": "\"Platform ilkesi — ispatlanabilirlik: hipotez → test → kanıtlar. Her hesaplama loglanır, metrikler yeniden üretilebilir ve “gürültü” arbitrajı rejim filtreleriyle ayıklanır. Böylece ham verileri disiplinli kararlara, sezgiyi doğrulanabilir taktiğe dönüştürüyoruz.\","
+        },
+        {
+          "i": 62,
+          "len": 273,
+          "text": "\"Forum çevrime gömülüdür: içerik AI skorlama’dan (kalite, etkileşim, anti-spam/anti-sybil) geçer ve aktivite QCoin ekonomisine haritalanır. Bu “beğeni için sosyal ağ” değil, bilginin ve katkının jetonlaştırılmış değere dönüştüğü hedeflenmiş bir bilişsel otobüstür.\""
+        },
+        {
+          "i": 88,
+          "len": 301,
+          "text": "\"Piyasa verileri: CEX/DEX’in tarihsel ve akış feed’lerini birleştirir, ortak şemaya getirir, boşlukları kapatır, bölünmeleri ve türev özelliklerini hesaba katarız. Üstünde — topluluk (ensemble) göstergeler (RSI/ADX/ATR/VWAP/OBV/Ichimoku/hacim kümeleri), rejim filtreleri ve likidite bağlamı.\","
+        },
+        {
+          "i": 89,
+          "len": 273,
+          "text": "\"On-chain katman: adres grafikleri, likidite hareketleri, büyük sahip yoğunlukları, köprü olayları, temel MEV riskleri. Açık blokzincirler kişisel veri değildir, ancak güvenilirlik ve olay incelemesi için istekleri ve hata ayıklama kimliklerini dikkatle loglarız.\","
+        },
+        {
+          "i": 90,
+          "len": 267,
+          "text": "\"Anlatılar ve haberler: çok dilli indeksleme, çeviri, yinelenenlerin kaldırılması, kaynak skoru, yenilik ve fiyatla kovaryansın değerlendirilmesi; sonuç — fiyat ve hacmin yanında gürültüyü anlamlı impulsdan ayırmaya yardım eden hafif sayısal bir üst katman.\","
+        },
+        {
+          "i": 91,
+          "len": 268,
+          "text": "\"Depolar ve önbellek: akışların sıcak/ılık olarak ayrılması, kritik işlev kaybı olmadan kademeli bozulma, VIP ve sistem görevleri için kanal önceliklendirme. Tüm hesaplama aşamalarında izlenebilirlik, artefakt sürüm kontrolü ve yeniden üretilebilirlik vardır.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\uk.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 47,
+          "len": 935,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI — це не просто платформа, а цілий кібернетичний всесвіт прийняття рішень: мультичейн-дані інституційного класу, автономні L7-агенти, ончейн-пайплайни та торговельна маршрутизація працюють як єдиний цифровий організм. Ми поєднуємо Web-MiniApp, Telegram MiniApp і QL7 AI Bot, форум з економікою QCoin та глобальну біржу (ядро на фінальній стадії), щоб надати миттєві альфа-сигнали, дисципліновані вікна входу/виходу, автоматизоване виконання та прозорий ризик-контур. Авторизація — через некостодіальні гаманці (ключі у вас), підтримка рівнів PRO/VIP, пріоритетні ліміти та зняття квот. В основі — юридично вивірена архітектура Web3, кросс-екчейндж-агрегація ліквідності, поведінкові та мікроструктурні моделі, а також відтворювані ресерч-пайплайни з логом гіпотеза → тест → свідчення. Це інфраструктура нового покоління для тих, хто працює в темпі ринку й потребує доказовості, швидкості та точності.\","
+        },
+        {
+          "i": 50,
+          "len": 260,
+          "text": "\"marquee\": \"ШІ • Квантові агенти • Ончейн-аналітика • Криптобіржа (ядро) • Форум • Академія • QCoin Майнінг • Автовиконання • Ризик-контур • Маршрутизація ліквідності • Метавсесвіт Web3 • Ігри • API/SDK • Підприємство • Усі права захищені • Quantum L7 AI ©\","
+        },
+        {
+          "i": 55,
+          "len": 346,
+          "text": "\"Quantum L7 AI — кросплатформна екосистема: ШІ-ядро, автономні L7-агенти, ончейн-моніторинг, нормалізовані маркет-фіди, соціальна мережа форуму та економіка QCoin об’єднані в єдину обчислювальну тканину. Кожен артефакт — транзакція, новинний наратив, пост, графік ліквідності — потрапляє в загальний контур даних і стає сигналом до дії.\","
+        },
+        {
+          "i": 56,
+          "len": 337,
+          "text": "\"Агенти L7 автономно читають документи й API, спостерігають блокчейни та стакани, класифікують поведінкові патерни, оцінюють режими ринку та формують перевірювані гіпотези. Результат — не «чорна скринька», а пояснювана картка: імовірність сценарію, амплітуда, горизонти, SL/TP, фактори впевненості та посилання на першоджерела.\","
+        },
+        {
+          "i": 57,
+          "len": 286,
+          "text": "\"Авторизація — через некостодіальні гаманці: ми не зберігаємо приватні ключі, а підтверджуємо володіння адресою. Права доступу й квоти синхронізуються між Telegram MiniApp, веб-інтерфейсом і ботом QL7, статус VIP визначає межі лімітів і пропускає у пріоритетні канали обробки.\","
+        },
+        {
+          "i": 58,
+          "len": 296,
+          "text": "\"Маркет-ядро побудоване на кросбіржовій агрегації, уніфікації символів/контрактів і latency-aware обробці фідів. Ми поєднуємо інституційного рівня історії з потоками реального часу, щоб відстежувати дисперсію спреду, ударні об’єми, баланс заявок, MEV-ризики та ефект новинного імпульсу.\","
+        },
+        {
+          "i": 59,
+          "len": 267,
+          "text": "\"Принцип платформи — доказовість: гіпотеза → тест → свідчення. Кожен розрахунок логуються, метрики відтворювані, а арбітраж «шуму» відсікається фільтрами режимів. Так ми перетворюємо сирі дані на дисципліновані рішення, а інтуїцію — на перевірювану тактику.\","
+        },
+        {
+          "i": 60,
+          "len": 273,
+          "text": "\"Форум вбудовується в контур: контент проходить AI-скоринг (якість, залученість, анти-спам/anti-sybil), а активність мапується в економіку QCoin. Це не «соцмережа заради лайків», а цільова когнітивна шина, де знання та внесок конвертуються в токенізовану цінність.\""
+        },
+        {
+          "i": 86,
+          "len": 286,
+          "text": "\"Маркет-дані: об’єднуємо історичні та потокові фіди CEX/DEX, приводимо до спільної схеми, закриваємо розриви, враховуємо спліти та особливості деривативів. Поверх — ансамблеві індикатори (RSI/ADX/ATR/VWAP/OBV/Ichimoku/об’ємні кластери), фільтри режимів і контекст ліквідності.\","
+        },
+        {
+          "i": 87,
+          "len": 252,
+          "text": "\"Ончейн-шар: адресні графи, переміщення ліквідності, концентрації власників, події мостів, базові MEV-ризики. Публічні блокчейни — не персональні дані, але ми обережно логуємо запити й відладкові ID для надійності та розслідування інцидентів.\","
+        },
+        {
+          "i": 88,
+          "len": 248,
+          "text": "\"Наративи та новини: мультимовна індексація, переклад, дедуплікація, скоринг джерел, оцінка новизни та коваріацій із ціною; результат — легка числова надбудова поряд із ціною й об’ємом, яка допомагає відрізнити шум від значущого імпульсу.\","
+        },
+        {
+          "i": 89,
+          "len": 236,
+          "text": "\"Сховища та кеш: поділ потоків на гарячі/теплі, деградація без втрати критичних функцій, пріоритизація каналів для VIP і системних завдань. Усі обчислювальні етапи мають трасування, контроль версій артефактів і відтворюваність.\""
+        }
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\zh.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 49,
+          "len": 369,
+          "text": "\"hero_subtitle\": \"Quantum L7 AI 不只是一个平台，而是一个完整的决策赛博宇宙：机构级的多链数据、自治的 L7 代理、链上流水线与交易路由像一个数字有机体协同运作。我们对接 Web-MiniApp、Telegram MiniApp 与 QL7 AI Bot、具有 QCoin 经济的论坛以及全球交易所（ 内核处于最终阶段 ），以提供即时的 Alpha 信号、纪律化的进场/出场窗口、自动化执行与透明的风险轮廓。授权通过非托管钱包（私钥在你手中），支持 PRO/VIP 等级、优先级限额与取消配额。其基础是法务严谨的 Web3 架构、跨交易所的流动性聚合、行为与微结构模型，以及可复现的研究流水线并记录 假设 → 测试 → 证据。它是为在市场节奏中工作并要求可证性、速度与精度的人所打造的新一代基础设施。\","
+        },
+        {
+          "i": 129,
+          "len": 208,
+          "text": "\"Quantum L7 AI 不仅仅是“分析”，而是围绕加密市场的交易决策与社会化互动的统一运营闭环。平台内核整合了 Web-MiniApp（网页 + Telegram）、带有游戏化 QCoin 挖矿的论坛，以及能降噪、识别流动性结构并给出纪律化入场/出场方案的 AI 研究引擎。我们把市场微观结构、链上遥测、行为模式与新闻叙事融合为一个一致且可解释的层，让你不必“追着”市场跑，而是可以提前设计下一步。\","
+        },
+        {
+          "i": 130,
+          "len": 187,
+          "text": "\"L7 代理是运行在数据之上的应用型 AI 模块。它们读取文档与信息流，请求 API，观察区块链、订单簿与衍生品，运行小型实验，并产出可解释的工件：假设、回测快照、上下文指标。重视的不是“黑箱魔法”，而是可追溯性：每个结论都能看到路径——考虑了哪些特征（流动性、价差、非对称、失衡、动量、成交量簇），为何在薄弱/易被操纵的区域降低权重，以及情景的失效边界在哪里。\","
+        },
+        {
+          "i": 134,
+          "len": 239,
+          "text": "\"分析内核。上百个指标只是调色板。关键在于“特征集合 + 上下文”：RSI/RSX、Stochastic、CCI/MFI、ADX/DI、ATR 与带宽、EMA/SMA/WMA、MACD/Signal/Histogram、VWAP/POC/Value-Area、成交量剖面、Bid/Ask 失衡与流动性扫单。我们把经典家族与状态过滤器、基于流动性与行为的启发式、以及链上流入/流出标记相融合。每张卡片不是“建议”，而是罗盘：历史幅度、实现期限、自信度、前提与失效边界。\","
+        },
+        {
+          "i": 138,
+          "len": 202,
+          "text": "\"架构。以 TypeScript/Python 实现的轻量服务位于稳定 API 之后；站点基于 Next.js，并通过 WebSocket 提供实时层。缓存层与后备来源确保在峰值期间的平滑降级。API/SDK 与 webhook 支持自动化，而角色与审计定义安全边界。MiniApp 同时运行在 Web 与 Telegram 上，让你在单一流程中操盘市场：图表、论坛、钱包、机器人——无摩擦。\","
+        },
+        {
+          "i": 257,
+          "len": 253,
+          "text": "\"exchange_sub\": \"Quantum L7 Exchange——这是一个多链、可信可解释的下一代交易平台，\\n将 CEX/DEX 流动性、AI 推荐与机构级数据基础设施融合为统一的计算织体。\\n我们处理 87 TB 的市场历史与超过 370 亿条历史 K 线，覆盖所有主流网络与平台，规范化 tick、\\n订单簿深度与衍生品规范，把市场拉齐到同一套决策标准。目标不是“又一个交易所”，\\n而是具备可证逻辑的执行回路：假设 → 测试 → 证据 → 成交，并配以透明的风险限制与可追溯审计。\","
+        },
+        {
+          "i": 262,
+          "len": 183,
+          "text": "\"L7 Exchange 是一条基于代理的管线，自治的 L7 代理会消费行情馈送、链上事件、新闻与\\n微观结构的行为信号，将其按时间对齐，输出可解释的（BUY/SELL/HOLD）建议，附带概率、\\n幅度、时间跨度与风险语境（流动性、价差、离散度、异常）。对用户而言，这意味着\\n决策的可复现性：每张信号卡都伴随因素日志、模型版本与原始来源链接。\","
+        },
+        {
+          "i": 340,
+          "len": 1014,
+          "text": "\"contact_sub\": \"为什么要联系我们？\\n\\n1. 合作伙伴与协作\\n与我们合作可以让您接触到 QuantumL7AI 的各类技术，包括：\\n— 将您的产品与我们的神经网络和智能代理集成；\\n— 联合推出教育项目和学习模块；\\n— 在我们的平台内推广您的品牌；\\n— 针对您的受众开发定制化的 AI 解决方案；\\n— 有机会举办联合活动、直播和 AMA（问我任何事）活动。\\n\\n我们愿意与任何项目合作 — 从小型企业到大型公司、初创企业以及教育平台。\\n如果您有想法或计划 — 请写信给我们。我们会尽快进行审核，并为您提供最合适的合作形式。\\n\\n2. 投资者\\n如果您希望：\\n— 获取 QuantumL7AI 的早期技术；\\n— 参与 AI 生态系统的构建和发展；\\n— 支持打造一个国际化学习平台；\\n— 第一时间了解战略决策和重大版本发布 —\\n\\n您可以直接与我们联系。\\n\\n我们欢迎所有与我们有共同使命的投资者，无论是个人还是机构：  \\n致力于发展创新性的 AI 技术，帮助人们成长并取得更大成就。  \\n我们会对每一次来信进行单独、认真地评估。\\n\\n3. 平台用户\\n如果你正在使用我们的服务 —— Premium 订阅、QuantumX、学习模块、Q-Coin 或智能代理 —— 你随时可以就以下问题联系我们：\\n\\n— 技术问题或错误；  \\n— 建议和改进意见；  \\n— 对新功能的需求；  \\n— 有关支付、Premium 访问和订阅的问题；  \\n— 关于漏洞和故障的反馈；  \\n— 表达感谢的信息（我们一直非常开心收到这些 ❤️）。\\n\\n我们会阅读每一条消息 —— 它们帮助我们不断变得更好。\\n\\n4. 投诉、安全与规则违规\\n如果你发现：\\n— 侮辱性或冒犯性的行为；  \\n— 可疑活动或欺诈行为；  \\n— 违反平台规则的情况；  \\n— 不正确或存在安全隐患的模型回答。\\n\\n请及时告诉我们，我们会迅速作出回应并保障平台安全。\\n\\n5. 内容创作者\\n如果你是：\\n— 博主；  \\n— 主播；  \\n— 大型 Telegram / YouTube / Instagram 频道的拥有者；  \\n— 课程作者或教育项目的发起人 —\\n\\n我们非常欢迎与您开展联合合作、功能集成以及各类合作伙伴计划。  \\n给我们写信 —— 我们一起讨论最合适的合作形式。\","
+        },
+        {
+          "i": 659,
+          "len": 522,
+          "text": "\"sub_intro\": \"Quantum L7 不是“又一个服务”，而是统一的决策闭环。87 TB 市场数据，跨链（across-chains）370 亿条历史K线，跨交易所聚合、流动性归一化与感知延迟（latency-aware）处理。一个账号即可开启 Web-MiniApp、Telegram 机器人 QL7 AI Bot 和带有 QCoin 挖矿的论坛。MiniApp 同时运行在 Telegram 与网页端，交易所推荐已实时给出（交易内核与执行——处于最终阶段）。VIP+ 提供不限时的 AI 分析、X2 任务倍增器，以及对通过 Quantum L7 AI 引擎打分的媒体内容（视频/图片/音频）的 QCoin 奖励计入。支付——通过 NowPayments：一旦链上（on-chain）确认到达，访问即刻开启，并在 MiniApp/机器人/论坛中同步。接下来——新一代 L7 区块链上线：VIP 获得更高的分发优先级层（priority tier）与 QCoin 提现队列优先、对质押/验证者角色的早期访问以及更高的限额。七种界面语言、严谨的钱包绑定、严格的风险管理纪律与无噪声的“入场窗口”——一切只为让你保持在市场流中。\","
+        },
+        {
+          "i": 669,
+          "len": 744,
+          "text": "\"sub_vip_desc\": \"\\n    • 统一的 VIP 层：MiniApp + Telegram + Web —— 各处同一状态与限额，无差异无延迟。<br/>\\n    • 论坛挖矿：每 4 小时确认活跃并记账 QCoin；VIP 获得时间 X2 与任务倍增 X2。<br/>\\n    • 媒体发布（VIP）：视频/图片/音频通过 Quantum L7 AI 评分（quality、engagement、anti-spam/anti-sybil），并转换为更高的 QCoin 奖励。<br/>\\n    • 市场推荐：按符号/TF 的信号已就绪；更深入的波动性分析、成交量聚类与 what-if/backtest 向 VIP 优先开放。<br/>\\n    • Telegram QL7 AI Bot：更高配额、回复优先、在动荡高峰期提供 X2 的“on-chain clarity” 窗口。<br/>\\n    • NowPayments：加密支付（USDT 等），链上确认后即刻激活——无需截图与人工核验。<br/>\\n    • L7 区块链（即将发布）：VIP —— 处于 QCoin 提现队列的更高层级，更高上限，提前获取验证者/质押与技术测试渠道。<br/>\\n    • 论坛个人资料：金色徽章、曝光提升、更高的媒体限额、更快的审核，以及内容在排序中的更高权重。<br/>\\n    • 7 种语言本地化与自适应 UX（从移动端 Telegram 到桌面端网页）——一个界面、不同环境、零摩擦。<br/>\\n    • 适合需要节奏的人：precise entries/SL/TP，无多余“泡沫”的风险轮廓，计算透明与公平的奖励经济。<br/>\\n  \","
+        },
+        {
+          "i": 775,
+          "len": 368,
+          "text": "\"ai_unlimit_desc\": \"为此账号开启 AI Box 的 24/7 不间断访问，并接入 Quantum L7 全生态的扩展 VIP 边界。通过 NowPayments 完成链上支付确认后，浏览器中的每日配额将停用 30 天——激活全程自动完成，无需截图与往返沟通。VIP 状态在网页版、MiniApp 与 Telegram 机器人之间同步：AI 分析无阻塞、队列优先、可在论坛发布媒体（视频/图片/音频），并强化 QCoin 挖矿。VIP 享有 X2 时间与任务倍增，内容将通过 Quantum L7 AI 评分（质量/参与度/anti-spam/anti-sybil）并获得额外 QCoin。累积计入 QCoin 整体经济，为下一代 L7 区块链上线做准备——VIP 在分配与提现队列中获得更高优先级与更早通道。\","
+        },
+        {
+          "i": 951,
+          "len": 310,
+          "text": "\"forum_qcoin_desc\": \"新一代加密货币，采用 proof-of-activity 奖励模型。\\n\\n现在在论坛中，不仅可以靠活跃度赚钱，还可以通过完成任务（quests）：完成任务即可获得真正的加密货币。\\n\\nVIP 用户可获得双倍奖励 ×2，并因其帖子获得的浏览、点赞和互动享有额外计入——其贡献以 Q COIN 计量。\\n\\n系统基于混合式 on-/off-chain 架构并持续同步，正准备与全新的 L7 区块链集成——面向下一代金融的平台。\\n\\nL7 将成为新的金融秩序：自有区块链、分布式经济与完全去中心化。\\n\\n保持活跃、完成任务，不要错过时机——从今天起赚取未来的加密货币。\","
+        }
+      ],
       "score": 12
     },
     {
@@ -1143,6 +1678,24 @@
         "local-storage": 2,
         "session-storage": 0,
         "network-call": 3,
+        "raf": 0,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 10
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobot.jsx",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 2,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
         "raf": 0,
         "interval": 1
       },
@@ -1764,32 +2317,32 @@
       },
       "longLines": [
         {
-          "i": 922,
+          "i": 921,
           "len": 190,
           "text": ".emojiBtn{ width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); font-size:22px; color:#fff; transition: transform .06s }"
         },
         {
-          "i": 1001,
+          "i": 1000,
           "len": 188,
           "text": ".avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }"
         },
         {
-          "i": 1442,
+          "i": 1441,
           "len": 196,
           "text": ".iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }"
         },
         {
-          "i": 1601,
+          "i": 1600,
           "len": 184,
           "text": ".sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }"
         },
         {
-          "i": 1736,
+          "i": 1735,
           "len": 208,
           "text": ".qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }"
         },
         {
-          "i": 5436,
+          "i": 5435,
           "len": 183,
           "text": ".dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; animation: dmPulse 2.6s ease-in-out infinite; }"
         }
@@ -2271,24 +2824,6 @@
         "network-call": 0,
         "raf": 2,
         "interval": 0
-      },
-      "longLines": [],
-      "score": 4
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 1,
-        "local-storage": 7,
-        "session-storage": 0,
-        "network-call": 1,
-        "raf": 0,
-        "interval": 1
       },
       "longLines": [],
       "score": 4
@@ -3520,6 +4055,60 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\tma\\auto\\page.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 1,
+        "local-storage": 2,
+        "session-storage": 0,
+        "network-call": 1,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 2,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendHost.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 5,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendProvider.jsx",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
@@ -7497,6 +8086,24 @@
       "score": 0
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\manifest.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\InviteFriendPopup.jsx",
       "counts": {
         "for-loop": 0,
@@ -7516,6 +8123,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\LanguageSwitcher.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\NotRobotHost.jsx",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

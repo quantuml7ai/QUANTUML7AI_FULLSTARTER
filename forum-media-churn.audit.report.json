@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 816,
+    "score": 824,
     "counts": {
       "playCalls": 2,
       "pauseCalls": 15,
@@ -11,7 +11,7 @@
       "currentSrcReads": 12,
       "pendingFlags": 56,
       "hardUnload": 21,
-      "iframeOps": 154,
+      "iframeOps": 158,
       "io": 8,
       "ro": 0,
       "raf": 10,
@@ -66,7 +66,7 @@
           "text": "try { el.load?.(); } catch {}"
         },
         {
-          "line": 2810,
+          "line": 2815,
           "text": "el.load?.();"
         }
       ],
@@ -84,7 +84,7 @@
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2711,
+          "line": 2716,
           "text": "try { el.setAttribute('src', nextSrc); } catch {}"
         }
       ],
@@ -212,6 +212,120 @@
         {
           "line": 397,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) return el;"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/ForumAds.js",
+    "score": 135,
+    "counts": {
+      "playCalls": 2,
+      "pauseCalls": 5,
+      "loadCalls": 3,
+      "srcSets": 0,
+      "srcRemoves": 2,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 28,
+      "io": 5,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "reload-thrash risk",
+      "iframe remount risk"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 1686,
+          "text": "v.play?.().catch(() => {"
+        },
+        {
+          "line": 1823,
+          "text": "if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 1132,
+          "text": "try { node.pause?.(); } catch {}"
+        },
+        {
+          "line": 1144,
+          "text": "try { node.pause?.(); } catch {}"
+        },
+        {
+          "line": 1160,
+          "text": "try { node?.pause?.(); } catch {}"
+        },
+        {
+          "line": 1676,
+          "text": "try { v.pause?.(); } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 1134,
+          "text": "try { node.load?.(); } catch {}"
+        },
+        {
+          "line": 1146,
+          "text": "try { node.load?.(); } catch {}"
+        },
+        {
+          "line": 1162,
+          "text": "try { node?.load?.(); } catch {}"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 1133,
+          "text": "try { node.removeAttribute('src'); } catch {}"
+        },
+        {
+          "line": 1145,
+          "text": "try { node.removeAttribute('src'); } catch {}"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 935,
+          "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
+        },
+        {
+          "line": 987,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
+        },
+        {
+          "line": 990,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
+        },
+        {
+          "line": 1024,
+          "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
+        }
+      ],
+      "io": [
+        {
+          "line": 1197,
+          "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')"
+        },
+        {
+          "line": 1201,
+          "text": "const nearObs = new IntersectionObserver("
+        },
+        {
+          "line": 1207,
+          "text": "const focusObs = new IntersectionObserver("
+        },
+        {
+          "line": 1724,
+          "text": "typeof IntersectionObserver === 'undefined' ||"
         }
       ]
     }
@@ -438,85 +552,6 @@
         {
           "line": 115,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/ForumAds.js",
-    "score": 92,
-    "counts": {
-      "playCalls": 2,
-      "pauseCalls": 2,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 28,
-      "io": 5,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 0
-    },
-    "flags": [],
-    "samples": {
-      "playCalls": [
-        {
-          "line": 1611,
-          "text": "v.play?.().catch(() => {"
-        },
-        {
-          "line": 1748,
-          "text": "if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});"
-        }
-      ],
-      "pauseCalls": [
-        {
-          "line": 1601,
-          "text": "try { v.pause?.(); } catch {}"
-        },
-        {
-          "line": 1621,
-          "text": "v.pause?.();"
-        }
-      ],
-      "iframeOps": [
-        {
-          "line": 935,
-          "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
-        },
-        {
-          "line": 987,
-          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
-        },
-        {
-          "line": 990,
-          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
-        },
-        {
-          "line": 1024,
-          "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
-        }
-      ],
-      "io": [
-        {
-          "line": 1139,
-          "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')"
-        },
-        {
-          "line": 1143,
-          "text": "const nearObs = new IntersectionObserver("
-        },
-        {
-          "line": 1149,
-          "text": "const focusObs = new IntersectionObserver("
-        },
-        {
-          "line": 1649,
-          "text": "typeof IntersectionObserver === 'undefined' ||"
         }
       ]
     }
@@ -2729,7 +2764,7 @@
         },
         {
           "line": 236,
-          "text": "const ytEmbedUrl = ytId ? `https://www.youtube.com/embed/${encodeURIComponent(ytId)}` : ''"
+          "text": "const ytEmbedUrl = ytId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(ytId)}` : ''"
         },
         {
           "line": 256,

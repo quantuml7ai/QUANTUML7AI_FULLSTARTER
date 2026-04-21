@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:02:44.837Z",
+  "generatedAt": "2026-04-21T20:31:53.241Z",
   "issues": [
     "legacy-iframe-prewarm-still-present"
   ],
@@ -33,7 +33,7 @@
         "forumQcastMuted": 0,
         "restoreGuard": 10,
         "sameSrcGuard": 4,
-        "sharedMute": 7
+        "sharedMute": 6
       }
     },
     {

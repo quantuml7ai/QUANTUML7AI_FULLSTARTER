@@ -233,7 +233,7 @@ export async function GET(req, { params }) {
 
   const textRaw = found ? String(post?.text || '') : ''
   const ytId = found ? extractYouTubeId(textRaw) : ''
-  const ytEmbedUrl = ytId ? `https://www.youtube.com/embed/${encodeURIComponent(ytId)}` : ''
+  const ytEmbedUrl = ytId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(ytId)}` : ''
   const ytThumbUrl = ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : ''
 
   const isAudioPost = found ? hasAudioInText(textRaw) : false

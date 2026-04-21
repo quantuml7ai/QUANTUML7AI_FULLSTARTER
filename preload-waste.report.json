@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:02:44.262Z",
+  "generatedAt": "2026-04-21T20:31:52.459Z",
   "report": [
     {
       "file": "app/layout.js",
@@ -13,11 +13,11 @@
     {
       "file": "app/about/page.js",
       "counts": {
-        "preload": 1,
+        "preload": 0,
         "fontHint": 0,
-        "startupMedia": 3
+        "startupMedia": 0
       },
-      "preloadWasteScore": 1
+      "preloadWasteScore": 0
     },
     {
       "file": "app/ads/home.js",

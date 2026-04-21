@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-18T03:02:14.417Z",
+  "generatedAt": "2026-04-21T20:30:57.758Z",
   "summary": {
-    "scannedFiles": 367,
-    "internalEdges": 498,
+    "scannedFiles": 378,
+    "internalEdges": 500,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -4695,7 +4695,84 @@
       "externalCount": 0
     },
     {
+      "file": "components/i18n-dicts/ar.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/en.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/es.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/manifest.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/ru.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/tr.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/uk.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "components/i18n-dicts/zh.js",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
       "file": "components/i18n.js",
+      "domain": "components",
+      "imports": [
+        "components/i18n-dicts/en.js",
+        "components/i18n-dicts/manifest.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "components/i18n.source.js",
       "domain": "components",
       "imports": [],
       "importCount": 0,
@@ -4703,6 +4780,17 @@
         "react"
       ],
       "externalCount": 1
+    },
+    {
+      "file": "components/InviteFriendHost.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/dynamic"
+      ],
+      "externalCount": 2
     },
     {
       "file": "components/InviteFriendPopup.jsx",
@@ -4751,6 +4839,17 @@
       "external": [
         "react",
         "next/navigation"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/NotRobotHost.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/dynamic"
       ],
       "externalCount": 2
     },

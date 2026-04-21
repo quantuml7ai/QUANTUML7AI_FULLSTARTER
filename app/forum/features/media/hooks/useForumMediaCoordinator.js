@@ -2675,9 +2675,14 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (!next) return '';
         const u = new URL(next, window.location.href);
         const host = String(u.hostname || '').toLowerCase();
-        if (!host.includes('youtube.com') && !host.includes('youtu.be')) return next;
+        if (!host.includes('youtube.com') && !host.includes('youtube-nocookie.com') && !host.includes('youtu.be')) return next;
+        if ((host.includes('youtube.com') || host.includes('youtu.be')) && !host.includes('youtube-nocookie.com')) {
+          u.hostname = 'www.youtube-nocookie.com';
+        }
         if (!u.searchParams.has('enablejsapi')) u.searchParams.set('enablejsapi', '1');
         if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+        if (!u.searchParams.has('rel')) u.searchParams.set('rel', '0');
+        if (!u.searchParams.has('modestbranding')) u.searchParams.set('modestbranding', '1');
         if (!u.searchParams.has('origin')) u.searchParams.set('origin', window.location.origin);
         return u.toString();
       } catch {

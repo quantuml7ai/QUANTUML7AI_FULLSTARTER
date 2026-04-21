@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-04-18T03:02:44.153Z",
+  "generatedAt": "2026-04-21T20:31:52.302Z",
   "summary": {
     "heavyProviders": 11,
     "signalTotals": {
       "dynamicImport": 6,
       "analytics": 8,
       "wallet": 13,
-      "authUi": 19,
+      "authUi": 15,
       "startupMedia": 7,
-      "timers": 22,
-      "listeners": 34
+      "timers": 19,
+      "listeners": 29
     },
     "filesScanned": 10
   },
@@ -111,38 +111,6 @@
       "score": 18
     },
     {
-      "file": "components/InviteFriendProvider.jsx",
-      "counts": {
-        "dynamicImport": 0,
-        "analytics": 0,
-        "wallet": 0,
-        "authUi": 4,
-        "startupMedia": 0,
-        "timers": 1,
-        "listeners": 4
-      },
-      "riskFlags": [
-        "long-lived-runtime-signals"
-      ],
-      "score": 18
-    },
-    {
-      "file": "components/NotRobot.jsx",
-      "counts": {
-        "dynamicImport": 0,
-        "analytics": 0,
-        "wallet": 0,
-        "authUi": 0,
-        "startupMedia": 0,
-        "timers": 6,
-        "listeners": 1
-      },
-      "riskFlags": [
-        "long-lived-runtime-signals"
-      ],
-      "score": 17
-    },
-    {
       "file": "components/BgAudio.js",
       "counts": {
         "dynamicImport": 0,
@@ -155,6 +123,34 @@
       },
       "riskFlags": [],
       "score": 14
+    },
+    {
+      "file": "components/NotRobot.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "analytics": 0,
+        "wallet": 0,
+        "authUi": 0,
+        "startupMedia": 0,
+        "timers": 3,
+        "listeners": 0
+      },
+      "riskFlags": [],
+      "score": 6
+    },
+    {
+      "file": "components/InviteFriendProvider.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "analytics": 0,
+        "wallet": 0,
+        "authUi": 0,
+        "startupMedia": 0,
+        "timers": 1,
+        "listeners": 0
+      },
+      "riskFlags": [],
+      "score": 2
     },
     {
       "file": "components/TopBar.js",

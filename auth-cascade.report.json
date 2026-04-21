@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:02:43.077Z",
+  "generatedAt": "2026-04-21T20:31:50.773Z",
   "repeatedMagic401Baseline": 1,
   "report": [
     {
@@ -83,15 +83,15 @@
     {
       "file": "components/InviteFriendProvider.jsx",
       "counts": {
-        "authOk": 2,
-        "authSuccess": 2,
+        "authOk": 0,
+        "authSuccess": 0,
         "authLogout": 0,
         "openAuth": 0,
         "magic401": 0,
         "wallet": 0,
-        "postAuthEffects": 7
+        "postAuthEffects": 3
       },
-      "fanoutScore": 11
+      "fanoutScore": 3
     },
     {
       "file": "components/QCoinDropFX.jsx",

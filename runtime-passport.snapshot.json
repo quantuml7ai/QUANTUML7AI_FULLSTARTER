@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:02:43.645Z",
+  "generatedAt": "2026-04-21T20:31:51.589Z",
   "passportFields": [
     "route",
     "routeBudgetProfile",
@@ -385,11 +385,9 @@
       "telemetryLevel": "T0",
       "telemetryLabel": "minimal-prod-counters",
       "routeBudgetProfile": "about-decorative",
-      "activeMediaOwners": [
-        "page.js"
-      ],
+      "activeMediaOwners": [],
       "countActiveIframe": 0,
-      "countActiveNativeVideo": 1,
+      "countActiveNativeVideo": 0,
       "countActiveAdMedia": 0,
       "qcastState": {
         "count": 0,
@@ -409,9 +407,9 @@
       "currentBudgetPressureScore": 20,
       "budgetPressureScore": 20,
       "mainThreadPressureScore": 0,
-      "memoryPressureScore": 10,
+      "memoryPressureScore": 0,
       "teardownCleanlinessScore": 1,
-      "startupHeavinessScore": 2,
+      "startupHeavinessScore": 1,
       "layoutTurbulenceScore": 0,
       "authFanoutScore": 0,
       "activeAdaptiveProfile": "about-decorative:mid",
@@ -435,7 +433,7 @@
         {
           "file": "app/about/page.js",
           "counts": {
-            "video": 1,
+            "video": 0,
             "iframe": 0,
             "audio": 0,
             "timers": 0,
@@ -444,8 +442,8 @@
             "auth": 0,
             "providers": 1,
             "layoutReads": 0,
-            "console": 1,
-            "preload": 1,
+            "console": 0,
+            "preload": 0,
             "sameSrc": 0,
             "blockedPromotion": 0
           }

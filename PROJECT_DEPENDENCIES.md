@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-04-18T03:02:06.634Z
-Исходных файлов в анализе: 792
-Локальных зависимостей: 687
+Сгенерировано автоматически: 2026-04-21T20:30:44.153Z
+Исходных файлов в анализе: 805
+Локальных зависимостей: 706
 
 ## Охват
 
@@ -56,7 +56,7 @@
 - `app/subscribe` — 3 файлов
 - `app/tma` — 1 файлов
 - `audit` — 170 файлов
-- `components` — 23 файлов
+- `components` — 34 файлов
 - `config` — 1 файлов
 - `forum/diagnostics` — 2 файлов
 - `forum/dm` — 31 файлов
@@ -87,9 +87,9 @@
 - `public/models` — 1 файлов
 - `public/tonconnect-manifest.json` — 1 файлов
 - `public/workers` — 1 файлов
-- `root` — 111 файлов
+- `root` — 112 файлов
 - `src/shared` — 32 файлов
-- `tools` — 58 файлов
+- `tools` — 59 файлов
 
 ## Топ Межзоновых Зависимостей
 
@@ -100,6 +100,7 @@
 - `forum/dm` -> `forum/dm` — 28 локальных импортов
 - `tools` -> `tools` — 28 локальных импортов
 - `root` -> `src/shared` — 25 локальных импортов
+- `components` -> `components` — 22 локальных импортов
 - `forum/media` -> `forum/media` — 21 локальных импортов
 - `root` -> `root` — 19 локальных импортов
 - `forum/root` -> `forum/ui` — 18 локальных импортов
@@ -110,7 +111,6 @@
 - `forum/profile` -> `forum/shared` — 13 локальных импортов
 - `forum/root` -> `forum/shared` — 13 локальных импортов
 - `forum/root` -> `forum/feed` — 13 локальных импортов
-- `components` -> `components` — 12 локальных импортов
 - `forum/profile` -> `forum/profile` — 12 локальных импортов
 - `forum/root` -> `forum/media` — 12 локальных импортов
 - `forum/dm` -> `forum/profile` — 10 локальных импортов
@@ -121,6 +121,7 @@
 - `app/layout.js` -> `components` — 9 локальных импортов
 - `forum/quests` -> `forum/quests` — 9 локальных импортов
 - `forum/root` -> `forum/profile` — 9 локальных импортов
+- `root` -> `components` — 9 локальных импортов
 - `api/forum` -> `api/profile` — 8 локальных импортов
 - `api/profile` -> `api/profile` — 6 локальных импортов
 - `forum/feed` -> `forum/ui` — 6 локальных импортов
@@ -142,7 +143,6 @@
 - `forum/ui` -> `forum/quests` — 3 локальных импортов
 - `src/shared` -> `config` — 3 локальных импортов
 - `api/battlecoin` -> `api/forum` — 2 локальных импортов
-- `api/forum` -> `lib/subscriptions.js` — 2 локальных импортов
 
 ## Исходящие Зависимости По Зонам
 
@@ -337,7 +337,7 @@
 
 ### components
 
-- `components` — 12
+- `components` — 22
 
 ### config
 
@@ -511,6 +511,7 @@
 - `src/shared` — 25
 - `root` — 19
 - `forum/feed` — 10
+- `components` — 9
 - `forum/media` — 4
 - `forum/shared` — 2
 - `api/forum` — 1
@@ -530,7 +531,7 @@
 
 - `app/api/forum/_utils.js` — fan-in 33; основные потребители: `app/api/academy/exam/route.js`, `app/api/forum/_db.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/mediaLock/route.js`
 - `app/api/forum/_db.js` — fan-in 32; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`
-- `components/i18n.js` — fan-in 30; основные потребители: `app/about/page.js`, `app/academy/AcademyExamBlock.js`, `app/academy/page.js`, `app/ads/GeoTargetingPicker.jsx`, `app/ads/home.js`, `app/ads/page.jsx`, `app/components/CryptoNewsLens.jsx`, `app/contact/page.js`
+- `components/i18n.js` — fan-in 31; основные потребители: `app/about/page.js`, `app/academy/AcademyExamBlock.js`, `app/academy/page.js`, `app/ads/GeoTargetingPicker.jsx`, `app/ads/home.js`, `app/ads/page.jsx`, `app/components/CryptoNewsLens.jsx`, `app/contact/page.js`
 - `tools/runtime-governance.js` — fan-in 25; основные потребители: `tools/audit-adaptive-actions.js`, `tools/audit-adaptive-core.js`, `tools/audit-auth-cascade.js`, `tools/audit-console-noise.js`, `tools/audit-diagnostics-boundaries.js`, `tools/audit-feature-flag-safety.js`, `tools/audit-forensic-mode-bounds.js`, `tools/audit-iframe-restore.js`
 - `app/forum/features/profile/utils/profileCache.js` — fan-in 18; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/InboxRepliesPane.jsx`, `app/forum/features/feed/components/ForumPostCard.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/PublishedPostsPane.jsx`, `app/forum/features/feed/components/ThreadRepliesPane.jsx`, `app/forum/features/feed/components/TopicItem.jsx`
 - `app/forum/shared/utils/classnames.js` — fan-in 17; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationsRail.jsx`, `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`

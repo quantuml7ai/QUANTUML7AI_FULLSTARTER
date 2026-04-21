@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-18T03:02:07.127Z
-Файлов в реестре: 1733
+Сгенерировано автоматически: 2026-04-21T20:30:44.866Z
+Файлов в реестре: 1746
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -35,7 +35,7 @@
 - `auth-cascade.report.json` — 1 файлов
 - `baseline-after.stage0.json` — 1 файлов
 - `baseline-before.stage0.json` — 1 файлов
-- `components` — 23 файлов
+- `components` — 34 файлов
 - `config` — 1 файлов
 - `console-noise-classification.report.json` — 1 файлов
 - `decorative-media-budget.report.json` — 1 файлов
@@ -110,9 +110,9 @@
 - `scenario.startup-shell.report.json` — 1 файлов
 - `src` — 32 файлов
 - `startup-budget.report.json` — 1 файлов
-- `tests` — 40 файлов
+- `tests` — 41 файлов
 - `timer-cleanup.report.json` — 1 файлов
-- `tools` — 61 файлов
+- `tools` — 62 файлов
 - `tsconfig.json` — 1 файлов
 - `tsconfig.tsbuildinfo` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
@@ -854,17 +854,29 @@
   - project-docs-audit.json — JSON-артефакт аудита project docs audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
   - project-tree-audit.json — JSON-артефакт аудита project tree audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
 - components/ — Общие React-компоненты всего проекта.
+  - i18n-dicts/ — Каталог i18n-dicts.
+    - ar.js — Общий React-компонент ar, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - en.js — Общий React-компонент en, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - es.js — Общий React-компонент es, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - manifest.js — Общий React-компонент manifest, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - ru.js — Общий React-компонент ru, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - tr.js — Общий React-компонент tr, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - uk.js — Общий React-компонент uk, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - zh.js — Общий React-компонент zh, используемый вне одного домена. Связи: используется в components/i18n.js, tests/unit/i18n/i18nDictionaries.test.js.
   - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
   - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: используется в app/layout.js.
   - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: используется в forum/page.js.
   - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
   - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
   - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
-  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - i18n.source.js — Общий React-компонент i18n.source, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - InviteFriendHost.jsx — Общий React-компонент Invite Friend Host, используемый вне одного домена. Связи: импортирует components/InviteFriendProvider.jsx; используется в app/layout.js.
   - InviteFriendPopup.jsx — Общий React-компонент Invite Friend Popup, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/InviteFriendProvider.jsx.
-  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx; используется в app/layout.js.
+  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx; используется в components/InviteFriendHost.jsx.
   - LanguageSwitcher.js — Общий React-компонент Language Switcher, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
-  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
+  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/NotRobotHost.jsx.
+  - NotRobotHost.jsx — Общий React-компонент Not Robot Host, используемый вне одного домена. Связи: импортирует components/NotRobot.jsx; используется в app/layout.js.
   - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
   - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
   - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
@@ -1974,6 +1986,8 @@
           - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
         - utils/ — Каталог utils.
           - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+    - i18n/ — Каталог i18n.
+      - i18nDictionaries.test.js — JS-файл i18n Dictionaries.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
     - runtime/ — Каталог runtime.
       - runtimeGovernance.test.js — JS-файл runtime Governance.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js.
 - tools/ — Локальные скрипты аудита, генерации и техобслуживания.
@@ -2036,6 +2050,7 @@
   - run-verification-audits.mjs — Локальный скрипт/инструмент run verification audits для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - runtime-governance-baseline.mjs — Локальный скрипт/инструмент runtime governance baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - runtime-governance.js — Локальный скрипт/инструмент runtime governance для аудита или техобслуживания. Связи: используется в tools/audit-adaptive-actions.js, tools/audit-adaptive-core.js, tools/audit-auth-cascade.js.
+  - split-i18n-dicts.mjs — Локальный скрипт/инструмент split i18n dicts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - verify-docs-workflow.mjs — Локальный скрипт/инструмент verify docs workflow для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - verify-environment.mjs — Локальный скрипт/инструмент verify environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
