@@ -215,7 +215,7 @@ export default function PostMediaStack({
 }) {
   const mediaKeyBase = String(postId || 'post')
   const stableEmbedKey = String(postId || mediaKeyBase || '').trim()
-  const ownerIdBase = `post-media:${mediaKeyBase}`
+  const ownerId = `post-media:${mediaKeyBase}`
   const lifecycleState = 'shell'
   const [stableEmbeds, setStableEmbeds] = React.useState(() => {
     const cached = POST_MEDIA_EMBED_CACHE.get(stableEmbedKey) || {}
@@ -264,9 +264,7 @@ export default function PostMediaStack({
               key={`video:${mediaKeyBase}:${src}:${i}`}
               className="videoCard mediaBox"
               data-kind="video"
-              data-forum-media-owner="1"
-              data-forum-media="video"
-              data-owner-id={`${ownerIdBase}:video:${i}`}
+              data-owner-id={ownerId}
               data-forum-embed-kind="native-video"
               data-lifecycle-state={lifecycleState}
               data-stable-shell="1"
@@ -276,13 +274,11 @@ export default function PostMediaStack({
                 key={`video-media:${mediaKeyBase}:${src}:${i}`}
                 data-forum-video="post"
                 data-forum-media="video"
-                data-forum-media-node="1"
-                data-owner-id={`${ownerIdBase}:video:${i}`}
+                data-owner-id={ownerId}
                 data-forum-embed-kind="native-video"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
                 src={src}
-                poster={videoLines.length === 1 ? posterUrl : undefined}
                 loading="lazy"
                 playsInline
                 controls={false}
@@ -314,9 +310,7 @@ export default function PostMediaStack({
                 className="videoCard mediaBox"
                 data-kind="iframe"
                 data-subkind="youtube"
-                data-forum-media-owner="1"
-                data-forum-media="youtube"
-                data-owner-id={`${ownerIdBase}:youtube:${i}`}
+                data-owner-id={ownerId}
                 data-forum-embed-kind="youtube"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
@@ -328,8 +322,7 @@ export default function PostMediaStack({
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
                   data-forum-media="youtube"
-                  data-forum-media-node="1"
-                  data-owner-id={`${ownerIdBase}:youtube:${i}`}
+                  data-owner-id={ownerId}
                   data-forum-embed-kind="youtube"
                   data-lifecycle-state={lifecycleState}
                   data-stable-shell="1"
@@ -409,9 +402,7 @@ export default function PostMediaStack({
                 key={`tt:${mediaKeyBase}:${videoId}:${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
-                data-forum-media-owner="1"
-                data-forum-media="tiktok"
-                data-owner-id={`${ownerIdBase}:tiktok:${i}`}
+                data-owner-id={ownerId}
                 data-forum-embed-kind="tiktok"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
@@ -420,9 +411,8 @@ export default function PostMediaStack({
                 <iframe
                   title="TikTok video"
                   data-forum-media="tiktok"
-                  data-forum-media-node="1"
                   data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  data-owner-id={`${ownerIdBase}:tiktok:${i}`}
+                  data-owner-id={ownerId}
                   data-forum-embed-kind="tiktok"
                   data-lifecycle-state={lifecycleState}
                   data-stable-shell="1"
@@ -446,16 +436,14 @@ export default function PostMediaStack({
               key={`audio:${mediaKeyBase}:${src}:${i}`}
               className="audioCard mediaBox"
               data-kind="qcast"
-              data-forum-media-owner="1"
-              data-forum-media="qcast"
-              data-owner-id={`${ownerIdBase}:qcast:${i}`}
+              data-owner-id={ownerId}
               data-forum-embed-kind="qcast"
               data-lifecycle-state={lifecycleState}
               data-stable-shell="1"
             >
               <QCastPlayerComponent
                 src={src}
-                data-owner-id={`${ownerIdBase}:qcast:${i}`}
+                data-owner-id={ownerId}
                 data-forum-embed-kind="qcast"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"

@@ -299,8 +299,6 @@ export default function VideoMedia({
   onError: onErrorProp,
   onPointerDown: onPointerDownProp,
   'data-forum-media': dataForumMedia,
-  'data-forum-media-node': dataForumMediaNode,
-  'data-forum-manual-only': dataForumManualOnly,
   'data-forum-video': dataForumVideo,
   readMutedPref,
   writeMutedPref,
@@ -324,21 +322,15 @@ export default function VideoMedia({
   const [hudVisible, setHudVisible] = React.useState(false)
   const [pausedState, setPausedState] = React.useState(true)
   const [mutedState, setMutedState] = React.useState(true)
-  const [frameReadyState, setFrameReadyState] = React.useState(() => !String(poster || '').trim())
   const [centerGlyph, setCenterGlyph] = React.useState('')
   const [fxBursts, setFxBursts] = React.useState([])
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
   const isPostVideo = String(dataForumVideo || '') === 'post'
-  const isManualOnly = String(dataForumManualOnly || '') === '1'
-  const hasForumOwnerContract =
-    String(dataForumMediaNode || '') === '1' ||
-    isPostVideo
-  const isCoordinatorManaged = hasForumOwnerContract && !isManualOnly
-  const disableLeafAutoplayLifecycle = hasForumOwnerContract || isManualOnly
+  const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
   const renderControls = isPostVideo ? false : controls
-  const renderPreload = isCoordinatorManaged ? undefined : preload
+  const renderPreload = dataForumVideo === 'post' ? undefined : preload 
 
   const readMuted = React.useCallback(() => {
     try {
@@ -427,16 +419,6 @@ export default function VideoMedia({
       })
     } catch {}
     fxTimersRef.current = []
-  }, [])
-
-  const readOwnerLifecycleFlag = React.useCallback((el, key) => {
-    try {
-      if (!el) return false
-      const owner = el.closest?.('[data-forum-media-owner="1"]') || null
-      return String(owner?.dataset?.[key] || el?.dataset?.[key] || '') === '1'
-    } catch {
-      return false
-    }
   }, [])
 
   const clearNativeControlsForPost = React.useCallback(() => {
@@ -534,7 +516,6 @@ React.useLayoutEffect(() => {
   if (!el) return
 
   const s = String(src || '')
-  const posterSrc = String(poster || '')
   const mediaKey = s
   const prevMediaKey = String(mediaKeyRef.current || '')
   const isNewMediaNode = prevMediaKey !== mediaKey
@@ -548,25 +529,13 @@ React.useLayoutEffect(() => {
   } catch {}
 
   try {
-    if (posterSrc) {
-      el.dataset.__posterOriginal = posterSrc
-      if (el.getAttribute('poster') !== posterSrc) el.setAttribute('poster', posterSrc)
-      if (isNewMediaNode) setFrameReadyState(false)
-    } else if (isNewMediaNode) {
-      delete el.dataset.__posterOriginal
-      el.removeAttribute('poster')
-      setFrameReadyState(true)
-    }
-  } catch {}
-
-  try {
     const wantsWarm =
-      readOwnerLifecycleFlag(el, '__prewarm') ||
-      readOwnerLifecycleFlag(el, '__active') ||
-      readOwnerLifecycleFlag(el, '__resident')
+      el.dataset?.__prewarm === '1' ||
+      el.dataset?.__active === '1' ||
+      el.dataset?.__resident === '1'
 
     const effectivePreload =
-      isCoordinatorManaged
+      isPostVideo
         ? (wantsWarm ? 'auto' : 'metadata')
         : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
 
@@ -620,41 +589,29 @@ React.useLayoutEffect(() => {
   }
 
   try {
-    // Для owner-driven autoplay media больше НЕ делаем eager attach/load на mount.
+    // Для post-video больше НЕ делаем eager attach/load на mount.
     // Единственный владелец lifecycle — coordinator.
-    if (isNewMediaNode && isCoordinatorManaged) {
+    if (isNewMediaNode && isPostVideo) {
       try { el.removeAttribute('src') } catch {}
       try { delete el.dataset.__bootAttachedSrc } catch {}
       try { delete el.dataset.__bootMetadataPrimed } catch {}
       try { el.dataset.__loadPending = '0' } catch {}
       try { el.dataset.__warmReady = '0' } catch {}
+      try { el.dataset.__active = '0' } catch {}
+      try { el.dataset.__prewarm = '0' } catch {}
+      try { el.dataset.__resident = '0' } catch {}
       try { delete el.dataset.__loadPendingSince } catch {}
       try { el.preload = 'metadata' } catch {}
-    } else if (isNewMediaNode && !isCoordinatorManaged) {
-      if (s) {
-        try {
-          if (String(el.getAttribute('src') || '') !== s) el.setAttribute('src', s)
-        } catch {}
-        try { el.dataset.__bootAttachedSrc = '1' } catch {}
-      } else {
-        try { el.removeAttribute('src') } catch {}
-        try { delete el.dataset.__bootAttachedSrc } catch {}
-      }
     }
   } catch {}
 }, [
   autoPlay,
   clearNativeControlsForPost,
   defaultMutedProp,
-  disableLeafAutoplayLifecycle,
-  isCoordinatorManaged,
   isPostVideo,
-  poster,
   playsInline,
   preloadMode,
-  readOwnerLifecycleFlag,
   readMuted,
-  setFrameReadyState,
   src,
 ])
   React.useEffect(() => {
@@ -672,21 +629,23 @@ React.useLayoutEffect(() => {
     }
 const onPlay = () => {
   clearNativeControlsForPost()
-  setFrameReadyState(true)
 
-  try {
-    touchActiveVideoFn(el)
-    enforceActiveVideoCapFn(el)
+  try { 
     el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '1'
     delete el.dataset.__loadPendingSince
-    if (!disableLeafAutoplayLifecycle) {
+  } catch {}
+
+  if (!coordinatorOwnsLifecycle) {
+    try { touchActiveVideoFn(el) } catch {}
+    try { enforceActiveVideoCapFn(el) } catch {}
+    try {
       el.dataset.__active = '1'
       el.dataset.__prewarm = '1'
       el.dataset.__resident = '1'
-    }
-    el.preload = 'auto'
-  } catch {}
+      el.preload = 'auto'
+    } catch {}
+  }
 
   setPausedState(false)
   showCenterGlyph('pause', 620)
@@ -694,9 +653,6 @@ const onPlay = () => {
 }
     const onPause = () => {
       clearNativeControlsForPost()
-      if (!disableLeafAutoplayLifecycle) {
-        try { el.dataset.__active = '0' } catch {}
-      }
       setPausedState(true)
       setHudVisible(true)
       setCenterGlyph('play')
@@ -717,9 +673,9 @@ const onPlay = () => {
     }
   }, [
   clearNativeControlsForPost,
+  coordinatorOwnsLifecycle,
   enforceActiveVideoCapFn,
   hudVisible,
-  disableLeafAutoplayLifecycle,
   revealHud,
   showCenterGlyph,
   touchActiveVideoFn,
@@ -802,7 +758,6 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         el.dataset.__warmReady = '0'
         el.dataset.__loadPendingSince = String(Date.now())
       } catch {}
-      if (String(poster || '').trim()) setFrameReadyState(false)
     }
     const markReady = () => {
       try {
@@ -811,7 +766,6 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         delete el.dataset.__loadPendingSince
         delete el.dataset.__readyRetryCount
       } catch {}
-      setFrameReadyState(true)
     }
     const markCold = () => {
       try {
@@ -819,7 +773,6 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         el.dataset.__warmReady = '0'
         delete el.dataset.__loadPendingSince
       } catch {}
-      if (String(poster || '').trim()) setFrameReadyState(false)
     }
 
     try { el.addEventListener('loadstart', markPending) } catch {}
@@ -839,7 +792,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       try { el.removeEventListener('emptied', markCold) } catch {}
       try { el.removeEventListener('error', markCold) } catch {}
     }
-  }, [poster])
+  }, [])
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -847,7 +800,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
     if (!el) return
 
     let io = null
-    if (disableLeafAutoplayLifecycle) {
+    if (dataForumVideo === 'post' || coordinatorOwnsLifecycle) {
       return () => {
         try {
           if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
@@ -989,7 +942,8 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       unloadVideoElFn(el)
     }
   }, [
-    disableLeafAutoplayLifecycle,
+    coordinatorOwnsLifecycle,
+    dataForumVideo,
     dropActiveVideoFn,
     enforceActiveVideoCapFn,
     isVideoNearViewportFn,
@@ -1036,7 +990,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
       }
       // Для пост-видео восстановление делает единый coordinator.
       // Локальный remove(src)+load() здесь создаёт лишние 206/cancel-циклы.
-      if (isCoordinatorManaged) {
+      if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle) {
         try {
           onErrorProp?.(e)
         } catch {}
@@ -1075,7 +1029,7 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
         onErrorProp?.(e)
       } catch {}
     },
-    [isCoordinatorManaged, onErrorProp],
+    [coordinatorOwnsLifecycle, dataForumVideo, onErrorProp],
   )
 
 const onVideoLoaded = React.useCallback(() => {
@@ -1083,10 +1037,9 @@ const onVideoLoaded = React.useCallback(() => {
     const el = ref.current
     if (!el) return
 
-  clearNativeControlsForPost()
-  setFrameReadyState(true)
+    clearNativeControlsForPost()
  
-  try {
+    try {
       el.dataset.__recoverTry = '0'
 
       el.dataset.__loadPending = '0'
@@ -1097,7 +1050,7 @@ const onVideoLoaded = React.useCallback(() => {
     // ВАЖНО:
     // loaded/canplay ≠ confirmed active playback.
     // active/touch/cap теперь ставит только coordinator после play_started.
-    if (!disableLeafAutoplayLifecycle) {
+    if (!coordinatorOwnsLifecycle) {
       try { touchActiveVideoFn(el) } catch {}
       try { enforceActiveVideoCapFn(el) } catch {}
       try {
@@ -1108,7 +1061,7 @@ const onVideoLoaded = React.useCallback(() => {
       } catch {}
     }
   } catch {}
-}, [clearNativeControlsForPost, disableLeafAutoplayLifecycle, enforceActiveVideoCapFn, touchActiveVideoFn])
+}, [clearNativeControlsForPost, coordinatorOwnsLifecycle, enforceActiveVideoCapFn, touchActiveVideoFn])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}
@@ -1153,11 +1106,6 @@ const onVideoLoaded = React.useCallback(() => {
     clearNativeControlsForPost()
     revealHud(2200)
     if (el.paused) {
-      try {
-        const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
-        const lazySrc = String(el.dataset?.__src || el.getAttribute('data-src') || '').trim()
-        if (!hasSrc && lazySrc) restoreVideoElFn(el)
-      } catch {}
       showCenterGlyph('play', 760)
       try {
         const p = el.play?.()
@@ -1169,7 +1117,7 @@ const onVideoLoaded = React.useCallback(() => {
     }
     showCenterGlyph('pause', 760)
     try { el.pause?.() } catch {}
-  }, [armUserIntentLease, clearNativeControlsForPost, restoreVideoElFn, revealHud, showCenterGlyph])
+  }, [armUserIntentLease, clearNativeControlsForPost, revealHud, showCenterGlyph])
 
   const onGoodEmoji = React.useCallback((e) => {
     try { e?.stopPropagation?.() } catch {}
@@ -1189,10 +1137,7 @@ const onVideoLoaded = React.useCallback(() => {
 <video
   ref={ref}
   data-forum-media={dataForumMedia}
-  data-forum-media-node={dataForumMediaNode}
-  data-forum-manual-only={dataForumManualOnly}
   data-forum-video={dataForumVideo}
-  poster={poster || undefined}
   playsInline={playsInline} 
   disableRemotePlayback
   preload={renderPreload}
@@ -1203,13 +1148,7 @@ const onVideoLoaded = React.useCallback(() => {
       disablePictureInPicture={disablePictureInPicture}
       referrerPolicy="no-referrer"
       className={className}
-      style={{
-        ...style,
-        opacity:
-          String(poster || '').trim() && !frameReadyState
-            ? 0.001
-            : style?.opacity,
-      }}
+      style={style}
       onPointerDown={handleRootPointerDown}
       onClick={isPostVideo ? handleSurfaceClick : undefined}
       onLoadedData={onVideoLoaded}
@@ -1230,16 +1169,6 @@ const onVideoLoaded = React.useCallback(() => {
       className="ql7VideoSurface"
       onPointerDown={handleRootPointerDown}
       onClick={handleSurfaceClick}
-      style={
-        String(poster || '').trim()
-          ? {
-              backgroundImage: `url("${String(poster).replace(/"/g, '\\"')}")`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center center',
-              backgroundRepeat: 'no-repeat',
-            }
-          : undefined
-      }
     >
       {videoNode}
 

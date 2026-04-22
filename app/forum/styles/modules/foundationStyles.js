@@ -234,20 +234,6 @@ const foundationStyles = String.raw`
       height:100%;
       min-height:100%;
     }
-    .mediaBox[data-kind="video"] > .ql7VideoSurface{
-      flex:1 1 auto;
-      align-self:stretch;
-      min-width:100%;
-      min-height:100%;
-      height:100%;
-      max-height:100%;
-      display:flex;
-    }
-    .mediaBox[data-kind="video"] > .ql7VideoSurface > video{
-      flex:1 1 auto;
-      min-width:100%;
-      min-height:100%;
-    }
 
     /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
     .mediaBox > iframe{
