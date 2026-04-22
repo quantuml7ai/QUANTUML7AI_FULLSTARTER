@@ -30,17 +30,14 @@ describe('forum media contracts', () => {
     expect(src).toContain('crossOrigin="anonymous"')
   })
 
-  test('forum ad slot bridges ads into forum owner lifecycle without rewriting ad core', () => {
-    const wrapper = read('app/forum/features/ui/components/ForumAdSlot.jsx')
-    const ads = read('app/forum/ForumAds.js')
-    expect(wrapper).toContain("data-forum-media-owner")
-    expect(wrapper).toContain("data-forum-media-node")
-    expect(wrapper).toContain("data-forum-ad-bridge")
-    expect(wrapper).toContain("data-forum-external-control")
-    expect(wrapper).toContain("forum-media-owner-command")
-    expect(wrapper).toContain("data-forum-scope', 'ad'")
-    expect(ads).toContain('const shouldPlay = isFocused && isPageActive')
-    expect(ads).toContain("const [attachedVideoSrc, setAttachedVideoSrc] = useState('')")
+  test('forum ads autoplay fallback does not persist global mute', () => {
+    const src = read('app/forum/ForumAds.js')
+    expect(src).not.toMatch(/forum-ads-autoplay-fallback[\s\S]*writeMutedPrefToStorage\(true/)
+    expect(src).not.toContain('shouldPlay')
+    expect(src).not.toContain('attachedVideoSrc')
+    expect(src).not.toContain('emitAdPlayToCoordinator')
+    expect(src).toContain('data-forum-media-owner')
+    expect(src).toContain('data-forum-media-node')
   })
 
   test('media coordinator removes legacy query ownership toggles and qcast local mute storage', () => {
@@ -50,8 +47,6 @@ describe('forum media contracts', () => {
     expect(src).not.toContain('forum:qcastMuted')
     expect(src).toContain("source === 'media_element' || source === 'external' || source === 'forum-splash'")
     expect(src).toContain("setMutedPref(!!el.muted, 'video')")
-    expect(src).toContain('site-media-audible')
-    expect(src).toContain("'ad_video', 'ad_youtube', 'ad_tiktok', 'ad_iframe'")
   })
 
   test('post video restore path avoids immediate duplicate load after src reattach', () => {
@@ -60,20 +55,10 @@ describe('forum media contracts', () => {
     expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
   })
 
-  test('native video ready replay can auto-start owner-driven pending candidate', () => {
-    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
-    expect(src).toContain("const coordinatorPlay =")
-    expect(src).toContain("!ownerMatchesActive && !manualLease && !hasGesture && !coordinatorPlay")
-    expect(src).toContain("reasonTag === 'activate_pending'")
-    expect(src).toContain("reasonTag === 'play_wait_ready'")
-    expect(src).toContain("markCoordinatorPlayIntent(owner || mediaEl")
-  })
-
   test('boot splash publishes an active gate marker for forum media policy', () => {
     const src = read('components/ForumBootSplash.jsx')
     expect(src).toContain('__forumBootSplashActive')
     expect(src).toContain("forum-boot-splash")
-    expect(src).toContain('FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1')
   })
 
   test('post media embeds expose stable owner metadata for coordinator policy', () => {
@@ -93,12 +78,5 @@ describe('forum media contracts', () => {
     expect(src).toContain('const resolveMediaRefs = (input) => {')
     expect(src).toContain("const requestHtmlMediaLoad = (input, reason = 'generic_load', opts = {}) => {")
     expect(src).not.toContain('.forum-ad-media-slot video, .forum-ad-media-slot iframe')
-  })
-
-  test('background audio reacts only to real audible media and still auto-retries on entry gesture', () => {
-    const src = read('components/BgAudio.js')
-    expect(src).toContain('site-media-audible')
-    expect(src).toContain('const isActuallyAudibleMedia = (target) => {')
-    expect(src).toContain("window.addEventListener('pointerdown', onGesture, captureOptions)")
   })
 })

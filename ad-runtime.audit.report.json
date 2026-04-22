@@ -1,17 +1,17 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-22T06:40:50.981Z",
+  "generatedAt": "2026-04-22T01:45:27.671Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "runtime": {
         "videoTag": 1,
         "iframeTag": 2,
-        "intersectionObserver": 5,
-        "mapUsage": 12,
+        "intersectionObserver": 2,
+        "mapUsage": 11,
         "fetchCalls": 5,
         "imageProbe": 1,
-        "ytPlayer": 5,
+        "ytPlayer": 0,
         "intervals": 1,
         "raf": 0,
         "preloadAttr": 1
@@ -23,7 +23,7 @@
         "rotation": 0,
         "package": 0
       },
-      "runtimeScore": 33,
+      "runtimeScore": 24,
       "businessScore": 0
     },
     {
@@ -37,7 +37,7 @@
         "imageProbe": 0,
         "ytPlayer": 0,
         "intervals": 0,
-        "raf": 2,
+        "raf": 1,
         "preloadAttr": 0
       },
       "business": {
@@ -47,7 +47,7 @@
         "rotation": 0,
         "package": 0
       },
-      "runtimeScore": 2,
+      "runtimeScore": 1,
       "businessScore": 0
     },
     {

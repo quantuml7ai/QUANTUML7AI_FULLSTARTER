@@ -1,830 +1,37 @@
 {
-  "file": "C:\\Users\\staro\\Downloads\\localhost 1234.har",
-  "totalEntries": 776,
-  "mediaEntries": 62,
-  "forumMediaEntries": 35,
-  "adMediaEntries": 16,
-  "externalMediaEntries": 11,
+  "file": "C:\\Users\\staro\\Downloads\\localhost 777222333.har",
+  "totalEntries": 131,
+  "mediaEntries": 4,
+  "forumMediaEntries": 0,
+  "adMediaEntries": 4,
+  "externalMediaEntries": 0,
   "diagEntries": 0,
-  "cancelledMediaEntries": 1,
-  "partial206Entries": 57,
-  "partial206ForumEntries": 34,
+  "cancelledMediaEntries": 0,
+  "partial206Entries": 3,
+  "partial206ForumEntries": 0,
   "categories": {
     "forum": {
-      "entries": 35,
-      "uniqueUrls": 12,
-      "cancelled": 1,
-      "partial206": 34,
-      "topRepeated": [
-        {
-          "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583707579.mp4",
-          "category": "forum",
-          "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 6,
-          "cancelled": 0,
-          "partial206": 6,
-          "transferred": 7391596,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:39.775Z",
-              "startedMs": 1776840519775,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 2097152,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:39.806Z",
-              "startedMs": 1776840519806,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 131072,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:39.809Z",
-              "startedMs": 1776840519809,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 29275,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:39.830Z",
-              "startedMs": 1776840519830,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 619099,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:39.854Z",
-              "startedMs": 1776840519854,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1208923,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:53.595Z",
-              "startedMs": 1776840773595,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 3306075,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840519775,
-          "lastSeenMs": 1776840773595,
-          "transferredMB": 7,
-          "firstSeenAt": "2026-04-22T06:48:39.775Z",
-          "lastSeenAt": "2026-04-22T06:52:53.595Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 5,
-              "repeatCount": 4,
-              "partial206Count": 5,
-              "cancelledCount": 0,
-              "transferredMB": 3.9,
-              "firstAt": "2026-04-22T06:48:39.775Z",
-              "lastAt": "2026-04-22T06:48:39.854Z",
-              "durationMs": 79,
-              "minGapMs": 3,
-              "maxGapMs": 31,
-              "avgGapMs": 20,
-              "tags": [
-                "burst-reload",
-                "same-src-thrash"
-              ]
-            },
-            {
-              "index": 2,
-              "count": 1,
-              "repeatCount": 0,
-              "partial206Count": 1,
-              "cancelledCount": 0,
-              "transferredMB": 3.15,
-              "firstAt": "2026-04-22T06:52:53.595Z",
-              "lastAt": "2026-04-22T06:52:53.595Z",
-              "durationMs": 0,
-              "minGapMs": 0,
-              "maxGapMs": 0,
-              "avgGapMs": 0,
-              "tags": []
-            }
-          ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 5,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583876006.mp4",
-          "category": "forum",
-          "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 5,
-          "cancelled": 0,
-          "partial206": 5,
-          "transferred": 2466858,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:26.723Z",
-              "startedMs": 1776840506723,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 589824,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:26.741Z",
-              "startedMs": 1776840506741,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 131072,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:26.744Z",
-              "startedMs": 1776840506744,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 446997,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:26.758Z",
-              "startedMs": 1776840506758,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 655360,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:26.761Z",
-              "startedMs": 1776840506761,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 643605,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840506723,
-          "lastSeenMs": 1776840506761,
-          "transferredMB": 2.4,
-          "firstSeenAt": "2026-04-22T06:48:26.723Z",
-          "lastSeenAt": "2026-04-22T06:48:26.761Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 5,
-              "repeatCount": 4,
-              "partial206Count": 5,
-              "cancelledCount": 0,
-              "transferredMB": 2.35,
-              "firstAt": "2026-04-22T06:48:26.723Z",
-              "lastAt": "2026-04-22T06:48:26.761Z",
-              "durationMs": 38,
-              "minGapMs": 3,
-              "maxGapMs": 18,
-              "avgGapMs": 10,
-              "tags": [
-                "burst-reload",
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 5,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584643845.mp4",
-          "category": "forum",
-          "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 5,
-          "cancelled": 1,
-          "partial206": 4,
-          "transferred": 5347385,
-          "statuses": [
-            "206",
-            ""
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:51:05.907Z",
-              "startedMs": 1776840665907,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 4128768,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:05.929Z",
-              "startedMs": 1776840665929,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 884736,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:05.932Z",
-              "startedMs": 1776840665932,
-              "status": 0,
-              "cancelled": true,
-              "partial206": false,
-              "transferBytes": 0,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:05.933Z",
-              "startedMs": 1776840665933,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 327680,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:05.935Z",
-              "startedMs": 1776840665935,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 6201,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840665907,
-          "lastSeenMs": 1776840665935,
-          "transferredMB": 5.1,
-          "firstSeenAt": "2026-04-22T06:51:05.907Z",
-          "lastSeenAt": "2026-04-22T06:51:05.935Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 5,
-              "repeatCount": 4,
-              "partial206Count": 4,
-              "cancelledCount": 1,
-              "transferredMB": 5.1,
-              "firstAt": "2026-04-22T06:51:05.907Z",
-              "lastAt": "2026-04-22T06:51:05.935Z",
-              "durationMs": 28,
-              "minGapMs": 1,
-              "maxGapMs": 22,
-              "avgGapMs": 7,
-              "tags": [
-                "burst-reload",
-                "partial-then-cancel",
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 5,
-          "hasPartialThenCancel": true
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1768623128767.mp4",
-          "category": "forum",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 3,
-          "transferred": 11558256,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:03.778Z",
-              "startedMs": 1776840483778,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 3145728,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:03.881Z",
-              "startedMs": 1776840483881,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 23920,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:29.795Z",
-              "startedMs": 1776840509795,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 8388608,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840483778,
-          "lastSeenMs": 1776840509795,
-          "transferredMB": 11,
-          "firstSeenAt": "2026-04-22T06:48:03.778Z",
-          "lastSeenAt": "2026-04-22T06:48:29.795Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 2,
-              "repeatCount": 1,
-              "partial206Count": 2,
-              "cancelledCount": 0,
-              "transferredMB": 3.02,
-              "firstAt": "2026-04-22T06:48:03.778Z",
-              "lastAt": "2026-04-22T06:48:03.881Z",
-              "durationMs": 103,
-              "minGapMs": 103,
-              "maxGapMs": 103,
-              "avgGapMs": 103,
-              "tags": [
-                "same-src-thrash"
-              ]
-            },
-            {
-              "index": 2,
-              "count": 1,
-              "repeatCount": 0,
-              "partial206Count": 1,
-              "cancelledCount": 0,
-              "transferredMB": 8,
-              "firstAt": "2026-04-22T06:48:29.795Z",
-              "lastAt": "2026-04-22T06:48:29.795Z",
-              "durationMs": 0,
-              "minGapMs": 0,
-              "maxGapMs": 0,
-              "avgGapMs": 0,
-              "tags": []
-            }
-          ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 2,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037524948.mp4",
-          "category": "forum",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 3,
-          "transferred": 3441874,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:49:21.704Z",
-              "startedMs": 1776840561704,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 3145728,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:21.745Z",
-              "startedMs": 1776840561745,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 617,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:21.747Z",
-              "startedMs": 1776840561747,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 295529,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840561704,
-          "lastSeenMs": 1776840561747,
-          "transferredMB": 3.3,
-          "firstSeenAt": "2026-04-22T06:49:21.704Z",
-          "lastSeenAt": "2026-04-22T06:49:21.747Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 3,
-              "repeatCount": 2,
-              "partial206Count": 3,
-              "cancelledCount": 0,
-              "transferredMB": 3.28,
-              "firstAt": "2026-04-22T06:49:21.704Z",
-              "lastAt": "2026-04-22T06:49:21.747Z",
-              "durationMs": 43,
-              "minGapMs": 2,
-              "maxGapMs": 41,
-              "avgGapMs": 22,
-              "tags": [
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 3,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037900461.mp4",
-          "category": "forum",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 3,
-          "transferred": 952566,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:52:58.705Z",
-              "startedMs": 1776840778705,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 131072,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:58.728Z",
-              "startedMs": 1776840778728,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1147,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:58.731Z",
-              "startedMs": 1776840778731,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 820347,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840778705,
-          "lastSeenMs": 1776840778731,
-          "transferredMB": 0.9,
-          "firstSeenAt": "2026-04-22T06:52:58.705Z",
-          "lastSeenAt": "2026-04-22T06:52:58.731Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 3,
-              "repeatCount": 2,
-              "partial206Count": 3,
-              "cancelledCount": 0,
-              "transferredMB": 0.91,
-              "firstAt": "2026-04-22T06:52:58.705Z",
-              "lastAt": "2026-04-22T06:52:58.731Z",
-              "durationMs": 26,
-              "minGapMs": 3,
-              "maxGapMs": 23,
-              "avgGapMs": 13,
-              "tags": [
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 3,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/voice-1776298767441.webm",
-          "category": "forum",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 3,
-          "transferred": 143322,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:51:44.734Z",
-              "startedMs": 1776840704734,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 69790,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:59.985Z",
-              "startedMs": 1776840719985,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 3998,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:59.988Z",
-              "startedMs": 1776840719988,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 69534,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840704734,
-          "lastSeenMs": 1776840719988,
-          "transferredMB": 0.1,
-          "firstSeenAt": "2026-04-22T06:51:44.734Z",
-          "lastSeenAt": "2026-04-22T06:51:59.988Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 1,
-              "repeatCount": 0,
-              "partial206Count": 1,
-              "cancelledCount": 0,
-              "transferredMB": 0.07,
-              "firstAt": "2026-04-22T06:51:44.734Z",
-              "lastAt": "2026-04-22T06:51:44.734Z",
-              "durationMs": 0,
-              "minGapMs": 0,
-              "maxGapMs": 0,
-              "avgGapMs": 0,
-              "tags": []
-            },
-            {
-              "index": 2,
-              "count": 2,
-              "repeatCount": 1,
-              "partial206Count": 2,
-              "cancelledCount": 0,
-              "transferredMB": 0.07,
-              "firstAt": "2026-04-22T06:51:59.985Z",
-              "lastAt": "2026-04-22T06:51:59.988Z",
-              "durationMs": 3,
-              "minGapMs": 3,
-              "maxGapMs": 3,
-              "avgGapMs": 3,
-              "tags": [
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 2,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1776572775493.webm",
-          "category": "forum",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 2,
-          "cancelled": 0,
-          "partial206": 2,
-          "transferred": 1996231,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:51:44.735Z",
-              "startedMs": 1776840704735,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1213880,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:51:57.491Z",
-              "startedMs": 1776840717491,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 782351,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840704735,
-          "lastSeenMs": 1776840717491,
-          "transferredMB": 1.9,
-          "firstSeenAt": "2026-04-22T06:51:44.735Z",
-          "lastSeenAt": "2026-04-22T06:51:57.491Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 2,
-              "repeatCount": 1,
-              "partial206Count": 2,
-              "cancelledCount": 0,
-              "transferredMB": 1.9,
-              "firstAt": "2026-04-22T06:51:44.735Z",
-              "lastAt": "2026-04-22T06:51:57.491Z",
-              "durationMs": 12756,
-              "minGapMs": 12756,
-              "maxGapMs": 12756,
-              "avgGapMs": 12756,
-              "tags": [
-                "same-src-thrash"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 2,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584999405.mp4",
-          "category": "forum",
-          "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-          "routeSegment": "forum",
-          "total": 2,
-          "cancelled": 0,
-          "partial206": 2,
-          "transferred": 3879658,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:03.777Z",
-              "startedMs": 1776840483777,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1939829,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:47.021Z",
-              "startedMs": 1776840767021,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1939829,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840483777,
-          "lastSeenMs": 1776840767021,
-          "transferredMB": 3.7,
-          "firstSeenAt": "2026-04-22T06:48:03.777Z",
-          "lastSeenAt": "2026-04-22T06:52:47.021Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 1,
-              "repeatCount": 0,
-              "partial206Count": 1,
-              "cancelledCount": 0,
-              "transferredMB": 1.85,
-              "firstAt": "2026-04-22T06:48:03.777Z",
-              "lastAt": "2026-04-22T06:48:03.777Z",
-              "durationMs": 0,
-              "minGapMs": 0,
-              "maxGapMs": 0,
-              "avgGapMs": 0,
-              "tags": []
-            },
-            {
-              "index": 2,
-              "count": 1,
-              "repeatCount": 0,
-              "partial206Count": 1,
-              "cancelledCount": 0,
-              "transferredMB": 1.85,
-              "firstAt": "2026-04-22T06:52:47.021Z",
-              "lastAt": "2026-04-22T06:52:47.021Z",
-              "durationMs": 0,
-              "minGapMs": 0,
-              "maxGapMs": 0,
-              "avgGapMs": 0,
-              "tags": []
-            }
-          ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 0,
-          "peakWindowRepeatCount": 1,
-          "hasPartialThenCancel": false
-        }
-      ]
+      "entries": 0,
+      "uniqueUrls": 0,
+      "cancelled": 0,
+      "partial206": 0,
+      "topRepeated": []
     },
     "ad": {
-      "entries": 16,
+      "entries": 4,
       "uniqueUrls": 1,
       "cancelled": 0,
-      "partial206": 15,
+      "partial206": 3,
       "topRepeated": [
         {
           "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764418639487-rcwlhg-ADS.mp4",
           "category": "ad",
           "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
           "routeSegment": "1764418639487-rcwlhg-ADS.mp4",
-          "total": 16,
+          "total": 4,
           "cancelled": 0,
-          "partial206": 15,
-          "transferred": 24236098,
+          "partial206": 3,
+          "transferred": 11640300,
           "statuses": [
             "200",
             "206"
@@ -839,8 +46,8 @@
           ],
           "events": [
             {
-              "startedAt": "2026-04-22T06:49:00.245Z",
-              "startedMs": 1776840540245,
+              "startedAt": "2026-04-21T20:11:12.835Z",
+              "startedMs": 1776802272835,
               "status": 200,
               "cancelled": false,
               "partial206": false,
@@ -848,17 +55,17 @@
               "initiator": "script"
             },
             {
-              "startedAt": "2026-04-22T06:49:00.322Z",
-              "startedMs": 1776840540322,
+              "startedAt": "2026-04-21T20:11:12.943Z",
+              "startedMs": 1776802272943,
               "status": 206,
               "cancelled": false,
               "partial206": true,
-              "transferBytes": 196608,
+              "transferBytes": 1048576,
               "initiator": "other"
             },
             {
-              "startedAt": "2026-04-22T06:49:00.325Z",
-              "startedMs": 1776840540325,
+              "startedAt": "2026-04-21T20:11:12.954Z",
+              "startedMs": 1776802272954,
               "status": 206,
               "cancelled": false,
               "partial206": true,
@@ -866,160 +73,34 @@
               "initiator": "other"
             },
             {
-              "startedAt": "2026-04-22T06:49:05.028Z",
-              "startedMs": 1776840545028,
+              "startedAt": "2026-04-21T20:11:13.390Z",
+              "startedMs": 1776802273390,
               "status": 206,
               "cancelled": false,
               "partial206": true,
-              "transferBytes": 393216,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.033Z",
-              "startedMs": 1776840545033,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 458752,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.043Z",
-              "startedMs": 1776840545043,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 458752,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.047Z",
-              "startedMs": 1776840545047,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 393216,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.051Z",
-              "startedMs": 1776840545051,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 458752,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.055Z",
-              "startedMs": 1776840545055,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 458752,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.060Z",
-              "startedMs": 1776840545060,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 327680,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.064Z",
-              "startedMs": 1776840545064,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 655360,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:05.082Z",
-              "startedMs": 1776840545082,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 262144,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:32.545Z",
-              "startedMs": 1776840752545,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 65536,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:32.548Z",
-              "startedMs": 1776840752548,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 17743,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:32.551Z",
-              "startedMs": 1776840752551,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 720896,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:52:33.350Z",
-              "startedMs": 1776840753350,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 19350863,
+              "transferBytes": 10573896,
               "initiator": "other"
             }
           ],
-          "firstSeenMs": 1776840540245,
-          "lastSeenMs": 1776840753350,
-          "transferredMB": 23.1,
-          "firstSeenAt": "2026-04-22T06:49:00.245Z",
-          "lastSeenAt": "2026-04-22T06:52:33.350Z",
+          "firstSeenMs": 1776802272835,
+          "lastSeenMs": 1776802273390,
+          "transferredMB": 11.1,
+          "firstSeenAt": "2026-04-21T20:11:12.835Z",
+          "lastSeenAt": "2026-04-21T20:11:13.390Z",
           "sameSrcWindows": [
             {
               "index": 1,
-              "count": 12,
-              "repeatCount": 11,
-              "partial206Count": 11,
-              "cancelledCount": 0,
-              "transferredMB": 3.89,
-              "firstAt": "2026-04-22T06:49:00.245Z",
-              "lastAt": "2026-04-22T06:49:05.082Z",
-              "durationMs": 4837,
-              "minGapMs": 3,
-              "maxGapMs": 4703,
-              "avgGapMs": 440,
-              "tags": [
-                "same-src-thrash",
-                "ad-repeat"
-              ]
-            },
-            {
-              "index": 2,
               "count": 4,
               "repeatCount": 3,
-              "partial206Count": 4,
+              "partial206Count": 3,
               "cancelledCount": 0,
-              "transferredMB": 19.22,
-              "firstAt": "2026-04-22T06:52:32.545Z",
-              "lastAt": "2026-04-22T06:52:33.350Z",
-              "durationMs": 805,
-              "minGapMs": 3,
-              "maxGapMs": 799,
-              "avgGapMs": 268,
+              "transferredMB": 11.1,
+              "firstAt": "2026-04-21T20:11:12.835Z",
+              "lastAt": "2026-04-21T20:11:13.390Z",
+              "durationMs": 555,
+              "minGapMs": 11,
+              "maxGapMs": 436,
+              "avgGapMs": 185,
               "tags": [
                 "burst-reload",
                 "same-src-thrash",
@@ -1027,985 +108,67 @@
               ]
             }
           ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 2,
-          "peakWindowRepeatCount": 12,
+          "sameSrcWindowCount": 1,
+          "repeatedWindowCount": 1,
+          "peakWindowRepeatCount": 4,
           "hasPartialThenCancel": false
         }
       ]
     },
     "external": {
-      "entries": 11,
-      "uniqueUrls": 3,
+      "entries": 0,
+      "uniqueUrls": 0,
       "cancelled": 0,
-      "partial206": 8,
-      "topRepeated": [
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-          "category": "external",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-          "total": 5,
-          "cancelled": 0,
-          "partial206": 5,
-          "transferred": 9639076,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:45.064Z",
-              "startedMs": 1776840525064,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 1245184,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:45.130Z",
-              "startedMs": 1776840525130,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 35410,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:54.631Z",
-              "startedMs": 1776840534631,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 5177344,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:53:20.369Z",
-              "startedMs": 1776840800369,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 3145728,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:53:20.375Z",
-              "startedMs": 1776840800375,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 35410,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840525064,
-          "lastSeenMs": 1776840800375,
-          "transferredMB": 9.2,
-          "firstSeenAt": "2026-04-22T06:48:45.064Z",
-          "lastSeenAt": "2026-04-22T06:53:20.375Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 3,
-              "repeatCount": 2,
-              "partial206Count": 3,
-              "cancelledCount": 0,
-              "transferredMB": 6.16,
-              "firstAt": "2026-04-22T06:48:45.064Z",
-              "lastAt": "2026-04-22T06:48:54.631Z",
-              "durationMs": 9567,
-              "minGapMs": 66,
-              "maxGapMs": 9501,
-              "avgGapMs": 4784,
-              "tags": [
-                "same-src-thrash",
-                "external-runtime-repeat"
-              ]
-            },
-            {
-              "index": 2,
-              "count": 2,
-              "repeatCount": 1,
-              "partial206Count": 2,
-              "cancelledCount": 0,
-              "transferredMB": 3.03,
-              "firstAt": "2026-04-22T06:53:20.369Z",
-              "lastAt": "2026-04-22T06:53:20.375Z",
-              "durationMs": 6,
-              "minGapMs": 6,
-              "maxGapMs": 6,
-              "avgGapMs": 6,
-              "tags": [
-                "same-src-thrash",
-                "external-runtime-repeat"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 2,
-          "repeatedWindowCount": 2,
-          "peakWindowRepeatCount": 3,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-          "category": "external",
-          "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-          "routeSegment": "1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 3,
-          "transferred": 16933087,
-          "statuses": [
-            "206"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:49:07.000Z",
-              "startedMs": 1776840547000,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 2555904,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:07.026Z",
-              "startedMs": 1776840547026,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 24799,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:49:07.059Z",
-              "startedMs": 1776840547059,
-              "status": 206,
-              "cancelled": false,
-              "partial206": true,
-              "transferBytes": 14352384,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840547000,
-          "lastSeenMs": 1776840547059,
-          "transferredMB": 16.1,
-          "firstSeenAt": "2026-04-22T06:49:07.000Z",
-          "lastSeenAt": "2026-04-22T06:49:07.059Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 3,
-              "repeatCount": 2,
-              "partial206Count": 3,
-              "cancelledCount": 0,
-              "transferredMB": 16.15,
-              "firstAt": "2026-04-22T06:49:07.000Z",
-              "lastAt": "2026-04-22T06:49:07.059Z",
-              "durationMs": 59,
-              "minGapMs": 26,
-              "maxGapMs": 33,
-              "avgGapMs": 30,
-              "tags": [
-                "same-src-thrash",
-                "external-runtime-repeat"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 3,
-          "hasPartialThenCancel": false
-        },
-        {
-          "url": "http://localhost:3000/load/load.mp4",
-          "category": "external",
-          "host": "localhost:3000",
-          "routeSegment": "load",
-          "total": 3,
-          "cancelled": 0,
-          "partial206": 0,
-          "transferred": 1353,
-          "statuses": [
-            "304"
-          ],
-          "types": [
-            "media"
-          ],
-          "initiators": [
-            "other"
-          ],
-          "events": [
-            {
-              "startedAt": "2026-04-22T06:48:03.319Z",
-              "startedMs": 1776840483319,
-              "status": 304,
-              "cancelled": false,
-              "partial206": false,
-              "transferBytes": 451,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:10.194Z",
-              "startedMs": 1776840490194,
-              "status": 304,
-              "cancelled": false,
-              "partial206": false,
-              "transferBytes": 451,
-              "initiator": "other"
-            },
-            {
-              "startedAt": "2026-04-22T06:48:17.118Z",
-              "startedMs": 1776840497118,
-              "status": 304,
-              "cancelled": false,
-              "partial206": false,
-              "transferBytes": 451,
-              "initiator": "other"
-            }
-          ],
-          "firstSeenMs": 1776840483319,
-          "lastSeenMs": 1776840497118,
-          "transferredMB": 0,
-          "firstSeenAt": "2026-04-22T06:48:03.319Z",
-          "lastSeenAt": "2026-04-22T06:48:17.118Z",
-          "sameSrcWindows": [
-            {
-              "index": 1,
-              "count": 3,
-              "repeatCount": 2,
-              "partial206Count": 0,
-              "cancelledCount": 0,
-              "transferredMB": 0,
-              "firstAt": "2026-04-22T06:48:03.319Z",
-              "lastAt": "2026-04-22T06:48:17.118Z",
-              "durationMs": 13799,
-              "minGapMs": 6875,
-              "maxGapMs": 6924,
-              "avgGapMs": 6900,
-              "tags": [
-                "external-runtime-repeat"
-              ]
-            }
-          ],
-          "sameSrcWindowCount": 1,
-          "repeatedWindowCount": 1,
-          "peakWindowRepeatCount": 3,
-          "hasPartialThenCancel": false
-        }
-      ]
+      "partial206": 0,
+      "topRepeated": []
     }
   },
   "telemetryCoverage": {
     "routeSegments": [
       {
-        "key": "forum",
-        "count": 35
-      },
-      {
         "key": "1764418639487-rcwlhg-ADS.mp4",
-        "count": 16
-      },
-      {
-        "key": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-        "count": 5
-      },
-      {
-        "key": "1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-        "count": 3
-      },
-      {
-        "key": "load",
-        "count": 3
+        "count": 4
       }
     ],
     "runtimeMarkersPresent": false,
     "ownerChangeCorrelationAvailable": false,
     "visibilityRestoreCorrelationAvailable": false
   },
-  "uniqueMediaUrls": 16,
-  "repeatedForumMp4Count": 7,
+  "uniqueMediaUrls": 1,
+  "repeatedForumMp4Count": 0,
   "repeatedAdMediaCount": 1,
-  "repeatedExternalMediaCount": 3,
-  "maxRepeatOnSingleForumMp4": 6,
-  "sameSrcWindowCount": 22,
+  "repeatedExternalMediaCount": 0,
+  "maxRepeatOnSingleForumMp4": 0,
+  "sameSrcWindowCount": 1,
   "metrics": {
-    "firstRequestCount": 16,
-    "repeatRequestCount": 46,
-    "cancelledMediaRatio": 0.0161,
-    "partial206MediaRatio": 0.9194,
-    "forumPartial206Ratio": 0.9714,
-    "repeatedWindowCount": 14,
-    "highRepeatWindowCount": 5,
-    "cancelledAfterPartialCount": 1,
-    "partialThenCancelUrlCount": 1
+    "firstRequestCount": 1,
+    "repeatRequestCount": 3,
+    "cancelledMediaRatio": 0,
+    "partial206MediaRatio": 0.75,
+    "forumPartial206Ratio": 0,
+    "repeatedWindowCount": 1,
+    "highRepeatWindowCount": 1,
+    "cancelledAfterPartialCount": 0,
+    "partialThenCancelUrlCount": 0
   },
   "failSignals": {
-    "sameSrcThrashDetected": true,
-    "forum206StormDetected": true,
-    "cancelAfterPartialDetected": true,
+    "sameSrcThrashDetected": false,
+    "forum206StormDetected": false,
+    "cancelAfterPartialDetected": false,
     "adRepeatStormDetected": true,
-    "externalMediaRepeatDetected": true
+    "externalMediaRepeatDetected": false
   },
-  "topRepeatedForumMp4": [
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583707579.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 6,
-      "cancelled": 0,
-      "partial206": 6,
-      "transferred": 7391596,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:39.775Z",
-          "startedMs": 1776840519775,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 2097152,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.806Z",
-          "startedMs": 1776840519806,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 131072,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.809Z",
-          "startedMs": 1776840519809,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 29275,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.830Z",
-          "startedMs": 1776840519830,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 619099,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.854Z",
-          "startedMs": 1776840519854,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1208923,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:53.595Z",
-          "startedMs": 1776840773595,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3306075,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840519775,
-      "lastSeenMs": 1776840773595,
-      "transferredMB": 7,
-      "firstSeenAt": "2026-04-22T06:48:39.775Z",
-      "lastSeenAt": "2026-04-22T06:52:53.595Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 5,
-          "cancelledCount": 0,
-          "transferredMB": 3.9,
-          "firstAt": "2026-04-22T06:48:39.775Z",
-          "lastAt": "2026-04-22T06:48:39.854Z",
-          "durationMs": 79,
-          "minGapMs": 3,
-          "maxGapMs": 31,
-          "avgGapMs": 20,
-          "tags": [
-            "burst-reload",
-            "same-src-thrash"
-          ]
-        },
-        {
-          "index": 2,
-          "count": 1,
-          "repeatCount": 0,
-          "partial206Count": 1,
-          "cancelledCount": 0,
-          "transferredMB": 3.15,
-          "firstAt": "2026-04-22T06:52:53.595Z",
-          "lastAt": "2026-04-22T06:52:53.595Z",
-          "durationMs": 0,
-          "minGapMs": 0,
-          "maxGapMs": 0,
-          "avgGapMs": 0,
-          "tags": []
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583876006.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 5,
-      "cancelled": 0,
-      "partial206": 5,
-      "transferred": 2466858,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:26.723Z",
-          "startedMs": 1776840506723,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 589824,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.741Z",
-          "startedMs": 1776840506741,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 131072,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.744Z",
-          "startedMs": 1776840506744,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 446997,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.758Z",
-          "startedMs": 1776840506758,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 655360,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.761Z",
-          "startedMs": 1776840506761,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 643605,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840506723,
-      "lastSeenMs": 1776840506761,
-      "transferredMB": 2.4,
-      "firstSeenAt": "2026-04-22T06:48:26.723Z",
-      "lastSeenAt": "2026-04-22T06:48:26.761Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 5,
-          "cancelledCount": 0,
-          "transferredMB": 2.35,
-          "firstAt": "2026-04-22T06:48:26.723Z",
-          "lastAt": "2026-04-22T06:48:26.761Z",
-          "durationMs": 38,
-          "minGapMs": 3,
-          "maxGapMs": 18,
-          "avgGapMs": 10,
-          "tags": [
-            "burst-reload",
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584643845.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 5,
-      "cancelled": 1,
-      "partial206": 4,
-      "transferred": 5347385,
-      "statuses": [
-        "206",
-        ""
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:51:05.907Z",
-          "startedMs": 1776840665907,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 4128768,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.929Z",
-          "startedMs": 1776840665929,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 884736,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.932Z",
-          "startedMs": 1776840665932,
-          "status": 0,
-          "cancelled": true,
-          "partial206": false,
-          "transferBytes": 0,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.933Z",
-          "startedMs": 1776840665933,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 327680,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.935Z",
-          "startedMs": 1776840665935,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 6201,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840665907,
-      "lastSeenMs": 1776840665935,
-      "transferredMB": 5.1,
-      "firstSeenAt": "2026-04-22T06:51:05.907Z",
-      "lastSeenAt": "2026-04-22T06:51:05.935Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 4,
-          "cancelledCount": 1,
-          "transferredMB": 5.1,
-          "firstAt": "2026-04-22T06:51:05.907Z",
-          "lastAt": "2026-04-22T06:51:05.935Z",
-          "durationMs": 28,
-          "minGapMs": 1,
-          "maxGapMs": 22,
-          "avgGapMs": 7,
-          "tags": [
-            "burst-reload",
-            "partial-then-cancel",
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": true
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1768623128767.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 3,
-      "cancelled": 0,
-      "partial206": 3,
-      "transferred": 11558256,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:03.778Z",
-          "startedMs": 1776840483778,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3145728,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:03.881Z",
-          "startedMs": 1776840483881,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 23920,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:29.795Z",
-          "startedMs": 1776840509795,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 8388608,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840483778,
-      "lastSeenMs": 1776840509795,
-      "transferredMB": 11,
-      "firstSeenAt": "2026-04-22T06:48:03.778Z",
-      "lastSeenAt": "2026-04-22T06:48:29.795Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 2,
-          "repeatCount": 1,
-          "partial206Count": 2,
-          "cancelledCount": 0,
-          "transferredMB": 3.02,
-          "firstAt": "2026-04-22T06:48:03.778Z",
-          "lastAt": "2026-04-22T06:48:03.881Z",
-          "durationMs": 103,
-          "minGapMs": 103,
-          "maxGapMs": 103,
-          "avgGapMs": 103,
-          "tags": [
-            "same-src-thrash"
-          ]
-        },
-        {
-          "index": 2,
-          "count": 1,
-          "repeatCount": 0,
-          "partial206Count": 1,
-          "cancelledCount": 0,
-          "transferredMB": 8,
-          "firstAt": "2026-04-22T06:48:29.795Z",
-          "lastAt": "2026-04-22T06:48:29.795Z",
-          "durationMs": 0,
-          "minGapMs": 0,
-          "maxGapMs": 0,
-          "avgGapMs": 0,
-          "tags": []
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 2,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037524948.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 3,
-      "cancelled": 0,
-      "partial206": 3,
-      "transferred": 3441874,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:49:21.704Z",
-          "startedMs": 1776840561704,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3145728,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:21.745Z",
-          "startedMs": 1776840561745,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 617,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:21.747Z",
-          "startedMs": 1776840561747,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 295529,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840561704,
-      "lastSeenMs": 1776840561747,
-      "transferredMB": 3.3,
-      "firstSeenAt": "2026-04-22T06:49:21.704Z",
-      "lastSeenAt": "2026-04-22T06:49:21.747Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 3,
-          "cancelledCount": 0,
-          "transferredMB": 3.28,
-          "firstAt": "2026-04-22T06:49:21.704Z",
-          "lastAt": "2026-04-22T06:49:21.747Z",
-          "durationMs": 43,
-          "minGapMs": 2,
-          "maxGapMs": 41,
-          "avgGapMs": 22,
-          "tags": [
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037900461.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 3,
-      "cancelled": 0,
-      "partial206": 3,
-      "transferred": 952566,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:52:58.705Z",
-          "startedMs": 1776840778705,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 131072,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:58.728Z",
-          "startedMs": 1776840778728,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1147,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:58.731Z",
-          "startedMs": 1776840778731,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 820347,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840778705,
-      "lastSeenMs": 1776840778731,
-      "transferredMB": 0.9,
-      "firstSeenAt": "2026-04-22T06:52:58.705Z",
-      "lastSeenAt": "2026-04-22T06:52:58.731Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 3,
-          "cancelledCount": 0,
-          "transferredMB": 0.91,
-          "firstAt": "2026-04-22T06:52:58.705Z",
-          "lastAt": "2026-04-22T06:52:58.731Z",
-          "durationMs": 26,
-          "minGapMs": 3,
-          "maxGapMs": 23,
-          "avgGapMs": 13,
-          "tags": [
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584999405.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 2,
-      "cancelled": 0,
-      "partial206": 2,
-      "transferred": 3879658,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:03.777Z",
-          "startedMs": 1776840483777,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1939829,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:47.021Z",
-          "startedMs": 1776840767021,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1939829,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840483777,
-      "lastSeenMs": 1776840767021,
-      "transferredMB": 3.7,
-      "firstSeenAt": "2026-04-22T06:48:03.777Z",
-      "lastSeenAt": "2026-04-22T06:52:47.021Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 1,
-          "repeatCount": 0,
-          "partial206Count": 1,
-          "cancelledCount": 0,
-          "transferredMB": 1.85,
-          "firstAt": "2026-04-22T06:48:03.777Z",
-          "lastAt": "2026-04-22T06:48:03.777Z",
-          "durationMs": 0,
-          "minGapMs": 0,
-          "maxGapMs": 0,
-          "avgGapMs": 0,
-          "tags": []
-        },
-        {
-          "index": 2,
-          "count": 1,
-          "repeatCount": 0,
-          "partial206Count": 1,
-          "cancelledCount": 0,
-          "transferredMB": 1.85,
-          "firstAt": "2026-04-22T06:52:47.021Z",
-          "lastAt": "2026-04-22T06:52:47.021Z",
-          "durationMs": 0,
-          "minGapMs": 0,
-          "maxGapMs": 0,
-          "avgGapMs": 0,
-          "tags": []
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 0,
-      "peakWindowRepeatCount": 1,
-      "hasPartialThenCancel": false
-    }
-  ],
+  "topRepeatedForumMp4": [],
   "topRepeatedAdMedia": [
     {
       "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764418639487-rcwlhg-ADS.mp4",
       "category": "ad",
       "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
       "routeSegment": "1764418639487-rcwlhg-ADS.mp4",
-      "total": 16,
+      "total": 4,
       "cancelled": 0,
-      "partial206": 15,
-      "transferred": 24236098,
+      "partial206": 3,
+      "transferred": 11640300,
       "statuses": [
         "200",
         "206"
@@ -2020,8 +183,8 @@
       ],
       "events": [
         {
-          "startedAt": "2026-04-22T06:49:00.245Z",
-          "startedMs": 1776840540245,
+          "startedAt": "2026-04-21T20:11:12.835Z",
+          "startedMs": 1776802272835,
           "status": 200,
           "cancelled": false,
           "partial206": false,
@@ -2029,17 +192,17 @@
           "initiator": "script"
         },
         {
-          "startedAt": "2026-04-22T06:49:00.322Z",
-          "startedMs": 1776840540322,
+          "startedAt": "2026-04-21T20:11:12.943Z",
+          "startedMs": 1776802272943,
           "status": 206,
           "cancelled": false,
           "partial206": true,
-          "transferBytes": 196608,
+          "transferBytes": 1048576,
           "initiator": "other"
         },
         {
-          "startedAt": "2026-04-22T06:49:00.325Z",
-          "startedMs": 1776840540325,
+          "startedAt": "2026-04-21T20:11:12.954Z",
+          "startedMs": 1776802272954,
           "status": 206,
           "cancelled": false,
           "partial206": true,
@@ -2047,160 +210,34 @@
           "initiator": "other"
         },
         {
-          "startedAt": "2026-04-22T06:49:05.028Z",
-          "startedMs": 1776840545028,
+          "startedAt": "2026-04-21T20:11:13.390Z",
+          "startedMs": 1776802273390,
           "status": 206,
           "cancelled": false,
           "partial206": true,
-          "transferBytes": 393216,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.033Z",
-          "startedMs": 1776840545033,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.043Z",
-          "startedMs": 1776840545043,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.047Z",
-          "startedMs": 1776840545047,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 393216,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.051Z",
-          "startedMs": 1776840545051,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.055Z",
-          "startedMs": 1776840545055,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.060Z",
-          "startedMs": 1776840545060,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 327680,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.064Z",
-          "startedMs": 1776840545064,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 655360,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.082Z",
-          "startedMs": 1776840545082,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 262144,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.545Z",
-          "startedMs": 1776840752545,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 65536,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.548Z",
-          "startedMs": 1776840752548,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 17743,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.551Z",
-          "startedMs": 1776840752551,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 720896,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:33.350Z",
-          "startedMs": 1776840753350,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 19350863,
+          "transferBytes": 10573896,
           "initiator": "other"
         }
       ],
-      "firstSeenMs": 1776840540245,
-      "lastSeenMs": 1776840753350,
-      "transferredMB": 23.1,
-      "firstSeenAt": "2026-04-22T06:49:00.245Z",
-      "lastSeenAt": "2026-04-22T06:52:33.350Z",
+      "firstSeenMs": 1776802272835,
+      "lastSeenMs": 1776802273390,
+      "transferredMB": 11.1,
+      "firstSeenAt": "2026-04-21T20:11:12.835Z",
+      "lastSeenAt": "2026-04-21T20:11:13.390Z",
       "sameSrcWindows": [
         {
           "index": 1,
-          "count": 12,
-          "repeatCount": 11,
-          "partial206Count": 11,
-          "cancelledCount": 0,
-          "transferredMB": 3.89,
-          "firstAt": "2026-04-22T06:49:00.245Z",
-          "lastAt": "2026-04-22T06:49:05.082Z",
-          "durationMs": 4837,
-          "minGapMs": 3,
-          "maxGapMs": 4703,
-          "avgGapMs": 440,
-          "tags": [
-            "same-src-thrash",
-            "ad-repeat"
-          ]
-        },
-        {
-          "index": 2,
           "count": 4,
           "repeatCount": 3,
-          "partial206Count": 4,
+          "partial206Count": 3,
           "cancelledCount": 0,
-          "transferredMB": 19.22,
-          "firstAt": "2026-04-22T06:52:32.545Z",
-          "lastAt": "2026-04-22T06:52:33.350Z",
-          "durationMs": 805,
-          "minGapMs": 3,
-          "maxGapMs": 799,
-          "avgGapMs": 268,
+          "transferredMB": 11.1,
+          "firstAt": "2026-04-21T20:11:12.835Z",
+          "lastAt": "2026-04-21T20:11:13.390Z",
+          "durationMs": 555,
+          "minGapMs": 11,
+          "maxGapMs": 436,
+          "avgGapMs": 185,
           "tags": [
             "burst-reload",
             "same-src-thrash",
@@ -2208,389 +245,24 @@
           ]
         }
       ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 2,
-      "peakWindowRepeatCount": 12,
+      "sameSrcWindowCount": 1,
+      "repeatedWindowCount": 1,
+      "peakWindowRepeatCount": 4,
       "hasPartialThenCancel": false
     }
   ],
-  "topRepeatedExternalMedia": [
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "total": 5,
-      "cancelled": 0,
-      "partial206": 5,
-      "transferred": 9639076,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:45.064Z",
-          "startedMs": 1776840525064,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1245184,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:45.130Z",
-          "startedMs": 1776840525130,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 35410,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:54.631Z",
-          "startedMs": 1776840534631,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 5177344,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:53:20.369Z",
-          "startedMs": 1776840800369,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3145728,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:53:20.375Z",
-          "startedMs": 1776840800375,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 35410,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840525064,
-      "lastSeenMs": 1776840800375,
-      "transferredMB": 9.2,
-      "firstSeenAt": "2026-04-22T06:48:45.064Z",
-      "lastSeenAt": "2026-04-22T06:53:20.375Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 3,
-          "cancelledCount": 0,
-          "transferredMB": 6.16,
-          "firstAt": "2026-04-22T06:48:45.064Z",
-          "lastAt": "2026-04-22T06:48:54.631Z",
-          "durationMs": 9567,
-          "minGapMs": 66,
-          "maxGapMs": 9501,
-          "avgGapMs": 4784,
-          "tags": [
-            "same-src-thrash",
-            "external-runtime-repeat"
-          ]
-        },
-        {
-          "index": 2,
-          "count": 2,
-          "repeatCount": 1,
-          "partial206Count": 2,
-          "cancelledCount": 0,
-          "transferredMB": 3.03,
-          "firstAt": "2026-04-22T06:53:20.369Z",
-          "lastAt": "2026-04-22T06:53:20.375Z",
-          "durationMs": 6,
-          "minGapMs": 6,
-          "maxGapMs": 6,
-          "avgGapMs": 6,
-          "tags": [
-            "same-src-thrash",
-            "external-runtime-repeat"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 2,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-      "total": 3,
-      "cancelled": 0,
-      "partial206": 3,
-      "transferred": 16933087,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:49:07.000Z",
-          "startedMs": 1776840547000,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 2555904,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:07.026Z",
-          "startedMs": 1776840547026,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 24799,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:07.059Z",
-          "startedMs": 1776840547059,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 14352384,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840547000,
-      "lastSeenMs": 1776840547059,
-      "transferredMB": 16.1,
-      "firstSeenAt": "2026-04-22T06:49:07.000Z",
-      "lastSeenAt": "2026-04-22T06:49:07.059Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 3,
-          "cancelledCount": 0,
-          "transferredMB": 16.15,
-          "firstAt": "2026-04-22T06:49:07.000Z",
-          "lastAt": "2026-04-22T06:49:07.059Z",
-          "durationMs": 59,
-          "minGapMs": 26,
-          "maxGapMs": 33,
-          "avgGapMs": 30,
-          "tags": [
-            "same-src-thrash",
-            "external-runtime-repeat"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "http://localhost:3000/load/load.mp4",
-      "category": "external",
-      "host": "localhost:3000",
-      "routeSegment": "load",
-      "total": 3,
-      "cancelled": 0,
-      "partial206": 0,
-      "transferred": 1353,
-      "statuses": [
-        "304"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:03.319Z",
-          "startedMs": 1776840483319,
-          "status": 304,
-          "cancelled": false,
-          "partial206": false,
-          "transferBytes": 451,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:10.194Z",
-          "startedMs": 1776840490194,
-          "status": 304,
-          "cancelled": false,
-          "partial206": false,
-          "transferBytes": 451,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:17.118Z",
-          "startedMs": 1776840497118,
-          "status": 304,
-          "cancelled": false,
-          "partial206": false,
-          "transferBytes": 451,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840483319,
-      "lastSeenMs": 1776840497118,
-      "transferredMB": 0,
-      "firstSeenAt": "2026-04-22T06:48:03.319Z",
-      "lastSeenAt": "2026-04-22T06:48:17.118Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 0,
-          "cancelledCount": 0,
-          "transferredMB": 0,
-          "firstAt": "2026-04-22T06:48:03.319Z",
-          "lastAt": "2026-04-22T06:48:17.118Z",
-          "durationMs": 13799,
-          "minGapMs": 6875,
-          "maxGapMs": 6924,
-          "avgGapMs": 6900,
-          "tags": [
-            "external-runtime-repeat"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    }
-  ],
-  "topCancelled": [
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584643845.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 5,
-      "cancelled": 1,
-      "partial206": 4,
-      "transferred": 5347385,
-      "statuses": [
-        "206",
-        ""
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:51:05.907Z",
-          "startedMs": 1776840665907,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 4128768,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.929Z",
-          "startedMs": 1776840665929,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 884736,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.932Z",
-          "startedMs": 1776840665932,
-          "status": 0,
-          "cancelled": true,
-          "partial206": false,
-          "transferBytes": 0,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.933Z",
-          "startedMs": 1776840665933,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 327680,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.935Z",
-          "startedMs": 1776840665935,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 6201,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840665907,
-      "lastSeenMs": 1776840665935,
-      "transferredMB": 5.1,
-      "firstSeenAt": "2026-04-22T06:51:05.907Z",
-      "lastSeenAt": "2026-04-22T06:51:05.935Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 4,
-          "cancelledCount": 1,
-          "transferredMB": 5.1,
-          "firstAt": "2026-04-22T06:51:05.907Z",
-          "lastAt": "2026-04-22T06:51:05.935Z",
-          "durationMs": 28,
-          "minGapMs": 1,
-          "maxGapMs": 22,
-          "avgGapMs": 7,
-          "tags": [
-            "burst-reload",
-            "partial-then-cancel",
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": true
-    }
-  ],
+  "topRepeatedExternalMedia": [],
+  "topCancelled": [],
   "topChurn": [
     {
       "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764418639487-rcwlhg-ADS.mp4",
       "category": "ad",
       "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
       "routeSegment": "1764418639487-rcwlhg-ADS.mp4",
-      "total": 16,
+      "total": 4,
       "cancelled": 0,
-      "partial206": 15,
-      "transferred": 24236098,
+      "partial206": 3,
+      "transferred": 11640300,
       "statuses": [
         "200",
         "206"
@@ -2605,8 +277,8 @@
       ],
       "events": [
         {
-          "startedAt": "2026-04-22T06:49:00.245Z",
-          "startedMs": 1776840540245,
+          "startedAt": "2026-04-21T20:11:12.835Z",
+          "startedMs": 1776802272835,
           "status": 200,
           "cancelled": false,
           "partial206": false,
@@ -2614,17 +286,17 @@
           "initiator": "script"
         },
         {
-          "startedAt": "2026-04-22T06:49:00.322Z",
-          "startedMs": 1776840540322,
+          "startedAt": "2026-04-21T20:11:12.943Z",
+          "startedMs": 1776802272943,
           "status": 206,
           "cancelled": false,
           "partial206": true,
-          "transferBytes": 196608,
+          "transferBytes": 1048576,
           "initiator": "other"
         },
         {
-          "startedAt": "2026-04-22T06:49:00.325Z",
-          "startedMs": 1776840540325,
+          "startedAt": "2026-04-21T20:11:12.954Z",
+          "startedMs": 1776802272954,
           "status": 206,
           "cancelled": false,
           "partial206": true,
@@ -2632,160 +304,34 @@
           "initiator": "other"
         },
         {
-          "startedAt": "2026-04-22T06:49:05.028Z",
-          "startedMs": 1776840545028,
+          "startedAt": "2026-04-21T20:11:13.390Z",
+          "startedMs": 1776802273390,
           "status": 206,
           "cancelled": false,
           "partial206": true,
-          "transferBytes": 393216,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.033Z",
-          "startedMs": 1776840545033,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.043Z",
-          "startedMs": 1776840545043,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.047Z",
-          "startedMs": 1776840545047,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 393216,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.051Z",
-          "startedMs": 1776840545051,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.055Z",
-          "startedMs": 1776840545055,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 458752,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.060Z",
-          "startedMs": 1776840545060,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 327680,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.064Z",
-          "startedMs": 1776840545064,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 655360,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:49:05.082Z",
-          "startedMs": 1776840545082,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 262144,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.545Z",
-          "startedMs": 1776840752545,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 65536,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.548Z",
-          "startedMs": 1776840752548,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 17743,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:32.551Z",
-          "startedMs": 1776840752551,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 720896,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:33.350Z",
-          "startedMs": 1776840753350,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 19350863,
+          "transferBytes": 10573896,
           "initiator": "other"
         }
       ],
-      "firstSeenMs": 1776840540245,
-      "lastSeenMs": 1776840753350,
-      "transferredMB": 23.1,
-      "firstSeenAt": "2026-04-22T06:49:00.245Z",
-      "lastSeenAt": "2026-04-22T06:52:33.350Z",
+      "firstSeenMs": 1776802272835,
+      "lastSeenMs": 1776802273390,
+      "transferredMB": 11.1,
+      "firstSeenAt": "2026-04-21T20:11:12.835Z",
+      "lastSeenAt": "2026-04-21T20:11:13.390Z",
       "sameSrcWindows": [
         {
           "index": 1,
-          "count": 12,
-          "repeatCount": 11,
-          "partial206Count": 11,
-          "cancelledCount": 0,
-          "transferredMB": 3.89,
-          "firstAt": "2026-04-22T06:49:00.245Z",
-          "lastAt": "2026-04-22T06:49:05.082Z",
-          "durationMs": 4837,
-          "minGapMs": 3,
-          "maxGapMs": 4703,
-          "avgGapMs": 440,
-          "tags": [
-            "same-src-thrash",
-            "ad-repeat"
-          ]
-        },
-        {
-          "index": 2,
           "count": 4,
           "repeatCount": 3,
-          "partial206Count": 4,
+          "partial206Count": 3,
           "cancelledCount": 0,
-          "transferredMB": 19.22,
-          "firstAt": "2026-04-22T06:52:32.545Z",
-          "lastAt": "2026-04-22T06:52:33.350Z",
-          "durationMs": 805,
-          "minGapMs": 3,
-          "maxGapMs": 799,
-          "avgGapMs": 268,
+          "transferredMB": 11.1,
+          "firstAt": "2026-04-21T20:11:12.835Z",
+          "lastAt": "2026-04-21T20:11:13.390Z",
+          "durationMs": 555,
+          "minGapMs": 11,
+          "maxGapMs": 436,
+          "avgGapMs": 185,
           "tags": [
             "burst-reload",
             "same-src-thrash",
@@ -2793,434 +339,10 @@
           ]
         }
       ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 2,
-      "peakWindowRepeatCount": 12,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583707579.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 6,
-      "cancelled": 0,
-      "partial206": 6,
-      "transferred": 7391596,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:39.775Z",
-          "startedMs": 1776840519775,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 2097152,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.806Z",
-          "startedMs": 1776840519806,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 131072,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.809Z",
-          "startedMs": 1776840519809,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 29275,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.830Z",
-          "startedMs": 1776840519830,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 619099,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:39.854Z",
-          "startedMs": 1776840519854,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1208923,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:52:53.595Z",
-          "startedMs": 1776840773595,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3306075,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840519775,
-      "lastSeenMs": 1776840773595,
-      "transferredMB": 7,
-      "firstSeenAt": "2026-04-22T06:48:39.775Z",
-      "lastSeenAt": "2026-04-22T06:52:53.595Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 5,
-          "cancelledCount": 0,
-          "transferredMB": 3.9,
-          "firstAt": "2026-04-22T06:48:39.775Z",
-          "lastAt": "2026-04-22T06:48:39.854Z",
-          "durationMs": 79,
-          "minGapMs": 3,
-          "maxGapMs": 31,
-          "avgGapMs": 20,
-          "tags": [
-            "burst-reload",
-            "same-src-thrash"
-          ]
-        },
-        {
-          "index": 2,
-          "count": 1,
-          "repeatCount": 0,
-          "partial206Count": 1,
-          "cancelledCount": 0,
-          "transferredMB": 3.15,
-          "firstAt": "2026-04-22T06:52:53.595Z",
-          "lastAt": "2026-04-22T06:52:53.595Z",
-          "durationMs": 0,
-          "minGapMs": 0,
-          "maxGapMs": 0,
-          "avgGapMs": 0,
-          "tags": []
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "total": 5,
-      "cancelled": 0,
-      "partial206": 5,
-      "transferred": 9639076,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:45.064Z",
-          "startedMs": 1776840525064,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 1245184,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:45.130Z",
-          "startedMs": 1776840525130,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 35410,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:54.631Z",
-          "startedMs": 1776840534631,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 5177344,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:53:20.369Z",
-          "startedMs": 1776840800369,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 3145728,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:53:20.375Z",
-          "startedMs": 1776840800375,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 35410,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840525064,
-      "lastSeenMs": 1776840800375,
-      "transferredMB": 9.2,
-      "firstSeenAt": "2026-04-22T06:48:45.064Z",
-      "lastSeenAt": "2026-04-22T06:53:20.375Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 3,
-          "repeatCount": 2,
-          "partial206Count": 3,
-          "cancelledCount": 0,
-          "transferredMB": 6.16,
-          "firstAt": "2026-04-22T06:48:45.064Z",
-          "lastAt": "2026-04-22T06:48:54.631Z",
-          "durationMs": 9567,
-          "minGapMs": 66,
-          "maxGapMs": 9501,
-          "avgGapMs": 4784,
-          "tags": [
-            "same-src-thrash",
-            "external-runtime-repeat"
-          ]
-        },
-        {
-          "index": 2,
-          "count": 2,
-          "repeatCount": 1,
-          "partial206Count": 2,
-          "cancelledCount": 0,
-          "transferredMB": 3.03,
-          "firstAt": "2026-04-22T06:53:20.369Z",
-          "lastAt": "2026-04-22T06:53:20.375Z",
-          "durationMs": 6,
-          "minGapMs": 6,
-          "maxGapMs": 6,
-          "avgGapMs": 6,
-          "tags": [
-            "same-src-thrash",
-            "external-runtime-repeat"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 2,
-      "repeatedWindowCount": 2,
-      "peakWindowRepeatCount": 3,
-      "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583876006.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 5,
-      "cancelled": 0,
-      "partial206": 5,
-      "transferred": 2466858,
-      "statuses": [
-        "206"
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:48:26.723Z",
-          "startedMs": 1776840506723,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 589824,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.741Z",
-          "startedMs": 1776840506741,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 131072,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.744Z",
-          "startedMs": 1776840506744,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 446997,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.758Z",
-          "startedMs": 1776840506758,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 655360,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:48:26.761Z",
-          "startedMs": 1776840506761,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 643605,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840506723,
-      "lastSeenMs": 1776840506761,
-      "transferredMB": 2.4,
-      "firstSeenAt": "2026-04-22T06:48:26.723Z",
-      "lastSeenAt": "2026-04-22T06:48:26.761Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 5,
-          "cancelledCount": 0,
-          "transferredMB": 2.35,
-          "firstAt": "2026-04-22T06:48:26.723Z",
-          "lastAt": "2026-04-22T06:48:26.761Z",
-          "durationMs": 38,
-          "minGapMs": 3,
-          "maxGapMs": 18,
-          "avgGapMs": 10,
-          "tags": [
-            "burst-reload",
-            "same-src-thrash"
-          ]
-        }
-      ],
       "sameSrcWindowCount": 1,
       "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
+      "peakWindowRepeatCount": 4,
       "hasPartialThenCancel": false
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584643845.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "total": 5,
-      "cancelled": 1,
-      "partial206": 4,
-      "transferred": 5347385,
-      "statuses": [
-        "206",
-        ""
-      ],
-      "types": [
-        "media"
-      ],
-      "initiators": [
-        "other"
-      ],
-      "events": [
-        {
-          "startedAt": "2026-04-22T06:51:05.907Z",
-          "startedMs": 1776840665907,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 4128768,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.929Z",
-          "startedMs": 1776840665929,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 884736,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.932Z",
-          "startedMs": 1776840665932,
-          "status": 0,
-          "cancelled": true,
-          "partial206": false,
-          "transferBytes": 0,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.933Z",
-          "startedMs": 1776840665933,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 327680,
-          "initiator": "other"
-        },
-        {
-          "startedAt": "2026-04-22T06:51:05.935Z",
-          "startedMs": 1776840665935,
-          "status": 206,
-          "cancelled": false,
-          "partial206": true,
-          "transferBytes": 6201,
-          "initiator": "other"
-        }
-      ],
-      "firstSeenMs": 1776840665907,
-      "lastSeenMs": 1776840665935,
-      "transferredMB": 5.1,
-      "firstSeenAt": "2026-04-22T06:51:05.907Z",
-      "lastSeenAt": "2026-04-22T06:51:05.935Z",
-      "sameSrcWindows": [
-        {
-          "index": 1,
-          "count": 5,
-          "repeatCount": 4,
-          "partial206Count": 4,
-          "cancelledCount": 1,
-          "transferredMB": 5.1,
-          "firstAt": "2026-04-22T06:51:05.907Z",
-          "lastAt": "2026-04-22T06:51:05.935Z",
-          "durationMs": 28,
-          "minGapMs": 1,
-          "maxGapMs": 22,
-          "avgGapMs": 7,
-          "tags": [
-            "burst-reload",
-            "partial-then-cancel",
-            "same-src-thrash"
-          ]
-        }
-      ],
-      "sameSrcWindowCount": 1,
-      "repeatedWindowCount": 1,
-      "peakWindowRepeatCount": 5,
-      "hasPartialThenCancel": true
     }
   ],
   "topSameSrcWindows": [
@@ -3230,331 +352,42 @@
       "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
       "routeSegment": "1764418639487-rcwlhg-ADS.mp4",
       "index": 1,
-      "count": 12,
-      "repeatCount": 11,
-      "partial206Count": 11,
-      "cancelledCount": 0,
-      "transferredMB": 3.89,
-      "firstAt": "2026-04-22T06:49:00.245Z",
-      "lastAt": "2026-04-22T06:49:05.082Z",
-      "durationMs": 4837,
-      "minGapMs": 3,
-      "maxGapMs": 4703,
-      "avgGapMs": 440,
-      "tags": [
-        "same-src-thrash",
-        "ad-repeat"
-      ]
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583707579.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 5,
-      "repeatCount": 4,
-      "partial206Count": 5,
-      "cancelledCount": 0,
-      "transferredMB": 3.9,
-      "firstAt": "2026-04-22T06:48:39.775Z",
-      "lastAt": "2026-04-22T06:48:39.854Z",
-      "durationMs": 79,
-      "minGapMs": 3,
-      "maxGapMs": 31,
-      "avgGapMs": 20,
-      "tags": [
-        "burst-reload",
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767583876006.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 5,
-      "repeatCount": 4,
-      "partial206Count": 5,
-      "cancelledCount": 0,
-      "transferredMB": 2.35,
-      "firstAt": "2026-04-22T06:48:26.723Z",
-      "lastAt": "2026-04-22T06:48:26.761Z",
-      "durationMs": 38,
-      "minGapMs": 3,
-      "maxGapMs": 18,
-      "avgGapMs": 10,
-      "tags": [
-        "burst-reload",
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://pf9g6yhoyajfxxxz.public.blob.vercel-storage.com/forum/video-1767584643845.mp4",
-      "category": "forum",
-      "host": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 5,
-      "repeatCount": 4,
-      "partial206Count": 4,
-      "cancelledCount": 1,
-      "transferredMB": 5.1,
-      "firstAt": "2026-04-22T06:51:05.907Z",
-      "lastAt": "2026-04-22T06:51:05.935Z",
-      "durationMs": 28,
-      "minGapMs": 1,
-      "maxGapMs": 22,
-      "avgGapMs": 7,
-      "tags": [
-        "burst-reload",
-        "partial-then-cancel",
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764418639487-rcwlhg-ADS.mp4",
-      "category": "ad",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1764418639487-rcwlhg-ADS.mp4",
-      "index": 2,
       "count": 4,
       "repeatCount": 3,
-      "partial206Count": 4,
+      "partial206Count": 3,
       "cancelledCount": 0,
-      "transferredMB": 19.22,
-      "firstAt": "2026-04-22T06:52:32.545Z",
-      "lastAt": "2026-04-22T06:52:33.350Z",
-      "durationMs": 805,
-      "minGapMs": 3,
-      "maxGapMs": 799,
-      "avgGapMs": 268,
+      "transferredMB": 11.1,
+      "firstAt": "2026-04-21T20:11:12.835Z",
+      "lastAt": "2026-04-21T20:11:13.390Z",
+      "durationMs": 555,
+      "minGapMs": 11,
+      "maxGapMs": 436,
+      "avgGapMs": 185,
       "tags": [
         "burst-reload",
         "same-src-thrash",
         "ad-repeat"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "index": 1,
-      "count": 3,
-      "repeatCount": 2,
-      "partial206Count": 3,
-      "cancelledCount": 0,
-      "transferredMB": 6.16,
-      "firstAt": "2026-04-22T06:48:45.064Z",
-      "lastAt": "2026-04-22T06:48:54.631Z",
-      "durationMs": 9567,
-      "minGapMs": 66,
-      "maxGapMs": 9501,
-      "avgGapMs": 4784,
-      "tags": [
-        "same-src-thrash",
-        "external-runtime-repeat"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1766962892812-d1lynx-1227_1_1_dfhghjhfgjk_gjfhggf00000000000000000000.mp4",
-      "index": 1,
-      "count": 3,
-      "repeatCount": 2,
-      "partial206Count": 3,
-      "cancelledCount": 0,
-      "transferredMB": 16.15,
-      "firstAt": "2026-04-22T06:49:07.000Z",
-      "lastAt": "2026-04-22T06:49:07.059Z",
-      "durationMs": 59,
-      "minGapMs": 26,
-      "maxGapMs": 33,
-      "avgGapMs": 30,
-      "tags": [
-        "same-src-thrash",
-        "external-runtime-repeat"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037524948.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 3,
-      "repeatCount": 2,
-      "partial206Count": 3,
-      "cancelledCount": 0,
-      "transferredMB": 3.28,
-      "firstAt": "2026-04-22T06:49:21.704Z",
-      "lastAt": "2026-04-22T06:49:21.747Z",
-      "durationMs": 43,
-      "minGapMs": 2,
-      "maxGapMs": 41,
-      "avgGapMs": 22,
-      "tags": [
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1772037900461.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 3,
-      "repeatCount": 2,
-      "partial206Count": 3,
-      "cancelledCount": 0,
-      "transferredMB": 0.91,
-      "firstAt": "2026-04-22T06:52:58.705Z",
-      "lastAt": "2026-04-22T06:52:58.731Z",
-      "durationMs": 26,
-      "minGapMs": 3,
-      "maxGapMs": 23,
-      "avgGapMs": 13,
-      "tags": [
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "http://localhost:3000/load/load.mp4",
-      "category": "external",
-      "host": "localhost:3000",
-      "routeSegment": "load",
-      "index": 1,
-      "count": 3,
-      "repeatCount": 2,
-      "partial206Count": 0,
-      "cancelledCount": 0,
-      "transferredMB": 0,
-      "firstAt": "2026-04-22T06:48:03.319Z",
-      "lastAt": "2026-04-22T06:48:17.118Z",
-      "durationMs": 13799,
-      "minGapMs": 6875,
-      "maxGapMs": 6924,
-      "avgGapMs": 6900,
-      "tags": [
-        "external-runtime-repeat"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "category": "external",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "1764004055177-4olvx2-video_2025-07ngfhdfthbfd-31_04-20-42.mp4",
-      "index": 2,
-      "count": 2,
-      "repeatCount": 1,
-      "partial206Count": 2,
-      "cancelledCount": 0,
-      "transferredMB": 3.03,
-      "firstAt": "2026-04-22T06:53:20.369Z",
-      "lastAt": "2026-04-22T06:53:20.375Z",
-      "durationMs": 6,
-      "minGapMs": 6,
-      "maxGapMs": 6,
-      "avgGapMs": 6,
-      "tags": [
-        "same-src-thrash",
-        "external-runtime-repeat"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1768623128767.mp4",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 2,
-      "repeatCount": 1,
-      "partial206Count": 2,
-      "cancelledCount": 0,
-      "transferredMB": 3.02,
-      "firstAt": "2026-04-22T06:48:03.778Z",
-      "lastAt": "2026-04-22T06:48:03.881Z",
-      "durationMs": 103,
-      "minGapMs": 103,
-      "maxGapMs": 103,
-      "avgGapMs": 103,
-      "tags": [
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/video-1776572775493.webm",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 1,
-      "count": 2,
-      "repeatCount": 1,
-      "partial206Count": 2,
-      "cancelledCount": 0,
-      "transferredMB": 1.9,
-      "firstAt": "2026-04-22T06:51:44.735Z",
-      "lastAt": "2026-04-22T06:51:57.491Z",
-      "durationMs": 12756,
-      "minGapMs": 12756,
-      "maxGapMs": 12756,
-      "avgGapMs": 12756,
-      "tags": [
-        "same-src-thrash"
-      ]
-    },
-    {
-      "url": "https://d9igfjzil0uuvgvg.public.blob.vercel-storage.com/forum/voice-1776298767441.webm",
-      "category": "forum",
-      "host": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "routeSegment": "forum",
-      "index": 2,
-      "count": 2,
-      "repeatCount": 1,
-      "partial206Count": 2,
-      "cancelledCount": 0,
-      "transferredMB": 0.07,
-      "firstAt": "2026-04-22T06:51:59.985Z",
-      "lastAt": "2026-04-22T06:51:59.988Z",
-      "durationMs": 3,
-      "minGapMs": 3,
-      "maxGapMs": 3,
-      "avgGapMs": 3,
-      "tags": [
-        "same-src-thrash"
       ]
     }
   ],
   "sameSrcWindowTags": [
     {
-      "key": "same-src-thrash",
-      "count": 13
+      "key": "ad-repeat",
+      "count": 1
     },
     {
       "key": "burst-reload",
-      "count": 4
+      "count": 1
     },
     {
-      "key": "external-runtime-repeat",
-      "count": 4
-    },
-    {
-      "key": "ad-repeat",
-      "count": 2
-    },
-    {
-      "key": "partial-then-cancel",
+      "key": "same-src-thrash",
       "count": 1
     }
   ],
   "initiatorCounts": [
     {
       "key": "other",
-      "count": 61
+      "count": 3
     },
     {
       "key": "script",
@@ -3564,29 +397,13 @@
   "hostCounts": [
     {
       "key": "d9igfjzil0uuvgvg.public.blob.vercel-storage.com",
-      "count": 39
-    },
-    {
-      "key": "pf9g6yhoyajfxxxz.public.blob.vercel-storage.com",
-      "count": 20
-    },
-    {
-      "key": "localhost:3000",
-      "count": 3
+      "count": 4
     }
   ],
   "statusCounts": [
     {
       "key": "206",
-      "count": 57
-    },
-    {
-      "key": "304",
       "count": 3
-    },
-    {
-      "key": "",
-      "count": 1
     },
     {
       "key": "200",

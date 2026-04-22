@@ -1,7 +1,7 @@
 // components/BgAudio.js
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function BgAudio({
   src = '/audio/cosmic.mp3',
@@ -13,16 +13,6 @@ export default function BgAudio({
   const [playing, setPlaying] = useState(false)
   const [locked, setLocked] = useState(true) // браузер запретил autoplay со звуком
 
-  const emitAudiblePlayback = useCallback(() => {
-    try {
-      window.dispatchEvent(
-        new CustomEvent('site-media-audible', {
-          detail: { source: 'bg-audio', element: audioRef.current || null },
-        })
-      )
-    } catch {}
-  }, [])
-
   /* =========================
      ГРОМКОСТЬ
   ========================= */
@@ -33,50 +23,6 @@ export default function BgAudio({
       } catch {}
     }
   }, [vol])
-
-  useEffect(() => {
-    const a = audioRef.current
-    if (!a) return undefined
-    const sync = () => {
-      try {
-        setPlaying(!a.paused)
-      } catch {}
-    }
-    sync()
-    try { a.addEventListener('play', sync) } catch {}
-    try { a.addEventListener('pause', sync) } catch {}
-    try { a.addEventListener('ended', sync) } catch {}
-    return () => {
-      try { a.removeEventListener('play', sync) } catch {}
-      try { a.removeEventListener('pause', sync) } catch {}
-      try { a.removeEventListener('ended', sync) } catch {}
-    }
-  }, [])
-
-  const unlockAudiblePlayback = useCallback(async () => {
-    const el = audioRef.current
-    if (!el) return false
-    try {
-      el.muted = false
-      el.defaultMuted = false
-      let playPromise = null
-      if (el.paused) playPromise = el.play?.()
-      if (playPromise && typeof playPromise.then === 'function') {
-        await playPromise
-      }
-      setPlaying(!el.paused)
-      setLocked(false)
-      emitAudiblePlayback()
-      window.dispatchEvent(
-        new CustomEvent('site-media-play', {
-          detail: { source: 'bg-audio' },
-        })
-      )
-      return true
-    } catch {
-      return false
-    }
-  }, [emitAudiblePlayback])
 
   /* =========================
      1) АВТОСТАРТ ПРИ МОНТАЖЕ
@@ -103,7 +49,6 @@ export default function BgAudio({
             detail: { source: 'bg-audio' },
           })
         )
-        emitAudiblePlayback()
       } catch {
         // autoplay со звуком запрещён → играем тихо
         try {
@@ -112,7 +57,7 @@ export default function BgAudio({
           await a.play().catch(() => {})
         } catch {}
         if (cancelled) return
-        setPlaying(!a.paused)
+        setPlaying(false)
         setLocked(true)
       }
     })()
@@ -123,7 +68,7 @@ export default function BgAudio({
       try { a.removeAttribute('src') } catch {}
       try { a.load?.() } catch {}
     }
-  }, [emitAudiblePlayback, src])
+  }, [src])
 
   /* =========================
      2) РАЗБЛОКИРОВКА ПО ЖЕСТУ
@@ -148,8 +93,22 @@ export default function BgAudio({
     }
 
     const enableSound = async () => {
-      const ok = await unlockAudiblePlayback()
-      if (ok) detach()
+      const el = audioRef.current
+      if (!el) return
+      try {
+        el.muted = false
+        await el.play()
+        setPlaying(true)
+        setLocked(false)
+
+        window.dispatchEvent(
+          new CustomEvent('site-media-play', {
+            detail: { source: 'bg-audio' },
+          })
+        )
+
+        detach()
+      } catch {}
     }
 
     const onGesture = () => {
@@ -166,7 +125,7 @@ export default function BgAudio({
     return () => {
       detach()
     }
-  }, [locked, unlockAudiblePlayback])
+  }, [locked])
 
   /* =========================
      3) КООРДИНАЦИЯ АУДИО
@@ -177,16 +136,6 @@ export default function BgAudio({
     if (!a) return
 
     // A) основной путь — кастомное событие
-    const isActuallyAudibleMedia = (target) => {
-      try {
-        if (!(target instanceof HTMLMediaElement)) return false
-        if (!!target.muted) return false
-        return Number(target.volume ?? 1) > 0.01
-      } catch {
-        return false
-      }
-    }
-
     const onMediaPlay = (e) => {
       if (e?.detail?.source === 'bg-audio') return
       if (!a.paused) {
@@ -199,18 +148,17 @@ export default function BgAudio({
     const onAnyPlay = (e) => {
       const target = e.target
       if (target === a) return
-      if (!isActuallyAudibleMedia(target)) return
       if (!a.paused) {
         try { a.pause() } catch {}
         setPlaying(false)
       }
     }
 
-    window.addEventListener('site-media-audible', onMediaPlay)
+    window.addEventListener('site-media-play', onMediaPlay)
     document.addEventListener('play', onAnyPlay, true)
 
     return () => {
-      window.removeEventListener('site-media-audible', onMediaPlay)
+      window.removeEventListener('site-media-play', onMediaPlay)
       document.removeEventListener('play', onAnyPlay, true)
     }
   }, [])
@@ -226,21 +174,18 @@ export default function BgAudio({
       try { a.pause() } catch {}
       setPlaying(false)
     } else {
-      const ok = await unlockAudiblePlayback()
-      if (!ok) {
-        try {
-          a.muted = false
-          await a.play()
-          setPlaying(true)
-          setLocked(false)
-          window.dispatchEvent(
-            new CustomEvent('site-media-play', {
-              detail: { source: 'bg-audio' },
-            })
-          )
-          emitAudiblePlayback()
-        } catch {}
-      }
+      try {
+        a.muted = false
+        await a.play()
+        setPlaying(true)
+        setLocked(false)
+
+        window.dispatchEvent(
+          new CustomEvent('site-media-play', {
+            detail: { source: 'bg-audio' },
+          })
+        )
+      } catch {}
     }
   }
 
