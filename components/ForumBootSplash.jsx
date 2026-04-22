@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 /* =========================================================
    FORUM BOOT SPLASH — MASTER SETTINGS
@@ -120,6 +120,17 @@ export default function ForumBootSplash({ onDone }) {
   const videoRef = useRef(null)
 
   const frameWidth = useMemo(() => getFrameWidth(), [])
+  const primeForumFeedMutedBoot = useCallback(() => {
+    try {
+      window.localStorage?.setItem('forum:mediaMuted', '1')
+      window.localStorage?.setItem('forum:videoMuted', '1')
+    } catch {}
+    try {
+      window.dispatchEvent(new CustomEvent('forum:media-mute', {
+        detail: { muted: true, source: 'forum-splash' },
+      }))
+    } catch {}
+  }, [])
 
   const finish = useCallback(() => {
     if (FORUM_SPLASH_ENABLED !== 1) {
@@ -262,6 +273,11 @@ export default function ForumBootSplash({ onDone }) {
       } catch {}
     }
   }, [finish, onDone, startPlayback, visible])
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+    primeForumFeedMutedBoot()
+  }, [primeForumFeedMutedBoot])
 
   useEffect(() => {
     if (!visible) return

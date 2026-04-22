@@ -5,6 +5,15 @@ import React from 'react'
 export default function DmVoicePlayer({ src }) {
   const audioRef = React.useRef(null)
   const waveRef = React.useRef(null)
+  const ownerId = React.useMemo(() => {
+    const input = String(src || '')
+    let hash = 2166136261
+    for (let i = 0; i < input.length; i += 1) {
+      hash ^= input.charCodeAt(i)
+      hash = Math.imul(hash, 16777619)
+    }
+    return `dm-audio:${(hash >>> 0).toString(36)}`
+  }, [src])
 
   const rafRef = React.useRef(0)
   const draggingRef = React.useRef(false)
@@ -260,7 +269,17 @@ export default function DmVoicePlayer({ src }) {
   const bw = Math.max(2, Math.floor((W - (bars - 1) * gap) / bars))
 
   return (
-    <div className={`dmVoice ${playing ? 'dmVoicePlaying' : ''}`} data-kind="dm-voice" onClick={(e) => e.stopPropagation()}>
+    <div
+      className={`dmVoice ${playing ? 'dmVoicePlaying' : ''}`}
+      data-kind="dm-voice"
+      data-forum-media-owner="1"
+      data-forum-media="audio"
+      data-forum-autoplay="0"
+      data-forum-scope="dm"
+      data-owner-id={ownerId}
+      data-stable-shell="1"
+      onClick={(e) => e.stopPropagation()}
+    >
       <button type="button" className="dmVoiceBtn" onClick={toggle} aria-label={playing ? 'Pause' : 'Play'}>
         {playing ? (
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden>
@@ -341,7 +360,15 @@ export default function DmVoicePlayer({ src }) {
         </div>
       </div>
 
-      <audio ref={audioRef} src={src} preload="auto" />
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="metadata"
+        data-forum-media-node="1"
+        data-forum-media="audio"
+        data-forum-manual-only="1"
+        data-owner-id={ownerId}
+      />
     </div>
   )
 }

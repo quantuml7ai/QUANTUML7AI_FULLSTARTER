@@ -1084,6 +1084,15 @@ const ytPlayerRef = useRef(null);
       }));
     } catch {}
   }, []);
+  const emitAdAudibleEvent = React.useCallback((source = 'ad') => {
+    if (!isBrowser()) return;
+    try {
+      const el = rootRef.current || videoRef.current || ytIframeRef.current || null;
+      window.dispatchEvent(new CustomEvent('site-media-audible', {
+        detail: { source, element: el, manual: !mutedRef.current, id: playerIdRef.current }
+      }));
+    } catch {}
+  }, []);
 const slotCssVars = {
   '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
   '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1235,20 +1244,24 @@ useEffect(() => {
         try {
           videoRef.current.muted = next;
         } catch {}
+        if (!next && shouldPlayRef.current) emitAdAudibleEvent('ad_video');
       }
 
       // YouTube
       if (ytPlayerRef.current) {
         try {
           if (next) ytPlayerRef.current.mute?.();
-          else ytPlayerRef.current.unMute?.();
+          else {
+            ytPlayerRef.current.unMute?.();
+            if (shouldPlayRef.current) emitAdAudibleEvent('ad_youtube');
+          }
         } catch {}
       }
     };
 
     window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
     return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
-  }, []);
+  }, [emitAdAudibleEvent]);
   const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
@@ -1636,6 +1649,7 @@ useEffect(() => {
               else ev.target.unMute?.();
               if (shouldPlayRef.current) ev.target.playVideo?.();
               else ev.target.pauseVideo?.();
+              if (shouldPlayRef.current && !mutedRef.current) emitAdAudibleEvent('ad_youtube');
             } catch {}
           },
         },
@@ -1672,6 +1686,9 @@ useEffect(() => {
     if (media.kind === 'video' && videoRef.current) {
       const v = videoRef.current;
       const srcKey = String(media.src || '');
+      if (shouldPlay && !String(attachedVideoSrc || '').trim()) {
+        return;
+      }
       if (isVideoSrcTemporarilyBlocked(srcKey)) {
         try { v.pause?.(); } catch {}
         return;
@@ -1681,6 +1698,7 @@ useEffect(() => {
         try {
           emitAdPlayToCoordinator('ad_video');
           v.muted = !!muted;
+          if (!muted) emitAdAudibleEvent('ad_video');
         } catch {}
 
         v.play?.().catch(() => {
@@ -1690,6 +1708,10 @@ useEffect(() => {
             emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
             setMuted(true);
             try { v.muted = true; } catch {}
+            try {
+              const retry = v.play?.();
+              if (retry && typeof retry.catch === 'function') retry.catch(() => {});
+            } catch {}
           }
         });
       } else {
@@ -1704,6 +1726,7 @@ useEffect(() => {
         if (shouldPlay) {
           emitAdPlayToCoordinator('ad_youtube');
           if (muted) p.mute?.();
+          else emitAdAudibleEvent('ad_youtube');
           p.playVideo?.();
         } else {
           p.pauseVideo?.();
@@ -1713,7 +1736,7 @@ useEffect(() => {
     if (media.kind === 'tiktok' && shouldPlay) {
       emitAdPlayToCoordinator('ad_tiktok');
     }
-  }, [emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
+  }, [attachedVideoSrc, emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
 
   // Impression tracking
   useEffect(() => {
@@ -1820,6 +1843,7 @@ useEffect(() => {
       try {
         v.muted = next;
       } catch {}
+      if (!next && shouldPlayRef.current) emitAdAudibleEvent('ad_video');
       if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
       return;
     }
@@ -1831,6 +1855,7 @@ useEffect(() => {
         if (next) p.mute?.();
         else {
           p.unMute?.();
+          if (shouldPlayRef.current) emitAdAudibleEvent('ad_youtube');
           if (shouldPlayRef.current) p.playVideo?.();
         }
       } catch {} 

@@ -8,16 +8,6 @@ import { createEnableVideoControlsOnTap } from './videoControls'
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
 export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-;(() => {
-  // На каждый новый перезапуск страницы стартуем в muted,
-  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
-  try {
-    if (typeof window === 'undefined') return
-const defaultMutedPref = String(1)
-localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
-localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
-  } catch {}
-})()
 
 export function readMutedPrefFromStorage() {
   try {
@@ -398,8 +388,9 @@ if (!canHardUnload || shouldKeepResidentPostVideo) {
     el.preload = 'none'
   } catch {}
 try {
-  el.removeAttribute('poster')
-  delete el.dataset.__posterOriginal
+  const originalPoster = String(el?.dataset?.__posterOriginal || '').trim()
+  if (originalPoster) el.setAttribute('poster', originalPoster)
+  else el.removeAttribute('poster')
   delete el.dataset.__posterMediaKey
   delete el.dataset.__posterRevealed
   delete el.dataset.__needsPosterRestore
@@ -416,6 +407,18 @@ export function __restoreVideoEl(el) {
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   const owner = __getMediaOwnerEl(el)
+  const ownerDataset = owner?.dataset || null
+  const hasOwnerWarmIntent = (() => {
+    try {
+      return (
+        String(ownerDataset?.__prewarm || '') === '1' ||
+        String(ownerDataset?.__active || '') === '1' ||
+        String(ownerDataset?.__resident || '') === '1'
+      )
+    } catch {
+      return false
+    }
+  })()
   if (!src) return
   try {
     delete el.dataset.__forceHardUnload
@@ -487,13 +490,18 @@ try {
   const shouldAutoPreload = 
     String(el.dataset?.__prewarm || '') === '1' ||
     String(el.dataset?.__active || '') === '1' ||
-    String(el.dataset?.__resident || '') === '1'
+    String(el.dataset?.__resident || '') === '1' ||
+    hasOwnerWarmIntent
 
   el.preload = shouldAutoPreload ? 'auto' : 'metadata'
 } catch {}
 try {
-  el.removeAttribute('poster')
-  delete el.dataset.__posterOriginal
+  const originalPoster = String(el?.dataset?.__posterOriginal || '').trim()
+  if (originalPoster) {
+    if (el.getAttribute('poster') !== originalPoster) el.setAttribute('poster', originalPoster)
+  } else {
+    el.removeAttribute('poster')
+  }
   delete el.dataset.__posterMediaKey
   delete el.dataset.__posterRevealed
   delete el.dataset.__needsPosterRestore
@@ -535,12 +543,18 @@ try {
     (
       String(el.dataset?.__prewarm || '') === '1' ||
       String(el.dataset?.__active || '') === '1' ||
-      String(el.dataset?.__resident || '') === '1'
+      String(el.dataset?.__resident || '') === '1' ||
+      hasOwnerWarmIntent
     )
 
   if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
-  if (shouldKickPostRestore && !isLoading && canRestoreLoad()) {
-    el.load?.()
+  // Для owner-driven post video не дублируем явный load() сразу после src reattach:
+  // setAttribute('src', ...) уже запускает fetch, а второй load() здесь разгоняет лишние 206/range циклы.
+  if (shouldKickPostRestore) {
+    try {
+      el.dataset.__loadPending = '1'
+      el.dataset.__warmReady = '0'
+    } catch {}
   }
 } catch {}
 }

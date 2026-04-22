@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 808,
+    "score": 820,
     "counts": {
       "playCalls": 2,
       "pauseCalls": 9,
@@ -9,7 +9,7 @@
       "srcSets": 7,
       "srcRemoves": 0,
       "currentSrcReads": 14,
-      "pendingFlags": 69,
+      "pendingFlags": 75,
       "hardUnload": 17,
       "iframeOps": 165,
       "io": 8,
@@ -26,29 +26,29 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2028,
+          "line": 2058,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2092,
+          "line": 2122,
           "text": "const retry = el.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 1768,
+          "line": 1798,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1778,
+          "line": 1808,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1788,
+          "line": 1818,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1881,
+          "line": 1911,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
@@ -58,11 +58,11 @@
           "text": "video.load?.();"
         },
         {
-          "line": 1209,
+          "line": 1229,
           "text": "try { leaf.load?.(); } catch {}"
         },
         {
-          "line": 3010,
+          "line": 3053,
           "text": "})) a.load?.();"
         }
       ],
@@ -72,15 +72,15 @@
           "text": "try { el.setAttribute('src', src); } catch {}"
         },
         {
-          "line": 2693,
+          "line": 2736,
           "text": "if (mediaNode.getAttribute('src')) { try { mediaNode.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2710,
+          "line": 2753,
           "text": "if (mediaNode.getAttribute('src')) { try { mediaNode.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2823,
+          "line": 2866,
           "text": "try { frame.setAttribute('src', nextSrc); } catch {}"
         }
       ],
@@ -98,7 +98,7 @@
           "text": "el?.currentSrc ||"
         },
         {
-          "line": 674,
+          "line": 687,
           "text": "leaf?.currentSrc ||"
         }
       ],
@@ -134,7 +134,7 @@
           "text": "__restoreVideoEl(video);"
         },
         {
-          "line": 1196,
+          "line": 1216,
           "text": "__restoreVideoEl(leaf);"
         }
       ],
@@ -214,15 +214,15 @@
   },
   {
     "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-    "score": 180,
+    "score": 189,
     "counts": {
       "playCalls": 0,
       "pauseCalls": 1,
-      "loadCalls": 4,
-      "srcSets": 1,
+      "loadCalls": 3,
+      "srcSets": 2,
       "srcRemoves": 1,
       "currentSrcReads": 2,
-      "pendingFlags": 40,
+      "pendingFlags": 44,
       "hardUnload": 7,
       "iframeOps": 0,
       "io": 0,
@@ -238,97 +238,97 @@
     "samples": {
       "pauseCalls": [
         {
-          "line": 336,
+          "line": 326,
           "text": "el.pause?.()"
         }
       ],
       "loadCalls": [
         {
-          "line": 409,
+          "line": 400,
           "text": "el.load?.()"
         },
         {
-          "line": 481,
+          "line": 484,
           "text": "el.load?.()"
         },
         {
-          "line": 541,
+          "line": 550,
           "text": "if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()"
-        },
-        {
-          "line": 543,
-          "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 504,
+          "line": 512,
           "text": "el.setAttribute('src', src)"
+        },
+        {
+          "line": 552,
+          "text": "// setAttribute('src', ...) уже запускает fetch, а второй load() здесь разгоняет лишние 206/range циклы."
         }
       ],
       "srcRemoves": [
         {
-          "line": 390,
+          "line": 380,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 385,
+          "line": 375,
           "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
         }
       ],
       "pendingFlags": [
         {
-          "line": 113,
+          "line": 103,
           "text": "const __residentVideoOwners = new Set()"
         },
         {
-          "line": 161,
+          "line": 151,
           "text": "return Number(owner?.dataset?.__residentLeaseUntil || 0) > Date.now()"
         },
         {
-          "line": 170,
+          "line": 160,
           "text": "__residentVideoOwners.delete(owner)"
         },
         {
-          "line": 171,
+          "line": 161,
           "text": "const idx = __residentVideoOwnerLRU.indexOf(owner)"
         }
       ],
       "hardUnload": [
         {
-          "line": 208,
+          "line": 198,
           "text": "__unloadVideoEl(leaf)"
         },
         {
-          "line": 287,
+          "line": 277,
           "text": "__unloadVideoEl(victim)"
         },
         {
-          "line": 316,
+          "line": 306,
           "text": "export function __unloadVideoEl(el) {"
         },
         {
-          "line": 413,
+          "line": 404,
           "text": "export function __restoreVideoEl(el) {"
         }
       ],
       "layoutReads": [
         {
-          "line": 147,
+          "line": 137,
           "text": "const rect = owner.getBoundingClientRect?.()"
         },
         {
-          "line": 149,
+          "line": 139,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
         },
         {
-          "line": 248,
+          "line": 238,
           "text": "const r = node.getBoundingClientRect?.()"
         },
         {
-          "line": 250,
+          "line": 240,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
         }
       ]
@@ -336,14 +336,14 @@
   },
   {
     "file": "app/forum/features/media/components/VideoMedia.jsx",
-    "score": 119,
+    "score": 136,
     "counts": {
       "playCalls": 1,
       "pauseCalls": 3,
       "loadCalls": 2,
-      "srcSets": 1,
-      "srcRemoves": 2,
-      "currentSrcReads": 1,
+      "srcSets": 2,
+      "srcRemoves": 3,
+      "currentSrcReads": 2,
       "pendingFlags": 31,
       "hardUnload": 0,
       "iframeOps": 0,
@@ -360,84 +360,210 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1122,
+          "line": 1154,
           "text": "const p = el.play?.()"
         }
       ],
       "pauseCalls": [
         {
-          "line": 904,
+          "line": 931,
           "text": "el.pause?.()"
         },
         {
-          "line": 1017,
+          "line": 1044,
           "text": "el.pause?.()"
         },
         {
-          "line": 1130,
+          "line": 1162,
           "text": "try { el.pause?.() } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 881,
+          "line": 908,
           "text": "el.load?.()"
         },
         {
-          "line": 1033,
+          "line": 1060,
           "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 1032,
+          "line": 633,
+          "text": "if (String(el.getAttribute('src') || '') !== s) el.setAttribute('src', s)"
+        },
+        {
+          "line": 1059,
           "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
         }
       ],
       "srcRemoves": [
         {
-          "line": 608,
+          "line": 623,
           "text": "try { el.removeAttribute('src') } catch {}"
         },
         {
-          "line": 1020,
+          "line": 637,
+          "text": "try { el.removeAttribute('src') } catch {}"
+        },
+        {
+          "line": 1047,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 876,
+          "line": 903,
           "text": "(el.readyState === 0 || !el.currentSrc) &&"
+        },
+        {
+          "line": 1148,
+          "text": "const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()"
         }
       ],
       "pendingFlags": [
         {
-          "line": 546,
+          "line": 561,
           "text": "readOwnerLifecycleFlag(el, '__prewarm') ||"
         },
         {
-          "line": 548,
+          "line": 563,
           "text": "readOwnerLifecycleFlag(el, '__resident')"
         },
         {
-          "line": 589,
+          "line": 604,
           "text": "delete el.dataset.__loadPendingSince"
         },
         {
-          "line": 611,
+          "line": 626,
           "text": "try { el.dataset.__loadPending = '0' } catch {}"
         }
       ],
       "io": [
         {
-          "line": 921,
+          "line": 948,
           "text": "io = new IntersectionObserver("
         }
       ],
       "layoutReads": [
         {
-          "line": 490,
+          "line": 494,
           "text": "const vh = Number(window?.innerHeight || 0)"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/ForumAds.js",
+    "score": 135,
+    "counts": {
+      "playCalls": 2,
+      "pauseCalls": 5,
+      "loadCalls": 3,
+      "srcSets": 0,
+      "srcRemoves": 2,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 28,
+      "io": 5,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "reload-thrash risk",
+      "iframe remount risk"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 1686,
+          "text": "v.play?.().catch(() => {"
+        },
+        {
+          "line": 1823,
+          "text": "if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 1132,
+          "text": "try { node.pause?.(); } catch {}"
+        },
+        {
+          "line": 1144,
+          "text": "try { node.pause?.(); } catch {}"
+        },
+        {
+          "line": 1160,
+          "text": "try { node?.pause?.(); } catch {}"
+        },
+        {
+          "line": 1676,
+          "text": "try { v.pause?.(); } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 1134,
+          "text": "try { node.load?.(); } catch {}"
+        },
+        {
+          "line": 1146,
+          "text": "try { node.load?.(); } catch {}"
+        },
+        {
+          "line": 1162,
+          "text": "try { node?.load?.(); } catch {}"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 1133,
+          "text": "try { node.removeAttribute('src'); } catch {}"
+        },
+        {
+          "line": 1145,
+          "text": "try { node.removeAttribute('src'); } catch {}"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 935,
+          "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
+        },
+        {
+          "line": 987,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
+        },
+        {
+          "line": 990,
+          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
+        },
+        {
+          "line": 1024,
+          "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
+        }
+      ],
+      "io": [
+        {
+          "line": 1197,
+          "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')"
+        },
+        {
+          "line": 1201,
+          "text": "const nearObs = new IntersectionObserver("
+        },
+        {
+          "line": 1207,
+          "text": "const focusObs = new IntersectionObserver("
+        },
+        {
+          "line": 1724,
+          "text": "typeof IntersectionObserver === 'undefined' ||"
         }
       ]
     }
@@ -898,57 +1024,6 @@
     }
   },
   {
-    "file": "app/forum/ForumAds.js",
-    "score": 52,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 22,
-      "io": 2,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 0
-    },
-    "flags": [],
-    "samples": {
-      "iframeOps": [
-        {
-          "line": 935,
-          "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
-        },
-        {
-          "line": 987,
-          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
-        },
-        {
-          "line": 990,
-          "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
-        },
-        {
-          "line": 1024,
-          "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
-        }
-      ],
-      "io": [
-        {
-          "line": 1415,
-          "text": "typeof IntersectionObserver === 'undefined' ||"
-        },
-        {
-          "line": 1424,
-          "text": "const observer = new IntersectionObserver("
-        }
-      ]
-    }
-  },
-  {
     "file": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
     "score": 51,
     "counts": {
@@ -1302,6 +1377,81 @@
         {
           "line": 91,
           "text": "const cardRect = card.getBoundingClientRect?.()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
+    "score": 41,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 7,
+      "io": 0,
+      "ro": 2,
+      "raf": 5,
+      "scrollWrites": 0,
+      "layoutReads": 2
+    },
+    "flags": [],
+    "samples": {
+      "iframeOps": [
+        {
+          "line": 61,
+          "text": "leaf = mediaSlot.querySelector?.('iframe')"
+        },
+        {
+          "line": 64,
+          "text": "if (raw.includes('youtube.com') || raw.includes('youtube-nocookie.com') || raw.includes('youtu.be')) kind = 'youtube'"
+        },
+        {
+          "line": 65,
+          "text": "else if (raw.includes('tiktok.com')) kind = 'tiktok'"
+        }
+      ],
+      "ro": [
+        {
+          "line": 139,
+          "text": "if (typeof ResizeObserver === 'undefined') return"
+        },
+        {
+          "line": 170,
+          "text": "const ro = new ResizeObserver(() => {"
+        }
+      ],
+      "raf": [
+        {
+          "line": 97,
+          "text": "bridgeRafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 126,
+          "text": "if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(bridgeRafRef.current)"
+        },
+        {
+          "line": 185,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 198,
+          "text": "try { cancelAnimationFrame(rafRef.current) } catch {}"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 142,
+          "text": "lastHRef.current = el.getBoundingClientRect().height || 0"
+        },
+        {
+          "line": 175,
+          "text": "h = node.getBoundingClientRect().height || 0"
         }
       ]
     }
@@ -1854,37 +2004,37 @@
     "samples": {
       "playCalls": [
         {
-          "line": 196,
+          "line": 205,
           "text": "if (a.paused) a.play?.()"
         }
       ],
       "pauseCalls": [
         {
-          "line": 124,
+          "line": 133,
           "text": "a.pause?.()"
         },
         {
-          "line": 197,
+          "line": 206,
           "text": "else a.pause?.()"
         }
       ],
       "raf": [
         {
-          "line": 59,
+          "line": 68,
           "text": "if (rafRef.current) cancelAnimationFrame(rafRef.current)"
         },
         {
-          "line": 102,
+          "line": 111,
           "text": "rafRef.current = requestAnimationFrame(tick)"
         },
         {
-          "line": 104,
+          "line": 113,
           "text": "rafRef.current = requestAnimationFrame(tick)"
         }
       ],
       "layoutReads": [
         {
-          "line": 216,
+          "line": 225,
           "text": "const rect = el.getBoundingClientRect()"
         }
       ]
@@ -2021,59 +2171,6 @@
         {
           "line": 77,
           "text": "scrollEl.scrollHeight > scrollEl.clientHeight + 1"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/ui/components/ForumAdSlot.jsx",
-    "score": 18,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 2,
-      "raf": 2,
-      "scrollWrites": 0,
-      "layoutReads": 2
-    },
-    "flags": [],
-    "samples": {
-      "ro": [
-        {
-          "line": 17,
-          "text": "if (typeof ResizeObserver === 'undefined') return"
-        },
-        {
-          "line": 48,
-          "text": "const ro = new ResizeObserver(() => {"
-        }
-      ],
-      "raf": [
-        {
-          "line": 63,
-          "text": "rafRef.current = requestAnimationFrame(() => {"
-        },
-        {
-          "line": 76,
-          "text": "try { cancelAnimationFrame(rafRef.current) } catch {}"
-        }
-      ],
-      "layoutReads": [
-        {
-          "line": 20,
-          "text": "lastHRef.current = el.getBoundingClientRect().height || 0"
-        },
-        {
-          "line": 53,
-          "text": "h = node.getBoundingClientRect().height || 0"
         }
       ]
     }

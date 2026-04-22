@@ -267,12 +267,22 @@ export const FORUM_STYLES = `
       height:100%;
       min-height:100%;
     }
+    .mediaBox[data-kind="video"] > .ql7VideoSurface{
+      flex:1 1 auto;
+      align-self:stretch;
+      min-width:100%;
+      min-height:100%;
+      height:100%;
+      max-height:100%;
+      display:flex;
+    }
 
     /* QL7 custom video controls (post video only) */
     .ql7VideoSurface{
       position:relative;
       width:100%;
       height:100%;
+      min-height:100%;
       display:block;
       overflow:hidden;
       background:#000;
@@ -281,8 +291,11 @@ export const FORUM_STYLES = `
       -webkit-tap-highlight-color:transparent;
     }
     .ql7VideoSurface > video{
+      flex:1 1 auto;
       width:100%;
       height:100%;
+      min-width:100%;
+      min-height:100%;
       display:block;
       object-fit:contain;
       background:#000;
@@ -7013,5 +7026,4 @@ const Styles = () => (
 )
 
 export default Styles
-
 

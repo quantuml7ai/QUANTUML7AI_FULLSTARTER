@@ -243,12 +243,15 @@ export default function DmThreadMessageRow({
                 data-kind="video"
                 data-forum-media-owner="1"
                 data-forum-media="video"
+                data-forum-autoplay="0"
+                data-forum-scope="dm"
                 data-owner-id={ownerId}
                 data-stable-shell="1"
               >
                 <VideoMedia
                   data-forum-media="video"
                   data-forum-media-node="1"
+                  data-forum-manual-only="1"
                   data-owner-id={ownerId}
                   src={src}
                   playsInline

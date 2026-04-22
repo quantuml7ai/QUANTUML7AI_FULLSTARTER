@@ -27,10 +27,14 @@ checks.push(runCheck(
   () => {
     const src = read('app/forum/features/media/components/VideoMedia.jsx')
     return (
-      !src.includes('el.dataset.__bootAttachedSrc = s') &&
-      !src.includes('const shouldBootstrapAttach = isPostVideo && !!s') &&
-      src.includes("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)") &&
-      src.includes("if (coordinatorOwnsLifecycle) return undefined")
+      src.includes("const isManualOnly = String(dataForumManualOnly || '') === '1'") &&
+      src.includes('const hasForumOwnerContract =') &&
+      src.includes("String(dataForumMediaNode || '') === '1' ||") &&
+      src.includes('\n    isPostVideo') &&
+      src.includes("const isCoordinatorManaged = hasForumOwnerContract && !isManualOnly") &&
+      src.includes("if (isNewMediaNode && isCoordinatorManaged)") &&
+      src.includes("data-forum-media-node={dataForumMediaNode}") &&
+      !src.includes('const shouldBootstrapAttach = isPostVideo && !!s')
     )
   },
   { file: 'app/forum/features/media/components/VideoMedia.jsx' },

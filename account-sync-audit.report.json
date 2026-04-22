@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-22T01:45:25.719Z",
+  "generatedAt": "2026-04-22T06:40:49.084Z",
   "summary": {
     "scannedFiles": 367,
     "filesWithSyncKeys": 141,
@@ -769,407 +769,407 @@
         },
         {
           "key": "vip",
-          "line": 586,
+          "line": 599,
           "text": "--vip-emoji-size: 48px;      /* можно быстро настроить под себя */"
         },
         {
           "key": "vip",
-          "line": 587,
+          "line": 600,
           "text": "--vip-emoji-size-sm: 48px;   /* на мобильных */"
         },
         {
           "key": "vip",
-          "line": 589,
+          "line": 602,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 590,
+          "line": 603,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 591,
+          "line": 604,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 596,
+          "line": 609,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 601,
+          "line": 614,
           "text": ".vipComposerPreview{ position:relative; display:inline-block; margin-top:6px }"
         },
         {
           "key": "vip",
-          "line": 602,
+          "line": 615,
           "text": ".vipComposerPreview .vipRemove{"
         },
         {
           "key": "vip",
-          "line": 608,
+          "line": 621,
           "text": ".moziEmojiBig{ width: var(--mozi-emoji-size, var(--vip-emoji-size)); height: var(--mozi-emoji-size, var(--vip-emoji-size)); display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 923,
+          "line": 936,
           "text": ".emojiBtn, .vipEmojiIcon, .lockBadge, .emojiPostBig{"
         },
         {
           "key": "vip",
-          "line": 928,
+          "line": 941,
           "text": ".vipEmojiIcon { display:inline-block; width:100%; height:100%; }"
         },
         {
           "key": "vip",
-          "line": 929,
+          "line": 942,
           "text": ".vipEmojiIcon img, .vipEmojiIcon { object-fit:cover; border-radius:8px }"
         },
         {
           "key": "vip",
-          "line": 933,
+          "line": 946,
           "text": "--vip-emoji-size: 48px;      /* базовый размер */"
         },
         {
           "key": "vip",
-          "line": 934,
+          "line": 947,
           "text": "--vip-emoji-size-sm: 40px;   /* на узких экранах */"
         },
         {
           "key": "vip",
-          "line": 988,
+          "line": 1001,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 989,
+          "line": 1002,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 990,
+          "line": 1003,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 996,
+          "line": 1009,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 2574,
+          "line": 2587,
           "text": ".iconBtn.vip { border-color: rgba(255,215,0,.55); color:#ffd700; box-shadow:0 0 14px rgba(255,215,0,.25) }"
         },
         {
           "key": "vip",
-          "line": 2575,
+          "line": 2588,
           "text": ".iconBtn.vipGray { opacity:.85 }"
         },
         {
           "key": "vip",
-          "line": 2576,
+          "line": 2589,
           "text": ".vipWrap { position:relative }"
         },
         {
           "key": "vip",
-          "line": 2584,
+          "line": 2597,
           "text": ".emojiGrid.vip { outline: 1px dashed rgba(255,215,0,.25); border-radius: 10px; padding: 6px; }"
         },
         {
           "key": "vip",
-          "line": 2585,
+          "line": 2598,
           "text": ".emojiBtn.vipAnim { will-change: transform; }"
         },
         {
           "key": "vip",
-          "line": 2586,
+          "line": 2599,
           "text": ".emojiBtn.vipAnim:hover { transform: translateY(-1px) scale(1.02); }"
         },
         {
           "key": "vip",
-          "line": 2606,
+          "line": 2619,
           "text": ".vipEmojiIcon { display:block; width:100%; height:100%; object-fit:cover; }"
         },
         {
           "key": "vip",
-          "line": 2608,
+          "line": 2621,
           "text": ".vipLock { position:absolute; right:-4px; top:-4px; font-size:12px; pointer-events:none; }"
         },
         {
           "key": "vip",
-          "line": 2609,
+          "line": 2622,
           "text": ".vipComposerPreview{ margin-top:6px; }"
         },
         {
           "key": "vip",
-          "line": 2610,
+          "line": 2623,
           "text": ":root{ --vip-emoji-size:48px; }"
         },
         {
           "key": "vip",
-          "line": 2611,
+          "line": 2624,
           "text": ".vipEmojiBig{ display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 2612,
+          "line": 2625,
           "text": ".vipComposerPreview{ margin-top:6px; }"
         },
         {
           "key": "vip",
-          "line": 2613,
+          "line": 2626,
           "text": ":root{ --vip-emoji-size:48px; --vip-emoji-size-sm:32px; }"
         },
         {
           "key": "vip",
-          "line": 2614,
+          "line": 2627,
           "text": ".vipEmojiBig{ display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 2616,
+          "line": 2629,
           "text": ".vipEmojiBig{ width:var(--vip-emoji-size-sm); height:var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 2647,
+          "line": 2660,
           "text": "--vip-badge-w, --vip-badge-h  (размер)"
         },
         {
           "key": "vip",
-          "line": 2648,
+          "line": 2661,
           "text": "--vip-badge-gap              (расстояние между бейджем и ником)"
         },
         {
           "key": "vip",
-          "line": 2649,
+          "line": 2662,
           "text": "--vip-badge-shift-x/y        (сдвиг бейджа)"
         },
         {
           "key": "vip",
-          "line": 2652,
+          "line": 2665,
           "text": "--vip-badge-w: clamp(42px, 9vw, 54px);"
         },
         {
           "key": "vip",
-          "line": 2653,
+          "line": 2666,
           "text": "--vip-badge-h: clamp(42px, 8.2vw, 58px);"
         },
         {
           "key": "vip",
-          "line": 2654,
+          "line": 2667,
           "text": "--vip-badge-gap: 2px;"
         },
         {
           "key": "vip",
-          "line": 2655,
+          "line": 2668,
           "text": "--vip-badge-shift-x: 0px;"
         },
         {
           "key": "vip",
-          "line": 2656,
+          "line": 2669,
           "text": "--vip-badge-shift-y: 0px;"
         },
         {
           "key": "vip",
-          "line": 2659,
+          "line": 2672,
           "text": ".nick-badge.vipNick{"
         },
         {
           "key": "vip",
-          "line": 2663,
+          "line": 2676,
           "text": "gap: var(--vip-badge-gap);"
         },
         {
           "key": "vip",
-          "line": 2667,
+          "line": 2680,
           "text": ".vipFlip{"
         },
         {
           "key": "vip",
-          "line": 2670,
+          "line": 2683,
           "text": "width: var(--vip-badge-w);"
         },
         {
           "key": "vip",
-          "line": 2671,
+          "line": 2684,
           "text": "height: var(--vip-badge-h);"
         },
         {
           "key": "vip",
-          "line": 2672,
+          "line": 2685,
           "text": "transform: translate(var(--vip-badge-shift-x), var(--vip-badge-shift-y));"
         },
         {
           "key": "vip",
-          "line": 2675,
+          "line": 2688,
           "text": ".vipFlipImg{"
         },
         {
           "key": "vip",
-          "line": 2687,
+          "line": 2700,
           "text": "@keyframes vipFlipA{"
         },
         {
           "key": "vip",
-          "line": 2691,
+          "line": 2704,
           "text": "@keyframes vipFlipB{"
         },
         {
           "key": "vip",
-          "line": 2695,
+          "line": 2708,
           "text": ".vipFlipImg.vip1{ animation: vipFlipA 25s infinite linear; }"
         },
         {
           "key": "vip",
-          "line": 2696,
+          "line": 2709,
           "text": ".vipFlipImg.vip2{ animation: vipFlipB 25s infinite linear; }"
         },
         {
           "key": "vip",
-          "line": 2699,
+          "line": 2712,
           "text": ".vipFlipImg.vip1, .vipFlipImg.vip2{ animation:none; }"
         },
         {
           "key": "vip",
-          "line": 2700,
+          "line": 2713,
           "text": ".vipFlipImg.vip2{ opacity:0; }"
         },
         {
           "key": "vip",
-          "line": 5467,
+          "line": 5480,
           "text": ".dmRow{ --vip-badge-w: 34px; --vip-badge-h: 36px; }"
         },
         {
           "key": "vip",
-          "line": 5468,
+          "line": 5481,
           "text": ".dmThreadHeader{ --vip-badge-w: 38px; --vip-badge-h: 40px; }"
         },
         {
           "key": "vip",
-          "line": 5868,
+          "line": 5881,
           "text": ".qcoinX2.vip{"
         },
         {
           "key": "vip",
-          "line": 6379,
+          "line": 6392,
           "text": "/* Золотой VIP-перелив для суммы награды — как у .qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6385,
+          "line": 6398,
           "text": "/* тот же градиент и скорость «shine», что у qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6835,
+          "line": 6848,
           "text": "/* ===== animated search/sort/vip controls ===== */"
         },
         {
           "key": "vip",
-          "line": 6894,
+          "line": 6907,
           "text": ".forumVipControlBtn.is-vip-invite{"
         },
         {
           "key": "vip",
-          "line": 6900,
+          "line": 6913,
           "text": ".forumVipControlBtn.is-vip-invite::before{"
         },
         {
           "key": "vip",
-          "line": 6905,
+          "line": 6918,
           "text": "animation: vipInviteAura 3.2s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 6907,
+          "line": 6920,
           "text": ".forumVipControlBtn.is-vip-invite::after{"
         },
         {
           "key": "vip",
-          "line": 6909,
+          "line": 6922,
           "text": "animation: vipInviteSweep 2.8s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6911,
+          "line": 6924,
           "text": ".forumVipControlBtn.is-vip-active{"
         },
         {
           "key": "vip",
-          "line": 6921,
+          "line": 6934,
           "text": ".forumVipControlBtn.is-vip-active::before{"
         },
         {
           "key": "vip",
-          "line": 6926,
+          "line": 6939,
           "text": "animation: vipActiveAura 2.6s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 6928,
+          "line": 6941,
           "text": ".forumVipControlBtn.is-vip-active::after{"
         },
         {
           "key": "vip",
-          "line": 6930,
+          "line": 6943,
           "text": "animation: vipActiveSweep 2.15s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6946,
+          "line": 6959,
           "text": ".forumVipControlBtn.is-vip-invite .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 6952,
+          "line": 6965,
           "text": "animation: vipInviteTextPulse 2.8s ease-in-out infinite, vipInviteTextShine 4.6s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6954,
+          "line": 6967,
           "text": ".forumVipControlBtn.is-vip-active .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 6961,
+          "line": 6974,
           "text": "animation: vipActiveTextGlow 1.9s ease-in-out infinite, vipInviteTextShine 4.2s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6963,
+          "line": 6976,
           "text": "@keyframes vipInviteAura{"
         },
         {
           "key": "vip",
-          "line": 6967,
+          "line": 6980,
           "text": "@keyframes vipInviteSweep{"
         },
         {
           "key": "vip",
-          "line": 6971,
+          "line": 6984,
           "text": "@keyframes vipActiveAura{"
         },
         {
           "key": "vip",
-          "line": 6975,
+          "line": 6988,
           "text": "@keyframes vipActiveSweep{"
         },
         {
           "key": "vip",
-          "line": 6979,
+          "line": 6992,
           "text": "@keyframes vipInviteTextPulse{"
         },
         {
           "key": "vip",
-          "line": 6983,
+          "line": 6996,
           "text": "@keyframes vipInviteTextShine{"
         },
         {
           "key": "vip",
-          "line": 6987,
+          "line": 7000,
           "text": "@keyframes vipActiveTextGlow{"
         }
       ],
@@ -2680,92 +2680,92 @@
         },
         {
           "key": "vip",
-          "line": 273,
+          "line": 287,
           "text": "--vip-emoji-size: 48px;      /* можно быстро настроить под себя */"
         },
         {
           "key": "vip",
-          "line": 274,
+          "line": 288,
           "text": "--vip-emoji-size-sm: 48px;   /* на мобильных */"
         },
         {
           "key": "vip",
-          "line": 276,
+          "line": 290,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 277,
+          "line": 291,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 278,
+          "line": 292,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 283,
+          "line": 297,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 288,
+          "line": 302,
           "text": ".vipComposerPreview{ position:relative; display:inline-block; margin-top:6px }"
         },
         {
           "key": "vip",
-          "line": 289,
+          "line": 303,
           "text": ".vipComposerPreview .vipRemove{"
         },
         {
           "key": "vip",
-          "line": 295,
+          "line": 309,
           "text": ".moziEmojiBig{ width: var(--mozi-emoji-size, var(--vip-emoji-size)); height: var(--mozi-emoji-size, var(--vip-emoji-size)); display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 610,
+          "line": 624,
           "text": ".emojiBtn, .vipEmojiIcon, .lockBadge, .emojiPostBig{"
         },
         {
           "key": "vip",
-          "line": 615,
+          "line": 629,
           "text": ".vipEmojiIcon { display:inline-block; width:100%; height:100%; }"
         },
         {
           "key": "vip",
-          "line": 616,
+          "line": 630,
           "text": ".vipEmojiIcon img, .vipEmojiIcon { object-fit:cover; border-radius:8px }"
         },
         {
           "key": "vip",
-          "line": 620,
+          "line": 634,
           "text": "--vip-emoji-size: 48px;      /* базовый размер */"
         },
         {
           "key": "vip",
-          "line": 621,
+          "line": 635,
           "text": "--vip-emoji-size-sm: 40px;   /* на узких экранах */"
         },
         {
           "key": "vip",
-          "line": 675,
+          "line": 689,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 676,
+          "line": 690,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 677,
+          "line": 691,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 683,
+          "line": 697,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         }
       ],

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-22T01:45:27.724Z",
+  "generatedAt": "2026-04-22T06:40:51.034Z",
   "issues": [
     "legacy-iframe-prewarm-still-present",
     "leaf-has-no-coordinator-ownership-branch"
@@ -32,9 +32,9 @@
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
-        "restoreGuard": 10,
+        "restoreGuard": 9,
         "sameSrcGuard": 4,
-        "sharedMute": 6
+        "sharedMute": 5
       }
     },
     {
@@ -72,17 +72,17 @@
     {
       "file": "app/forum/ForumAds.js",
       "counts": {
-        "ownerId": 3,
+        "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
         "coordinatorOwnsLifecycle": 0,
-        "siteMediaPlay": 0,
+        "siteMediaPlay": 1,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
         "restoreGuard": 0,
         "sameSrcGuard": 0,
-        "sharedMute": 5
+        "sharedMute": 6
       }
     },
     {

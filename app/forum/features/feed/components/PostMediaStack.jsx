@@ -282,6 +282,7 @@ export default function PostMediaStack({
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
                 src={src}
+                poster={videoLines.length === 1 ? posterUrl : undefined}
                 loading="lazy"
                 playsInline
                 controls={false}
