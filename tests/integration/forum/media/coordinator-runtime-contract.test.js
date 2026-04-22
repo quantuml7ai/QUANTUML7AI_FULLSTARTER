@@ -8,13 +8,16 @@ const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8')
 describe('coordinator runtime contract', () => {
   test('VideoMedia does not run local post-video src detach recovery', () => {
     const src = read('app/forum/features/media/components/VideoMedia.jsx')
-    expect(src).toContain("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)")
+    expect(src).toContain("const isCoordinatorManaged =")
+    expect(src).toContain("String(dataForumMediaNode || '') === '1'")
+    expect(src).toContain('if (isCoordinatorManaged) {')
   })
 
   test('coordinator defers hard unload during settling', () => {
     const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     expect(src).toContain('hard_unload_deferred_settling')
     expect(src).toContain('markSettling')
+    expect(src).toContain('const { owner, leaf, kind } = resolveMediaRefs(el);')
   })
 
   test('coordinator respects splash gate and keeps qcast on the shared mute source', () => {
@@ -29,9 +32,10 @@ describe('coordinator runtime contract', () => {
 
   test('video feed windowing keeps a reverse-scroll hold for coarse and iOS clients', () => {
     const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
-    expect(src).toContain('flipHoldUntil')
-    expect(src).toContain('directionFlip')
-    expect(src).toContain('overscanBase')
+    expect(src).toContain('VF_WINDOW_STICKY_MS')
+    expect(src).toContain('velocityBoost')
+    expect(src).toContain('direction > 0')
+    expect(src).toContain('direction < 0')
   })
 
   test('media lifecycle runtime exports touch marker for resident policy', () => {

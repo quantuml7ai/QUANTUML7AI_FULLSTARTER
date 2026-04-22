@@ -33,6 +33,11 @@ describe('forum media contracts', () => {
   test('forum ads autoplay fallback does not persist global mute', () => {
     const src = read('app/forum/ForumAds.js')
     expect(src).not.toMatch(/forum-ads-autoplay-fallback[\s\S]*writeMutedPrefToStorage\(true/)
+    expect(src).not.toContain('shouldPlay')
+    expect(src).not.toContain('attachedVideoSrc')
+    expect(src).not.toContain('emitAdPlayToCoordinator')
+    expect(src).toContain('data-forum-media-owner')
+    expect(src).toContain('data-forum-media-node')
   })
 
   test('media coordinator removes legacy query ownership toggles and qcast local mute storage', () => {
@@ -58,9 +63,20 @@ describe('forum media contracts', () => {
 
   test('post media embeds expose stable owner metadata for coordinator policy', () => {
     const src = read('app/forum/features/feed/components/PostMediaStack.jsx')
+    expect(src).toContain('data-forum-media-owner="1"')
+    expect(src).toContain('data-forum-media-node="1"')
     expect(src).toContain('data-owner-id=')
     expect(src).toContain('data-forum-embed-kind=')
     expect(src).toContain('data-lifecycle-state=')
     expect(src).toContain('data-stable-shell="1"')
+  })
+
+  test('media coordinator uses owner-shell selector and centralized html load path', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).toContain(`const ownerSelector = '[data-forum-media-owner="1"]'`)
+    expect(src).toContain(`const mediaNodeSelector = '[data-forum-media-node="1"]'`)
+    expect(src).toContain('const resolveMediaRefs = (input) => {')
+    expect(src).toContain("const requestHtmlMediaLoad = (input, reason = 'generic_load', opts = {}) => {")
+    expect(src).not.toContain('.forum-ad-media-slot video, .forum-ad-media-slot iframe')
   })
 })

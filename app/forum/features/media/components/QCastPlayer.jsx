@@ -20,6 +20,11 @@ export default function QCastPlayer({
   writeMutedPref,
   mutedEventName = 'forum:media-mute',
   rearmPooledFxNode,
+  'data-owner-id': dataOwnerId,
+  'data-forum-embed-kind': dataForumEmbedKind,
+  'data-lifecycle-state': dataLifecycleState,
+  'data-stable-shell': dataStableShell,
+  ...rest
 }) {
   const desiredMuted = React.useCallback((pref) => (
     pref == null ? true : !!pref
@@ -929,13 +934,38 @@ React.useEffect(() => {
 }, []);
 
   return (
-    <div className="qcastPlayer" ref={hostRef} onPointerDown={onPlayerPointerDown}
-      data-preview={preview ? '1' : '0'} data-forum-media="qcast" data-qcast="1" data-viz={qcastFxProfile.viz ? '1' : '0'} dir={dir}>
+    <div
+      {...rest}
+      className="qcastPlayer"
+      ref={hostRef}
+      onPointerDown={onPlayerPointerDown}
+      data-preview={preview ? '1' : '0'}
+      data-forum-media="qcast"
+      data-qcast="1"
+      data-viz={qcastFxProfile.viz ? '1' : '0'}
+      data-owner-id={dataOwnerId}
+      data-forum-embed-kind={dataForumEmbedKind}
+      data-lifecycle-state={dataLifecycleState}
+      data-stable-shell={dataStableShell}
+      dir={dir}
+    >
       <Image className="qcastCover" src="/audio/Q-Cast.png" alt="Q-Cast" width={720} height={1280} unoptimized />
       {qcastFxProfile.viz ? ( 
         <canvas ref={canvasRef} className="qcastViz" data-on={isPlaying ? '1' : '0'} aria-hidden="true" />
       ) : null}
-     <audio ref={audioRef} src={src} preload="metadata" playsInline crossOrigin="anonymous" referrerPolicy="no-referrer" data-qcast-audio="1" className="qcastAudio" />
+     <audio
+      ref={audioRef}
+      src={src}
+      preload="metadata"
+      playsInline
+      crossOrigin="anonymous"
+      referrerPolicy="no-referrer"
+      data-qcast-audio="1"
+      data-forum-media-node="1"
+      data-forum-media="qcast"
+      data-owner-id={dataOwnerId}
+      className="qcastAudio"
+     />
 
       {FX_POOL > 0 ? (
         <div className="qcastFxLayer" data-scope={qcastFxProfile.fullscreen ? 'viewport' : 'card'} aria-hidden="true">

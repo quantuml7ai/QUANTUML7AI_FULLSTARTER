@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:30:57.758Z",
+  "generatedAt": "2026-04-22T01:44:44.601Z",
   "summary": {
     "scannedFiles": 378,
-    "internalEdges": 500,
+    "internalEdges": 498,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 117,
+    "crossDomainEdgeCount": 116,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -219,12 +219,6 @@
       "from": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/hooks/useEvent.js",
-      "toDomain": "forum-shared"
-    },
-    {
-      "from": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
-      "fromDomain": "forum-ui",
-      "to": "app/forum/shared/config/runtime.js",
       "toDomain": "forum-shared"
     },
     {
@@ -2025,11 +2019,8 @@
     {
       "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
       "domain": "forum-ui",
-      "imports": [
-        "app/forum/shared/config/runtime.js",
-        "app/forum/features/feed/utils/interleaveRecommendationRails.js"
-      ],
-      "importCount": 2,
+      "imports": [],
+      "importCount": 0,
       "external": [
         "react"
       ],
