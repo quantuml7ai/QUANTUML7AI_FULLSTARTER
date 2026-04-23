@@ -234,22 +234,10 @@ export default function DmThreadMessageRow({
         )}
         {!!videoUrls.length && (
           <div className="dmMediaGrid">
-            {videoUrls.map((src, i) => {
-              const ownerId = `dm-video:${m?.id || 'm'}:${i}`
-              return (
-              <div
-                key={`${m?.id || 'm'}:vid:${i}`}
-                className="videoCard mediaBox dmMediaBox"
-                data-kind="video"
-                data-forum-media-owner="1"
-                data-forum-media="video"
-                data-owner-id={ownerId}
-                data-stable-shell="1"
-              >
+            {videoUrls.map((src, i) => (
+              <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
                 <VideoMedia
                   data-forum-media="video"
-                  data-forum-media-node="1"
-                  data-owner-id={ownerId}
                   src={src}
                   playsInline
                   preload="metadata"
@@ -260,7 +248,7 @@ export default function DmThreadMessageRow({
                   style={{ objectFit: 'contain', background: '#000' }}
                 />
               </div>
-            )})}
+            ))}
           </div>
         )}
         {!!audioUrls.length && (
