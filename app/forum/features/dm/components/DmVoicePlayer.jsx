@@ -2,7 +2,22 @@
 
 import React from 'react'
 
-export default function DmVoicePlayer({ src }) {
+function pauseOtherDmThreadMedia(currentMedia) {
+  if (!(currentMedia instanceof HTMLMediaElement)) return
+  try {
+    const scope = currentMedia.closest?.('.dmThread')
+    if (!(scope instanceof Element)) return
+    scope.querySelectorAll?.('[data-dm-media="1"]').forEach((node) => {
+      if (!(node instanceof HTMLMediaElement)) return
+      if (node === currentMedia) return
+      try {
+        if (!node.paused) node.pause()
+      } catch {}
+    })
+  } catch {}
+}
+
+export default function DmVoicePlayer({ src, dmScope = false }) {
   const audioRef = React.useRef(null)
   const waveRef = React.useRef(null)
 
@@ -64,6 +79,10 @@ export default function DmVoicePlayer({ src }) {
     if (durationPollRef.current) clearInterval(durationPollRef.current)
     durationPollRef.current = 0
   }, [])
+  const syncDmMutex = React.useCallback((audio) => {
+    if (!dmScope) return
+    pauseOtherDmThreadMedia(audio || audioRef.current)
+  }, [dmScope])
 
   const readDuration = React.useCallback((audio) => {
     const a = audio || audioRef.current
@@ -132,6 +151,7 @@ export default function DmVoicePlayer({ src }) {
 
     const onLoaded = () => syncAudioMetrics(a)
     const onPlay = () => {
+      syncDmMutex(a)
       setPlaying(true)
       syncAudioMetrics(a)
       startRaf()
@@ -181,7 +201,7 @@ export default function DmVoicePlayer({ src }) {
       stopRaf()
       stopDurationPoll()
     }
-  }, [src, startRaf, stopDurationPoll, stopRaf, syncAudioMetrics])
+  }, [src, startRaf, stopDurationPoll, stopRaf, syncAudioMetrics, syncDmMutex])
 
   React.useEffect(() => {
     const a = audioRef.current
@@ -341,7 +361,13 @@ export default function DmVoicePlayer({ src }) {
         </div>
       </div>
 
-      <audio ref={audioRef} src={src} preload="auto" />
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="auto"
+        data-dm-media={dmScope ? '1' : undefined}
+        data-dm-media-kind={dmScope ? 'audio' : undefined}
+      />
     </div>
   )
 }

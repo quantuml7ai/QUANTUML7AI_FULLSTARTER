@@ -19,6 +19,21 @@ import {
   extractDmStickersFromText,
 } from '../utils/mediaParsing'
 
+function pauseOtherDmThreadMedia(currentMedia) {
+  if (!(currentMedia instanceof HTMLMediaElement)) return
+  try {
+    const scope = currentMedia.closest?.('.dmThread')
+    if (!(scope instanceof Element)) return
+    scope.querySelectorAll?.('[data-dm-media="1"]').forEach((node) => {
+      if (!(node instanceof HTMLMediaElement)) return
+      if (node === currentMedia) return
+      try {
+        if (!node.paused) node.pause()
+      } catch {}
+    })
+  } catch {}
+}
+
 export default function DmThreadMessageRow({
   m,
   dmDeletedMsgMap,
@@ -113,6 +128,9 @@ export default function DmThreadMessageRow({
   const dmTranslateLabel = dmTrState?.loading
     ? t?.('crypto_news_translate_loading')
     : (dmTrState?.isTranslated ? t?.('crypto_news_show_original') : t?.('crypto_news_translate'))
+  const onDmVideoPlay = (e) => {
+    pauseOtherDmThreadMedia(e?.currentTarget || e?.target)
+  }
 
   const onDmTranslateToggle = async (e) => {
     e?.preventDefault?.()
@@ -237,15 +255,17 @@ export default function DmThreadMessageRow({
             {videoUrls.map((src, i) => (
               <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
                 <VideoMedia
-                  data-forum-media="video"
                   src={src}
                   playsInline
                   preload="metadata"
                   controls
                   controlsList="nodownload noplaybackrate noremoteplayback"
                   disablePictureInPicture
+                  data-dm-media="1"
+                  data-dm-media-kind="video"
                   className="mediaBoxItem"
                   style={{ objectFit: 'contain', background: '#000' }}
+                  onPlay={onDmVideoPlay}
                 />
               </div>
             ))}
@@ -255,7 +275,7 @@ export default function DmThreadMessageRow({
           <div className="dmMediaGrid">
             {audioUrls.map((src, i) => (
               <div key={`${m?.id || 'm'}:aud:${i}`} className="dmMediaBox" data-kind="audio">
-                <DmVoicePlayer src={src} />
+                <DmVoicePlayer src={src} dmScope />
               </div>
             ))}
           </div>

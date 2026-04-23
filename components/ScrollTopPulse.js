@@ -1,7 +1,6 @@
-// components/ScrollTopPulse.js
-'use client'
-
-import { useCallback, useEffect, useRef, useState } from 'react'
+'use client' 
+ 
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 
 const APPEAR_DELAY_MS = 800
 const AUTO_HIDE_MS    = 2000
@@ -14,7 +13,7 @@ const DIR_SWITCH_PX   = 500
 // === НАСТРОЙКА СКОРОСТИ СКРОЛЛА (ПОСТОЯННАЯ СКОРОСТЬ!) ===
 const SCROLL_PX_PER_SEC = 200
 
-export default function ScrollTopPulse() {
+function ScrollTopPulse() {
   const [visible, setVisible] = useState(false)
   const [mode, setMode] = useState('up') // 'up' | 'down'
 
@@ -30,12 +29,12 @@ export default function ScrollTopPulse() {
     }, 360)
   }, [])
 
-  const visibleRef   = useRef(false)
-  const modeRef      = useRef('up')
-  const lastYRef     = useRef(0)
-  const dirAccumRef  = useRef(0)
-  const appearTimerRef = useRef(null)
-  const hideTimerRef   = useRef(null)
+  const visibleRef      = useRef(false)
+  const modeRef         = useRef('up')
+  const lastYRef        = useRef(0)
+  const dirAccumRef     = useRef(0)
+  const appearTimerRef  = useRef(null)
+  const hideTimerRef    = useRef(null)
 
   // === управление анимацией скролла (отмена) ===
   const rafRef = useRef(0)
@@ -44,6 +43,21 @@ export default function ScrollTopPulse() {
 
   // хранит текущую цель (для телепорта по повторному клику)
   const teleportTargetGetterRef = useRef(null)
+
+  // направление текущего автоскролла:
+  // нужно, чтобы во время долгого программного скролла
+  // кнопка могла снова появиться в правильном режиме
+  const autoScrollModeRef = useRef(null) // 'up' | 'down' | null
+
+  // отдельный таймер повторного появления кнопки во время автоскролла
+  const autoReappearTimerRef = useRef(null)
+
+  const clearAutoReappearTimer = useCallback(() => {
+    if (autoReappearTimerRef.current) {
+      clearTimeout(autoReappearTimerRef.current)
+      autoReappearTimerRef.current = null
+    }
+  }, [])
 
   const detachCancelListeners = useCallback(() => {
     if (!cancelListenersAttachedRef.current) return
@@ -58,8 +72,7 @@ export default function ScrollTopPulse() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ВАЖНО: cancelScroll должен быть стабильным по ссылке, иначе removeEventListener не снимет старые хендлеры
-  const cancelScroll = useCallback((e) => {
-    // 🔥 КЛЮЧЕВАЯ ФИШКА:
+  const cancelScroll = useCallback((e) => { 
     // если пользователь нажал на саму кнопку — НЕ отменяем здесь,
     // чтобы onClick смог сделать телепорт.
     if (e?.target?.closest?.('.ql7-scroll-top')) return
@@ -72,9 +85,11 @@ export default function ScrollTopPulse() {
       rafRef.current = 0
     }
 
+    clearAutoReappearTimer()
+    autoScrollModeRef.current = null
     teleportTargetGetterRef.current = null
     detachCancelListeners()
-  }, [detachCancelListeners])
+  }, [clearAutoReappearTimer, detachCancelListeners])
 
   const attachCancelListeners = useCallback(() => {
     if (cancelListenersAttachedRef.current) return
@@ -88,6 +103,42 @@ export default function ScrollTopPulse() {
     window.addEventListener('mousedown', cancelScroll, { passive: true, capture: true })
     window.addEventListener('keydown', cancelScroll, { capture: true })
   }, [cancelScroll])
+
+  const startAutoReappearTimer = useCallback(() => {
+    clearAutoReappearTimer()
+
+    autoReappearTimerRef.current = setTimeout(() => {
+      autoReappearTimerRef.current = null
+
+      // если автоскролл уже завершился — ничего не делаем
+      if (!scrollingRef.current) return
+
+      const y = window.scrollY || 0
+      const doc = document.documentElement || document.body
+      const docHeight = doc.scrollHeight || 0
+      const viewportHeight = window.innerHeight || 0
+      const maxY = Math.max(0, docHeight - viewportHeight)
+      const distanceToBottom = maxY - y
+
+      // у самого верха / низа кнопку не показываем
+      if (y <= TOP_HIDE_Y || distanceToBottom <= TOP_HIDE_Y) return
+
+      const nextMode = autoScrollModeRef.current
+      if (nextMode && modeRef.current !== nextMode) {
+        modeRef.current = nextMode
+        setMode(nextMode)
+      }
+
+      // во время автоскролла повторно показываем кнопку,
+      // чтобы второй клик сделал телепорт.
+      // hide-таймер тут сознательно НЕ ставим: иначе снова начнётся
+      // лишняя таймерная раскачка во время программного движения.
+      if (!visibleRef.current) {
+        visibleRef.current = true
+        setVisible(true)
+      }
+    }, APPEAR_DELAY_MS)
+  }, [clearAutoReappearTimer])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -119,7 +170,9 @@ export default function ScrollTopPulse() {
     const hideNow = () => {
       clearAppear()
       clearHide()
+      clearAutoReappearTimer()
       dirAccumRef.current = 0
+
       if (visibleRef.current) {
         visibleRef.current = false
         setVisible(false)
@@ -135,10 +188,7 @@ export default function ScrollTopPulse() {
 
     const onScroll = () => {
       const y = window.scrollY || 0
-      const lastY = lastYRef.current
-      const deltaY = y - lastY
-      lastYRef.current = y
-
+ 
       const doc = document.documentElement || document.body
       const docHeight = doc.scrollHeight || 0
       const viewportHeight = window.innerHeight || 0
@@ -148,8 +198,25 @@ export default function ScrollTopPulse() {
       // если мы почти в самом верху или почти внизу — кнопку прячем
       if (y <= TOP_HIDE_Y || distanceToBottom <= TOP_HIDE_Y) {
         hideNow()
+        lastYRef.current = y
         return
       }
+
+      // Во время программного автоскролла НЕ запускаем снова логику
+      // определения направления, смены mode, spin и scheduling show/hide.
+      // Иначе компонент начинает сам себя раскачивать на каждом scroll-событии.
+      //
+      // Но baseline позиции обновляем обязательно, чтобы после завершения
+      // не было ложного гигантского deltaY при первом ручном скролле.
+      if (scrollingRef.current) {
+        lastYRef.current = y
+        dirAccumRef.current = 0
+        return
+      }
+
+      const lastY = lastYRef.current
+      const deltaY = y - lastY
+      lastYRef.current = y
 
       const absDelta = Math.abs(deltaY)
       if (absDelta >= 0.5) {
@@ -230,6 +297,7 @@ export default function ScrollTopPulse() {
       window.removeEventListener('scroll', onScroll)
       clearAppear()
       clearHide()
+      clearAutoReappearTimer()
 
       if (spinTimerRef.current) {
         clearTimeout(spinTimerRef.current)
@@ -239,7 +307,7 @@ export default function ScrollTopPulse() {
       // на размонтировании — стопаем анимацию и снимаем слушатели
       cancelScroll()
     }
-  }, [cancelScroll, triggerSpin])
+  }, [cancelScroll, clearAutoReappearTimer, triggerSpin])
 
   // === ПОСТОЯННАЯ СКОРОСТЬ + ДОКРУТКА ДО РЕАЛЬНОГО КОНЦА ===
   // targetYOrGetter: число или функция, возвращающая targetY
@@ -259,7 +327,9 @@ export default function ScrollTopPulse() {
 
     const speed = Math.max(1, SCROLL_PX_PER_SEC) // px/сек
 
+    clearAutoReappearTimer()
     scrollingRef.current = true
+    startAutoReappearTimer()
     attachCancelListeners()
 
     // === ВАЖНО ДЛЯ ПЛАВНОСТИ НА iOS/Safari/разных браузерах ===
@@ -299,6 +369,8 @@ export default function ScrollTopPulse() {
         window.scrollTo(0, finalY)
 
         scrollingRef.current = false
+        clearAutoReappearTimer()
+        autoScrollModeRef.current = null
         detachCancelListeners()
         teleportTargetGetterRef.current = null
         rafRef.current = 0
@@ -341,6 +413,9 @@ export default function ScrollTopPulse() {
       cancelAnimationFrame(rafRef.current)
       rafRef.current = 0
     }
+
+    clearAutoReappearTimer()
+    autoScrollModeRef.current = null
     detachCancelListeners()
 
     // телепорт к актуальной цели
@@ -366,9 +441,12 @@ export default function ScrollTopPulse() {
       return
     }
 
+    autoScrollModeRef.current = 'up'
+
     try {
       smoothScrollTo(0)
     } catch {
+      autoScrollModeRef.current = null
       window.scrollTo(0, 0)
     }
 
@@ -401,6 +479,8 @@ export default function ScrollTopPulse() {
       return
     }
 
+    autoScrollModeRef.current = 'down'
+
     try {
       // "живой" низ: докрутит даже если страница растёт по пути
       smoothScrollTo(() => {
@@ -411,6 +491,7 @@ export default function ScrollTopPulse() {
         )
       })
     } catch {
+      autoScrollModeRef.current = null
       const doc = document.documentElement || document.body
       const maxY = Math.max(
         0,
@@ -463,11 +544,9 @@ export default function ScrollTopPulse() {
         aria-label={mode === 'down' ? 'Scroll to bottom' : 'Scroll to top'}
         onClick={handleClick}
         onKeyDown={onKeyDown}
-      >
-        {/* расширитель зоны клика (попадание рядом) */}
+      > 
         <span className="hitpad" aria-hidden="true" />
-
-        {/* оболочка/рамка */}
+ 
         <span className="shell" aria-hidden="true">
           <svg className="ring" viewBox="0 0 100 100" width="100%" height="100%">
             <defs>
@@ -492,8 +571,7 @@ export default function ScrollTopPulse() {
                 </feMerge>
               </filter>
             </defs>
-
-            {/* премиальный «волнистый» контур (тонкий) */}
+ 
             <path
               d="M50 6
                  C58 6, 64 9, 70 12
@@ -515,8 +593,7 @@ export default function ScrollTopPulse() {
               filter="url(#softGlow)"
               opacity="0.9"
             />
-
-            {/* лёгкие статичные частицы */}
+ 
             <circle cx="78" cy="20" r="1.2" fill="url(#ql7Gold)" opacity="0.75" />
             <circle cx="90" cy="52" r="1.1" fill="url(#ql7Gold)" opacity="0.55" />
             <circle cx="18" cy="26" r="1.1" fill="url(#ql7Gold)" opacity="0.6" />
@@ -524,8 +601,7 @@ export default function ScrollTopPulse() {
             <circle cx="32" cy="90" r="1.1" fill="url(#ql7Gold)" opacity="0.55" />
           </svg>
         </span>
-
-        {/* стрелка + подпись */}
+ 
         <span className="content" aria-hidden="true">
           <svg className="arrow" viewBox="0 0 100 100">
             <defs>
@@ -544,8 +620,7 @@ export default function ScrollTopPulse() {
                 </feMerge>
               </filter>
             </defs>
-
-            {/* корпус стрелки */}
+ 
             <path
               d="M50 12
                  C49 12, 48 13, 47 14
@@ -567,8 +642,7 @@ export default function ScrollTopPulse() {
               filter="url(#arrowGlow)"
               opacity="0.98"
             />
-
-            {/* внутренний “энерго-луч” */}
+ 
             <path
               d="M50 22
                  L35 37
@@ -582,8 +656,7 @@ export default function ScrollTopPulse() {
               fill="#ffffff"
               opacity="0.22"
             />
-
-            {/* тонкие ребра */}
+ 
             <path
               d="M43 32 L43 82"
               stroke="#ffffff"
@@ -599,8 +672,7 @@ export default function ScrollTopPulse() {
               strokeLinecap="round"
             />
           </svg>
-
-          {/* подпись ниже стрелки, чтобы не перекрывалась */}
+ 
           <span className="auto">auto</span>
         </span>
       </div>
@@ -613,8 +685,7 @@ export default function ScrollTopPulse() {
 
           right: var(--stp-right, 18px) !important;
           bottom: var(--stp-bottom, 86px) !important;
-
-          /* кнопка: “в полтора раза меньше”, чем был большой вариант */
+ 
           width: var(--stp-size, 56px) !important;
           height: var(--stp-size, 56px) !important;
 
@@ -638,16 +709,14 @@ export default function ScrollTopPulse() {
           transform: translateZ(0) scale(1);
           animation: ql7-fade-in 180ms ease-out;
         }
-
-        /* расширение клика — можно попасть рядом */
+ 
         .ql7-scroll-top .hitpad {
           position: absolute;
           inset: -10px;
           border-radius: 999px;
           background: transparent;
         }
-
-        /* стекло внутри волны */
+ 
         .ql7-scroll-top::before {
           content: '';
           position: absolute;
@@ -673,16 +742,14 @@ export default function ScrollTopPulse() {
           height: 100%;
           display: block;
         }
-
-        /* одноразовый “прокрут” оболочки при смене режима */
+ 
         .ql7-scroll-top.spin-cw .shell {
           animation: ql7-spin-cw 300ms cubic-bezier(.2, .9, .2, 1);
         }
         .ql7-scroll-top.spin-ccw .shell {
           animation: ql7-spin-ccw 300ms cubic-bezier(.2, .9, .2, 1);
         }
-
-        /* контент (стрелка + авто) */
+ 
         .ql7-scroll-top .content {
           position: absolute;
           inset: 0;
@@ -691,23 +758,18 @@ export default function ScrollTopPulse() {
           align-items: center;
           justify-items: center;
           pointer-events: none;
-
-          /* даём место снизу под “авто” */
+ 
           padding: 8px 8px 6px;
           gap: 2px;
           transform: translateZ(0);
         }
-
-        /* стрелка занимает максимум и реально переворачивается */
+ 
         .ql7-scroll-top .arrow {
           width: 100%;
           height: 100%;
           display: block;
           transform-origin: 50% 50%;
-
-          /* меньше по высоте, чтобы не лезла на подпись */
-          max-height: 40px;
-
+          max-height: 40px; 
           transition: transform 260ms cubic-bezier(.2,.9,.2,1);
         }
 
@@ -728,8 +790,7 @@ export default function ScrollTopPulse() {
           transform: translateY(-1px);
           user-select: none;
         }
-
-        /* лёгкий hover/active — без тяжёлых эффектов */
+ 
         .ql7-scroll-top:hover {
           transform: translateZ(0) scale(1.03);
         }
@@ -777,3 +838,5 @@ export default function ScrollTopPulse() {
     </>
   )
 }
+
+export default memo(ScrollTopPulse)
