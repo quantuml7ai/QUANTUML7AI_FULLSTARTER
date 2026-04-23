@@ -317,7 +317,7 @@ export default function PostMediaStack({
                 style={{ margin: 0 }}
               >
                 <iframe
-                  data-src={`https://www.youtube.com/embed/${videoId}?${ytEmbedParams}`}
+                  data-src={`https://www.youtube-nocookie.com/embed/${videoId}?${ytEmbedParams}`}
                   title="YouTube video"
                   id={`yt_${postId || 'post'}_${i}`}
                   data-yt-id={videoId}
