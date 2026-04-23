@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 1900
+const VF_OVERSCAN_PX = 950
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -72,14 +72,14 @@ export default function useVideoFeedWindowing({
  
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 13
+      if (!isBrowserFn()) return 7
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 12
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 13
-      return 16
+      if (coarse) return 6
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 7
+      return 8
     } catch {
-      return 13
+      return 7
     }
   }, [isBrowserFn])
 
@@ -107,29 +107,29 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
 
-const vfRecommendationsEvery = useMemo(() => {
-  const runtimeCfg = readForumRuntimeConfig()
-  return Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
-}, [])
+  const vfRecommendationsEvery = useMemo(() => {
+    const runtimeCfg = readForumRuntimeConfig()
+    return Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
+  }, [])
 
-const vfSlots = useMemo(() => {
-  const slotsWithAds = debugAdsSlots(
-    'video',
-    interleaveAdsFn(visibleVideoFeed || [], adEvery, {
-      isSkippable: (p) => !p || !p.id,
-      getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+  const vfSlots = useMemo(() => {
+    const slotsWithAds = debugAdsSlots(
+      'video',
+      interleaveAdsFn(visibleVideoFeed || [], adEvery, {
+        isSkippable: (p) => !p || !p.id,
+        getId: (p) => p?.id || `${p?.topicId || 'vf'}:${p?.ts || 0}`,
+      })
+    )
+
+    if (vfRecommendationsEvery <= 0) return slotsWithAds
+
+    return interleaveRecommendationRails(slotsWithAds, vfRecommendationsEvery, {
+      isSkippable: (slot) => {
+        if (String(slot?.type || '') !== 'item') return true
+        return !slot?.item?.id
+      },
     })
-  )
-
-  if (vfRecommendationsEvery <= 0) return slotsWithAds
-
-  return interleaveRecommendationRails(slotsWithAds, vfRecommendationsEvery, {
-    isSkippable: (slot) => {
-      if (String(slot?.type || '') !== 'item') return true
-      return !slot?.item?.id
-    },
-  })
-}, [visibleVideoFeed, adEvery, debugAdsSlots, interleaveAdsFn, vfRecommendationsEvery])
+  }, [visibleVideoFeed, adEvery, debugAdsSlots, interleaveAdsFn, vfRecommendationsEvery])
 
   const vfGetScrollEl = useCallback(() => {
     try {
@@ -189,24 +189,24 @@ const vfSlots = useMemo(() => {
     } catch {}
   }, [vfGetScrollEl, vfHasInnerScrollable])
 
-const vfGetFixedRecommendationH = useCallback(() => {
-  try {
-    if (!isBrowserFn()) return VF_RECOMMENDATION_CARD_H_TABLET
-    const w = window?.innerWidth || 0
-    if (w >= 1024) return VF_RECOMMENDATION_CARD_H_DESKTOP
-    if (w >= 640) return VF_RECOMMENDATION_CARD_H_TABLET
-    return VF_RECOMMENDATION_CARD_H_MOBILE
-  } catch {
-    return VF_RECOMMENDATION_CARD_H_TABLET
-  }
-}, [isBrowserFn])
+  const vfGetFixedRecommendationH = useCallback(() => {
+    try {
+      if (!isBrowserFn()) return VF_RECOMMENDATION_CARD_H_TABLET
+      const w = window?.innerWidth || 0
+      if (w >= 1024) return VF_RECOMMENDATION_CARD_H_DESKTOP
+      if (w >= 640) return VF_RECOMMENDATION_CARD_H_TABLET
+      return VF_RECOMMENDATION_CARD_H_MOBILE
+    } catch {
+      return VF_RECOMMENDATION_CARD_H_TABLET
+    }
+  }, [isBrowserFn])
 
-const vfEstimateH = useCallback((i) => {
-  const slot = vfSlots?.[i]
-  if (slot?.type === 'recommendation_rail') return vfGetFixedRecommendationH()
-  if (slot && slot.type !== 'item') return vfGetFixedAdH()
-  return vfGetFixedItemH() + VF_ITEM_CHROME_EST
-}, [vfSlots, vfGetFixedRecommendationH, vfGetFixedAdH, vfGetFixedItemH])
+  const vfEstimateH = useCallback((i) => {
+    const slot = vfSlots?.[i]
+    if (slot?.type === 'recommendation_rail') return vfGetFixedRecommendationH()
+    if (slot && slot.type !== 'item') return vfGetFixedAdH()
+    return vfGetFixedItemH() + VF_ITEM_CHROME_EST
+  }, [vfSlots, vfGetFixedRecommendationH, vfGetFixedAdH, vfGetFixedItemH])
 
   const vfGetH = useCallback((i) => {
     const h = vfHeightsRef.current.get(i)
@@ -241,7 +241,7 @@ const vfEstimateH = useCallback((i) => {
     const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-    const velocityBoost = Math.min(1100, Math.round(velocity * 520))
+    const velocityBoost = Math.min(550, Math.round(velocity * 260))
     const overscanPx = VF_OVERSCAN_PX + velocityBoost
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
@@ -260,7 +260,7 @@ const vfEstimateH = useCallback((i) => {
       end++
     }
 
-    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 2 : 0) + (velocity > 1.2 ? 2 : 0)
+    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 1 : 0) + (velocity > 1.2 ? 1 : 0)
     if ((end - start) > vfMaxRender) {
       const mid = Math.floor((start + end) / 2)
       const half = Math.floor(vfMaxRender / 2)
@@ -280,7 +280,7 @@ const vfEstimateH = useCallback((i) => {
       if (shrinkOnly) {
         const now = Date.now()
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
-        const stickyItems = velocity > 1.2 ? 4 : velocity > 0.55 ? 3 : 2
+        const stickyItems = velocity > 1.2 ? 2 : velocity > 0.55 ? 2 : 1
         const stickyMaxRender = vfMaxRender + stickyItems
         const leadingTrim = Math.max(0, nextStart - prev.start)
         const trailingTrim = Math.max(0, prev.end - nextEnd)
@@ -589,18 +589,18 @@ const vfEstimateH = useCallback((i) => {
     }
   }, [videoFeedOpen, vfScheduleRecalc, vfGetBreakpoint, isBrowserFn])
 
-useEffect(() => {
-  const ros = vfRosRef.current
+  useEffect(() => {
+    const ros = vfRosRef.current
 
-  return () => {
-    try {
-      ros.forEach((ro) => {
-        try { ro.disconnect() } catch {}
-      })
-      ros.clear()
-    } catch {}
-  }
-}, [])
+    return () => {
+      try {
+        ros.forEach((ro) => {
+          try { ro.disconnect() } catch {}
+        })
+        ros.clear()
+      } catch {}
+    }
+  }, [])
 
   return {
     vfSlots,
