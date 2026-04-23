@@ -70,10 +70,22 @@ export default function useForumDiagnostics() {
 
       let mediaSnapshot = diagSnapshotRef.current?.media || null
       if (needsFreshMedia) {
-        const videos = Array.from(document.querySelectorAll('video'))
-        const audios = Array.from(document.querySelectorAll('audio'))
-        const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
+        const ownerSelector = '[data-forum-media-owner="1"]'
+        const mediaNodeSelector = '[data-forum-media-node="1"]'
+        const owners = Array.from(document.querySelectorAll(ownerSelector))
+        const leaves = Array.from(document.querySelectorAll(mediaNodeSelector))
+        const videos = leaves.filter((el) => el instanceof HTMLVideoElement)
+        const audios = leaves.filter((el) => el instanceof HTMLAudioElement)
+        const iframes = leaves.filter((el) => el instanceof HTMLIFrameElement)
         const qcastAudios = Array.from(document.querySelectorAll('audio[data-qcast-audio="1"]'))
+        const htmlLeavesWithSrc = leaves.filter((el) => {
+          try {
+            if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return false
+            return !!String(el.getAttribute('src') || el.currentSrc || '').trim()
+          } catch {
+            return false
+          }
+        }).length
         let playing = 0
         for (const v of videos) {
           try {
@@ -128,9 +140,41 @@ export default function useForumDiagnostics() {
             return false
           }
         }).length
+        const activeOwners = owners.filter((owner) => String(owner?.dataset?.__active || '') === '1').length
+        const prewarmOwners = owners.filter((owner) => String(owner?.dataset?.__prewarm || '') === '1').length
+        const residentOwners = owners.filter((owner) => String(owner?.dataset?.__resident || '') === '1').length
+        const adOwners = owners.filter((owner) => String(owner?.getAttribute?.('data-forum-scope') || '') === 'ad').length
+        const residentVideoOwners = owners.filter((owner) => {
+          try {
+            return (
+              String(owner?.getAttribute?.('data-forum-media') || '') === 'video' &&
+              String(owner?.dataset?.__resident || '') === '1'
+            )
+          } catch {
+            return false
+          }
+        }).length
+        const ownerLeafAnomalies = owners.filter((owner) => {
+          try {
+            const leaf = owner.querySelector?.(mediaNodeSelector) || owner.querySelector?.('audio[data-qcast-audio="1"]') || null
+            if (!(leaf instanceof Element)) return true
+            return String(leaf.getAttribute('data-owner-id') || '') !== String(owner.getAttribute('data-owner-id') || '')
+          } catch {
+            return true
+          }
+        }).length
         mediaSnapshot = {
+          owners: owners.length,
+          activeOwners,
+          prewarmOwners,
+          residentOwners,
+          residentVideoOwners,
+          adOwners,
+          ownerLeafAnomalies,
+          leaves: leaves.length,
           videos: videos.length,
           videosPlaying: playing,
+          htmlLeavesWithSrc,
           audios: audios.length,
           audiosPlaying: audioPlaying,
           qcastAudios: qcastAudios.length,
@@ -190,8 +234,17 @@ export default function useForumDiagnostics() {
         scrollY: typeof window !== 'undefined' ? window.scrollY : undefined,
         innerH: typeof window !== 'undefined' ? window.innerHeight : undefined,
         docH: document?.documentElement?.scrollHeight,
+        owners: mediaSnapshot.owners,
+        activeOwners: mediaSnapshot.activeOwners,
+        prewarmOwners: mediaSnapshot.prewarmOwners,
+        residentOwners: mediaSnapshot.residentOwners,
+        residentVideoOwners: mediaSnapshot.residentVideoOwners,
+        adOwners: mediaSnapshot.adOwners,
+        ownerLeafAnomalies: mediaSnapshot.ownerLeafAnomalies,
+        leaves: mediaSnapshot.leaves,
         videos: mediaSnapshot.videos,
         videosPlaying: mediaSnapshot.videosPlaying,
+        htmlLeavesWithSrc: mediaSnapshot.htmlLeavesWithSrc,
         audios: mediaSnapshot.audios,
         audiosPlaying: mediaSnapshot.audiosPlaying,
         qcastAudios: mediaSnapshot.qcastAudios,
@@ -495,10 +548,13 @@ export default function useForumDiagnostics() {
       if (typeof window.dumpForumDomPressure !== 'function') {
         window.dumpForumDomPressure = () => {
           try {
+            const ownerSelector = '[data-forum-media-owner="1"]'
+            const mediaNodeSelector = '[data-forum-media-node="1"]'
             const allNodes = Number(document.getElementsByTagName('*')?.length || 0)
-            const mediaOwners = Array.from(document.querySelectorAll('[data-forum-media]'))
-            const videos = Array.from(document.querySelectorAll('video[data-forum-video="post"]'))
-            const iframes = Array.from(document.querySelectorAll('iframe[data-forum-media]'))
+            const mediaOwners = Array.from(document.querySelectorAll(ownerSelector))
+            const mediaLeaves = Array.from(document.querySelectorAll(mediaNodeSelector))
+            const videos = mediaLeaves.filter((node) => node instanceof HTMLVideoElement)
+            const iframes = mediaLeaves.filter((node) => node instanceof HTMLIFrameElement)
             const cards = Number(document.querySelectorAll('article[data-forum-post-card="1"]')?.length || 0)
             const videosWithSrc = videos.filter((v) => {
               try {
@@ -537,6 +593,7 @@ export default function useForumDiagnostics() {
               allNodes,
               postCards: cards,
               mediaOwners: mediaOwners.length,
+              mediaLeaves: mediaLeaves.length,
               videos: videos.length,
               videosWithSrc,
               iframes: iframes.length,
@@ -647,6 +704,8 @@ export default function useForumDiagnostics() {
                       tag: String(node.tagName || '').toLowerCase(),
                       cls: String(node.className || '').slice(0, 120),
                       forumMedia: String(node.getAttribute?.('data-forum-media') || ''),
+                      forumMediaOwner: String(node.getAttribute?.('data-forum-media-owner') || ''),
+                      forumMediaNode: String(node.getAttribute?.('data-forum-media-node') || ''),
                       forumVideo: String(node.getAttribute?.('data-forum-video') || ''),
                       adSlot: String(node.getAttribute?.('data-ad-slot') || ''),
                     }

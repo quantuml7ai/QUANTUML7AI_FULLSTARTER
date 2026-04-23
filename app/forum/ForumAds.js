@@ -1148,10 +1148,7 @@ useEffect(() => {
     return undefined;
   }
 
-  // ВАЖНО:
-  // ad-video не должен конкурировать с post-card video на стадии "рядом".
-  // attach src — только при реальном shouldPlay.
-  const wantAttached = shouldPlay;
+  const wantAttached = shouldPlay || isNear;
   if (wantAttached) {
     setAttachedVideoSrc((prev) => (prev === nextSrc ? prev : nextSrc));
     return undefined;
@@ -1164,7 +1161,7 @@ useEffect(() => {
     try { node?.removeAttribute?.('src'); } catch {}
     try { node?.load?.(); } catch {}
     setAttachedVideoSrc('');
-  }, 220);
+  }, isNear ? 1800 : 450);
 
   return () => {
     if (detachVideoTimerRef.current) {
@@ -1203,7 +1200,7 @@ useEffect(() => {
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '240px 0px', threshold: 0 }
+      { rootMargin: '800px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1682,27 +1679,19 @@ useEffect(() => {
       if (shouldPlay) {
         // синхроним mute ДО play
         try {
-          
+          emitAdPlayToCoordinator('ad_video');
           v.muted = !!muted;
         } catch {}
 
-        const playAttempt = v.play?.();
-        if (playAttempt && typeof playAttempt.then === 'function') {
-          playAttempt.then(() => {
-            emitAdPlayToCoordinator('ad_video');
-          }).catch(() => {
-            // если пробовали со звуком и браузер запретил — откатим в mute глобально
-            if (!muted) {
-              writeMutedPrefToStorage(true);
-              emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
-              setMuted(true);
-              try { v.muted = true; } catch {}
-            }
-          });
-        } else {
-          emitAdPlayToCoordinator('ad_video');
-        }
-
+        v.play?.().catch(() => {
+          // если пробовали со звуком и браузер запретил — откатим в mute глобально
+          if (!muted) {
+            writeMutedPrefToStorage(true);
+            emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
+            setMuted(true);
+            try { v.muted = true; } catch {}
+          }
+        });
       } else {
         v.pause?.();
       }
