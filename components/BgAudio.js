@@ -1,5 +1,6 @@
 'use client' 
  
+import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 function isAudibleMediaElement(el) {
@@ -304,12 +305,15 @@ export default function BgAudio({
         aria-label="Toggle background audio"
       >
         <span className="audio-toggle__visual" aria-hidden="true">
-          <img
-            className="audio-toggle__gif"
-            src="/audio/bgaudio.gif"
-            alt=""
-            draggable="false"
-          />
+<Image
+  className="audio-toggle__gif"
+  src="/audio/bgaudio.gif"
+  alt=""
+  width={34}
+  height={34}
+  unoptimized
+  draggable={false}
+/>
           <span className="audio-toggle__slash" />
         </span>
       </button>
