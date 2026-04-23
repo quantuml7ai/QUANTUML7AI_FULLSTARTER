@@ -13,9 +13,9 @@ export const MEDIA_MUTED_EVENT = 'forum:media-mute'
   // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
   try {
     if (typeof window === 'undefined') return
-const defaultMutedPref = String(1)
-localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
-localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
+    const defaultMutedPref = String(1)
+    if (localStorage.getItem(MEDIA_MUTED_KEY) == null) localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
+    if (localStorage.getItem(MEDIA_VIDEO_MUTED_KEY) == null) localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
   } catch {}
 })()
 
@@ -134,14 +134,6 @@ export function __enforceActiveVideoCap(exceptEl) {
         __activeVideoLRU.push(victim)
         continue
       }
-      if (
-        String(victim?.dataset?.__playRequested || '') === '1' ||
-        String(victim?.dataset?.__loadPending || '') === '1'
-      ) {
-        __activeVideoLRU.shift()
-        __activeVideoLRU.push(victim)
-        continue
-      }      
       if (__isVideoNearViewport(victim, 140)) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
@@ -201,7 +193,6 @@ export function __unloadVideoEl(el) {
   } catch {}
   try {
     el.dataset.__active = '0'
-    el.dataset.__playRequested = '0'
     el.dataset.__loadPending = '0'
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
@@ -233,7 +224,7 @@ const shouldKeepResidentPostVideo =
 if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
-    el.dataset.__prewarm = '0'
+    el.dataset.__prewarm = isPostFeedVideo ? '1' : '0'
     el.preload = 'metadata'
   } catch {}
   return
@@ -337,7 +328,8 @@ const burstLimit = fastRestore ? 4 : 5
     return
   }
 try {
-  const shouldAutoPreload = 
+  const shouldAutoPreload =
+    isPostFeedVideo ||
     String(el.dataset?.__prewarm || '') === '1' ||
     String(el.dataset?.__active || '') === '1' ||
     String(el.dataset?.__resident || '') === '1'

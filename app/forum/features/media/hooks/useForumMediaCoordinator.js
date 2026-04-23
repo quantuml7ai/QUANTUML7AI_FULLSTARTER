@@ -1910,20 +1910,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       };
       try {
         markCoordinatorPlayIntent(el, 1500);
-        try {
-          el.dataset.__playRequested = '1';
-          el.dataset.__prewarm = '1';
-          el.dataset.__resident = '1';
-          if (String(el.dataset?.__active || '') !== '1') {
-            el.dataset.__active = '0';
-          }
-        } catch {}
-
         const p = el.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
             if (!canContinue()) {
-              try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_started_stale', el, { reason, muted: !!el.muted });
               withSystemPause(el, () => {
                 try { if (!el.paused) el.pause(); } catch {}
@@ -1931,26 +1921,12 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               return;
             }
             trace('play_started', el, { reason, muted: !!el.muted });
-            try {
-              el.dataset.__playRequested = '0';
-              el.dataset.__active = '1';
-              el.dataset.__prewarm = '1';
-              el.dataset.__resident = '1';
-              el.dataset.__loadPending = '0';
-              el.dataset.__warmReady = '1';
-              delete el.dataset.__loadPendingSince;
-              el.preload = 'auto';
-            } catch {}
-            try { __touchActiveVideoEl(el); } catch {}
-            try { __enforceActiveVideoCap(el); } catch {}            
             try { pauseForeignMedia(el); } catch {}
           }).catch((err) => {
             if (!canContinue()) {
-              try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_reject_stale', el, { reason });
               return;
             }
-            try { el.dataset.__playRequested = '0'; } catch {}
             trace('play_reject', el, {
               reason,
               name: String(err?.name || ''),
@@ -1987,7 +1963,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               if (retry && typeof retry.then === 'function') {
                 retry.then(() => {
                   if (!canContinue()) {
-                    try { el.dataset.__playRequested = '0'; } catch {}
                     trace('play_retry_stale', el, { reason });
                     withSystemPause(el, () => {
                       try { if (!el.paused) el.pause(); } catch {}
@@ -1995,21 +1970,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                     return;
                   }
                   trace('play_retry_muted_ok', el, { reason });
-                  try {
-                    el.dataset.__playRequested = '0';
-                    el.dataset.__active = '1';
-                    el.dataset.__prewarm = '1';
-                    el.dataset.__resident = '1';
-                    el.dataset.__loadPending = '0';
-                    el.dataset.__warmReady = '1';
-                    delete el.dataset.__loadPendingSince;
-                    el.preload = 'auto';
-                  } catch {}
-                  try { __touchActiveVideoEl(el); } catch {}
-                  try { __enforceActiveVideoCap(el); } catch {}
-                  try { pauseForeignMedia(el); } catch {}                  
                 }).catch((retryErr) => {
-                  try { el.dataset.__playRequested = '0'; } catch {}
                   trace('play_retry_muted_fail', el, {
                     reason,
                     name: String(retryErr?.name || ''),
@@ -2714,14 +2675,9 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         if (!next) return '';
         const u = new URL(next, window.location.href);
         const host = String(u.hostname || '').toLowerCase();
-        if (!host.includes('youtube.com') && !host.includes('youtube-nocookie.com') && !host.includes('youtu.be')) return next;
-        if ((host.includes('youtube.com') || host.includes('youtu.be')) && !host.includes('youtube-nocookie.com')) {
-          u.hostname = 'www.youtube-nocookie.com';
-        }
+        if (!host.includes('youtube.com') && !host.includes('youtu.be')) return next;
         if (!u.searchParams.has('enablejsapi')) u.searchParams.set('enablejsapi', '1');
         if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
-        if (!u.searchParams.has('rel')) u.searchParams.set('rel', '0');
-        if (!u.searchParams.has('modestbranding')) u.searchParams.set('modestbranding', '1');
         if (!u.searchParams.has('origin')) u.searchParams.set('origin', window.location.origin);
         return u.toString();
       } catch {
@@ -3359,21 +3315,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 reason: 'prepared_wait_next_tick',
               });
             }
-            traceCandidate('candidate_activate_pending', candidate, {
-              ratio,
-              score,
-              visiblePx,
-              centerDist,
-              reason: 'pending_ready_hold',
-            });
-            return;
           }
-          traceCandidate('candidate_activate', candidate, {
+          traceCandidate(isReadyCandidate(candidate) ? 'candidate_activate' : 'candidate_activate_pending', candidate, {
             ratio,
             score,
             visiblePx,
             centerDist,
-            reason: 'ready',
+            reason: isReadyCandidate(candidate) ? 'ready' : 'pending_ready',
           });
           active = candidate;
           activeSinceTs = Date.now();
