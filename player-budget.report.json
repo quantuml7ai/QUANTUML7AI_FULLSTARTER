@@ -1,8 +1,7 @@
 {
-  "generatedAt": "2026-04-22T01:45:27.724Z",
+  "generatedAt": "2026-04-21T20:31:53.241Z",
   "issues": [
-    "legacy-iframe-prewarm-still-present",
-    "leaf-has-no-coordinator-ownership-branch"
+    "legacy-iframe-prewarm-still-present"
   ],
   "files": [
     {
@@ -43,7 +42,7 @@
         "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
-        "coordinatorOwnsLifecycle": 0,
+        "coordinatorOwnsLifecycle": 5,
         "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
@@ -72,25 +71,25 @@
     {
       "file": "app/forum/ForumAds.js",
       "counts": {
-        "ownerId": 3,
+        "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
         "coordinatorOwnsLifecycle": 0,
-        "siteMediaPlay": 0,
+        "siteMediaPlay": 1,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
         "restoreGuard": 0,
         "sameSrcGuard": 0,
-        "sharedMute": 5
+        "sharedMute": 6
       }
     },
     {
       "file": "app/forum/features/media/components/QCastPlayer.jsx",
       "counts": {
-        "ownerId": 2,
-        "embedKind": 1,
-        "lifecycleState": 1,
+        "ownerId": 0,
+        "embedKind": 0,
+        "lifecycleState": 0,
         "coordinatorOwnsLifecycle": 0,
         "siteMediaPlay": 3,
         "legacyWarmSweep": 0,
