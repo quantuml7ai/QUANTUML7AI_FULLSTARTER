@@ -397,7 +397,7 @@ const NotRobotHost = dynamic(() => import('../components/NotRobotHost'), { ssr: 
 const InviteFriendHost = dynamic(() => import('../components/InviteFriendHost'), { ssr: false })
 const QCoinDropFX = dynamic(() => import('../components/QCoinDropFX'), { ssr: false }) 
 const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
-// const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
+const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
 
 export const metadata = {
   // чуть более строгий base (как ты пишешь ссылки)
@@ -535,9 +535,9 @@ export default function RootLayout({ children }) {
             </div>
 
             <NotRobotHost />
-            {/* <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
+            <ForumShellGate label="bg_audio" delayMs={3200} idleTimeoutMs={2600}>
               <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
-            </ForumShellGate> */}
+            </ForumShellGate>
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
            <InviteFriendHost />
            <ForumShellGate label="scroll_top_pulse" delayMs={2200} idleTimeoutMs={1800}>
