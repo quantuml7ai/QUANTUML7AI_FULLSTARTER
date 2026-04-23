@@ -109,9 +109,11 @@ body{
 /* Panels */
 .panel{
   width:min(1100px,94vw);
-  background:linear-gradient(180deg,rgba(7,12,20,.65),rgba(7,12,20,.35));
-  border:1px solid rgba(157,220,255,.14);
-  border-radius:16px;backdrop-filter:blur(6px);
+  background:linear-gradient(180deg,rgba(7, 12, 20, 0.705),rgb(7, 12, 20));
+  border:1px solid rgb(0, 69, 148);
+  border-radius:16px;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   padding:22px 24px;box-shadow:0 12px 28px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.05);
   margin:18px 0 24px
 }
@@ -371,7 +373,8 @@ ul.bullets li{margin:6px 0}
   font-weight:900;
   letter-spacing:.06em;
   font-size: 21px;       /* размер текста — живёт сам по себе */
-  user-select:none;
+  -webkit-user-select: none;
+  user-select: none;
   /* убираем тени у текста, по твоей просьбе */
   text-shadow: none;
   display: inline-flex;
@@ -423,30 +426,152 @@ ul.bullets li{margin:6px 0}
 
 /* === Background audio control === */
 .audio-toggle{
-  position: fixed; left: 14px; bottom: 14px; z-index: 60;
-  width: 44px; height: 44px; border-radius: 999px;
-  display: grid; place-items: center;
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 60;
+
+  width: 56px !important;
+  height: 56px !important;
+  max-width: 56px !important;
+  aspect-ratio: 1 / 1;
+  border-radius: 999px !important;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+
   background:
     radial-gradient(120% 120% at 30% 30%, rgba(255,255,255,.12), rgba(255,255,255,0) 60%),
-    radial-gradient(100% 100% at 70% 70%, rgba(0,200,255,.16), rgba(0,200,255,0) 60%),
-    linear-gradient(180deg, rgba(0,35,60,.25), rgba(0,35,60,.35));
-  border: 1px solid rgba(157,220,255,.35);
-  color:#e6f4ff; cursor:pointer; user-select:none;
-  box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 8px 20px rgba(0,0,0,.35);
-  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
-}
-.audio-toggle:hover{ transform: translateY(-1px) scale(1.03) }
-.audio-toggle:active{ transform: scale(.98) }
-.audio-toggle .ico{ font-size: 18px; filter: drop-shadow(0 0 6px rgba(64,200,255,.7)); }
+    radial-gradient(100% 100% at 70% 70%, rgba(0, 200, 255, 0), rgba(0,200,255,0) 60%),
+    linear-gradient(180deg, rgba(0, 35, 60, 0), rgba(0,35,60,.42));
 
-.audio-toggle.on{ animation: audioPulse 3s ease-out infinite; }
-@keyframes audioPulse{
-  0%   { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 0 rgba(0,194,255,.35) }
-  60%  { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 12px rgba(0,194,255,0) }
-  100% { box-shadow: inset 0 0 18px rgba(0,180,255,.16), 0 0 0 0 rgba(0,194,255,0) }
+  border: 1px solid rgba(157, 221, 255, 0);
+  box-shadow:
+    inset 0 0 18px rgba(0, 179, 255, 0),
+    0 8px 20px rgba(0,0,0,.35);
+
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+
+  transition:
+    transform .18s ease,
+    filter .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
 }
+
+.audio-toggle:hover{
+  transform: translateY(-1px) scale(1.03);
+  filter: brightness(1.06);
+}
+
+.audio-toggle:active{
+  transform: scale(.98);
+}
+
+.audio-toggle__visual{
+  position: relative;
+  width: 34px;
+  height: 34px;
+  display: block;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.audio-toggle__gif{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  border-radius: 8px;
+  filter:
+    drop-shadow(0 0 6px rgba(64, 201, 255, 0))
+    drop-shadow(0 0 12px rgba(0, 179, 255, 0));
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.audio-toggle__slash{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,40,40,.95), rgba(255,110,110,.98));
+  box-shadow:
+    0 0 8px rgba(255,50,50,.6),
+    0 0 16px rgba(255,0,0,.25);
+  transform: translate(-50%, -50%) rotate(-38deg) scale(1);
+  transform-origin: center;
+  opacity: 1;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.audio-toggle.on{
+  animation: audioPulse 3s ease-out infinite;
+}
+
+.audio-toggle.on .audio-toggle__slash{
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-38deg) scale(.85);
+}
+
+.audio-toggle.off .audio-toggle__gif{
+  filter:
+    grayscale(.1)
+    brightness(.9)
+    drop-shadow(0 0 2px rgba(255,80,80,.18));
+}
+
+@keyframes audioPulse{
+  0%{
+    box-shadow:
+      inset 0 0 18px rgba(0,180,255,.16),
+      0 0 0 0 rgba(0,194,255,.35);
+  }
+  60%{
+    box-shadow:
+      inset 0 0 18px rgba(0,180,255,.16),
+      0 0 0 12px rgba(0,194,255,0);
+  }
+  100%{
+    box-shadow:
+      inset 0 0 18px rgba(0,180,255,.16),
+      0 0 0 0 rgba(0,194,255,0);
+  }
+}
+
+@media (max-width: 640px){
+  .audio-toggle{
+    width: 50px !important;
+    height: 50px !important;
+    max-width: 50px !important;
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .audio-toggle__visual{
+    width: 30px;
+    height: 30px;
+  }
+
+  .audio-toggle__slash{
+    width: 38px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce){
-  .audio-toggle.on{ animation:none }
+  .audio-toggle.on{
+    animation: none;
+  }
 }
 
 /* === Brand logo (PNG) === */
@@ -504,9 +629,10 @@ ul.bullets li{margin:6px 0}
 /* на всякий — и по изображению убираем tap-highlight/drag */
 .topbar a.brand img{
   -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
-} 
+}
 /* === Telegram card tape in hero — responsive like quantum-shot === */
 .tg-tape{
   display:block;
@@ -770,9 +896,10 @@ ul.bullets li{margin:6px 0}
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 16 / 9;    /* подправь под свой ролик при необходимости */
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   background: #0b1020;
+  -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
 }
@@ -969,6 +1096,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
   border: 0;
   border-radius: var(--radius);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 
   transition: transform .08s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, opacity .2s ease;
@@ -1095,6 +1223,7 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
   border: 0;
   border-radius: var(--radius);
   cursor: pointer;
+  -webkit-user-select: none;
   user-select: none;
 
   transition: transform .08s ease, box-shadow .2s ease, background-color .2s ease, color .2s ease, opacity .2s ease;
@@ -1150,8 +1279,9 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
   width: var(--ql7-icon-size, 120px);
   height: auto;
   display: block;
+  -webkit-user-select: none;
   user-select: none;
-  pointer-events: none; /* клик ловит ссылка */
+  pointer-events: none;
   background: transparent;
 
   /* базовая «парящая» анимация как на главной */
@@ -1358,8 +1488,9 @@ h1, h2, h3, h4, h5, h6{
   padding: 16px;
   background: radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 55%),
     rgba(3, 7, 18, 0.92);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  overflow-y: auto;   /* если по высоте не влезаем – скроллится всё окно */
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
@@ -1775,6 +1906,7 @@ h1, h2, h3, h4, h5, h6{
   max-height:100%;
   object-fit:contain;
   pointer-events:none;
+  -webkit-user-select:none;
   user-select:none;
   -webkit-user-drag:none;
   transition:transform .22s ease, filter .22s ease;

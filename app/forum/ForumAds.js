@@ -27,10 +27,82 @@ function readMutedPrefFromStorage() {
   }
 }
 
+function readMutedPrefFromDocument() {
+  if (!isBrowser()) return null;
+
+  try {
+    if (typeof window.__FORUM_MEDIA_MUTED__ === 'boolean') {
+      return window.__FORUM_MEDIA_MUTED__;
+    }
+  } catch {}
+
+  try {
+    if (typeof window.__SITE_MEDIA_MUTED__ === 'boolean') {
+      return window.__SITE_MEDIA_MUTED__;
+    }
+  } catch {}
+
+  try {
+    const root = document?.documentElement;
+    const body = document?.body;
+
+    const raw =
+      root?.dataset?.forumMediaMuted ??
+      root?.dataset?.mediaMuted ??
+      body?.dataset?.forumMediaMuted ??
+      body?.dataset?.mediaMuted ??
+      null;
+
+    if (raw == null || raw === '') return null;
+    return raw === '1' || raw === 'true';
+  } catch {
+    return null;
+  }
+}
+
+function readMutedPref() {
+  const fromDocument = readMutedPrefFromDocument();
+  if (typeof fromDocument === 'boolean') return fromDocument;
+  return readMutedPrefFromStorage();
+}
+
 function writeMutedPrefToStorage(val) {
   if (!isBrowser()) return;
+  const next = val ? '1' : '0';
   try {
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, val ? '1' : '0');
+    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
+    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next);
+  } catch {}
+}
+
+function writeMutedPrefToDocument(val) {
+  if (!isBrowser()) return;
+
+  const nextBool = !!val;
+  const nextStr = nextBool ? '1' : '0';
+
+  try {
+    window.__FORUM_MEDIA_MUTED__ = nextBool;
+  } catch {}
+
+  try {
+    window.__SITE_MEDIA_MUTED__ = nextBool;
+  } catch {}
+
+  try {
+    const root = document?.documentElement;
+    if (root?.dataset) {
+      root.dataset.forumMediaMuted = nextStr;
+      root.dataset.mediaMuted = nextStr;
+    }
+  } catch {}
+
+  try {
+    const body = document?.body;
+    if (body?.dataset) {
+      body.dataset.forumMediaMuted = nextStr;
+      body.dataset.mediaMuted = nextStr;
+    }
   } catch {}
 }
 
@@ -45,9 +117,18 @@ function emitMutedPref(val, id, source = 'forum-ads') {
   } catch {}
 }
 
+function syncMutedPrefEverywhere(val, id, source = 'forum-ads') {
+  writeMutedPrefToStorage(val);
+  writeMutedPrefToDocument(val);
+  emitMutedPref(val, id, source);
+}
+
 function desiredMutedFromPref(pref) {
-  // Если префа нет — стартуем muted=true (иначе автоплей часто будет блокироваться браузером).
-  return pref == null ? true : !!pref;
+  // AUTO-режим:
+  // - null  => в этом файле ничего не форсим;
+  // - true  => явный muted;
+  // - false => явный sound-on.
+  return pref == null ? null : !!pref;
 }
 // ===== FIXED AD SLOT HEIGHT (px) =====
 // Контент внутри вписывается, но высота/ширина слота не растут.
@@ -1008,7 +1089,7 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const router = useRouter();
  const isFluid = layout === 'fluid';
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(null);
 
   // уникальный id инстанса, чтобы не ловить свой же event
   const playerIdRef = useRef(
@@ -1016,11 +1097,16 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   );
 
   // init muted from global pref (forum scheme)
-  useEffect(() => {
-    const pref = readMutedPrefFromStorage();
-    const want = desiredMutedFromPref(pref);
-    setMuted(want);
-  }, []);
+useEffect(() => {
+  const pref = readMutedPref();
+  setMuted(desiredMutedFromPref(pref));
+
+  // Нормализуем все глобальные контуры, если состояние уже известно.
+  if (typeof pref === 'boolean') {
+    writeMutedPrefToStorage(pref);
+    writeMutedPrefToDocument(pref);
+  }
+}, []);
   // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
   const [mediaHref, setMediaHref] = useState(null);
 
@@ -1070,20 +1156,44 @@ const ytPlayerRef = useRef(null);
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
-  const mutedRef = useRef(true);
+  const mutedRef = useRef(null);
   const adPlayEventTsRef = useRef(0);
-  const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
-    if (!isBrowser()) return;
-    try {
-      const now = Date.now();
-      if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
-      adPlayEventTsRef.current = now;
-      const el = rootRef.current || videoRef.current || ytIframeRef.current || null;
-      window.dispatchEvent(new CustomEvent('site-media-play', {
-        detail: { source, element: el, manual: false, id: playerIdRef.current }
-      }));
-    } catch {}
-  }, []);
+const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
+  if (!isBrowser()) return;
+
+  try {
+    const now = Date.now();
+    if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
+    adPlayEventTsRef.current = now;
+
+    const isMutedNow = mutedRef.current === true;
+
+    let el = null;
+    if (source === 'ad_video') {
+      el = videoRef.current || rootRef.current || null;
+    } else if (source === 'ad_youtube') {
+      el = ytIframeRef.current || rootRef.current || null;
+    } else {
+      el = videoRef.current || ytIframeRef.current || rootRef.current || null;
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('site-media-play', {
+        detail: {
+          source,
+          element: el,
+          manual: false,
+          id: playerIdRef.current,
+          muted: isMutedNow,
+          audible:
+            source === 'ad_video' || source === 'ad_youtube'
+              ? !isMutedNow
+              : undefined,
+        },
+      })
+    );
+  } catch {}
+}, []);
 const slotCssVars = {
   '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
   '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1116,7 +1226,7 @@ useEffect(() => {
 }, [shouldPlay]);
 
 useEffect(() => {
-  mutedRef.current = !!muted;
+  mutedRef.current = muted;
 }, [muted]);
 
 useEffect(() => {
@@ -1149,9 +1259,10 @@ useEffect(() => {
   }
 
   // ВАЖНО:
-  // ad-video не должен конкурировать с post-card video на стадии "рядом".
-  // attach src — только при реальном shouldPlay.
-  const wantAttached = shouldPlay;
+  // Держим ad-video attached не только пока он "в фокусе",
+  // но и пока блок ещё рядом с viewport.
+  // Это убирает визуальное исчезновение видео на глазах у пользователя.
+  const wantAttached = shouldPlay || isNear;
   if (wantAttached) {
     setAttachedVideoSrc((prev) => (prev === nextSrc ? prev : nextSrc));
     return undefined;
@@ -1164,7 +1275,7 @@ useEffect(() => {
     try { node?.removeAttribute?.('src'); } catch {}
     try { node?.load?.(); } catch {}
     setAttachedVideoSrc('');
-  }, 220);
+  }, 900);
 
   return () => {
     if (detachVideoTimerRef.current) {
@@ -1203,7 +1314,7 @@ useEffect(() => {
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
-      { rootMargin: '240px 0px', threshold: 0 }
+      { rootMargin: '420px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1222,36 +1333,41 @@ useEffect(() => {
   }, []);
 
   // ===== Global mute sync from forum =====
-  useEffect(() => {
-    if (!isBrowser()) return;
+useEffect(() => {
+  if (!isBrowser()) return;
 
-    const onMuted = (e) => {
-      const d = e?.detail || {};
-      if (d?.id && d.id === playerIdRef.current) return; // ignore self
-      if (typeof d?.muted !== 'boolean') return;
+  const onMuted = (e) => {
+    const d = e?.detail || {};
+    if (d?.id && d.id === playerIdRef.current) return; // ignore self
+    if (typeof d?.muted !== 'boolean') return;
 
-      const next = !!d.muted;
-      setMuted(next);
+    const next = !!d.muted;
 
-      // HTML5
-      if (videoRef.current) {
-        try {
-          videoRef.current.muted = next;
-        } catch {}
-      }
+    // Нормализуем глобальное состояние под координатор и остальные контуры.
+    writeMutedPrefToStorage(next);
+    writeMutedPrefToDocument(next);
 
-      // YouTube
-      if (ytPlayerRef.current) {
-        try {
-          if (next) ytPlayerRef.current.mute?.();
-          else ytPlayerRef.current.unMute?.();
-        } catch {}
-      }
-    };
+    setMuted(next);
 
-    window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
-    return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
-  }, []);
+    // HTML5
+    if (videoRef.current) {
+      try {
+        videoRef.current.muted = next;
+      } catch {}
+    }
+
+    // YouTube
+    if (ytPlayerRef.current) {
+      try {
+        if (next) ytPlayerRef.current.mute?.();
+        else ytPlayerRef.current.unMute?.();
+      } catch {}
+    }
+  };
+
+  window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
+  return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
+}, []);
   const safeClick = useMemo(() => {
     try {
       const u = new URL(url);
@@ -1619,28 +1735,30 @@ useEffect(() => {
     try {
       localPlayer = new window.YT.Player(ytIframeRef.current, {
         videoId: media.src,
-        playerVars: {
-          autoplay: 0,
-          controls: 0,
-          mute: 1,
-          rel: 0,
-          fs: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          loop: 1,
-          playlist: media.src,
-        },
+playerVars: {
+  autoplay: 0,
+  controls: 0,
+  rel: 0,
+  fs: 0,
+  modestbranding: 1,
+  playsinline: 1,
+  loop: 1,
+  playlist: media.src,
+},
         events: {
-          onReady: (ev) => {
-            if (cancelled) return;
-            ytPlayerRef.current = ev.target;
-            try {
-              if (mutedRef.current) ev.target.mute?.();
-              else ev.target.unMute?.();
-              if (shouldPlayRef.current) ev.target.playVideo?.();
-              else ev.target.pauseVideo?.();
-            } catch {}
-          },
+onReady: (ev) => {
+  if (cancelled) return;
+  ytPlayerRef.current = ev.target;
+  try {
+    if (mutedRef.current === true) {
+      ev.target.mute?.();
+    } else if (mutedRef.current === false) {
+      ev.target.unMute?.();
+    }
+    if (shouldPlayRef.current) ev.target.playVideo?.();
+    else ev.target.pauseVideo?.();
+  } catch {}
+},
         },
       });
 
@@ -1672,55 +1790,47 @@ useEffect(() => {
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
     // HTML5 video
-    if (media.kind === 'video' && videoRef.current) {
-      const v = videoRef.current;
-      const srcKey = String(media.src || '');
-      if (isVideoSrcTemporarilyBlocked(srcKey)) {
-        try { v.pause?.(); } catch {}
-        return;
-      }
-      if (shouldPlay) {
-        // синхроним mute ДО play
-        try {
-          
-          v.muted = !!muted;
-        } catch {}
+if (media.kind === 'video' && videoRef.current) {
+  const v = videoRef.current;
+  const srcKey = String(media.src || '');
 
-        const playAttempt = v.play?.();
-        if (playAttempt && typeof playAttempt.then === 'function') {
-          playAttempt.then(() => {
-            emitAdPlayToCoordinator('ad_video');
-          }).catch(() => {
-            // если пробовали со звуком и браузер запретил — откатим в mute глобально
-            if (!muted) {
-              writeMutedPrefToStorage(true);
-              emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');
-              setMuted(true);
-              try { v.muted = true; } catch {}
-            }
-          });
-        } else {
+  if (isVideoSrcTemporarilyBlocked(srcKey)) {
+    try { v.pause?.(); } catch {}
+    return;
+  }
+
+  if (shouldPlay) {
+    const playAttempt = v.play?.();
+
+    if (playAttempt && typeof playAttempt.then === 'function') {
+      playAttempt
+        .then(() => {
           emitAdPlayToCoordinator('ad_video');
-        }
-
-      } else {
-        v.pause?.();
-      }
+        })
+        .catch(() => {});
+    } else {
+      emitAdPlayToCoordinator('ad_video');
     }
+  } else {
+    v.pause?.();
+  }
+}
 
     // YouTube player (Iframe API)
-    if (media.kind === 'youtube' && ytPlayerRef.current) {
-      const p = ytPlayerRef.current;
-      try {
-        if (shouldPlay) {
-          emitAdPlayToCoordinator('ad_youtube');
-          if (muted) p.mute?.();
-          p.playVideo?.();
-        } else {
-          p.pauseVideo?.();
-        }
-      } catch {}
+if (media.kind === 'youtube' && ytPlayerRef.current) {
+  const p = ytPlayerRef.current;
+  try {
+    if (shouldPlay) {
+      if (muted === true) p.mute?.();
+      else if (muted === false) p.unMute?.();
+
+      emitAdPlayToCoordinator('ad_youtube');
+      p.playVideo?.();
+    } else {
+      p.pauseVideo?.();
     }
+  } catch {}
+}
     if (media.kind === 'tiktok' && shouldPlay) {
       emitAdPlayToCoordinator('ad_tiktok');
     }
@@ -1813,40 +1923,44 @@ useEffect(() => {
     );
   };
 
-  const handleToggleSound = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const next = !muted;
+const handleToggleSound = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
 
-    // 1) сохранить глобально + оповестить всех
-    writeMutedPrefToStorage(next);
-    emitMutedPref(next, playerIdRef.current, 'forum-ads-toggle');
+  const next = muted === true ? false : true;
 
-    // 2) локально
-    setMuted(next);
+  // 1) сохранить и разложить состояние ВЕЗДЕ:
+  // storage + document/window + global event
+  syncMutedPrefEverywhere(next, playerIdRef.current, 'forum-ads-toggle');
 
-    // HTML5
-    if (media.kind === 'video' && videoRef.current) {
-      const v = videoRef.current;
-      try {
-        v.muted = next;
-      } catch {}
-      if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});
-      return;
+  // 2) локально
+  setMuted(next);
+
+  // HTML5
+  if (media.kind === 'video' && videoRef.current) {
+    const v = videoRef.current;
+    try {
+      v.muted = next;
+    } catch {}
+    if (v.paused && !next && shouldPlayRef.current) {
+      v.play?.().catch(() => {});
     }
+    return;
+  }
 
-    // YouTube
-    if (media.kind === 'youtube' && ytPlayerRef.current) {
-      const p = ytPlayerRef.current;
-      try { 
-        if (next) p.mute?.();
-        else {
-          p.unMute?.();
-          if (shouldPlayRef.current) p.playVideo?.();
-        }
-      } catch {} 
-    } 
-  };
+  // YouTube
+  if (media.kind === 'youtube' && ytPlayerRef.current) {
+    const p = ytPlayerRef.current;
+    try {
+      if (next) {
+        p.mute?.();
+      } else {
+        p.unMute?.();
+        if (shouldPlayRef.current) p.playVideo?.();
+      }
+    } catch {}
+  }
+};
 
   const showSoundButton =
     media.kind === 'video' || media.kind === 'youtube';
@@ -1869,16 +1983,19 @@ useEffect(() => {
   }
   /* ===== FIXED (как в форуме сейчас) ===== */
   .forum-ad-media-slot[data-layout="fixed"] {
+    min-height: var(--ad-slot-h-m);
     height: var(--ad-slot-h-m);
   }
   @media (min-width: 640px) {
 .forum-ad-media-slot[data-layout="fixed"] {
+      min-height: var(--ad-slot-h-t);
       height: var(--ad-slot-h-t);
     }
   }
 
   @media (min-width: 1024px) {
     .forum-ad-media-slot[data-layout="fixed"] {
+      min-height: var(--ad-slot-h-d);
       height: var(--ad-slot-h-d);
     }
   }
@@ -2221,27 +2338,27 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
 {media.kind === 'video' && media.src && (
   <div className="forum-ad-media-fill">
-    <video
-      ref={videoRef}
-      src={attachedVideoSrc || undefined}
-      className="forum-ad-fit"
-      muted={muted}
-      loop
-      playsInline
-      referrerPolicy="no-referrer"
-      preload={shouldPlay ? 'auto' : (isNear ? 'metadata' : 'none')}
-      onLoadedData={() => {
-        try { clearVideoSrcBlock(media?.src); } catch {}
-      }}
-      onCanPlay={() => {
-        try { clearVideoSrcBlock(media?.src); } catch {}
-      }}
-      onError={() => {
-        try {
-          markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
-        } catch {}
-      }}
-    />
+<video
+  ref={videoRef}
+  src={attachedVideoSrc || undefined}
+  className="forum-ad-fit"
+  {...(muted == null ? {} : { muted })}
+  loop
+  playsInline
+  referrerPolicy="no-referrer"
+  preload={shouldPlay ? 'auto' : (isNear ? 'metadata' : 'none')}
+  onLoadedData={() => {
+    try { clearVideoSrcBlock(media?.src); } catch {}
+  }}
+  onCanPlay={() => {
+    try { clearVideoSrcBlock(media?.src); } catch {}
+  }}
+  onError={() => {
+    try {
+      markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
+    } catch {}
+  }}
+/>
   </div>
 )}
 
