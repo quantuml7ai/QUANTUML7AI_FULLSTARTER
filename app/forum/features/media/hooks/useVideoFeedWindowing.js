@@ -72,9 +72,9 @@ export default function useVideoFeedWindowing({
  
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 7 
+      if (!isBrowserFn()) return 7
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-      const dm = Number(window?.navigator?.deviceMemory || 0) 
+      const dm = Number(window?.navigator?.deviceMemory || 0)
       if (coarse) return 6
       if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 7
       return 8
@@ -82,7 +82,7 @@ export default function useVideoFeedWindowing({
       return 7
     }
   }, [isBrowserFn])
- 
+
   const vfGetFixedItemH = useCallback(() => {
     try {
       if (!isBrowserFn()) return VF_VIDEO_CARD_H_TABLET
@@ -241,7 +241,7 @@ export default function useVideoFeedWindowing({
     const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-    const velocityBoost = Math.min(550, Math.round(velocity * 260)) 
+    const velocityBoost = Math.min(550, Math.round(velocity * 260))
     const overscanPx = VF_OVERSCAN_PX + velocityBoost
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
@@ -607,4 +607,4 @@ export default function useVideoFeedWindowing({
     vfWin,
     vfMeasureRef,
   }
-} 
+}
