@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 860,
+    "score": 858,
     "counts": {
       "playCalls": 2,
       "pauseCalls": 15,
@@ -9,7 +9,7 @@
       "srcSets": 7,
       "srcRemoves": 0,
       "currentSrcReads": 13,
-      "pendingFlags": 70,
+      "pendingFlags": 69,
       "hardUnload": 21,
       "iframeOps": 158,
       "io": 8,
@@ -26,11 +26,11 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1975,
+          "line": 1982,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2039,
+          "line": 2046,
           "text": "const retry = el.play?.();"
         }
       ],
@@ -66,7 +66,7 @@
           "text": "try { el.load?.(); } catch {}"
         },
         {
-          "line": 2911,
+          "line": 2947,
           "text": "el.load?.();"
         }
       ],
@@ -76,15 +76,15 @@
           "text": "try { el.setAttribute('src', src); } catch {}"
         },
         {
-          "line": 2683,
+          "line": 2706,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2700,
+          "line": 2723,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2812,
+          "line": 2835,
           "text": "try { el.setAttribute('src', nextSrc); } catch {}"
         }
       ],
@@ -218,14 +218,14 @@
   },
   {
     "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-    "score": 157,
+    "score": 168,
     "counts": {
       "playCalls": 0,
       "pauseCalls": 2,
       "loadCalls": 4,
-      "srcSets": 1,
+      "srcSets": 2,
       "srcRemoves": 1,
-      "currentSrcReads": 8,
+      "currentSrcReads": 10,
       "pendingFlags": 27,
       "hardUnload": 6,
       "iframeOps": 0,
@@ -242,42 +242,46 @@
     "samples": {
       "pauseCalls": [
         {
-          "line": 331,
-          "text": "el.pause?.()"
+          "line": 367,
+          "text": "try { el.pause?.() } catch {}"
         },
         {
-          "line": 427,
-          "text": "el.pause?.()"
+          "line": 481,
+          "text": "try { el.pause?.() } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 492,
+          "line": 563,
+          "text": "try { el.load?.() } catch {}"
+        },
+        {
+          "line": 686,
           "text": "el.load?.()"
         },
         {
-          "line": 594,
+          "line": 762,
           "text": "el.load?.()"
         },
         {
-          "line": 659,
-          "text": "if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()"
-        },
-        {
-          "line": 671,
+          "line": 783,
           "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 622,
+          "line": 726,
           "text": "el.setAttribute('src', src)"
+        },
+        {
+          "line": 770,
+          "text": "// Для post-video после setAttribute('src') не дублируем load без нужды."
         }
       ],
       "srcRemoves": [
         {
-          "line": 461,
-          "text": "el.removeAttribute('src')"
+          "line": 518,
+          "text": "try { el.removeAttribute('src') } catch {}"
         }
       ],
       "currentSrcReads": [
@@ -290,11 +294,11 @@
           "text": "hasSrc: !!String(el?.getAttribute?.('src') || el?.currentSrc || ''),"
         },
         {
-          "line": 186,
+          "line": 187,
           "text": "const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '')"
         },
         {
-          "line": 213,
+          "line": 227,
           "text": "const attachedSrc = String(el?.getAttribute?.('src') || el?.currentSrc || '')"
         }
       ],
@@ -308,39 +312,39 @@
           "text": "loadPending: String(el?.dataset?.__loadPending || ''),"
         },
         {
-          "line": 190,
+          "line": 191,
           "text": "String(el?.dataset?.__resident || '') === '1' ||"
         },
         {
-          "line": 267,
-          "text": "String(victim?.dataset?.__loadPending || '') === '1'"
+          "line": 200,
+          "text": "String(el?.dataset?.__loadPending || '') !== '1' &&"
         }
       ],
       "hardUnload": [
         {
-          "line": 283,
+          "line": 307,
           "text": "__unloadVideoEl(victim)"
         },
         {
-          "line": 357,
+          "line": 409,
           "text": "export function __unloadVideoEl(el) {"
         },
         {
-          "line": 496,
+          "line": 569,
           "text": "export function __restoreVideoEl(el) {"
         },
         {
-          "line": 716,
+          "line": 830,
           "text": "restoreVideoEl={__restoreVideoEl}"
         }
       ],
       "layoutReads": [
         {
-          "line": 241,
+          "line": 255,
           "text": "const r = el.getBoundingClientRect?.()"
         },
         {
-          "line": 243,
+          "line": 257,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
         }
       ]
@@ -486,83 +490,83 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1111,
+          "line": 1129,
           "text": "const p = el.play?.()"
         }
       ],
       "pauseCalls": [
         {
-          "line": 892,
+          "line": 905,
           "text": "el.pause?.()"
         },
         {
-          "line": 1006,
+          "line": 1019,
           "text": "el.pause?.()"
         },
         {
-          "line": 1119,
+          "line": 1137,
           "text": "try { el.pause?.() } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 869,
+          "line": 882,
           "text": "el.load?.()"
         },
         {
-          "line": 1022,
+          "line": 1035,
           "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 1021,
+          "line": 1034,
           "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
         }
       ],
       "srcRemoves": [
         {
-          "line": 595,
+          "line": 597,
           "text": "try { el.removeAttribute('src') } catch {}"
         },
         {
-          "line": 1009,
+          "line": 1022,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 864,
+          "line": 877,
           "text": "(el.readyState === 0 || !el.currentSrc) &&"
         }
       ],
       "pendingFlags": [
         {
-          "line": 533,
+          "line": 535,
           "text": "el.dataset?.__prewarm === '1' ||"
         },
         {
-          "line": 535,
+          "line": 537,
           "text": "el.dataset?.__resident === '1'"
         },
         {
-          "line": 576,
+          "line": 578,
           "text": "delete el.dataset.__loadPendingSince"
         },
         {
-          "line": 598,
+          "line": 600,
           "text": "try { el.dataset.__loadPending = '0' } catch {}"
         }
       ],
       "io": [
         {
-          "line": 909,
+          "line": 922,
           "text": "io = new IntersectionObserver("
         }
       ],
       "layoutReads": [
         {
-          "line": 477,
+          "line": 479,
           "text": "const vh = Number(window?.innerHeight || 0)"
         }
       ]
@@ -912,57 +916,57 @@
     "samples": {
       "ro": [
         {
-          "line": 598,
+          "line": 599,
           "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
         }
       ],
       "raf": [
         {
-          "line": 361,
+          "line": 362,
           "text": "vfRafRef.current = requestAnimationFrame(() => {"
         },
         {
-          "line": 371,
+          "line": 372,
           "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}"
         },
         {
-          "line": 375,
+          "line": 376,
           "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}"
         },
         {
-          "line": 409,
+          "line": 410,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
         }
       ],
       "scrollWrites": [
         {
-          "line": 199,
+          "line": 200,
           "text": "el.scrollTop = Math.max(0, Number(el.scrollTop || 0) + d)"
         },
         {
-          "line": 209,
+          "line": 210,
           "text": "window.scrollTo(0, nextTop)"
         },
         {
-          "line": 403,
+          "line": 404,
           "text": "if (vfHasInnerScrollable(el)) el.scrollTop = 0"
         }
       ],
       "layoutReads": [
         {
-          "line": 165,
+          "line": 166,
           "text": "const clientH = Number(el.clientHeight || 0)"
         },
         {
-          "line": 176,
+          "line": 177,
           "text": "const winH = Number(window.innerHeight || 0) || 0"
         },
         {
-          "line": 183,
+          "line": 184,
           "text": "vh: Number(el.clientHeight || 0) || winH,"
         },
         {
-          "line": 262,
+          "line": 263,
           "text": "const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800"
         }
       ]

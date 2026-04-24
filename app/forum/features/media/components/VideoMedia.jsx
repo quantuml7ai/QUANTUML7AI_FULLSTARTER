@@ -327,10 +327,12 @@ export default function VideoMedia({
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const mediaVisMargin = Number.isFinite(Number(mediaVisMarginPx)) ? Number(mediaVisMarginPx) : 380
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
-  const isPostVideo = String(dataForumVideo || '') === 'post'
-  const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
-  const renderControls = isPostVideo ? false : controls
-  const renderPreload = dataForumVideo === 'post' ? undefined : preload 
+const isPostVideo = String(dataForumVideo || '') === 'post'
+const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
+const coordinatorOwnsPostLifecycle = isPostVideo && coordinatorOwnsLifecycle
+const posterSrc = typeof poster === 'string' ? poster.trim() : ''
+const renderControls = isPostVideo ? false : controls
+const renderPreload = dataForumVideo === 'post' ? undefined : preload
 
   const readMuted = React.useCallback(() => {
     try {
@@ -591,18 +593,25 @@ React.useLayoutEffect(() => {
   try {
     // Для post-video больше НЕ делаем eager attach/load на mount.
     // Единственный владелец lifecycle — coordinator.
-    if (isNewMediaNode && isPostVideo) {
-      try { el.removeAttribute('src') } catch {}
-      try { delete el.dataset.__bootAttachedSrc } catch {}
-      try { delete el.dataset.__bootMetadataPrimed } catch {}
-      try { el.dataset.__loadPending = '0' } catch {}
-      try { el.dataset.__warmReady = '0' } catch {}
-      try { el.dataset.__active = '0' } catch {}
-      try { el.dataset.__prewarm = '0' } catch {}
-      try { el.dataset.__resident = '0' } catch {}
-      try { delete el.dataset.__loadPendingSince } catch {}
-      try { el.preload = 'metadata' } catch {}
+if (isNewMediaNode && isPostVideo) {
+  try { el.removeAttribute('src') } catch {}
+  try { delete el.dataset.__bootAttachedSrc } catch {}
+  try { delete el.dataset.__bootMetadataPrimed } catch {}
+  try { el.dataset.__loadPending = '0' } catch {}
+  try { el.dataset.__warmReady = '0' } catch {}
+  try { el.dataset.__active = '0' } catch {}
+  try { el.dataset.__prewarm = '0' } catch {}
+  try { el.dataset.__resident = '0' } catch {}
+  try { delete el.dataset.__loadPendingSince } catch {}
+  try { el.preload = 'metadata' } catch {}
+
+  try {
+    if (posterSrc) {
+      el.setAttribute('data-poster', posterSrc)
+      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
     }
+  } catch {}
+}
   } catch {}
 }, [
   autoPlay,
@@ -610,6 +619,7 @@ React.useLayoutEffect(() => {
   defaultMutedProp,
   isPostVideo,
   playsInline,
+  posterSrc,
   preloadMode,
   readMuted,
   src,
@@ -630,21 +640,23 @@ React.useLayoutEffect(() => {
 const onPlay = () => {
   clearNativeControlsForPost()
 
-  try { 
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '1'
-    delete el.dataset.__loadPendingSince
-  } catch {}
-
-  if (!coordinatorOwnsLifecycle) {
-    try { touchActiveVideoFn(el) } catch {}
-    try { enforceActiveVideoCapFn(el) } catch {}
+  if (!coordinatorOwnsPostLifecycle) {
     try {
-      el.dataset.__active = '1'
-      el.dataset.__prewarm = '1'
-      el.dataset.__resident = '1'
-      el.preload = 'auto'
+      el.dataset.__loadPending = '0'
+      el.dataset.__warmReady = '1'
+      delete el.dataset.__loadPendingSince
     } catch {}
+
+    if (!coordinatorOwnsLifecycle) {
+      try { touchActiveVideoFn(el) } catch {}
+      try { enforceActiveVideoCapFn(el) } catch {}
+      try {
+        el.dataset.__active = '1'
+        el.dataset.__prewarm = '1'
+        el.dataset.__resident = '1'
+        el.preload = 'auto'
+      } catch {}
+    }
   }
 
   setPausedState(false)
@@ -672,14 +684,15 @@ const onPlay = () => {
       try { el.removeEventListener('ended', onEnded) } catch {}
     }
   }, [
-  clearNativeControlsForPost,
-  coordinatorOwnsLifecycle,
-  enforceActiveVideoCapFn,
-  hudVisible,
-  revealHud,
-  showCenterGlyph,
-  touchActiveVideoFn,
-])
+    clearNativeControlsForPost,
+    coordinatorOwnsLifecycle,
+    coordinatorOwnsPostLifecycle,
+    enforceActiveVideoCapFn,
+    hudVisible,
+    revealHud,
+    showCenterGlyph,
+    touchActiveVideoFn,
+  ])
 
   React.useEffect(() => {
     const el = ref.current
@@ -748,51 +761,59 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
     }
   }, [autoPlay, defaultMutedProp, isPostVideo, mutedEvent, readMuted, writeMuted])
 
-  React.useEffect(() => {
-    const el = ref.current
-    if (!el) return
+React.useEffect(() => {
+  const el = ref.current
+  if (!el) return
 
-    const markPending = () => {
-      try {
-        el.dataset.__loadPending = '1'
-        el.dataset.__warmReady = '0'
-        el.dataset.__loadPendingSince = String(Date.now())
-      } catch {}
-    }
-    const markReady = () => {
-      try {
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '1'
-        delete el.dataset.__loadPendingSince
-        delete el.dataset.__readyRetryCount
-      } catch {}
-    }
-    const markCold = () => {
-      try {
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '0'
-        delete el.dataset.__loadPendingSince
-      } catch {}
-    }
+  const leafMayWriteLifecycle = !coordinatorOwnsPostLifecycle
 
-    try { el.addEventListener('loadstart', markPending) } catch {}
-    try { el.addEventListener('loadeddata', markReady) } catch {}
-    try { el.addEventListener('canplay', markReady) } catch {}
-    try { el.addEventListener('playing', markReady) } catch {}
-    try { el.addEventListener('abort', markCold) } catch {}
-    try { el.addEventListener('emptied', markCold) } catch {}
-    try { el.addEventListener('error', markCold) } catch {}
+  const markPending = () => {
+    if (!leafMayWriteLifecycle) return
+    try {
+      el.dataset.__loadPending = '1'
+      el.dataset.__warmReady = '0'
+      el.dataset.__loadPendingSince = String(Date.now())
+    } catch {}
+  }
 
-    return () => {
-      try { el.removeEventListener('loadstart', markPending) } catch {}
-      try { el.removeEventListener('loadeddata', markReady) } catch {}
-      try { el.removeEventListener('canplay', markReady) } catch {}
-      try { el.removeEventListener('playing', markReady) } catch {}
-      try { el.removeEventListener('abort', markCold) } catch {}
-      try { el.removeEventListener('emptied', markCold) } catch {}
-      try { el.removeEventListener('error', markCold) } catch {}
-    }
-  }, [])
+  const markReady = () => {
+    if (!leafMayWriteLifecycle) return
+    try {
+      const hasAttachedSrc = !!String(el.getAttribute('src') || el.currentSrc || '')
+      el.dataset.__loadPending = '0'
+      el.dataset.__warmReady = hasAttachedSrc ? '1' : '0'
+      delete el.dataset.__loadPendingSince
+      delete el.dataset.__readyRetryCount
+    } catch {}
+  }
+
+  const markCold = () => {
+    if (!leafMayWriteLifecycle) return
+    try {
+      el.dataset.__loadPending = '0'
+      el.dataset.__warmReady = '0'
+      delete el.dataset.__loadPendingSince
+    } catch {}
+  }
+
+  try { el.addEventListener('loadstart', markPending) } catch {}
+  try { el.addEventListener('loadeddata', markReady) } catch {}
+  try { el.addEventListener('canplay', markReady) } catch {}
+  try { el.addEventListener('playing', markReady) } catch {}
+  try { el.addEventListener('abort', markCold) } catch {}
+  try { el.addEventListener('emptied', markCold) } catch {}
+  try { el.addEventListener('error', markCold) } catch {}
+
+  return () => {
+    try { el.removeEventListener('loadstart', markPending) } catch {}
+    try { el.removeEventListener('loadeddata', markReady) } catch {}
+    try { el.removeEventListener('canplay', markReady) } catch {}
+    try { el.removeEventListener('playing', markReady) } catch {}
+    try { el.removeEventListener('abort', markCold) } catch {}
+    try { el.removeEventListener('emptied', markCold) } catch {}
+    try { el.removeEventListener('error', markCold) } catch {}
+  }
+}, [coordinatorOwnsPostLifecycle])
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -1038,18 +1059,17 @@ const onVideoLoaded = React.useCallback(() => {
     if (!el) return
 
     clearNativeControlsForPost()
- 
-    try {
-      el.dataset.__recoverTry = '0'
 
-      el.dataset.__loadPending = '0'
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__loadPendingSince
-    } catch {}
+    if (!coordinatorOwnsPostLifecycle) {
+      try {
+        el.dataset.__recoverTry = '0'
+        el.dataset.__loadPending = '0'
+        el.dataset.__warmReady = '1'
+        delete el.dataset.__loadPendingSince
+      } catch {}
+    }
 
-    // ВАЖНО:
-    // loaded/canplay ≠ confirmed active playback.
-    // active/touch/cap теперь ставит только coordinator после play_started.
+    // loaded/canplay не должны делать leaf вторым lifecycle-owner
     if (!coordinatorOwnsLifecycle) {
       try { touchActiveVideoFn(el) } catch {}
       try { enforceActiveVideoCapFn(el) } catch {}
@@ -1061,7 +1081,13 @@ const onVideoLoaded = React.useCallback(() => {
       } catch {}
     }
   } catch {}
-}, [clearNativeControlsForPost, coordinatorOwnsLifecycle, enforceActiveVideoCapFn, touchActiveVideoFn])
+}, [
+  clearNativeControlsForPost,
+  coordinatorOwnsLifecycle,
+  coordinatorOwnsPostLifecycle,
+  enforceActiveVideoCapFn,
+  touchActiveVideoFn,
+])
 
   const handleRootPointerDown = React.useCallback((e) => {
     try { onPointerDownProp?.(e) } catch {}
@@ -1138,24 +1164,26 @@ const onVideoLoaded = React.useCallback(() => {
   ref={ref}
   data-forum-media={dataForumMedia}
   data-forum-video={dataForumVideo}
-  playsInline={playsInline} 
+  data-poster={posterSrc || undefined}
+  poster={posterSrc || undefined}
+  playsInline={playsInline}
   disableRemotePlayback
   preload={renderPreload}
   controls={isPostVideo ? undefined : renderControls}
   autoPlay={autoPlay}
   loop={loop}
-      controlsList={controlsList}
-      disablePictureInPicture={disablePictureInPicture}
-      referrerPolicy="no-referrer"
-      className={className}
-      style={style}
-      onPointerDown={handleRootPointerDown}
-      onClick={isPostVideo ? handleSurfaceClick : undefined}
-      onLoadedData={onVideoLoaded}
-      onCanPlay={onVideoLoaded}
-      onError={onVideoError}
-      {...rest}
-    />
+  controlsList={controlsList}
+  disablePictureInPicture={disablePictureInPicture}
+  referrerPolicy="no-referrer"
+  className={className}
+  style={style}
+  onPointerDown={handleRootPointerDown}
+  onClick={isPostVideo ? handleSurfaceClick : undefined}
+  onLoadedData={onVideoLoaded}
+  onCanPlay={onVideoLoaded}
+  onError={onVideoError}
+  {...rest}
+/>
   )
 
   if (!isPostVideo) return videoNode

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-23T12:33:03.711Z",
+  "generatedAt": "2026-04-24T07:54:04.360Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -15,8 +15,8 @@
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
       "counts": {
-        "dataSrc": 9,
-        "setSrc": 1,
+        "dataSrc": 11,
+        "setSrc": 2,
         "removeSrc": 1,
         "restore": 34,
         "postMessagePause": 0,

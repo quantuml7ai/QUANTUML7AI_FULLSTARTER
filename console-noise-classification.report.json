@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-18T03:00:38.521Z",
+  "generatedAt": "2026-04-24T07:54:03.326Z",
   "summary": {
     "B": 3,
     "A": 6,
@@ -84,7 +84,7 @@
         "consoleError": 0,
         "consoleWarn": 0,
         "magic401": 0,
-        "forcedReflow": 6,
+        "forcedReflow": 7,
         "thirdPartyNoise": 0,
         "mediaChurn": 22
       },
@@ -98,7 +98,7 @@
         "magic401": 0,
         "forcedReflow": 2,
         "thirdPartyNoise": 0,
-        "mediaChurn": 6
+        "mediaChurn": 16
       },
       "noiseClass": "A"
     },

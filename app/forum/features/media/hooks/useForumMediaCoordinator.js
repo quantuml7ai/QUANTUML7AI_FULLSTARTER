@@ -1961,18 +1961,25 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         } catch {}
         return false;
       };
-      try {
-        markCoordinatorPlayIntent(el, 1500);
-        try {
-          el.dataset.__playRequested = '1';
-          el.dataset.__prewarm = '1';
-          el.dataset.__resident = '1';
-          if (String(el.dataset?.__active || '') !== '1') {
-            el.dataset.__active = '0';
-          }
-        } catch {}
+try {
+  markCoordinatorPlayIntent(el, 1500);
 
-        const p = el.play?.();
+  const isPostFeedVideo =
+    el instanceof HTMLVideoElement &&
+    String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+
+  try {
+    el.dataset.__playRequested = '1';
+    el.dataset.__resident = '1';
+    if (!isPostFeedVideo) {
+      el.dataset.__prewarm = '1';
+      if (String(el.dataset?.__active || '') !== '1') {
+        el.dataset.__active = '0';
+      }
+    }
+  } catch {}
+
+  const p = el.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
             if (!canContinue()) {
@@ -1984,19 +1991,24 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               return;
             }
             trace('play_started', el, { reason, muted: !!el.muted });
-            try {
-              el.dataset.__playRequested = '0';
-              el.dataset.__active = '1';
-              el.dataset.__prewarm = '1';
-              el.dataset.__resident = '1';
-              el.dataset.__loadPending = '0';
-              el.dataset.__warmReady = '1';
-              delete el.dataset.__loadPendingSince;
-              el.preload = 'auto';
-            } catch {}
-            try { __touchActiveVideoEl(el); } catch {}
-            try { __enforceActiveVideoCap(el); } catch {}            
-            try { pauseForeignMedia(el); } catch {}
+try {
+  const confirmedReady =
+    Number(el?.readyState || 0) >= 2 &&
+    !!String(el?.getAttribute?.('src') || el?.currentSrc || '')
+
+  el.dataset.__playRequested = '0';
+  el.dataset.__active = '1';
+  el.dataset.__prewarm = '1';
+  el.dataset.__resident = '1';
+  el.dataset.__loadPending = '0';
+  el.dataset.__warmReady = confirmedReady ? '1' : '0';
+  delete el.dataset.__loadPendingSince;
+  el.preload = 'auto';
+} catch {}
+
+try { pauseForeignMedia(el); } catch {}
+try { __touchActiveVideoEl(el); } catch {}
+try { __enforceActiveVideoCap(el); } catch {}
           }).catch((err) => {
             if (!canContinue()) {
               try { el.dataset.__playRequested = '0'; } catch {}
@@ -2048,19 +2060,24 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                     return;
                   }
                   trace('play_retry_muted_ok', el, { reason });
-                  try {
-                    el.dataset.__playRequested = '0';
-                    el.dataset.__active = '1';
-                    el.dataset.__prewarm = '1';
-                    el.dataset.__resident = '1';
-                    el.dataset.__loadPending = '0';
-                    el.dataset.__warmReady = '1';
-                    delete el.dataset.__loadPendingSince;
-                    el.preload = 'auto';
-                  } catch {}
-                  try { __touchActiveVideoEl(el); } catch {}
-                  try { __enforceActiveVideoCap(el); } catch {}
-                  try { pauseForeignMedia(el); } catch {}                  
+try {
+  const confirmedReady =
+    Number(el?.readyState || 0) >= 2 &&
+    !!String(el?.getAttribute?.('src') || el?.currentSrc || '')
+
+  el.dataset.__playRequested = '0';
+  el.dataset.__active = '1';
+  el.dataset.__prewarm = '1';
+  el.dataset.__resident = '1';
+  el.dataset.__loadPending = '0';
+  el.dataset.__warmReady = confirmedReady ? '1' : '0';
+  delete el.dataset.__loadPendingSince;
+  el.preload = 'auto';
+} catch {}
+
+try { pauseForeignMedia(el); } catch {}
+try { __touchActiveVideoEl(el); } catch {}
+try { __enforceActiveVideoCap(el); } catch {}                 
                 }).catch((retryErr) => {
                   try { el.dataset.__playRequested = '0'; } catch {}
                   trace('play_retry_muted_fail', el, {
@@ -2615,26 +2632,42 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         invalidatePlayRequest(el);
         try { el.dataset.__coordinatorUnloadUntil = String(Date.now() + 2500); } catch {}
         const isPostVideo = el instanceof HTMLVideoElement && String(el?.getAttribute?.('data-forum-video') || '') === 'post';
-        let forceHard = false;
-        try {
-          const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 2200 : (isCoarseUi ? 1500 : 1200));
-          forceHard =
-            unloadReason === 'cleanup' ||
-            unloadReason === 'error_blocked' ||
-            (farOutOfView && (isIOSUi || isCoarseUi));
-          if (forceHard) el.dataset.__forceHardUnload = '1';
-          else delete el.dataset.__forceHardUnload;
-        } catch {}
-        trace(isPostVideo && !forceHard ? 'soft_release' : 'hard_unload', el, { reason: unloadReason });
-        try { __dropActiveVideoEl(el); } catch {}
-        if (el instanceof HTMLVideoElement) {
-          withSystemPause(el, () => {
-            try {
-              if (isPostVideo && !forceHard) __softReleaseVideoEl(el, `coordinator:${unloadReason}`);
-              else __unloadVideoEl(el);
-            } catch {}
-          });
-        } else {
+let forceHard = false;
+try {
+  const disconnected = !(el instanceof Element) || !el.isConnected;
+  const farOutOfView =
+    unloadReason === 'out_of_view' &&
+    !isNearViewportElement(el, isIOSUi ? 2600 : (isCoarseUi ? 1800 : 1600));
+
+  if (isPostVideo) {
+    forceHard =
+      (!!disconnected && unloadReason === 'cleanup') ||
+      (!!disconnected && unloadReason === 'resident_cap') ||
+      (!!disconnected && unloadReason === 'error_blocked');
+  } else {
+    forceHard =
+      unloadReason === 'cleanup' ||
+      unloadReason === 'resident_cap' ||
+      unloadReason === 'error_blocked' ||
+      (farOutOfView && (isIOSUi || isCoarseUi));
+  }
+
+  if (forceHard) el.dataset.__forceHardUnload = '1';
+  else delete el.dataset.__forceHardUnload;
+} catch {}
+
+trace(isPostVideo && !forceHard ? 'soft_release' : 'hard_unload', el, { reason: unloadReason });
+
+try { __dropActiveVideoEl(el); } catch {}
+
+if (el instanceof HTMLVideoElement) {
+  withSystemPause(el, () => {
+    try {
+      if (isPostVideo && !forceHard) __softReleaseVideoEl(el, `coordinator:${unloadReason}`);
+      else __unloadVideoEl(el);
+    } catch {}
+  });
+} else {
           withSystemPause(el, () => {
             try { if (!el.paused) el.pause(); } catch {}
           });
@@ -2882,38 +2915,53 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         }
         try {
           clearSuppressedPlayback(el);
-          if (el instanceof HTMLVideoElement) {
-            const hasSrc = !!el.getAttribute('src');
-            let restoredNow = false;
-            if (!hasSrc) {
-              trace('play_restore', el);
-              __restoreVideoEl(el);
-              restoredNow = true;
-            }
-            try { el.dataset.__prewarm = '1'; } catch {}
-            try { el.dataset.__active = '1'; } catch {}
-            try { el.preload = 'auto'; } catch {}
-            try {
-              const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-              if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
-                const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
-                if (!canKickLoad(el, {
-                  channel: 'play_cold',
-                  minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
-                  burstWindowMs: isIOSUi ? 22000 : 15000,
-                  burstLimit: isIOSUi ? 4 : 5,
-                  blockMs: isIOSUi ? 12000 : 9000,
-                  bypassSrcLimiter: userIntentKick || isIOSUi,
-                  bypassPendingBudget: true,
-                })) return;
-                try { el.dataset.__loadPending = '1'; } catch {}
-                trace('play_load', el);
-                el.load?.();
-              }
-            } catch {}
-            __touchActiveVideoEl(el);
-            __enforceActiveVideoCap(el);
-          }
+if (el instanceof HTMLVideoElement) {
+  const isPostFeedVideo =
+    String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+
+  const hasSrc = !!el.getAttribute('src');
+  let restoredNow = false;
+
+  if (!hasSrc) {
+    trace('play_restore', el);
+    __restoreVideoEl(el);
+    restoredNow = true;
+  }
+
+  try { el.preload = 'auto'; } catch {}
+
+  try {
+    const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
+
+    if (
+      !isPostFeedVideo &&
+      !restoredNow &&
+      empty &&
+      el.dataset?.__loadPending !== '1' &&
+      el.paused &&
+      (el.currentTime === 0)
+    ) {
+      const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
+      if (!canKickLoad(el, {
+        channel: 'play_cold',
+        minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
+        burstWindowMs: isIOSUi ? 22000 : 15000,
+        burstLimit: isIOSUi ? 4 : 5,
+        blockMs: isIOSUi ? 12000 : 9000,
+        bypassSrcLimiter: userIntentKick || isIOSUi,
+        bypassPendingBudget: true,
+      })) return;
+
+      try { el.dataset.__loadPending = '1'; } catch {}
+      trace('play_load', el);
+      el.load?.();
+    }
+  } catch {}
+
+  // ВАЖНО:
+  // active touch / cap переносим на confirmed play success.
+  // Нельзя выбивать соседние видео раньше, чем этот элемент реально стартовал.
+}
           applyMutedPref(el);
           el.playsInline = true;
           // LOOP: автоплей всегда зацикленный 
