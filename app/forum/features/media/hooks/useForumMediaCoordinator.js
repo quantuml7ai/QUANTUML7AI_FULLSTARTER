@@ -1643,11 +1643,14 @@ const onMutedEvent = (e) => {
     source === 'forum-splash' ||
     source === 'video' ||
     source === 'youtube' ||
-    source === 'qcast';
+    source === 'qcast' ||
+    source === 'forum-ads' ||
+    source === 'forum-ads-toggle';
 
   if (source === 'forum-coordinator') return;
   if (!isAuthoritativeMuteSource) return;
   if (typeof e?.detail?.muted !== 'boolean') return;
+
   setMutedPref(e.detail.muted, source, false);
 };
     const onMediaPauseCaptured = (e) => {
@@ -2623,72 +2626,58 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
       }
       return Math.max(140, Math.round(viewportH * (isIOSUi ? 0.56 : (isCoarseUi ? 0.40 : 0.30))));
     };
-    const pauseForeignMedia = (keepEl = null) => {
+const pauseForeignMedia = (keepEl = null) => {
   try {
     document.querySelectorAll(selector).forEach((node) => {
-          if (!(node instanceof Element)) return;
-          if (node === keepEl) return;
-          if (keepEl instanceof Element && keepEl.contains?.(node)) return;
-          if (node.contains?.(keepEl)) return;
-          if (node instanceof HTMLVideoElement || node instanceof HTMLAudioElement) {
-            invalidatePlayRequest(node);
-            markSuppressedPlayback(node, 1200);
-            try {
-              const owner = getOwnerNode(node);
-              if (owner instanceof Element) markSuppressedPlayback(owner, 1200);
-            } catch {}
-            withSystemPause(node, () => {
-              try { if (!node.paused) node.pause(); } catch {}
-            });
-            return;
-          }
-          const kind = String(node.getAttribute?.('data-forum-media') || '');
-          if (kind === 'qcast') {
-            const a = node.querySelector?.('audio[data-qcast-audio="1"]');
-            if (a instanceof HTMLAudioElement) {
-              invalidatePlayRequest(a);
-              markSuppressedPlayback(a, 1200);
-              markSuppressedPlayback(node, 1200);
-              withSystemPause(a, () => {
-                try { if (!a.paused) a.pause(); } catch {}
-              });
-            }
-            return;
-          }
-          if (kind === 'youtube') {
-            const player = ytPlayers.get(node);
-            try { player?.pauseVideo?.(); } catch {}
-            try { stopYtMutePoll(player); } catch {}
-            return;
-          }
+      if (!(node instanceof Element)) return;
+      if (node === keepEl) return;
+      if (keepEl instanceof Element && keepEl.contains?.(node)) return;
+      if (node.contains?.(keepEl)) return;
+
+      if (node instanceof HTMLVideoElement || node instanceof HTMLAudioElement) {
+        invalidatePlayRequest(node);
+        markSuppressedPlayback(node, 1200);
+        try {
+          const owner = getOwnerNode(node);
+          if (owner instanceof Element) markSuppressedPlayback(owner, 1200);
+        } catch {}
+        withSystemPause(node, () => {
+          try { if (!node.paused) node.pause(); } catch {}
+        });
+        return;
+      }
+
+      const kind = String(node.getAttribute?.('data-forum-media') || '');
+
+      if (kind === 'qcast') {
+        const a = node.querySelector?.('audio[data-qcast-audio="1"]');
+        if (a instanceof HTMLAudioElement) {
+          invalidatePlayRequest(a);
+          markSuppressedPlayback(a, 1200);
+          markSuppressedPlayback(node, 1200);
+          withSystemPause(a, () => {
+            try { if (!a.paused) a.pause(); } catch {}
+          });
+        }
+        return;
+      }
+
+      if (kind === 'youtube') {
+        const player = ytPlayers.get(node);
+        try { player?.pauseVideo?.(); } catch {}
+        try { stopYtMutePoll(player); } catch {}
+        return;
+      }
+
       if (kind === 'tiktok' || kind === 'iframe') {
         try { node.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
         try { node.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
         // Не делаем отложенный hard-unload на обычном foreign pause:
         // это давало визуальное исчезновение iframe и дергания ленты.
       }
-    });
-    // Рекламный media-runtime живёт отдельно от selector координатора.
-    // На фокусе контентного кандидата гасим ad-media best-effort, чтобы не было 2 одновременных потоков.
-    document.querySelectorAll('.forum-ad-media-slot video, .forum-ad-media-slot iframe').forEach((node) => {
-      if (!(node instanceof Element)) return;
-      if (node === keepEl) return;
-      if (keepEl instanceof Element && keepEl.contains?.(node)) return;
-      if (node.contains?.(keepEl)) return;
-      if (node instanceof HTMLVideoElement || node instanceof HTMLAudioElement) {
-        withSystemPause(node, () => {
-          try { if (!node.paused) node.pause(); } catch {}
-        });
-        return;
-      }
-      if (node instanceof HTMLIFrameElement) {
-        try { node.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
-        try { node.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
-      }
-    });
+    }); 
   } catch {}
-};
-
+}; 
     const hardUnloadMedia = (...args) => {
       const el = args?.[0];
       const unloadReason = String(args?.[1] || 'unknown');
@@ -3668,83 +3657,33 @@ return;
         traceCandidate('candidate_external_promote', candidate, { reason });
       } catch {}
     };
-    const onExternalMediaPlay = (e) => {
-      const source = String(e?.detail?.source || '');
-      const isAdSource =
-        source === 'ad' ||
-        source === 'forum_ads' ||
-        source === 'forum-ads' ||
-        source.startsWith('ad_');
-      if (isAdSource) {
-        const externalEl = e?.detail?.element || null;
-        if (externalEl instanceof Element) {
-          const manual = !!e?.detail?.manual;
-          const manualLease = hasManualLease(externalEl);
-          const hasGesture = hasUserGestureIntent(externalEl);
-          const visiblePxNow = getOwnerVisiblePx(externalEl);
-          const minVisiblePx = getStartVisiblePx(externalEl);
-          const centerDistNow = getOwnerCenterDist(externalEl);
-          const maxCenterDist = getPriorityCenterMaxDist(externalEl);
-          if (
-            !manual &&
-            !manualLease &&
-            !hasGesture &&
-            (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)
-          ) {
-            traceCandidate('candidate_external_ignored', externalEl, {
-              reason: `${source}:out_of_focus`,
-              visiblePx: visiblePxNow,
-              minVisiblePx,
-              centerDist: centerDistNow,
-              maxCenterDist,
-            });
-            try {
-              if (externalEl instanceof HTMLVideoElement || externalEl instanceof HTMLAudioElement) {
-                withSystemPause(externalEl, () => {
-                  try { if (!externalEl.paused) externalEl.pause(); } catch {}
-                });
-              } else if (externalEl instanceof HTMLIFrameElement) {
-                try { externalEl.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
-                try { externalEl.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
-              } else {
-                const adVideo = externalEl.querySelector?.('video');
-                if (adVideo instanceof HTMLVideoElement) {
-                  withSystemPause(adVideo, () => {
-                    try { if (!adVideo.paused) adVideo.pause(); } catch {}
-                  });
-                }
-                const adIframe = externalEl.querySelector?.('iframe');
-                if (adIframe instanceof HTMLIFrameElement) {
-                  try { adIframe.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
-                  try { adIframe.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
-                }
-              }
-            } catch {}
-            return;
-          }
-          try {
-            if (active && active !== externalEl) {
-              softPauseMedia(active);
-              scheduleHardUnload(active, null, 'ad_focus_switch');
-              active = null;
-              activeSinceTs = 0;
-            }
-          } catch {}
-          try { cancelUnload(externalEl); } catch {}
-          try { pauseForeignMedia(externalEl); } catch {}
-          traceCandidate('candidate_external_promote', externalEl, { reason: source });
-        }
-        return;
-      }
-      if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
-      const candidate = e?.detail?.element || null;
-      const manual = !!e?.detail?.manual;
-      if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
-        traceCandidate('candidate_external_ignored', candidate, { reason: source });
-        return;
-      }
-      promoteExternalActive(candidate, `${source}_external_play`, { manual });
-    };
+const onExternalMediaPlay = (e) => {
+  const source = String(e?.detail?.source || '');
+
+  // Рекламный runtime живёт полностью отдельно от forum media coordinator.
+  // Координатор НЕ продвигает рекламу в active-owner, НЕ паузит из-за неё
+  // форумное media и НЕ пытается управлять её autoplay/focus-логикой.
+  const isAdSource =
+    source === 'ad' ||
+    source === 'forum_ads' ||
+    source === 'forum-ads' ||
+    source === 'forum-ads-toggle' ||
+    source.startsWith('ad_');
+
+  if (isAdSource) return;
+
+  if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
+
+  const candidate = e?.detail?.element || null;
+  const manual = !!e?.detail?.manual;
+
+  if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
+    traceCandidate('candidate_external_ignored', candidate, { reason: source });
+    return;
+  }
+
+  promoteExternalActive(candidate, `${source}_external_play`, { manual });
+};
 
     observeAll();
     const recoverVisibleHtmlMedia = (reason = 'visibility_recover') => {
