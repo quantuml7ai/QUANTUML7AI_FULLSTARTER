@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 950
+const VF_OVERSCAN_PX = 1120
+const VF_OVERSCAN_PX_TABLET = 1400
+const VF_OVERSCAN_PX_DESKTOP = 1880
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -13,9 +15,9 @@ const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
-const VF_WINDOW_STICKY_MS = 320
+const VF_WINDOW_STICKY_MS = 520
 const VF_LAYOUT_JITTER_PX = 28
-const VF_SCROLL_SETTLE_MS = 180
+const VF_SCROLL_SETTLE_MS = 260
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 
 function defaultIsBrowser() {
@@ -46,7 +48,7 @@ export default function useVideoFeedWindowing({
   const vfRosRef = useRef(new Map())
   const vfRafRef = useRef(0)
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
-  const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
+  const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0, flipHoldUntil: 0 })
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const vfBreakpointRef = useRef('unknown')
@@ -72,14 +74,33 @@ export default function useVideoFeedWindowing({
  
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 7
+      if (!isBrowserFn()) return 8
+      const w = Number(window?.innerWidth || 0)
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 6
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 7
-      return 8
+      const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
+      if (coarse) return 8
+      if (w >= 1280) return lowMem ? 12 : 14
+      if (w >= 1024) return lowMem ? 10 : 13
+      if (w >= 640) return lowMem ? 9 : 10
+      return lowMem ? 8 : 9
     } catch {
       return 7
+    }
+  }, [isBrowserFn])
+
+  const vfGetOverscanBase = useCallback(() => {
+    try {
+      if (!isBrowserFn()) return VF_OVERSCAN_PX_TABLET
+      const w = Number(window?.innerWidth || 0)
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+      if (coarse) return VF_OVERSCAN_PX
+      if (w >= 1280) return 1960
+      if (w >= 1024) return VF_OVERSCAN_PX_DESKTOP
+      if (w >= 640) return VF_OVERSCAN_PX_TABLET
+      return VF_OVERSCAN_PX
+    } catch {
+      return VF_OVERSCAN_PX_TABLET
     }
   }, [isBrowserFn])
 
@@ -241,8 +262,11 @@ export default function useVideoFeedWindowing({
     const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
+    const flipHoldUntil = Number(vfScrollStateRef.current?.flipHoldUntil || 0)
+    const flipHoldActive = flipHoldUntil > Date.now()
+    const overscanBase = vfGetOverscanBase()
     const velocityBoost = Math.min(550, Math.round(velocity * 260))
-    const overscanPx = VF_OVERSCAN_PX + velocityBoost
+    const overscanPx = overscanBase + velocityBoost + (flipHoldActive ? Math.round(overscanBase * 0.18) : 0)
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
 
@@ -286,7 +310,7 @@ export default function useVideoFeedWindowing({
         const trailingTrim = Math.max(0, prev.end - nextEnd)
         const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
 
-        if (recentWindowChange || smallShrink) {
+        if (flipHoldActive || recentWindowChange || smallShrink) {
           nextStart = prev.start
           nextEnd = prev.end
         } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
@@ -330,7 +354,7 @@ export default function useVideoFeedWindowing({
       vfWinRef.current = next
       return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfGetOverscanBase, vfBuildWindow, isBrowserFn])
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return
@@ -430,9 +454,22 @@ export default function useVideoFeedWindowing({
         const signedDy = top - Number(prev?.top || 0)
         const dy = Math.abs(signedDy)
         const velocity = dt > 220 ? 0 : (dy / dt)
-        const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
+        const prevDirection = Number(prev?.direction || 0)
+        const direction = dy < 2 ? prevDirection : (signedDy > 0 ? 1 : -1)
+        const directionFlip = direction !== 0 && prevDirection !== 0 && direction !== prevDirection
+        const coarseLike = (() => {
+          try {
+            const ua = String(window?.navigator?.userAgent || '')
+            return /iP(hone|ad|od)/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches
+          } catch {
+            return false
+          }
+        })()
+        const flipHoldUntil = directionFlip && coarseLike
+          ? (Date.now() + Math.max(220, VF_SCROLL_SETTLE_MS + 80))
+          : Number(prev?.flipHoldUntil || 0)
 
-        vfScrollStateRef.current = { top, ts: now, velocity, direction }
+        vfScrollStateRef.current = { top, ts: now, velocity, direction, flipHoldUntil }
  
         scrollActivity.activeUntil = Date.now() + VF_SCROLL_SETTLE_MS
         if (scrollActivity.settleTimer) { 
@@ -506,7 +543,7 @@ export default function useVideoFeedWindowing({
       }
 
       scrollActivity.activeUntil = 0
-      vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
+      vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0, flipHoldUntil: 0 }
     }
   }, [
     videoFeedOpen,

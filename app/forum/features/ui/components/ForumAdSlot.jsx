@@ -85,7 +85,7 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
 
   return (
     <div ref={hostRef} className="forumAdSlot" data-slotkind={slotKind} data-slotkey={slotKey}>
-      <AdCard url={url} slotKind={slotKind} nearId={nearId} />
+      <AdCard url={url} slotKind={slotKind} nearId={nearId} forumMediaScoped />
     </div>
   )
 }

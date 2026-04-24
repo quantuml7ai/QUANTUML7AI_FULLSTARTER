@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T20:31:47.985Z",
+  "generatedAt": "2026-04-24T05:51:51.424Z",
   "report": [
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
@@ -9,9 +9,9 @@
         "restoreLoadBlockedUntil": 2,
         "restoreLoadWindowStart": 2,
         "lastWarmLoadKickTs": 0,
-        "loadPending": 3,
-        "currentSrc": 2,
-        "dataSrc": 7
+        "loadPending": 10,
+        "currentSrc": 8,
+        "dataSrc": 9
       },
       "guardScore": 6
     },
@@ -23,9 +23,9 @@
         "restoreLoadBlockedUntil": 0,
         "restoreLoadWindowStart": 0,
         "lastWarmLoadKickTs": 3,
-        "loadPending": 28,
-        "currentSrc": 12,
-        "dataSrc": 28
+        "loadPending": 37,
+        "currentSrc": 14,
+        "dataSrc": 27
       },
       "guardScore": 0
     },

@@ -48,6 +48,7 @@ const GROUPS = {
     ['tools/audit-forum-startup.js', ['forum-startup.audit.report.json']],
     ['tools/audit-media-budget.js', ['media-budget.audit.report.json']],
     ['tools/audit-player-ownership.js', ['player-budget.report.json', 'qcast-ownership.report.json']],
+    ['tools/audit-post-video-lifecycle.js', ['native-post-video.audit.report.json']],
     ['tools/audit-iframe-restore.js', ['iframe-restore.report.json']],
     ['tools/audit-same-src-thrash.js', ['same-src-thrash.report.json']],
     ['tools/audit-forum-scroll-runtime.js', ['forum-scroll.audit.report.json']],

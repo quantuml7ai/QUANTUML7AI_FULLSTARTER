@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:31:50.700Z",
+  "generatedAt": "2026-04-24T05:51:50.758Z",
   "summary": {
     "scannedFiles": 367,
     "filesWithSyncKeys": 141,
@@ -8571,17 +8571,17 @@
       "hits": [
         {
           "key": "userId",
-          "line": 181,
+          "line": 199,
           "text": "userId={fromId}"
         },
         {
           "key": "vip",
-          "line": 202,
+          "line": 220,
           "text": "<div key={`${m?.id || 'm'}:stk:${i}`} className=\"vipMediaBox dmMediaBox\" data-kind=\"sticker\">"
         },
         {
           "key": "vip",
-          "line": 210,
+          "line": 228,
           "text": "className={s.kind === 'mozi' ? 'moziEmojiBig emojiPostBig' : 'vipEmojiBig emojiPostBig'}"
         }
       ],

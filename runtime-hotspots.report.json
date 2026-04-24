@@ -1,15 +1,15 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:30:55.655Z",
+  "generatedAt": "2026-04-24T05:51:46.949Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 17,
+        "for-loop": 14,
         "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 14,
+        "layout-read": 16,
         "sync-json": 0,
         "local-storage": 4,
         "session-storage": 0,
@@ -17,14 +17,8 @@
         "raf": 4,
         "interval": 2
       },
-      "longLines": [
-        {
-          "i": 494,
-          "len": 190,
-          "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
-        }
-      ],
-      "score": 95
+      "longLines": [],
+      "score": 94
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -283,6 +277,24 @@
       },
       "longLines": [],
       "score": 28
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
+      "counts": {
+        "for-loop": 2,
+        "while-loop": 2,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 3,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 25
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\components\\CryptoNewsLens.jsx",
@@ -736,6 +748,24 @@
       "score": 16
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 2,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 0,
+        "local-storage": 6,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 15
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\profile\\_identity.js",
       "counts": {
         "for-loop": 7,
@@ -925,24 +955,6 @@
         "layout-read": 0,
         "sync-json": 0,
         "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 12
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 1,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 3,
-        "sync-json": 0,
-        "local-storage": 6,
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
@@ -2959,24 +2971,6 @@
       "score": 3
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useVideoFeedWindowing.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 1,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 3
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\moderation\\components\\ReportPopover.jsx",
       "counts": {
         "for-loop": 0,
@@ -4065,6 +4059,24 @@
         "local-storage": 2,
         "session-storage": 0,
         "network-call": 1,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
@@ -7979,24 +7991,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\subscribe\\page.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

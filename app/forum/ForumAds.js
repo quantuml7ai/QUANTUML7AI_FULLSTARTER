@@ -1081,7 +1081,7 @@ const lastMediaIndexByKey = new Map();
  * Превью тянет карточку на всю доступную высоту.
  */
 
-export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
+export function AdCard({ url, slotKind, nearId, layout = 'fixed', forumMediaScoped = false }) {
   const conf = getForumAdConf();
   useAdPreconnect(conf);
   const i18n = useI18n();
@@ -1155,11 +1155,12 @@ const ytPlayerRef = useRef(null);
   const [isPageActive, setIsPageActive] = useState(true);
 
   const shouldPlay = isFocused && isPageActive;
+  const shouldAutoPlayMedia = !forumMediaScoped && shouldPlay;
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(null);
   const adPlayEventTsRef = useRef(0);
 const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
-  if (!isBrowser()) return;
+  if (forumMediaScoped || !isBrowser()) return;
 
   try {
     const now = Date.now();
@@ -1193,7 +1194,7 @@ const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
       })
     );
   } catch {}
-}, []);
+}, [forumMediaScoped]);
 const slotCssVars = {
   '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
   '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
@@ -1222,8 +1223,8 @@ const slotCssVars = {
 };
 
 useEffect(() => {
-  shouldPlayRef.current = shouldPlay;
-}, [shouldPlay]);
+  shouldPlayRef.current = shouldAutoPlayMedia;
+}, [shouldAutoPlayMedia]);
 
 useEffect(() => {
   mutedRef.current = muted;
@@ -1233,6 +1234,11 @@ useEffect(() => {
   if (detachVideoTimerRef.current) {
     clearTimeout(detachVideoTimerRef.current);
     detachVideoTimerRef.current = null;
+  }
+
+  if (forumMediaScoped) {
+    setAttachedVideoSrc('');
+    return undefined;
   }
 
   if (media.kind !== 'video') {
@@ -1262,7 +1268,7 @@ useEffect(() => {
   // Держим ad-video attached не только пока он "в фокусе",
   // но и пока блок ещё рядом с viewport.
   // Это убирает визуальное исчезновение видео на глазах у пользователя.
-  const wantAttached = shouldPlay || isNear;
+  const wantAttached = shouldAutoPlayMedia || isNear;
   if (wantAttached) {
     setAttachedVideoSrc((prev) => (prev === nextSrc ? prev : nextSrc));
     return undefined;
@@ -1283,9 +1289,10 @@ useEffect(() => {
       detachVideoTimerRef.current = null;
     }
   };
-}, [isNear, media.kind, media.src, shouldPlay]);
+}, [forumMediaScoped, isNear, media.kind, media.src, shouldAutoPlayMedia]);
   // Page visibility + focus/blur
   useEffect(() => {
+    if (forumMediaScoped) return undefined;
     if (!isBrowser()) return;
 
     const sync = () => {
@@ -1303,7 +1310,7 @@ useEffect(() => {
       window.removeEventListener('focus', sync);
       window.removeEventListener('blur', sync);
     };
-  }, []);
+  }, [forumMediaScoped]);
 
   // Intersection: near + focused
   useEffect(() => {
@@ -1707,6 +1714,14 @@ useEffect(() => {
   // YouTube Iframe API для управления звуком
 useEffect(() => {
   if (!isBrowser()) return;
+  if (forumMediaScoped) {
+    const existing = ytPlayerRef.current;
+    if (existing) {
+      try { existing.destroy?.(); } catch {}
+      ytPlayerRef.current = null;
+    }
+    return undefined;
+  }
   if (media.kind !== 'youtube' || !media.src) {
     const existing = ytPlayerRef.current;
     if (existing) {
@@ -1786,9 +1801,10 @@ onReady: (ev) => {
     cancelled = true;
     cleanupPlayer();
   };
-}, [media.kind, media.src]);
+}, [forumMediaScoped, media.kind, media.src]);
   // ===== Hard stop / resume playback depending on attention =====
   useEffect(() => {
+    if (forumMediaScoped) return undefined;
     // HTML5 video
 if (media.kind === 'video' && videoRef.current) {
   const v = videoRef.current;
@@ -1799,7 +1815,7 @@ if (media.kind === 'video' && videoRef.current) {
     return;
   }
 
-  if (shouldPlay) {
+  if (shouldAutoPlayMedia) {
     const playAttempt = v.play?.();
 
     if (playAttempt && typeof playAttempt.then === 'function') {
@@ -1820,7 +1836,7 @@ if (media.kind === 'video' && videoRef.current) {
 if (media.kind === 'youtube' && ytPlayerRef.current) {
   const p = ytPlayerRef.current;
   try {
-    if (shouldPlay) {
+    if (shouldAutoPlayMedia) {
       if (muted === true) p.mute?.();
       else if (muted === false) p.unMute?.();
 
@@ -1831,10 +1847,10 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     }
   } catch {}
 }
-    if (media.kind === 'tiktok' && shouldPlay) {
+    if (media.kind === 'tiktok' && shouldAutoPlayMedia) {
       emitAdPlayToCoordinator('ad_tiktok');
     }
-  }, [emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
+  }, [emitAdPlayToCoordinator, forumMediaScoped, shouldAutoPlayMedia, media.kind, media.src, muted]);
 
   // Impression tracking
   useEffect(() => {
@@ -1942,7 +1958,7 @@ const handleToggleSound = (e) => {
     try {
       v.muted = next;
     } catch {}
-    if (v.paused && !next && shouldPlayRef.current) {
+    if (!forumMediaScoped && v.paused && !next && shouldPlayRef.current) {
       v.play?.().catch(() => {});
     }
     return;
@@ -1956,7 +1972,7 @@ const handleToggleSound = (e) => {
         p.mute?.();
       } else {
         p.unMute?.();
-        if (shouldPlayRef.current) p.playVideo?.();
+        if (!forumMediaScoped && shouldPlayRef.current) p.playVideo?.();
       }
     } catch {}
   }
@@ -2340,13 +2356,16 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   <div className="forum-ad-media-fill">
 <video
   ref={videoRef}
-  src={attachedVideoSrc || undefined}
   className="forum-ad-fit"
   {...(muted == null ? {} : { muted })}
   loop
   playsInline
   referrerPolicy="no-referrer"
-  preload={shouldPlay ? 'auto' : (isNear ? 'metadata' : 'none')}
+  data-forum-media={forumMediaScoped ? 'video' : undefined}
+  data-forum-ad-media={forumMediaScoped ? '1' : undefined}
+  data-src={forumMediaScoped ? media.src : undefined}
+  src={forumMediaScoped ? undefined : (attachedVideoSrc || undefined)}
+  preload={forumMediaScoped ? 'none' : (shouldAutoPlayMedia ? 'auto' : (isNear ? 'metadata' : 'none'))}
   onLoadedData={() => {
     try { clearVideoSrcBlock(media?.src); } catch {}
   }}
@@ -2371,10 +2390,13 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 >
   <iframe
     ref={ytIframeRef}
-    src={`https://www.youtube-nocookie.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+    data-forum-media={forumMediaScoped ? 'youtube' : undefined}
+    data-forum-ad-media={forumMediaScoped ? '1' : undefined}
+    data-src={`https://www.youtube-nocookie.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+    src={forumMediaScoped ? undefined : `https://www.youtube-nocookie.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
     frameBorder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure"
     allowFullScreen
     style={{
       position: 'absolute',
@@ -2389,16 +2411,19 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && shouldPlay && (
+            {media.kind === 'tiktok' && media.src && (forumMediaScoped || shouldAutoPlayMedia) && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
 >
   <iframe
-    src={`https://www.tiktok.com/embed/v2/${media.src}`}
+    data-forum-media={forumMediaScoped ? 'tiktok' : undefined}
+    data-forum-ad-media={forumMediaScoped ? '1' : undefined}
+    data-src={`https://www.tiktok.com/embed/v2/${media.src}`}
+    src={forumMediaScoped ? undefined : `https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
     frameBorder="0"
-    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share; compute-pressure"
     style={{
       position: 'absolute',
       inset: 0,
@@ -2412,7 +2437,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 
             )}
 
-            {media.kind === 'tiktok' && media.src && !shouldPlay && (
+            {media.kind === 'tiktok' && media.src && !forumMediaScoped && !shouldAutoPlayMedia && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>

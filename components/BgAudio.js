@@ -178,6 +178,7 @@ export default function BgAudio({
       window.removeEventListener('click', onGesture, captureOptions)
       window.removeEventListener('keydown', onGesture, captureOptions)
       window.removeEventListener('touchstart', onGesture, captureOptions)
+      window.removeEventListener('touchmove', onGesture, captureOptions)
     }
 
     const enableSound = async () => {
@@ -199,6 +200,7 @@ export default function BgAudio({
     window.addEventListener('click', onGesture, captureOptions)
     window.addEventListener('keydown', onGesture, captureOptions)
     window.addEventListener('touchstart', onGesture, captureOptions)
+    window.addEventListener('touchmove', onGesture, captureOptions)
 
     return () => {
       detach()

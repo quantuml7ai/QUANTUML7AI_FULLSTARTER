@@ -1,0 +1,72 @@
+{
+  "generatedAt": "2026-04-24T05:51:31.043Z",
+  "status": "pass",
+  "files": {
+    "runtime": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+    "coordinator": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
+    "videoLeaf": "app/forum/features/media/components/VideoMedia.jsx",
+    "postMediaStack": "app/forum/features/feed/components/PostMediaStack.jsx",
+    "policy": "app/forum/features/media/utils/mediaStatePolicy.js"
+  },
+  "signals": {
+    "softReleaseHelper": true,
+    "hardUnloadPolicyGate": true,
+    "coordinatorSoftReleaseBridge": true,
+    "detachedPostLoadKickGuard": true,
+    "candidateWaitRestore": true,
+    "orphanShellDump": true,
+    "restoreSharesKickClock": true,
+    "restoreSeedsPendingSince": true,
+    "recentRestoreLoadHold": true,
+    "softPauseUsesSoftRelease": true,
+    "foreignPauseUsesSoftRelease": true,
+    "postPrewarmMetadataResident": true,
+    "postPrewarmDetachedHold": true,
+    "autoplayRetryWatchdog": true,
+    "pendingActivateUsesPlayMedia": true,
+    "leafCoordinatorGuard": true,
+    "leafCoordinatorPostSrcDetached": true,
+    "leafPostPreloadNone": true,
+    "leafCoordinatorLoadStateGuard": true,
+    "leafCoordinatorLoadedHandlerGuard": true,
+    "leafPosterAttr": true,
+    "leafPosterDatasetSync": true,
+    "postMediaPosterForward": true,
+    "leafPostMountLifecycleReset": false,
+    "leafPostMountSrcDetach": false
+  },
+  "ownershipWrites": {
+    "coordinator": {
+      "active": 7,
+      "prewarm": 7,
+      "resident": 8,
+      "loadPending": 13,
+      "warmReady": 5
+    },
+    "runtime": {
+      "active": 2,
+      "prewarm": 2,
+      "resident": 1,
+      "loadPending": 4,
+      "warmReady": 3
+    },
+    "videoLeaf": {
+      "active": 5,
+      "prewarm": 4,
+      "resident": 2,
+      "loadPending": 5,
+      "warmReady": 5
+    }
+  },
+  "issues": [],
+  "notes": [
+    "Coordinator remains the decision layer; runtime owns side-effect helpers such as soft release and restore.",
+    "VideoMedia must not detach src or zero owner-flags for new post-video mounts.",
+    "Restore-originated load kicks must share the same recent-kick guard as coordinator cold-load retries.",
+    "PostMediaStack and VideoMedia must keep poster wired through to the DOM video element, otherwise poster-preserve logic is a no-op.",
+    "Coordinator-owned post-video should render without a live src attribute until the coordinator explicitly restores it.",
+    "Soft pause and foreign pause must demote video state via soft release, otherwise hot resident flags linger and keep churn alive.",
+    "Low-priority post-video prewarm should stay metadata-resident; aggressive load kicks are only allowed near actual activation.",
+    "Late-loaded active media should keep retrying autoplay through the coordinator until a real play succeeds or the owner loses focus."
+  ]
+}

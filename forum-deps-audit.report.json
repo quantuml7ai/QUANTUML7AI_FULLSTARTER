@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:30:57.758Z",
+  "generatedAt": "2026-04-24T05:51:48.834Z",
   "summary": {
     "scannedFiles": 378,
-    "internalEdges": 500,
+    "internalEdges": 502,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -1942,9 +1942,10 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/shared/utils/browser.js",
-        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/mediaStatePolicy.js"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -2026,8 +2027,8 @@
       "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/shared/config/runtime.js",
-        "app/forum/features/feed/utils/interleaveRecommendationRails.js"
+        "app/forum/features/feed/utils/interleaveRecommendationRails.js",
+        "app/forum/shared/config/runtime.js"
       ],
       "importCount": 2,
       "external": [
@@ -2087,9 +2088,10 @@
       "imports": [
         "app/forum/features/media/components/VideoMedia.jsx",
         "app/forum/features/media/components/QCastPlayer.jsx",
-        "app/forum/features/media/utils/videoControls.js"
+        "app/forum/features/media/utils/videoControls.js",
+        "app/forum/features/media/utils/mediaStatePolicy.js"
       ],
-      "importCount": 3,
+      "importCount": 4,
       "external": [
         "react"
       ],
@@ -4649,9 +4651,10 @@
       "imports": [],
       "importCount": 0,
       "external": [
+        "next/image",
         "react"
       ],
-      "externalCount": 1
+      "externalCount": 2
     },
     {
       "file": "components/ForumBootSplash.jsx",
