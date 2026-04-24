@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 1120
-const VF_OVERSCAN_PX_TABLET = 1400
-const VF_OVERSCAN_PX_DESKTOP = 1880
+const VF_OVERSCAN_PX = 980
+const VF_OVERSCAN_PX_TABLET = 1180
+const VF_OVERSCAN_PX_DESKTOP = 1480
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -15,9 +15,9 @@ const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
-const VF_WINDOW_STICKY_MS = 520
+const VF_WINDOW_STICKY_MS = 320
 const VF_LAYOUT_JITTER_PX = 28
-const VF_SCROLL_SETTLE_MS = 260
+const VF_SCROLL_SETTLE_MS = 180
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 
 function defaultIsBrowser() {
@@ -74,16 +74,16 @@ export default function useVideoFeedWindowing({
  
   const vfGetMaxRender = useCallback(() => {
     try {
-      if (!isBrowserFn()) return 8
+      if (!isBrowserFn()) return 7
       const w = Number(window?.innerWidth || 0)
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
       const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
-      if (coarse) return 8
-      if (w >= 1280) return lowMem ? 12 : 14
-      if (w >= 1024) return lowMem ? 10 : 13
-      if (w >= 640) return lowMem ? 9 : 10
-      return lowMem ? 8 : 9
+      if (coarse) return 6
+      if (w >= 1280) return lowMem ? 8 : 10
+      if (w >= 1024) return lowMem ? 8 : 9
+      if (w >= 640) return lowMem ? 7 : 8
+      return lowMem ? 6 : 7
     } catch {
       return 7
     }
@@ -95,7 +95,7 @@ export default function useVideoFeedWindowing({
       const w = Number(window?.innerWidth || 0)
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       if (coarse) return VF_OVERSCAN_PX
-      if (w >= 1280) return 1960
+      if (w >= 1280) return 1560
       if (w >= 1024) return VF_OVERSCAN_PX_DESKTOP
       if (w >= 640) return VF_OVERSCAN_PX_TABLET
       return VF_OVERSCAN_PX

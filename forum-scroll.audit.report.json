@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T05:51:50.854Z",
+  "generatedAt": "2026-04-23T12:33:03.867Z",
   "scannedFiles": 274,
   "report": [
     {
@@ -817,7 +817,7 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "score": 46,
+      "score": 45,
       "counts": {
         "scrollWrite": 0,
         "scrollRead": 4,
@@ -827,67 +827,67 @@
         "rectReads": 7,
         "resizeObserver": 0,
         "raf": 5,
-        "timers": 10
+        "timers": 9
       },
       "hits": [
         {
           "key": "scrollRead",
-          "line": 305,
+          "line": 304,
           "text": "return Number(scrollEl.scrollTop || 0);"
         },
         {
           "key": "scrollRead",
-          "line": 309,
+          "line": 308,
           "text": "return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);"
         },
         {
           "key": "rectReads",
-          "line": 258,
+          "line": 257,
           "text": "const rect = video.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 522,
+          "line": 615,
           "text": "const rect = video.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 548,
+          "line": 641,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2394,
+          "line": 2255,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2677,
+          "line": 2508,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2694,
+          "line": 2525,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3264,
+          "line": 3063,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "key": "raf",
-          "line": 105,
+          "line": 104,
           "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
         },
         {
           "key": "raf",
-          "line": 339,
+          "line": 338,
           "text": "warmSweepRaf = requestAnimationFrame(runner);"
         },
         {
           "key": "raf",
-          "line": 3417,
+          "line": 3216,
           "text": "rafId = requestAnimationFrame(() => {"
         }
       ]
@@ -2155,27 +2155,27 @@
       "hits": [
         {
           "key": "timers",
-          "line": 453,
+          "line": 449,
           "text": "controlsTimerRef.current = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 466,
+          "line": 462,
           "text": "centerIconTimerRef.current = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 511,
+          "line": 507,
           "text": "const tid = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 904,
+          "line": 879,
           "text": "unloadTimer = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 1042,
+          "line": 1017,
           "text": "recoverTimerRef.current = setTimeout(() => {"
         }
       ]
@@ -2629,7 +2629,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 262,
+          "line": 241,
           "text": "const r = el.getBoundingClientRect?.()"
         }
       ]

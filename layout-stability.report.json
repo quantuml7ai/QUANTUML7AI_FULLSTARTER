@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-24T05:51:54.642Z",
+  "generatedAt": "2026-04-18T03:00:37.928Z",
   "report": [
     {
       "file": "components/ForumBootSplash.jsx",
@@ -20,8 +20,8 @@
         "fixedDimensions": 12,
         "layoutReads": 0,
         "raf": 0,
-        "video": 0,
-        "image": 4
+        "video": 1,
+        "image": 3
       },
       "stabilityScore": 30
     },
@@ -66,24 +66,24 @@
       "counts": {
         "aspectRatio": 0,
         "fixedDimensions": 0,
-        "layoutReads": 9,
+        "layoutReads": 8,
         "raf": 4,
         "video": 0,
         "image": 0
       },
-      "stabilityScore": -22
+      "stabilityScore": -20
     },
     {
       "file": "components/ScrollTopPulse.js",
       "counts": {
         "aspectRatio": 0,
         "fixedDimensions": 8,
-        "layoutReads": 4,
+        "layoutReads": 3,
         "raf": 3,
         "video": 0,
         "image": 0
       },
-      "stabilityScore": 5
+      "stabilityScore": 7
     }
   ]
 }

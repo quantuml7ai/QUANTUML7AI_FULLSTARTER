@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-24T05:45:12.447Z
-Файлов в реестре: 1749
+Сгенерировано автоматически: 2026-04-23T12:32:20.800Z
+Файлов в реестре: 1747
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -64,7 +64,6 @@
 - `media-ownership.audit.report.json` — 1 файлов
 - `mobile-matrix.report.json` — 1 файлов
 - `mode-contract.validation.report.json` — 1 файлов
-- `native-post-video.audit.report.json` — 1 файлов
 - `next-env.d.ts` — 1 файлов
 - `next.config.mjs` — 1 файлов
 - `observer-cleanup.report.json` — 1 файлов
@@ -113,7 +112,7 @@
 - `startup-budget.report.json` — 1 файлов
 - `tests` — 41 файлов
 - `timer-cleanup.report.json` — 1 файлов
-- `tools` — 63 файлов
+- `tools` — 62 файлов
 - `tsconfig.json` — 1 файлов
 - `tsconfig.tsbuildinfo` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
@@ -450,7 +449,7 @@
           - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
         - hooks/ — Каталог слоя хуки внутри feature media.
           - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
-          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/mediaStatePolicy.js, forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx.
           - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js, forum/features/media/hooks/useVideoFeedState.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
           - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
           - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
@@ -468,7 +467,7 @@
           - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/mediaStatePolicy.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
           - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
           - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
-          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/media/utils/mediaLifecycleRuntime.js, tests/unit/forum/media/mediaStatePolicy.test.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js, tests/unit/forum/media/mediaStatePolicy.test.js.
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
@@ -2028,7 +2027,6 @@
   - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
-  - audit-post-video-lifecycle.js — Локальный скрипт/инструмент audit post video lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
@@ -2096,7 +2094,6 @@
 - media-ownership.audit.report.json — JSON-файл media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - mobile-matrix.report.json — JSON-файл mobile matrix.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - mode-contract.validation.report.json — JSON-файл mode contract.validation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-- native-post-video.audit.report.json — JSON-файл native post video.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - observer-cleanup.report.json — JSON-файл observer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

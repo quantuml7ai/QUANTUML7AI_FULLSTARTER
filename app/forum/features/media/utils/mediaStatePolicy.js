@@ -18,10 +18,8 @@ export function shouldKeepResidentPostVideo({
   if (!isPostFeedVideo) return false
   if (hardUnloadRequested) return false
   if (nearViewport) return true
-  const recentTouch = Number(recentTouchAgeMs || Number.POSITIVE_INFINITY)
-  if (recentTouch <= 5000) return true
-  if ((residentFlag || prewarmFlag) && recentTouch <= 2200) return true
-  return false
+  if (residentFlag || prewarmFlag) return true
+  return Number(recentTouchAgeMs || Number.POSITIVE_INFINITY) <= 5000
 }
 
 export function shouldHardUnloadPostVideo({

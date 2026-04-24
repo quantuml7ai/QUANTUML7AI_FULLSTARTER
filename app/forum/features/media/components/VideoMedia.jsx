@@ -315,8 +315,6 @@ export default function VideoMedia({
   const ref = React.useRef(null)
   const recoverTimerRef = React.useRef(0)
   const mediaKeyRef = React.useRef('')
-  const posterSnapshotRef = React.useRef({ mediaKey: '', value: '' })
-  const coordinatorOwnsLifecycleRef = React.useRef(false)
   const controlsTimerRef = React.useRef(0)
   const centerIconTimerRef = React.useRef(0)
   const fxTimersRef = React.useRef([])
@@ -331,10 +329,8 @@ export default function VideoMedia({
   const preloadMode = String(preload || 'none').trim().toLowerCase() || 'none'
   const isPostVideo = String(dataForumVideo || '') === 'post'
   const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
-  coordinatorOwnsLifecycleRef.current = coordinatorOwnsLifecycle
   const renderControls = isPostVideo ? false : controls
-  const renderPreload = isPostVideo ? 'none' : preload
-  const renderSrc = coordinatorOwnsLifecycle && isPostVideo ? undefined : src
+  const renderPreload = dataForumVideo === 'post' ? undefined : preload 
 
   const readMuted = React.useCallback(() => {
     try {
@@ -520,7 +516,6 @@ React.useLayoutEffect(() => {
   if (!el) return
 
   const s = String(src || '')
-  const nextPoster = String(poster || '').trim()
   const mediaKey = s
   const prevMediaKey = String(mediaKeyRef.current || '')
   const isNewMediaNode = prevMediaKey !== mediaKey
@@ -531,28 +526,6 @@ React.useLayoutEffect(() => {
   try {
     if (s) el.setAttribute('data-src', s)
     else el.removeAttribute('data-src')
-  } catch {}
-
-  try {
-    const posterValue =
-      nextPoster ||
-      String(el.getAttribute('poster') || el.dataset?.__posterOriginal || el.dataset?.poster || '').trim()
-
-    posterSnapshotRef.current = {
-      mediaKey,
-      value: posterValue,
-    }
-
-    if (posterValue) {
-      if (el.getAttribute('poster') !== posterValue) el.setAttribute('poster', posterValue)
-      el.dataset.poster = posterValue
-      el.dataset.__posterOriginal = posterValue
-      if (mediaKey) el.dataset.__posterMediaKey = mediaKey
-    } else if (!el.getAttribute('poster')) {
-      delete el.dataset.poster
-      delete el.dataset.__posterMediaKey
-      if (!String(el.dataset?.__posterOriginal || '').trim()) delete el.dataset.__posterOriginal
-    }
   } catch {}
 
   try {
@@ -619,8 +592,14 @@ React.useLayoutEffect(() => {
     // Для post-video больше НЕ делаем eager attach/load на mount.
     // Единственный владелец lifecycle — coordinator.
     if (isNewMediaNode && isPostVideo) {
+      try { el.removeAttribute('src') } catch {}
       try { delete el.dataset.__bootAttachedSrc } catch {}
       try { delete el.dataset.__bootMetadataPrimed } catch {}
+      try { el.dataset.__loadPending = '0' } catch {}
+      try { el.dataset.__warmReady = '0' } catch {}
+      try { el.dataset.__active = '0' } catch {}
+      try { el.dataset.__prewarm = '0' } catch {}
+      try { el.dataset.__resident = '0' } catch {}
       try { delete el.dataset.__loadPendingSince } catch {}
       try { el.preload = 'metadata' } catch {}
     }
@@ -630,7 +609,6 @@ React.useLayoutEffect(() => {
   clearNativeControlsForPost,
   defaultMutedProp,
   isPostVideo,
-  poster,
   playsInline,
   preloadMode,
   readMuted,
@@ -652,12 +630,13 @@ React.useLayoutEffect(() => {
 const onPlay = () => {
   clearNativeControlsForPost()
 
+  try { 
+    el.dataset.__loadPending = '0'
+    el.dataset.__warmReady = '1'
+    delete el.dataset.__loadPendingSince
+  } catch {}
+
   if (!coordinatorOwnsLifecycle) {
-    try {
-      el.dataset.__loadPending = '0'
-      el.dataset.__warmReady = '1'
-      delete el.dataset.__loadPendingSince
-    } catch {}
     try { touchActiveVideoFn(el) } catch {}
     try { enforceActiveVideoCapFn(el) } catch {}
     try {
@@ -772,10 +751,6 @@ const nextMuted = typeof initial === 'boolean' ? initial : fallbackMuted
   React.useEffect(() => {
     const el = ref.current
     if (!el) return
-
-    if (coordinatorOwnsLifecycleRef.current) {
-      return undefined
-    }
 
     const markPending = () => {
       try {
@@ -1063,17 +1038,19 @@ const onVideoLoaded = React.useCallback(() => {
     if (!el) return
 
     clearNativeControlsForPost()
+ 
+    try {
+      el.dataset.__recoverTry = '0'
+
+      el.dataset.__loadPending = '0'
+      el.dataset.__warmReady = '1'
+      delete el.dataset.__loadPendingSince
+    } catch {}
 
     // ВАЖНО:
     // loaded/canplay ≠ confirmed active playback.
-    // Для coordinator-owned post-video lifecycle flags пишет только coordinator.
+    // active/touch/cap теперь ставит только coordinator после play_started.
     if (!coordinatorOwnsLifecycle) {
-      try {
-        el.dataset.__recoverTry = '0'
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '1'
-        delete el.dataset.__loadPendingSince
-      } catch {}
       try { touchActiveVideoFn(el) } catch {}
       try { enforceActiveVideoCapFn(el) } catch {}
       try {
@@ -1161,8 +1138,6 @@ const onVideoLoaded = React.useCallback(() => {
   ref={ref}
   data-forum-media={dataForumMedia}
   data-forum-video={dataForumVideo}
-  src={renderSrc}
-  poster={poster || undefined}
   playsInline={playsInline} 
   disableRemotePlayback
   preload={renderPreload}

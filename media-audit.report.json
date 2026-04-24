@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T05:51:50.021Z",
+  "generatedAt": "2026-04-18T03:00:33.566Z",
   "results": [
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.source.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
       "counts": {
         "video": 0,
         "autoplay": 0,
@@ -70,32 +70,41 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
       "counts": {
-        "video": 0,
-        "autoplay": 3,
-        "loop": 10,
+        "video": 1,
+        "autoplay": 7,
+        "loop": 2,
         "preload": 10,
         "img": 0,
         "lazy": 0,
         "create": 0,
         "revoke": 0
       },
-      "flags": [],
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
       "samples": {
-        "video": [],
+        "video": [
+          {
+            "line": 1135,
+            "text": "<video"
+          }
+        ],
         "autoplay": [
           {
-            "line": 166,
-            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
+            "line": 296,
+            "text": "autoPlay,"
           },
           {
-            "line": 427,
-            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
+            "line": 559,
+            "text": ": (isPostVideo ? true : !!autoPlay)"
           },
           {
-            "line": 1855,
-            "text": "// иначе при гонках промисов возможен двойной autoplay."
+            "line": 615,
+            "text": "autoPlay,"
           }
         ],
         "img": [],
@@ -162,41 +171,32 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "video": 1,
-        "autoplay": 6,
-        "loop": 2,
-        "preload": 10,
+        "video": 0,
+        "autoplay": 3,
+        "loop": 10,
+        "preload": 8,
         "img": 0,
         "lazy": 0,
         "create": 0,
         "revoke": 0
       },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + loop",
-        "⚠ video + preload"
-      ],
+      "flags": [],
       "samples": {
-        "video": [
-          {
-            "line": 1160,
-            "text": "<video"
-          }
-        ],
+        "video": [],
         "autoplay": [
           {
-            "line": 296,
-            "text": "autoPlay,"
+            "line": 164,
+            "text": "// Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start."
           },
           {
-            "line": 586,
-            "text": ": (isPostVideo ? true : !!autoPlay)"
+            "line": 519,
+            "text": "// === Shorts-like autoplay: play when in focus, pause when out ==="
           },
           {
-            "line": 629,
-            "text": "autoPlay,"
+            "line": 1707,
+            "text": "// иначе при гонках промисов возможен двойной autoplay."
           }
         ],
         "img": [],
@@ -351,6 +351,53 @@
       }
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "video": 1,
+        "autoplay": 4,
+        "loop": 2,
+        "preload": 1,
+        "img": 1,
+        "lazy": 1,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + loop",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 2138,
+            "text": "<video"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 1545,
+            "text": "autoplay: 0,"
+          },
+          {
+            "line": 1615,
+            "text": "emitMutedPref(true, playerIdRef.current, 'forum-ads-autoplay-fallback');"
+          },
+          {
+            "line": 2174,
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
+          }
+        ],
+        "img": [
+          {
+            "line": 2222,
+            "text": "<img"
+          }
+        ],
+        "create": []
+      }
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "counts": {
         "video": 2,
@@ -393,13 +440,13 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\about\\page.js",
       "counts": {
         "video": 1,
-        "autoplay": 3,
-        "loop": 2,
+        "autoplay": 1,
+        "loop": 3,
         "preload": 1,
-        "img": 1,
+        "img": 3,
         "lazy": 1,
         "create": 0,
         "revoke": 0
@@ -412,170 +459,30 @@
       "samples": {
         "video": [
           {
-            "line": 2357,
+            "line": 182,
             "text": "<video"
           }
         ],
         "autoplay": [
           {
-            "line": 1754,
-            "text": "autoplay: 0,"
-          },
-          {
-            "line": 2399,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure\""
-          },
-          {
-            "line": 2426,
-            "text": "allow=\"autoplay; encrypted-media; fullscreen; picture-in-picture; web-share; compute-pressure\""
+            "line": 185,
+            "text": "autoPlay"
           }
         ],
         "img": [
           {
-            "line": 2450,
+            "line": 208,
+            "text": "<img src={img.src} alt={img.alt} loading=\"lazy\" />"
+          },
+          {
+            "line": 298,
+            "text": "<img"
+          },
+          {
+            "line": 312,
             "text": "<img"
           }
         ],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\en.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 9,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ar.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\es.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ru.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\tr.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\uk.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\zh.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
         "create": []
       }
     },
@@ -613,43 +520,6 @@
           {
             "line": 97,
             "text": "startupMediaSignals: rootRows.reduce((sum, row) => sum + Number(row.counts.autoplay || 0), 0),"
-          }
-        ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-post-video-lifecycle.js",
-      "counts": {
-        "video": 1,
-        "autoplay": 2,
-        "loop": 0,
-        "preload": 1,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [
-        "⚠ video + autoplay",
-        "⚠ video + preload"
-      ],
-      "samples": {
-        "video": [
-          {
-            "line": 59,
-            "text": "leafPosterAttr: /<video[\\s\\S]{0,320}poster=\\{poster \\|\\| undefined\\}/.test(videoLeaf),"
-          }
-        ],
-        "autoplay": [
-          {
-            "line": 104,
-            "text": "if (!signals.autoplayRetryWatchdog) issues.push('missing-autoplay-retry-watchdog');"
-          },
-          {
-            "line": 131,
-            "text": "'Late-loaded active media should keep retrying autoplay through the coordinator until a real play succeeds or the owner loses focus.',"
           }
         ],
         "img": [],
@@ -761,7 +631,32 @@
         "video": 0,
         "autoplay": 1,
         "loop": 0,
-        "preload": 4,
+        "preload": 3,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [],
+      "samples": {
+        "video": [],
+        "autoplay": [
+          {
+            "line": 13,
+            "text": "// чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния."
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "counts": {
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 1,
         "img": 0,
         "lazy": 0,
         "create": 0,
@@ -773,7 +668,44 @@
         "autoplay": [
           {
             "line": 14,
-            "text": "// чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния."
+            "text": "const [locked, setLocked] = useState(true) // браузер запретил autoplay со звуком"
+          },
+          {
+            "line": 53,
+            "text": "// autoplay со звуком запрещён → играем тихо"
+          }
+        ],
+        "img": [],
+        "create": []
+      }
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tests\\component\\runtime\\runtimeComponentSurfaces.test.jsx",
+      "counts": {
+        "video": 1,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 1,
+        "img": 0,
+        "lazy": 0,
+        "create": 0,
+        "revoke": 0
+      },
+      "flags": [
+        "⚠ video + autoplay",
+        "⚠ video + preload"
+      ],
+      "samples": {
+        "video": [
+          {
+            "line": 19,
+            "text": "['app/about/page.js', ['about-hero-video', '<video', 'autoPlay']],"
+          }
+        ],
+        "autoplay": [
+          {
+            "line": 19,
+            "text": "['app/about/page.js', ['about-hero-video', '<video', 'autoPlay']],"
           }
         ],
         "img": [],
@@ -788,7 +720,7 @@
         "loop": 0,
         "preload": 0,
         "img": 0,
-        "lazy": 4,
+        "lazy": 1,
         "create": 0,
         "revoke": 0
       },
@@ -798,11 +730,11 @@
         "autoplay": [
           {
             "line": 332,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure\""
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           },
           {
             "line": 422,
-            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure\""
+            "text": "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\""
           }
         ],
         "img": [],
@@ -927,26 +859,6 @@
             "text": "{ key: 'startupMedia', rx: /<video\\b|autoPlay|playsInline/g },"
           }
         ],
-        "img": [],
-        "create": []
-      }
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 2,
-        "preload": 1,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
         "img": [],
         "create": []
       }
@@ -1123,14 +1035,14 @@
       "samples": {
         "video": [
           {
-            "line": 1239,
+            "line": 1240,
             "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
           }
         ],
         "autoplay": [],
         "img": [
           {
-            "line": 1239,
+            "line": 1240,
             "text": "/* 2) Обычные <img>/<video>/<canvas>/<svg> внутри — растянуть и покрыть */"
           }
         ],
@@ -1377,39 +1289,6 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\about\\page.js",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 0,
-        "img": 4,
-        "lazy": 1,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [
-          {
-            "line": 177,
-            "text": "<img"
-          },
-          {
-            "line": 196,
-            "text": "<img src={img.src} alt={img.alt} loading=\"lazy\" />"
-          },
-          {
-            "line": 286,
-            "text": "<img"
-          }
-        ],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\ScrollTopPulse.js",
       "counts": {
         "video": 0,
@@ -1490,26 +1369,6 @@
       }
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tests\\component\\runtime\\runtimeComponentSurfaces.test.jsx",
-      "counts": {
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 1,
-        "img": 0,
-        "lazy": 0,
-        "create": 0,
-        "revoke": 0
-      },
-      "flags": [],
-      "samples": {
-        "video": [],
-        "autoplay": [],
-        "img": [],
-        "create": []
-      }
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\HeroAvatar.js",
       "counts": {
         "video": 0,
@@ -1556,11 +1415,11 @@
         "autoplay": [],
         "img": [
           {
-            "line": 286,
+            "line": 493,
             "text": "<img"
           },
           {
-            "line": 314,
+            "line": 521,
             "text": "<img"
           }
         ],

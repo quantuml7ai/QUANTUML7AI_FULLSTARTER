@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T05:51:48.834Z",
+  "generatedAt": "2026-04-23T12:32:28.953Z",
   "summary": {
     "scannedFiles": 378,
-    "internalEdges": 502,
+    "internalEdges": 501,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -1942,10 +1942,9 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/shared/utils/browser.js",
-        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-        "app/forum/features/media/utils/mediaStatePolicy.js"
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
       ],
-      "importCount": 3,
+      "importCount": 2,
       "external": [
         "react"
       ],

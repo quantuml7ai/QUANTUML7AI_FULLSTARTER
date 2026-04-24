@@ -2396,7 +2396,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     src={forumMediaScoped ? undefined : `https://www.youtube-nocookie.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
     title="YouTube video"
     frameBorder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
     allowFullScreen
     style={{
       position: 'absolute',
@@ -2423,7 +2423,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     src={forumMediaScoped ? undefined : `https://www.tiktok.com/embed/v2/${media.src}`}
     title="TikTok video"
     frameBorder="0"
-    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; web-share; compute-pressure"
+    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
     style={{
       position: 'absolute',
       inset: 0,

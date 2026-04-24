@@ -1,6 +1,6 @@
 {
   "phase": "project-tree-audit",
-  "timestamp": "2026-04-24T05:45:13.771Z",
+  "timestamp": "2026-04-23T12:32:21.813Z",
   "scope": "whole repository tree registry",
   "touched_files": [
     "PROJECT_TREE.md"
@@ -14,13 +14,13 @@
   "storage_risk": "none",
   "runtime_risk": "low",
   "notes": [
-    "repo_files=1749",
-    "source_files=807",
+    "repo_files=1747",
+    "source_files=805",
     "route_files=96"
   ],
   "status": "ok",
-  "total_repo_files": 1749,
-  "total_source_files": 807,
+  "total_repo_files": 1747,
+  "total_source_files": 805,
   "top_level_breakdown": {
     ".env.local": 1,
     ".env.local.example": 1,
@@ -67,7 +67,6 @@
     "media-ownership.audit.report.json": 1,
     "mobile-matrix.report.json": 1,
     "mode-contract.validation.report.json": 1,
-    "native-post-video.audit.report.json": 1,
     "next-env.d.ts": 1,
     "next.config.mjs": 1,
     "observer-cleanup.report.json": 1,
@@ -116,7 +115,7 @@
     "startup-budget.report.json": 1,
     "tests": 41,
     "timer-cleanup.report.json": 1,
-    "tools": 63,
+    "tools": 62,
     "tsconfig.json": 1,
     "tsconfig.tsbuildinfo": 1,
     "vitest.config.mjs": 1,

@@ -278,7 +278,6 @@ export default function PostMediaStack({
                 data-forum-embed-kind="native-video"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
-                poster={posterUrl || undefined}
                 src={src}
                 loading="lazy"
                 playsInline
@@ -329,7 +328,7 @@ export default function PostMediaStack({
                   data-stable-shell="1"
                   loading="lazy"
                   frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
                 />
@@ -419,7 +418,7 @@ export default function PostMediaStack({
                   data-stable-shell="1"
                   loading="lazy"
                   frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; compute-pressure"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="mediaBoxItem"
                 />
