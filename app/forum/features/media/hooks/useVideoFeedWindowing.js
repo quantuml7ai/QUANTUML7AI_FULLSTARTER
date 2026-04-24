@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 1120
-const VF_OVERSCAN_PX_TABLET = 1360
-const VF_OVERSCAN_PX_DESKTOP = 1880
+const VF_OVERSCAN_PX = 980
+const VF_OVERSCAN_PX_TABLET = 1180
+const VF_OVERSCAN_PX_DESKTOP = 1480
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -72,40 +72,37 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
  
-const vfGetMaxRender = useCallback(() => {
-  try {
-    if (!isBrowserFn()) return 8
-    const w = Number(window?.innerWidth || 0)
-    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-    const dm = Number(window?.navigator?.deviceMemory || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
+  const vfGetMaxRender = useCallback(() => {
+    try {
+      if (!isBrowserFn()) return 7
+      const w = Number(window?.innerWidth || 0)
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+      const dm = Number(window?.navigator?.deviceMemory || 0)
+      const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
+      if (coarse) return 6
+      if (w >= 1280) return lowMem ? 8 : 10
+      if (w >= 1024) return lowMem ? 8 : 9
+      if (w >= 640) return lowMem ? 7 : 8
+      return lowMem ? 6 : 7
+    } catch {
+      return 7
+    }
+  }, [isBrowserFn])
 
-    if (coarse) return 7
-    if (w >= 1280) return lowMem ? 10 : 12
-    if (w >= 1024) return lowMem ? 9 : 11
-    if (w >= 640) return lowMem ? 8 : 9
-    return lowMem ? 7 : 8
-  } catch {
-    return 8
-  }
-}, [isBrowserFn])
-
-const vfGetOverscanBase = useCallback(() => {
-  try {
-    if (!isBrowserFn()) return VF_OVERSCAN_PX_TABLET
-    const w = Number(window?.innerWidth || 0)
-    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-
-    if (coarse) return VF_OVERSCAN_PX
-    if (w >= 1440) return 2120
-    if (w >= 1280) return 1960
-    if (w >= 1024) return VF_OVERSCAN_PX_DESKTOP
-    if (w >= 640) return VF_OVERSCAN_PX_TABLET
-    return VF_OVERSCAN_PX
-  } catch {
-    return VF_OVERSCAN_PX_TABLET
-  }
-}, [isBrowserFn])
+  const vfGetOverscanBase = useCallback(() => {
+    try {
+      if (!isBrowserFn()) return VF_OVERSCAN_PX_TABLET
+      const w = Number(window?.innerWidth || 0)
+      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+      if (coarse) return VF_OVERSCAN_PX
+      if (w >= 1280) return 1560
+      if (w >= 1024) return VF_OVERSCAN_PX_DESKTOP
+      if (w >= 640) return VF_OVERSCAN_PX_TABLET
+      return VF_OVERSCAN_PX
+    } catch {
+      return VF_OVERSCAN_PX_TABLET
+    }
+  }, [isBrowserFn])
 
   const vfGetFixedItemH = useCallback(() => {
     try {
@@ -268,7 +265,7 @@ const vfGetOverscanBase = useCallback(() => {
     const flipHoldUntil = Number(vfScrollStateRef.current?.flipHoldUntil || 0)
     const flipHoldActive = flipHoldUntil > Date.now()
     const overscanBase = vfGetOverscanBase()
-    const velocityBoost = Math.min(360, Math.round(velocity * 140))
+    const velocityBoost = Math.min(550, Math.round(velocity * 260))
     const overscanPx = overscanBase + velocityBoost + (flipHoldActive ? Math.round(overscanBase * 0.18) : 0)
     const fromY = Math.max(0, st - overscanPx)
     const toY = st + vh + overscanPx
@@ -287,7 +284,7 @@ const vfGetOverscanBase = useCallback(() => {
       end++
     }
 
-    const vfMaxRender = vfGetMaxRender() + (velocity > 1.0 ? 1 : 0)
+    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 1 : 0) + (velocity > 1.2 ? 1 : 0)
     if ((end - start) > vfMaxRender) {
       const mid = Math.floor((start + end) / 2)
       const half = Math.floor(vfMaxRender / 2)
@@ -307,7 +304,7 @@ const vfGetOverscanBase = useCallback(() => {
       if (shrinkOnly) {
         const now = Date.now()
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
-        const stickyItems = velocity > 1.2 ? 3 : velocity > 0.55 ? 2 : 2
+        const stickyItems = velocity > 1.2 ? 2 : velocity > 0.55 ? 2 : 1
         const stickyMaxRender = vfMaxRender + stickyItems
         const leadingTrim = Math.max(0, nextStart - prev.start)
         const trailingTrim = Math.max(0, prev.end - nextEnd)

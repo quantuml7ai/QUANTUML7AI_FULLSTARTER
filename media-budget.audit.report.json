@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T07:54:04.261Z",
+  "generatedAt": "2026-04-23T12:33:03.584Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -12,7 +12,7 @@
         "pauseCall": 15,
         "loadCall": 0,
         "preloadAttr": 10,
-        "prewarmFlag": 13,
+        "prewarmFlag": 14,
         "residentFlag": 14,
         "loadPendingFlag": 32,
         "userPauseFlag": 12,
@@ -28,7 +28,7 @@
         "pause-semantics",
         "viewport-orchestration"
       ],
-      "score": 112
+      "score": 113
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -66,10 +66,10 @@
         "playCall": 0,
         "pauseCall": 0,
         "loadCall": 0,
-        "preloadAttr": 5,
+        "preloadAttr": 4,
         "prewarmFlag": 8,
-        "residentFlag": 7,
-        "loadPendingFlag": 7,
+        "residentFlag": 8,
+        "loadPendingFlag": 6,
         "userPauseFlag": 0,
         "systemPauseFlag": 0,
         "manualLeaseFlag": 0,
@@ -80,7 +80,7 @@
         "load-policy",
         "budget-state"
       ],
-      "score": 33
+      "score": 32
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",

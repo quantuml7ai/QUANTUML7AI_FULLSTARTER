@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-24T05:51:31.043Z",
-  "status": "pass",
+  "generatedAt": "2026-04-24T10:11:07.925Z",
+  "status": "warn",
   "files": {
     "runtime": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
     "coordinator": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -23,42 +23,52 @@
     "postPrewarmMetadataResident": true,
     "postPrewarmDetachedHold": true,
     "autoplayRetryWatchdog": true,
-    "pendingActivateUsesPlayMedia": true,
+    "pendingActivateUsesPlayMedia": false,
     "leafCoordinatorGuard": true,
-    "leafCoordinatorPostSrcDetached": true,
-    "leafPostPreloadNone": true,
-    "leafCoordinatorLoadStateGuard": true,
-    "leafCoordinatorLoadedHandlerGuard": true,
-    "leafPosterAttr": true,
-    "leafPosterDatasetSync": true,
+    "leafCoordinatorPostSrcDetached": false,
+    "leafPostPreloadNone": false,
+    "leafCoordinatorLoadStateGuard": false,
+    "leafCoordinatorLoadedHandlerGuard": false,
+    "leafPosterAttr": false,
+    "leafPosterDatasetSync": false,
     "postMediaPosterForward": true,
-    "leafPostMountLifecycleReset": false,
-    "leafPostMountSrcDetach": false
+    "leafPostMountLifecycleReset": true,
+    "leafPostMountSrcDetach": true
   },
   "ownershipWrites": {
     "coordinator": {
-      "active": 7,
-      "prewarm": 7,
+      "active": 5,
+      "prewarm": 6,
       "resident": 8,
       "loadPending": 13,
-      "warmReady": 5
+      "warmReady": 4
     },
     "runtime": {
       "active": 2,
       "prewarm": 2,
       "resident": 1,
       "loadPending": 4,
-      "warmReady": 3
+      "warmReady": 4
     },
     "videoLeaf": {
-      "active": 5,
-      "prewarm": 4,
-      "resident": 2,
-      "loadPending": 5,
+      "active": 6,
+      "prewarm": 5,
+      "resident": 3,
+      "loadPending": 6,
       "warmReady": 5
     }
   },
-  "issues": [],
+  "issues": [
+    "pending-activate-path-does-not-promote-candidate-into-play-pipeline",
+    "video-leaf-still-forwards-src-to-coordinator-owned-post-video",
+    "video-leaf-post-preload-is-not-none",
+    "video-leaf-loadstate-effect-still-writes-coordinator-owned-flags",
+    "video-leaf-loaded-handler-still-writes-coordinator-owned-flags",
+    "video-leaf-missing-poster-attr",
+    "video-leaf-missing-poster-dataset-sync",
+    "leaf-post-video-reset-still-mutates-owner-flags",
+    "leaf-post-video-reset-still-detaches-src"
+  ],
   "notes": [
     "Coordinator remains the decision layer; runtime owns side-effect helpers such as soft release and restore.",
     "VideoMedia must not detach src or zero owner-flags for new post-video mounts.",

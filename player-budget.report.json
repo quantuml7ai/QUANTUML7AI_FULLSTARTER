@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-24T07:54:04.310Z",
+  "generatedAt": "2026-04-23T12:33:08.258Z",
   "issues": [
     "legacy-iframe-prewarm-still-present"
   ],
@@ -42,7 +42,7 @@
         "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
-        "coordinatorOwnsLifecycle": 10,
+        "coordinatorOwnsLifecycle": 9,
         "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,

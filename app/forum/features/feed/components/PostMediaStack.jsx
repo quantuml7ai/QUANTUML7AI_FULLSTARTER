@@ -270,31 +270,29 @@ export default function PostMediaStack({
               data-stable-shell="1"
               style={{ margin: 0 }}
             >
-<VideoMediaComponent
-  key={`video-media:${mediaKeyBase}:${src}:${i}`}
-  data-forum-video="post"
-  data-forum-media="video"
-  data-owner-id={ownerId}
-  data-forum-embed-kind="native-video"
-  data-lifecycle-state={lifecycleState}
-  data-stable-shell="1"
-  src={src}
-  poster={posterUrl || undefined}
-  data-poster={posterUrl || undefined}
-  loading="lazy"
-  playsInline
-  controls={false}
-  controlsList="nodownload noplaybackrate noremoteplayback"
-  disablePictureInPicture
-  className="mediaBoxItem"
-  style={{
-    objectFit: 'contain',
-    background: '#000',
-  }}
-  onPointerDown={(event) => {
-    event.stopPropagation()
-  }}
-/>
+              <VideoMediaComponent
+                key={`video-media:${mediaKeyBase}:${src}:${i}`}
+                data-forum-video="post"
+                data-forum-media="video"
+                data-owner-id={ownerId}
+                data-forum-embed-kind="native-video"
+                data-lifecycle-state={lifecycleState}
+                data-stable-shell="1"
+                src={src}
+                loading="lazy"
+                playsInline
+                controls={false}
+                controlsList="nodownload noplaybackrate noremoteplayback"
+                disablePictureInPicture
+                className="mediaBoxItem"
+                style={{
+                  objectFit: 'contain',
+                  background: '#000',
+                }}
+                onPointerDown={(event) => {
+                  event.stopPropagation()
+                }}
+              />
             </div>
           ))}
         </div>

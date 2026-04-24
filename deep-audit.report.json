@@ -1,61 +1,61 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T07:54:01.970Z",
+  "generatedAt": "2026-04-18T03:00:33.277Z",
   "summary": {
-    "projectFilesScanned": 563,
+    "projectFilesScanned": 549,
     "forumFilesScanned": 306,
     "projectTotals": {
-      "addEvt": 243,
-      "remEvt": 225,
+      "addEvt": 241,
+      "remEvt": 223,
       "setInt": 34,
       "clrInt": 48,
-      "setTo": 135,
-      "raf": 61,
-      "caf": 48,
+      "setTo": 132,
+      "raf": 58,
+      "caf": 45,
       "rect": 21,
-      "qsa": 37,
-      "video": 30,
-      "autoplay": 76,
-      "loop": 149,
-      "preload": 53,
+      "qsa": 35,
+      "video": 31,
+      "autoplay": 80,
+      "loop": 105,
+      "preload": 49,
       "createUrl": 16,
       "revokeUrl": 29,
       "fetch": 135,
-      "redis": 612,
-      "accountKeys": 1465,
+      "redis": 598,
+      "accountKeys": 1320,
       "unicodeEscape": 569,
       "mojibake": 15
     },
     "forumTotals": {
-      "addEvt": 168,
-      "remEvt": 163,
+      "addEvt": 165,
+      "remEvt": 160,
       "setInt": 20,
       "clrInt": 28,
-      "setTo": 94,
-      "raf": 55,
-      "caf": 41,
+      "setTo": 91,
+      "raf": 52,
+      "caf": 38,
       "rect": 20,
-      "qsa": 33,
+      "qsa": 32,
       "video": 11,
-      "autoplay": 21,
-      "loop": 24,
-      "preload": 42,
+      "autoplay": 23,
+      "loop": 69,
+      "preload": 38,
       "createUrl": 13,
       "revokeUrl": 27,
       "fetch": 64,
-      "redis": 216,
-      "accountKeys": 662,
-      "unicodeEscape": 13,
+      "redis": 230,
+      "accountKeys": 799,
+      "unicodeEscape": 561,
       "mojibake": 15
     },
-    "forumRiskFiles": 26,
+    "forumRiskFiles": 27,
     "unicodeEscapeFiles": 15,
     "mojibakeFiles": 2
   },
   "topProject": [
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.source.js",
-      "forumScope": false,
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "forumScope": true,
       "counts": {
         "addEvt": 0,
         "remEvt": 0,
@@ -155,11 +155,11 @@
         "raf": 4,
         "caf": 4,
         "rect": 0,
-        "qsa": 19,
+        "qsa": 18,
         "video": 0,
         "autoplay": 3,
         "loop": 11,
-        "preload": 10,
+        "preload": 8,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -169,7 +169,7 @@
         "mojibake": 0
       },
       "flags": [],
-      "score": 104
+      "score": 98
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -185,7 +185,7 @@
         "rect": 0,
         "qsa": 0,
         "video": 1,
-        "autoplay": 7,
+        "autoplay": 8,
         "loop": 3,
         "preload": 10,
         "createUrl": 0,
@@ -199,7 +199,7 @@
       "flags": [
         "video + autoplay"
       ],
-      "score": 90
+      "score": 96
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-full-forum.js",
@@ -383,6 +383,36 @@
       "score": 43
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 4,
+        "remEvt": 4,
+        "setInt": 1,
+        "clrInt": 1,
+        "setTo": 3,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 1,
+        "autoplay": 4,
+        "loop": 2,
+        "preload": 1,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 5,
+        "redis": 2,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "video + autoplay"
+      ],
+      "score": 43
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "forumScope": true,
       "counts": {
@@ -413,80 +443,22 @@
       "score": 40
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "forumScope": true,
-      "counts": {
-        "addEvt": 4,
-        "remEvt": 4,
-        "setInt": 1,
-        "clrInt": 1,
-        "setTo": 4,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 1,
-        "autoplay": 3,
-        "loop": 2,
-        "preload": 1,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 5,
-        "redis": 2,
-        "accountKeys": 0,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [
-        "video + autoplay"
-      ],
-      "score": 37
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\en.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\about\\page.js",
       "forumScope": false,
       "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
+        "addEvt": 1,
+        "remEvt": 1,
         "setInt": 0,
         "clrInt": 0,
         "setTo": 0,
         "raf": 0,
         "caf": 0,
         "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 9,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 57,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 36
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
-      "forumScope": true,
-      "counts": {
-        "addEvt": 2,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
+        "qsa": 1,
+        "video": 1,
         "autoplay": 1,
-        "loop": 0,
-        "preload": 5,
+        "loop": 3,
+        "preload": 1,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -496,9 +468,9 @@
         "mojibake": 0
       },
       "flags": [
-        "event-listeners imbalance (2/0)"
+        "video + autoplay"
       ],
-      "score": 29
+      "score": 27
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\layout.js",
@@ -528,174 +500,6 @@
       "flags": [
         "event-listeners imbalance (6/0)"
       ],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ar.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 14,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\es.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 25,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\ru.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 11,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\tr.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 9,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\uk.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 11,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
-      "score": 24
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n-dicts\\zh.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 6,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 2,
-        "accountKeys": 10,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [],
       "score": 24
     },
     {
@@ -757,6 +561,36 @@
       "score": 24
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 2,
+        "remEvt": 0,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 0,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 3,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "event-listeners imbalance (2/0)"
+      ],
+      "score": 23
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\SnowFX.jsx",
       "forumScope": false,
       "counts": {
@@ -800,36 +634,6 @@
         "video": 1,
         "autoplay": 1,
         "loop": 1,
-        "preload": 1,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 0,
-        "accountKeys": 0,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [
-        "video + autoplay"
-      ],
-      "score": 21
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tools\\audit-post-video-lifecycle.js",
-      "forumScope": false,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 0,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 1,
-        "autoplay": 2,
-        "loop": 0,
         "preload": 1,
         "createUrl": 0,
         "revokeUrl": 0,
@@ -929,6 +733,64 @@
       },
       "flags": [
         "unicode escapes found (1)"
+      ],
+      "score": 15
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\BgAudio.js",
+      "forumScope": false,
+      "counts": {
+        "addEvt": 8,
+        "remEvt": 8,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 0,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 2,
+        "loop": 0,
+        "preload": 1,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [],
+      "score": 15
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\tests\\component\\runtime\\runtimeComponentSurfaces.test.jsx",
+      "forumScope": false,
+      "counts": {
+        "addEvt": 0,
+        "remEvt": 0,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 0,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 1,
+        "autoplay": 1,
+        "loop": 0,
+        "preload": 1,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "video + autoplay"
       ],
       "score": 15
     },
@@ -1223,9 +1085,185 @@
         "video + autoplay"
       ],
       "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmVoicePlayer.jsx",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 9,
+        "remEvt": 9,
+        "setInt": 1,
+        "clrInt": 4,
+        "setTo": 0,
+        "raf": 2,
+        "caf": 1,
+        "rect": 1,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "raf imbalance (2/1)"
+      ],
+      "score": 11
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\moderationPrep.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 2,
+        "remEvt": 0,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 2,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 1,
+        "createUrl": 2,
+        "revokeUrl": 3,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "event-listeners imbalance (2/0)"
+      ],
+      "score": 11
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\academy\\AcademyExamBlock.js",
+      "forumScope": false,
+      "counts": {
+        "addEvt": 4,
+        "remEvt": 2,
+        "setInt": 1,
+        "clrInt": 1,
+        "setTo": 3,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 4,
+        "redis": 0,
+        "accountKeys": 13,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "event-listeners imbalance (4/2)"
+      ],
+      "score": 10
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\QCastPlayer.jsx",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 12,
+        "remEvt": 12,
+        "setInt": 1,
+        "clrInt": 1,
+        "setTo": 1,
+        "raf": 1,
+        "caf": 1,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 2,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [],
+      "score": 10
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumHeadCollapse.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 2,
+        "remEvt": 2,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 3,
+        "raf": 5,
+        "caf": 5,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 0,
+        "preload": 0,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 0,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [],
+      "score": 10
     }
   ],
   "topForum": [
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\i18n.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 0,
+        "remEvt": 0,
+        "setInt": 0,
+        "clrInt": 0,
+        "setTo": 0,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 0,
+        "autoplay": 0,
+        "loop": 45,
+        "preload": 0,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 0,
+        "redis": 14,
+        "accountKeys": 137,
+        "unicodeEscape": 548,
+        "mojibake": 0
+      },
+      "flags": [
+        "unicode escapes found (548)"
+      ],
+      "score": 3468
+    },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "forumScope": true,
@@ -1238,11 +1276,11 @@
         "raf": 4,
         "caf": 4,
         "rect": 0,
-        "qsa": 19,
+        "qsa": 18,
         "video": 0,
         "autoplay": 3,
         "loop": 11,
-        "preload": 10,
+        "preload": 8,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -1252,7 +1290,7 @@
         "mojibake": 0
       },
       "flags": [],
-      "score": 104
+      "score": 98
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\VideoMedia.jsx",
@@ -1268,7 +1306,7 @@
         "rect": 0,
         "qsa": 0,
         "video": 1,
-        "autoplay": 7,
+        "autoplay": 8,
         "loop": 3,
         "preload": 10,
         "createUrl": 0,
@@ -1282,7 +1320,7 @@
       "flags": [
         "video + autoplay"
       ],
-      "score": 90
+      "score": 96
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
@@ -1375,6 +1413,36 @@
       "score": 48
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "forumScope": true,
+      "counts": {
+        "addEvt": 4,
+        "remEvt": 4,
+        "setInt": 1,
+        "clrInt": 1,
+        "setTo": 3,
+        "raf": 0,
+        "caf": 0,
+        "rect": 0,
+        "qsa": 0,
+        "video": 1,
+        "autoplay": 4,
+        "loop": 2,
+        "preload": 1,
+        "createUrl": 0,
+        "revokeUrl": 0,
+        "fetch": 5,
+        "redis": 2,
+        "accountKeys": 0,
+        "unicodeEscape": 0,
+        "mojibake": 0
+      },
+      "flags": [
+        "video + autoplay"
+      ],
+      "score": 43
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "forumScope": true,
       "counts": {
@@ -1405,36 +1473,6 @@
       "score": 40
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "forumScope": true,
-      "counts": {
-        "addEvt": 4,
-        "remEvt": 4,
-        "setInt": 1,
-        "clrInt": 1,
-        "setTo": 4,
-        "raf": 0,
-        "caf": 0,
-        "rect": 0,
-        "qsa": 0,
-        "video": 1,
-        "autoplay": 3,
-        "loop": 2,
-        "preload": 1,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 5,
-        "redis": 2,
-        "accountKeys": 0,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [
-        "video + autoplay"
-      ],
-      "score": 37
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaLifecycleRuntime.js",
       "forumScope": true,
       "counts": {
@@ -1450,7 +1488,7 @@
         "video": 0,
         "autoplay": 1,
         "loop": 0,
-        "preload": 5,
+        "preload": 3,
         "createUrl": 0,
         "revokeUrl": 0,
         "fetch": 0,
@@ -1462,7 +1500,7 @@
       "flags": [
         "event-listeners imbalance (2/0)"
       ],
-      "score": 29
+      "score": 23
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinWithdrawPopover.jsx",
@@ -1929,36 +1967,6 @@
       },
       "flags": [],
       "score": 8
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\alignInboxStartUnderTabs.js",
-      "forumScope": true,
-      "counts": {
-        "addEvt": 0,
-        "remEvt": 0,
-        "setInt": 0,
-        "clrInt": 0,
-        "setTo": 1,
-        "raf": 1,
-        "caf": 0,
-        "rect": 2,
-        "qsa": 0,
-        "video": 0,
-        "autoplay": 0,
-        "loop": 0,
-        "preload": 0,
-        "createUrl": 0,
-        "revokeUrl": 0,
-        "fetch": 0,
-        "redis": 0,
-        "accountKeys": 0,
-        "unicodeEscape": 0,
-        "mojibake": 0
-      },
-      "flags": [
-        "raf imbalance (1/0)"
-      ],
-      "score": 6
     }
   ]
 }

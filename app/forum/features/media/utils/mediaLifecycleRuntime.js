@@ -60,10 +60,18 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
 })()
 
 const __SOFT_RESIDENT_POST_VIDEO = (() => {
-  // Для forum post-video soft-resident должен быть включен везде.
-  // Иначе desktop Chrome слишком легко уводит surface в cold path:
-  // shell карточки жив, а video внутри становится серым/мертвым.
-  return true
+  try {
+    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
+    const isIOS = /iP(hone|ad|od)/i.test(ua)
+    const isAndroid = /Android/i.test(ua)
+    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
+    const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3
+
+    return !!isIOS || !!isAndroid || !!coarse || !!lowMem
+  } catch {
+    return true
+  }
 })()
 
 const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
@@ -73,13 +81,12 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
     const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-
     if (isIOS) return 2
     if (lowMem) return 2
     if (coarse) return 3
-    return 6
-  } catch {
     return 4
+  } catch {
+    return 3
   }
 })()
 
@@ -174,7 +181,6 @@ function __isVisiblePostVideoShell(el) {
 function __detectEmptyPostVideoShell(el, reason = 'runtime_check') {
   if (!(el instanceof HTMLVideoElement)) return false
   if (String(el?.getAttribute?.('data-forum-video') || '') !== 'post') return false
-
   try {
     const shellVisible = __isVisiblePostVideoShell(el)
     const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '')
@@ -184,30 +190,17 @@ function __detectEmptyPostVideoShell(el, reason = 'runtime_check') {
       String(el?.dataset?.__resident || '') === '1' ||
       String(el?.dataset?.__prewarm || '') === '1' ||
       String(el?.dataset?.__playRequested || '') === '1'
-
-    const stuckFallbackOnly =
-      shellVisible &&
-      !hasSrc &&
-      hasPoster &&
-      ownerActive &&
-      String(el?.dataset?.__loadPending || '') !== '1' &&
-      String(el?.dataset?.__prewarm || '') === '1'
-
-    if ((!shellVisible || hasSrc || hasPoster || !ownerActive) && !stuckFallbackOnly) return false
-
+    if (!shellVisible || hasSrc || hasPoster || !ownerActive) return false
     const now = Date.now()
     const lastHit = Number(el?.dataset?.__lastEmptyShellDiagTs || 0)
     if (lastHit > 0 && (now - lastHit) < 1400) return true
-
     try { el.dataset.__lastEmptyShellDiagTs = String(now) } catch {}
-
     __bumpForumVideoLifecycleCounter('emptyShellDetectedCount')
     __pushForumVideoLifecycleEvent('orphan_shell_detected', el, {
       reason,
       shellVisible,
       hasSrc,
       hasPoster,
-      stuckFallbackOnly,
     })
     return true
   } catch {
@@ -260,22 +253,15 @@ export function __isVideoNearViewport(el, marginPx = 120) {
 export function __enforceActiveVideoCap(exceptEl) {
   try {
     let guard = 0
-
     while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 128) {
       guard += 1
       const victim = __activeVideoLRU[0]
       if (!victim) break
-
-      const victimIsPostFeedVideo =
-        String(victim?.getAttribute?.('data-forum-video') || '') === 'post'
-      const protectMargin = victimIsPostFeedVideo ? 700 : 180
-
       if (victim === exceptEl) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
       }
-
       if (
         String(victim?.dataset?.__playRequested || '') === '1' ||
         String(victim?.dataset?.__loadPending || '') === '1'
@@ -283,25 +269,23 @@ export function __enforceActiveVideoCap(exceptEl) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
-      }
-
-      if (__isVideoNearViewport(victim, protectMargin)) {
+      }      
+      if (__isVideoNearViewport(victim, 140)) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
       }
-
       __activeVideoLRU.shift()
       __activeVideoEls.delete(victim)
-
-      if (victimIsPostFeedVideo) {
+      if (String(victim?.getAttribute?.('data-forum-video') || '') === 'post') {
         __softReleaseVideoEl(victim, 'active_cap')
       } else {
         __unloadVideoEl(victim)
       }
     }
   } catch {}
-} 
+}
+
 export function __readMediaMutedPref() {
   const v = readMutedPrefFromStorage()
   if (typeof v === 'boolean') return v
@@ -328,80 +312,50 @@ export function __markMediaLifecycleTouch(el, reason = 'runtime_touch') {
 
 export function __softReleaseVideoEl(el, reason = 'soft_release') {
   if (!(el instanceof HTMLVideoElement)) return
-
   const prevTouchTs = Number(el?.dataset?.__lastLifecycleTouchTs || 0)
   const nowTs = __markMediaLifecycleTouch(el, reason)
-  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   const residentFlag = String(el?.dataset?.__resident || '') === '1'
   const prewarmFlag = String(el?.dataset?.__prewarm || '') === '1'
-  const shellVisible = isPostFeedVideo ? __isVisiblePostVideoShell(el) : false
-  const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
-  const posterSrc = String(
-    el?.getAttribute?.('poster') ||
-    el?.getAttribute?.('data-poster') ||
-    el?.dataset?.poster ||
-    ''
-  )
-
+  const nearViewport = __isVideoNearViewport(el, 420)
   const keepResident =
-    isPostFeedVideo &&
-    (
-      shellVisible ||
-      shouldKeepResidentPostVideo({
-        isPostFeedVideo: true,
-        hardUnloadRequested: false,
-        nearViewport,
-        recentTouchAgeMs: prevTouchTs > 0 ? Math.max(0, nowTs - prevTouchTs) : Number.POSITIVE_INFINITY,
-        residentFlag,
-        prewarmFlag,
-      })
-    )
-
-  try { el.pause?.() } catch {}
-
-try {
-  const hasAttachedSrc = !!String(el?.getAttribute?.('src') || el?.currentSrc || '')
-  const readyEnough = Number(el?.readyState || 0) >= 1 && hasAttachedSrc
-
-  el.dataset.__active = '0'
-  el.dataset.__playRequested = '0'
-  el.dataset.__loadPending = '0'
-  el.dataset.__warmReady = readyEnough ? '1' : '0'
-  el.dataset.__resident = keepResident ? '1' : '0'
-  el.dataset.__prewarm = '0'
-  el.dataset.__lastSoftReleaseTs = String(nowTs)
-  el.dataset.__lastUnloadTs = String(nowTs)
-  el.preload = keepResident ? 'metadata' : 'none'
-} catch {}
-
+    String(el?.getAttribute?.('data-forum-video') || '') === 'post' &&
+    shouldKeepResidentPostVideo({
+      isPostFeedVideo: true,
+      hardUnloadRequested: false,
+      nearViewport,
+      recentTouchAgeMs: prevTouchTs > 0 ? Math.max(0, nowTs - prevTouchTs) : Number.POSITIVE_INFINITY,
+      residentFlag,
+      prewarmFlag,
+    })
   try {
-    if (isPostFeedVideo && posterSrc) {
-      el.setAttribute('data-poster', posterSrc)
-      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-    }
-    if (isPostFeedVideo && el.dataset?.__src && !el.getAttribute('data-src')) {
-      el.setAttribute('data-src', String(el.dataset.__src))
-    }
+    el.pause?.()
   } catch {}
-
+  try {
+    el.dataset.__active = '0'
+    el.dataset.__playRequested = '0'
+    el.dataset.__loadPending = '0'
+    el.dataset.__warmReady = Number(el?.readyState || 0) >= 1 ? '1' : '0'
+    el.dataset.__resident = keepResident ? '1' : '0'
+    el.dataset.__prewarm = '0'
+    el.dataset.__lastSoftReleaseTs = String(nowTs)
+    el.dataset.__lastUnloadTs = String(nowTs)
+    el.preload = 'metadata'
+  } catch {}
   __bumpForumVideoLifecycleCounter('softReleaseCount')
-  if (isPostFeedVideo) __bumpForumVideoLifecycleCounter('posterPreservedCount')
-
+  __bumpForumVideoLifecycleCounter('posterPreservedCount')
   __pushForumVideoLifecycleEvent('soft_release', el, {
     reason,
     nearViewport,
     keepResident,
-    shellVisible,
+    shellVisible: __isVisiblePostVideoShell(el),
     srcAttached: !!String(el?.getAttribute?.('src') || el?.currentSrc || ''),
     posterPreserved: !!String(el?.getAttribute?.('poster') || ''),
   })
-
   __detectEmptyPostVideoShell(el, reason)
 }
 
 export function __unloadVideoEl(el) {
   if (!el) return
-
   const prevTouchTs = Number(el?.dataset?.__lastLifecycleTouchTs || 0)
   const nowTs = __markMediaLifecycleTouch(el, 'unload')
   const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
@@ -409,11 +363,11 @@ export function __unloadVideoEl(el) {
   const playRequestedFlag = String(el?.dataset?.__playRequested || '') === '1'
   const residentFlag = String(el?.dataset?.__resident || '') === '1'
   const prewarmFlag = String(el?.dataset?.__prewarm || '') === '1'
-  const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
-  const shellVisible = isPostFeedVideo ? __isVisiblePostVideoShell(el) : false
-
+  const nearViewport = __isVideoNearViewport(el, 420)
   try {
-    if (isPostFeedVideo) {
+    if (isPostFeedVideo) { 
+      // Для feed-видео не переносим seek-позицию между unload/restore:
+      // это снижает range-шторм и нестабильные "серые" перезапуски.
       delete el.dataset.__resumeTime
     } else {
       const cur = Number(el.currentTime || 0)
@@ -424,7 +378,6 @@ export function __unloadVideoEl(el) {
       else delete el.dataset.__resumeTime
     }
   } catch {}
-
   const hardUnloadRequested = (() => {
     try {
       return String(el?.dataset?.__forceHardUnload || '') === '1'
@@ -447,32 +400,32 @@ export function __unloadVideoEl(el) {
     shouldKeepResidentPostVideo({
       isPostFeedVideo,
       hardUnloadRequested,
-      nearViewport: nearViewport || shellVisible,
+      nearViewport,
       recentTouchAgeMs: prevTouchTs > 0 ? Math.max(0, nowTs - prevTouchTs) : Number.POSITIVE_INFINITY,
       residentFlag,
       prewarmFlag,
     })
 
-  const allowHardUnloadPostVideo =
-    shouldHardUnloadPostVideo({
-      isPostFeedVideo,
-      hardUnloadRequested,
-      isConnected: !!el?.isConnected,
-      nearViewport: nearViewport || shellVisible,
-      recentTouchAgeMs: prevTouchTs > 0 ? Math.max(0, nowTs - prevTouchTs) : Number.POSITIVE_INFINITY,
-      residentFlag,
-      prewarmFlag,
-      activeFlag,
-      playRequestedFlag,
-    }) && !shellVisible
+  const allowHardUnloadPostVideo = shouldHardUnloadPostVideo({
+    isPostFeedVideo,
+    hardUnloadRequested,
+    isConnected: !!el?.isConnected,
+    nearViewport,
+    recentTouchAgeMs: prevTouchTs > 0 ? Math.max(0, nowTs - prevTouchTs) : Number.POSITIVE_INFINITY,
+    residentFlag,
+    prewarmFlag,
+    activeFlag,
+    playRequestedFlag,
+  })
 
   if (isPostFeedVideo && (!canHardUnload || keepResidentPostVideo || !allowHardUnloadPostVideo)) {
     __softReleaseVideoEl(el, hardUnloadRequested ? 'post_soft_release_forced' : 'post_soft_release')
     return
   }
 
-  try { el.pause?.() } catch {}
-
+  try {
+    el.pause?.()
+  } catch {}
   try {
     el.dataset.__active = '0'
     el.dataset.__playRequested = '0'
@@ -482,21 +435,18 @@ export function __unloadVideoEl(el) {
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
-
   try {
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
   } catch {}
-
   const { storedSrc, hasAttachedSrc, hasPoster } = __getVideoSurfaceState(el)
   const networkEmpty =
     typeof HTMLMediaElement !== 'undefined' &&
     Number(el?.networkState || 0) === HTMLMediaElement.NETWORK_EMPTY
-
   if (storedSrc && !hasAttachedSrc && (Number(el?.readyState || 0) === 0 || networkEmpty)) {
     try {
-      el.preload = isPostFeedVideo ? 'metadata' : 'none'
+      el.preload = 'none'
       el.dataset.__lastHardUnloadTs = String(nowTs)
     } catch {}
     __bumpForumVideoLifecycleCounter('hardUnloadCount')
@@ -507,18 +457,17 @@ export function __unloadVideoEl(el) {
     })
     return
   }
-
-  try { el.removeAttribute('src') } catch {}
+  try {
+    el.removeAttribute('src')
+  } catch {}
   try {
     if (el.dataset?.__src) {
       el.setAttribute('data-src', String(el.dataset.__src))
     }
   } catch {}
-
   try {
-    el.preload = isPostFeedVideo ? 'metadata' : 'none'
+    el.preload = 'none'
   } catch {}
-
   try {
     if (!isPostFeedVideo) {
       el.removeAttribute('poster')
@@ -528,128 +477,101 @@ export function __unloadVideoEl(el) {
       delete el.dataset.__needsPosterRestore
       __bumpForumVideoLifecycleCounter('posterRemovedCount')
     } else {
-      const posterSrc = String(
-        el?.getAttribute?.('poster') ||
-        el?.getAttribute?.('data-poster') ||
-        el?.dataset?.poster ||
-        ''
-      )
-      if (posterSrc) {
-        el.setAttribute('data-poster', posterSrc)
-        if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-      }
       __bumpForumVideoLifecycleCounter('posterPreservedCount')
     }
     el.dataset.__lastHardUnloadTs = String(nowTs)
   } catch {}
-
   __bumpForumVideoLifecycleCounter('hardUnloadCount')
   __pushForumVideoLifecycleEvent('hard_unload', el, {
     reason: hardUnloadRequested ? 'forced' : 'runtime',
     nearViewport,
-    shellVisible,
     srcAttached: hasAttachedSrc,
     posterPreserved: isPostFeedVideo && hasPoster,
   })
-
-  if (!isPostFeedVideo) {
-    try { el.load?.() } catch {}
-  }
-
-  __detectEmptyPostVideoShell(el, 'hard_unload_complete')
+  try {
+    el.load?.()
+  } catch {}
 }
 
 export function __restoreVideoEl(el) {
   if (!el) return
-
   const nowTs = __markMediaLifecycleTouch(el, 'restore')
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
   const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   if (!src) return
-
-  const shellVisible = isPostFeedVideo ? __isVisiblePostVideoShell(el) : false
-  const wantsHot =
-    String(el.dataset?.__prewarm || '') === '1' ||
-    String(el.dataset?.__active || '') === '1' ||
-    String(el.dataset?.__resident || '') === '1' ||
-    String(el.dataset?.__playRequested || '') === '1'
-
   __bumpForumVideoLifecycleCounter('restoreAttemptCount')
   __pushForumVideoLifecycleEvent('restore_attempt', el, {
     srcAttached: !!String(el?.getAttribute?.('src') || el?.currentSrc || ''),
-    shellVisible,
+    shellVisible: __isVisiblePostVideoShell(el),
     posterPreserved: !!String(el?.getAttribute?.('poster') || ''),
   })
-
   try {
     delete el.dataset.__forceHardUnload
-    el.dataset.__lastRestoreTs = String(nowTs)
   } catch {}
-
   let lastRestoreAssessment = null
   const assessRestoreLoad = () => {
-    try {
-      const now = Date.now()
-      const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
-      if (blockedUntil > now) {
-        return {
-          allowed: false,
-          reason: 'blocked_until',
-          blockedForMs: blockedUntil - now,
-        }
+  try {
+    const now = Date.now()
+    const blockedUntil = Number(el.dataset?.__restoreLoadBlockedUntil || 0)
+    if (blockedUntil > now) {
+      return {
+        allowed: false,
+        reason: 'blocked_until',
+        blockedForMs: blockedUntil - now,
       }
-
-      const fastRestore = isPostFeedVideo
-      const minGap = fastRestore ? 1200 : 1500
-      const winMs = fastRestore ? 20000 : 16000
-      const burstLimit = fastRestore ? 4 : 5
-
-      const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
-      if (lastTs > 0 && (now - lastTs) < minGap) {
-        return {
-          allowed: false,
-          reason: 'min_gap',
-          blockedForMs: minGap - (now - lastTs),
-        }
-      }
-
-      const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
-      const inWindow = winStart > 0 && (now - winStart) < winMs
-      let count = Number(el.dataset?.__restoreLoadCount || 0)
-
-      if (!inWindow) {
-        el.dataset.__restoreLoadWindowStart = String(now)
-        count = 0
-      }
-
-      count += 1
-      el.dataset.__restoreLoadCount = String(count)
-
-      if (count > burstLimit) {
-        el.dataset.__restoreLoadBlockedUntil = String(now + (fastRestore ? 6000 : 10000))
-        return {
-          allowed: false,
-          reason: 'burst_limit',
-          blockedForMs: fastRestore ? 6000 : 10000,
-        }
-      }
-
-      el.dataset.__lastRestoreLoadTs = String(now)
-      return { allowed: true, reason: 'ok', blockedForMs: 0 }
-    } catch {
-      return { allowed: true, reason: 'error_fallback', blockedForMs: 0 }
     }
-  }
 
+    const fastRestore = isPostFeedVideo
+    const minGap = fastRestore ? 1200 : 1500
+    const winMs = fastRestore ? 20000 : 16000
+    const burstLimit = fastRestore ? 4 : 5
+
+    const lastTs = Number(el.dataset?.__lastRestoreLoadTs || 0)
+    if (lastTs > 0 && (now - lastTs) < minGap) {
+      return {
+        allowed: false,
+        reason: 'min_gap',
+        blockedForMs: minGap - (now - lastTs),
+      }
+    }
+
+    const winStart = Number(el.dataset?.__restoreLoadWindowStart || 0)
+    const inWindow = winStart > 0 && (now - winStart) < winMs
+    let count = Number(el.dataset?.__restoreLoadCount || 0)
+
+    if (!inWindow) {
+      el.dataset.__restoreLoadWindowStart = String(now)
+      count = 0
+    }
+
+    count += 1
+    el.dataset.__restoreLoadCount = String(count)
+
+    if (count > burstLimit) {
+      el.dataset.__restoreLoadBlockedUntil = String(now + (fastRestore ? 6000 : 10000))
+      return {
+        allowed: false,
+        reason: 'burst_limit',
+        blockedForMs: fastRestore ? 6000 : 10000,
+      }
+    }
+
+    el.dataset.__lastRestoreLoadTs = String(now)
+    return { allowed: true, reason: 'ok', blockedForMs: 0 }
+  } catch {
+    return { allowed: true, reason: 'error_fallback', blockedForMs: 0 }
+  }
+}
   const canRestoreLoad = () => {
     lastRestoreAssessment = assessRestoreLoad()
     return !!lastRestoreAssessment?.allowed
   }
-
+  try {
+    el.dataset.__lastRestoreTs = String(nowTs)
+  } catch {}
   try {
     if (!el.getAttribute('data-src')) el.setAttribute('data-src', String(src))
   } catch {}
-
   const cur = el.getAttribute('src') || ''
   if (cur === src) {
     try {
@@ -658,13 +580,7 @@ export function __restoreVideoEl(el) {
       const isNetworkEmpty =
         typeof HTMLMediaElement !== 'undefined' &&
         networkStateNow === HTMLMediaElement.NETWORK_EMPTY
-
       if (readyStateNow === 0 || isNetworkEmpty) {
-        if (isPostFeedVideo && !wantsHot) {
-          try { el.preload = 'metadata' } catch {}
-          return
-        }
-
         const restoreLoad = assessRestoreLoad()
         if (!restoreLoad.allowed) {
           __bumpForumVideoLifecycleCounter('restoreBlockedCount')
@@ -672,7 +588,6 @@ export function __restoreVideoEl(el) {
           __detectEmptyPostVideoShell(el, `restore_blocked:${restoreLoad.reason}`)
           return
         }
-
         el.dataset.__loadPending = '1'
         el.dataset.__warmReady = '0'
         __bumpForumVideoLifecycleCounter('loadKickCount')
@@ -681,11 +596,14 @@ export function __restoreVideoEl(el) {
     } catch {}
     return
   }
+try {
+  const shouldAutoPreload = 
+    String(el.dataset?.__prewarm || '') === '1' ||
+    String(el.dataset?.__active || '') === '1' ||
+    String(el.dataset?.__resident || '') === '1'
 
-  try {
-    el.preload = wantsHot ? 'auto' : 'metadata'
-  } catch {}
-
+  el.preload = shouldAutoPreload ? 'auto' : 'metadata'
+} catch {}
   try {
     if (!isPostFeedVideo) {
       el.removeAttribute('poster')
@@ -695,29 +613,16 @@ export function __restoreVideoEl(el) {
       delete el.dataset.__needsPosterRestore
       __bumpForumVideoLifecycleCounter('posterRemovedCount')
     } else {
-      const posterSrc = String(
-        el?.getAttribute?.('poster') ||
-        el?.getAttribute?.('data-poster') ||
-        el?.dataset?.poster ||
-        ''
-      )
-      if (posterSrc) {
-        el.setAttribute('data-poster', posterSrc)
-        if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-      }
       __bumpForumVideoLifecycleCounter('posterPreservedCount')
     }
   } catch {}
-
-try {
-  // После restore для post-video нельзя заранее объявлять слот warmReady.
-  // Сначала должен реально подняться attached media surface.
-  el.dataset.__loadPending = wantsHot ? '1' : '0'
-  el.dataset.__warmReady = '0'
-  el.setAttribute('src', src)
-} catch {}
-
-  try { 
+  try {
+    el.dataset.__loadPending = '1'
+    el.dataset.__warmReady = '0'
+    el.setAttribute('src', src)
+  } catch {}
+  try {
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
       const resumeTo = Number(el.dataset?.__resumeTime || 0)
       if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
@@ -727,11 +632,7 @@ try {
             const safeTarget = Number.isFinite(duration) && duration > 0
               ? Math.max(0, Math.min(resumeTo, duration - 0.12))
               : resumeTo
-            if (
-              Number.isFinite(safeTarget) &&
-              safeTarget > 0.05 &&
-              Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05
-            ) {
+            if (Number.isFinite(safeTarget) && safeTarget > 0.05 && Math.abs(Number(el.currentTime || 0) - safeTarget) > 0.05) {
               el.currentTime = safeTarget
             }
           } catch {}
@@ -741,46 +642,40 @@ try {
       }
     }
   } catch {}
+try {
+  const networkState = Number(el.networkState || 0)
+  const isLoading =
+    typeof HTMLMediaElement !== 'undefined' &&
+    networkState === HTMLMediaElement.NETWORK_LOADING
 
-  try {
-    const networkState = Number(el.networkState || 0)
-    const isLoading =
-      typeof HTMLMediaElement !== 'undefined' &&
-      networkState === HTMLMediaElement.NETWORK_LOADING
+  const shouldKickPostRestore =
+    isPostFeedVideo &&
+    (
+      String(el.dataset?.__prewarm || '') === '1' ||
+      String(el.dataset?.__active || '') === '1' ||
+      String(el.dataset?.__resident || '') === '1'
+    )
 
-    if (!isPostFeedVideo && !isLoading && canRestoreLoad()) {
+  if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
+  if (!isPostFeedVideo && !isLoading && lastRestoreAssessment?.allowed) {
+      __bumpForumVideoLifecycleCounter('loadKickCount')
+  } else if (!isPostFeedVideo && !isLoading) {
+    const restoreLoad = lastRestoreAssessment || assessRestoreLoad()
+    __bumpForumVideoLifecycleCounter('restoreBlockedCount')
+    __pushForumVideoLifecycleEvent('restore_blocked', el, restoreLoad)
+  }
+  if (shouldKickPostRestore && !isLoading) {
+    const restoreLoad = assessRestoreLoad()
+    if (restoreLoad.allowed) {
       __bumpForumVideoLifecycleCounter('loadKickCount')
       el.load?.()
-    } else if (!isPostFeedVideo && !isLoading) {
-      const restoreLoad = lastRestoreAssessment || assessRestoreLoad()
+    } else {
       __bumpForumVideoLifecycleCounter('restoreBlockedCount')
       __pushForumVideoLifecycleEvent('restore_blocked', el, restoreLoad)
+      __detectEmptyPostVideoShell(el, `restore_blocked:${restoreLoad.reason}`)
     }
-
-    if (isPostFeedVideo && wantsHot && !isLoading) {
-      // Для post-video после setAttribute('src') не дублируем load без нужды.
-      // Явный load допускаем только если src уже attached, но сеть пустая,
-      // либо если restore path явно горячий и не заблокирован.
-      const readyStateNow = Number(el.readyState || 0)
-      const networkStateNow = Number(el.networkState || 0)
-      const isNetworkEmpty =
-        typeof HTMLMediaElement !== 'undefined' &&
-        networkStateNow === HTMLMediaElement.NETWORK_EMPTY
-
-      if (cur === src && (readyStateNow === 0 || isNetworkEmpty)) {
-        const restoreLoad = assessRestoreLoad()
-        if (restoreLoad.allowed) {
-          __bumpForumVideoLifecycleCounter('loadKickCount')
-          el.load?.()
-        } else {
-          __bumpForumVideoLifecycleCounter('restoreBlockedCount')
-          __pushForumVideoLifecycleEvent('restore_blocked', el, restoreLoad)
-          __detectEmptyPostVideoShell(el, `restore_blocked:${restoreLoad.reason}`)
-        }
-      }
-    }
-  } catch {}
-
+  }
+} catch {}
   __detectEmptyPostVideoShell(el, 'restore_complete')
 }
 

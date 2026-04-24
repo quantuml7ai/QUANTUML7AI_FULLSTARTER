@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-24T07:54:04.501Z",
+  "generatedAt": "2026-04-23T12:33:03.867Z",
   "scannedFiles": 274,
   "report": [
     {
@@ -626,62 +626,62 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 210,
+          "line": 209,
           "text": "window.scrollTo(0, nextTop)"
         },
         {
           "key": "scrollWrite",
-          "line": 405,
+          "line": 404,
           "text": "else window.scrollTo(0, 0)"
         },
         {
           "key": "scrollRead",
-          "line": 176,
+          "line": 175,
           "text": "const winTop = Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 183,
+          "line": 182,
           "text": "st: Number(el.scrollTop || 0),"
         },
         {
           "key": "scrollRead",
-          "line": 200,
+          "line": 199,
           "text": "el.scrollTop = Math.max(0, Number(el.scrollTop || 0) + d)"
         },
         {
           "key": "scrollRead",
-          "line": 208,
+          "line": 207,
           "text": "Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d"
         },
         {
           "key": "scrollRead",
-          "line": 404,
+          "line": 403,
           "text": "if (vfHasInnerScrollable(el)) el.scrollTop = 0"
         },
         {
           "key": "rectReads",
-          "line": 572,
+          "line": 571,
           "text": "const h = node.getBoundingClientRect?.()?.height"
         },
         {
           "key": "resizeObserver",
-          "line": 599,
+          "line": 598,
           "text": "if (!vfRosRef.current.get(idx) && typeof ResizeObserver !== 'undefined') {"
         },
         {
           "key": "raf",
-          "line": 362,
+          "line": 361,
           "text": "vfRafRef.current = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 410,
+          "line": 409,
           "text": "vfHardResetScheduleRef.current.rafA = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 418,
+          "line": 417,
           "text": "vfHardResetScheduleRef.current.timeoutId = setTimeout(() => {"
         }
       ]
@@ -857,22 +857,22 @@
         },
         {
           "key": "rectReads",
-          "line": 2262,
+          "line": 2255,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2515,
+          "line": 2508,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2532,
+          "line": 2525,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3101,
+          "line": 3063,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
@@ -887,7 +887,7 @@
         },
         {
           "key": "raf",
-          "line": 3254,
+          "line": 3216,
           "text": "rafId = requestAnimationFrame(() => {"
         }
       ]
@@ -2155,27 +2155,27 @@
       "hits": [
         {
           "key": "timers",
-          "line": 451,
+          "line": 449,
           "text": "controlsTimerRef.current = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 464,
+          "line": 462,
           "text": "centerIconTimerRef.current = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 509,
+          "line": 507,
           "text": "const tid = window.setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 892,
+          "line": 879,
           "text": "unloadTimer = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 1030,
+          "line": 1017,
           "text": "recoverTimerRef.current = setTimeout(() => {"
         }
       ]
@@ -2629,7 +2629,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 255,
+          "line": 241,
           "text": "const r = el.getBoundingClientRect?.()"
         }
       ]
