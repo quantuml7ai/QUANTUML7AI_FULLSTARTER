@@ -431,8 +431,8 @@ ul.bullets li{margin:6px 0}
   bottom: 14px;
   z-index: 60;
 
-  width: 56px !important;
-  height: 56px !important;
+  width: 50px !important;
+  height: 50px !important;
   max-width: 56px !important;
   aspect-ratio: 1 / 1;
   border-radius: 999px !important;
@@ -476,8 +476,8 @@ ul.bullets li{margin:6px 0}
 
 .audio-toggle__visual{
   position: relative;
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   display: block;
   pointer-events: none;
   -webkit-user-select: none;
