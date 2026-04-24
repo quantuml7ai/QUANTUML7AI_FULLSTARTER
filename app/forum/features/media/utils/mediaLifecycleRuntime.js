@@ -58,20 +58,7 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
   }
 })()
 
-const __SOFT_RESIDENT_POST_VIDEO = (() => {
-  try {
-    const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
-    const isIOS = /iP(hone|ad|od)/i.test(ua)
-    const isAndroid = /Android/i.test(ua)
-    const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3
-
-    return !!isIOS || !!isAndroid || !!coarse || !!lowMem
-  } catch {
-    return true
-  }
-})()
+const __SOFT_RESIDENT_POST_VIDEO = true
 
 const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
   try {
@@ -83,12 +70,11 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
     if (isIOS) return 2
     if (lowMem) return 2
     if (coarse) return 3
-    return 4
+    return 6
   } catch {
-    return 3
-  }
-})()
-
+    return 4
+  } 
+})() 
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
@@ -129,6 +115,11 @@ export function __enforceActiveVideoCap(exceptEl) {
       guard += 1
       const victim = __activeVideoLRU[0]
       if (!victim) break
+
+      const victimIsPostFeedVideo =
+        String(victim?.getAttribute?.('data-forum-video') || '') === 'post'
+      const protectMargin = victimIsPostFeedVideo ? 700 : 180
+
       if (victim === exceptEl) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
@@ -141,15 +132,29 @@ export function __enforceActiveVideoCap(exceptEl) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
-      }      
-      if (__isVideoNearViewport(victim, 140)) {
+      }
+      if (__isVideoNearViewport(victim, protectMargin)) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
       }
+
       __activeVideoLRU.shift()
       __activeVideoEls.delete(victim)
-      __unloadVideoEl(victim)
+
+      if (victimIsPostFeedVideo) {
+        try {
+          victim.pause?.()
+        } catch {}
+        try {
+          victim.dataset.__active = '0'
+          victim.dataset.__prewarm = '0'
+          victim.dataset.__resident = '1'
+          victim.preload = 'metadata'
+        } catch {}
+      } else {
+        __unloadVideoEl(victim)
+      }
     }
   } catch {}
 }
@@ -160,11 +165,22 @@ export function __readMediaMutedPref() {
   return true
 }
 
-export function __writeMediaMutedPref(nextMuted) {
+export function __writeMediaMutedPref(nextMuted, source = 'media_element', emit = true) {
   try {
     const v = nextMuted ? '1' : '0'
     localStorage.setItem(MEDIA_MUTED_KEY, v)
     localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
+  } catch {}
+
+  if (!emit || typeof window === 'undefined') return
+
+  try {
+    window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
+      detail: {
+        muted: !!nextMuted,
+        source: String(source || 'media_element'),
+      },
+    }))
   } catch {}
 }
 
@@ -225,17 +241,40 @@ const canHardUnload = (() => {
   }
 })()
 
+const shellVisible = isPostFeedVideo ? __isVideoNearViewport(el, 220) : false
+const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
+
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   __SOFT_RESIDENT_POST_VIDEO &&
-  !hardUnloadRequested
+  (!hardUnloadRequested || nearViewport || shellVisible)
 
 if (!canHardUnload || shouldKeepResidentPostVideo) {
+  try {
+    el.pause?.()
+  } catch {}
   try {
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = '0'
     el.preload = 'metadata'
+    el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
+
+  if (isPostFeedVideo) {
+    try {
+      const posterSrc = String(
+        el?.getAttribute?.('poster') ||
+        el?.getAttribute?.('data-poster') ||
+        el?.dataset?.poster ||
+        ''
+      )
+      if (posterSrc) {
+        el.setAttribute('data-poster', posterSrc)
+        if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
+      }
+    } catch {}
+  }
+
   return
 }
   try {
@@ -252,19 +291,34 @@ if (!canHardUnload || shouldKeepResidentPostVideo) {
     }
   } catch {}
   try {
-    el.preload = 'none'
+    el.preload = isPostFeedVideo ? 'metadata' : 'none'
   } catch {}
 try {
-  el.removeAttribute('poster')
-  delete el.dataset.__posterOriginal
-  delete el.dataset.__posterMediaKey
-  delete el.dataset.__posterRevealed
-  delete el.dataset.__needsPosterRestore
+  if (!isPostFeedVideo) {
+    el.removeAttribute('poster')
+    delete el.dataset.__posterOriginal
+    delete el.dataset.__posterMediaKey
+    delete el.dataset.__posterRevealed
+    delete el.dataset.__needsPosterRestore
+  } else {
+    const posterSrc = String(
+      el?.getAttribute?.('poster') ||
+      el?.getAttribute?.('data-poster') ||
+      el?.dataset?.poster ||
+      ''
+    )
+    if (posterSrc) {
+      el.setAttribute('data-poster', posterSrc)
+      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
+    }
+  }
   el.dataset.__lastHardUnloadTs = String(nowTs)
 } catch {}
-  try {
-    el.load?.()
-  } catch {}
+  if (!isPostFeedVideo) {
+    try {
+      el.load?.()
+    } catch {}
+  }
 }
 
 export function __restoreVideoEl(el) {
@@ -320,22 +374,31 @@ const burstLimit = fastRestore ? 4 : 5
     if (!el.getAttribute('data-src')) el.setAttribute('data-src', String(src))
   } catch {}
   const cur = el.getAttribute('src') || ''
-  if (cur === src) {
-    try {
-      const readyStateNow = Number(el.readyState || 0)
-      const networkStateNow = Number(el.networkState || 0)
-      const isNetworkEmpty =
-        typeof HTMLMediaElement !== 'undefined' &&
-        networkStateNow === HTMLMediaElement.NETWORK_EMPTY
+if (cur === src) {
+  try {
+    const readyStateNow = Number(el.readyState || 0)
+    const networkStateNow = Number(el.networkState || 0)
+    const isNetworkEmpty =
+      typeof HTMLMediaElement !== 'undefined' &&
+      networkStateNow === HTMLMediaElement.NETWORK_EMPTY
+
+    if (isPostFeedVideo) {
       if (readyStateNow === 0 || isNetworkEmpty) {
-        if (!canRestoreLoad()) return
-        el.dataset.__loadPending = '1'
+        el.dataset.__loadPending = '0'
         el.dataset.__warmReady = '0'
-        el.load?.()
       }
-    } catch {}
-    return
-  }
+      return
+    }
+
+    if (readyStateNow === 0 || isNetworkEmpty) {
+      if (!canRestoreLoad()) return
+      el.dataset.__loadPending = '1'
+      el.dataset.__warmReady = '0'
+      el.load?.()
+    }
+  } catch {}
+  return
+}
 try {
   const shouldAutoPreload = 
     String(el.dataset?.__prewarm || '') === '1' ||
@@ -383,18 +446,10 @@ try {
     typeof HTMLMediaElement !== 'undefined' &&
     networkState === HTMLMediaElement.NETWORK_LOADING
 
-  const shouldKickPostRestore =
-    isPostFeedVideo &&
-    (
-      String(el.dataset?.__prewarm || '') === '1' ||
-      String(el.dataset?.__active || '') === '1' ||
-      String(el.dataset?.__resident || '') === '1'
-    )
+if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
 
-  if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()
-  if (shouldKickPostRestore && !isLoading && canRestoreLoad()) {
-    el.load?.()
-  }
+// Для post-video restore — только DOM/surface restore.
+// Сетевой kickoff остаётся у coordinator.
 } catch {}
 }
 

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 950
+const VF_OVERSCAN_PX = 1120
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -13,9 +13,9 @@ const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
-const VF_WINDOW_STICKY_MS = 320
+const VF_WINDOW_STICKY_MS = 520
 const VF_LAYOUT_JITTER_PX = 28
-const VF_SCROLL_SETTLE_MS = 180
+const VF_SCROLL_SETTLE_MS = 260
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 
 function defaultIsBrowser() {
@@ -70,18 +70,18 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
  
-  const vfGetMaxRender = useCallback(() => {
-    try {
-      if (!isBrowserFn()) return 7
-      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-      const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 6
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 7
-      return 8
-    } catch {
-      return 7
-    }
-  }, [isBrowserFn])
+const vfGetMaxRender = useCallback(() => {
+  try {
+    if (!isBrowserFn()) return 8
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const dm = Number(window?.navigator?.deviceMemory || 0)
+    if (coarse) return 7
+    if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
+    return 10
+  } catch {
+    return 8
+  }
+}, [isBrowserFn])
 
   const vfGetFixedItemH = useCallback(() => {
     try {
@@ -241,32 +241,32 @@ export default function useVideoFeedWindowing({
     const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-    const velocityBoost = Math.min(550, Math.round(velocity * 260))
-    const overscanPx = VF_OVERSCAN_PX + velocityBoost
-    const fromY = Math.max(0, st - overscanPx)
-    const toY = st + vh + overscanPx
+const velocityBoost = Math.min(360, Math.round(velocity * 140))
+const overscanPx = VF_OVERSCAN_PX + velocityBoost
+const fromY = Math.max(0, st - overscanPx)
+const toY = st + vh + overscanPx
 
-    let acc = 0
-    let start = 0
-    while (start < total && (acc + vfGetH(start)) < fromY) {
-      acc += vfGetH(start)
-      start++
-    }
+let acc = 0
+let start = 0
+while (start < total && (acc + vfGetH(start)) < fromY) {
+  acc += vfGetH(start)
+  start++
+}
 
-    let end = start
-    let acc2 = acc
-    while (end < total && acc2 < toY) {
-      acc2 += vfGetH(end)
-      end++
-    }
+let end = start
+let acc2 = acc
+while (end < total && acc2 < toY) {
+  acc2 += vfGetH(end)
+  end++
+}
 
-    const vfMaxRender = vfGetMaxRender() + (velocity > 0.6 ? 1 : 0) + (velocity > 1.2 ? 1 : 0)
-    if ((end - start) > vfMaxRender) {
-      const mid = Math.floor((start + end) / 2)
-      const half = Math.floor(vfMaxRender / 2)
-      start = Math.max(0, mid - half)
-      end = Math.min(total, start + vfMaxRender)
-    }
+const vfMaxRender = vfGetMaxRender() + (velocity > 1.0 ? 1 : 0)
+if ((end - start) > vfMaxRender) {
+  const mid = Math.floor((start + end) / 2)
+  const half = Math.floor(vfMaxRender / 2)
+  start = Math.max(0, mid - half)
+  end = Math.min(total, start + vfMaxRender)
+}
 
     setVfWin((prev) => {
       let nextStart = start
@@ -280,7 +280,7 @@ export default function useVideoFeedWindowing({
       if (shrinkOnly) {
         const now = Date.now()
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
-        const stickyItems = velocity > 1.2 ? 2 : velocity > 0.55 ? 2 : 1
+        const stickyItems = velocity > 1.2 ? 3 : velocity > 0.55 ? 2 : 2
         const stickyMaxRender = vfMaxRender + stickyItems
         const leadingTrim = Math.max(0, nextStart - prev.start)
         const trailingTrim = Math.max(0, prev.end - nextEnd)
