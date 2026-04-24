@@ -408,11 +408,24 @@ try {
   el.preload = shouldAutoPreload ? 'auto' : 'metadata'
 } catch {}
 try {
-  el.removeAttribute('poster')
-  delete el.dataset.__posterOriginal
-  delete el.dataset.__posterMediaKey
-  delete el.dataset.__posterRevealed
-  delete el.dataset.__needsPosterRestore
+  if (!isPostFeedVideo) {
+    el.removeAttribute('poster')
+    delete el.dataset.__posterOriginal
+    delete el.dataset.__posterMediaKey
+    delete el.dataset.__posterRevealed
+    delete el.dataset.__needsPosterRestore
+  } else {
+    const posterSrc = String(
+      el?.getAttribute?.('poster') ||
+      el?.getAttribute?.('data-poster') ||
+      el?.dataset?.poster ||
+      ''
+    )
+    if (posterSrc) {
+      el.setAttribute('data-poster', posterSrc)
+      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
+    }
+  }
 } catch {}
   try {
     el.dataset.__loadPending = '1'

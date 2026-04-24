@@ -1449,22 +1449,35 @@ const applyMutedPrefToAll = () => {
         return false;
       }
       el = mediaEl;
-      try {
-        applyMutedPref(el);
-        el.playsInline = true;
-        if (el instanceof HTMLVideoElement) {
-          try { el.dataset.__resident = '1'; } catch {}
-          try { el.dataset.__prewarm = '1'; } catch {}
-          try { el.preload = 'auto'; } catch {}
-          if (!el.getAttribute('src')) {
-            trace('candidate_restore', el, { reason });
-            __restoreVideoEl(el);
-          }
-        } else {
-          try { el.preload = 'auto'; } catch {}
-        }
-        const readyState = Number(el.readyState || 0);
-        if (readyState >= 2 || String(el.dataset?.__warmReady || '') === '1') return true;
+try {
+  applyMutedPref(el);
+  el.playsInline = true;
+
+  if (el instanceof HTMLVideoElement) {
+    const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+
+    try { el.dataset.__resident = '1'; } catch {}
+    try { el.dataset.__prewarm = '1'; } catch {}
+    try { el.preload = 'auto'; } catch {}
+
+    if (!el.getAttribute('src')) {
+      trace('candidate_restore', el, { reason });
+      __restoreVideoEl(el);
+
+      // ВАЖНО:
+      // Для post-video не продолжаем этот же проход в candidate_force_load.
+      // Иначе получается restore + load в одном тике, что и раздувает churn.
+      if (isPostVideo) {
+        armReadyReplay(el);
+        return false;
+      }
+    }
+  } else {
+    try { el.preload = 'auto'; } catch {}
+  }
+
+  const readyState = Number(el.readyState || 0);
+  if (readyState >= 2 || String(el.dataset?.__warmReady || '') === '1') return true;
 
         const now = Date.now();
         const reasonTag = String(reason || '').trim();
@@ -1875,15 +1888,40 @@ const onMutedEvent = (e) => {
         blockedForMs: Math.max(0, Number(blocked?.until || 0) - Date.now()),
       });
     };
-    const onMediaLoadedCaptured = (e) => {
-      const target = e?.target;
-      if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
-      clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
-      try {
-        target.dataset.__loadPending = '0';
-        if (target.readyState >= 2) target.dataset.__warmReady = '1';
-      } catch {}
-    };
+const onMediaLoadedCaptured = (e) => {
+  const target = e?.target;
+  if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
+
+  clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
+
+  try {
+    target.dataset.__loadPending = '0';
+    if (target.readyState >= 2) target.dataset.__warmReady = '1';
+  } catch {}
+
+  try {
+    const wantsAutoplay =
+      (
+        String(target?.dataset?.__playRequested || '') === '1' ||
+        String(target?.dataset?.__active || '') === '1' ||
+        String(target?.dataset?.__prewarm || '') === '1'
+      ) &&
+      !isUserPaused(target) &&
+      !hasSuppressedPlayback(target);
+
+    const lastLoadedRetryTs = Number(target?.dataset?.__loadedRetryTs || 0);
+    const now = Date.now();
+
+    const canAttemptAudible = hasUserGestureIntent(target) || hasManualLease(target);
+    const canAttempt = !!target.muted || canAttemptAudible;
+
+    if (wantsAutoplay && canAttempt && target.paused && (now - lastLoadedRetryTs) > 700) {
+      try { target.dataset.__loadedRetryTs = String(now); } catch {}
+      trace('loaded_autoplay_retry', target, { type: e?.type || 'loaded' });
+      startHtmlMedia(target, 'loaded_autoplay_retry');
+    }
+  } catch {}
+};
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
       try {
         if (!(iframe instanceof HTMLIFrameElement)) return;
@@ -2921,54 +2959,63 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
           markSuppressedPlayback(el, 2200);
           return;
         }
-        try {
-          clearSuppressedPlayback(el);
-          if (el instanceof HTMLVideoElement) {
-            const hasSrc = !!el.getAttribute('src');
-            let restoredNow = false;
-            if (!hasSrc) {
-              trace('play_restore', el);
-              __restoreVideoEl(el);
-              restoredNow = true;
-            }
-            try { el.dataset.__prewarm = '1'; } catch {}
-            try { el.dataset.__active = '1'; } catch {}
-            try { el.preload = 'auto'; } catch {}
-            try {
-              const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-              if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
-                const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
-                if (!canKickLoad(el, {
-                  channel: 'play_cold',
-                  minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
-                  burstWindowMs: isIOSUi ? 22000 : 15000,
-                  burstLimit: isIOSUi ? 4 : 5,
-                  blockMs: isIOSUi ? 12000 : 9000,
-                  bypassSrcLimiter: userIntentKick || isIOSUi,
-                  bypassPendingBudget: true,
-                })) return;
-                try { el.dataset.__loadPending = '1'; } catch {}
-                trace('play_load', el);
-                el.load?.();
-              }
-            } catch {}
-            __touchActiveVideoEl(el);
-            __enforceActiveVideoCap(el);
-          }
-          applyMutedPref(el);
-          el.playsInline = true;
-          // LOOP: автоплей всегда зацикленный 
-          el.loop = true;
-          if ((el.readyState || 0) < 2) {
-            ensurePendingHtmlMediaReady(el, 'play_wait_ready');
-            trace('play_wait_ready', el);
-            armReadyReplay(el);
-          } else if (el.paused) {
-            trace('play_now', el);
-            startHtmlMedia(el, 'play_now');
-          }
-        } catch {}
-        return;
+try {
+  clearSuppressedPlayback(el);
+
+  if (el instanceof HTMLVideoElement) {
+    const hasSrc = !!el.getAttribute('src');
+    let restoredNow = false;
+
+    if (!hasSrc) {
+      trace('play_restore', el);
+      __restoreVideoEl(el);
+      restoredNow = true;
+    }
+
+    try { el.dataset.__prewarm = '1'; } catch {}
+    try { el.dataset.__resident = '1'; } catch {}
+    try {
+      if (String(el.dataset?.__active || '') !== '1') {
+        el.dataset.__active = '0';
+      }
+    } catch {}
+    try { el.preload = 'auto'; } catch {}
+
+    try {
+      const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
+      if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
+        const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
+        if (!canKickLoad(el, {
+          channel: 'play_cold',
+          minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
+          burstWindowMs: isIOSUi ? 22000 : 15000,
+          burstLimit: isIOSUi ? 4 : 5,
+          blockMs: isIOSUi ? 12000 : 9000,
+          bypassSrcLimiter: userIntentKick || isIOSUi,
+          bypassPendingBudget: true,
+        })) return;
+
+        try { el.dataset.__loadPending = '1'; } catch {}
+        trace('play_load', el);
+        el.load?.();
+      }
+    } catch {}
+  }
+
+  applyMutedPref(el);
+  el.playsInline = true;
+  el.loop = true;
+
+  if ((el.readyState || 0) < 2) {
+    ensurePendingHtmlMediaReady(el, 'play_wait_ready');
+    trace('play_wait_ready', el);
+    armReadyReplay(el);
+  } else if (el.paused) {
+    trace('play_now', el);
+    startHtmlMedia(el, 'play_now');
+  }
+} catch {}
+return;
       }
 
       const kind = el.getAttribute('data-forum-media');
