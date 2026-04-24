@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-23T12:32:20.800Z
-Файлов в реестре: 1747
+Сгенерировано автоматически: 2026-04-21T20:30:44.866Z
+Файлов в реестре: 1746
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -80,7 +80,7 @@
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
 - `provider-baseline.report.json` — 1 файлов
-- `public` — 921 файлов
+- `public` — 920 файлов
 - `qcast-ownership.report.json` — 1 файлов
 - `README.md` — 1 файлов
 - `route-budget.report.json` — 1 файлов
@@ -464,10 +464,10 @@
         - utils/ — Каталог слоя утилиты внутри feature media.
           - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
           - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: используется в forum/ForumRoot.jsx.
-          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/mediaStatePolicy.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
           - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
           - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
-          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js, tests/unit/forum/media/mediaStatePolicy.test.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
@@ -947,7 +947,6 @@
   - ai/ — Подкаталог статических ассетов public/ai.
     - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - audio/ — Подкаталог статических ассетов public/audio.
-    - bgaudio.gif — GIF-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - Q-Cast.png — PNG-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - branding/ — Подкаталог статических ассетов public/branding.

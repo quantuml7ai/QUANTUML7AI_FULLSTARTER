@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-23T12:33:08.258Z",
+  "generatedAt": "2026-04-21T20:31:53.241Z",
   "issues": [
     "legacy-iframe-prewarm-still-present"
   ],
@@ -31,7 +31,7 @@
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
-        "restoreGuard": 18,
+        "restoreGuard": 10,
         "sameSrcGuard": 4,
         "sharedMute": 6
       }
@@ -42,7 +42,7 @@
         "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
-        "coordinatorOwnsLifecycle": 9,
+        "coordinatorOwnsLifecycle": 5,
         "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
@@ -81,7 +81,7 @@
         "forumQcastMuted": 0,
         "restoreGuard": 0,
         "sameSrcGuard": 0,
-        "sharedMute": 11
+        "sharedMute": 6
       }
     },
     {

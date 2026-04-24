@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-23T12:33:07.499Z",
+  "generatedAt": "2026-04-21T20:31:52.302Z",
   "summary": {
     "heavyProviders": 11,
     "signalTotals": {
@@ -7,9 +7,9 @@
       "analytics": 8,
       "wallet": 13,
       "authUi": 15,
-      "startupMedia": 6,
-      "timers": 20,
-      "listeners": 28
+      "startupMedia": 7,
+      "timers": 19,
+      "listeners": 29
     },
     "filesScanned": 10
   },
@@ -86,13 +86,13 @@
         "wallet": 0,
         "authUi": 0,
         "startupMedia": 0,
-        "timers": 5,
+        "timers": 4,
         "listeners": 7
       },
       "riskFlags": [
         "long-lived-runtime-signals"
       ],
-      "score": 21
+      "score": 19
     },
     {
       "file": "components/ForumBootSplash.jsx",
@@ -117,12 +117,12 @@
         "analytics": 0,
         "wallet": 0,
         "authUi": 0,
-        "startupMedia": 2,
+        "startupMedia": 3,
         "timers": 0,
-        "listeners": 7
+        "listeners": 8
       },
       "riskFlags": [],
-      "score": 11
+      "score": 14
     },
     {
       "file": "components/NotRobot.jsx",

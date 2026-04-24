@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-23T12:33:03.711Z",
+  "generatedAt": "2026-04-21T20:31:47.911Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -15,10 +15,10 @@
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
       "counts": {
-        "dataSrc": 9,
+        "dataSrc": 7,
         "setSrc": 1,
         "removeSrc": 1,
-        "restore": 34,
+        "restore": 13,
         "postMessagePause": 0,
         "ytPlayers": 0
       }
@@ -38,8 +38,8 @@
       "file": "app/forum/features/media/components/VideoMedia.jsx",
       "counts": {
         "dataSrc": 3,
-        "setSrc": 1,
-        "removeSrc": 2,
+        "setSrc": 2,
+        "removeSrc": 1,
         "restore": 7,
         "postMessagePause": 0,
         "ytPlayers": 0

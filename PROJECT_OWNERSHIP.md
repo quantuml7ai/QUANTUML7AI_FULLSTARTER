@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-04-23T12:32:19.802Z
+Сгенерировано автоматически: 2026-04-21T20:30:43.625Z
 
 ## Общий Принцип
 
@@ -390,7 +390,7 @@
 
 - Зона: `public/audio`
 - Назначение: Статические ассеты namespace audio.
-- Точки входа: `public/audio/bgaudio.gif`, `public/audio/cosmic.mp3`, `public/audio/Q-Cast.png`
+- Точки входа: `public/audio/cosmic.mp3`, `public/audio/Q-Cast.png`
 - Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
 
 ### public/branding

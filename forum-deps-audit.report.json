@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-23T12:32:28.953Z",
+  "generatedAt": "2026-04-21T20:30:57.758Z",
   "summary": {
     "scannedFiles": 378,
-    "internalEdges": 501,
+    "internalEdges": 500,
     "cycleCount": 0,
     "crossDomainEdgeCount": 117,
     "forumRootImportCount": 1,
@@ -2026,8 +2026,8 @@
       "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/feed/utils/interleaveRecommendationRails.js",
-        "app/forum/shared/config/runtime.js"
+        "app/forum/shared/config/runtime.js",
+        "app/forum/features/feed/utils/interleaveRecommendationRails.js"
       ],
       "importCount": 2,
       "external": [
@@ -2087,10 +2087,9 @@
       "imports": [
         "app/forum/features/media/components/VideoMedia.jsx",
         "app/forum/features/media/components/QCastPlayer.jsx",
-        "app/forum/features/media/utils/videoControls.js",
-        "app/forum/features/media/utils/mediaStatePolicy.js"
+        "app/forum/features/media/utils/videoControls.js"
       ],
-      "importCount": 4,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -4650,10 +4649,9 @@
       "imports": [],
       "importCount": 0,
       "external": [
-        "next/image",
         "react"
       ],
-      "externalCount": 2
+      "externalCount": 1
     },
     {
       "file": "components/ForumBootSplash.jsx",

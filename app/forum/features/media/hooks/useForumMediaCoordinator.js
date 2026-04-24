@@ -10,7 +10,6 @@ import {
   __dropActiveVideoEl,
   __enforceActiveVideoCap,
   __restoreVideoEl,
-  __softReleaseVideoEl,
   __unloadVideoEl,
   __hasLazyVideoSourceWithoutSrc,
   __isVideoNearViewport,
@@ -583,53 +582,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       } catch {}
       trace(event, el, extra);
     };
-    const ensureLifecycleDiagRoot = () => {
-      try {
-        const existing = window.__forumVideoLifecycleDiag;
-        if (existing && typeof existing === 'object') {
-          if (!existing.counters || typeof existing.counters !== 'object') existing.counters = {};
-          if (!Array.isArray(existing.events)) existing.events = [];
-          return existing;
-        }
-      } catch {}
-      const next = { counters: {}, events: [] };
-      try { window.__forumVideoLifecycleDiag = next; } catch {}
-      return next;
-    };
-    const bumpLifecycleCounter = (name, amount = 1) => {
-      const key = String(name || '').trim();
-      if (!key) return 0;
-      try {
-        const root = ensureLifecycleDiagRoot();
-        const next = Number(root?.counters?.[key] || 0) + Number(amount || 0);
-        root.counters[key] = next;
-        return next;
-      } catch {
-        return 0;
-      }
-    };
-    const collectOrphanPostShells = () => {
-      try {
-        return Array.from(document.querySelectorAll('video[data-forum-video="post"]')).reduce((acc, video) => {
-          if (!(video instanceof HTMLVideoElement)) return acc;
-          const rect = video.getBoundingClientRect?.();
-          const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-          const visible = !!rect && rect.bottom >= -220 && rect.top <= viewportH + 220;
-          if (!visible) return acc;
-          const hasSrc = !!String(video.getAttribute('src') || video.currentSrc || '');
-          const hasPoster = !!String(video.getAttribute('poster') || '');
-          const activeish =
-            String(video?.dataset?.__active || '') === '1' ||
-            String(video?.dataset?.__resident || '') === '1' ||
-            String(video?.dataset?.__prewarm || '') === '1' ||
-            String(video?.dataset?.__playRequested || '') === '1';
-          if (!hasSrc && !hasPoster && activeish) acc += 1;
-          return acc;
-        }, 0);
-      } catch {
-        return 0;
-      }
-    };
     try {
       window.dumpForumMediaState = () => {
         try {
@@ -746,8 +698,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             ytMutePollsSize: ytMutePolls.size,
             detachedYtPolls,
             activeConnected: !!(active instanceof Element && active.isConnected),
-            orphanPostVideoShells: collectOrphanPostShells(),
-            lifecycleCounters: { ...(ensureLifecycleDiagRoot()?.counters || {}) },
           };
         } catch {
           return {};
@@ -958,7 +908,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
                 node.dataset.__loadPending = '0';
                 delete node.dataset.__loadPendingSince;
               } catch {}
-              bumpLifecycleCounter('loadPendingStaleResetCount');
               trace('load_pending_stale_reset', node, { pendingForMs, stalePendingMs });
               return acc;
             }
@@ -1143,7 +1092,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         }
       } catch {}
       try { media.dataset.__lastLoadKickTs = String(now); } catch {}
-      bumpLifecycleCounter('loadKickCount');
       return true;
     };
     const getOwnerNode = (el) => {
@@ -1513,7 +1461,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             el.dataset.__loadPending = '0';
             delete el.dataset.__loadPendingSince;
           } catch {}
-          bumpLifecycleCounter('loadPendingStaleResetCount');
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
         const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
@@ -2587,7 +2534,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     });
     // Рекламный media-runtime живёт отдельно от selector координатора.
     // На фокусе контентного кандидата гасим ad-media best-effort, чтобы не было 2 одновременных потоков.
-    document.querySelectorAll('.forum-ad-media-slot video:not([data-forum-media]), .forum-ad-media-slot iframe:not([data-forum-media])').forEach((node) => {
+    document.querySelectorAll('.forum-ad-media-slot video, .forum-ad-media-slot iframe').forEach((node) => {
       if (!(node instanceof Element)) return;
       if (node === keepEl) return;
       if (keepEl instanceof Element && keepEl.contains?.(node)) return;
@@ -2611,28 +2558,24 @@ export default function useForumMediaCoordinator({ emitDiag }) {
       const unloadReason = String(args?.[1] || 'unknown');
       if (!el) return;
       clearReadyReplay(el);
+      trace('hard_unload', el, { reason: unloadReason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         invalidatePlayRequest(el);
         try { el.dataset.__coordinatorUnloadUntil = String(Date.now() + 2500); } catch {}
-        const isPostVideo = el instanceof HTMLVideoElement && String(el?.getAttribute?.('data-forum-video') || '') === 'post';
-        let forceHard = false;
         try {
           const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 2200 : (isCoarseUi ? 1500 : 1200));
-          forceHard =
+          const forceHard =
             unloadReason === 'cleanup' ||
+            unloadReason === 'resident_cap' ||
             unloadReason === 'error_blocked' ||
             (farOutOfView && (isIOSUi || isCoarseUi));
           if (forceHard) el.dataset.__forceHardUnload = '1';
           else delete el.dataset.__forceHardUnload;
         } catch {}
-        trace(isPostVideo && !forceHard ? 'soft_release' : 'hard_unload', el, { reason: unloadReason });
         try { __dropActiveVideoEl(el); } catch {}
         if (el instanceof HTMLVideoElement) {
           withSystemPause(el, () => {
-            try {
-              if (isPostVideo && !forceHard) __softReleaseVideoEl(el, `coordinator:${unloadReason}`);
-              else __unloadVideoEl(el);
-            } catch {}
+            try { __unloadVideoEl(el); } catch {}
           });
         } else {
           withSystemPause(el, () => {
@@ -3591,30 +3534,19 @@ export default function useForumMediaCoordinator({ emitDiag }) {
         const externalEl = e?.detail?.element || null;
         if (externalEl instanceof Element) {
           const manual = !!e?.detail?.manual;
-          const externalOwner = (() => {
-            try {
-              const directOwner = getOwnerNode(externalEl);
-              if (directOwner instanceof Element) return directOwner;
-            } catch {}
-            try {
-              const nestedOwner = externalEl.querySelector?.(selector);
-              if (nestedOwner instanceof Element) return nestedOwner;
-            } catch {}
-            return externalEl;
-          })();
-          const manualLease = hasManualLease(externalOwner) || hasManualLease(externalEl);
-          const hasGesture = hasUserGestureIntent(externalOwner) || hasUserGestureIntent(externalEl);
-          const visiblePxNow = getOwnerVisiblePx(externalOwner);
-          const minVisiblePx = getStartVisiblePx(externalOwner);
-          const centerDistNow = getOwnerCenterDist(externalOwner);
-          const maxCenterDist = getPriorityCenterMaxDist(externalOwner);
+          const manualLease = hasManualLease(externalEl);
+          const hasGesture = hasUserGestureIntent(externalEl);
+          const visiblePxNow = getOwnerVisiblePx(externalEl);
+          const minVisiblePx = getStartVisiblePx(externalEl);
+          const centerDistNow = getOwnerCenterDist(externalEl);
+          const maxCenterDist = getPriorityCenterMaxDist(externalEl);
           if (
             !manual &&
             !manualLease &&
             !hasGesture &&
             (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)
           ) {
-            traceCandidate('candidate_external_ignored', externalOwner, {
+            traceCandidate('candidate_external_ignored', externalEl, {
               reason: `${source}:out_of_focus`,
               visiblePx: visiblePxNow,
               minVisiblePx,
@@ -3646,18 +3578,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             return;
           }
           try {
-            if (active && active !== externalOwner) {
+            if (active && active !== externalEl) {
               softPauseMedia(active);
               scheduleHardUnload(active, null, 'ad_focus_switch');
               active = null;
               activeSinceTs = 0;
             }
           } catch {}
-          try { cancelUnload(externalOwner); } catch {}
-          try { pauseForeignMedia(externalOwner); } catch {}
-          active = externalOwner;
-          activeSinceTs = Date.now();
-          traceCandidate('candidate_external_promote', externalOwner, { reason: source });
+          try { cancelUnload(externalEl); } catch {}
+          try { pauseForeignMedia(externalEl); } catch {}
+          traceCandidate('candidate_external_promote', externalEl, { reason: source });
         }
         return;
       }
@@ -3873,3 +3803,4 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     }; 
   }, [emitDiag]);
 }
+
