@@ -1506,28 +1506,45 @@ try {
           } catch {}
           trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
-        const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
-        if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
-          const minGapMs = highPriorityReason
-            ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
-            : (isIOSUi ? 1900 : (isCoarseUi ? 1600 : 1400));
-          if (!canKickLoad(el, {
-            channel: 'candidate_cold',
-            minGapMs,
-            burstWindowMs: isIOSUi ? 22000 : 16000,
-            burstLimit: isIOSUi ? 4 : 5,
-            blockMs: isIOSUi ? 14000 : 10000,
-            bypassPendingBudget: highPriorityReason,
-            bypassSrcLimiter: highPriorityReason && isIOSUi,
-          })) {
-            armReadyReplay(el);
-            return false;
-          }
-          try { el.dataset.__candidateBoostTs = String(now); } catch {}
-          try { el.dataset.__loadPending = '1'; } catch {}
-          trace('candidate_force_load', el, { reason: `${reason}:cold` });
-          try { el.load?.(); } catch {}
-        }
+const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
+if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
+  const isPostVideo =
+    el instanceof HTMLVideoElement &&
+    String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+
+  const allowDirectColdLoad =
+    !isPostVideo ||
+    highPriorityReason ||
+    String(el?.dataset?.__playRequested || '') === '1' ||
+    String(el?.dataset?.__active || '') === '1';
+
+  if (!allowDirectColdLoad) {
+    armReadyReplay(el);
+    return false;
+  }
+
+  const minGapMs = highPriorityReason
+    ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
+    : (isIOSUi ? 1900 : (isCoarseUi ? 1600 : 1400));
+
+  if (!canKickLoad(el, {
+    channel: 'candidate_cold',
+    minGapMs,
+    burstWindowMs: isIOSUi ? 22000 : 16000,
+    burstLimit: isIOSUi ? 4 : 5,
+    blockMs: isIOSUi ? 14000 : 10000,
+    bypassPendingBudget: highPriorityReason,
+    bypassSrcLimiter: highPriorityReason && isIOSUi,
+  })) {
+    armReadyReplay(el);
+    return false;
+  }
+
+  try { el.dataset.__candidateBoostTs = String(now); } catch {}
+  try { el.dataset.__loadPending = '1'; } catch {}
+  trace('candidate_force_load', el, { reason: `${reason}:cold` });
+  try { el.load?.(); } catch {}
+}
         const stalledPending =
           String(el.dataset?.__loadPending || '') === '1' &&
           readyState === 0 &&
@@ -1541,6 +1558,10 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
     String(el?.getAttribute?.('data-forum-video') || '') === 'post';
 
   if (isPostVideo) {
+    const wantsRealPlayback =
+      String(el?.dataset?.__playRequested || '') === '1' ||
+      String(el?.dataset?.__active || '') === '1';
+
     try { el.dataset.__readyRetryCount = String(readyRetryCount + 1); } catch {}
 
     if (!el.getAttribute('src')) {
@@ -1550,6 +1571,11 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
         mode: 'restore_only',
       });
       try { __restoreVideoEl(el); } catch {}
+      armReadyReplay(el);
+      return false;
+    }
+
+    if (!wantsRealPlayback) {
       armReadyReplay(el);
       return false;
     }
@@ -1903,11 +1929,14 @@ const onMediaLoadedCaptured = (e) => {
   } catch {}
 
   try {
+    const isPostVideo =
+      target instanceof HTMLVideoElement &&
+      String(target?.getAttribute?.('data-forum-video') || '') === 'post';
+
     const wantsAutoplay =
       (
         String(target?.dataset?.__playRequested || '') === '1' ||
-        String(target?.dataset?.__active || '') === '1' ||
-        String(target?.dataset?.__prewarm || '') === '1'
+        String(target?.dataset?.__active || '') === '1'
       ) &&
       !isUserPaused(target) &&
       !hasSuppressedPlayback(target);
@@ -1918,7 +1947,17 @@ const onMediaLoadedCaptured = (e) => {
     const canAttemptAudible = hasUserGestureIntent(target) || hasManualLease(target);
     const canAttempt = !!target.muted || canAttemptAudible;
 
-    if (wantsAutoplay && canAttempt && target.paused && (now - lastLoadedRetryTs) > 700) {
+    const nearViewport = isPostVideo
+      ? isNearViewportElement(target, isCoarseUi ? 820 : 1100)
+      : true;
+
+    if (
+      wantsAutoplay &&
+      canAttempt &&
+      nearViewport &&
+      target.paused &&
+      (now - lastLoadedRetryTs) > 900
+    ) {
       try { target.dataset.__loadedRetryTs = String(now); } catch {}
       trace('loaded_autoplay_retry', target, { type: e?.type || 'loaded' });
       startHtmlMedia(target, 'loaded_autoplay_retry');
@@ -2951,45 +2990,62 @@ const pauseForeignMedia = (keepEl = null) => {
 try {
   clearSuppressedPlayback(el);
 
-  if (el instanceof HTMLVideoElement) {
-    const hasSrc = !!el.getAttribute('src');
-    let restoredNow = false;
+if (el instanceof HTMLVideoElement) {
+  const hasSrc = !!el.getAttribute('src');
+  const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+  let restoredNow = false;
 
-    if (!hasSrc) {
-      trace('play_restore', el);
-      __restoreVideoEl(el);
-      restoredNow = true;
-    }
-
-    try { el.dataset.__prewarm = '1'; } catch {}
-    try { el.dataset.__resident = '1'; } catch {}
-    try {
-      if (String(el.dataset?.__active || '') !== '1') {
-        el.dataset.__active = '0';
-      }
-    } catch {}
-    try { el.preload = 'auto'; } catch {}
-
-    try {
-      const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
-      if (!restoredNow && empty && el.dataset?.__loadPending !== '1' && el.paused && (el.currentTime === 0)) {
-        const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
-        if (!canKickLoad(el, {
-          channel: 'play_cold',
-          minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
-          burstWindowMs: isIOSUi ? 22000 : 15000,
-          burstLimit: isIOSUi ? 4 : 5,
-          blockMs: isIOSUi ? 12000 : 9000,
-          bypassSrcLimiter: userIntentKick || isIOSUi,
-          bypassPendingBudget: true,
-        })) return;
-
-        try { el.dataset.__loadPending = '1'; } catch {}
-        trace('play_load', el);
-        el.load?.();
-      }
-    } catch {}
+  if (!hasSrc) {
+    trace('play_restore', el);
+    __restoreVideoEl(el);
+    restoredNow = true;
   }
+
+  try { el.dataset.__prewarm = '1'; } catch {}
+  try { el.dataset.__resident = '1'; } catch {}
+  try {
+    if (String(el.dataset?.__active || '') !== '1') {
+      el.dataset.__active = '0';
+    }
+  } catch {}
+  try { el.preload = 'auto'; } catch {}
+
+  try {
+    const empty = (el.networkState === HTMLMediaElement.NETWORK_EMPTY) || !el.currentSrc;
+    const userIntentKick = hasUserGestureIntent(el) || hasManualLease(el);
+
+    const shouldKickAfterRestore =
+      restoredNow &&
+      isPostVideo &&
+      empty &&
+      el.dataset?.__loadPending !== '1' &&
+      el.paused &&
+      (el.currentTime === 0);
+
+    const shouldKickCold =
+      !restoredNow &&
+      empty &&
+      el.dataset?.__loadPending !== '1' &&
+      el.paused &&
+      (el.currentTime === 0);
+
+    if (shouldKickAfterRestore || shouldKickCold) {
+      if (!canKickLoad(el, {
+        channel: shouldKickAfterRestore ? 'play_restore' : 'play_cold',
+        minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
+        burstWindowMs: isIOSUi ? 22000 : 15000,
+        burstLimit: isIOSUi ? 4 : 5,
+        blockMs: isIOSUi ? 12000 : 9000,
+        bypassSrcLimiter: userIntentKick || isIOSUi || isCoarseUi,
+        bypassPendingBudget: true,
+      })) return;
+
+      try { el.dataset.__loadPending = '1'; } catch {}
+      trace(shouldKickAfterRestore ? 'play_restore_load' : 'play_load', el);
+      el.load?.();
+    }
+  } catch {}
+}
 
   applyMutedPref(el);
   el.playsInline = true;
