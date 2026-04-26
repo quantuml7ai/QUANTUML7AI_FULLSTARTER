@@ -176,16 +176,21 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             if (__hasLazyVideoSourceWithoutSrc(video)) return;
             const cold = (video.readyState === 0 || !video.currentSrc);
             const safe = cold && video.paused && (video.currentTime === 0);
-            if (safe && video.dataset?.__loadPending !== '1') {
-              const now = Date.now();
-              const minWarmGap = isIOSWarm ? 2200 : (isCoarseWarm ? 1900 : 1600);
-              const lastWarmKickTs = Number(video.dataset?.__lastWarmLoadKickTs || 0);
-              if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
-              try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
-              try { video.dataset.__loadPending = '1'; } catch {}
-              trace('warm_load', video);
-              video.load?.();
-            }
+if (safe && video.dataset?.__loadPending !== '1') {
+  const now = Date.now();
+  const minWarmGap = isIOSWarm ? 2200 : (isCoarseWarm ? 1900 : 1600);
+  const lastWarmKickTs = Number(video.dataset?.__lastWarmLoadKickTs || 0);
+  if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
+  try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
+  trace('warm_load', video);
+  kickMediaLoad(video, {
+    channel: 'warm_load',
+    minGapMs: minWarmGap,
+    burstWindowMs: isIOSWarm ? 22000 : 16000,
+    burstLimit: isIOSWarm ? 2 : 3,
+    blockMs: isIOSWarm ? 12000 : 9000,
+  });
+}
           } catch {}
         });
         pending.set(video, job);
@@ -1124,6 +1129,73 @@ const applyMutedPrefToAll = () => {
       try { media.dataset.__lastLoadKickTs = String(now); } catch {}
       return true;
     };
+const markLoadPending = (el, reason = 'load') => {
+  const media = getMediaStateNode(el);
+  if (!(media instanceof HTMLMediaElement)) return false;
+
+  const now = Date.now();
+  try {
+    media.dataset.__loadPending = '1';
+    media.dataset.__loadPendingSince = String(now);
+    media.dataset.__loadPendingReason = String(reason || 'load');
+    media.dataset.__warmReady = '0';
+  } catch {}
+
+  pendingLoadsCacheTs = 0;
+  pendingLoadsCacheVal = 0;
+  return true;
+};
+
+const clearLoadPending = (el, reason = 'clear', warmReady = false) => {
+  const media = getMediaStateNode(el);
+  if (!(media instanceof HTMLMediaElement)) return;
+
+  try {
+    media.dataset.__loadPending = '0';
+    media.dataset.__warmReady = warmReady ? '1' : '0';
+    media.dataset.__loadPendingClearReason = String(reason || 'clear');
+    delete media.dataset.__loadPendingSince;
+  } catch {}
+
+  pendingLoadsCacheTs = 0;
+  pendingLoadsCacheVal = 0;
+};
+
+const kickMediaLoad = (
+  el,
+  {
+    channel = 'generic',
+    minGapMs = 1300,
+    burstWindowMs = 16000,
+    burstLimit = 5,
+    blockMs = 10000,
+    bypassSrcLimiter = false,
+    bypassPendingBudget = false,
+  } = {},
+) => {
+  const media = getMediaStateNode(el);
+  if (!(media instanceof HTMLMediaElement)) return false;
+
+  if (!canKickLoad(media, {
+    channel,
+    minGapMs,
+    burstWindowMs,
+    burstLimit,
+    blockMs,
+    bypassSrcLimiter,
+    bypassPendingBudget,
+  })) return false;
+
+  markLoadPending(media, channel);
+
+  try {
+    media.load?.();
+    return true;
+  } catch {
+    clearLoadPending(media, 'load_throw', false);
+    return false;
+  }
+};    
     const getOwnerNode = (el) => {
       try {
         if (el instanceof Element) {
@@ -1481,14 +1553,16 @@ try {
 
         const now = Date.now();
         const reasonTag = String(reason || '').trim();
-        const highPriorityReason =
-          reasonTag === 'activate_pending' ||
-          reasonTag === 'play_wait_ready' ||
-          reasonTag === 'visibility_recover' ||
-          reasonTag === 'pending_grace' ||
-          reasonTag === 'early_prewarm' ||
-          reasonTag === 'io_near_prewarm' ||
-          reasonTag === 'candidate_near_prewarm';
+const highPriorityReason =
+  reasonTag === 'activate_pending' ||
+  reasonTag === 'play_wait_ready' ||
+  reasonTag === 'visibility_recover';
+
+const isPrewarmOnly =
+  reasonTag === 'pending_grace' ||
+  reasonTag === 'early_prewarm' ||
+  reasonTag === 'io_near_prewarm' ||
+  reasonTag === 'candidate_near_prewarm';
         const lastBoostTs = Number(el.dataset?.__candidateBoostTs || 0);
         const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
@@ -1527,24 +1601,22 @@ if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
     ? (isIOSUi ? 1300 : (isCoarseUi ? 1000 : 900))
     : (isIOSUi ? 1900 : (isCoarseUi ? 1600 : 1400));
 
-  if (!canKickLoad(el, {
+  try { el.dataset.__candidateBoostTs = String(now); } catch {}
+  trace('candidate_force_load', el, { reason: `${reason}:cold` });
+
+  if (!kickMediaLoad(el, {
     channel: 'candidate_cold',
     minGapMs,
     burstWindowMs: isIOSUi ? 22000 : 16000,
-    burstLimit: isIOSUi ? 4 : 5,
+    burstLimit: isIOSUi ? (highPriorityReason ? 3 : 2) : (highPriorityReason ? 4 : 3),
     blockMs: isIOSUi ? 14000 : 10000,
-    bypassPendingBudget: highPriorityReason,
-    bypassSrcLimiter: highPriorityReason && isIOSUi,
+    bypassPendingBudget: false,
+    bypassSrcLimiter: false,
   })) {
     armReadyReplay(el);
     return false;
   }
-
-  try { el.dataset.__candidateBoostTs = String(now); } catch {}
-  try { el.dataset.__loadPending = '1'; } catch {}
-  trace('candidate_force_load', el, { reason: `${reason}:cold` });
-  try { el.load?.(); } catch {}
-}
+} 
         const stalledPending =
           String(el.dataset?.__loadPending || '') === '1' &&
           readyState === 0 &&
@@ -1580,58 +1652,52 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
       return false;
     }
 
-    try {
-      el.dataset.__loadPending = '0';
-      delete el.dataset.__loadPendingSince;
-      el.dataset.__candidateBoostTs = String(now);
-    } catch {}
-
-    if (!canKickLoad(el, {
-      channel: 'candidate_retry',
-      minGapMs: isIOSUi ? 1600 : 1200,
-      burstWindowMs: isIOSUi ? 22000 : 17000,
-      burstLimit: isIOSUi ? 3 : 4,
-      blockMs: isIOSUi ? 13000 : 9000,
-      bypassPendingBudget: true,
-      bypassSrcLimiter: isIOSUi,
-    })) {
-      armReadyReplay(el);
-      return false;
-    }
+    clearLoadPending(el, 'candidate_retry_reset', false);
+    try { el.dataset.__candidateBoostTs = String(now); } catch {}
 
     trace('candidate_pending_stall_retry', el, {
       reason,
       stalledMs: now - pendingSince,
       mode: 'load_only',
     });
-    try { el.load?.(); } catch {}
+
+    if (!kickMediaLoad(el, {
+      channel: 'candidate_retry',
+      minGapMs: isIOSUi ? 1600 : 1200,
+      burstWindowMs: isIOSUi ? 22000 : 17000,
+      burstLimit: isIOSUi ? 2 : 3,
+      blockMs: isIOSUi ? 13000 : 9000,
+      bypassPendingBudget: false,
+      bypassSrcLimiter: false,
+    })) {
+      armReadyReplay(el);
+      return false;
+    }
+
     armReadyReplay(el);
     return false;
   }
 
-  if (!canKickLoad(el, {
-    channel: 'candidate_retry',
-    minGapMs: isIOSUi ? 1600 : 1200,
-    burstWindowMs: isIOSUi ? 22000 : 17000,
-    burstLimit: isIOSUi ? 3 : 4,
-    blockMs: isIOSUi ? 13000 : 9000,
-    bypassPendingBudget: true,
-    bypassSrcLimiter: isIOSUi,
-  })) {
-    armReadyReplay(el);
-    return false;
-  }
   try { el.dataset.__candidateBoostTs = String(now); } catch {}
   try { el.dataset.__readyRetryCount = String(readyRetryCount + 1); } catch {}
   trace('candidate_pending_stall_retry', el, {
     reason,
     stalledMs: now - pendingSince,
   });
-  try {
-    if (!el.getAttribute('src')) __restoreVideoEl(el);
-  } catch {}
-  try { el.load?.(); } catch {}
-}
+
+  if (!kickMediaLoad(el, {
+    channel: 'candidate_retry',
+    minGapMs: isIOSUi ? 1600 : 1200,
+    burstWindowMs: isIOSUi ? 22000 : 17000,
+    burstLimit: isIOSUi ? 2 : 3,
+    blockMs: isIOSUi ? 13000 : 9000,
+    bypassPendingBudget: false,
+    bypassSrcLimiter: false,
+  })) {
+    armReadyReplay(el);
+    return false;
+  }
+} 
         armReadyReplay(el);
       } catch {}
       return false;
@@ -1922,11 +1988,7 @@ const onMediaLoadedCaptured = (e) => {
   if (!(target instanceof HTMLVideoElement || target instanceof HTMLAudioElement)) return;
 
   clearMediaSrcBlocked(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata');
-
-  try {
-    target.dataset.__loadPending = '0';
-    if (target.readyState >= 2) target.dataset.__warmReady = '1';
-  } catch {}
+  clearLoadPending(target, e?.type === 'canplay' ? 'canplay' : 'loadeddata', target.readyState >= 2);
 
   try {
     const isPostVideo =
@@ -1945,25 +2007,35 @@ const onMediaLoadedCaptured = (e) => {
     const now = Date.now();
 
     const canAttemptAudible = hasUserGestureIntent(target) || hasManualLease(target);
-    const canAttempt = !!target.muted || canAttemptAudible;
+    const allowRetry =
+      isPostVideo
+        ? true
+        : (!!target.muted || canAttemptAudible);
 
     const nearViewport = isPostVideo
       ? isNearViewportElement(target, isCoarseUi ? 820 : 1100)
       : true;
 
+    const readyPlayAttemptTs = Number(target?.dataset?.__readyPlayAttemptTs || 0);
+
     if (
       wantsAutoplay &&
-      canAttempt &&
+      allowRetry &&
       nearViewport &&
       target.paused &&
-      (now - lastLoadedRetryTs) > 900
+      (now - lastLoadedRetryTs) > 900 &&
+      (now - readyPlayAttemptTs) > 1200
     ) {
-      try { target.dataset.__loadedRetryTs = String(now); } catch {}
+      try {
+        target.dataset.__loadedRetryTs = String(now);
+        target.dataset.__readyPlayAttemptTs = String(now);
+      } catch {}
       trace('loaded_autoplay_retry', target, { type: e?.type || 'loaded' });
       startHtmlMedia(target, 'loaded_autoplay_retry');
     }
   } catch {}
 };
+
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
       try {
         if (!(iframe instanceof HTMLIFrameElement)) return;
@@ -2384,21 +2456,41 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
       } catch {}
       return false;
     };
-    const shouldRetainHtmlMedia = (el) => {
-      const mediaEl = getMediaStateNode(el);
-      if (!(mediaEl instanceof HTMLMediaElement)) return false;
-      try {
-        const owner = getOwnerNode(el);
-        const ownerDataset = owner instanceof Element ? owner.dataset : null;
-        const mediaDataset = mediaEl.dataset || null;
-        if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
-        if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') return true;
-        if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') return true;
-        if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') return true;
-        if (isNearViewportElement(owner || mediaEl)) return true;
-      } catch {}
+const shouldRetainHtmlMedia = (el) => {
+  const mediaEl = getMediaStateNode(el);
+  if (!(mediaEl instanceof HTMLMediaElement)) return false;
+
+  try {
+    const owner = getOwnerNode(el);
+    const ownerDataset = owner instanceof Element ? owner.dataset : null;
+    const mediaDataset = mediaEl.dataset || null;
+
+    const hardUnloadPending =
+      String(mediaDataset?.__pendingHardUnload || ownerDataset?.__pendingHardUnload || '') === '1';
+
+    if (hardUnloadPending) return false;
+
+    if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
+
+    if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') {
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 520 : 760);
+    }
+
+    if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') {
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 420 : 640);
+    }
+
+    if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') {
+      const since = Number(mediaDataset?.__loadPendingSince || ownerDataset?.__loadPendingSince || 0);
+      if (since > 0 && Date.now() - since < (isIOSUi ? 2600 : 3600)) return true;
       return false;
-    };
+    }
+
+    if (isNearViewportElement(owner || mediaEl, isIOSUi ? 360 : 520)) return true;
+  } catch {}
+
+  return false;
+};
     const mediaSrcBlockMap = new Map();
     // Keep source blocking short/adaptive: damp retry storms,
     // but avoid multi-minute false blacklisting after transient errors.
@@ -3030,20 +3122,18 @@ if (el instanceof HTMLVideoElement) {
       (el.currentTime === 0);
 
     if (shouldKickAfterRestore || shouldKickCold) {
-      if (!canKickLoad(el, {
+      trace(shouldKickAfterRestore ? 'play_restore_load' : 'play_load', el);
+
+      if (!kickMediaLoad(el, {
         channel: shouldKickAfterRestore ? 'play_restore' : 'play_cold',
         minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
         burstWindowMs: isIOSUi ? 22000 : 15000,
-        burstLimit: isIOSUi ? 4 : 5,
+        burstLimit: isIOSUi ? 3 : 4,
         blockMs: isIOSUi ? 12000 : 9000,
-        bypassSrcLimiter: userIntentKick || isIOSUi || isCoarseUi,
-        bypassPendingBudget: true,
+        bypassSrcLimiter: userIntentKick,
+        bypassPendingBudget: userIntentKick,
       })) return;
-
-      try { el.dataset.__loadPending = '1'; } catch {}
-      trace(shouldKickAfterRestore ? 'play_restore_load' : 'play_load', el);
-      el.load?.();
-    }
+    } 
   } catch {}
 }
 
@@ -3715,10 +3805,7 @@ return;
     };
 const onExternalMediaPlay = (e) => {
   const source = String(e?.detail?.source || '');
-
-  // Рекламный runtime живёт полностью отдельно от forum media coordinator.
-  // Координатор НЕ продвигает рекламу в active-owner, НЕ паузит из-за неё
-  // форумное media и НЕ пытается управлять её autoplay/focus-логикой.
+ 
   const isAdSource =
     source === 'ad' ||
     source === 'forum_ads' ||
@@ -3735,6 +3822,13 @@ const onExternalMediaPlay = (e) => {
 
   if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
     traceCandidate('candidate_external_ignored', candidate, { reason: source });
+    return;
+  }
+
+  if (!manual && active && candidate && active !== candidate) {
+    traceCandidate('candidate_external_hold_active', candidate, {
+      reason: source,
+    });
     return;
   }
 
@@ -3765,18 +3859,19 @@ const onExternalMediaPlay = (e) => {
           const networkEmpty =
             typeof HTMLMediaElement !== 'undefined' &&
             Number(mediaEl.networkState || 0) === HTMLMediaElement.NETWORK_EMPTY;
-          if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadPending !== '1') {
-            if (!canKickLoad(mediaEl, {
-              channel: 'visibility_recover',
-              minGapMs: isIOSUi ? 2100 : (isCoarseUi ? 1800 : 1500),
-              burstWindowMs: isIOSUi ? 24000 : 18000,
-              burstLimit: isIOSUi ? 3 : 4,
-              blockMs: isIOSUi ? 15000 : 11000,
-            })) return;
-            try { mediaEl.dataset.__loadPending = '1'; } catch {}
-            trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
-            try { mediaEl.load?.(); } catch {}
-          }
+if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadPending !== '1') {
+  trace('visibility_restore', mediaEl, { reason, mode: 'kick_stalled' });
+
+  if (!kickMediaLoad(mediaEl, {
+    channel: 'visibility_recover',
+    minGapMs: isIOSUi ? 2100 : (isCoarseUi ? 1800 : 1500),
+    burstWindowMs: isIOSUi ? 24000 : 18000,
+    burstLimit: isIOSUi ? 2 : 3,
+    blockMs: isIOSUi ? 15000 : 11000,
+    bypassSrcLimiter: false,
+    bypassPendingBudget: false,
+  })) return;
+}
         });
       } catch {}
     };

@@ -49,12 +49,12 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
     const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-    if (isIOS) return false
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3
+    if (isIOS) return true
     if (lowMem) return true
     return false
   } catch {
-    return false
+    return true
   }
 })()
 
@@ -247,8 +247,8 @@ const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   __SOFT_RESIDENT_POST_VIDEO &&
-  (!hardUnloadRequested || nearViewport || shellVisible)
-
+  !hardUnloadRequested &&
+  (nearViewport || shellVisible)
 if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.pause?.()
@@ -390,12 +390,13 @@ if (cur === src) {
       return
     }
 
-    if (readyStateNow === 0 || isNetworkEmpty) {
-      if (!canRestoreLoad()) return
-      el.dataset.__loadPending = '1'
-      el.dataset.__warmReady = '0'
-      el.load?.()
-    }
+if (readyStateNow === 0 || isNetworkEmpty) {
+  if (!canRestoreLoad()) return
+  el.dataset.__loadPending = '1'
+  el.dataset.__loadPendingSince = String(Date.now())
+  el.dataset.__warmReady = '0'
+  el.load?.()
+}
   } catch {}
   return
 }
@@ -427,11 +428,12 @@ try {
     }
   }
 } catch {}
-  try {
-    el.dataset.__loadPending = '1'
-    el.dataset.__warmReady = '0'
-    el.setAttribute('src', src)
-  } catch {}
+try {
+  el.dataset.__loadPending = '1'
+  el.dataset.__loadPendingSince = String(Date.now())
+  el.dataset.__warmReady = '0'
+  el.setAttribute('src', src)
+} catch {}
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {

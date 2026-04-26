@@ -123,12 +123,77 @@ function syncMutedPrefEverywhere(val, id, source = 'forum-ads') {
   emitMutedPref(val, id, source);
 }
 
+const FORUM_AD_DEFAULT_MUTED = true;
+
+function normalizeForumAdMuted(value) {
+  // Только явный false означает "звук включён".
+  // null / undefined / любое неизвестное состояние = безопасный muted.
+  return value === false ? false : true;
+}
+
+function resolveForumAdStartupMuted() {
+  // ВАЖНО:
+  // Для старта рекламы главным источником считаем именно document/window,
+  // потому что туда текущий модуль уже раскладывает глобальное состояние.
+  const fromDocument = readMutedPrefFromDocument();
+
+  if (typeof fromDocument === 'boolean') {
+    return {
+      muted: fromDocument,
+      source: 'document',
+      hadDocumentState: true,
+    };
+  }
+
+  return {
+    muted: FORUM_AD_DEFAULT_MUTED,
+    source: 'fallback-muted',
+    hadDocumentState: false,
+  };
+}
+
+function commitForumAdMutedState(val) {
+  const next = normalizeForumAdMuted(val);
+
+  // Оставляем текущую архитектуру совместимости:
+  // document/window — главный глобальный контур,
+  // storage — fallback/совместимость с форумом.
+  writeMutedPrefToDocument(next);
+  writeMutedPrefToStorage(next);
+
+  return next;
+}
+
+function applyForumAdMutedToVideo(videoEl, val) {
+  if (!videoEl) return;
+
+  const next = normalizeForumAdMuted(val);
+
+  try {
+    videoEl.muted = next;
+  } catch {}
+
+  try {
+    videoEl.defaultMuted = next;
+  } catch {}
+
+  try {
+    if (next) {
+      videoEl.setAttribute('muted', '');
+    } else {
+      videoEl.removeAttribute('muted');
+    }
+  } catch {}
+}
+
 function desiredMutedFromPref(pref) {
-  // AUTO-режим:
-  // - null  => в этом файле ничего не форсим;
-  // - true  => явный muted;
-  // - false => явный sound-on.
-  return pref == null ? null : !!pref;
+  // Совместимость со старым вызовом.
+  // Раньше null означал "не форсим".
+  // Для рекламы null больше нельзя отдавать в video,
+  // потому что на мобильных autoplay должен стартовать muted.
+  return typeof pref === 'boolean'
+    ? pref
+    : FORUM_AD_DEFAULT_MUTED;
 }
 // ===== FIXED AD SLOT HEIGHT (px) =====
 // Контент внутри вписывается, но высота/ширина слота не растут.
@@ -200,6 +265,62 @@ const adMediaResolveCache = new Map();
 const adMediaResolveInflight = new Map();
 const AD_MEDIA_RESOLVE_CACHE_OK_MS = 12 * 60 * 1000;
 const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
+
+// Native video must be attached imperatively, not through React `src` state.
+// Otherwise every visibility / preload re-render may reset the <video src>
+// and Chrome starts a new set of HTTP Range / 206 requests.
+const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'none';
+const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
+
+function getAdVideoNodeSrc(videoEl) {
+  if (!videoEl) return '';
+  try {
+    return String(videoEl.currentSrc || videoEl.getAttribute('src') || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function detachAdNativeVideo(videoEl) {
+  if (!videoEl) return;
+  try { videoEl.pause?.(); } catch {}
+  try { videoEl.removeAttribute('src'); } catch {}
+  try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
+  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+  try { videoEl.load?.(); } catch {}
+}
+
+function ensureAdNativeVideoSrc(videoEl, src, muted) {
+  if (!videoEl) return false;
+
+  const nextSrc = String(src || '').trim();
+  if (!nextSrc) return false;
+
+  applyForumAdMutedToVideo(videoEl, muted);
+
+  const currentSrc = getAdVideoNodeSrc(videoEl);
+  const attachedSrc = (() => {
+    try { return String(videoEl.dataset?.adNativeSrc || '').trim(); }
+    catch { return ''; }
+  })();
+
+  if (currentSrc === nextSrc || attachedSrc === nextSrc) {
+    try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
+    return true;
+  }
+
+  try { videoEl.pause?.(); } catch {}
+  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
+  try { videoEl.src = nextSrc; } catch {
+    try { videoEl.setAttribute('src', nextSrc); } catch {}
+  }
+  try { videoEl.dataset.adNativeSrc = nextSrc; } catch {}
+
+  // load() разрешён только при реальной смене URL, не на scroll/focus jitter.
+  try { videoEl.load?.(); } catch {}
+
+  return true;
+}
 
 // ======================= ADS LINKS FROM REDIS =======================
 
@@ -885,7 +1006,7 @@ function shouldProbeMediaKind(rawUrl) {
 }
 
 // Определяем тип медиа по Content-Type через HEAD
-async function detectMediaKind(url, timeoutMs = 3000) {
+async function detectMediaKind(url, timeoutMs = 3000, opts = {}) {
   if (!url || !isBrowser() || typeof fetch === 'undefined') return null;
 
   const key = String(url).trim();
@@ -929,29 +1050,32 @@ async function detectMediaKind(url, timeoutMs = 3000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const headResp = await fetch(key, {
-        method: 'HEAD',
-        signal: controller.signal,
-        cache: 'no-store',
-        referrerPolicy: 'no-referrer',
-      }).catch(() => null);
+const headResp = await fetch(key, {
+  method: 'HEAD',
+  signal: controller.signal,
+  cache: 'default',
+  referrerPolicy: 'no-referrer',
+}).catch(() => null);
       if (headResp) {
         const byHeadCt = classify(headResp.headers.get('content-type'));
         if (byHeadCt) return persist(byHeadCt, true);
       }
 
-      // Некоторые хранилища/прокси режут HEAD, но GET работает.
-      const getResp = await fetch(key, {
-        method: 'GET',
-        headers: { Range: 'bytes=0-1' },
-        signal: controller.signal,
-        cache: 'no-store',
-        referrerPolicy: 'no-referrer',
-      }).catch(() => null);
-      if (getResp) {
-        const byGetCt = classify(getResp.headers.get('content-type'));
-        if (byGetCt) return persist(byGetCt, true);
-      }
+// В рекламе по умолчанию НЕ делаем GET Range bytes=0-1.
+// Такой probe сам даёт лишний 206 для native video.
+if (opts?.allowRangeFallback === true) {
+  const getResp = await fetch(key, {
+    method: 'GET',
+    headers: { Range: 'bytes=0-1' },
+    signal: controller.signal,
+    cache: 'default',
+    referrerPolicy: 'no-referrer',
+  }).catch(() => null);
+  if (getResp) {
+    const byGetCt = classify(getResp.headers.get('content-type'));
+    if (byGetCt) return persist(byGetCt, true);
+  }
+}
 
       return persist(null, false);
     } catch {
@@ -1087,24 +1211,45 @@ export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
   const i18n = useI18n();
   const t = i18n?.t;
   const router = useRouter();
- const isFluid = layout === 'fluid';
+  const isFluid = layout === 'fluid';
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
-  const [muted, setMuted] = useState(null);
+
+  // Стартовое состояние рекламы:
+  // 1) сначала читаем document/window;
+  // 2) если там пусто — fallback muted=true;
+  // 3) это состояние сразу используется первым render.
+  const startupMutedRef = useRef(null);
+  if (startupMutedRef.current == null) {
+    startupMutedRef.current = resolveForumAdStartupMuted();
+  }
+
+  const [muted, setMuted] = useState(() =>
+    normalizeForumAdMuted(startupMutedRef.current?.muted)
+  );
 
   // уникальный id инстанса, чтобы не ловить свой же event
   const playerIdRef = useRef(
     `ad_${Math.random().toString(36).slice(2)}_${Date.now()}`
   );
 
-  // init muted from global pref (forum scheme)
+  // init muted from global document/window state.
+  // Если document/window был пустой — сюда уже пришёл fallback muted=true,
+  // и мы сразу раскладываем его в общий document/window + storage.
 useEffect(() => {
-  const pref = readMutedPref();
-  setMuted(desiredMutedFromPref(pref));
+  const startup = startupMutedRef.current || resolveForumAdStartupMuted();
+  const next = commitForumAdMutedState(startup.muted);
 
-  // Нормализуем все глобальные контуры, если состояние уже известно.
-  if (typeof pref === 'boolean') {
-    writeMutedPrefToStorage(pref);
-    writeMutedPrefToDocument(pref);
+  setMuted((prev) => (prev === next ? prev : next));
+
+  // Если video уже существует — синхронизируем DOM property/attribute.
+  applyForumAdMutedToVideo(videoRef.current, next);
+
+  // Если YouTube player уже существует — синхронизируем его тоже.
+  if (ytPlayerRef.current) {
+    try {
+      if (next) ytPlayerRef.current.mute?.();
+      else ytPlayerRef.current.unMute?.();
+    } catch {}
   }
 }, []);
   // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
@@ -1112,8 +1257,7 @@ useEffect(() => {
 
 const rootRef = useRef(null);
 const videoRef = useRef(null);
-const detachVideoTimerRef = useRef(null);
-const [attachedVideoSrc, setAttachedVideoSrc] = useState('');
+const attachedVideoSrcRef = useRef('');
 const ytIframeRef = useRef(null);
 const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
@@ -1156,9 +1300,9 @@ const ytPlayerRef = useRef(null);
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
-  const mutedRef = useRef(null);
+  const mutedRef = useRef(normalizeForumAdMuted(muted));
   const adPlayEventTsRef = useRef(0);
-const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
+  const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
   if (!isBrowser()) return;
 
   try {
@@ -1166,7 +1310,7 @@ const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
     if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
     adPlayEventTsRef.current = now;
 
-    const isMutedNow = mutedRef.current === true;
+        const isMutedNow = normalizeForumAdMuted(mutedRef.current);
 
     let el = null;
     if (source === 'ad_video') {
@@ -1226,64 +1370,38 @@ useEffect(() => {
 }, [shouldPlay]);
 
 useEffect(() => {
-  mutedRef.current = muted;
+  const next = normalizeForumAdMuted(muted);
+  mutedRef.current = next;
+  applyForumAdMutedToVideo(videoRef.current, next);
 }, [muted]);
 
 useEffect(() => {
-  if (detachVideoTimerRef.current) {
-    clearTimeout(detachVideoTimerRef.current);
-    detachVideoTimerRef.current = null;
-  }
+  const node = videoRef.current;
 
   if (media.kind !== 'video') {
-    setAttachedVideoSrc('');
-    const node = videoRef.current;
-    if (node) {
-      try { node.pause?.(); } catch {}
-      try { node.removeAttribute('src'); } catch {}
-      try { node.load?.(); } catch {}
-    }
+    attachedVideoSrcRef.current = '';
+    detachAdNativeVideo(node);
     return undefined;
   }
 
   const nextSrc = String(media.src || '').trim();
+
   if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) {
-    setAttachedVideoSrc('');
-    const node = videoRef.current;
-    if (node) {
-      try { node.pause?.(); } catch {}
-      try { node.removeAttribute('src'); } catch {}
-      try { node.load?.(); } catch {}
-    }
+    attachedVideoSrcRef.current = '';
+    detachAdNativeVideo(node);
     return undefined;
   }
 
-  // ВАЖНО:
-  // Держим ad-video attached не только пока он "в фокусе",
-  // но и пока блок ещё рядом с viewport.
-  // Это убирает визуальное исчезновение видео на глазах у пользователя.
-  const wantAttached = shouldPlay || isNear;
-  if (wantAttached) {
-    setAttachedVideoSrc((prev) => (prev === nextSrc ? prev : nextSrc));
-    return undefined;
+  // Не привязываем native video к isNear / shouldPlay.
+  // Скролл и IntersectionObserver не должны менять <video src>.
+  // Если URL реально сменился — очищаем старый ресурс один раз.
+  if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
+    attachedVideoSrcRef.current = '';
+    detachAdNativeVideo(node);
   }
 
-  detachVideoTimerRef.current = setTimeout(() => {
-    detachVideoTimerRef.current = null;
-    const node = videoRef.current;
-    try { node?.pause?.(); } catch {}
-    try { node?.removeAttribute?.('src'); } catch {}
-    try { node?.load?.(); } catch {}
-    setAttachedVideoSrc('');
-  }, 900);
-
-  return () => {
-    if (detachVideoTimerRef.current) {
-      clearTimeout(detachVideoTimerRef.current);
-      detachVideoTimerRef.current = null;
-    }
-  };
-}, [isNear, media.kind, media.src, shouldPlay]);
+  return undefined;
+}, [media.kind, media.src]);
   // Page visibility + focus/blur
   useEffect(() => {
     if (!isBrowser()) return;
@@ -1341,20 +1459,13 @@ useEffect(() => {
     if (d?.id && d.id === playerIdRef.current) return; // ignore self
     if (typeof d?.muted !== 'boolean') return;
 
-    const next = !!d.muted;
+    const next = commitForumAdMutedState(d.muted);
 
-    // Нормализуем глобальное состояние под координатор и остальные контуры.
-    writeMutedPrefToStorage(next);
-    writeMutedPrefToDocument(next);
-
-    setMuted(next);
+    mutedRef.current = next;
+    setMuted((prev) => (prev === next ? prev : next));
 
     // HTML5
-    if (videoRef.current) {
-      try {
-        videoRef.current.muted = next;
-      } catch {}
-    }
+    applyForumAdMutedToVideo(videoRef.current, next);
 
     // YouTube
     if (ytPlayerRef.current) {
@@ -1495,32 +1606,48 @@ useEffect(() => {
       if (!cancelled) setMedia(next);
     };
 
-    async function run() {
-      // 0) сначала пробуем определить тип по Content-Type (HEAD)
-      if (!cancelled && shouldProbeMediaKind(mediaHref)) {
-        const detected = await detectMediaKind(mediaHref).catch(() => null);
-        if (cancelled) return;
+async function run() {
+  // 0) Прямое native-video определяем по URL ДО любых сетевых probe.
+  // Для .mp4/.webm это убирает лишний HEAD/GET Range перед установкой <video>.
+  if (!cancelled && isLikelyVideoUrl(mediaHref)) {
+    publishResolved({ kind: 'video', src: mediaHref, step: 'env_video' }, true);
+    emitAdEvent(
+      'ad_fallback',
+      { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
+      conf
+    );
+    return;
+  }
 
-        if (detected === 'video') {
-          publishResolved({ kind: 'video', src: mediaHref, step: 'head_video' }, true);
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
+  // 1) Content-Type probe оставляем для неочевидных image/video URL.
+  // Range fallback выключен: он сам создавал лишний 206.
+  if (!cancelled && shouldProbeMediaKind(mediaHref)) {
+    const detected = await detectMediaKind(mediaHref, 3000, {
+      allowRangeFallback: false,
+    }).catch(() => null);
 
-        if (detected === 'image') {
-          publishResolved({ kind: 'image', src: mediaHref, step: 'head_image' }, true);
-          emitAdEvent(
-            'ad_fallback',
-            { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
-            conf
-          );
-          return;
-        }
-      }
+    if (cancelled) return;
+
+    if (detected === 'video') {
+      publishResolved({ kind: 'video', src: mediaHref, step: 'head_video' }, true);
+      emitAdEvent(
+        'ad_fallback',
+        { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
+        conf
+      );
+      return;
+    }
+
+    if (detected === 'image') {
+      publishResolved({ kind: 'image', src: mediaHref, step: 'head_image' }, true);
+      emitAdEvent(
+        'ad_fallback',
+        { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
+        conf
+      );
+      return;
+    }
+  }
 
       // 1) прямое видео (blob, mp4 и т.п.) по URL-эвристике
       if (!cancelled && isLikelyVideoUrl(mediaHref)) {
@@ -1792,14 +1919,20 @@ onReady: (ev) => {
     // HTML5 video
 if (media.kind === 'video' && videoRef.current) {
   const v = videoRef.current;
-  const srcKey = String(media.src || '');
+  const srcKey = String(media.src || '').trim();
+  const nextMuted = normalizeForumAdMuted(muted);
 
-  if (isVideoSrcTemporarilyBlocked(srcKey)) {
+  applyForumAdMutedToVideo(v, nextMuted);
+
+  if (!srcKey || isVideoSrcTemporarilyBlocked(srcKey)) {
     try { v.pause?.(); } catch {}
     return;
   }
 
   if (shouldPlay) {
+    const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+    if (attached) attachedVideoSrcRef.current = srcKey;
+
     const playAttempt = v.play?.();
 
     if (playAttempt && typeof playAttempt.then === 'function') {
@@ -1812,17 +1945,21 @@ if (media.kind === 'video' && videoRef.current) {
       emitAdPlayToCoordinator('ad_video');
     }
   } else {
-    v.pause?.();
+    // Пауза без removeAttribute('src') и без load().
+    // Так браузер не начинает новый набор 206 при каждом повторном входе в viewport.
+    try { v.pause?.(); } catch {}
   }
 }
 
     // YouTube player (Iframe API)
 if (media.kind === 'youtube' && ytPlayerRef.current) {
   const p = ytPlayerRef.current;
+  const nextMuted = normalizeForumAdMuted(muted);
+
   try {
     if (shouldPlay) {
-      if (muted === true) p.mute?.();
-      else if (muted === false) p.unMute?.();
+      if (nextMuted) p.mute?.();
+      else p.unMute?.();
 
       emitAdPlayToCoordinator('ad_youtube');
       p.playVideo?.();
@@ -1927,40 +2064,49 @@ const handleToggleSound = (e) => {
   e.preventDefault();
   e.stopPropagation();
 
-  const next = muted === true ? false : true;
+  const currentMuted = normalizeForumAdMuted(muted);
+  const next = !currentMuted;
 
   // 1) сохранить и разложить состояние ВЕЗДЕ:
   // storage + document/window + global event
   syncMutedPrefEverywhere(next, playerIdRef.current, 'forum-ads-toggle');
 
   // 2) локально
-  setMuted(next);
+  mutedRef.current = next;
+  setMuted((prev) => (prev === next ? prev : next));
 
   // HTML5
   if (media.kind === 'video' && videoRef.current) {
     const v = videoRef.current;
-    try {
-      v.muted = next;
-    } catch {}
-    if (v.paused && !next && shouldPlayRef.current) {
+
+    applyForumAdMutedToVideo(v, next);
+
+    if (v.paused && shouldPlayRef.current) {
       v.play?.().catch(() => {});
     }
+
     return;
   }
 
   // YouTube
   if (media.kind === 'youtube' && ytPlayerRef.current) {
     const p = ytPlayerRef.current;
+
     try {
       if (next) {
         p.mute?.();
       } else {
         p.unMute?.();
-        if (shouldPlayRef.current) p.playVideo?.();
+      }
+
+      if (shouldPlayRef.current) {
+        p.playVideo?.();
       }
     } catch {}
   }
 };
+
+  const isAdMuted = normalizeForumAdMuted(muted);
 
   const showSoundButton =
     media.kind === 'video' || media.kind === 'youtube';
@@ -2339,31 +2485,36 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 {media.kind === 'video' && media.src && (
   <div className="forum-ad-media-fill">
 <video
-  ref={videoRef}
-  src={attachedVideoSrc || undefined}
+  ref={videoRef} 
   className="forum-ad-fit"
-  {...(muted == null ? {} : { muted })}
+  muted={isAdMuted}
   loop
   playsInline
   referrerPolicy="no-referrer"
-  preload={shouldPlay ? 'auto' : (isNear ? 'metadata' : 'none')}
+  preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
   onLoadedData={() => {
-    try { clearVideoSrcBlock(media?.src); } catch {}
-  }}
-  onCanPlay={() => {
-    try { clearVideoSrcBlock(media?.src); } catch {}
-  }}
-  onError={() => {
     try {
-      markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
+      applyForumAdMutedToVideo(videoRef.current, isAdMuted);
+      clearVideoSrcBlock(media?.src);
     } catch {}
   }}
+  onCanPlay={() => {
+    try {
+      applyForumAdMutedToVideo(videoRef.current, isAdMuted);
+      clearVideoSrcBlock(media?.src);
+    } catch {}
+  }}
+onError={() => {
+  try {
+    markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
+    attachedVideoSrcRef.current = '';
+    detachAdNativeVideo(videoRef.current);
+  } catch {}
+}}
 />
   </div>
 )}
-
-
-
+ 
             {media.kind === 'youtube' && media.src && (
 <div
   className="relative overflow-hidden rounded-lg"
@@ -2465,18 +2616,18 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
               </div>
             )}
 
-            {showSoundButton && (
-              <button
-                type="button"
-                onClick={handleToggleSound}
-                className={`forum-ad-audio-toggle ${muted ? 'on' : 'off'}`}
-                aria-label={muted ? 'on' : 'off'}
-              >
-                <span className="ico" aria-hidden="true">
-                  {muted ? '🔇' : '🔊'}
-                </span>
-              </button>
-            )} 
+{showSoundButton && (
+  <button
+    type="button"
+    onClick={handleToggleSound}
+    className={`forum-ad-audio-toggle ${isAdMuted ? 'on' : 'off'}`}
+    aria-label={isAdMuted ? 'muted' : 'unmuted'}
+  >
+    <span className="ico" aria-hidden="true">
+      {isAdMuted ? '🔇' : '🔊'}
+    </span>
+  </button>
+)}
 
             <div className="forum-ad-lens" aria-hidden="true">
               <svg
