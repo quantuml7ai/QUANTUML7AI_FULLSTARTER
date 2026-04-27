@@ -95,12 +95,18 @@ function writeMutedPrefToDocument(val) {
   try {
     window.__SITE_MEDIA_SOUND_UNLOCKED__ = !nextBool;
   } catch {}
+
+  if (userSet) {
+    try { window.__FORUM_MEDIA_SOUND_USER_SET__ = true; } catch {}
+    try { window.__SITE_MEDIA_SOUND_USER_SET__ = true; } catch {}
+  }  
   try {
     const root = document?.documentElement;
     if (root?.dataset) {
       root.dataset.forumMediaMuted = nextStr;
       root.dataset.mediaMuted = nextStr;
       root.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1';
+      if (userSet) root.dataset.forumMediaSoundUserSet = '1';
     }
   } catch {}
 
@@ -110,6 +116,7 @@ function writeMutedPrefToDocument(val) {
       body.dataset.forumMediaMuted = nextStr;
       body.dataset.mediaMuted = nextStr;
       body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1';
+      if (userSet) body.dataset.forumMediaSoundUserSet = '1';
     }
   } catch {}
 }
@@ -126,8 +133,9 @@ function emitMutedPref(val, id, source = 'forum-ads') {
 }
 
 function syncMutedPrefEverywhere(val, id, source = 'forum-ads') {
+  const userSet = source === 'forum-ads-toggle' || String(source || '').endsWith('-toggle');
   writeMutedPrefToStorage(val);
-  writeMutedPrefToDocument(val);
+  writeMutedPrefToDocument(val, userSet);
   emitMutedPref(val, id, source);
 }
 
@@ -166,7 +174,7 @@ function commitForumAdMutedState(val) {
   // Оставляем текущую архитектуру совместимости:
   // document/window — главный глобальный контур,
   // storage — fallback/совместимость с форумом.
-  writeMutedPrefToDocument(next);
+  writeMutedPrefToDocument(next, false);
   writeMutedPrefToStorage(next);
 
   return next;
@@ -1268,6 +1276,7 @@ const videoRef = useRef(null);
 const attachedVideoSrcRef = useRef('');
 const adNativePrimeTsRef = useRef(0);
 const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
+const adNativeFocusKickTsRef = useRef(0);
 const ytIframeRef = useRef(null);
 const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
@@ -1425,54 +1434,27 @@ useEffect(() => {
   const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
   if (attached) attachedVideoSrcRef.current = srcKey;
 
-  // Отдельный рекламный контур: рядом с viewport подтягиваем первый кадр,
-  // но не отправляем site-media-play и не вмешиваемся в координатор форума.
-  if (Number(v.readyState || 0) < 2 && nextMuted) {
+  // Near-зона рекламы теперь только подготавливает ресурс.
+  // Никакого play() до focus: иначе offscreen-реклама может украсть mobile media pipeline
+  // и погасить текущее видео форума в viewport.
+  if (Number(v.readyState || 0) < 2) {
     const now = Date.now();
-    const lastPrimeTs = Number(adNativePrimeTsRef.current || 0);
-    const canPrime = (now - lastPrimeTs) > 2200 && !shouldPlayRef.current;
+    const lastWarmTs = Number(adNativePrimeTsRef.current || 0);
+    const canWarm = (now - lastWarmTs) > 1600 && !shouldPlayRef.current;
 
-    if (canPrime) {
-      const hasOtherPlaying = (() => {
-        try {
-          return Array.from(document.querySelectorAll('video,audio')).some((node) => {
-            if (!(node instanceof HTMLMediaElement)) return false;
-            if (node === v) return false;
-            if (node.paused || node.ended) return false;
-            return Number(node.readyState || 0) >= 2;
-          });
-        } catch {
-          return false;
+    if (canWarm) {
+      adNativePrimeTsRef.current = now;
+      try {
+        applyForumAdMutedToVideo(v, nextMuted);
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (String(v.dataset?.__adLoadPending || '') !== '1') {
+          v.dataset.__adLoadPending = '1';
+          v.load?.();
         }
-      })();
-
-      // Рекламный prime не должен красть мобильный media pipeline у форума/splash/BG audio.
-      // Если что-то уже играет — оставляем только src/load/preload без play().
-      if (!hasOtherPlaying) {
-        adNativePrimeTsRef.current = now;
-        try {
-          applyForumAdMutedToVideo(v, true);
-          v.playsInline = true;
-          v.setAttribute('playsinline', '');
-          v.setAttribute('webkit-playsinline', '');
-          v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-        } catch {}
-
-        try {
-          const p = v.play?.();
-          const finish = () => {
-            try {
-              if (!shouldPlayRef.current && !v.paused) v.pause?.();
-              applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current));
-            } catch {}
-          };
-          if (p && typeof p.then === 'function') {
-            p.then(() => setTimeout(finish, 160)).catch(() => {});
-          } else {
-            setTimeout(finish, 160);
-          }
-        } catch {}
-      }
+      } catch {}
     }
   }
 
@@ -2059,7 +2041,55 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
       emitAdPlayToCoordinator('ad_tiktok');
     }
   }, [emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
+  // Focus-only autoplay retry for mobile ads.
+  // Работает только когда карточка реально в focus-zone; near/offscreen не играет.
+  useEffect(() => {
+    if (media.kind !== 'video') return undefined;
+    if (!shouldPlay || !isPageActive) return undefined;
 
+    let cancelled = false;
+    let timer = 0;
+
+    const kick = () => {
+      if (cancelled) return;
+      const v = videoRef.current;
+      const srcKey = String(media.src || '').trim();
+      if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
+      const now = Date.now();
+      if ((now - Number(adNativeFocusKickTsRef.current || 0)) < 420) return;
+      adNativeFocusKickTsRef.current = now;
+
+      try {
+        const nextMuted = normalizeForumAdMuted(mutedRef.current);
+        const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+        if (attached) attachedVideoSrcRef.current = srcKey;
+        applyForumAdMutedToVideo(v, nextMuted);
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (v.paused) v.play?.().catch(() => {});
+      } catch {}
+    };
+
+    kick();
+    timer = window.setInterval(() => {
+      try {
+        const v = videoRef.current;
+        if (!shouldPlayRef.current || !v || !v.paused || Number(v.readyState || 0) >= 2) {
+          if (timer) window.clearInterval(timer);
+          timer = 0;
+          return;
+        }
+        kick();
+      } catch {}
+    }, 520);
+
+    return () => {
+      cancelled = true;
+      if (timer) window.clearInterval(timer);
+    };
+  }, [isPageActive, media.kind, media.src, shouldPlay]);
   // Impression tracking
   useEffect(() => {
     const el = rootRef.current;
@@ -2576,12 +2606,19 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   className="forum-ad-fit"
   muted={isAdMuted}
   loop
-  playsInline
-  autoPlay
+  playsInline 
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
   onPlaying={() => {
     try {
+      const v = videoRef.current;
+      if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (!shouldPlayRef.current) {
+        // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
+        // и не отправляем site-media-play, чтобы не выключать активное видео форума.
+        try { v?.pause?.(); } catch {}
+        return;
+      }      
       const st = adNativePauseRecoveryRef.current || {};
       if (st.timer) clearTimeout(st.timer);
       adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
@@ -2612,14 +2649,20 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   }}  
   onLoadedData={() => {
     try {
-      applyForumAdMutedToVideo(videoRef.current, isAdMuted);
+      const v = videoRef.current;
+      if (v?.dataset) v.dataset.__adLoadPending = '0';
+      applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
+      if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
     } catch {}
   }}
   onCanPlay={() => {
     try {
-      applyForumAdMutedToVideo(videoRef.current, isAdMuted);
+      const v = videoRef.current;
+      if (v?.dataset) v.dataset.__adLoadPending = '0';
+      applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
+      if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
     } catch {}
   }}
 onError={() => {

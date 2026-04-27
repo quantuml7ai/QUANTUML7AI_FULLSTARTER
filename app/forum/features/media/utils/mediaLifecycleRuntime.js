@@ -43,7 +43,7 @@ export function readMutedPrefFromDocument() {
   }
 }
 
-export function writeMutedPrefToDocument(nextMuted) {
+export function writeMutedPrefToDocument(nextMuted, userSet = false) {
   try {
     if (typeof window === 'undefined') return
     const nextBool = !!nextMuted
@@ -52,12 +52,17 @@ export function writeMutedPrefToDocument(nextMuted) {
     try { window.__SITE_MEDIA_MUTED__ = nextBool } catch {}
     try { window.__FORUM_MEDIA_SOUND_UNLOCKED__ = !nextBool } catch {}
     try { window.__SITE_MEDIA_SOUND_UNLOCKED__ = !nextBool } catch {}
+    if (userSet) {
+      try { window.__FORUM_MEDIA_SOUND_USER_SET__ = true } catch {}
+      try { window.__SITE_MEDIA_SOUND_USER_SET__ = true } catch {}
+    }    
     try {
       const root = document?.documentElement
       if (root?.dataset) {
         root.dataset.forumMediaMuted = nextStr
         root.dataset.mediaMuted = nextStr
         root.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
+        if (userSet) root.dataset.forumMediaSoundUserSet = '1'
       }
     } catch {}
     try {
@@ -66,6 +71,7 @@ export function writeMutedPrefToDocument(nextMuted) {
         body.dataset.forumMediaMuted = nextStr
         body.dataset.mediaMuted = nextStr
         body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
+        if (userSet) body.dataset.forumMediaSoundUserSet = '1'
       }
     } catch {}
   } catch {}
@@ -85,7 +91,7 @@ export function writeMutedPrefToStorage(nextMuted) {
   // and is mirrored to storage for legacy components until the next reload.
   try {
     if (typeof window === 'undefined') return
-    writeMutedPrefToDocument(true)
+    writeMutedPrefToDocument(true, false)
     writeMutedPrefToStorage(true)
   } catch {}
 })()
@@ -251,7 +257,7 @@ export function __readMediaMutedPref() {
 
 export function __writeMediaMutedPref(nextMuted, source = 'media_element', emit = true) {
   const next = !!nextMuted
-  writeMutedPrefToDocument(next)
+  writeMutedPrefToDocument(next, true)
   writeMutedPrefToStorage(next)
 
   if (!emit || typeof window === 'undefined') return

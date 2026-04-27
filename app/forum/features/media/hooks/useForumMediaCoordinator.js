@@ -776,7 +776,21 @@ if (safe && video.dataset?.__loadPending !== '1') {
       };
     } catch {}
 
-    const writeMutedPref = (val) => {
+    const isUserSoundSource = (source) => {
+      const s = String(source || '').trim();
+      return (
+        s === 'video' ||
+        s === 'qcast' ||
+        s === 'youtube' ||
+        s === 'media_element' ||
+        s === 'forum-ads-toggle' ||
+        s === 'user' ||
+        s.startsWith('user-') ||
+        s.endsWith('-toggle')
+      );
+    };
+
+    const writeMutedPref = (val, userSet = false) => {
       const nextBool = !!val;
       const next = nextBool ? '1' : '0';      
       try { 
@@ -784,7 +798,7 @@ if (safe && video.dataset?.__loadPending !== '1') {
         localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
       } catch {}
       try {
-        writeMutedPrefToDocument(nextBool);
+        writeMutedPrefToDocument(nextBool, !!userSet);
       } catch {}      
     };
     // Единственный runtime-документ звука для native/video/audio/QCast/YouTube/TikTok/iframe/Ads.
@@ -798,7 +812,7 @@ if (safe && video.dataset?.__loadPending !== '1') {
       mutedPref = null;
     }
     if (typeof mutedPref !== 'boolean') mutedPref = true;
-    try { writeMutedPrefToDocument(mutedPref); } catch {}
+    try { writeMutedPrefToDocument(mutedPref, false); } catch {}
     const desiredMuted = () => {
       try {
         const fromDocument = readMutedPrefFromDocument();
@@ -881,12 +895,13 @@ const applyMutedPrefToAll = () => {
 
     const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       const next = !!val;
+      const userSet = isUserSoundSource(source);
       if (mutedPref === next && source === 'forum-coordinator') {
-        writeMutedPref(next);
+        writeMutedPref(next, false);
         return;
       }
       mutedPref = next;
-      writeMutedPref(next);
+      writeMutedPref(next, userSet);
       applyMutedPrefToAll();
       if (emit) {
         try {
@@ -1750,6 +1765,17 @@ const h = () => {
   if (shouldSkipMutePersist(el)) return;
   try {
     const owner = getOwnerNode(el);
+    const now = Date.now();
+    const persistUntil = Number(el?.dataset?.__persistMuteUntil || owner?.dataset?.__persistMuteUntil || 0);
+    const manualSoundChange =
+      persistUntil > now ||
+      hasManualLease(el) ||
+      hasManualLease(owner) ||
+      hasUserGestureIntent(el) ||
+      hasUserGestureIntent(owner);
+
+    // Programmatic muted fallback / coordinator sync must not become a user sound choice.
+    if (!manualSoundChange) return;    
     const isQcastAudio =
       owner?.getAttribute?.('data-forum-media') === 'qcast' ||
       String(el?.dataset?.qcastAudio || '') === '1';
@@ -3696,7 +3722,11 @@ return;
                 a.removeAttribute?.('muted');
               } catch {}
             }
-            try { writeQcastMutedPref(!!a.muted); } catch {}
+            try {
+              if (keepManualQcastSound || keepUserUnmutedQcast) {
+                writeQcastMutedPref(!!a.muted);
+              }
+            } catch {}
             // LOOP: qcast-аудио тоже зацикливаем
             a.loop = true;
             try { a.preload = 'auto'; } catch {}

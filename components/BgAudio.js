@@ -2,7 +2,55 @@
  
 import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
+const MEDIA_MUTED_EVENT = 'forum:media-mute'
 
+function readForumMediaSoundDocument() {
+  try {
+    const mutedFromWindow = (() => {
+      try {
+        if (typeof window.__FORUM_MEDIA_MUTED__ === 'boolean') return window.__FORUM_MEDIA_MUTED__
+        if (typeof window.__SITE_MEDIA_MUTED__ === 'boolean') return window.__SITE_MEDIA_MUTED__
+      } catch {}
+      return null
+    })()
+
+    const userSetFromWindow = (() => {
+      try {
+        return window.__FORUM_MEDIA_SOUND_USER_SET__ === true ||
+          window.__SITE_MEDIA_SOUND_USER_SET__ === true
+      } catch {
+        return false
+      }
+    })()
+
+    const root = document?.documentElement
+    const body = document?.body
+    const rawMuted =
+      mutedFromWindow ??
+      root?.dataset?.forumMediaMuted ??
+      root?.dataset?.mediaMuted ??
+      body?.dataset?.forumMediaMuted ??
+      body?.dataset?.mediaMuted ??
+      null
+
+    const rawUserSet =
+      userSetFromWindow ||
+      root?.dataset?.forumMediaSoundUserSet === '1' ||
+      body?.dataset?.forumMediaSoundUserSet === '1'
+
+    const val = rawMuted == null ? '' : String(rawMuted).trim().toLowerCase()
+    const muted =
+      val === '1' || val === 'true' || val === 'yes' || val === 'muted'
+        ? true
+        : val === '0' || val === 'false' || val === 'no' || val === 'unmuted'
+          ? false
+          : null
+
+    return { muted, userSet: !!rawUserSet }
+  } catch {
+    return { muted: null, userSet: false }
+  }
+}
 function isAudibleMediaElement(el) {
   if (!el) return false
 
@@ -96,9 +144,26 @@ export default function BgAudio({
     setPlaying(false)
   }, [])
 
+  const muteBecauseForumMediaChoice = useCallback(() => {
+    const a = audioRef.current
+    if (!a) return
+
+    try { a.pause() } catch {}
+    try { a.muted = true } catch {}
+    try { a.currentTime = 0 } catch {}
+
+    setPlaying(false)
+    setLocked(false)
+  }, [])
+
   const playWithSound = useCallback(async () => {
     const a = audioRef.current
     if (!a) return false
+    const forumSound = readForumMediaSoundDocument()
+    if (forumSound.userSet) {
+      muteBecauseForumMediaChoice()
+      return false
+    }
 
     try {
       const duration = Number(a.duration)
@@ -127,7 +192,7 @@ export default function BgAudio({
     } catch {
       return false
     }
-  }, [emitBgAudioPlay])
+  }, [emitBgAudioPlay, muteBecauseForumMediaChoice])
 
   /* =========================
      1) АВТОСТАРТ ПРИ МОНТАЖЕ
@@ -204,6 +269,33 @@ export default function BgAudio({
       detach()
     }
   }, [locked, playWithSound])
+/* =========================  
+     3) ЕДИНЫЙ ДОКУМЕНТ ЗВУКА ФОРУМА
+     - BGAudio только читает состояние;
+     - сам ничего не пишет;
+     - после пользовательского выбора media sound сразу тушится.
+  ========================= */
+  useEffect(() => {
+    const syncFromForumSoundDocument = () => {
+      const state = readForumMediaSoundDocument()
+      if (!state.userSet) return
+      muteBecauseForumMediaChoice()
+    }
+
+    syncFromForumSoundDocument()
+
+    const onForumMuted = () => {
+      setTimeout(syncFromForumSoundDocument, 0)
+    }
+
+    window.addEventListener(MEDIA_MUTED_EVENT, onForumMuted)
+    window.addEventListener('storage', onForumMuted)
+
+    return () => {
+      window.removeEventListener(MEDIA_MUTED_EVENT, onForumMuted)
+      window.removeEventListener('storage', onForumMuted)
+    }
+  }, [muteBecauseForumMediaChoice])
 
   /* =========================
      3) КООРДИНАЦИЯ АУДИО
