@@ -892,15 +892,15 @@ const applyMutedPrefToAll = () => {
         const ua = String(navigator?.userAgent || '');
         const ios = /iP(hone|ad|od)/i.test(ua);
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-        if (ios) {
-          const dm = Number(navigator?.deviceMemory || 0);
-          if (Number.isFinite(dm) && dm > 0 && dm <= 3) return 2;
-          return 3;
-        }
-        if (coarse) return 3;
+        const dm = Number(navigator?.deviceMemory || 0);
+        const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3;
+
+        if (ios) return 1;
+        if (lowMem) return 1;
+        if (coarse) return 2;
         return 4;
       } catch {
-        return 4;
+        return 2;
       }
     })();
     let pendingLoadsCacheTs = 0;
@@ -1185,6 +1185,12 @@ const kickMediaLoad = (
     bypassSrcLimiter,
     bypassPendingBudget,
   })) return false;
+
+  try {
+    if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim()) {
+      __restoreVideoEl(media);
+    }
+  } catch {}
 
   markLoadPending(media, channel);
 
@@ -1528,18 +1534,23 @@ try {
   if (el instanceof HTMLVideoElement) {
     const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
 
+    const reasonTagEarly = String(reason || '').trim();
+    const highPriorityReasonEarly =
+      reasonTagEarly === 'activate_pending' ||
+      reasonTagEarly === 'play_wait_ready' ||
+      reasonTagEarly === 'visibility_recover';
+
     try { el.dataset.__resident = '1'; } catch {}
-    try { el.dataset.__prewarm = '1'; } catch {}
-    try { el.preload = 'auto'; } catch {}
+    try { el.dataset.__prewarm = highPriorityReasonEarly ? '1' : '0'; } catch {}
+    try { el.preload = highPriorityReasonEarly ? 'auto' : 'metadata'; } catch {}
 
     if (!el.getAttribute('src')) {
       trace('candidate_restore', el, { reason });
       __restoreVideoEl(el);
 
-      // ВАЖНО:
-      // Для post-video не продолжаем этот же проход в candidate_force_load.
-      // Иначе получается restore + load в одном тике, что и раздувает churn.
-      if (isPostVideo) {
+      // Low-priority prewarm restores DOM only. Real network load is allowed
+      // only for activation/play/visibility recovery.
+      if (isPostVideo && !highPriorityReasonEarly) {
         armReadyReplay(el);
         return false;
       }
@@ -2427,10 +2438,15 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
     })();
     const IFRAME_HARD_UNLOAD_MS = isIOSUi ? 9800 : (isCoarseUi ? 7600 : 5200);
     const IFRAME_RESIDENT_CAP = (() => {
-      if (isCoarseUi) return 4;
-      const dm = Number(navigator?.deviceMemory || 0);
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 5;
-      return 6;
+      try {
+        if (isIOSUi) return 1;
+        if (isCoarseUi) return 2;
+        const dm = Number(navigator?.deviceMemory || 0);
+        if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 3;
+        return 4;
+      } catch {
+        return 2;
+      }
     })();
     let mediaDiagLastTs = 0;
     const emitMediaDiag = (event, extra = {}, force = false) => {
@@ -3145,6 +3161,17 @@ if (el instanceof HTMLVideoElement) {
     ensurePendingHtmlMediaReady(el, 'play_wait_ready');
     trace('play_wait_ready', el);
     armReadyReplay(el);
+
+    const canMutedAutoplayKick =
+      el instanceof HTMLVideoElement &&
+      !!el.muted &&
+      !isUserPaused(el) &&
+      !hasSuppressedPlayback(el);
+
+    if (canMutedAutoplayKick && el.paused) {
+      trace('play_pending_muted', el);
+      startHtmlMedia(el, 'play_pending_muted');
+    }
   } else if (el.paused) {
     trace('play_now', el);
     startHtmlMedia(el, 'play_now');
@@ -3444,10 +3471,21 @@ return;
 
           if (candidate && ratio >= PREWARM_RATIO && !isReadyCandidate(candidate)) {
             const candidateKind = getMediaKind(candidate);
-            const prepared =
-              candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe'
-                ? prepareExternalMedia(candidate, 'early_prewarm')
-                : ensurePendingHtmlMediaReady(candidate, 'early_prewarm');
+            const isExternalCandidate =
+              candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';
+            const externalCanPrepare =
+              !isExternalCandidate ||
+              (
+                visiblePx >= getStartVisiblePx(candidate) &&
+                centerDist <= getPriorityCenterMaxDist(candidate)
+              );
+            const prepared = externalCanPrepare
+              ? (
+                  isExternalCandidate
+                    ? prepareExternalMedia(candidate, 'early_prewarm')
+                    : ensurePendingHtmlMediaReady(candidate, 'early_prewarm')
+                )
+              : false;
             traceCandidate('candidate_early_prewarm', candidate, {
               ratio,
               score,
@@ -3455,6 +3493,7 @@ return;
               centerDist,
               threshold: PREWARM_RATIO,
               prepared,
+              externalCanPrepare,
             });
           }
 
@@ -3674,11 +3713,21 @@ return;
       if (!(el instanceof Element)) return false;
       if (isUserPaused(el) || hasSuppressedPlayback(el)) return false;
       const kind = getMediaKind(el);
+
       if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
+        // Heavy iframe providers are activated only inside the focus/start zone.
+        // Near prewarm must not create far YouTube/TikTok frames and compete
+        // with the current native video on mobile browsers.
+        const visiblePx = getOwnerVisiblePx(el);
+        const centerDist = getOwnerCenterDist(el);
+        if (visiblePx < getStartVisiblePx(el) || centerDist > getPriorityCenterMaxDist(el)) {
+          return false;
+        }
         return prepareExternalMedia(el, reason);
       }
+
       return ensurePendingHtmlMediaReady(el, reason);
-    };
+    }; 
 
     nearIo = new IntersectionObserver(
       (entries) => {
@@ -3699,7 +3748,7 @@ return;
           });
         if (!intersecting.length) return;
 
-        const maxBatch = isIOSUi ? 3 : (isCoarseUi ? 2 : 3);
+        const maxBatch = isIOSUi ? 1 : (isCoarseUi ? 1 : 2);
         let preparedCount = 0;
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;
@@ -3728,9 +3777,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 1120 : (isCoarseUi ? 560 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.9 : 1.6)))
+          Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.25)))
         }px 0px ${
-          Math.max(isIOSUi ? 2240 : (isCoarseUi ? 1180 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 4.8 : 2.6)))
+          Math.max(isIOSUi ? 860 : (isCoarseUi ? 720 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.15 : 1.85)))
         }px 0px`,
       },
     );

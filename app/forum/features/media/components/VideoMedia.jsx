@@ -332,7 +332,7 @@ const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
 const coordinatorOwnsPostLifecycle = isPostVideo && coordinatorOwnsLifecycle
 const posterSrc = typeof poster === 'string' ? poster.trim() : ''
 const renderControls = isPostVideo ? false : controls
-const renderPreload = dataForumVideo === 'post' ? undefined : preload 
+const renderPreload = isPostVideo ? 'metadata' : preload
 
   const readMuted = React.useCallback(() => {
     try {
@@ -1133,6 +1133,30 @@ const onVideoLoaded = React.useCallback(() => {
     revealHud(2200)
     if (el.paused) {
       showCenterGlyph('play', 760)
+
+      if (isPostVideo) {
+        const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
+
+        if (!hasSrc) {
+          restoreVideoElFn(el)
+        }
+
+        try { el.playsInline = true } catch {}
+        try { el.preload = 'auto' } catch {}
+
+        try {
+          if (el.muted !== mutedState) el.muted = !!mutedState
+        } catch {}
+
+        if ((el.readyState || 0) < 2 && String(el.dataset?.__loadPending || '') !== '1') {
+          try {
+            el.dataset.__loadPending = '1'
+            el.dataset.__loadPendingSince = String(Date.now())
+            el.load?.()
+          } catch {}
+        }
+      }
+
       try {
         const p = el.play?.()
         if (p && typeof p.catch === 'function') {
@@ -1143,7 +1167,15 @@ const onVideoLoaded = React.useCallback(() => {
     }
     showCenterGlyph('pause', 760)
     try { el.pause?.() } catch {}
-  }, [armUserIntentLease, clearNativeControlsForPost, revealHud, showCenterGlyph])
+  }, [
+    armUserIntentLease,
+    clearNativeControlsForPost,
+    isPostVideo,
+    mutedState,
+    restoreVideoElFn,
+    revealHud,
+    showCenterGlyph,
+  ])
 
   const onGoodEmoji = React.useCallback((e) => {
     try { e?.stopPropagation?.() } catch {}
@@ -1169,8 +1201,10 @@ const videoNode = (
     playsInline={playsInline}
     disableRemotePlayback
     preload={renderPreload}
+    muted={isPostVideo ? mutedState : undefined}
+    data-default-muted={isPostVideo ? '1' : undefined}
     controls={isPostVideo ? undefined : renderControls}
-    autoPlay={autoPlay}
+    autoPlay={isPostVideo ? undefined : autoPlay}
     loop={loop}
     controlsList={controlsList}
     disablePictureInPicture={disablePictureInPicture}

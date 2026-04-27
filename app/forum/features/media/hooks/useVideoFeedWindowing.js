@@ -3,6 +3,8 @@ import interleaveRecommendationRails from '../../feed/utils/interleaveRecommenda
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
 const VF_OVERSCAN_PX = 1120
+const VF_OVERSCAN_PX_MOBILE = 620
+const VF_OVERSCAN_PX_TABLET = 760
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550 
@@ -72,14 +74,35 @@ export default function useVideoFeedWindowing({
  
 const vfGetMaxRender = useCallback(() => {
   try {
-    if (!isBrowserFn()) return 8
+    if (!isBrowserFn()) return 6
     const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
     const dm = Number(window?.navigator?.deviceMemory || 0)
-    if (coarse) return 7
-    if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
-    return 10
-  } catch {
+    if (coarse) return 5
+    if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 6
     return 8
+  } catch {
+    return 6
+  }
+}, [isBrowserFn])
+
+const vfGetOverscanPx = useCallback((velocity = 0) => {
+  try {
+    if (!isBrowserFn()) return VF_OVERSCAN_PX_TABLET
+    const w = Number(window?.innerWidth || 0)
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const base =
+      coarse || w < 700
+        ? VF_OVERSCAN_PX_MOBILE
+        : w < 1100
+          ? VF_OVERSCAN_PX_TABLET
+          : VF_OVERSCAN_PX
+
+    const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.6)
+    const boost = coarse ? 0.28 : 0.55
+
+    return Math.round(base * (1 + v * boost))
+  } catch {
+    return VF_OVERSCAN_PX_MOBILE
   }
 }, [isBrowserFn])
 
@@ -241,8 +264,7 @@ const vfGetMaxRender = useCallback(() => {
     const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
     const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
     const direction = Number(vfScrollStateRef.current?.direction || 0)
-const velocityBoost = Math.min(360, Math.round(velocity * 140))
-const overscanPx = VF_OVERSCAN_PX + velocityBoost
+const overscanPx = vfGetOverscanPx(velocity)
 const fromY = Math.max(0, st - overscanPx)
 const toY = st + vh + overscanPx
 
@@ -260,7 +282,7 @@ while (end < total && acc2 < toY) {
   end++
 }
 
-const vfMaxRender = vfGetMaxRender() + (velocity > 1.0 ? 1 : 0)
+const vfMaxRender = vfGetMaxRender() + (velocity > 1.0 && !(window?.matchMedia?.('(pointer: coarse)')?.matches) ? 1 : 0)
 if ((end - start) > vfMaxRender) {
   const mid = Math.floor((start + end) / 2)
   const half = Math.floor(vfMaxRender / 2)
@@ -330,7 +352,7 @@ if ((end - start) > vfMaxRender) {
       vfWinRef.current = next
       return next
     })
-  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfBuildWindow, isBrowserFn])
+  }, [videoFeedOpen, vfSlots.length, vfReadViewportState, vfGetH, vfGetMaxRender, vfGetOverscanPx, vfBuildWindow, isBrowserFn])
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return

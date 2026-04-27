@@ -60,21 +60,30 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
 
 const __SOFT_RESIDENT_POST_VIDEO = true
 
-const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
+const __MEDIA_RUNTIME_PROFILE = (() => {
   try {
     const ua = String((typeof navigator !== 'undefined' ? navigator.userAgent : '') || '')
     const isIOS = /iP(hone|ad|od)/i.test(ua)
+    const isAndroid = /Android/i.test(ua)
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
     const dm = Number((typeof navigator !== 'undefined' ? navigator?.deviceMemory : 0) || 0)
-    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 2
-    if (isIOS) return 2
-    if (lowMem) return 2
-    if (coarse) return 3
-    return 6
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3
+    return { isIOS, isAndroid, coarse: coarse || isIOS || isAndroid, lowMem }
   } catch {
-    return 4
-  } 
-})() 
+    return { isIOS: false, isAndroid: false, coarse: true, lowMem: true }
+  }
+})()
+
+const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
+  try {
+    if (__MEDIA_RUNTIME_PROFILE.isIOS) return 1
+    if (__MEDIA_RUNTIME_PROFILE.lowMem) return 1
+    if (__MEDIA_RUNTIME_PROFILE.coarse) return 2
+    return 5
+  } catch {
+    return 2
+  }
+})()
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
@@ -125,15 +134,18 @@ export function __enforceActiveVideoCap(exceptEl) {
         __activeVideoLRU.push(victim)
         continue
       }
+      const victimNearProtected = __isVideoNearViewport(victim, protectMargin)
+      const victimLoadPending = String(victim?.dataset?.__loadPending || '') === '1'
+
       if (
         String(victim?.dataset?.__playRequested || '') === '1' ||
-        String(victim?.dataset?.__loadPending || '') === '1'
+        (victimLoadPending && victimNearProtected)
       ) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
       }
-      if (__isVideoNearViewport(victim, protectMargin)) {
+      if (victimNearProtected) {
         __activeVideoLRU.shift()
         __activeVideoLRU.push(victim)
         continue
@@ -383,10 +395,9 @@ if (cur === src) {
       networkStateNow === HTMLMediaElement.NETWORK_EMPTY
 
     if (isPostFeedVideo) {
-      if (readyStateNow === 0 || isNetworkEmpty) {
-        el.dataset.__loadPending = '0'
-        el.dataset.__warmReady = '0'
-      }
+      el.dataset.__loadPending = '0'
+      delete el.dataset.__loadPendingSince
+      el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
       return
     }
 
@@ -401,11 +412,16 @@ if (readyStateNow === 0 || isNetworkEmpty) {
   return
 }
 try {
-  const shouldAutoPreload = 
-    String(el.dataset?.__prewarm || '') === '1' ||
-    String(el.dataset?.__active || '') === '1' ||
-    String(el.dataset?.__resident || '') === '1'
+  const shouldAutoPreload =
+    !isPostFeedVideo &&
+    (
+      String(el.dataset?.__prewarm || '') === '1' ||
+      String(el.dataset?.__active || '') === '1' ||
+      String(el.dataset?.__resident || '') === '1'
+    )
 
+  // Feed native video is network-started only by the coordinator.
+  // Restore may put src back, but must not make an offscreen video preload auto.
   el.preload = shouldAutoPreload ? 'auto' : 'metadata'
 } catch {}
 try {
@@ -429,10 +445,18 @@ try {
   }
 } catch {}
 try {
-  el.dataset.__loadPending = '1'
-  el.dataset.__loadPendingSince = String(Date.now())
-  el.dataset.__warmReady = '0'
+  if (isPostFeedVideo) {
+    el.dataset.__loadPending = '0'
+    delete el.dataset.__loadPendingSince
+    el.dataset.__warmReady = Number(el.readyState || 0) >= 2 ? '1' : '0'
+  } else {
+    el.dataset.__loadPending = '1'
+    el.dataset.__loadPendingSince = String(Date.now())
+    el.dataset.__warmReady = '0'
+  }
   el.setAttribute('src', src)
+  el.dataset.__attachedSrc = String(src)
+  el.dataset.__attachedSrcTs = String(Date.now())
 } catch {}
   try {
     const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
