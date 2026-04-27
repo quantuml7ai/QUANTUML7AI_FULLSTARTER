@@ -75,7 +75,7 @@ function writeMutedPrefToStorage(val) {
   } catch {}
 }
 
-function writeMutedPrefToDocument(val) {
+function writeMutedPrefToDocument(val, userSet = false) {
   if (!isBrowser()) return;
 
   const nextBool = !!val;
