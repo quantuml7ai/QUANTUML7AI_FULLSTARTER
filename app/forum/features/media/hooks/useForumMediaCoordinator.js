@@ -903,9 +903,11 @@ const applyMutedPrefToAll = () => {
         return 2;
       }
     })();
-    let pendingLoadsCacheTs = 0;
-    let pendingLoadsCacheVal = 0;
-    const readPendingLoads = (force = false) => {
+let pendingLoadsCacheTs = 0;
+let pendingLoadsCacheVal = 0;
+let nativePrewarmEl = null;
+let nativePrewarmTs = 0;
+const readPendingLoads = (force = false) => {
       try {
         const now = Date.now();
         if (!force && (now - pendingLoadsCacheTs) < 140) return pendingLoadsCacheVal;
@@ -1529,10 +1531,11 @@ const kickMediaLoad = (
       el = mediaEl;
 
       const reasonTag = String(reason || '').trim();
-      const highPriorityReason =
-        reasonTag === 'activate_pending' ||
-        reasonTag === 'play_wait_ready' ||
-        reasonTag === 'visibility_recover';
+const highPriorityReason =
+  reasonTag === 'activate_pending' ||
+  reasonTag === 'play_wait_ready' ||
+  reasonTag === 'visibility_recover' ||
+  reasonTag === 'native_priority_prewarm';
 
       const isPrewarmOnly =
         reasonTag === 'pending_grace' ||
@@ -1613,9 +1616,9 @@ if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
   try { el.dataset.__candidateBoostTs = String(now); } catch {}
   trace('candidate_force_load', el, { reason: `${reason}:cold` });
 
-  if (!kickMediaLoad(el, {
-    channel: 'candidate_cold',
-    minGapMs,
+if (!kickMediaLoad(el, {
+  channel: highPriorityReason ? reasonTag || 'candidate_cold' : 'candidate_cold',
+  minGapMs,
     burstWindowMs: isIOSUi ? 22000 : 16000,
     burstLimit: isIOSUi ? (highPriorityReason ? 3 : 2) : (highPriorityReason ? 4 : 3),
     blockMs: isIOSUi ? 14000 : 10000,
@@ -2967,6 +2970,223 @@ const pauseForeignMedia = (keepEl = null) => {
       }, delay);
       unloadTimers.set(el, id);
     }; 
+    const getOwnerViewportGapPx = (el) => {
+      try {
+        const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
+        if (!(owner instanceof Element)) return Number.POSITIVE_INFINITY;
+        const rect = owner.getBoundingClientRect?.();
+        if (!rect) return Number.POSITIVE_INFINITY;
+        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        if (rect.bottom < 0) return Math.abs(Number(rect.bottom || 0));
+        if (rect.top > viewportH) return Number(rect.top || 0) - viewportH;
+        return 0;
+      } catch {
+        return Number.POSITIVE_INFINITY;
+      }
+    };
+
+    const getNativePrewarmGapLimit = () => {
+      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+      if (isIOSUi) return Math.max(560, Math.min(820, Math.round(viewportH * 0.9)));
+      if (isCoarseUi) return Math.max(480, Math.min(760, Math.round(viewportH * 0.82)));
+      return Math.max(420, Math.min(920, Math.round(viewportH * 0.78)));
+    };
+
+    const getNativePrimeGapLimit = () => {
+      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+      if (isIOSUi) return Math.max(260, Math.min(420, Math.round(viewportH * 0.42)));
+      if (isCoarseUi) return Math.max(220, Math.min(360, Math.round(viewportH * 0.36)));
+      return 0;
+    };
+
+    const isNativePostVideoCandidate = (el) => {
+      try {
+        const media = getMediaStateNode(el);
+        return (
+          media instanceof HTMLVideoElement &&
+          String(media?.getAttribute?.('data-forum-video') || '') === 'post' &&
+          String(media?.getAttribute?.('data-forum-media') || '') === 'video'
+        );
+      } catch {
+        return false;
+      }
+    };
+
+    const isNativePrewarmEligible = (el) => {
+      try {
+        const media = getMediaStateNode(el);
+        if (!(media instanceof HTMLVideoElement)) return false;
+        if (!media.isConnected) return false;
+        if (isUserPaused(media) || isUserPaused(el)) return false;
+        if (isMediaSrcBlocked(media)) return false;
+        const visiblePx = getOwnerVisiblePx(media);
+        const centerDist = getOwnerCenterDist(media);
+        const gapPx = getOwnerViewportGapPx(media);
+        const startDist = getPriorityCenterMaxDist(media);
+        if (visiblePx > 0 && centerDist <= Math.max(180, startDist + (isIOSUi ? 160 : 120))) return true;
+        return gapPx <= getNativePrewarmGapLimit();
+      } catch {
+        return false;
+      }
+    };
+
+    const releaseNativePrewarmExcept = (keepEl = null, reason = 'native_prewarm_replace') => {
+      try {
+        const prev = nativePrewarmEl;
+        if (!(prev instanceof HTMLVideoElement)) return;
+        if (keepEl && prev === keepEl) return;
+        if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
+        nativePrewarmEl = null;
+        try {
+          prev.dataset.__prewarm = '0';
+          prev.dataset.__resident = '0';
+          prev.dataset.__nativePrewarm = '0';
+        } catch {}
+        if (!isNearViewportElement(prev, isIOSUi ? 420 : 520)) {
+          scheduleHardUnload(prev, isIOSUi ? 900 : 800, reason);
+        } else {
+          try { prev.preload = 'metadata'; } catch {}
+        }
+      } catch {}
+    };
+
+    const primeNativeFirstFrame = (el, reason = 'native_prime') => {
+      const media = getMediaStateNode(el);
+      if (!(media instanceof HTMLVideoElement)) return false;
+      if (!(isIOSUi || isCoarseUi)) return false;
+      if (Number(media.readyState || 0) >= 2) return true;
+      if (isUserPaused(media) || hasSuppressedPlayback(media)) return false;
+
+      const visiblePx = getOwnerVisiblePx(media);
+      const gapPx = getOwnerViewportGapPx(media);
+      const primeLimit = getNativePrimeGapLimit();
+      if (visiblePx <= 0 && gapPx > primeLimit) return false;
+
+      const now = Date.now();
+      const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
+      if (lastPrimeTs > 0 && (now - lastPrimeTs) < (isIOSUi ? 2200 : 1800)) return false;
+      if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
+
+      try {
+        media.dataset.__nativePrimeTs = String(now);
+        media.dataset.__nativePrimePending = '1';
+        media.dataset.__nativePrimeReason = String(reason || 'native_prime');
+      } catch {}
+
+      try { markSkipMutePersist(media, 1800); } catch {}
+      try {
+        media.muted = true;
+        media.defaultMuted = true;
+        media.setAttribute('muted', '');
+        media.playsInline = true;
+        media.setAttribute('playsinline', '');
+        media.setAttribute('webkit-playsinline', '');
+        media.preload = 'auto';
+      } catch {}
+
+      try { markCoordinatorPlayIntent(media, 1200); } catch {}
+
+      const finishPrime = (state = 'done') => {
+        try { media.dataset.__nativePrimePending = '0'; } catch {}
+        try {
+          const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
+          const nowVisiblePx = getOwnerVisiblePx(media);
+          const nowCenterDist = getOwnerCenterDist(media);
+          const shouldKeepPlaying =
+            stillActive ||
+            (
+              nowVisiblePx >= getAutoplayMinVisiblePx(media) &&
+              nowCenterDist <= getPriorityCenterMaxDist(media)
+            );
+          if (!shouldKeepPlaying && !media.paused) {
+            withSystemPause(media, () => {
+              try { media.pause?.(); } catch {}
+            });
+          }
+          trace('native_prime_finish', media, { reason, state, readyState: Number(media.readyState || 0) });
+        } catch {}
+      };
+
+      try {
+        const p = media.play?.();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            setTimeout(() => finishPrime('played'), isIOSUi ? 140 : 90);
+          }).catch((err) => {
+            try { media.dataset.__nativePrimePending = '0'; } catch {}
+            trace('native_prime_reject', media, {
+              reason,
+              name: String(err?.name || ''),
+              message: String(err?.message || ''),
+            });
+          });
+        } else {
+          setTimeout(() => finishPrime('sync_play'), 120);
+        }
+        return true;
+      } catch (err) {
+        try { media.dataset.__nativePrimePending = '0'; } catch {}
+        trace('native_prime_throw', media, { reason, message: String(err?.message || err || '') });
+        return false;
+      }
+    };
+
+    const prepareNativePriorityPrewarm = (el, reason = 'native_priority_prewarm') => {
+      const media = getMediaStateNode(el);
+      if (!(media instanceof HTMLVideoElement)) return false;
+      if (!isNativePostVideoCandidate(media)) return false;
+      if (!isNativePrewarmEligible(media)) return false;
+      if (isUserPaused(media) || hasSuppressedPlayback(media)) return false;
+
+      releaseNativePrewarmExcept(media, 'native_prewarm_replace');
+
+      try {
+        applyMutedPref(media);
+        media.playsInline = true;
+        media.setAttribute('playsinline', '');
+        media.setAttribute('webkit-playsinline', '');
+        media.dataset.__resident = '1';
+        media.dataset.__prewarm = '1';
+        media.dataset.__nativePrewarm = '1';
+        media.dataset.__nativePrewarmReason = String(reason || 'native_priority_prewarm');
+        media.preload = 'auto';
+      } catch {}
+
+      nativePrewarmEl = media;
+      nativePrewarmTs = Date.now();
+
+      if (Number(media.readyState || 0) >= 2 || String(media.dataset?.__warmReady || '') === '1') {
+        trace('native_prewarm_ready', media, { reason });
+        return true;
+      }
+
+      const kicked = kickMediaLoad(media, {
+        channel: 'native_priority_prewarm',
+        minGapMs: isIOSUi ? 720 : (isCoarseUi ? 820 : 900),
+        burstWindowMs: isIOSUi ? 18000 : 15000,
+        burstLimit: isIOSUi ? 2 : 3,
+        blockMs: isIOSUi ? 7000 : 6000,
+        bypassSrcLimiter: false,
+        bypassPendingBudget: false,
+      });
+
+      if (!kicked && String(media.dataset?.__loadPending || '') !== '1') {
+        trace('native_prewarm_kick_skip', media, { reason });
+        return false;
+      }
+
+      trace('native_prewarm_kick', media, {
+        reason,
+        kicked,
+        gapPx: getOwnerViewportGapPx(media),
+        visiblePx: getOwnerVisiblePx(media),
+        centerDist: getOwnerCenterDist(media),
+      });
+
+      primeNativeFirstFrame(media, reason);
+      armReadyReplay(media);
+      return true;
+    };    
     // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
     // добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.
     const ensureIframeLoopParam = (src) => {
@@ -3471,19 +3691,24 @@ return;
             const candidateKind = getMediaKind(candidate);
             const isExternalCandidate =
               candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';
+            const isNativeCandidate = isNativePostVideoCandidate(candidate);
             const externalCanPrepare =
               !isExternalCandidate ||
               (
                 visiblePx >= getStartVisiblePx(candidate) &&
                 centerDist <= getPriorityCenterMaxDist(candidate)
               );
-            const prepared = externalCanPrepare
-              ? (
-                  isExternalCandidate
-                    ? prepareExternalMedia(candidate, 'early_prewarm')
-                    : ensurePendingHtmlMediaReady(candidate, 'early_prewarm')
-                )
-              : false;
+            const prepared = isNativeCandidate
+              ? prepareNativePriorityPrewarm(candidate, 'early_native_candidate')
+              : (
+                  externalCanPrepare
+                    ? (
+                        isExternalCandidate
+                          ? prepareExternalMedia(candidate, 'early_prewarm')
+                          : ensurePendingHtmlMediaReady(candidate, 'early_prewarm')
+                      )
+                    : false
+                );
             traceCandidate('candidate_early_prewarm', candidate, {
               ratio,
               score,
@@ -3492,6 +3717,7 @@ return;
               threshold: PREWARM_RATIO,
               prepared,
               externalCanPrepare,
+              isNativeCandidate,
             });
           }
 
@@ -3738,6 +3964,13 @@ return;
       if (isUserPaused(el) || hasSuppressedPlayback(el)) return false;
       const kind = getMediaKind(el);
 
+      if (isNativePostVideoCandidate(el)) {
+        const media = getMediaStateNode(el);
+        const isActiveNative = !!(active && media && (active === media || active.contains?.(media) || media.contains?.(active)));
+        if (isActiveNative && isReadyCandidate(media)) return false;
+        return prepareNativePriorityPrewarm(media || el, reason === 'io_near_prewarm' ? 'native_near_prewarm' : reason);
+      }
+
       if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
         // Heavy iframe providers are activated only inside the focus/start zone.
         // Near prewarm must not create far YouTube/TikTok frames and compete
@@ -3777,6 +4010,11 @@ return;
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;
           const el = item.entry.target;
+          const media = getMediaStateNode(el);
+          const isActiveItem = !!(active && (active === el || active === media || active.contains?.(el) || el.contains?.(active)));
+          const isReadyActiveNative = isActiveItem && isNativePostVideoCandidate(el) && isReadyCandidate(el);
+          if (isReadyActiveNative) continue;
+          
           const pendingLoads = readPendingLoads();
           if (
             pendingLoads >= Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0)) &&
@@ -3792,6 +4030,7 @@ return;
               ratio: Number(item.entry.intersectionRatio || 0),
               centerDist: item.centerDist,
               visiblePx: item.visiblePx,
+              gapPx: getOwnerViewportGapPx(el),
               reason: 'io_near_prewarm',
               queueIndex: preparedCount,
             });
@@ -3801,9 +4040,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.25)))
+          Math.max(isIOSUi ? 480 : (isCoarseUi ? 380 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.35 : 1.18)))
         }px 0px ${
-          Math.max(isIOSUi ? 860 : (isCoarseUi ? 720 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.15 : 1.85)))
+          Math.max(isIOSUi ? 760 : (isCoarseUi ? 680 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.95 : 1.72)))
         }px 0px`,
       },
     );
@@ -4059,6 +4298,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       try { if (rafId) cancelAnimationFrame(rafId); } catch {}
       io?.disconnect?.();
       nearIo?.disconnect?.();
+      try { releaseNativePrewarmExcept(null, 'cleanup'); } catch {}
       try { sweepDetachedMediaState('cleanup', true); } catch {}
 
       try {
