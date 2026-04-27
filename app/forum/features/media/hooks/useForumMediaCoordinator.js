@@ -1527,6 +1527,19 @@ const kickMediaLoad = (
         return false;
       }
       el = mediaEl;
+
+      const reasonTag = String(reason || '').trim();
+      const highPriorityReason =
+        reasonTag === 'activate_pending' ||
+        reasonTag === 'play_wait_ready' ||
+        reasonTag === 'visibility_recover';
+
+      const isPrewarmOnly =
+        reasonTag === 'pending_grace' ||
+        reasonTag === 'early_prewarm' ||
+        reasonTag === 'io_near_prewarm' ||
+        reasonTag === 'candidate_near_prewarm';
+
 try {
   applyMutedPref(el);
   el.playsInline = true;
@@ -1534,27 +1547,23 @@ try {
   if (el instanceof HTMLVideoElement) {
     const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
 
-    const reasonTagEarly = String(reason || '').trim();
-    const highPriorityReasonEarly =
-      reasonTagEarly === 'activate_pending' ||
-      reasonTagEarly === 'play_wait_ready' ||
-      reasonTagEarly === 'visibility_recover';
+    try { el.dataset.__resident = highPriorityReason ? '1' : '0'; } catch {}
+    try { el.dataset.__prewarm = highPriorityReason ? '1' : '0'; } catch {}
+    try { el.preload = highPriorityReason ? 'auto' : 'metadata'; } catch {}
 
-    try { el.dataset.__resident = '1'; } catch {}
-    try { el.dataset.__prewarm = highPriorityReasonEarly ? '1' : '0'; } catch {}
-    try { el.preload = highPriorityReasonEarly ? 'auto' : 'metadata'; } catch {}
+    // Critical mobile fix:
+    // low-priority near/prewarm must NOT attach src for post native video.
+    // On iOS/Safari even src+metadata may start Range/206, then coordinator cancels it.
+    // Only activation/play/visibility recovery is allowed to restore src and touch network.
+    if (isPostVideo && isPrewarmOnly && !highPriorityReason) {
+      trace('candidate_skip_low_priority_native_restore', el, { reason });
+      return Number(el.readyState || 0) >= 2 || String(el.dataset?.__warmReady || '') === '1';
+    }
 
     if (!el.getAttribute('src')) {
       trace('candidate_restore', el, { reason });
       __restoreVideoEl(el);
-
-      // Low-priority prewarm restores DOM only. Real network load is allowed
-      // only for activation/play/visibility recovery.
-      if (isPostVideo && !highPriorityReasonEarly) {
-        armReadyReplay(el);
-        return false;
-      }
-    }
+    } 
   } else {
     try { el.preload = 'auto'; } catch {}
   }
@@ -1562,18 +1571,7 @@ try {
   const readyState = Number(el.readyState || 0);
   if (readyState >= 2 || String(el.dataset?.__warmReady || '') === '1') return true;
 
-        const now = Date.now();
-        const reasonTag = String(reason || '').trim();
-const highPriorityReason =
-  reasonTag === 'activate_pending' ||
-  reasonTag === 'play_wait_ready' ||
-  reasonTag === 'visibility_recover';
-
-const isPrewarmOnly =
-  reasonTag === 'pending_grace' ||
-  reasonTag === 'early_prewarm' ||
-  reasonTag === 'io_near_prewarm' ||
-  reasonTag === 'candidate_near_prewarm';
+        const now = Date.now(); 
         const lastBoostTs = Number(el.dataset?.__candidateBoostTs || 0);
         const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
@@ -3665,10 +3663,36 @@ return;
             const candidateKind = getMediaKind(candidate);
             const isExternalCandidate =
               candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';
+            const isNativeVideoCandidate =
+              candidate instanceof HTMLVideoElement ||
+              candidateKind === 'video';
+
             const prepared =
               isExternalCandidate
                 ? prepareExternalMedia(candidate, 'activate_pending')
                 : ensurePendingHtmlMediaReady(candidate, 'activate_pending');
+
+            if (isNativeVideoCandidate) {
+              // Critical mobile autoplay fix:
+              // Do NOT wait for loadeddata/canplay before calling play().
+              // iOS/Safari often will not fetch the first frame from load() alone.
+              // The active muted native video must receive a play() kick immediately.
+              traceCandidate('candidate_activate_native_pending_play', candidate, {
+                ratio,
+                score,
+                visiblePx,
+                centerDist,
+                prepared,
+                reason: 'native_pending_play_kick',
+              });
+              active = candidate;
+              activeSinceTs = Date.now();
+              cancelUnload(active);
+              emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0, score });
+              playMedia(active);
+              return;
+            }
+
             if (prepared && isExternalCandidate) {
               traceCandidate('candidate_prepare_before_activate', candidate, {
                 ratio,
