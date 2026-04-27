@@ -1427,16 +1427,37 @@ useEffect(() => {
   if (!isPageActive || !isNear) return undefined;
 
   const v = videoRef.current;
-  if (!v) return undefined;
-  // Near-zone для рекламы больше не цепляет src/load.
-  // Регресс 206/cancel пришёл отсюда: hidden ad в near-zone получал src + load(),
-  // браузер открывал Range-запросы, потом focus-координатор форума/скролл их гасил.
-  // Реклама должна играть только в focus-zone; здесь только защитно гасим случайный старт.
-  if (!shouldPlayRef.current) {
-    try { if (!v.paused) v.pause?.(); } catch {}
-    try { v.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
-    try { if (v.dataset) v.dataset.__adLoadPending = '0'; } catch {}
-   }
+  const srcKey = String(media.src || '').trim();
+  if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return undefined;
+
+  const nextMuted = normalizeForumAdMuted(mutedRef.current);
+  const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+  if (attached) attachedVideoSrcRef.current = srcKey;
+
+  // Near-зона рекламы теперь только подготавливает ресурс.
+  // Никакого play() до focus: иначе offscreen-реклама может украсть mobile media pipeline
+  // и погасить текущее видео форума в viewport.
+  if (Number(v.readyState || 0) < 2) {
+    const now = Date.now();
+    const lastWarmTs = Number(adNativePrimeTsRef.current || 0);
+    const canWarm = (now - lastWarmTs) > 1600 && !shouldPlayRef.current;
+
+    if (canWarm) {
+      adNativePrimeTsRef.current = now;
+      try {
+        applyForumAdMutedToVideo(v, nextMuted);
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (String(v.dataset?.__adLoadPending || '') !== '1') {
+          v.dataset.__adLoadPending = '1';
+          v.load?.();
+        }
+      } catch {}
+    }
+  }
+
   return undefined;
 }, [isNear, isPageActive, media.kind, media.src]);
 
@@ -2028,8 +2049,6 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
 
     let cancelled = false;
     let timer = 0;
-    let attempts = 0;
-    const maxAttempts = 8;
 
     const kick = () => {
       if (cancelled) return;
@@ -2049,33 +2068,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
         v.setAttribute('playsinline', '');
         v.setAttribute('webkit-playsinline', '');
         v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-        if (v.paused) {
-          attempts += 1;
-          const p = v.play?.();
-          if (p && typeof p.catch === 'function') {
-            p.catch(() => {
-              try {
-                // Если пользовательский документ сейчас unmuted, mobile browser может
-                // отклонить audible autoplay. Делаем transient muted retry, но не пишем
-                // это состояние в общий документ звука.
-                if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
-                applyForumAdMutedToVideo(v, true);
-                const retry = v.play?.();
-                if (retry && typeof retry.then === 'function') {
-                  retry.then(() => {
-                    setTimeout(() => {
-                      try {
-                        if (shouldPlayRef.current && normalizeForumAdMuted(mutedRef.current) === false) {
-                          applyForumAdMutedToVideo(v, false);
-                        }
-                      } catch {}
-                    }, 140);
-                  }).catch(() => {});
-                }
-              } catch {}
-            });
-          }
-        }
+        if (v.paused) v.play?.().catch(() => {});
       } catch {}
     };
 
@@ -2083,7 +2076,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     timer = window.setInterval(() => {
       try {
         const v = videoRef.current;
-        if (!shouldPlayRef.current || !v || !v.paused || attempts >= maxAttempts) {
+        if (!shouldPlayRef.current || !v || !v.paused || Number(v.readyState || 0) >= 2) {
           if (timer) window.clearInterval(timer);
           timer = 0;
           return;
