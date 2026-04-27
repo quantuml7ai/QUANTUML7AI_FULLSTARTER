@@ -907,6 +907,7 @@ let pendingLoadsCacheTs = 0;
 let pendingLoadsCacheVal = 0;
 let nativePrewarmEl = null;
 let nativePrewarmTs = 0;
+const nativePauseRecovery = new WeakMap();
 const readPendingLoads = (force = false) => {
       try {
         const now = Date.now();
@@ -1785,6 +1786,32 @@ const onMutedEvent = (e) => {
         clearCoordinatorPlayIntent(owner);
         return;
       }
+      const isNativeAutoplayPause =
+        target instanceof HTMLVideoElement &&
+        String(target?.getAttribute?.('data-forum-video') || '') === 'post' &&
+        !manualLease &&
+        !hasGesture &&
+        ownerMatchesActive &&
+        nearViewport &&
+        getOwnerVisiblePx(owner) >= Math.max(48, Math.round(getAutoplayMinVisiblePx(owner) * 0.58)) &&
+        getOwnerCenterDist(owner) <= Math.max(190, getPriorityCenterMaxDist(owner) + (isIOSUi ? 120 : 80));
+
+      if (isNativeAutoplayPause) {
+        trace('pause_recover_active_native', target, {
+          visiblePx: getOwnerVisiblePx(owner),
+          centerDist: getOwnerCenterDist(owner),
+          coordinatorPlay,
+          ownerMatchesActive,
+        });
+        clearReadyReplay(target);
+        clearSuppressedPlayback(target);
+        clearSuppressedPlayback(owner);
+        clearCoordinatorPlayIntent(target);
+        clearCoordinatorPlayIntent(owner);
+        cancelUnload(owner);
+        scheduleNativePauseRecovery(target, owner, 'pause_event_active_native');
+        return;
+      }      
       if (!manualLease && !hasGesture && (coordinatorPlay || !ownerMatchesActive)) {
         trace('pause_ignore_non_user', target, {
           coordinatorPlay,
@@ -1885,6 +1912,30 @@ const onMutedEvent = (e) => {
         });
         return;
       }
+      const activeOwnerNow = active instanceof Element ? active : null;
+      const ownerMatchesActiveNow = !!(activeOwnerNow && (
+        activeOwnerNow === owner ||
+        activeOwnerNow.contains?.(owner) ||
+        owner.contains?.(activeOwnerNow)
+      ));
+      const isNativePrimePlay =
+        target instanceof HTMLVideoElement &&
+        String(target?.getAttribute?.('data-forum-video') || '') === 'post' &&
+        String(target?.dataset?.__nativePrimePending || '') === '1' &&
+        String(target?.dataset?.__nativePrewarm || '') === '1' &&
+        coordinatorPlay &&
+        !manualLease &&
+        !hasGesture &&
+        !ownerMatchesActiveNow;
+
+      if (isNativePrimePlay) {
+        trace('native_prime_play_no_focus_steal', target, {
+          activeKind: String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''),
+          visiblePx: getOwnerVisiblePx(owner),
+          centerDist: getOwnerCenterDist(owner),
+        });
+        return;
+      }      
       clearSuppressedPlayback(target);
       clearSuppressedPlayback(owner);
       clearUserGestureIntent(target);
@@ -1905,6 +1956,7 @@ const onMutedEvent = (e) => {
           cancelUnload(owner);
           active = owner;
           activeSinceTs = Date.now();
+          try { nativePauseRecovery.delete(target); } catch {}
           // Любой play (и manual, и coordinator) должен жёстко гасить остальных,
           // иначе при гонках промисов возможен двойной autoplay.
           pauseForeignMedia(owner);
@@ -2987,16 +3039,16 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(560, Math.min(820, Math.round(viewportH * 0.9)));
-      if (isCoarseUi) return Math.max(480, Math.min(760, Math.round(viewportH * 0.82)));
-      return Math.max(420, Math.min(920, Math.round(viewportH * 0.78)));
+      if (isIOSUi) return Math.max(700, Math.min(1120, Math.round(viewportH * 1.18)));
+      if (isCoarseUi) return Math.max(580, Math.min(940, Math.round(viewportH * 1.02)));
+      return Math.max(460, Math.min(980, Math.round(viewportH * 0.84)));
     };
 
     const getNativePrimeGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(260, Math.min(420, Math.round(viewportH * 0.42)));
-      if (isCoarseUi) return Math.max(220, Math.min(360, Math.round(viewportH * 0.36)));
-      return 0;
+      if (isIOSUi) return Math.max(420, Math.min(680, Math.round(viewportH * 0.72)));
+      if (isCoarseUi) return Math.max(320, Math.min(540, Math.round(viewportH * 0.58)));
+      return Math.max(0, Math.min(360, Math.round(viewportH * 0.3)));
     };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3029,7 +3081,84 @@ const pauseForeignMedia = (keepEl = null) => {
         return false;
       }
     };
+    const isActiveNativeOwner = (media, owner = null) => {
+      try {
+        if (!(media instanceof HTMLVideoElement)) return false;
+        const targetOwner = owner instanceof Element ? owner : getOwnerNode(media);
+        if (!(targetOwner instanceof Element)) return false;
+        return !!(active && (
+          active === media ||
+          active === targetOwner ||
+          active.contains?.(media) ||
+          active.contains?.(targetOwner) ||
+          media.contains?.(active) ||
+          targetOwner.contains?.(active)
+        ));
+      } catch {
+        return false;
+      }
+    };
 
+    const scheduleNativePauseRecovery = (media, owner = null, reason = 'native_pause_recover') => {
+      try {
+        if (!(media instanceof HTMLVideoElement)) return false;
+        if (!media.isConnected) return false;
+        if (isUserPaused(media) || hasSuppressedPlayback(media)) return false;
+
+        const targetOwner = owner instanceof Element ? owner : getOwnerNode(media);
+        if (!(targetOwner instanceof Element)) return false;
+        if (!isActiveNativeOwner(media, targetOwner)) return false;
+
+        const now = Date.now();
+        const prev = nativePauseRecovery.get(media) || { ts: 0, count: 0, timer: 0 };
+        const windowMs = isIOSUi ? 9000 : 7000;
+        const nextCount = prev.ts > 0 && (now - prev.ts) < windowMs
+          ? Number(prev.count || 0) + 1
+          : 1;
+
+        if (nextCount > (isIOSUi ? 3 : 2)) {
+          trace('pause_recover_active_native_skip_limit', media, { reason, count: nextCount });
+          return false;
+        }
+
+        try { if (prev.timer) clearTimeout(prev.timer); } catch {}
+
+        const delay = isIOSUi ? 140 : (isCoarseUi ? 120 : 90);
+        const timer = setTimeout(() => {
+          try {
+            const currentOwner = getOwnerNode(media);
+            if (!(currentOwner instanceof Element)) return;
+            if (!isActiveNativeOwner(media, currentOwner)) return;
+            if (isUserPaused(media) || hasSuppressedPlayback(media)) return;
+            if (!media.paused) return;
+
+            const visiblePxNow = getOwnerVisiblePx(currentOwner);
+            const centerDistNow = getOwnerCenterDist(currentOwner);
+            if (visiblePxNow < Math.max(44, Math.round(getAutoplayMinVisiblePx(currentOwner) * 0.56))) return;
+            if (centerDistNow > Math.max(200, getPriorityCenterMaxDist(currentOwner) + (isIOSUi ? 130 : 80))) return;
+
+            trace('pause_recover_active_native_retry', media, {
+              reason,
+              count: nextCount,
+              visiblePx: visiblePxNow,
+              centerDist: centerDistNow,
+            });
+
+            clearSuppressedPlayback(media);
+            clearSuppressedPlayback(currentOwner);
+            markCoordinatorPlayIntent(media, isIOSUi ? 2600 : 2200);
+            markCoordinatorPlayIntent(currentOwner, isIOSUi ? 2600 : 2200);
+            cancelUnload(currentOwner);
+            playMedia(currentOwner);
+          } catch {}
+        }, delay);
+
+        nativePauseRecovery.set(media, { ts: now, count: nextCount, timer });
+        return true;
+      } catch {
+        return false;
+      }
+    };
     const releaseNativePrewarmExcept = (keepEl = null, reason = 'native_prewarm_replace') => {
       try {
         const prev = nativePrewarmEl;
@@ -3084,7 +3213,7 @@ const pauseForeignMedia = (keepEl = null) => {
         media.preload = 'auto';
       } catch {}
 
-      try { markCoordinatorPlayIntent(media, 1200); } catch {}
+      try { markCoordinatorPlayIntent(media, isIOSUi ? 1800 : 1500); } catch {}
 
       const finishPrime = (state = 'done') => {
         try { media.dataset.__nativePrimePending = '0'; } catch {}
@@ -3111,7 +3240,7 @@ const pauseForeignMedia = (keepEl = null) => {
         const p = media.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
-            setTimeout(() => finishPrime('played'), isIOSUi ? 140 : 90);
+            setTimeout(() => finishPrime('played'), isIOSUi ? 180 : 110);
           }).catch((err) => {
             try { media.dataset.__nativePrimePending = '0'; } catch {}
             trace('native_prime_reject', media, {
@@ -3137,7 +3266,34 @@ const pauseForeignMedia = (keepEl = null) => {
       if (!isNativePostVideoCandidate(media)) return false;
       if (!isNativePrewarmEligible(media)) return false;
       if (isUserPaused(media) || hasSuppressedPlayback(media)) return false;
-
+      const prev = nativePrewarmEl;
+      if (prev instanceof HTMLVideoElement && prev !== media && prev.isConnected && !isActiveNativeOwner(prev)) {
+        const now = Date.now();
+        const age = now - Number(nativePrewarmTs || 0);
+        const prevGap = getOwnerViewportGapPx(prev);
+        const nextGap = getOwnerViewportGapPx(media);
+        const prevVisible = getOwnerVisiblePx(prev);
+        const nextVisible = getOwnerVisiblePx(media);
+        const nextClearlyBetter =
+          nextVisible > Math.max(0, prevVisible + 36) ||
+          nextGap + (isIOSUi ? 180 : 140) < prevGap ||
+          getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
+        const canHoldPrev =
+          age < (isIOSUi ? 1250 : 950) &&
+          isNativePrewarmEligible(prev) &&
+          !nextClearlyBetter;
+        if (canHoldPrev) {
+          trace('native_prewarm_keep_existing', prev, {
+            reason,
+            age,
+            prevGap,
+            nextGap,
+            prevVisible,
+            nextVisible,
+          });
+          return true;
+        }
+      }
       releaseNativePrewarmExcept(media, 'native_prewarm_replace');
 
       try {
@@ -3162,10 +3318,10 @@ const pauseForeignMedia = (keepEl = null) => {
 
       const kicked = kickMediaLoad(media, {
         channel: 'native_priority_prewarm',
-        minGapMs: isIOSUi ? 720 : (isCoarseUi ? 820 : 900),
-        burstWindowMs: isIOSUi ? 18000 : 15000,
-        burstLimit: isIOSUi ? 2 : 3,
-        blockMs: isIOSUi ? 7000 : 6000,
+        minGapMs: isIOSUi ? 460 : (isCoarseUi ? 560 : 760),
+        burstWindowMs: isIOSUi ? 15000 : 13000,
+        burstLimit: isIOSUi ? 3 : 3,
+        blockMs: isIOSUi ? 5200 : 5200,
         bypassSrcLimiter: false,
         bypassPendingBudget: false,
       });
@@ -4040,9 +4196,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 480 : (isCoarseUi ? 380 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.35 : 1.18)))
+          Math.max(isIOSUi ? 580 : (isCoarseUi ? 460 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.62 : 1.32)))
         }px 0px ${
-          Math.max(isIOSUi ? 760 : (isCoarseUi ? 680 : 920), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.95 : 1.72)))
+          Math.max(isIOSUi ? 1080 : (isCoarseUi ? 860 : 960), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.82 : 2.1)))
         }px 0px`,
       },
     );

@@ -1258,6 +1258,8 @@ useEffect(() => {
 const rootRef = useRef(null);
 const videoRef = useRef(null);
 const attachedVideoSrcRef = useRef('');
+const adNativePrimeTsRef = useRef(0);
+const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
 const ytIframeRef = useRef(null);
 const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
@@ -1402,6 +1404,55 @@ useEffect(() => {
 
   return undefined;
 }, [media.kind, media.src]);
+
+useEffect(() => {
+  if (media.kind !== 'video') return undefined;
+  if (!isPageActive || !isNear) return undefined;
+
+  const v = videoRef.current;
+  const srcKey = String(media.src || '').trim();
+  if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return undefined;
+
+  const nextMuted = normalizeForumAdMuted(mutedRef.current);
+  const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+  if (attached) attachedVideoSrcRef.current = srcKey;
+
+  // Отдельный рекламный контур: рядом с viewport подтягиваем первый кадр,
+  // но не отправляем site-media-play и не вмешиваемся в координатор форума.
+  if (Number(v.readyState || 0) < 2 && nextMuted) {
+    const now = Date.now();
+    const lastPrimeTs = Number(adNativePrimeTsRef.current || 0);
+    const canPrime = (now - lastPrimeTs) > 2200 && !shouldPlayRef.current;
+
+    if (canPrime) {
+      adNativePrimeTsRef.current = now;
+      try {
+        applyForumAdMutedToVideo(v, true);
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+      } catch {}
+
+      try {
+        const p = v.play?.();
+        const finish = () => {
+          try {
+            if (!shouldPlayRef.current && !v.paused) v.pause?.();
+          } catch {}
+        };
+        if (p && typeof p.then === 'function') {
+          p.then(() => setTimeout(finish, 160)).catch(() => {});
+        } else {
+          setTimeout(finish, 160);
+        }
+      } catch {}
+    }
+  }
+
+  return undefined;
+}, [isNear, isPageActive, media.kind, media.src]);
+
   // Page visibility + focus/blur
   useEffect(() => {
     if (!isBrowser()) return;
@@ -1936,12 +1987,22 @@ if (media.kind === 'video' && videoRef.current) {
     const playAttempt = v.play?.();
 
     if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt
+      playAttempt      
         .then(() => {
+          try {
+            const st = adNativePauseRecoveryRef.current || {};
+            if (st.timer) clearTimeout(st.timer);
+            adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+          } catch {}          
           emitAdPlayToCoordinator('ad_video');
         })
         .catch(() => {});
     } else {
+      try {
+        const st = adNativePauseRecoveryRef.current || {};
+        if (st.timer) clearTimeout(st.timer);
+        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+      } catch {}      
       emitAdPlayToCoordinator('ad_video');
     }
   } else {
@@ -2490,8 +2551,39 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   muted={isAdMuted}
   loop
   playsInline
+  autoPlay
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
+  onPlaying={() => {
+    try {
+      const st = adNativePauseRecoveryRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+      emitAdPlayToCoordinator('ad_video');
+    } catch {}
+  }}
+  onPause={() => {
+    try {
+      const v = videoRef.current;
+      const srcKey = String(media?.src || '').trim();
+      if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
+
+      const prev = adNativePauseRecoveryRef.current || { timer: 0, ts: 0, count: 0 };
+      const now = Date.now();
+      const nextCount = prev.ts > 0 && (now - prev.ts) < 7000 ? Number(prev.count || 0) + 1 : 1;
+      if (nextCount > 2) return;
+
+      if (prev.timer) clearTimeout(prev.timer);
+      const timer = setTimeout(() => {
+        try {
+          if (!shouldPlayRef.current || !v.paused) return;
+          applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current));
+          v.play?.().catch(() => {});
+        } catch {}
+      }, 140);
+      adNativePauseRecoveryRef.current = { timer, ts: now, count: nextCount };
+    } catch {}
+  }}  
   onLoadedData={() => {
     try {
       applyForumAdMutedToVideo(videoRef.current, isAdMuted);
