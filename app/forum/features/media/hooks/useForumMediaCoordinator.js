@@ -6,6 +6,8 @@ import {
   MEDIA_VIDEO_MUTED_KEY,
   MEDIA_MUTED_EVENT,
   readMutedPrefFromStorage,
+  readMutedPrefFromDocument,
+  writeMutedPrefToDocument,
   __touchActiveVideoEl,
   __dropActiveVideoEl,
   __enforceActiveVideoCap,
@@ -775,29 +777,39 @@ if (safe && video.dataset?.__loadPending !== '1') {
     } catch {}
 
     const writeMutedPref = (val) => {
-      try {
-        const next = val ? '1' : '0';
+      const nextBool = !!val;
+      const next = nextBool ? '1' : '0';      
+      try { 
         localStorage.setItem(MEDIA_MUTED_KEY, next);
         localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
       } catch {}
+      try {
+        writeMutedPrefToDocument(nextBool);
+      } catch {}      
     };
-    // Единый источник mute-предпочтения для video/iframe/youtube — storage.
-    // Для QCast используем отдельный ключ, чтобы звук QCast не "сбивался"
-    // от глобального muted-состояния видеоленты.
-    // В mediaLifecycleRuntime уже есть одноразовый session boot mute,
-    // поэтому здесь нельзя каждый init насильно перетирать настройку.
+    // Единственный runtime-документ звука для native/video/audio/QCast/YouTube/TikTok/iframe/Ads.
+    // На каждый новый page load runtime сбрасывает документ в muted=true ради splash/BG-audio.
+    // После пользовательского выбора все контуры читают document/window, storage — только legacy mirror.
     let mutedPref = null;
     try {
-      mutedPref = readMutedPrefFromStorage();
+      const fromDocument = readMutedPrefFromDocument();
+      mutedPref = typeof fromDocument === 'boolean' ? fromDocument : readMutedPrefFromStorage();
     } catch {
       mutedPref = null;
     }
     if (typeof mutedPref !== 'boolean') mutedPref = true;
-
-    const desiredMuted = () => (mutedPref == null ? true : !!mutedPref);
-    const readQcastMutedPref = () => {
-      return readMutedPrefFromStorage();
-    };
+    try { writeMutedPrefToDocument(mutedPref); } catch {}
+    const desiredMuted = () => {
+      try {
+        const fromDocument = readMutedPrefFromDocument();
+        if (typeof fromDocument === 'boolean') {
+          mutedPref = fromDocument;
+          return fromDocument;
+        }
+      } catch {}
+      return mutedPref == null ? true : !!mutedPref;
+     };
+    const readQcastMutedPref = () => desiredMuted();
 const writeQcastMutedPref = (next) => {
   setMutedPref(!!next, 'qcast');
 };
@@ -805,8 +817,14 @@ const writeQcastMutedPref = (next) => {
 
     const applyMutedPref = (el) => {
       if (!(el instanceof HTMLMediaElement)) return;
+      if (shouldSkipMutePersist(el)) return;
       const want = desiredMuted();
       if (el.muted !== want) el.muted = want;
+      try {
+        el.defaultMuted = want;
+        if (want) el.setAttribute('muted', '');
+        else el.removeAttribute('muted');
+      } catch {}      
     };
 const applyMutedPrefToAll = () => {
   try {
@@ -816,6 +834,7 @@ const applyMutedPrefToAll = () => {
       const kind = String(el?.getAttribute?.('data-forum-media') || '');
 
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
+        if (shouldSkipMutePersist(el)) return;
         if (el.muted !== want) el.muted = want;
         el.defaultMuted = want;
         if (want) el.setAttribute('muted', '');
@@ -826,6 +845,7 @@ const applyMutedPrefToAll = () => {
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
+          if (shouldSkipMutePersist(a) || shouldSkipMutePersist(el)) return;
           if (a.muted !== want) a.muted = want;
           a.defaultMuted = want;
           if (want) a.setAttribute('muted', '');
@@ -861,7 +881,10 @@ const applyMutedPrefToAll = () => {
 
     const setMutedPref = (val, source = 'forum-coordinator', emit = true) => {
       const next = !!val;
-      if (mutedPref === next && source === 'forum-coordinator') return;
+      if (mutedPref === next && source === 'forum-coordinator') {
+        writeMutedPref(next);
+        return;
+      }
       mutedPref = next;
       writeMutedPref(next);
       applyMutedPrefToAll();
@@ -2197,6 +2220,30 @@ const onMediaLoadedCaptured = (e) => {
           : {};
       };
     } catch {}
+    const restoreUserSoundAfterSafeAutoplay = (el, reason = 'autoplay_started') => {
+      try {
+        if (!(el instanceof HTMLMediaElement)) return;
+        if (desiredMuted() !== false) return;
+        if (!el.muted) return;
+        const unlocked = (() => {
+          try {
+            return window.__FORUM_MEDIA_SOUND_UNLOCKED__ === true ||
+              window.__SITE_MEDIA_SOUND_UNLOCKED__ === true ||
+              document?.documentElement?.dataset?.forumMediaSoundUnlocked === '1' ||
+              document?.body?.dataset?.forumMediaSoundUnlocked === '1';
+          } catch {
+            return false;
+          }
+        })();
+        if (!unlocked) return;
+        markSkipMutePersist(el, 1400);
+        el.dataset.__restoreUserSoundAfterAutoplay = String(Date.now());
+        el.muted = false;
+        el.defaultMuted = false;
+        el.removeAttribute('muted');
+        trace('restore_user_sound_after_autoplay', el, { reason });
+      } catch {}
+    };    
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
       const playToken = bumpPlayRequestToken(el);
@@ -2244,7 +2291,7 @@ try {
   el.preload = 'auto';
 } catch {}
 
-try { pauseForeignMedia(el); } catch {}
+try { restoreUserSoundAfterSafeAutoplay(el, reason); } catch {}
 
 if (String(el?.dataset?.__warmReady || '') === '1') {
   try { __touchActiveVideoEl(el); } catch {}
@@ -2316,7 +2363,7 @@ try {
   el.preload = 'auto';
 } catch {}
 
-try { pauseForeignMedia(el); } catch {}
+try { restoreUserSoundAfterSafeAutoplay(el, reason); } catch {}
 
 if (String(el?.dataset?.__warmReady || '') === '1') {
   try { __touchActiveVideoEl(el); } catch {}
@@ -3190,19 +3237,53 @@ const pauseForeignMedia = (keepEl = null) => {
       const gapPx = getOwnerViewportGapPx(media);
       const primeLimit = getNativePrimeGapLimit();
       if (visiblePx <= 0 && gapPx > primeLimit) return false;
+      const owner = getOwnerNode(media);
+      const activeOwnerNow = active instanceof Element ? active : null;
+      const ownerMatchesActiveNow = !!(activeOwnerNow && owner instanceof Element && (
+        activeOwnerNow === owner ||
+        activeOwnerNow.contains?.(owner) ||
+        owner.contains?.(activeOwnerNow)
+      ));
 
+      // Mobile WebKit/Chrome often allow only one real playing media pipeline.
+      // Prewarm may attach src/load, but it must not play-prime while splash, BG audio,
+      // QCast, Ads, YouTube bridge or another native video is already playing.
+      const foreignPlaying = (() => {
+        try {
+          return Array.from(document.querySelectorAll('video,audio')).some((node) => {
+            if (!(node instanceof HTMLMediaElement)) return false;
+            if (node === media) return false;
+            if (node.paused || node.ended) return false;
+            if (owner instanceof Element && owner.contains?.(node)) return false;
+            return Number(node.readyState || 0) >= 2;
+          });
+        } catch {
+          return false;
+        }
+      })();
+
+      if (!ownerMatchesActiveNow && (foreignPlaying || activeOwnerNow instanceof Element)) {
+        trace('native_prime_skip_active_playing', media, {
+          reason,
+          foreignPlaying,
+          activeKind: String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''),
+          gapPx,
+          visiblePx,
+        });
+        return false;
+      }
       const now = Date.now();
       const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
       if (lastPrimeTs > 0 && (now - lastPrimeTs) < (isIOSUi ? 2200 : 1800)) return false;
       if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
-
+      const wantedMutedBeforePrime = desiredMuted();
       try {
         media.dataset.__nativePrimeTs = String(now);
         media.dataset.__nativePrimePending = '1';
         media.dataset.__nativePrimeReason = String(reason || 'native_prime');
       } catch {}
 
-      try { markSkipMutePersist(media, 1800); } catch {}
+      try { markSkipMutePersist(media, 2600); } catch {}
       try {
         media.muted = true;
         media.defaultMuted = true;
@@ -3232,6 +3313,14 @@ const pauseForeignMedia = (keepEl = null) => {
               try { media.pause?.(); } catch {}
             });
           }
+          if (!shouldKeepPlaying && wantedMutedBeforePrime === false && media.paused) {
+            try { markSkipMutePersist(media, 900); } catch {}
+            try {
+              media.muted = false;
+              media.defaultMuted = false;
+              media.removeAttribute('muted');
+            } catch {}
+          }    
           trace('native_prime_finish', media, { reason, state, readyState: Number(media.readyState || 0) });
         } catch {}
       };
@@ -3536,15 +3625,18 @@ if (el instanceof HTMLVideoElement) {
     trace('play_wait_ready', el);
     armReadyReplay(el);
 
-    const canMutedAutoplayKick =
-      el instanceof HTMLVideoElement &&
-      !!el.muted &&
+    const canNativeAutoplayKick =
+      el instanceof HTMLVideoElement && 
       !isUserPaused(el) &&
       !hasSuppressedPlayback(el);
 
-    if (canMutedAutoplayKick && el.paused) {
-      trace('play_pending_muted', el);
-      startHtmlMedia(el, 'play_pending_muted');
+    if (canNativeAutoplayKick && el.paused) {
+      const wantedMuted = desiredMuted();
+      // If the user already enabled sound in this runtime session, try audible start.
+      // If the browser rejects it, startHtmlMedia() will do a transient muted retry
+      // without writing that fallback into the global sound document.
+      trace(el.muted ? 'play_pending_muted' : 'play_pending_user_sound', el, { wantedMuted });
+      startHtmlMedia(el, el.muted ? 'play_pending_muted' : 'play_pending_user_sound');
     }
   } else if (el.paused) {
     trace('play_now', el);

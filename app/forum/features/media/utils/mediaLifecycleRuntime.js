@@ -8,14 +8,85 @@ import { createEnableVideoControlsOnTap } from './videoControls'
 export const MEDIA_MUTED_KEY = 'forum:mediaMuted'
 export const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'
 export const MEDIA_MUTED_EVENT = 'forum:media-mute'
-;(() => {
-  // На каждый новый перезапуск страницы стартуем в muted,
-  // чтобы iPhone/Safari не блокировал autoplay из-за старого unmuted-состояния.
+function normalizeMutedRaw(raw) {
+  if (raw == null || raw === '') return null
+  const s = String(raw).trim().toLowerCase()
+  if (s === '1' || s === 'true' || s === 'yes' || s === 'muted') return true
+  if (s === '0' || s === 'false' || s === 'no' || s === 'unmuted') return false
+  return null
+}
+
+export function readMutedPrefFromDocument() {
+  try {
+    if (typeof window !== 'undefined' && typeof window.__FORUM_MEDIA_MUTED__ === 'boolean') {
+      return window.__FORUM_MEDIA_MUTED__
+    }
+  } catch {}
+  try {
+    if (typeof window !== 'undefined' && typeof window.__SITE_MEDIA_MUTED__ === 'boolean') {
+      return window.__SITE_MEDIA_MUTED__
+    }
+  } catch {}
+  try {
+    if (typeof document === 'undefined') return null
+    const root = document?.documentElement
+    const body = document?.body
+    return normalizeMutedRaw(
+      root?.dataset?.forumMediaMuted ??
+      root?.dataset?.mediaMuted ??
+      body?.dataset?.forumMediaMuted ??
+      body?.dataset?.mediaMuted ??
+      null
+    )
+  } catch {
+    return null
+  }
+}
+
+export function writeMutedPrefToDocument(nextMuted) {
   try {
     if (typeof window === 'undefined') return
-const defaultMutedPref = String(1)
-localStorage.setItem(MEDIA_MUTED_KEY, defaultMutedPref)
-localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, defaultMutedPref)
+    const nextBool = !!nextMuted
+    const nextStr = nextBool ? '1' : '0'
+    try { window.__FORUM_MEDIA_MUTED__ = nextBool } catch {}
+    try { window.__SITE_MEDIA_MUTED__ = nextBool } catch {}
+    try { window.__FORUM_MEDIA_SOUND_UNLOCKED__ = !nextBool } catch {}
+    try { window.__SITE_MEDIA_SOUND_UNLOCKED__ = !nextBool } catch {}
+    try {
+      const root = document?.documentElement
+      if (root?.dataset) {
+        root.dataset.forumMediaMuted = nextStr
+        root.dataset.mediaMuted = nextStr
+        root.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
+      }
+    } catch {}
+    try {
+      const body = document?.body
+      if (body?.dataset) {
+        body.dataset.forumMediaMuted = nextStr
+        body.dataset.mediaMuted = nextStr
+        body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
+      }
+    } catch {}
+  } catch {}
+}
+
+export function writeMutedPrefToStorage(nextMuted) {
+  try {
+    const v = nextMuted ? '1' : '0'
+    localStorage.setItem(MEDIA_MUTED_KEY, v)
+    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
+  } catch {}
+}
+;(() => {
+  // Session boot policy for the forum media layer:
+  // every fresh page load starts muted, so splash/BG audio is not covered by feed media.
+  // A user's sound choice is authoritative only inside the current runtime document
+  // and is mirrored to storage for legacy components until the next reload.
+  try {
+    if (typeof window === 'undefined') return
+    writeMutedPrefToDocument(true)
+    writeMutedPrefToStorage(true)
   } catch {}
 })()
 
@@ -23,8 +94,7 @@ export function readMutedPrefFromStorage() {
   try {
     let v = localStorage.getItem(MEDIA_MUTED_KEY)
     if (v == null) v = localStorage.getItem(MEDIA_VIDEO_MUTED_KEY)
-    if (v == null) return null
-    return v === '1' || v === 'true'
+    return normalizeMutedRaw(v)
   } catch {
     return null
   }
@@ -172,24 +242,24 @@ export function __enforceActiveVideoCap(exceptEl) {
 }
 
 export function __readMediaMutedPref() {
-  const v = readMutedPrefFromStorage()
-  if (typeof v === 'boolean') return v
+  const fromDocument = readMutedPrefFromDocument()
+  if (typeof fromDocument === 'boolean') return fromDocument
+  const fromStorage = readMutedPrefFromStorage()
+  if (typeof fromStorage === 'boolean') return fromStorage
   return true
 }
 
 export function __writeMediaMutedPref(nextMuted, source = 'media_element', emit = true) {
-  try {
-    const v = nextMuted ? '1' : '0'
-    localStorage.setItem(MEDIA_MUTED_KEY, v)
-    localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, v)
-  } catch {}
+  const next = !!nextMuted
+  writeMutedPrefToDocument(next)
+  writeMutedPrefToStorage(next)
 
   if (!emit || typeof window === 'undefined') return
 
   try {
     window.dispatchEvent(new CustomEvent(MEDIA_MUTED_EVENT, {
       detail: {
-        muted: !!nextMuted,
+        muted: next,
         source: String(source || 'media_element'),
       },
     }))
@@ -541,7 +611,7 @@ export function QCastPlayer(props) {
   return (
     <QCastPlayerLeaf
       {...props}
-      readMutedPrefFromStorage={readMutedPrefFromStorage}
+      readMutedPrefFromStorage={__readMediaMutedPref}
       writeMutedPref={__writeMediaMutedPref}
       mutedEventName={MEDIA_MUTED_EVENT}
       rearmPooledFxNode={__rearmPooledFxNode}

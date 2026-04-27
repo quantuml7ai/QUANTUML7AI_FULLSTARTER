@@ -88,12 +88,19 @@ function writeMutedPrefToDocument(val) {
   try {
     window.__SITE_MEDIA_MUTED__ = nextBool;
   } catch {}
+  try {
+    window.__FORUM_MEDIA_SOUND_UNLOCKED__ = !nextBool;
+  } catch {}
 
+  try {
+    window.__SITE_MEDIA_SOUND_UNLOCKED__ = !nextBool;
+  } catch {}
   try {
     const root = document?.documentElement;
     if (root?.dataset) {
       root.dataset.forumMediaMuted = nextStr;
       root.dataset.mediaMuted = nextStr;
+      root.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1';
     }
   } catch {}
 
@@ -102,6 +109,7 @@ function writeMutedPrefToDocument(val) {
     if (body?.dataset) {
       body.dataset.forumMediaMuted = nextStr;
       body.dataset.mediaMuted = nextStr;
+      body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1';
     }
   } catch {}
 }
@@ -1425,28 +1433,46 @@ useEffect(() => {
     const canPrime = (now - lastPrimeTs) > 2200 && !shouldPlayRef.current;
 
     if (canPrime) {
-      adNativePrimeTsRef.current = now;
-      try {
-        applyForumAdMutedToVideo(v, true);
-        v.playsInline = true;
-        v.setAttribute('playsinline', '');
-        v.setAttribute('webkit-playsinline', '');
-        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-      } catch {}
-
-      try {
-        const p = v.play?.();
-        const finish = () => {
-          try {
-            if (!shouldPlayRef.current && !v.paused) v.pause?.();
-          } catch {}
-        };
-        if (p && typeof p.then === 'function') {
-          p.then(() => setTimeout(finish, 160)).catch(() => {});
-        } else {
-          setTimeout(finish, 160);
+      const hasOtherPlaying = (() => {
+        try {
+          return Array.from(document.querySelectorAll('video,audio')).some((node) => {
+            if (!(node instanceof HTMLMediaElement)) return false;
+            if (node === v) return false;
+            if (node.paused || node.ended) return false;
+            return Number(node.readyState || 0) >= 2;
+          });
+        } catch {
+          return false;
         }
-      } catch {}
+      })();
+
+      // Рекламный prime не должен красть мобильный media pipeline у форума/splash/BG audio.
+      // Если что-то уже играет — оставляем только src/load/preload без play().
+      if (!hasOtherPlaying) {
+        adNativePrimeTsRef.current = now;
+        try {
+          applyForumAdMutedToVideo(v, true);
+          v.playsInline = true;
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        } catch {}
+
+        try {
+          const p = v.play?.();
+          const finish = () => {
+            try {
+              if (!shouldPlayRef.current && !v.paused) v.pause?.();
+              applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current));
+            } catch {}
+          };
+          if (p && typeof p.then === 'function') {
+            p.then(() => setTimeout(finish, 160)).catch(() => {});
+          } else {
+            setTimeout(finish, 160);
+          }
+        } catch {}
+      }
     }
   }
 
