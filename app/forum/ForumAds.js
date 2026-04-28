@@ -349,18 +349,26 @@ const AD_NATIVE_WARM_STICKY_MS = 4200;
 const AD_NATIVE_WARM_RELOAD_GAP_MS = 12000;
 let adNativeWarmSlot = { video: null, src: '', ts: 0 };
 
-function getAdViewportGapPx(el) {
+function getAdViewportState(el) {
   try {
-    if (!el?.isConnected) return Number.POSITIVE_INFINITY;
+    if (!el?.isConnected) {
+      return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
+    }
     const rect = el.getBoundingClientRect?.();
     const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-    if (!rect || viewportH <= 0) return Number.POSITIVE_INFINITY;
-    if (rect.bottom < 0) return Math.abs(Number(rect.bottom || 0));
-    if (rect.top > viewportH) return Number(rect.top || 0) - viewportH;
-    return 0;
+    if (!rect || viewportH <= 0) {
+      return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
+    }
+    if (rect.bottom < 0) return { gapPx: Math.abs(Number(rect.bottom || 0)), isAbove: true, isBelow: false, inViewport: false };
+    if (rect.top > viewportH) return { gapPx: Number(rect.top || 0) - viewportH, isAbove: false, isBelow: true, inViewport: false };
+    return { gapPx: 0, isAbove: false, isBelow: false, inViewport: true };
   } catch {
-    return Number.POSITIVE_INFINITY;
+    return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
   }
+}
+
+function getAdViewportGapPx(el) {
+  return getAdViewportState(el).gapPx;
 }
 
 function isAdNativeVideoLoadingOrReady(videoEl) {
@@ -382,12 +390,36 @@ function isAdNativeVideoLoadingOrReady(videoEl) {
 function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
   try {
     if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
+
+    const reasonKey = String(reason || 'release');
+    const state = getAdViewportState(videoEl);
+    const keepNearExitWarm =
+      reasonKey === 'near_exit' &&
+      videoEl.paused &&
+      isAdNativeVideoLoadingOrReady(videoEl) &&
+      state.gapPx <= 2200;
+
+    // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
+    // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
+    // Поэтому near_exit не убивает живой близкий warm; replace/unmount/bad_src по-прежнему освобождают.
+    if (keepNearExitWarm) {
+      adNativeWarmSlot = {
+        video: videoEl,
+        src: String(videoEl.dataset?.adNativeSrc || videoEl.currentSrc || videoEl.getAttribute?.('src') || adNativeWarmSlot.src || ''),
+        ts: Date.now(),
+      };
+      try {
+        if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1';
+        videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+      } catch {}
+      return;
+    }
+
     adNativeWarmSlot = { video: null, src: '', ts: 0 };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '0'; } catch {}
 
-    // Single-source rule: when a slot loses the controlled warm owner and is not playing,
-    // detach it immediately. Otherwise several ad cards keep ADS.mp4 attached and Chrome
-    // opens parallel Range/206 chains.
+    // Single-source rule: when a slot really loses the controlled warm owner and is not playing,
+    // detach it. Only the near_exit jitter path above is allowed to keep the single warm alive.
     if (videoEl.paused) detachAdNativeVideo(videoEl);
   } catch {}
 }
@@ -408,20 +440,27 @@ function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
 
       const now = Date.now();
       const age = now - Number(adNativeWarmSlot.ts || 0);
-      const prevGap = getAdViewportGapPx(prev);
-      const nextGap = getAdViewportGapPx(ownerEl || videoEl);
-      const prevLoading = isAdNativeVideoLoadingOrReady(prev);
-      const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-      const nextClearlyCloser = nextGap + 520 < prevGap;
+const prevState = getAdViewportState(prev);
+const nextState = getAdViewportState(ownerEl || videoEl);
+const prevGap = prevState.gapPx;
+const nextGap = nextState.gapPx;
+const prevLoading = isAdNativeVideoLoadingOrReady(prev);
+const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
+const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 980;
+const nextInsideRunway = nextGap <= 1700;
+const nextClearlyCloser =
+  nextGap + 280 < prevGap ||
+  (prevIsBehindRunway && nextInsideRunway);
 
-      // Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
-      if (sameSrc && prevLoading && age < AD_NATIVE_WARM_RELOAD_GAP_MS && !nextClearlyCloser) {
-        return false;
-      }
+// Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
+// Но если прошлый owner уже уехал за runway, а следующий слот входит в runway — передаём warm.
+if (sameSrc && prevLoading && age < AD_NATIVE_WARM_RELOAD_GAP_MS && !nextClearlyCloser) {
+  return false;
+}
 
-      if (age < AD_NATIVE_WARM_STICKY_MS && !nextClearlyCloser) {
-        return false;
-      }
+if (age < AD_NATIVE_WARM_STICKY_MS && !nextClearlyCloser) {
+  return false;
+}
 
       releaseAdNativeWarmSlot(prev, 'replace');
     }
@@ -1612,7 +1651,7 @@ useEffect(() => {
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: '480px 0px 760px 0px', threshold: 0 }
+      { rootMargin: '720px 0px 1320px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)

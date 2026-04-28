@@ -2476,9 +2476,71 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
       });
       return ytApiPromise;
     };
-    const ytPlayers = new Map();
-    const ytMutePolls = new Map();
-    const ytMuteLast = new Map();    
+const ytPlayers = new Map();
+const ytMutePolls = new Map();
+const ytMuteLast = new Map();
+const externalPlayKickTimers = new Map();
+
+const clearExternalPlayKick = (el) => {
+  try {
+    const id = externalPlayKickTimers.get(el);
+    if (id) clearTimeout(id);
+    externalPlayKickTimers.delete(el);
+  } catch {}
+};
+
+const isExternalKickAllowed = (el) => {
+  try {
+    if (!(el instanceof Element) || !el.isConnected) return false;
+    if (active !== el) return false;
+    if (isUserPaused(el) || hasSuppressedPlayback(el)) return false;
+    const visiblePx = getOwnerVisiblePx(el);
+    const minVisiblePx = getAutoplayMinVisiblePx(el);
+    const centerDist = getOwnerCenterDist(el);
+    const maxCenterDist = getPriorityCenterMaxDist(el);
+    return visiblePx >= minVisiblePx && centerDist <= maxCenterDist;
+  } catch {
+    return false;
+  }
+};
+
+const scheduleExternalPlayKick = (el, runner, reason = 'external_focus_kick') => {
+  try {
+    if (!(el instanceof Element) || typeof runner !== 'function') return;
+    clearExternalPlayKick(el);
+    let count = 0;
+    const maxCount = isIOSUi ? 8 : (isCoarseUi ? 7 : 5);
+    const delayMs = isIOSUi ? 340 : (isCoarseUi ? 380 : 420);
+
+    const tick = () => {
+      if (!isExternalKickAllowed(el)) {
+        clearExternalPlayKick(el);
+        return;
+      }
+
+      count += 1;
+
+      try { runner(); } catch {}
+
+      traceCandidate('external_focus_play_kick', el, {
+        reason,
+        count,
+        visiblePx: getOwnerVisiblePx(el),
+        centerDist: getOwnerCenterDist(el),
+      });
+
+      if (count >= maxCount) {
+        clearExternalPlayKick(el);
+        return;
+      }
+
+      const id = setTimeout(tick, delayMs);
+      externalPlayKickTimers.set(el, id);
+    };
+
+    tick();
+  } catch {}
+};    
     try { window.__forumYtPlayers = ytPlayers; } catch {}
     const isAttachedYtPlayer = (player, iframeRef = null) => {
       try {
@@ -2889,6 +2951,7 @@ const shouldRetainHtmlMedia = (el) => {
         return;
       }
       if (kind === 'youtube') {
+        clearExternalPlayKick(el);
         markSuppressedPlayback(el, 1400);
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
@@ -2896,6 +2959,7 @@ const shouldRetainHtmlMedia = (el) => {
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
+        clearExternalPlayKick(el);
         markSuppressedPlayback(el, 1400);
         try {
           el.contentWindow?.postMessage?.({ method: 'pause' }, '*');
@@ -2988,6 +3052,7 @@ const pauseForeignMedia = (keepEl = null) => {
       }
 
       if (kind === 'youtube') {
+        clearExternalPlayKick(node);
         const player = ytPlayers.get(node);
         try { player?.pauseVideo?.(); } catch {}
         try { stopYtMutePoll(player); } catch {}
@@ -2995,6 +3060,7 @@ const pauseForeignMedia = (keepEl = null) => {
       }
 
       if (kind === 'tiktok' || kind === 'iframe') {
+        clearExternalPlayKick(node);
         try { node.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
         try { node.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
         // Не делаем отложенный hard-unload на обычном foreign pause:
@@ -3877,6 +3943,9 @@ return;
                 })) a.load?.();
               } catch {}
               armReadyReplay(a);
+              if (a.paused && !isUserPaused(a) && !isUserPaused(el)) {
+                startHtmlMedia(a, 'qcast_pending_play_kick');
+              }
             } else if (a.paused) {
               startHtmlMedia(a, 'qcast_play_now');
             }
@@ -3898,12 +3967,18 @@ return;
         } catch {}
         const player = await initYouTubePlayer(el);
         if (!player) return;
-        try {
-          if (desiredMuted()) player?.mute?.();
-          else player?.unMute?.();
-          player?.playVideo?.();
-          enforceIframeResidentCap(el);
-          emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
+try {
+  const kick = () => {
+    try {
+      if (desiredMuted()) player?.mute?.();
+      else player?.unMute?.();
+      player?.playVideo?.();
+    } catch {}
+  };
+  kick();
+  scheduleExternalPlayKick(el, kick, 'youtube_viewport_autoplay');
+  enforceIframeResidentCap(el);
+  emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
         } catch {}
         return;
       }
@@ -3922,11 +3997,21 @@ return;
           try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
           try { el.setAttribute('src', src); } catch {}
         }
-        try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
-        enforceIframeResidentCap(el);
-        emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });
-        window.dispatchEvent(new CustomEvent('site-media-play', {
-          detail: { source: kind, element: el }
+try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
+
+const kickExternalFrame = () => {
+  try { el.contentWindow?.postMessage?.({ method: 'play' }, '*'); } catch {}
+  try { el.contentWindow?.postMessage?.({ event: 'command', func: 'playVideo', args: '' }, '*'); } catch {}
+  try { el.contentWindow?.postMessage?.('play', '*'); } catch {}
+};
+
+kickExternalFrame();
+scheduleExternalPlayKick(el, kickExternalFrame, String(kind) + '_viewport_autoplay');
+enforceIframeResidentCap(el);
+emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });
+
+window.dispatchEvent(new CustomEvent('site-media-play', {
+  detail: { source: kind, element: el }
         }));
       }
     };
@@ -4754,6 +4839,10 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       mutationSweepPending = false;
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
       window.removeEventListener('site-media-play', onExternalMediaPlay);
+      try {
+        externalPlayKickTimers.forEach((id) => { try { clearTimeout(id); } catch {} });
+        externalPlayKickTimers.clear();
+      } catch {}
       document.removeEventListener('visibilitychange', onVisibilityRecover, true);
       window.removeEventListener('pageshow', onPageShowRecover);
       window.removeEventListener('focus', onWindowFocusRecover, true);

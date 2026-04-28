@@ -23,6 +23,7 @@ const VF_ANCHOR_DELTA_IGNORE_PX = 3
 const VF_ANCHOR_DELTA_MAX_PX = 64
 const VF_ANCHOR_FLUSH_MS = 140
 const VF_ANCHOR_ACTIVE_RETRY_MS = 120
+const VF_ACTIVE_SCROLL_WINDOW_TOP_GUARD_PX = 96
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -324,9 +325,29 @@ export default function useVideoFeedWindowing({
         }
       }
 
-      const next = vfBuildWindow(nextStart, nextEnd, total)
-      const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
-      const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
+const next = vfBuildWindow(nextStart, nextEnd, total)
+const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
+const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
+const nowForWindowGuard = Date.now()
+const scrollActiveForWindowGuard =
+  Number(vfScrollActivityRef.current?.activeUntil || 0) > nowForWindowGuard ||
+  Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.08
+
+if (
+  scrollActiveForWindowGuard &&
+  prev.start !== next.start &&
+  topDelta > VF_ACTIVE_SCROLL_WINDOW_TOP_GUARD_PX
+) {
+  try {
+    emitDiag?.('video_feed_window_shift_suppressed', {
+      reason: 'active_scroll_top_spacer_guard',
+      prevStart: prev.start,
+      nextStart: next.start,
+      topDelta: Math.round(topDelta),
+    })
+  } catch {}
+  return prev
+}
 
       if (
         prev.start === next.start &&
