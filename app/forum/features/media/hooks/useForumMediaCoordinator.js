@@ -3473,12 +3473,14 @@ const keepBufferedInsteadOfAbort =
         const nextGap = getOwnerViewportGapPx(media);
         const prevVisible = getOwnerVisiblePx(prev);
         const nextVisible = getOwnerVisiblePx(media);
+        const prevCenter = getOwnerCenterDist(prev);
+        const nextCenter = getOwnerCenterDist(media);        
         const nextClearlyBetter =
-          nextVisible > Math.max(0, prevVisible + 36) ||
-          nextGap + (isIOSUi ? 180 : 140) < prevGap ||
-          getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
+          nextVisible > Math.max(0, prevVisible + 72) ||
+          nextGap + (isIOSUi ? 320 : 240) < prevGap ||
+          nextCenter + (isIOSUi ? 220 : 160) < prevCenter;
         const canHoldPrev =
-          age < (isIOSUi ? 1250 : 950) &&
+          age < (isIOSUi ? 2600 : 2100) &&
           isNativePrewarmEligible(prev) &&
           !nextClearlyBetter;
         if (canHoldPrev) {
@@ -3489,6 +3491,8 @@ const keepBufferedInsteadOfAbort =
             nextGap,
             prevVisible,
             nextVisible,
+            prevCenter,
+            nextCenter,            
           });
           return true;
         }
@@ -4370,14 +4374,20 @@ return;
       }
 
       if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
-        // Heavy iframe providers are activated only inside the focus/start zone.
-        // Near prewarm must not create far YouTube/TikTok frames and compete
-        // with the current native video on mobile browsers.
+        // External providers also participate in the same pipeline, but with a soft runway:
+        // prepare iframe shortly before focus, not several cards away and not only after focus.
         const visiblePx = getOwnerVisiblePx(el);
         const centerDist = getOwnerCenterDist(el);
-        if (visiblePx < getStartVisiblePx(el) || centerDist > getPriorityCenterMaxDist(el)) {
-          return false;
-        }
+        const gapPx = getOwnerViewportGapPx(el);
+        const startPx = getStartVisiblePx(el);
+        const startCenter = getPriorityCenterMaxDist(el);
+        const externalRunwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
+        const externalVisibleGate = Math.max(36, Math.round(startPx * (isIOSUi ? 0.42 : 0.5)));
+        const canPrepareExternal =
+          visiblePx >= externalVisibleGate ||
+          (gapPx <= externalRunwayPx && centerDist <= startCenter + externalRunwayPx);
+        if (!canPrepareExternal) return false;
+       
         return prepareExternalMedia(el, reason);
       }
 

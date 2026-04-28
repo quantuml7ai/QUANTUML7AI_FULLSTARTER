@@ -84,9 +84,9 @@ export default function useVideoFeedWindowing({
       if (!isBrowserFn()) return 6
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-if (coarse) return 8
-if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
-return 10
+      if (coarse) return 9
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 9
+      return 11
     } catch {
       return 6
     }
@@ -294,10 +294,20 @@ return 10
       (velocity > 1.0 && !(window?.matchMedia?.('(pointer: coarse)')?.matches) ? 1 : 0)
 
     if ((end - start) > vfMaxRender) {
-      const mid = Math.floor((start + end) / 2)
-      const half = Math.floor(vfMaxRender / 2)
-      start = Math.max(0, mid - half)
-      end = Math.min(total, start + vfMaxRender)
+      // Direction-aware trim: for media feeds we keep more DOM ahead of the scroll direction,
+      // so coordinator sees the next video/ad/qcast/iframe early enough for prewarm.
+      if (direction > 0) {
+        end = Math.min(total, end)
+        start = Math.max(0, end - vfMaxRender)
+      } else if (direction < 0) {
+        start = Math.max(0, start)
+        end = Math.min(total, start + vfMaxRender)
+      } else {
+        const mid = Math.floor((start + end) / 2)
+        const half = Math.floor(vfMaxRender / 2)
+        start = Math.max(0, mid - half)
+        end = Math.min(total, start + vfMaxRender)
+      }
     }
 
     setVfWin((prev) => {
