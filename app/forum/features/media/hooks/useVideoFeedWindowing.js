@@ -3,8 +3,8 @@ import interleaveRecommendationRails from '../../feed/utils/interleaveRecommenda
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
 const VF_OVERSCAN_PX = 1120
-const VF_OVERSCAN_PX_MOBILE = 620
-const VF_OVERSCAN_PX_TABLET = 760
+const VF_OVERSCAN_PX_MOBILE = 860
+const VF_OVERSCAN_PX_TABLET = 980
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
@@ -15,10 +15,14 @@ const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
-const VF_WINDOW_STICKY_MS = 520
-const VF_LAYOUT_JITTER_PX = 28
-const VF_SCROLL_SETTLE_MS = 260
+const VF_WINDOW_STICKY_MS = 780
+const VF_LAYOUT_JITTER_PX = 32
+const VF_SCROLL_SETTLE_MS = 320
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
+const VF_ANCHOR_DELTA_IGNORE_PX = 3
+const VF_ANCHOR_DELTA_MAX_PX = 64
+const VF_ANCHOR_FLUSH_MS = 140
+const VF_ANCHOR_ACTIVE_RETRY_MS = 120
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -50,6 +54,9 @@ export default function useVideoFeedWindowing({
   const vfHardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
   const vfScrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const vfScrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
+  const vfPendingAnchorDeltaRef = useRef(0)
+  const vfAnchorFlushTimerRef = useRef(0)
+  const vfLastAnchorAdjustTsRef = useRef(0)
   const vfWinMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const vfBreakpointRef = useRef('unknown')
   const vfWinRef = useRef({ start: 0, end: 0, top: 0, bottom: 0 })
@@ -77,9 +84,9 @@ export default function useVideoFeedWindowing({
       if (!isBrowserFn()) return 6
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 5
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 6
-      return 8
+if (coarse) return 8
+if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
+return 10
     } catch {
       return 6
     }
@@ -206,7 +213,7 @@ export default function useVideoFeedWindowing({
     try {
       const nextTop = Math.max(
         0,
-        Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d,
+        Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d
       )
       window.scrollTo(0, nextTop)
     } catch {}
@@ -332,7 +339,21 @@ export default function useVideoFeedWindowing({
       const next = vfBuildWindow(nextStart, nextEnd, total)
       const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
       const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
+const scrollActiveNow =
+  Number(vfScrollActivityRef.current?.activeUntil || 0) > Date.now() ||
+  Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.08
 
+if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
+  try {
+    emitDiag?.('video_feed_window_shift_suppressed', {
+      reason: 'active_scroll_top_spacer_guard',
+      prevStart: prev.start,
+      nextStart: next.start,
+      topDelta: Math.round(topDelta),
+    })
+  } catch {}
+  return prev
+}
       if (
         prev.start === next.start &&
         prev.end === next.end &&
@@ -364,6 +385,7 @@ export default function useVideoFeedWindowing({
     vfGetOverscanPx,
     vfBuildWindow,
     isBrowserFn,
+    emitDiag,
   ])
 
   const vfScheduleRecalc = useCallback(() => {
@@ -373,6 +395,68 @@ export default function useVideoFeedWindowing({
       try { vfRecalcWindow() } catch {}
     })
   }, [vfRecalcWindow])
+
+  const vfIsScrollActiveNow = useCallback(() => {
+    try {
+      const now = Date.now()
+      if (Number(vfScrollActivityRef.current?.activeUntil || 0) > now) return true
+      const velocity = Math.abs(Number(vfScrollStateRef.current?.velocity || 0))
+      return velocity > 0.06
+    } catch {
+      return false
+    }
+  }, [])
+
+  const vfApplyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta') => {
+    const raw = Number(delta || 0)
+    if (!Number.isFinite(raw) || Math.abs(raw) < VF_ANCHOR_DELTA_IGNORE_PX) return
+ 
+    vfLastAnchorAdjustTsRef.current = Date.now()
+    // Premium scroll rule: do not write scrollTop from ResizeObserver/windowing.
+    // Measured heights may update the virtual spacers, but hidden scrollTop compensation
+    // is perceived as a blink/teleport on fast back-scroll.
+    try {
+      emitDiag?.('video_feed_anchor_adjust_suppressed', {
+        reason,
+        delta: Math.round(raw),
+        applied: 0,
+      })
+    } catch {}
+  }, [emitDiag])
+
+  const vfScheduleAnchorFlush = useCallback((delay = VF_ANCHOR_FLUSH_MS) => {
+    try {
+      if (vfAnchorFlushTimerRef.current) {
+        clearTimeout(vfAnchorFlushTimerRef.current)
+        vfAnchorFlushTimerRef.current = 0
+      }
+
+      const flush = () => {
+        vfAnchorFlushTimerRef.current = 0
+
+        if (vfIsScrollActiveNow()) {
+          vfAnchorFlushTimerRef.current = setTimeout(flush, VF_ANCHOR_ACTIVE_RETRY_MS)
+          return
+        }
+
+        const pending = Number(vfPendingAnchorDeltaRef.current || 0)
+        vfPendingAnchorDeltaRef.current = 0
+
+        if (Math.abs(pending) >= VF_ANCHOR_DELTA_IGNORE_PX) {
+          try {
+            emitDiag?.('video_feed_anchor_deferred_drop', {
+              reason: 'drop_deferred_scrolltop_teleport_guard',
+              pending: Math.round(pending),
+            })
+          } catch {}
+        }
+
+        vfScheduleRecalc()
+      }
+
+      vfAnchorFlushTimerRef.current = setTimeout(flush, Math.max(16, Number(delay || 0)))
+    } catch {}
+  }, [emitDiag, vfIsScrollActiveNow, vfScheduleRecalc])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {
@@ -400,6 +484,12 @@ export default function useVideoFeedWindowing({
       } catch {}
 
       try { vfHeightsRef.current.clear() } catch {}
+      try { vfPendingAnchorDeltaRef.current = 0 } catch {}
+      try {
+        if (vfAnchorFlushTimerRef.current) clearTimeout(vfAnchorFlushTimerRef.current)
+        vfAnchorFlushTimerRef.current = 0
+      } catch {}
+
       const initialEnd = Math.min(vfGetMaxRender(), Math.max(0, vfSlots.length || 0))
       const initial = { start: 0, end: initialEnd, top: 0, bottom: 0 }
 
@@ -537,6 +627,12 @@ export default function useVideoFeedWindowing({
         scrollActivity.settleTimer = 0
       }
 
+      if (vfAnchorFlushTimerRef.current) {
+        try { clearTimeout(vfAnchorFlushTimerRef.current) } catch {}
+        vfAnchorFlushTimerRef.current = 0
+      }
+      vfPendingAnchorDeltaRef.current = 0
+
       scrollActivity.activeUntil = 0
       vfScrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
@@ -577,13 +673,23 @@ export default function useVideoFeedWindowing({
 
           if (Number.isFinite(prev)) {
             const delta = nextH - prev
-            if (delta !== 0 && idx < Number(vfWinRef.current?.start || 0)) {
-              vfAdjustScrollBy(delta)
+            const isAboveWindow = idx < Number(vfWinRef.current?.start || 0)
+
+            if (delta !== 0 && isAboveWindow) {
+              if (vfIsScrollActiveNow()) {
+                vfPendingAnchorDeltaRef.current += delta
+                vfScheduleAnchorFlush()
+              } else {
+                vfApplyAnchoredScrollDelta(delta, 'height_above_window')
+              }
             }
           }
 
-          const now = Date.now()
-          if (Number(vfScrollActivityRef.current.activeUntil || 0) > now) return
+          if (vfIsScrollActiveNow()) {
+            vfScheduleAnchorFlush(VF_SCROLL_SETTLE_MS)
+            return
+          }
+
           vfScheduleRecalc()
         } catch {}
       }
@@ -596,8 +702,8 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfAdjustScrollBy, vfScheduleRecalc])
-
+  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
+  
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
@@ -630,6 +736,11 @@ export default function useVideoFeedWindowing({
           try { ro.disconnect() } catch {}
         })
         ros.clear()
+      } catch {}
+      try {
+        if (vfAnchorFlushTimerRef.current) clearTimeout(vfAnchorFlushTimerRef.current)
+        vfAnchorFlushTimerRef.current = 0
+        vfPendingAnchorDeltaRef.current = 0
       } catch {}
     }
   }, [])
