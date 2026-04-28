@@ -20,7 +20,6 @@ const VF_LAYOUT_JITTER_PX = 32
 const VF_SCROLL_SETTLE_MS = 320
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 const VF_ANCHOR_DELTA_IGNORE_PX = 3
-const VF_ANCHOR_DELTA_MAX_PX = 180
 const VF_ANCHOR_FLUSH_MS = 140
 const VF_ANCHOR_ACTIVE_RETRY_MS = 120
 
@@ -196,27 +195,6 @@ return 10
     } catch {}
 
     return { st: winTop, vh: winH, mode: 'window' }
-  }, [vfGetScrollEl, vfHasInnerScrollable])
-
-  const vfAdjustScrollBy = useCallback((delta) => {
-    const d = Number(delta || 0)
-    if (!Number.isFinite(d) || Math.abs(d) < 1) return
-
-    try {
-      const el = vfGetScrollEl()
-      if (vfHasInnerScrollable(el)) {
-        el.scrollTop = Math.max(0, Number(el.scrollTop || 0) + d)
-        return
-      }
-    } catch {}
-
-    try {
-      const nextTop = Math.max(
-        0,
-        Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d
-      )
-      window.scrollTo(0, nextTop)
-    } catch {}
   }, [vfGetScrollEl, vfHasInnerScrollable])
 
   const vfGetFixedRecommendationH = useCallback(() => {
@@ -396,20 +374,18 @@ return 10
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < VF_ANCHOR_DELTA_IGNORE_PX) return
 
-    const applied = Math.sign(raw) * Math.min(Math.abs(raw), VF_ANCHOR_DELTA_MAX_PX)
     vfLastAnchorAdjustTsRef.current = Date.now()
 
-    try { vfAdjustScrollBy(applied) } catch {}
-
+    // Do not write scrollTop as hidden compensation in the premium video feed.
+    // During fast back-scroll it looks like a small teleport / blink.
     try {
-      emitDiag?.('video_feed_anchor_adjust', {
+      emitDiag?.('video_feed_anchor_adjust_suppressed', {
         reason,
         delta: Math.round(raw),
-        applied: Math.round(applied),
-        pendingLeft: Math.round(raw - applied),
+        applied: 0,
       })
     } catch {}
-  }, [vfAdjustScrollBy, emitDiag])
+  }, [emitDiag])
 
   const vfScheduleAnchorFlush = useCallback((delay = VF_ANCHOR_FLUSH_MS) => {
     try {
@@ -430,7 +406,12 @@ return 10
         vfPendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= VF_ANCHOR_DELTA_IGNORE_PX) {
-          vfApplyAnchoredScrollDelta(pending, 'deferred_height_above_window')
+          try {
+            emitDiag?.('video_feed_anchor_deferred_drop', {
+              reason: 'drop_deferred_scrolltop_teleport_guard',
+              pending: Math.round(pending),
+            })
+          } catch {}
         }
 
         vfScheduleRecalc()
@@ -438,7 +419,7 @@ return 10
 
       vfAnchorFlushTimerRef.current = setTimeout(flush, Math.max(16, Number(delay || 0)))
     } catch {}
-  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleRecalc])
+  }, [emitDiag, vfIsScrollActiveNow, vfScheduleRecalc])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {

@@ -65,15 +65,6 @@ export function writeMutedPrefToDocument(nextMuted, userSet = false) {
         if (userSet) root.dataset.forumMediaSoundUserSet = '1'
       }
     } catch {}
-    try {
-      const body = document?.body
-      if (body?.dataset) {
-        body.dataset.forumMediaMuted = nextStr
-        body.dataset.mediaMuted = nextStr
-        body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
-        if (userSet) body.dataset.forumMediaSoundUserSet = '1'
-      }
-    } catch {}
   } catch {}
 }
 
@@ -335,7 +326,7 @@ const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   __SOFT_RESIDENT_POST_VIDEO &&
-  !hardUnloadRequested &&
+  !!el?.isConnected &&
   (nearViewport || shellVisible)
 if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {

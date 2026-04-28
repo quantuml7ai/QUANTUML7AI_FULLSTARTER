@@ -303,6 +303,80 @@ export const FORUM_STYLES = `
     .ql7VideoSurface > video::-webkit-media-controls-fullscreen-button{ display:none !important; }
     .ql7VideoSurface > video::-moz-media-controls{ display:none !important; } 
     .ql7VideoSurface > video::-webkit-media-controls-overlay-play-button{ display:none !important; }
+
+    /* =========================================================
+       Composited media safe mode:
+       Chrome desktop may tear the video/iframe subtree when hover transform,
+       paint containment and backdrop-filter sit on the same post shell.
+       Scope is intentionally narrow: only native video / external iframe cards.
+    ========================================================= */
+    .forum_root .item[data-composited-media-card="1"],
+    .forum_root .item--compositedMedia{
+      transform:none;
+    }
+    .forum_root .item[data-composited-media-card="1"]:hover,
+    .forum_root .item--compositedMedia:hover{
+      transform:none;
+    }
+    .forum_root .postBodyFrame[data-composited-frame="1"],
+    .forum_root .item[data-composited-media-card="1"] > .postBodyFrame,
+    .forum_root .item--compositedMedia > .postBodyFrame{
+      -webkit-backdrop-filter:none !important;
+      backdrop-filter:none !important;
+      contain:none !important;
+      isolation:isolate;
+      background:
+        radial-gradient(140% 160% at 8% 0%, rgba(120,200,255,.16), rgba(10,16,24,.74) 55%),
+        linear-gradient(160deg, rgba(8,12,22,.94), rgba(16,26,42,.88));
+    }
+    .forum_root .item[data-composited-media-card="1"] .mediaBox[data-kind="video"],
+    .forum_root .item[data-composited-media-card="1"] .mediaBox[data-kind="iframe"],
+    .forum_root .item--compositedMedia .mediaBox[data-kind="video"],
+    .forum_root .item--compositedMedia .mediaBox[data-kind="iframe"]{
+      contain:none !important;
+      isolation:isolate;
+      overflow:hidden;
+    }
+    .forum_root .mediaBox[data-kind="video"] > .ql7VideoSurface,
+    .forum_root .mediaBox[data-kind="video"] > [data-forum-video-surface="1"]{
+      width:100%;
+      height:100%;
+      min-height:100%;
+      flex:0 0 100%;
+      display:block;
+      background:#000;
+    }
+    .forum_root .mediaBox[data-kind="video"] > .ql7VideoSurface > video,
+    .forum_root .mediaBox[data-kind="video"] > [data-forum-video-surface="1"] > video{
+      width:100%;
+      height:100%;
+      min-height:100%;
+      display:block;
+      object-fit:contain;
+      background:#000;
+    }
+    .forum_root .item[data-composited-media-card="1"] .mediaBox[data-kind="iframe"] > iframe,
+    .forum_root .item--compositedMedia .mediaBox[data-kind="iframe"] > iframe{
+      width:100%;
+      height:100%;
+      min-height:100%;
+      display:block;
+      background:#000;
+    }
+    .postTextFrame{
+      position:relative;
+      display:block;
+      width:100%;
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.018)),
+        rgba(3,7,18,.22);
+      border:1px solid rgba(140, 190, 255, .14);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+      contain:none;
+    }
     .ql7VideoHud{
       position:absolute;
       inset:0;
@@ -7014,4 +7088,3 @@ const Styles = () => (
 )
 
 export default Styles
-

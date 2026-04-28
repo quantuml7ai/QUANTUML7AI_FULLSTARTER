@@ -103,6 +103,11 @@ export default function ForumPostCard({
     isVideoFeed,
   })
 
+  const hasCompositedMedia =
+    videoLines.length > 0 ||
+    ytLines.length > 0 ||
+    tiktokLines.length > 0
+
   const {
     isTranslated,
     translateLoading,
@@ -129,9 +134,11 @@ export default function ForumPostCard({
   return (
     <article
       ref={cardRef}
-      className="item"
+      className={`item ${isVideoFeed ? 'item--videoFeed' : ''} ${hasCompositedMedia ? 'item--compositedMedia' : ''}`}
       style={{ position: 'relative' }}
       data-forum-post-card="1"
+      data-video-feed-card={isVideoFeed ? '1' : undefined}
+      data-composited-media-card={hasCompositedMedia ? '1' : undefined}
       data-forum-post-id={String(p?.id || '')}
       role="article"
       aria-label={t('forum_post_aria')}
@@ -147,7 +154,11 @@ export default function ForumPostCard({
         setBoomNodeRef={setBoomNodeRef}
       />
 
-      <div className="postBodyFrame">
+      <div
+        className="postBodyFrame"
+        data-video-feed-frame={isVideoFeed ? '1' : undefined}
+        data-composited-frame={hasCompositedMedia ? '1' : undefined}
+      >
         <PostOwnerMenu isOwner={isOwner} post={p} onOwnerDelete={onOwnerDelete} t={t} />
         <PostHeaderMeta
           p={p}

@@ -1219,6 +1219,41 @@ const clearLoadPending = (el, reason = 'clear', warmReady = false) => {
   pendingLoadsCacheVal = 0;
 };
 
+const getHtmlMediaNetworkSnapshot = (el) => {
+  const media = getMediaStateNode(el);
+  const snap = {
+    media,
+    hasSrc: false,
+    readyState: 0,
+    networkState: 0,
+    loadPending: false,
+    pendingForMs: 0,
+  };
+  if (!(media instanceof HTMLMediaElement)) return snap;
+  try {
+    snap.hasSrc = !!String(media.currentSrc || media.getAttribute?.('src') || '').trim();
+    snap.readyState = Number(media.readyState || 0);
+    snap.networkState = Number(media.networkState || 0);
+    snap.loadPending = String(media.dataset?.__loadPending || '') === '1';
+    const since = Number(media.dataset?.__loadPendingSince || 0);
+    snap.pendingForMs = since > 0 ? Date.now() - since : 0;
+  } catch {}
+  return snap;
+};
+
+const isHtmlMediaLoadingOrBuffered = (el) => {
+  const snap = getHtmlMediaNetworkSnapshot(el);
+  const media = snap.media;
+  if (!(media instanceof HTMLMediaElement)) return false;
+  try {
+    if (!snap.hasSrc) return false;
+    if (snap.readyState >= 1) return true;
+    if (snap.networkState === HTMLMediaElement.NETWORK_LOADING) return true;
+    if (snap.loadPending && snap.pendingForMs < (isIOSUi ? 12000 : (isCoarseUi ? 10000 : 8000))) return true;
+  } catch {}
+  return false;
+};
+
 const kickMediaLoad = (
   el,
   {
@@ -1233,6 +1268,22 @@ const kickMediaLoad = (
 ) => {
   const media = getMediaStateNode(el);
   if (!(media instanceof HTMLMediaElement)) return false;
+
+  if (isHtmlMediaLoadingOrBuffered(media)) {
+    const snap = getHtmlMediaNetworkSnapshot(media);
+    trace('load_kick_hold_existing_fetch', media, {
+      channel,
+      readyState: snap.readyState,
+      networkState: snap.networkState,
+      loadPending: snap.loadPending ? '1' : '0',
+      pendingForMs: snap.pendingForMs,
+    });
+    if (snap.readyState >= 2) clearLoadPending(media, 'already_buffered', true);
+    else if (!snap.loadPending && snap.networkState === HTMLMediaElement.NETWORK_LOADING) {
+      markLoadPending(media, `${channel}_existing_fetch`);
+    }
+    return true;
+  }
 
   if (!canKickLoad(media, {
     channel,
@@ -2310,7 +2361,42 @@ const onMediaLoadedCaptured = (e) => {
         el.removeAttribute('muted');
         trace('restore_user_sound_after_autoplay', el, { reason });
       } catch {}
-    };    
+    };
+    const hasMediaUserLeaseNow = (el) => {
+      try {
+        const owner = getOwnerNode(el);
+        const now = Date.now();
+        const leaseUntil = Math.max(
+          Number(el?.dataset?.__manualLeaseUntil || 0),
+          Number(el?.dataset?.__userGestureUntil || 0),
+          Number(owner?.dataset?.__manualLeaseUntil || 0),
+          Number(owner?.dataset?.__userGestureUntil || 0),
+        );
+        return leaseUntil > now;
+      } catch {
+        return false;
+      }
+    };
+    const isHtmlMediaPlaybackViewportAllowed = (el) => {
+      try {
+        if (hasMediaUserLeaseNow(el)) return true;
+        const owner = getOwnerNode(el) || el;
+        if (!(owner instanceof Element)) return true;
+        const rect = owner.getBoundingClientRect?.();
+        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        if (!rect || viewportH <= 0) return true;
+        const visiblePx = Math.max(0, Math.min(Number(rect.bottom || 0), viewportH) - Math.max(Number(rect.top || 0), 0));
+        const center = (Number(rect.top || 0) + Number(rect.bottom || 0)) / 2;
+        const centerDist = Math.abs(center - (viewportH / 2));
+        const minVisiblePx = isIOSUi
+          ? Math.max(126, Math.round(viewportH * 0.17))
+          : (isCoarseUi ? Math.max(156, Math.round(viewportH * 0.21)) : 96);
+        const maxCenterDist = isCoarseUi ? Math.round(viewportH * 0.72) : Math.round(viewportH * 0.76);
+        return visiblePx >= minVisiblePx && centerDist <= maxCenterDist;
+      } catch {
+        return true;
+      }
+    };
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
       const playToken = bumpPlayRequestToken(el);
@@ -2337,6 +2423,14 @@ const onMediaLoadedCaptured = (e) => {
             if (!canContinue()) {
               try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_started_stale', el, { reason, muted: !!el.muted });
+              withSystemPause(el, () => {
+                try { if (!el.paused) el.pause(); } catch {}
+              });
+              return;
+            }
+            if (!isHtmlMediaPlaybackViewportAllowed(el)) {
+              try { el.dataset.__playRequested = '0'; } catch {}
+              trace('play_started_out_of_focus_guard', el, { reason, muted: !!el.muted });
               withSystemPause(el, () => {
                 try { if (!el.paused) el.pause(); } catch {}
               });
@@ -2409,6 +2503,14 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                   if (!canContinue()) {
                     try { el.dataset.__playRequested = '0'; } catch {}
                     trace('play_retry_stale', el, { reason });
+                    withSystemPause(el, () => {
+                      try { if (!el.paused) el.pause(); } catch {}
+                    });
+                    return;
+                  }
+                  if (!isHtmlMediaPlaybackViewportAllowed(el)) {
+                    try { el.dataset.__playRequested = '0'; } catch {}
+                    trace('play_retry_out_of_focus_guard', el, { reason });
                     withSystemPause(el, () => {
                       try { if (!el.paused) el.pause(); } catch {}
                     });
@@ -2586,7 +2688,55 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
     let nearIo = null;
 
     const observed = new WeakSet();
-    const unloadTimers = new Map(); // el -> timeoutId 
+    const unloadTimers = new Map(); // el -> timeoutId
+    const mediaDomOrder = new WeakMap();
+    let mediaDomOrderSeq = 1;
+    let coordinatorLastScrollTop = 0;
+    let coordinatorScrollDirection = 1;
+    const readCoordinatorScrollTop = () => {
+      try {
+        const scrollEl = document.querySelector?.('[data-forum-scroll="1"]') || null;
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) return Number(scrollEl.scrollTop || 0);
+      } catch {}
+      try { return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0); } catch {}
+      return 0;
+    };
+    const updateCoordinatorScrollDirection = () => {
+      const top = readCoordinatorScrollTop();
+      const delta = top - Number(coordinatorLastScrollTop || 0);
+      if (Math.abs(delta) > 2) coordinatorScrollDirection = delta > 0 ? 1 : -1;
+      coordinatorLastScrollTop = top;
+      return coordinatorScrollDirection || 1;
+    };
+    const getMediaDomOrder = (el) => {
+      try {
+        if (!(el instanceof Element)) return Number.MAX_SAFE_INTEGER;
+        if (!mediaDomOrder.has(el)) mediaDomOrder.set(el, mediaDomOrderSeq++);
+        return Number(mediaDomOrder.get(el) || Number.MAX_SAFE_INTEGER);
+      } catch {
+        return Number.MAX_SAFE_INTEGER;
+      }
+    };
+    const getNearQueuePlacement = (el, dir = 1) => {
+      try {
+        const rect = el?.getBoundingClientRect?.();
+        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        if (!rect || viewportH <= 0) return { band: 9, top: 0, bottom: 0, order: getMediaDomOrder(el) };
+        const top = Number(rect.top || 0);
+        const bottom = Number(rect.bottom || 0);
+        const inViewport = bottom > 0 && top < viewportH;
+        if (dir < 0) {
+          if (bottom <= viewportH * 0.9) return { band: 0, top, bottom, order: getMediaDomOrder(el) };
+          if (inViewport) return { band: 1, top, bottom, order: getMediaDomOrder(el) };
+          return { band: 2, top, bottom, order: getMediaDomOrder(el) };
+        }
+        if (top >= viewportH * 0.1) return { band: 0, top, bottom, order: getMediaDomOrder(el) };
+        if (inViewport) return { band: 1, top, bottom, order: getMediaDomOrder(el) };
+        return { band: 2, top, bottom, order: getMediaDomOrder(el) };
+      } catch {
+        return { band: 9, top: 0, bottom: 0, order: getMediaDomOrder(el) };
+      }
+    };
     const isIOSUi = (() => {
       try {
         return /iP(hone|ad|od)/i.test(String(navigator?.userAgent || ''));
@@ -3146,6 +3296,30 @@ const pauseForeignMedia = (keepEl = null) => {
       const delay = Number.isFinite(ms) ? ms : getUnloadDelay(el, reason);
       const id = setTimeout(() => {
         unloadTimers.delete(el);
+
+        try {
+          const visiblePx = getOwnerVisiblePx(el);
+          const nearVisible = isNearViewportElement(
+            el,
+            isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100),
+          );
+          const protectedReason =
+            reason !== 'cleanup' &&
+            reason !== 'error_blocked';
+
+          if (protectedReason && (visiblePx > 48 || nearVisible)) {
+            if (isIframeLike(el)) {
+              trace('hard_unload_skip_visible_iframe', el, { reason, visiblePx });
+              return;
+            }
+
+            if (shouldRetainHtmlMedia(el)) {
+              trace('hard_unload_skip_visible_html_media', el, { reason, visiblePx });
+              return;
+            }
+          }
+        } catch {}
+
         if (!isIframeLike(el) && shouldRetainHtmlMedia(el)) {
           trace('hard_unload_skip_retained', el, { reason });
           return;
@@ -3618,6 +3792,7 @@ const keepBufferedInsteadOfAbort =
         }
         if (!u.searchParams.has('enablejsapi')) u.searchParams.set('enablejsapi', '1');
         if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
+        if (!u.searchParams.has('mute')) u.searchParams.set('mute', '1');
         if (!u.searchParams.has('rel')) u.searchParams.set('rel', '0');
         if (!u.searchParams.has('modestbranding')) u.searchParams.set('modestbranding', '1');
         if (!u.searchParams.has('origin')) u.searchParams.set('origin', window.location.origin);
@@ -3884,6 +4059,9 @@ return;
                 })) a.load?.();
               } catch {}
               armReadyReplay(a);
+              if (a.paused && !isUserPaused(a) && !isUserPaused(el)) {
+                startHtmlMedia(a, 'qcast_pending_play_kick');
+              }
             } else if (a.paused) {
               startHtmlMedia(a, 'qcast_play_now');
             }
@@ -3906,9 +4084,15 @@ return;
         const player = await initYouTubePlayer(el);
         if (!player) return;
         try {
-          if (desiredMuted()) player?.mute?.();
-          else player?.unMute?.();
-          player?.playVideo?.();
+          const kickYoutube = () => {
+            try {
+              if (desiredMuted()) player?.mute?.();
+              else player?.unMute?.();
+              player?.playVideo?.();
+            } catch {}
+          };
+          kickYoutube();
+          scheduleExternalPlayKick(el, kickYoutube, 'youtube_viewport_autoplay');
           enforceIframeResidentCap(el);
           emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
         } catch {}
@@ -3930,6 +4114,13 @@ return;
           try { el.setAttribute('src', src); } catch {}
         }
         try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
+        const kickExternalFrame = () => {
+          try { el.contentWindow?.postMessage?.({ method: 'play' }, '*'); } catch {}
+          try { el.contentWindow?.postMessage?.({ event: 'command', func: 'playVideo', args: '' }, '*'); } catch {}
+          try { el.contentWindow?.postMessage?.('play', '*'); } catch {}
+        };
+        kickExternalFrame();
+        scheduleExternalPlayKick(el, kickExternalFrame, `${kind}_viewport_autoplay`);
         enforceIframeResidentCap(el);
         emitMediaDiag('iframe_play', { kind, ...getIframeSnapshot() });
         window.dispatchEvent(new CustomEvent('site-media-play', {
@@ -3993,6 +4184,50 @@ return;
     const PENDING_READY_GRACE_MS = isIOSUi ? 980 : (isCoarseUi ? 620 : 420);
     const PENDING_READY_GRACE_RATIO = 0.12;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
+    const externalPlayKickTimers = new Map();
+    const clearExternalPlayKick = (el) => {
+      try {
+        const id = externalPlayKickTimers.get(el);
+        if (id) clearTimeout(id);
+        externalPlayKickTimers.delete(el);
+      } catch {}
+    };
+    const isExternalKickAllowed = (el) => {
+      try {
+        if (!(el instanceof Element) || !el.isConnected) return false;
+        const kind = getMediaKind(el);
+        if (kind !== 'youtube' && kind !== 'tiktok' && kind !== 'iframe') return false;
+        if (active && active !== el) return false;
+        return isStartableCandidate(el, Number(ratios.get(el) || 0), getOwnerVisiblePx(el), getOwnerCenterDist(el));
+      } catch {
+        return false;
+      }
+    };
+    const scheduleExternalPlayKick = (el, runner, reason = 'external_viewport_kick') => {
+      try {
+        if (!(el instanceof Element) || typeof runner !== 'function') return;
+        clearExternalPlayKick(el);
+        let count = 0;
+        const maxCount = isIOSUi ? 9 : (isCoarseUi ? 7 : 5);
+        const delayMs = isIOSUi ? 320 : (isCoarseUi ? 360 : 420);
+        const tick = () => {
+          if (!isExternalKickAllowed(el)) {
+            clearExternalPlayKick(el);
+            return;
+          }
+          count += 1;
+          traceCandidate('external_focus_play_kick', el, { reason, count });
+          try { runner(); } catch {}
+          if (count >= maxCount) {
+            clearExternalPlayKick(el);
+            return;
+          }
+          const id = setTimeout(tick, delayMs);
+          externalPlayKickTimers.set(el, id);
+        };
+        tick();
+      } catch {}
+    };
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
       if (kind === 'qcast') return isIOSUi ? 0.08 : (isCoarseUi ? 0.14 : 0.18);
@@ -4275,6 +4510,8 @@ return;
           const relaxedStartForIOS = (() => {
             if (!isIOSUi) return false;
             if (!(candidate instanceof Element)) return false;
+            const candidateKind = getMediaKind(candidate);
+            if (candidate instanceof HTMLVideoElement || candidateKind === 'video') return false;
             const ratioGate = Math.max(0.08, Number(getStartRatio(candidate) || 0) * 0.82);
             const pxGate = Math.max(58, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.78));
             const centerGate = Math.max(140, Number(getPriorityCenterMaxDist(candidate) || 0) + 40);
@@ -4427,18 +4664,29 @@ return;
 
     nearIo = new IntersectionObserver(
       (entries) => {
+        const dir = updateCoordinatorScrollDirection();
         const intersecting = (entries || [])
           .filter((entry) => !!entry?.isIntersecting && entry?.target instanceof Element)
           .map((entry) => {
-            const metrics = getCandidateMetrics(entry.target, Number(entry.intersectionRatio || 0));
+            const target = entry.target;
+            const metrics = getCandidateMetrics(target, Number(entry.intersectionRatio || 0));
+            const placement = getNearQueuePlacement(target, dir);
             return {
               entry,
               metrics,
+              placement,
               centerDist: Number(metrics?.centerDist ?? Number.POSITIVE_INFINITY),
               visiblePx: Number(metrics?.visiblePx || 0),
             };
           })
           .sort((a, b) => {
+            if (a.placement.band !== b.placement.band) return a.placement.band - b.placement.band;
+            if (dir < 0) {
+              if (a.placement.bottom !== b.placement.bottom) return b.placement.bottom - a.placement.bottom;
+            } else if (a.placement.top !== b.placement.top) {
+              return a.placement.top - b.placement.top;
+            }
+            if (a.placement.order !== b.placement.order) return a.placement.order - b.placement.order;
             if (a.centerDist !== b.centerDist) return a.centerDist - b.centerDist;
             return b.visiblePx - a.visiblePx;
           });
@@ -4491,6 +4739,7 @@ return;
         if (!(el instanceof Element)) return;
         if (observed.has(el)) return;
         observed.add(el);
+        getMediaDomOrder(el);
 
         // аудио/видео: следим за mute, чтобы запоминать выбор
         if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
@@ -4743,6 +4992,8 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       try {
         unloadTimers.forEach((id) => clearTimeout(id));
         unloadTimers.clear();
+        externalPlayKickTimers.forEach((id) => clearTimeout(id));
+        externalPlayKickTimers.clear();
       } catch {}
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });

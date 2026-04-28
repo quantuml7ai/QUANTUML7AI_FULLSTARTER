@@ -25,6 +25,13 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('isNearViewportElement(frame, isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100))')
   })
 
+  test('coordinator holds an existing html-media fetch instead of calling load again', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).toContain('const getHtmlMediaNetworkSnapshot = (el) => {')
+    expect(src).toContain('const isHtmlMediaLoadingOrBuffered = (el) => {')
+    expect(src).toContain("trace('load_kick_hold_existing_fetch', media, {")
+  })
+
   test('coordinator respects splash gate and keeps qcast on the shared mute source', () => {
     const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     expect(src).toContain('isSplashGateActive')
@@ -44,6 +51,13 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('stickyItems')
   })
 
+  test('video feed windowing drops hidden anchor scrolltop writes during deferred height settling', () => {
+    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
+    expect(src).toContain('video_feed_anchor_adjust_suppressed')
+    expect(src).toContain('video_feed_anchor_deferred_drop')
+    expect(src).not.toContain("emitDiag?.('video_feed_anchor_adjust', {")
+  })
+
   test('media lifecycle runtime exports touch marker for resident policy', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
     expect(src).toContain('export function __markMediaLifecycleTouch')
@@ -58,5 +72,14 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('__isVideoNearViewport(el, 900)')
     expect(src).toContain("el.dataset.__loadPending = '1'")
     expect(src).toContain('try { el.load?.() } catch {}')
+  })
+
+  test('coordinator sorts near-prewarm by scroll direction and DOM order, then repeats viewport kicks for external media', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).toContain('const mediaDomOrder = new WeakMap();')
+    expect(src).toContain('const getNearQueuePlacement = (el, dir = 1) => {')
+    expect(src).toContain('const scheduleExternalPlayKick = (el, runner, reason = \'external_viewport_kick\') => {')
+    expect(src).toContain('scheduleExternalPlayKick(el, kickYoutube, \'youtube_viewport_autoplay\')')
+    expect(src).toContain('scheduleExternalPlayKick(el, kickExternalFrame, `${kind}_viewport_autoplay`)')
   })
 })
