@@ -1228,7 +1228,8 @@ const videoNode = (
 
   return (
     <div
-      className="ql7VideoSurface"
+      className="ql7VideoSurface mediaBoxItem"
+      data-forum-video-surface="1"
       onPointerDown={handleRootPointerDown}
       onClick={handleSurfaceClick}
     >

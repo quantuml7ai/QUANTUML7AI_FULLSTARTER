@@ -65,15 +65,6 @@ export function writeMutedPrefToDocument(nextMuted, userSet = false) {
         if (userSet) root.dataset.forumMediaSoundUserSet = '1'
       }
     } catch {}
-    try {
-      const body = document?.body
-      if (body?.dataset) {
-        body.dataset.forumMediaMuted = nextStr
-        body.dataset.mediaMuted = nextStr
-        body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
-        if (userSet) body.dataset.forumMediaSoundUserSet = '1'
-      }
-    } catch {}
   } catch {}
 }
 
@@ -335,7 +326,7 @@ const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   __SOFT_RESIDENT_POST_VIDEO &&
-  !hardUnloadRequested &&
+  !!el?.isConnected &&
   (nearViewport || shellVisible)
 if (!canHardUnload || shouldKeepResidentPostVideo) {
   try {
@@ -471,9 +462,25 @@ if (cur === src) {
       networkStateNow === HTMLMediaElement.NETWORK_EMPTY
 
     if (isPostFeedVideo) {
-      el.dataset.__loadPending = '0'
-      delete el.dataset.__loadPendingSince
-      el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
+      const shouldKickLoad =
+        (readyStateNow === 0 || isNetworkEmpty) &&
+        (
+          String(el.dataset?.__active || '') === '1' ||
+          String(el.dataset?.__prewarm || '') === '1' ||
+          String(el.dataset?.__resident || '') === '1' ||
+          __isVideoNearViewport(el, 900)
+        )
+
+      if (shouldKickLoad && canRestoreLoad()) {
+        el.dataset.__loadPending = '1'
+        el.dataset.__loadPendingSince = String(Date.now())
+        el.dataset.__warmReady = '0'
+        try { el.load?.() } catch {}
+      } else {
+        el.dataset.__loadPending = '0'
+        delete el.dataset.__loadPendingSince
+        el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
+      }
       return
     }
 

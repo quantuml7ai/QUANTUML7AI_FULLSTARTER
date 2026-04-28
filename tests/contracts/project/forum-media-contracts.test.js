@@ -40,7 +40,10 @@ describe('forum media contracts', () => {
     expect(src).not.toContain("qs.get('legacyWarmSweep')")
     expect(src).not.toContain("qs.get('legacyIframePrewarm')")
     expect(src).not.toContain('forum:qcastMuted')
-    expect(src).toContain("source === 'media_element' || source === 'external' || source === 'forum-splash'")
+    expect(src).toContain('const isAuthoritativeMuteSource =')
+    expect(src).toContain("source === 'media_element' ||")
+    expect(src).toContain("source === 'external' ||")
+    expect(src).toContain("source === 'forum-splash' ||")
     expect(src).toContain("setMutedPref(!!el.muted, 'video')")
   })
 
@@ -48,6 +51,7 @@ describe('forum media contracts', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
     expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
+    expect(src).toContain('__isVideoNearViewport(el, 900)')
   })
 
   test('boot splash publishes an active gate marker for forum media policy', () => {
@@ -62,5 +66,50 @@ describe('forum media contracts', () => {
     expect(src).toContain('data-forum-embed-kind=')
     expect(src).toContain('data-lifecycle-state=')
     expect(src).toContain('data-stable-shell="1"')
+  })
+
+  test('post cards publish composited media safe-mode markers and text frame shell', () => {
+    const cardSrc = read('app/forum/features/feed/components/ForumPostCard.jsx')
+    const bodySrc = read('app/forum/features/feed/components/PostBodyContent.jsx')
+    expect(cardSrc).toContain('data-composited-media-card={hasCompositedMedia ? \'1\' : undefined}')
+    expect(cardSrc).toContain('data-composited-frame={hasCompositedMedia ? \'1\' : undefined}')
+    expect(bodySrc).toContain('className="postTextFrame"')
+    expect(bodySrc).not.toContain('className="postBodyFrame"')
+  })
+
+  test('video feed cards disable hover transform to reduce desktop compositor churn', () => {
+    const src = read('app/forum/styles/ForumStyles.jsx')
+    expect(src).toContain('html[data-video-feed="1"] article[data-forum-post-card="1"].item:hover{ transform:none }')
+    expect(src).toContain('.forum_root .item[data-composited-media-card="1"] .mediaBox[data-kind="video"]')
+    expect(src).toContain('.postTextFrame{')
+  })
+
+  test('coordinator and ads keep existing fetches instead of reloading empty shells', () => {
+    const coordinatorSrc = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    const adsSrc = read('app/forum/ForumAds.js')
+    expect(coordinatorSrc).toContain('const isHtmlMediaLoadingOrBuffered = (el) => {')
+    expect(coordinatorSrc).toContain("trace('load_kick_hold_existing_fetch', media, {")
+    expect(coordinatorSrc).toContain('const allowNearViewportRestore =')
+    expect(coordinatorSrc).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
+    expect(adsSrc).toContain('const hadSrc = (() => {')
+    expect(adsSrc).toContain("videoEl.dataset.__adWarmOwner = '0';")
+  })
+
+  test('video feed windowing keeps a narrower render budget and real anchored scroll compensation', () => {
+    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
+    expect(src).toContain('const VF_OVERSCAN_PX_MOBILE = 620')
+    expect(src).toContain('const VF_OVERSCAN_PX_TABLET = 760')
+    expect(src).toContain('const vfAdjustScrollBy = useCallback((delta) => {')
+    expect(src).toContain('if (coarse) return 5')
+    expect(src).toContain('return 8')
+  })
+
+  test('mute document sync does not write hydration-sensitive body dataset flags', () => {
+    const runtimeSrc = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    const adsSrc = read('app/forum/ForumAds.js')
+    expect(runtimeSrc).not.toContain('body.dataset.forumMediaMuted =')
+    expect(runtimeSrc).not.toContain('body.dataset.forumMediaSoundUnlocked =')
+    expect(adsSrc).not.toContain('body.dataset.forumMediaMuted =')
+    expect(adsSrc).not.toContain('body.dataset.forumMediaSoundUnlocked =')
   })
 })
