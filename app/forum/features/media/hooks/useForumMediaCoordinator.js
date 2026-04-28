@@ -3112,16 +3112,16 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(700, Math.min(1120, Math.round(viewportH * 1.18)));
-      if (isCoarseUi) return Math.max(580, Math.min(940, Math.round(viewportH * 1.02)));
-      return Math.max(460, Math.min(980, Math.round(viewportH * 0.84)));
+      if (isIOSUi) return Math.max(620, Math.min(980, Math.round(viewportH * 1.04)));
+      if (isCoarseUi) return Math.max(520, Math.min(860, Math.round(viewportH * 0.92)));
+      return Math.max(440, Math.min(940, Math.round(viewportH * 0.8)));
     };
 
     const getNativePrimeGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(420, Math.min(680, Math.round(viewportH * 0.72)));
-      if (isCoarseUi) return Math.max(320, Math.min(540, Math.round(viewportH * 0.58)));
-      return Math.max(0, Math.min(360, Math.round(viewportH * 0.3)));
+      if (isIOSUi) return Math.max(320, Math.min(520, Math.round(viewportH * 0.55)));
+      if (isCoarseUi) return Math.max(260, Math.min(440, Math.round(viewportH * 0.46)));
+      return Math.max(0, Math.min(300, Math.round(viewportH * 0.24)));
     };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3431,12 +3431,35 @@ const pauseForeignMedia = (keepEl = null) => {
         return true;
       }
 
+      const alreadyLoadingOrBuffered = (() => {
+        try {
+          const hasSrc = !!String(media.getAttribute?.('src') || media.currentSrc || '').trim();
+          const networkState = Number(media.networkState || 0);
+          const loadPending = String(media.dataset?.__loadPending || '') === '1';
+          return hasSrc && (loadPending || networkState === HTMLMediaElement.NETWORK_LOADING || networkState === HTMLMediaElement.NETWORK_IDLE);
+        } catch {
+          return false;
+        }
+      })();
+
+      if (alreadyLoadingOrBuffered) {
+        trace('native_prewarm_keep_loading', media, {
+          reason,
+          readyState: Number(media.readyState || 0),
+          networkState: Number(media.networkState || 0),
+          gapPx: getOwnerViewportGapPx(media),
+          visiblePx: getOwnerVisiblePx(media),
+        });
+        armReadyReplay(media);
+        return true;
+      }      
+
       const kicked = kickMediaLoad(media, {
         channel: 'native_priority_prewarm',
-        minGapMs: isIOSUi ? 460 : (isCoarseUi ? 560 : 760),
-        burstWindowMs: isIOSUi ? 15000 : 13000,
-        burstLimit: isIOSUi ? 3 : 3,
-        blockMs: isIOSUi ? 5200 : 5200,
+        minGapMs: isIOSUi ? 900 : (isCoarseUi ? 980 : 1100),
+        burstWindowMs: isIOSUi ? 18000 : 16000,
+        burstLimit: isIOSUi ? 2 : 2,
+        blockMs: isIOSUi ? 7600 : 6800,
         bypassSrcLimiter: false,
         bypassPendingBudget: false,
       });
@@ -3454,7 +3477,20 @@ const pauseForeignMedia = (keepEl = null) => {
         centerDist: getOwnerCenterDist(media),
       });
 
-      primeNativeFirstFrame(media, reason);
+      // Prewarm имеет право заранее поставить src/load/preload, чтобы первый кадр успел подготовиться.
+      // Но play-prime разрешён только активному owner'у: неактивный prime на mobile ворует media pipeline,
+      // ставит текущее видео на pause и плодит cancel/206/cancel.
+      if (isActiveNativeOwner(media)) {
+        primeNativeFirstFrame(media, reason);
+      } else {
+        trace('native_prewarm_prime_deferred', media, {
+          reason,
+          readyState: Number(media.readyState || 0),
+          networkState: Number(media.networkState || 0),
+          gapPx: getOwnerViewportGapPx(media),
+          visiblePx: getOwnerVisiblePx(media),
+        });
+      }
       armReadyReplay(media);
       return true;
     };    
@@ -4318,9 +4354,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 580 : (isCoarseUi ? 460 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.62 : 1.32)))
+          Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.22)))
         }px 0px ${
-          Math.max(isIOSUi ? 1080 : (isCoarseUi ? 860 : 960), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.82 : 2.1)))
+          Math.max(isIOSUi ? 920 : (isCoarseUi ? 760 : 940), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.38 : 1.9)))
         }px 0px`,
       },
     );
