@@ -1961,8 +1961,7 @@ const onMutedEvent = (e) => {
       const minVisiblePx = getAutoplayMinVisiblePx(owner);
       const centerDistNow = getOwnerCenterDist(owner);
       const maxCenterDist = getPriorityCenterMaxDist(owner);
-      if (
-        !coordinatorPlay &&
+      if ( 
         !manualLease &&
         !hasGesture &&
         (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)
@@ -2919,9 +2918,16 @@ const shouldRetainHtmlMedia = (el) => {
     };
     const getAutoplayMinVisiblePx = (el) => {
       const kind = String(getOwnerNode(el)?.getAttribute?.('data-forum-media') || el?.getAttribute?.('data-forum-media') || '');
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 98 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 128 : 120);
+      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+      if (kind === 'qcast') return isIOSUi ? 86 : (isCoarseUi ? 118 : 90);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
+        return isIOSUi
+          ? Math.max(132, Math.round(viewportH * 0.18))
+          : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.24)) : 150);
+      }
+      return isIOSUi
+        ? Math.max(152, Math.round(viewportH * 0.2))
+        : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.25)) : 130);
     };
     const getOwnerCenterDist = (el) => {
       try {
@@ -3982,15 +3988,22 @@ return;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 0.08 : (isCoarseUi ? 0.14 : 0.18);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);
-      return isIOSUi ? 0.11 : (isCoarseUi ? 0.24 : 0.35);
+      if (kind === 'qcast') return isIOSUi ? 0.1 : (isCoarseUi ? 0.16 : 0.18);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.16 : (isCoarseUi ? 0.24 : 0.3);
+      return isIOSUi ? 0.2 : (isCoarseUi ? 0.28 : 0.35);
     };
     const getStartVisiblePx = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 110 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);
-      return isIOSUi ? 72 : (isCoarseUi ? 150 : 120);
+      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+      if (kind === 'qcast') return isIOSUi ? 86 : (isCoarseUi ? 118 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
+        return isIOSUi
+          ? Math.max(132, Math.round(viewportH * 0.18))
+          : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.24)) : 140);
+      }
+      return isIOSUi
+        ? Math.max(152, Math.round(viewportH * 0.2))
+        : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.25)) : 120);
     };
     const getStopCenterMaxDist = (el) => {
       const startDist = getPriorityCenterMaxDist(el);
@@ -4262,9 +4275,14 @@ return;
           const relaxedStartForIOS = (() => {
             if (!isIOSUi) return false;
             if (!(candidate instanceof Element)) return false;
-            const ratioGate = Math.max(0.08, Number(getStartRatio(candidate) || 0) * 0.82);
-            const pxGate = Math.max(58, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.78));
-            const centerGate = Math.max(140, Number(getPriorityCenterMaxDist(candidate) || 0) + 40);
+            const candidateKind = getMediaKind(candidate);
+            // Native video must be prepared outside viewport, but it must not start from the edge.
+            // Keep relaxed start only for external players, where API bootstrap sometimes needs
+            // one extra active-zone kick.
+            if (candidate instanceof HTMLVideoElement || candidateKind === 'video') return false;
+            const ratioGate = Math.max(0.1, Number(getStartRatio(candidate) || 0) * 0.9);
+            const pxGate = Math.max(96, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.86));
+            const centerGate = Math.max(150, Number(getPriorityCenterMaxDist(candidate) || 0) + 24);
             return (
               Number(ratio || 0) >= ratioGate &&
               Number(visiblePx || 0) >= pxGate &&
@@ -4550,13 +4568,26 @@ const onExternalMediaPlay = (e) => {
     source === 'forum-ads' ||
     source === 'forum-ads-toggle' ||
     source.startsWith('ad_');
-
-  if (isAdSource) return;
-
-  if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
-
+ 
   const candidate = e?.detail?.element || null;
   const manual = !!e?.detail?.manual;
+  if (isAdSource) {
+    // Ads live in their own module, but there is still only one playing media pipeline.
+    // When an ad really starts, the forum coordinator must immediately stop native/QCast/iframe.
+    try {
+      if (active instanceof Element) {
+        softPauseMedia(active);
+        scheduleHardUnload(active, null, 'ad_external_play');
+      }
+      active = null;
+      activeSinceTs = 0;
+      pauseForeignMedia(null);
+      traceCandidate('candidate_ad_external_play_pause_forum', candidate, { reason: source });
+    } catch {}
+    return;
+  }
+
+  if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
 
   if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
     traceCandidate('candidate_external_ignored', candidate, { reason: source });
@@ -4564,10 +4595,21 @@ const onExternalMediaPlay = (e) => {
   }
 
   if (!manual && active && candidate && active !== candidate) {
-    traceCandidate('candidate_external_hold_active', candidate, {
-      reason: source,
-    });
-    return;
+    const owner = candidate instanceof Element
+      ? (candidate.matches?.(selector) ? candidate : candidate.closest?.(selector))
+      : null;
+    const ratioNow = owner instanceof Element ? Number(ratios.get(owner) || 0) : 0;
+    const visiblePxNow = owner instanceof Element ? getOwnerVisiblePx(owner) : 0;
+    const centerDistNow = owner instanceof Element ? getOwnerCenterDist(owner) : Number.POSITIVE_INFINITY;
+    if (!(owner instanceof Element) || !isStartableCandidate(owner, ratioNow, visiblePxNow, centerDistNow)) {
+      traceCandidate('candidate_external_hold_active', candidate, {
+        reason: source,
+        ratio: ratioNow,
+        visiblePx: visiblePxNow,
+        centerDist: centerDistNow,
+      });
+      return;
+    }
   }
 
   promoteExternalActive(candidate, `${source}_external_play`, { manual });

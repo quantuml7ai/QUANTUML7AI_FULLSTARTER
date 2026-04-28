@@ -197,28 +197,7 @@ export default function useVideoFeedWindowing({
 
     return { st: winTop, vh: winH, mode: 'window' }
   }, [vfGetScrollEl, vfHasInnerScrollable])
-
-  const vfAdjustScrollBy = useCallback((delta) => {
-    const d = Number(delta || 0)
-    if (!Number.isFinite(d) || Math.abs(d) < 1) return
-
-    try {
-      const el = vfGetScrollEl()
-      if (vfHasInnerScrollable(el)) {
-        el.scrollTop = Math.max(0, Number(el.scrollTop || 0) + d)
-        return
-      }
-    } catch {}
-
-    try {
-      const nextTop = Math.max(
-        0,
-        Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d
-      )
-      window.scrollTo(0, nextTop)
-    } catch {}
-  }, [vfGetScrollEl, vfHasInnerScrollable])
-
+ 
   const vfGetFixedRecommendationH = useCallback(() => {
     try {
       if (!isBrowserFn()) return VF_RECOMMENDATION_CARD_H_TABLET
@@ -315,6 +294,11 @@ export default function useVideoFeedWindowing({
 
       if (shrinkOnly) {
         const now = Date.now()
+        const scrollActiveNow =
+          Number(vfScrollActivityRef.current?.activeUntil || 0) > now ||
+          Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.06
+        if (scrollActiveNow) return prev
+        
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
         const stickyItems = velocity > 1.2 ? 3 : velocity > 0.55 ? 2 : 2
         const stickyMaxRender = vfMaxRender + stickyItems
@@ -400,20 +384,19 @@ export default function useVideoFeedWindowing({
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < VF_ANCHOR_DELTA_IGNORE_PX) return
 
-    const applied = Math.sign(raw) * Math.min(Math.abs(raw), VF_ANCHOR_DELTA_MAX_PX)
+    // Premium scroll rule: virtual measurements may update, but this hook must not
+    // write scrollTop as a compensation. Any scrollTop write during/back-after scroll
+    // is perceived as a teleport, especially when moving back up the feed.
     vfLastAnchorAdjustTsRef.current = Date.now()
-
-    try { vfAdjustScrollBy(applied) } catch {}
-
-    try {
-      emitDiag?.('video_feed_anchor_adjust', {
+ 
+   try {
+      emitDiag?.('video_feed_anchor_adjust_suppressed', {
         reason,
         delta: Math.round(raw),
-        applied: Math.round(applied),
-        pendingLeft: Math.round(raw - applied),
+        applied: 0,
       })
     } catch {}
-  }, [vfAdjustScrollBy, emitDiag])
+  }, [emitDiag])
 
   const vfScheduleAnchorFlush = useCallback((delay = VF_ANCHOR_FLUSH_MS) => {
     try {
