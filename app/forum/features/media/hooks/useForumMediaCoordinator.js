@@ -971,14 +971,31 @@ const readPendingLoads = (force = false) => {
             const readyState = Number(node?.readyState || 0);
             const networkState = Number(node?.networkState || 0);
             const pendingForMs = since > 0 ? (now - since) : 0;
+            const hasSrcNow = !!String(node?.currentSrc || node?.getAttribute?.('src') || '').trim();
+const longLoadingStuckMs = (() => {
+  try {
+    const ua = String(navigator?.userAgent || '');
+    const ios = /iP(hone|ad|od)/i.test(ua);
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+    if (ios) return 14000;
+    if (coarse) return 11000;
+    return 9000;
+  } catch {
+    return 11000;
+  }
+})();
             const mayBeStuck =
               pendingForMs > stalePendingMs &&
               readyState === 0 &&
-              (
-                networkState === HTMLMediaElement.NETWORK_LOADING ||
+              ( 
                 networkState === HTMLMediaElement.NETWORK_EMPTY ||
-                networkState === HTMLMediaElement.NETWORK_NO_SOURCE
-              );
+                networkState === HTMLMediaElement.NETWORK_NO_SOURCE ||
+                (
+                  networkState === HTMLMediaElement.NETWORK_LOADING &&
+                  !hasSrcNow &&
+                  pendingForMs > longLoadingStuckMs
+                )                
+              ); 
             if (mayBeStuck) {
               try {
                 node.dataset.__loadPending = '0';
@@ -1619,17 +1636,29 @@ try {
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
         const networkState = Number(el.networkState || 0);
         const stalePendingMs = isIOSUi ? 2400 : (isCoarseUi ? 3200 : 4200);
+const pendingForMs = pendingSince > 0 ? (now - pendingSince) : 0;
+const hasSrcNowForPending = !!String(el.currentSrc || el.getAttribute?.('src') || '').trim();
+const hardStalePendingMs = isIOSUi ? 14000 : (isCoarseUi ? 11000 : 9000);
+const canClearStalePending =
+  networkState === HTMLMediaElement.NETWORK_EMPTY ||
+  networkState === HTMLMediaElement.NETWORK_NO_SOURCE ||
+  (
+    networkState === HTMLMediaElement.NETWORK_LOADING &&
+    !hasSrcNowForPending &&
+    pendingForMs > hardStalePendingMs
+  );        
         if (
           String(el.dataset?.__loadPending || '') === '1' &&
           pendingSince > 0 &&
           readyState === 0 &&
-          (now - pendingSince) > stalePendingMs
+          pendingForMs > stalePendingMs &&
+          canClearStalePending
         ) {
           try {
             el.dataset.__loadPending = '0';
             delete el.dataset.__loadPendingSince;
           } catch {}
-          trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
+          trace('candidate_clear_stale_pending', el, { reason, pendingForMs, networkState, hasSrc: hasSrcNowForPending });
         }
 const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
 if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
@@ -1673,7 +1702,7 @@ if (!kickMediaLoad(el, {
           readyState === 0 &&
           networkState === HTMLMediaElement.NETWORK_LOADING &&
           pendingSince > 0 &&
-          (now - pendingSince) > (isIOSUi ? 1100 : 1450);
+          (now - pendingSince) > (isIOSUi ? 5200 : (isCoarseUi ? 4400 : 3800));
         const maxReadyRetryCount = isIOSUi ? 2 : 1;
 if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
   const isPostVideo =
@@ -1702,7 +1731,19 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
       armReadyReplay(el);
       return false;
     }
-
+const hasAttachedSrcForRetry = !!String(el.currentSrc || el.getAttribute?.('src') || '').trim();
+if (networkState === HTMLMediaElement.NETWORK_LOADING && hasAttachedSrcForRetry) {
+  // Do not call load() again while the browser is already fetching the same MP4.
+  // Re-load here aborts the current Range request and creates the 206/cancel loop.
+  trace('candidate_pending_stall_hold_loading', el, {
+    reason,
+    stalledMs: now - pendingSince,
+    readyRetryCount,
+    networkState,
+  });
+  armReadyReplay(el);
+  return false;
+}
     clearLoadPending(el, 'candidate_retry_reset', false);
     try { el.dataset.__candidateBoostTs = String(now); } catch {}
 
@@ -2615,17 +2656,22 @@ const shouldRetainHtmlMedia = (el) => {
     if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
 
     if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') {
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 520 : 760);
+      // Native prewarm loads ahead of the focus zone. Do not hard-unload it with
+      // the small old margin, otherwise Chrome/Safari abort the Range request and
+      // the next activation starts a fresh 206 chain.
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 980 : (isCoarseUi ? 860 : 940));
     }
 
     if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') {
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 420 : 640);
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 760 : (isCoarseUi ? 680 : 760));
     }
 
     if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') {
       const since = Number(mediaDataset?.__loadPendingSince || ownerDataset?.__loadPendingSince || 0);
-      if (since > 0 && Date.now() - since < (isIOSUi ? 2600 : 3600)) return true;
-      return false;
+      const pendingForMs = since > 0 ? Date.now() - since : 0;
+      const graceMs = isIOSUi ? 9000 : (isCoarseUi ? 7800 : 6800);
+      if (since > 0 && pendingForMs < graceMs) return true;
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 1100 : (isCoarseUi ? 900 : 920));
     }
 
     if (isNearViewportElement(owner || mediaEl, isIOSUi ? 360 : 520)) return true;
@@ -3239,13 +3285,51 @@ const pauseForeignMedia = (keepEl = null) => {
         if (keepEl && prev === keepEl) return;
         if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
         nativePrewarmEl = null;
+const now = Date.now();
+const prevGapPx = getOwnerViewportGapPx(prev);
+const prevVisiblePx = getOwnerVisiblePx(prev);
+const prevNetworkState = Number(prev.networkState || 0);
+const prevLoadPending = String(prev.dataset?.__loadPending || '') === '1';
+const prevLastKickTs = Math.max(
+  Number(prev.dataset?.__lastLoadKickTs || 0),
+  Number(prev.dataset?.__candidateBoostTs || 0),
+  Number(prev.dataset?.__nativePrimeTs || 0),
+);
+const prevRecentlyTouched = prevLastKickTs > 0 && (now - prevLastKickTs) < (isIOSUi ? 9000 : 7200);
+const prevLoading =
+  prevLoadPending ||
+  prevNetworkState === HTMLMediaElement.NETWORK_LOADING ||
+  (prevNetworkState === HTMLMediaElement.NETWORK_IDLE && !!String(prev.currentSrc || prev.getAttribute?.('src') || '').trim());
+const protectedGap = getNativePrewarmGapLimit() + (isIOSUi ? 360 : 260);
+const keepBufferedInsteadOfAbort =
+  prevLoading &&
+  (prevVisiblePx > 0 || prevGapPx <= protectedGap || prevRecentlyTouched);        
         try {
-          prev.dataset.__prewarm = '0';
-          prev.dataset.__resident = '0';
           prev.dataset.__nativePrewarm = '0';
+          if (keepBufferedInsteadOfAbort) {
+            prev.dataset.__prewarm = '1';
+            prev.dataset.__resident = '1';
+          } else {
+            prev.dataset.__prewarm = '0';
+            prev.dataset.__resident = '0';
+          }          
         } catch {}
-        if (!isNearViewportElement(prev, isIOSUi ? 420 : 520)) {
-          scheduleHardUnload(prev, isIOSUi ? 900 : 800, reason);
+
+        if (keepBufferedInsteadOfAbort) {
+          try { prev.preload = 'auto'; } catch {}
+          trace('native_prewarm_release_keep_loading', prev, {
+            reason,
+            prevGapPx,
+            prevVisiblePx,
+            prevNetworkState,
+            prevLoadPending,
+            prevRecentlyTouched,
+          });
+          return;
+        }
+
+        if (!isNearViewportElement(prev, isIOSUi ? 760 : (isCoarseUi ? 680 : 760))) {
+          scheduleHardUnload(prev, isIOSUi ? 3600 : (isCoarseUi ? 3000 : 2800), reason);
         } else {
           try { prev.preload = 'metadata'; } catch {}
         }
