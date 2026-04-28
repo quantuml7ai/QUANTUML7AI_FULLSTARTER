@@ -971,31 +971,14 @@ const readPendingLoads = (force = false) => {
             const readyState = Number(node?.readyState || 0);
             const networkState = Number(node?.networkState || 0);
             const pendingForMs = since > 0 ? (now - since) : 0;
-            const hasSrcNow = !!String(node?.currentSrc || node?.getAttribute?.('src') || '').trim();
-const longLoadingStuckMs = (() => {
-  try {
-    const ua = String(navigator?.userAgent || '');
-    const ios = /iP(hone|ad|od)/i.test(ua);
-    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-    if (ios) return 14000;
-    if (coarse) return 11000;
-    return 9000;
-  } catch {
-    return 11000;
-  }
-})();
             const mayBeStuck =
               pendingForMs > stalePendingMs &&
               readyState === 0 &&
-              ( 
+              (
+                networkState === HTMLMediaElement.NETWORK_LOADING ||
                 networkState === HTMLMediaElement.NETWORK_EMPTY ||
-                networkState === HTMLMediaElement.NETWORK_NO_SOURCE ||
-                (
-                  networkState === HTMLMediaElement.NETWORK_LOADING &&
-                  !hasSrcNow &&
-                  pendingForMs > longLoadingStuckMs
-                )                
-              ); 
+                networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+              );
             if (mayBeStuck) {
               try {
                 node.dataset.__loadPending = '0';
@@ -1636,29 +1619,17 @@ try {
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
         const networkState = Number(el.networkState || 0);
         const stalePendingMs = isIOSUi ? 2400 : (isCoarseUi ? 3200 : 4200);
-const pendingForMs = pendingSince > 0 ? (now - pendingSince) : 0;
-const hasSrcNowForPending = !!String(el.currentSrc || el.getAttribute?.('src') || '').trim();
-const hardStalePendingMs = isIOSUi ? 14000 : (isCoarseUi ? 11000 : 9000);
-const canClearStalePending =
-  networkState === HTMLMediaElement.NETWORK_EMPTY ||
-  networkState === HTMLMediaElement.NETWORK_NO_SOURCE ||
-  (
-    networkState === HTMLMediaElement.NETWORK_LOADING &&
-    !hasSrcNowForPending &&
-    pendingForMs > hardStalePendingMs
-  );        
         if (
           String(el.dataset?.__loadPending || '') === '1' &&
           pendingSince > 0 &&
           readyState === 0 &&
-          pendingForMs > stalePendingMs &&
-          canClearStalePending
+          (now - pendingSince) > stalePendingMs
         ) {
           try {
             el.dataset.__loadPending = '0';
             delete el.dataset.__loadPendingSince;
           } catch {}
-          trace('candidate_clear_stale_pending', el, { reason, pendingForMs, networkState, hasSrc: hasSrcNowForPending });
+          trace('candidate_clear_stale_pending', el, { reason, pendingForMs: now - pendingSince });
         }
 const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
 if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
@@ -1702,7 +1673,7 @@ if (!kickMediaLoad(el, {
           readyState === 0 &&
           networkState === HTMLMediaElement.NETWORK_LOADING &&
           pendingSince > 0 &&
-          (now - pendingSince) > (isIOSUi ? 5200 : (isCoarseUi ? 4400 : 3800));
+          (now - pendingSince) > (isIOSUi ? 1100 : 1450);
         const maxReadyRetryCount = isIOSUi ? 2 : 1;
 if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
   const isPostVideo =
@@ -1731,19 +1702,7 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
       armReadyReplay(el);
       return false;
     }
-const hasAttachedSrcForRetry = !!String(el.currentSrc || el.getAttribute?.('src') || '').trim();
-if (networkState === HTMLMediaElement.NETWORK_LOADING && hasAttachedSrcForRetry) {
-  // Do not call load() again while the browser is already fetching the same MP4.
-  // Re-load here aborts the current Range request and creates the 206/cancel loop.
-  trace('candidate_pending_stall_hold_loading', el, {
-    reason,
-    stalledMs: now - pendingSince,
-    readyRetryCount,
-    networkState,
-  });
-  armReadyReplay(el);
-  return false;
-}
+
     clearLoadPending(el, 'candidate_retry_reset', false);
     try { el.dataset.__candidateBoostTs = String(now); } catch {}
 
@@ -1961,7 +1920,8 @@ const onMutedEvent = (e) => {
       const minVisiblePx = getAutoplayMinVisiblePx(owner);
       const centerDistNow = getOwnerCenterDist(owner);
       const maxCenterDist = getPriorityCenterMaxDist(owner);
-      if ( 
+      if (
+        !coordinatorPlay &&
         !manualLease &&
         !hasGesture &&
         (visiblePxNow < minVisiblePx || centerDistNow > maxCenterDist)
@@ -2655,22 +2615,17 @@ const shouldRetainHtmlMedia = (el) => {
     if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
 
     if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') {
-      // Native prewarm loads ahead of the focus zone. Do not hard-unload it with
-      // the small old margin, otherwise Chrome/Safari abort the Range request and
-      // the next activation starts a fresh 206 chain.
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 980 : (isCoarseUi ? 860 : 940));
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 520 : 760);
     }
 
     if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') {
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 760 : (isCoarseUi ? 680 : 760));
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 420 : 640);
     }
 
     if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') {
       const since = Number(mediaDataset?.__loadPendingSince || ownerDataset?.__loadPendingSince || 0);
-      const pendingForMs = since > 0 ? Date.now() - since : 0;
-      const graceMs = isIOSUi ? 9000 : (isCoarseUi ? 7800 : 6800);
-      if (since > 0 && pendingForMs < graceMs) return true;
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 1100 : (isCoarseUi ? 900 : 920));
+      if (since > 0 && Date.now() - since < (isIOSUi ? 2600 : 3600)) return true;
+      return false;
     }
 
     if (isNearViewportElement(owner || mediaEl, isIOSUi ? 360 : 520)) return true;
@@ -2918,16 +2873,9 @@ const shouldRetainHtmlMedia = (el) => {
     };
     const getAutoplayMinVisiblePx = (el) => {
       const kind = String(getOwnerNode(el)?.getAttribute?.('data-forum-media') || el?.getAttribute?.('data-forum-media') || '');
-      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (kind === 'qcast') return isIOSUi ? 86 : (isCoarseUi ? 118 : 90);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
-        return isIOSUi
-          ? Math.max(132, Math.round(viewportH * 0.18))
-          : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.24)) : 150);
-      }
-      return isIOSUi
-        ? Math.max(152, Math.round(viewportH * 0.2))
-        : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.25)) : 130);
+      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 98 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 150 : 140);
+      return isIOSUi ? 72 : (isCoarseUi ? 128 : 120);
     };
     const getOwnerCenterDist = (el) => {
       try {
@@ -3291,51 +3239,13 @@ const pauseForeignMedia = (keepEl = null) => {
         if (keepEl && prev === keepEl) return;
         if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
         nativePrewarmEl = null;
-const now = Date.now();
-const prevGapPx = getOwnerViewportGapPx(prev);
-const prevVisiblePx = getOwnerVisiblePx(prev);
-const prevNetworkState = Number(prev.networkState || 0);
-const prevLoadPending = String(prev.dataset?.__loadPending || '') === '1';
-const prevLastKickTs = Math.max(
-  Number(prev.dataset?.__lastLoadKickTs || 0),
-  Number(prev.dataset?.__candidateBoostTs || 0),
-  Number(prev.dataset?.__nativePrimeTs || 0),
-);
-const prevRecentlyTouched = prevLastKickTs > 0 && (now - prevLastKickTs) < (isIOSUi ? 9000 : 7200);
-const prevLoading =
-  prevLoadPending ||
-  prevNetworkState === HTMLMediaElement.NETWORK_LOADING ||
-  (prevNetworkState === HTMLMediaElement.NETWORK_IDLE && !!String(prev.currentSrc || prev.getAttribute?.('src') || '').trim());
-const protectedGap = getNativePrewarmGapLimit() + (isIOSUi ? 360 : 260);
-const keepBufferedInsteadOfAbort =
-  prevLoading &&
-  (prevVisiblePx > 0 || prevGapPx <= protectedGap || prevRecentlyTouched);        
         try {
+          prev.dataset.__prewarm = '0';
+          prev.dataset.__resident = '0';
           prev.dataset.__nativePrewarm = '0';
-          if (keepBufferedInsteadOfAbort) {
-            prev.dataset.__prewarm = '1';
-            prev.dataset.__resident = '1';
-          } else {
-            prev.dataset.__prewarm = '0';
-            prev.dataset.__resident = '0';
-          }          
         } catch {}
-
-        if (keepBufferedInsteadOfAbort) {
-          try { prev.preload = 'auto'; } catch {}
-          trace('native_prewarm_release_keep_loading', prev, {
-            reason,
-            prevGapPx,
-            prevVisiblePx,
-            prevNetworkState,
-            prevLoadPending,
-            prevRecentlyTouched,
-          });
-          return;
-        }
-
-        if (!isNearViewportElement(prev, isIOSUi ? 760 : (isCoarseUi ? 680 : 760))) {
-          scheduleHardUnload(prev, isIOSUi ? 3600 : (isCoarseUi ? 3000 : 2800), reason);
+        if (!isNearViewportElement(prev, isIOSUi ? 420 : 520)) {
+          scheduleHardUnload(prev, isIOSUi ? 900 : 800, reason);
         } else {
           try { prev.preload = 'metadata'; } catch {}
         }
@@ -3479,14 +3389,12 @@ const keepBufferedInsteadOfAbort =
         const nextGap = getOwnerViewportGapPx(media);
         const prevVisible = getOwnerVisiblePx(prev);
         const nextVisible = getOwnerVisiblePx(media);
-        const prevCenter = getOwnerCenterDist(prev);
-        const nextCenter = getOwnerCenterDist(media);        
         const nextClearlyBetter =
-          nextVisible > Math.max(0, prevVisible + 72) ||
-          nextGap + (isIOSUi ? 320 : 240) < prevGap ||
-          nextCenter + (isIOSUi ? 220 : 160) < prevCenter;
+          nextVisible > Math.max(0, prevVisible + 36) ||
+          nextGap + (isIOSUi ? 180 : 140) < prevGap ||
+          getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
         const canHoldPrev =
-          age < (isIOSUi ? 2600 : 2100) &&
+          age < (isIOSUi ? 1250 : 950) &&
           isNativePrewarmEligible(prev) &&
           !nextClearlyBetter;
         if (canHoldPrev) {
@@ -3497,8 +3405,6 @@ const keepBufferedInsteadOfAbort =
             nextGap,
             prevVisible,
             nextVisible,
-            prevCenter,
-            nextCenter,            
           });
           return true;
         }
@@ -3988,22 +3894,15 @@ return;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
     const getStartRatio = (el) => {
       const kind = getMediaKind(el);
-      if (kind === 'qcast') return isIOSUi ? 0.1 : (isCoarseUi ? 0.16 : 0.18);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.16 : (isCoarseUi ? 0.24 : 0.3);
-      return isIOSUi ? 0.2 : (isCoarseUi ? 0.28 : 0.35);
+      if (kind === 'qcast') return isIOSUi ? 0.08 : (isCoarseUi ? 0.14 : 0.18);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 0.12 : (isCoarseUi ? 0.22 : 0.3);
+      return isIOSUi ? 0.11 : (isCoarseUi ? 0.24 : 0.35);
     };
     const getStartVisiblePx = (el) => {
       const kind = getMediaKind(el);
-      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (kind === 'qcast') return isIOSUi ? 86 : (isCoarseUi ? 118 : 80);
-      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
-        return isIOSUi
-          ? Math.max(132, Math.round(viewportH * 0.18))
-          : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.24)) : 140);
-      }
-      return isIOSUi
-        ? Math.max(152, Math.round(viewportH * 0.2))
-        : (isCoarseUi ? Math.max(190, Math.round(viewportH * 0.25)) : 120);
+      if (kind === 'qcast') return isIOSUi ? 64 : (isCoarseUi ? 110 : 80);
+      if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') return isIOSUi ? 96 : (isCoarseUi ? 180 : 140);
+      return isIOSUi ? 72 : (isCoarseUi ? 150 : 120);
     };
     const getStopCenterMaxDist = (el) => {
       const startDist = getPriorityCenterMaxDist(el);
@@ -4107,19 +4006,11 @@ return;
             const isExternalCandidate =
               candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';
             const isNativeCandidate = isNativePostVideoCandidate(candidate);
-            const externalRunwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
-            const externalVisibleGate = Math.max(
-              36,
-              Math.round(getStartVisiblePx(candidate) * (isIOSUi ? 0.42 : 0.5))
-            );            
             const externalCanPrepare =
               !isExternalCandidate ||
               (
-                visiblePx >= externalVisibleGate ||
-                (
-                  getOwnerViewportGapPx(candidate) <= externalRunwayPx &&
-                  centerDist <= getPriorityCenterMaxDist(candidate) + externalRunwayPx
-                )
+                visiblePx >= getStartVisiblePx(candidate) &&
+                centerDist <= getPriorityCenterMaxDist(candidate)
               );
             const prepared = isNativeCandidate
               ? prepareNativePriorityPrewarm(candidate, 'early_native_candidate')
@@ -4275,14 +4166,9 @@ return;
           const relaxedStartForIOS = (() => {
             if (!isIOSUi) return false;
             if (!(candidate instanceof Element)) return false;
-            const candidateKind = getMediaKind(candidate);
-            // Native video must be prepared outside viewport, but it must not start from the edge.
-            // Keep relaxed start only for external players, where API bootstrap sometimes needs
-            // one extra active-zone kick.
-            if (candidate instanceof HTMLVideoElement || candidateKind === 'video') return false;
-            const ratioGate = Math.max(0.1, Number(getStartRatio(candidate) || 0) * 0.9);
-            const pxGate = Math.max(96, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.86));
-            const centerGate = Math.max(150, Number(getPriorityCenterMaxDist(candidate) || 0) + 24);
+            const ratioGate = Math.max(0.08, Number(getStartRatio(candidate) || 0) * 0.82);
+            const pxGate = Math.max(58, Math.round(Number(getStartVisiblePx(candidate) || 0) * 0.78));
+            const centerGate = Math.max(140, Number(getPriorityCenterMaxDist(candidate) || 0) + 40);
             return (
               Number(ratio || 0) >= ratioGate &&
               Number(visiblePx || 0) >= pxGate &&
@@ -4348,23 +4234,13 @@ return;
             }
 
             if (prepared && isExternalCandidate) {
-              // External players (YouTube/TikTok/iframe) do not always produce another
-              // IntersectionObserver tick right after src/API bootstrap. If we only
-              // prepare and wait, autoplay can stay stuck. Start the active candidate now;
-              // playMedia() will initialize YouTube API and then call playVideo().
-              traceCandidate('candidate_external_activate_after_prepare', candidate, {
+              traceCandidate('candidate_prepare_before_activate', candidate, {
                 ratio,
                 score,
                 visiblePx,
                 centerDist,
-                reason: 'external_prepared_play_now',
-               });
-              active = candidate;
-              activeSinceTs = Date.now();
-              cancelUnload(active);
-              emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0, score });
-              playMedia(active);
-              return;
+                reason: 'prepared_wait_next_tick',
+              });
             }
             traceCandidate('candidate_activate_pending', candidate, {
               ratio,
@@ -4410,20 +4286,14 @@ return;
       }
 
       if (kind === 'youtube' || kind === 'tiktok' || kind === 'iframe') {
-        // External providers also participate in the same pipeline, but with a soft runway:
-        // prepare iframe shortly before focus, not several cards away and not only after focus.
+        // Heavy iframe providers are activated only inside the focus/start zone.
+        // Near prewarm must not create far YouTube/TikTok frames and compete
+        // with the current native video on mobile browsers.
         const visiblePx = getOwnerVisiblePx(el);
         const centerDist = getOwnerCenterDist(el);
-        const gapPx = getOwnerViewportGapPx(el);
-        const startPx = getStartVisiblePx(el);
-        const startCenter = getPriorityCenterMaxDist(el);
-        const externalRunwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
-        const externalVisibleGate = Math.max(36, Math.round(startPx * (isIOSUi ? 0.42 : 0.5)));
-        const canPrepareExternal =
-          visiblePx >= externalVisibleGate ||
-          (gapPx <= externalRunwayPx && centerDist <= startCenter + externalRunwayPx);
-        if (!canPrepareExternal) return false;
-       
+        if (visiblePx < getStartVisiblePx(el) || centerDist > getPriorityCenterMaxDist(el)) {
+          return false;
+        }
         return prepareExternalMedia(el, reason);
       }
 
@@ -4568,26 +4438,13 @@ const onExternalMediaPlay = (e) => {
     source === 'forum-ads' ||
     source === 'forum-ads-toggle' ||
     source.startsWith('ad_');
- 
-  const candidate = e?.detail?.element || null;
-  const manual = !!e?.detail?.manual;
-  if (isAdSource) {
-    // Ads live in their own module, but there is still only one playing media pipeline.
-    // When an ad really starts, the forum coordinator must immediately stop native/QCast/iframe.
-    try {
-      if (active instanceof Element) {
-        softPauseMedia(active);
-        scheduleHardUnload(active, null, 'ad_external_play');
-      }
-      active = null;
-      activeSinceTs = 0;
-      pauseForeignMedia(null);
-      traceCandidate('candidate_ad_external_play_pause_forum', candidate, { reason: source });
-    } catch {}
-    return;
-  }
+
+  if (isAdSource) return;
 
   if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
+
+  const candidate = e?.detail?.element || null;
+  const manual = !!e?.detail?.manual;
 
   if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
     traceCandidate('candidate_external_ignored', candidate, { reason: source });
@@ -4595,21 +4452,10 @@ const onExternalMediaPlay = (e) => {
   }
 
   if (!manual && active && candidate && active !== candidate) {
-    const owner = candidate instanceof Element
-      ? (candidate.matches?.(selector) ? candidate : candidate.closest?.(selector))
-      : null;
-    const ratioNow = owner instanceof Element ? Number(ratios.get(owner) || 0) : 0;
-    const visiblePxNow = owner instanceof Element ? getOwnerVisiblePx(owner) : 0;
-    const centerDistNow = owner instanceof Element ? getOwnerCenterDist(owner) : Number.POSITIVE_INFINITY;
-    if (!(owner instanceof Element) || !isStartableCandidate(owner, ratioNow, visiblePxNow, centerDistNow)) {
-      traceCandidate('candidate_external_hold_active', candidate, {
-        reason: source,
-        ratio: ratioNow,
-        visiblePx: visiblePxNow,
-        centerDist: centerDistNow,
-      });
-      return;
-    }
+    traceCandidate('candidate_external_hold_active', candidate, {
+      reason: source,
+    });
+    return;
   }
 
   promoteExternalActive(candidate, `${source}_external_play`, { manual });
