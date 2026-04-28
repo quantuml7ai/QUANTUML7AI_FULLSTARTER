@@ -345,8 +345,8 @@ function ensureAdNativeVideoSrc(videoEl, src, muted) {
 
   return true;
 }
-const AD_NATIVE_WARM_STICKY_MS = 2600;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 6500;
+const AD_NATIVE_WARM_STICKY_MS = 4200;
+const AD_NATIVE_WARM_RELOAD_GAP_MS = 12000;
 let adNativeWarmSlot = { video: null, src: '', ts: 0 };
 
 function getAdViewportGapPx(el) {
@@ -385,10 +385,10 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
     adNativeWarmSlot = { video: null, src: '', ts: 0 };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '0'; } catch {}
 
-    // Не рубим близкий warm Range-поток: detach только если слот реально далеко и не играет.
-    const gapPx = getAdViewportGapPx(videoEl);
-    const farEnough = gapPx > 1200;
-    if (videoEl.paused && farEnough) detachAdNativeVideo(videoEl);
+    // Single-source rule: when a slot loses the controlled warm owner and is not playing,
+    // detach it immediately. Otherwise several ad cards keep ADS.mp4 attached and Chrome
+    // opens parallel Range/206 chains.
+    if (videoEl.paused) detachAdNativeVideo(videoEl);
   } catch {}
 }
 
@@ -412,7 +412,7 @@ function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
       const nextGap = getAdViewportGapPx(ownerEl || videoEl);
       const prevLoading = isAdNativeVideoLoadingOrReady(prev);
       const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-      const nextClearlyCloser = nextGap + 240 < prevGap;
+      const nextClearlyCloser = nextGap + 520 < prevGap;
 
       // Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
       if (sameSrc && prevLoading && age < AD_NATIVE_WARM_RELOAD_GAP_MS && !nextClearlyCloser) {
@@ -1484,8 +1484,9 @@ useEffect(() => {
 }, [shouldPlay]);
 
 useEffect(() => {
+  const node = videoRef.current;
   return () => {
-    try { releaseAdNativeWarmSlot(videoRef.current, 'unmount'); } catch {}
+    try { releaseAdNativeWarmSlot(node, 'unmount'); } catch {}
   };
 }, []);
 
@@ -1544,8 +1545,14 @@ useEffect(() => {
   // near = src/load/preload for ONE ad native video only; no play(), no site-media-play.
   if (!shouldPlayRef.current) {
     const canOwnWarm = claimAdNativeWarmSlot(v, srcKey, rootRef.current);
-    if (!canOwnWarm) return undefined;
- 
+    if (!canOwnWarm) {
+      // This ad card is near, but another card owns the single native warm slot.
+      // Keep this node network-cold to avoid parallel ADS.mp4 206/cancel chains.
+      try {
+        if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') detachAdNativeVideo(v);
+      } catch {}
+      return undefined;
+    }
     const nextMuted = normalizeForumAdMuted(mutedRef.current);
     const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
     if (attached) attachedVideoSrcRef.current = srcKey;
@@ -1605,7 +1612,7 @@ useEffect(() => {
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: '560px 0px 900px 0px', threshold: 0 }
+      { rootMargin: '480px 0px 760px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)

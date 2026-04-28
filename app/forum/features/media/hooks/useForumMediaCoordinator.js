@@ -4094,11 +4094,19 @@ return;
             const isExternalCandidate =
               candidateKind === 'youtube' || candidateKind === 'tiktok' || candidateKind === 'iframe';
             const isNativeCandidate = isNativePostVideoCandidate(candidate);
+            const externalRunwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
+            const externalVisibleGate = Math.max(
+              36,
+              Math.round(getStartVisiblePx(candidate) * (isIOSUi ? 0.42 : 0.5))
+            );            
             const externalCanPrepare =
               !isExternalCandidate ||
               (
-                visiblePx >= getStartVisiblePx(candidate) &&
-                centerDist <= getPriorityCenterMaxDist(candidate)
+                visiblePx >= externalVisibleGate ||
+                (
+                  getOwnerViewportGapPx(candidate) <= externalRunwayPx &&
+                  centerDist <= getPriorityCenterMaxDist(candidate) + externalRunwayPx
+                )
               );
             const prepared = isNativeCandidate
               ? prepareNativePriorityPrewarm(candidate, 'early_native_candidate')
@@ -4322,13 +4330,23 @@ return;
             }
 
             if (prepared && isExternalCandidate) {
-              traceCandidate('candidate_prepare_before_activate', candidate, {
+              // External players (YouTube/TikTok/iframe) do not always produce another
+              // IntersectionObserver tick right after src/API bootstrap. If we only
+              // prepare and wait, autoplay can stay stuck. Start the active candidate now;
+              // playMedia() will initialize YouTube API and then call playVideo().
+              traceCandidate('candidate_external_activate_after_prepare', candidate, {
                 ratio,
                 score,
                 visiblePx,
                 centerDist,
-                reason: 'prepared_wait_next_tick',
-              });
+                reason: 'external_prepared_play_now',
+               });
+              active = candidate;
+              activeSinceTs = Date.now();
+              cancelUnload(active);
+              emitMediaDiag('media_focus_switch', { ratio, prevRatio: 0, score });
+              playMedia(active);
+              return;
             }
             traceCandidate('candidate_activate_pending', candidate, {
               ratio,

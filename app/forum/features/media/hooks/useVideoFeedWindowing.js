@@ -20,7 +20,7 @@ const VF_LAYOUT_JITTER_PX = 32
 const VF_SCROLL_SETTLE_MS = 320
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 const VF_ANCHOR_DELTA_IGNORE_PX = 3
-const VF_ANCHOR_DELTA_MAX_PX = 180
+const VF_ANCHOR_DELTA_MAX_PX = 64
 const VF_ANCHOR_FLUSH_MS = 140
 const VF_ANCHOR_ACTIVE_RETRY_MS = 120
 
@@ -84,9 +84,9 @@ export default function useVideoFeedWindowing({
       if (!isBrowserFn()) return 6
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 9
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 9
-      return 11
+      if (coarse) return 8
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
+      return 10
     } catch {
       return 6
     }
@@ -294,20 +294,14 @@ export default function useVideoFeedWindowing({
       (velocity > 1.0 && !(window?.matchMedia?.('(pointer: coarse)')?.matches) ? 1 : 0)
 
     if ((end - start) > vfMaxRender) {
-      // Direction-aware trim: for media feeds we keep more DOM ahead of the scroll direction,
-      // so coordinator sees the next video/ad/qcast/iframe early enough for prewarm.
-      if (direction > 0) {
-        end = Math.min(total, end)
-        start = Math.max(0, end - vfMaxRender)
-      } else if (direction < 0) {
-        start = Math.max(0, start)
-        end = Math.min(total, start + vfMaxRender)
-      } else {
-        const mid = Math.floor((start + end) / 2)
-        const half = Math.floor(vfMaxRender / 2)
-        start = Math.max(0, mid - half)
-        end = Math.min(total, start + vfMaxRender)
-      }
+      // Stable centered trim. Direction-aware trim caused backward-scroll teleport:
+      // when user reversed direction, start/end could jump to the opposite edge of
+      // the overscan window and top spacer changed by hundreds of px in one frame.
+      const mid = Math.floor((start + end) / 2)
+      const half = Math.floor(vfMaxRender / 2)
+      start = Math.max(0, mid - half)
+      end = Math.min(total, start + vfMaxRender)
+      if ((end - start) < vfMaxRender) start = Math.max(0, end - vfMaxRender)
     }
 
     setVfWin((prev) => {
@@ -440,7 +434,15 @@ export default function useVideoFeedWindowing({
         vfPendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= VF_ANCHOR_DELTA_IGNORE_PX) {
-          vfApplyAnchoredScrollDelta(pending, 'deferred_height_above_window')
+          // Do not apply delayed scrollTop correction after the user stops scrolling.
+          // That delayed correction is perceived as a teleport, especially when scrolling back.
+          // Keep the measured heights, recalc the virtual window, but do not move scrollTop here.
+          try {
+            emitDiag?.('video_feed_anchor_deferred_drop', {
+              reason: 'drop_deferred_scrolltop_teleport_guard',
+              pending: Math.round(pending),
+            })
+          } catch {}
         }
 
         vfScheduleRecalc()
@@ -448,7 +450,7 @@ export default function useVideoFeedWindowing({
 
       vfAnchorFlushTimerRef.current = setTimeout(flush, Math.max(16, Number(delay || 0)))
     } catch {}
-  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleRecalc])
+  }, [emitDiag, vfIsScrollActiveNow, vfScheduleRecalc])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {
@@ -669,10 +671,20 @@ export default function useVideoFeedWindowing({
 
             if (delta !== 0 && isAboveWindow) {
               if (vfIsScrollActiveNow()) {
+                // Never move scrollTop during live scroll. We also do not replay this
+                // correction after settle; delayed scrollTop writes are the visible jump.                
                 vfPendingAnchorDeltaRef.current += delta
                 vfScheduleAnchorFlush()
-              } else {
+              } else if (Math.abs(delta) <= VF_ANCHOR_DELTA_MAX_PX) {
                 vfApplyAnchoredScrollDelta(delta, 'height_above_window')
+              } else {
+                try {
+                  emitDiag?.('video_feed_anchor_large_delta_drop', {
+                    reason: 'large_height_delta_above_window',
+                    idx,
+                    delta: Math.round(delta),
+                  })
+                } catch {}                
               }
             }
           }
@@ -694,7 +706,7 @@ export default function useVideoFeedWindowing({
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
+  }, [emitDiag, vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
 
   useEffect(() => {
     if (!isBrowserFn()) return undefined
