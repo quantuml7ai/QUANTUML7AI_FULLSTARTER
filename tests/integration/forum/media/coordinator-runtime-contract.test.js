@@ -51,11 +51,12 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('stickyItems')
   })
 
-  test('video feed windowing drops hidden anchor scrolltop writes during deferred height settling', () => {
+  test('video feed windowing keeps anchored scroll compensation narrow instead of deferred suppression', () => {
     const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
-    expect(src).toContain('video_feed_anchor_adjust_suppressed')
-    expect(src).toContain('video_feed_anchor_deferred_drop')
-    expect(src).not.toContain("emitDiag?.('video_feed_anchor_adjust', {")
+    expect(src).toContain('const vfAdjustScrollBy = useCallback((delta) => {')
+    expect(src).toContain('vfAdjustScrollBy(delta)')
+    expect(src).not.toContain('video_feed_anchor_adjust_suppressed')
+    expect(src).not.toContain('video_feed_anchor_deferred_drop')
   })
 
   test('media lifecycle runtime exports touch marker for resident policy', () => {
@@ -81,5 +82,13 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('const scheduleExternalPlayKick = (el, runner, reason = \'external_viewport_kick\') => {')
     expect(src).toContain('scheduleExternalPlayKick(el, kickYoutube, \'youtube_viewport_autoplay\')')
     expect(src).toContain('scheduleExternalPlayKick(el, kickExternalFrame, `${kind}_viewport_autoplay`)')
+  })
+
+  test('native post-video can prewarm near the viewport before activation and primes the first frame through coordinator', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).toContain('const allowNearViewportRestore =')
+    expect(src).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
+    expect(src).toContain('getOwnerViewportGapPx(el) <= (isIOSUi ? 280 : (isCoarseUi ? 320 : 220))')
+    expect(src).toContain('if (!primeNativeFirstFrame(media, reason)) {')
   })
 })

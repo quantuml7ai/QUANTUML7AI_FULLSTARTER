@@ -89,8 +89,19 @@ describe('forum media contracts', () => {
     const adsSrc = read('app/forum/ForumAds.js')
     expect(coordinatorSrc).toContain('const isHtmlMediaLoadingOrBuffered = (el) => {')
     expect(coordinatorSrc).toContain("trace('load_kick_hold_existing_fetch', media, {")
+    expect(coordinatorSrc).toContain('const allowNearViewportRestore =')
+    expect(coordinatorSrc).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
     expect(adsSrc).toContain('const hadSrc = (() => {')
     expect(adsSrc).toContain("videoEl.dataset.__adWarmOwner = '0';")
+  })
+
+  test('video feed windowing keeps a narrower render budget and real anchored scroll compensation', () => {
+    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
+    expect(src).toContain('const VF_OVERSCAN_PX_MOBILE = 620')
+    expect(src).toContain('const VF_OVERSCAN_PX_TABLET = 760')
+    expect(src).toContain('const vfAdjustScrollBy = useCallback((delta) => {')
+    expect(src).toContain('if (coarse) return 5')
+    expect(src).toContain('return 8')
   })
 
   test('mute document sync does not write hydration-sensitive body dataset flags', () => {
