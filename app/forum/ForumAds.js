@@ -2439,20 +2439,17 @@ const handleToggleSound = (e) => {
     background: var(--bg-soft, #020817);
   }
   /* ===== FIXED (как в форуме сейчас) ===== */
-  .forum-ad-media-slot[data-layout="fixed"] {
-
+  .forum-ad-media-slot[data-layout="fixed"] { 
     height: var(--ad-slot-h-m);
   }
   @media (min-width: 640px) {
-.forum-ad-media-slot[data-layout="fixed"] {
-      
+.forum-ad-media-slot[data-layout="fixed"] { 
       height: var(--ad-slot-h-t);
     }
   }
 
   @media (min-width: 1024px) {
-    .forum-ad-media-slot[data-layout="fixed"] {
-      
+    .forum-ad-media-slot[data-layout="fixed"] { 
       height: var(--ad-slot-h-d);
     }
   }
