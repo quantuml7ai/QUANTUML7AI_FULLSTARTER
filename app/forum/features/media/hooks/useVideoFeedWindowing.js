@@ -84,9 +84,9 @@ export default function useVideoFeedWindowing({
       if (!isBrowserFn()) return 6
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-if (coarse) return 8
-if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
-return 10
+      if (coarse) return 8
+      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
+      return 10
     } catch {
       return 6
     }
@@ -197,28 +197,7 @@ return 10
 
     return { st: winTop, vh: winH, mode: 'window' }
   }, [vfGetScrollEl, vfHasInnerScrollable])
-
-  const vfAdjustScrollBy = useCallback((delta) => {
-    const d = Number(delta || 0)
-    if (!Number.isFinite(d) || Math.abs(d) < 1) return
-
-    try {
-      const el = vfGetScrollEl()
-      if (vfHasInnerScrollable(el)) {
-        el.scrollTop = Math.max(0, Number(el.scrollTop || 0) + d)
-        return
-      }
-    } catch {}
-
-    try {
-      const nextTop = Math.max(
-        0,
-        Number(window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + d
-      )
-      window.scrollTo(0, nextTop)
-    } catch {}
-  }, [vfGetScrollEl, vfHasInnerScrollable])
-
+ 
   const vfGetFixedRecommendationH = useCallback(() => {
     try {
       if (!isBrowserFn()) return VF_RECOMMENDATION_CARD_H_TABLET
@@ -294,10 +273,14 @@ return 10
       (velocity > 1.0 && !(window?.matchMedia?.('(pointer: coarse)')?.matches) ? 1 : 0)
 
     if ((end - start) > vfMaxRender) {
+      // Stable centered trim. Direction-aware trim caused backward-scroll teleport:
+      // when user reversed direction, start/end could jump to the opposite edge of
+      // the overscan window and top spacer changed by hundreds of px in one frame.
       const mid = Math.floor((start + end) / 2)
       const half = Math.floor(vfMaxRender / 2)
       start = Math.max(0, mid - half)
       end = Math.min(total, start + vfMaxRender)
+      if ((end - start) < vfMaxRender) start = Math.max(0, end - vfMaxRender)
     }
 
     setVfWin((prev) => {
@@ -311,6 +294,11 @@ return 10
 
       if (shrinkOnly) {
         const now = Date.now()
+        const scrollActiveNow =
+          Number(vfScrollActivityRef.current?.activeUntil || 0) > now ||
+          Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.06
+        if (scrollActiveNow) return prev
+        
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
         const stickyItems = velocity > 1.2 ? 3 : velocity > 0.55 ? 2 : 2
         const stickyMaxRender = vfMaxRender + stickyItems
@@ -339,21 +327,7 @@ return 10
       const next = vfBuildWindow(nextStart, nextEnd, total)
       const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
       const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
-const scrollActiveNow =
-  Number(vfScrollActivityRef.current?.activeUntil || 0) > Date.now() ||
-  Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.08
 
-if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
-  try {
-    emitDiag?.('video_feed_window_shift_suppressed', {
-      reason: 'active_scroll_top_spacer_guard',
-      prevStart: prev.start,
-      nextStart: next.start,
-      topDelta: Math.round(topDelta),
-    })
-  } catch {}
-  return prev
-}
       if (
         prev.start === next.start &&
         prev.end === next.end &&
@@ -385,8 +359,7 @@ if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
     vfGetOverscanPx,
     vfBuildWindow,
     isBrowserFn,
-    emitDiag,
-  ])
+  ]) 
 
   const vfScheduleRecalc = useCallback(() => {
     if (vfRafRef.current) return
@@ -410,12 +383,13 @@ if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
   const vfApplyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta') => {
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < VF_ANCHOR_DELTA_IGNORE_PX) return
- 
+
+    // Premium scroll rule: virtual measurements may update, but this hook must not
+    // write scrollTop as a compensation. Any scrollTop write during/back-after scroll
+    // is perceived as a teleport, especially when moving back up the feed.
     vfLastAnchorAdjustTsRef.current = Date.now()
-    // Premium scroll rule: do not write scrollTop from ResizeObserver/windowing.
-    // Measured heights may update the virtual spacers, but hidden scrollTop compensation
-    // is perceived as a blink/teleport on fast back-scroll.
-    try {
+ 
+   try {
       emitDiag?.('video_feed_anchor_adjust_suppressed', {
         reason,
         delta: Math.round(raw),
@@ -443,6 +417,9 @@ if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
         vfPendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= VF_ANCHOR_DELTA_IGNORE_PX) {
+          // Do not apply delayed scrollTop correction after the user stops scrolling.
+          // That delayed correction is perceived as a teleport, especially when scrolling back.
+          // Keep the measured heights, recalc the virtual window, but do not move scrollTop here.
           try {
             emitDiag?.('video_feed_anchor_deferred_drop', {
               reason: 'drop_deferred_scrolltop_teleport_guard',
@@ -677,10 +654,20 @@ if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
 
             if (delta !== 0 && isAboveWindow) {
               if (vfIsScrollActiveNow()) {
+                // Never move scrollTop during live scroll. We also do not replay this
+                // correction after settle; delayed scrollTop writes are the visible jump.                
                 vfPendingAnchorDeltaRef.current += delta
                 vfScheduleAnchorFlush()
-              } else {
+              } else if (Math.abs(delta) <= VF_ANCHOR_DELTA_MAX_PX) {
                 vfApplyAnchoredScrollDelta(delta, 'height_above_window')
+              } else {
+                try {
+                  emitDiag?.('video_feed_anchor_large_delta_drop', {
+                    reason: 'large_height_delta_above_window',
+                    idx,
+                    delta: Math.round(delta),
+                  })
+                } catch {}                
               }
             }
           }
@@ -702,8 +689,8 @@ if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
         vfRosRef.current.set(idx, ro)
       }
     } catch {}
-  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
-  
+  }, [emitDiag, vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
+
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined
