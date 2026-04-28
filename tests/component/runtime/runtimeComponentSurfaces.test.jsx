@@ -13,7 +13,7 @@ const SURFACE_CASES = [
   ['components/AuthNavClient.jsx', ['auth:ok', 'open-auth', 'useWeb3Modal']],
   ['components/TopBar.js', ['AuthNavClient', 'LanguageSwitcher', 'nav-orbit']],
   ['components/ScrollTopPulse.js', ['requestAnimationFrame', 'passive: true', 'SCROLL_PX_PER_SEC']],
-  ['components/BgAudio.js', ['site-media-play', 'touchstart', 'preload="metadata"']],
+  ['components/BgAudio.js', ['site-media-play', 'touchmove', 'preload="metadata"']],
   ['components/InviteFriendProvider.jsx', ['InviteFriendPopup', 'readUnifiedAccountId', '/api/referral/link']],
   ['components/QCoinDropFX.jsx', ['requestAnimationFrame', 'auth:ok', '/api/qcoin/drop']],
   ['app/about/page.js', ['about-hero-poster', '/branding/about-poster.jpg', 'data-anim="1"']],

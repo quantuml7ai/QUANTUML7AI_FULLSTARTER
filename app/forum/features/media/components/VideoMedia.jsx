@@ -1204,7 +1204,7 @@ const videoNode = (
     muted={isPostVideo ? mutedState : undefined}
     data-default-muted={isPostVideo ? '1' : undefined}
     controls={isPostVideo ? undefined : renderControls}
-    autoPlay={isPostVideo ? undefined : autoPlay}
+    autoPlay={isPostVideo ? true : autoPlay}
     loop={loop}
     controlsList={controlsList}
     disablePictureInPicture={disablePictureInPicture}
@@ -1228,8 +1228,7 @@ const videoNode = (
 
   return (
     <div
-      className="ql7VideoSurface mediaBoxItem"
-      data-forum-video-surface="1"
+      className="ql7VideoSurface"
       onPointerDown={handleRootPointerDown}
       onClick={handleSurfaceClick}
     >
