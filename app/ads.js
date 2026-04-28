@@ -170,27 +170,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       </section>
 
       {/* Локальные стили только для рекламного слота */}
-      <style jsx>{`
-        /* На остальном сайте AdCard идёт в layout="fluid",
-           поэтому fixed-высоты из ForumAds сюда не применяются.
-           Даем fluid-слоту тот же нижний порог высоты, чтобы он не схлопывался
-           на skeleton / placeholder / до разрешения медиа. */
-        section[data-ads-slot] :global(.forum-ad-media-slot[data-layout="fluid"]) {
-          min-height: var(--ad-slot-h-m);
-        }
-
-        @media (min-width: 640px) {
-          section[data-ads-slot] :global(.forum-ad-media-slot[data-layout="fluid"]) {
-            min-height: var(--ad-slot-h-t);
-          }
-        }
-
-        @media (min-width: 1024px) {
-          section[data-ads-slot] :global(.forum-ad-media-slot[data-layout="fluid"]) {
-            min-height: var(--ad-slot-h-d);
-          }
-        }
-
+      <style jsx>{` 
         /* Любой медиа-контент внутри рекламного секшена:
            - старается занять всю ширину
            - если меньше, то по центру с одинаковыми отступами слева/справа */
