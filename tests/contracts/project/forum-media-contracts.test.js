@@ -40,7 +40,10 @@ describe('forum media contracts', () => {
     expect(src).not.toContain("qs.get('legacyWarmSweep')")
     expect(src).not.toContain("qs.get('legacyIframePrewarm')")
     expect(src).not.toContain('forum:qcastMuted')
-    expect(src).toContain("source === 'media_element' || source === 'external' || source === 'forum-splash'")
+    expect(src).toContain('const isAuthoritativeMuteSource =')
+    expect(src).toContain("source === 'media_element' ||")
+    expect(src).toContain("source === 'external' ||")
+    expect(src).toContain("source === 'forum-splash' ||")
     expect(src).toContain("setMutedPref(!!el.muted, 'video')")
   })
 
@@ -48,6 +51,7 @@ describe('forum media contracts', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
     expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
+    expect(src).toContain('__isVideoNearViewport(el, 900)')
   })
 
   test('boot splash publishes an active gate marker for forum media policy', () => {
@@ -62,5 +66,10 @@ describe('forum media contracts', () => {
     expect(src).toContain('data-forum-embed-kind=')
     expect(src).toContain('data-lifecycle-state=')
     expect(src).toContain('data-stable-shell="1"')
+  })
+
+  test('video feed cards disable hover transform to reduce desktop compositor churn', () => {
+    const src = read('app/forum/styles/ForumStyles.jsx')
+    expect(src).toContain('html[data-video-feed="1"] article[data-forum-post-card="1"].item:hover{ transform:none }')
   })
 })

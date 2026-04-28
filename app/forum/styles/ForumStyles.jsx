@@ -863,6 +863,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
     .tag{ border-radius:10px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14); padding:.35rem .52rem; display:inline-flex; align-items:center; gap:.35rem }
     .item{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.06); border-radius:14px; padding:12px; transition:transform .08s, background .15s }
     .item:hover{ background:rgba(255,255,255,.08); transform:translateY(-1px) }
+    html[data-video-feed="1"] article[data-forum-post-card="1"].item:hover{ transform:none }
     .title{ font-size:1.8rem; font-weight:800; letter-spacing:.2px;  color: #febf01ff; }
     .meta{ font-size:.84rem; opacity:.78 }
     .nick{ font-weight:700; letter-spacing:.15px }
@@ -7013,5 +7014,4 @@ const Styles = () => (
 )
 
 export default Styles
-
 

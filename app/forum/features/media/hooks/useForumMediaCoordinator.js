@@ -3097,7 +3097,20 @@ const pauseForeignMedia = (keepEl = null) => {
       if (extra <= 0) return;
 
       const sorted = loaded
-        .filter((frame) => frame !== keepEl)
+        .filter((frame) => {
+          if (frame === keepEl) return false;
+
+          try {
+            const visiblePx = getOwnerVisiblePx(frame);
+            if (visiblePx > 48) return false;
+
+            if (isNearViewportElement(frame, isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100))) {
+              return false;
+            }
+          } catch {}
+
+          return true;
+        })
         .sort((a, b) => {
           const ta = Number(a?.getAttribute?.('data-forum-last-active-ts') || 0);
           const tb = Number(b?.getAttribute?.('data-forum-last-active-ts') || 0);
@@ -4774,7 +4787,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       emitMediaDiag('media_coordinator_cleanup', {
         ...getIframeSnapshot(),
       }, true);
-    }; 
+    };
   }, [emitDiag]);
 }
-

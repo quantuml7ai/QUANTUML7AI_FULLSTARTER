@@ -471,9 +471,25 @@ if (cur === src) {
       networkStateNow === HTMLMediaElement.NETWORK_EMPTY
 
     if (isPostFeedVideo) {
-      el.dataset.__loadPending = '0'
-      delete el.dataset.__loadPendingSince
-      el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
+      const shouldKickLoad =
+        (readyStateNow === 0 || isNetworkEmpty) &&
+        (
+          String(el.dataset?.__active || '') === '1' ||
+          String(el.dataset?.__prewarm || '') === '1' ||
+          String(el.dataset?.__resident || '') === '1' ||
+          __isVideoNearViewport(el, 900)
+        )
+
+      if (shouldKickLoad && canRestoreLoad()) {
+        el.dataset.__loadPending = '1'
+        el.dataset.__loadPendingSince = String(Date.now())
+        el.dataset.__warmReady = '0'
+        try { el.load?.() } catch {}
+      } else {
+        el.dataset.__loadPending = '0'
+        delete el.dataset.__loadPendingSince
+        el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
+      }
       return
     }
 
