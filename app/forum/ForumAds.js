@@ -2440,7 +2440,7 @@ const handleToggleSound = (e) => {
   }
   /* ===== FIXED (как в форуме сейчас) ===== */
   .forum-ad-media-slot[data-layout="fixed"] {
-    min-height: var(--ad-slot-h-m);
+
     height: var(--ad-slot-h-m);
   }
   @media (min-width: 640px) {
