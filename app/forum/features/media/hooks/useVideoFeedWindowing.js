@@ -3,20 +3,20 @@ import interleaveRecommendationRails from '../../feed/utils/interleaveRecommenda
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
 const VF_OVERSCAN_PX = 1120
-const VF_OVERSCAN_PX_MOBILE = 700
-const VF_OVERSCAN_PX_TABLET = 860
+const VF_OVERSCAN_PX_MOBILE = 860
+const VF_OVERSCAN_PX_TABLET = 980
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
-const VF_AD_CARD_H_MOBILE = 200
-const VF_AD_CARD_H_TABLET = 260
-const VF_AD_CARD_H_DESKTOP = 320
+const VF_AD_CARD_H_MOBILE = 520
+const VF_AD_CARD_H_TABLET = 620
+const VF_AD_CARD_H_DESKTOP = 650
 const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
 const VF_ITEM_CHROME_EST = 240
 const VF_WINDOW_STICKY_MS = 780
-const VF_LAYOUT_JITTER_PX = 42
+const VF_LAYOUT_JITTER_PX = 32
 const VF_SCROLL_SETTLE_MS = 320
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 const VF_ANCHOR_DELTA_IGNORE_PX = 3
@@ -84,9 +84,9 @@ export default function useVideoFeedWindowing({
       if (!isBrowserFn()) return 6
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 6
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 7
-      return 9
+if (coarse) return 8
+if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
+return 10
     } catch {
       return 6
     }
