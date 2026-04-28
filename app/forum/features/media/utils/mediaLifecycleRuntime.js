@@ -65,6 +65,15 @@ export function writeMutedPrefToDocument(nextMuted, userSet = false) {
         if (userSet) root.dataset.forumMediaSoundUserSet = '1'
       }
     } catch {}
+    try {
+      const body = document?.body
+      if (body?.dataset) {
+        body.dataset.forumMediaMuted = nextStr
+        body.dataset.mediaMuted = nextStr
+        body.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1'
+        if (userSet) body.dataset.forumMediaSoundUserSet = '1'
+      }
+    } catch {}    
   } catch {}
 }
 
