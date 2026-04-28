@@ -2445,14 +2445,14 @@ const handleToggleSound = (e) => {
   }
   @media (min-width: 640px) {
 .forum-ad-media-slot[data-layout="fixed"] {
-      min-height: var(--ad-slot-h-t);
+      
       height: var(--ad-slot-h-t);
     }
   }
 
   @media (min-width: 1024px) {
     .forum-ad-media-slot[data-layout="fixed"] {
-      min-height: var(--ad-slot-h-d);
+      
       height: var(--ad-slot-h-d);
     }
   }
