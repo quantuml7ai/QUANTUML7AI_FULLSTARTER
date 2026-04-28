@@ -1427,16 +1427,37 @@ useEffect(() => {
   if (!isPageActive || !isNear) return undefined;
 
   const v = videoRef.current;
-  if (!v) return undefined;
-  // ВАЖНО: рекламный near-prewarm больше не трогает src/load.
-  // Регресс 206/cancel пришёл отсюда: несколько невидимых ad-slot'ов получали один ADS.mp4,
-  // каждый делал load(), Chrome открывал Range-запросы, а потом focus/scroll их отменял.
-  // Для рекламы безопасная модель такая: near = ничего сетевого, focus = attach + play retry.
-  if (!shouldPlayRef.current) {
-    try { if (!v.paused) v.pause?.(); } catch {}
-    try { v.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
-    try { if (v.dataset) v.dataset.__adLoadPending = '0'; } catch {}
-   }
+  const srcKey = String(media.src || '').trim();
+  if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return undefined;
+
+  const nextMuted = normalizeForumAdMuted(mutedRef.current);
+  const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+  if (attached) attachedVideoSrcRef.current = srcKey;
+
+  // Near-зона рекламы теперь только подготавливает ресурс.
+  // Никакого play() до focus: иначе offscreen-реклама может украсть mobile media pipeline
+  // и погасить текущее видео форума в viewport.
+  if (Number(v.readyState || 0) < 2) {
+    const now = Date.now();
+    const lastWarmTs = Number(adNativePrimeTsRef.current || 0);
+    const canWarm = (now - lastWarmTs) > 1600 && !shouldPlayRef.current;
+
+    if (canWarm) {
+      adNativePrimeTsRef.current = now;
+      try {
+        applyForumAdMutedToVideo(v, nextMuted);
+        v.playsInline = true;
+        v.setAttribute('playsinline', '');
+        v.setAttribute('webkit-playsinline', '');
+        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (String(v.dataset?.__adLoadPending || '') !== '1') {
+          v.dataset.__adLoadPending = '1';
+          v.load?.();
+        }
+      } catch {}
+    }
+  }
+
   return undefined;
 }, [isNear, isPageActive, media.kind, media.src]);
 
@@ -2047,20 +2068,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
         v.setAttribute('playsinline', '');
         v.setAttribute('webkit-playsinline', '');
         v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-        if (v.paused) {
-          const playAttempt = v.play?.();
-          if (playAttempt && typeof playAttempt.catch === 'function') {
-            playAttempt.catch(() => {
-              // Если пользовательский звук включён, мобильный браузер может отклонить audible autoplay.
-              // Делаем технический muted-retry только в focus-zone и не пишем это в глобальный sound document.
-              try {
-                if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
-                applyForumAdMutedToVideo(v, true);
-                v.play?.().catch(() => {});
-              } catch {}
-            });
-          }
-        }
+        if (v.paused) v.play?.().catch(() => {});
       } catch {}
     };
 
@@ -2068,7 +2076,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     timer = window.setInterval(() => {
       try {
         const v = videoRef.current;
-        if (!shouldPlayRef.current || !v || !v.paused) {
+        if (!shouldPlayRef.current || !v || !v.paused || Number(v.readyState || 0) >= 2) {
           if (timer) window.clearInterval(timer);
           timer = 0;
           return;
