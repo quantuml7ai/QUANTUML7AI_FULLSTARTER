@@ -20,7 +20,7 @@ const VF_LAYOUT_JITTER_PX = 32
 const VF_SCROLL_SETTLE_MS = 320
 const VF_HEIGHT_DELTA_IGNORE_PX = 2
 const VF_ANCHOR_DELTA_IGNORE_PX = 3
-const VF_ANCHOR_DELTA_MAX_PX = 180
+const VF_ANCHOR_DELTA_MAX_PX = 64
 const VF_ANCHOR_FLUSH_MS = 140
 const VF_ANCHOR_ACTIVE_RETRY_MS = 120
 
@@ -339,7 +339,21 @@ return 10
       const next = vfBuildWindow(nextStart, nextEnd, total)
       const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
       const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
+const scrollActiveNow =
+  Number(vfScrollActivityRef.current?.activeUntil || 0) > Date.now() ||
+  Math.abs(Number(vfScrollStateRef.current?.velocity || 0)) > 0.08
 
+if (scrollActiveNow && prev.start !== next.start && topDelta > 96) {
+  try {
+    emitDiag?.('video_feed_window_shift_suppressed', {
+      reason: 'active_scroll_top_spacer_guard',
+      prevStart: prev.start,
+      nextStart: next.start,
+      topDelta: Math.round(topDelta),
+    })
+  } catch {}
+  return prev
+}
       if (
         prev.start === next.start &&
         prev.end === next.end &&
@@ -371,6 +385,7 @@ return 10
     vfGetOverscanPx,
     vfBuildWindow,
     isBrowserFn,
+    emitDiag,
   ])
 
   const vfScheduleRecalc = useCallback(() => {
@@ -395,21 +410,19 @@ return 10
   const vfApplyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta') => {
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < VF_ANCHOR_DELTA_IGNORE_PX) return
-
-    const applied = Math.sign(raw) * Math.min(Math.abs(raw), VF_ANCHOR_DELTA_MAX_PX)
+ 
     vfLastAnchorAdjustTsRef.current = Date.now()
-
-    try { vfAdjustScrollBy(applied) } catch {}
-
+    // Premium scroll rule: do not write scrollTop from ResizeObserver/windowing.
+    // Measured heights may update the virtual spacers, but hidden scrollTop compensation
+    // is perceived as a blink/teleport on fast back-scroll.
     try {
-      emitDiag?.('video_feed_anchor_adjust', {
+      emitDiag?.('video_feed_anchor_adjust_suppressed', {
         reason,
         delta: Math.round(raw),
-        applied: Math.round(applied),
-        pendingLeft: Math.round(raw - applied),
+        applied: 0,
       })
     } catch {}
-  }, [vfAdjustScrollBy, emitDiag])
+  }, [emitDiag])
 
   const vfScheduleAnchorFlush = useCallback((delay = VF_ANCHOR_FLUSH_MS) => {
     try {
@@ -430,7 +443,12 @@ return 10
         vfPendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= VF_ANCHOR_DELTA_IGNORE_PX) {
-          vfApplyAnchoredScrollDelta(pending, 'deferred_height_above_window')
+          try {
+            emitDiag?.('video_feed_anchor_deferred_drop', {
+              reason: 'drop_deferred_scrolltop_teleport_guard',
+              pending: Math.round(pending),
+            })
+          } catch {}
         }
 
         vfScheduleRecalc()
@@ -438,7 +456,7 @@ return 10
 
       vfAnchorFlushTimerRef.current = setTimeout(flush, Math.max(16, Number(delay || 0)))
     } catch {}
-  }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleRecalc])
+  }, [emitDiag, vfIsScrollActiveNow, vfScheduleRecalc])
 
   useEffect(() => {
     const cancelHardResetSchedule = () => {
@@ -685,7 +703,7 @@ return 10
       }
     } catch {}
   }, [vfApplyAnchoredScrollDelta, vfIsScrollActiveNow, vfScheduleAnchorFlush, vfScheduleRecalc])
-
+  
   useEffect(() => {
     if (!isBrowserFn()) return undefined
     if (!videoFeedOpen) return undefined

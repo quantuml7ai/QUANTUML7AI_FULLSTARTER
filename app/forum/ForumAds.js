@@ -299,9 +299,30 @@ function getAdVideoNodeSrc(videoEl) {
 
 function detachAdNativeVideo(videoEl) {
   if (!videoEl) return;
+const hadSrc = (() => {
+  try {
+    return !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || videoEl.dataset?.adNativeSrc || '').trim();
+  } catch {
+    return false;
+  }
+})();
+
+if (!hadSrc) {
+  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+
+  try {
+    if (videoEl.dataset) {
+      videoEl.dataset.__adLoadPending = '0';
+      videoEl.dataset.__adWarmOwner = '0';
+    }
+  } catch {}
+
+  return;
+}  
   try { videoEl.pause?.(); } catch {}
   try { videoEl.removeAttribute('src'); } catch {}
   try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
+  try { if (videoEl.dataset) videoEl.dataset.__adLoadPending = '0'; } catch {}
   try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
   try { videoEl.load?.(); } catch {}
 }
@@ -345,8 +366,8 @@ function ensureAdNativeVideoSrc(videoEl, src, muted) {
 
   return true;
 }
-const AD_NATIVE_WARM_STICKY_MS = 4200;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 12000;
+const AD_NATIVE_WARM_STICKY_MS = 3000;
+const AD_NATIVE_WARM_RELOAD_GAP_MS = 14000;
 let adNativeWarmSlot = { video: null, src: '', ts: 0 };
 
 function getAdViewportState(el) {
@@ -446,10 +467,10 @@ const prevGap = prevState.gapPx;
 const nextGap = nextState.gapPx;
 const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 980;
-const nextInsideRunway = nextGap <= 1700;
+const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 900;
+const nextInsideRunway = nextGap <= 1900;
 const nextClearlyCloser =
-  nextGap + 280 < prevGap ||
+  nextGap + 180 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
 // Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
@@ -1651,7 +1672,7 @@ useEffect(() => {
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: '720px 0px 1320px 0px', threshold: 0 }
+      { rootMargin: '760px 0px 1500px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
