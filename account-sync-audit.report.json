@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T14:49:10.794Z",
+  "generatedAt": "2026-04-29T15:11:57.175Z",
   "summary": {
     "scannedFiles": 370,
     "filesWithSyncKeys": 141,
@@ -1039,137 +1039,137 @@
         },
         {
           "key": "vip",
-          "line": 5467,
+          "line": 5477,
           "text": ".dmRow{ --vip-badge-w: 34px; --vip-badge-h: 36px; }"
         },
         {
           "key": "vip",
-          "line": 5468,
+          "line": 5478,
           "text": ".dmThreadHeader{ --vip-badge-w: 38px; --vip-badge-h: 40px; }"
         },
         {
           "key": "vip",
-          "line": 5868,
+          "line": 5878,
           "text": ".qcoinX2.vip{"
         },
         {
           "key": "vip",
-          "line": 6379,
+          "line": 6389,
           "text": "/* Золотой VIP-перелив для суммы награды — как у .qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6385,
+          "line": 6395,
           "text": "/* тот же градиент и скорость «shine», что у qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6835,
+          "line": 6845,
           "text": "/* ===== animated search/sort/vip controls ===== */"
         },
         {
           "key": "vip",
-          "line": 6894,
+          "line": 6904,
           "text": ".forumVipControlBtn.is-vip-invite{"
         },
         {
           "key": "vip",
-          "line": 6900,
+          "line": 6910,
           "text": ".forumVipControlBtn.is-vip-invite::before{"
         },
         {
           "key": "vip",
-          "line": 6905,
+          "line": 6915,
           "text": "animation: vipInviteAura 3.2s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 6907,
+          "line": 6917,
           "text": ".forumVipControlBtn.is-vip-invite::after{"
         },
         {
           "key": "vip",
-          "line": 6909,
+          "line": 6919,
           "text": "animation: vipInviteSweep 2.8s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6911,
+          "line": 6921,
           "text": ".forumVipControlBtn.is-vip-active{"
         },
         {
           "key": "vip",
-          "line": 6921,
+          "line": 6931,
           "text": ".forumVipControlBtn.is-vip-active::before{"
         },
         {
           "key": "vip",
-          "line": 6926,
+          "line": 6936,
           "text": "animation: vipActiveAura 2.6s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 6928,
+          "line": 6938,
           "text": ".forumVipControlBtn.is-vip-active::after{"
         },
         {
           "key": "vip",
-          "line": 6930,
+          "line": 6940,
           "text": "animation: vipActiveSweep 2.15s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6946,
+          "line": 6956,
           "text": ".forumVipControlBtn.is-vip-invite .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 6952,
+          "line": 6962,
           "text": "animation: vipInviteTextPulse 2.8s ease-in-out infinite, vipInviteTextShine 4.6s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6954,
+          "line": 6964,
           "text": ".forumVipControlBtn.is-vip-active .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 6961,
+          "line": 6971,
           "text": "animation: vipActiveTextGlow 1.9s ease-in-out infinite, vipInviteTextShine 4.2s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6963,
+          "line": 6973,
           "text": "@keyframes vipInviteAura{"
         },
         {
           "key": "vip",
-          "line": 6967,
+          "line": 6977,
           "text": "@keyframes vipInviteSweep{"
         },
         {
           "key": "vip",
-          "line": 6971,
+          "line": 6981,
           "text": "@keyframes vipActiveAura{"
         },
         {
           "key": "vip",
-          "line": 6975,
+          "line": 6985,
           "text": "@keyframes vipActiveSweep{"
         },
         {
           "key": "vip",
-          "line": 6979,
+          "line": 6989,
           "text": "@keyframes vipInviteTextPulse{"
         },
         {
           "key": "vip",
-          "line": 6983,
+          "line": 6993,
           "text": "@keyframes vipInviteTextShine{"
         },
         {
           "key": "vip",
-          "line": 6987,
+          "line": 6997,
           "text": "@keyframes vipActiveTextGlow{"
         }
       ],
