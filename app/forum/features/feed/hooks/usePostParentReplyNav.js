@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
 
 export default function usePostParentReplyNav({ post, parentText, parentPost, onOpenThread }) {
   const parentSnippet = React.useMemo(() => {
@@ -17,6 +18,9 @@ export default function usePostParentReplyNav({ post, parentText, parentPost, on
       const pid = post?.parentId
       if (!pid) return
       if (typeof document === 'undefined') return
+      try {
+        revealForumWindowedDomId(`post_${pid}`, { holdMs: 1800 })
+      } catch {}
 
       const scrollAndFlash = (node) => {
         if (!node) return
@@ -44,6 +48,9 @@ export default function usePostParentReplyNav({ post, parentText, parentPost, on
       try {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            try {
+              revealForumWindowedDomId(`post_${pid}`, { holdMs: 1800 })
+            } catch {}
             const el2 = document.getElementById(`post_${pid}`)
             if (el2) scrollAndFlash(el2)
           })

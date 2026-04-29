@@ -65,14 +65,13 @@ export default function VideoFeedPane({
       <div className="grid gap-2" suppressHydrationWarning>
         {vfWin.top > 0 && <div aria-hidden="true" style={{ height: vfWin.top }} />}
 
-        {vfSlots.slice(vfWin.start, vfWin.end).map((slot, indexInWindow) => {
-          const index = vfWin.start + indexInWindow
+        {vfSlots.slice(vfWin.start, vfWin.end).map((slot) => {
           if (slot.type === 'recommendation_rail') {
             const railState = userRecommendationsRail?.getSlotState?.(slot.key) || null
             return (
               <div
                 key={slot.key}
-                ref={vfMeasureRef(index)}
+                ref={vfMeasureRef(slot.key)}
                 data-feed-card="1"
                 data-feed-kind="recommendation_rail"
               >
@@ -96,7 +95,7 @@ export default function VideoFeedPane({
             return (
               <div
                 key={slot.key}
-                ref={vfMeasureRef(index)}
+                ref={vfMeasureRef(slot.key)}
                 id={`post_${p?.id || ''}`}
                 data-feed-card="1"
                 data-feed-kind="post"
@@ -133,7 +132,7 @@ export default function VideoFeedPane({
           const url = pickAdUrlForSlot(slot.key, 'video')
           if (!url) {
             return (
-              <div key={slot.key} ref={vfMeasureRef(index)}>
+              <div key={slot.key} ref={vfMeasureRef(slot.key)}>
                 <div
                   className="forumAdSlotPlaceholder mediaBox"
                   data-kind="ad"
@@ -146,7 +145,7 @@ export default function VideoFeedPane({
           }
 
           return (
-            <div key={slot.key} ref={vfMeasureRef(index)}>
+            <div key={slot.key} ref={vfMeasureRef(slot.key)}>
               <ForumAdSlot
                 slotKey={slot.key}
                 url={url}

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T20:31:53.241Z",
+  "generatedAt": "2026-04-29T13:45:05.390Z",
   "issues": [
     "legacy-iframe-prewarm-still-present"
   ],
@@ -17,7 +17,7 @@
         "forumQcastMuted": 0,
         "restoreGuard": 5,
         "sameSrcGuard": 0,
-        "sharedMute": 9
+        "sharedMute": 14
       }
     },
     {
@@ -33,7 +33,7 @@
         "forumQcastMuted": 0,
         "restoreGuard": 10,
         "sameSrcGuard": 4,
-        "sharedMute": 6
+        "sharedMute": 11
       }
     },
     {
@@ -42,7 +42,7 @@
         "ownerId": 0,
         "embedKind": 0,
         "lifecycleState": 0,
-        "coordinatorOwnsLifecycle": 5,
+        "coordinatorOwnsLifecycle": 10,
         "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
@@ -75,13 +75,13 @@
         "embedKind": 0,
         "lifecycleState": 0,
         "coordinatorOwnsLifecycle": 0,
-        "siteMediaPlay": 1,
+        "siteMediaPlay": 3,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
         "restoreGuard": 0,
         "sameSrcGuard": 0,
-        "sharedMute": 6
+        "sharedMute": 9
       }
     },
     {

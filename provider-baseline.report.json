@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T20:31:52.302Z",
+  "generatedAt": "2026-04-29T13:45:04.666Z",
   "summary": {
     "heavyProviders": 11,
     "signalTotals": {
@@ -7,8 +7,8 @@
       "analytics": 8,
       "wallet": 13,
       "authUi": 15,
-      "startupMedia": 7,
-      "timers": 19,
+      "startupMedia": 6,
+      "timers": 21,
       "listeners": 29
     },
     "filesScanned": 10
@@ -86,13 +86,29 @@
         "wallet": 0,
         "authUi": 0,
         "startupMedia": 0,
-        "timers": 4,
+        "timers": 5,
         "listeners": 7
       },
       "riskFlags": [
         "long-lived-runtime-signals"
       ],
-      "score": 19
+      "score": 21
+    },
+    {
+      "file": "components/BgAudio.js",
+      "counts": {
+        "dynamicImport": 0,
+        "analytics": 0,
+        "wallet": 0,
+        "authUi": 0,
+        "startupMedia": 2,
+        "timers": 1,
+        "listeners": 8
+      },
+      "riskFlags": [
+        "long-lived-runtime-signals"
+      ],
+      "score": 18
     },
     {
       "file": "components/ForumBootSplash.jsx",
@@ -109,20 +125,6 @@
         "startup-media-present"
       ],
       "score": 18
-    },
-    {
-      "file": "components/BgAudio.js",
-      "counts": {
-        "dynamicImport": 0,
-        "analytics": 0,
-        "wallet": 0,
-        "authUi": 0,
-        "startupMedia": 3,
-        "timers": 0,
-        "listeners": 8
-      },
-      "riskFlags": [],
-      "score": 14
     },
     {
       "file": "components/NotRobot.jsx",

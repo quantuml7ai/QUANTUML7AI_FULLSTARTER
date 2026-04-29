@@ -2,6 +2,12 @@
 
 import React from 'react'
 import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+import useForumWindowing from '../../../shared/hooks/useForumWindowing'
+import {
+  readForumCardEstimate,
+  readForumWindowingMaxRender,
+  readForumWindowingOverscan,
+} from '../../../shared/utils/forumWindowingPresets'
 
 const CLOSE_INBOX_THREAD_OPTIONS = Object.freeze({
   closeInbox: true,
@@ -48,6 +54,17 @@ export default function UserPostsPane({
     }
     return map
   }, [dataPosts])
+
+  const { win: userPostsWin, measureRef: userPostsMeasureRef } = useForumWindowing({
+    active: true,
+    items: visibleUserPosts || [],
+    getItemKey: (post, index) => String(post?.id || `uprofile:${index}`),
+    getItemDomId: (post) => (post?.id ? `post_${post.id}` : ''),
+    estimateItemHeight: () => readForumCardEstimate('post'),
+    maxRender: () => readForumWindowingMaxRender('post'),
+    overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
+    listId: 'forum:profile-posts',
+  })
 
   React.useLayoutEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -177,7 +194,9 @@ export default function UserPostsPane({
         </button>
       </div>
 
-      {(visibleUserPosts || []).map((p, idx) => {
+      {userPostsWin.top > 0 && <div aria-hidden="true" style={{ height: userPostsWin.top }} />}
+      {(visibleUserPosts || []).slice(userPostsWin.start, userPostsWin.end).map((p, indexInWindow) => {
+        const idx = userPostsWin.start + indexInWindow
         const parent = p?.parentId ? (postsById.get(String(p.parentId)) || null) : null
         const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
         const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
@@ -185,6 +204,7 @@ export default function UserPostsPane({
         return (
           <div
             key={`uprofile:${p?.id || ''}`}
+            ref={userPostsMeasureRef(String(p?.id || ''))}
             id={`post_${p?.id || ''}`}
             data-feed-card="1"
             data-feed-kind="post"
@@ -217,6 +237,7 @@ export default function UserPostsPane({
           </div>
         )
       })}
+      {userPostsWin.bottom > 0 && <div aria-hidden="true" style={{ height: userPostsWin.bottom }} />}
 
       {userPostsHasMore && (
         <div className="loadMoreFooter">

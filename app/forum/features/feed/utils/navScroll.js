@@ -1,5 +1,7 @@
 'use client'
 
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
+
 export function getScrollSnapshot(options = {}) {
   const isBrowserFn = typeof options?.isBrowserFn === 'function' ? options.isBrowserFn : () => false
   const getScrollEl = typeof options?.getScrollEl === 'function' ? options.getScrollEl : () => null
@@ -74,7 +76,10 @@ export function restoreEntryPosition(options = {}) {
   const entryId = String(state.entryId || '').trim()
   if (!entryId) return false
   const el = document.getElementById(entryId)
-  if (!el) return false
+  if (!el) {
+    try { revealForumWindowedDomId(entryId, { holdMs: 1800 }) } catch {}
+    return false
+  }
 
   const useInner = !!state?.scroll?.useInner
   const offset = Number(state?.entryOffset)

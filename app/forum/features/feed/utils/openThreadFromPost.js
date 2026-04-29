@@ -1,5 +1,7 @@
 'use client'
 
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
+
 export function openThreadFromVideoFeedPost({
   post,
   data,
@@ -28,6 +30,7 @@ export function openThreadFromVideoFeedPost({
 
   setTimeout(() => {
     try {
+      revealForumWindowedDomId(`post_${post.id}`, { holdMs: 1800 })
       document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'auto', block: 'nearest' })
     } catch {}
   }, 120)

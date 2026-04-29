@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-21T20:30:44.866Z
-Файлов в реестре: 1746
+Сгенерировано автоматически: 2026-04-29T13:44:22.858Z
+Файлов в реестре: 1753
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -29,7 +29,7 @@
 - `adaptive-actions.report.json` — 1 файлов
 - `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 383 файлов
+- `app` — 386 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `auth-cascade.report.json` — 1 файлов
@@ -64,6 +64,7 @@
 - `media-ownership.audit.report.json` — 1 файлов
 - `mobile-matrix.report.json` — 1 файлов
 - `mode-contract.validation.report.json` — 1 файлов
+- `native-post-video.audit.report.json` — 1 файлов
 - `next-env.d.ts` — 1 файлов
 - `next.config.mjs` — 1 файлов
 - `observer-cleanup.report.json` — 1 файлов
@@ -80,7 +81,7 @@
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
 - `provider-baseline.report.json` — 1 файлов
-- `public` — 920 файлов
+- `public` — 921 файлов
 - `qcast-ownership.report.json` — 1 файлов
 - `README.md` — 1 файлов
 - `route-budget.report.json` — 1 файлов
@@ -110,9 +111,9 @@
 - `scenario.startup-shell.report.json` — 1 файлов
 - `src` — 32 файлов
 - `startup-budget.report.json` — 1 файлов
-- `tests` — 41 файлов
+- `tests` — 42 файлов
 - `timer-cleanup.report.json` — 1 файлов
-- `tools` — 62 файлов
+- `tools` — 63 файлов
 - `tsconfig.json` — 1 файлов
 - `tsconfig.tsbuildinfo` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
@@ -335,7 +336,7 @@
       - dm/ — Подсистема Quantum Messenger / DM.
         - components/ — Каталог слоя компоненты внутри feature dm.
           - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
-          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
           - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
@@ -343,7 +344,7 @@
           - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
           - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
-          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
           - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: используется в forum/features/dm/components/InboxPane.jsx.
         - hooks/ — Каталог слоя хуки внутри feature dm.
           - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
@@ -381,15 +382,15 @@
           - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
-          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/dm/components/InboxPane.jsx.
-          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/ThreadSection.jsx.
           - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
           - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
           - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumRoot.jsx.
           - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
-          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
-          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
           - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
         - constants/ — Каталог слоя константы внутри feature feed.
@@ -400,7 +401,7 @@
           - useForumCreatePostAction.js — Хук use Forum Create Post Action домена ленты/тем/постов. Связи: импортирует forum/features/dm/services/sendDmComposerMessage.js, forum/features/media/services/resolveComposerMediaPayload.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
           - useForumCreateTopicAction.js — Хук use Forum Create Topic Action домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
           - useForumDataRuntime.js — Хук use Forum Data Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumMutationQueue.js, forum/features/feed/hooks/useForumSseBridge.js, forum/features/feed/hooks/useForumSyncLoop.js; используется в forum/ForumRoot.jsx.
-          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
           - useForumFeedRuntime.js — Хук use Forum Feed Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useThreadOpenNavigation.js, forum/features/feed/hooks/useThreadPostsModel.js; используется в forum/ForumRoot.jsx.
           - useForumHomeAction.js — Хук use Forum Home Action домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
           - useForumMutationActions.js — Хук use Forum Mutation Actions домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
@@ -414,10 +415,10 @@
           - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
           - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
           - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
-          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
-          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
           - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
           - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
           - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
@@ -428,11 +429,11 @@
           - cardMemo.js — Утилита card Memo домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostCardBridge.jsx, forum/features/feed/components/TopicItem.jsx, tests/unit/forum/features/feed/utils/cardMemo.test.js.
           - interleaveRecommendationRails.js — Утилита interleave Recommendation Rails домена ленты/тем/постов. Связи: используется в forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/features/feed/utils/interleaveRecommendationRails.test.js.
           - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
-          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/ForumRoot.jsx.
           - navState.js — Утилита nav State домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
-          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
           - postEvents.js — Утилита post Events домена ленты/тем/постов. Связи: импортирует forum/events/bus.js; используется в forum/ForumRoot.jsx.
-          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
           - signatures.js — Утилита signatures домена ленты/тем/постов. Связи: используется в forum/features/feed/utils/snapshotTransforms.js.
           - snapshotTransforms.js — Утилита snapshot Transforms домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/signatures.js; используется в forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumMutationQueue.js.
       - media/ — Подсистема медиа, плееров и preview.
@@ -456,7 +457,7 @@
           - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
           - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
           - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
-          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
           - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
           - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
         - services/ — Каталог слоя сервисы внутри feature media.
@@ -625,6 +626,7 @@
         - useEvent.js — Shared хук use Event форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
         - useForumNavBridge.js — Shared хук use Forum Nav Bridge форума. Связи: импортирует forum/shared/hooks/useEvent.js; используется в forum/ForumRoot.jsx.
         - useForumToast.js — Shared хук use Forum Toast форума. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumRoot.jsx.
+        - useForumWindowing.js — Shared хук use Forum Windowing форума. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
         - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
         - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
       - storage/ — Каталог shared-слоя форума: storage.
@@ -637,6 +639,8 @@
         - counts.js — Shared утилита counts форума. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/components/UserRecommendationCard.jsx, forum/features/profile/components/ProfilePopover.jsx.
         - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
         - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
+        - forumWindowingPresets.js — Shared утилита forum Windowing Presets форума. Связи: используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js, forum/features/feed/hooks/useThreadOpenNavigation.js.
         - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
         - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx.
         - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
@@ -947,6 +951,7 @@
   - ai/ — Подкаталог статических ассетов public/ai.
     - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - audio/ — Подкаталог статических ассетов public/audio.
+    - bgaudio.gif — GIF-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - Q-Cast.png — PNG-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - branding/ — Подкаталог статических ассетов public/branding.
@@ -1986,6 +1991,7 @@
           - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
         - utils/ — Каталог utils.
           - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+      - windowing-registry.test.js — JS-файл windowing registry.test. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
     - i18n/ — Каталог i18n.
       - i18nDictionaries.test.js — JS-файл i18n Dictionaries.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
     - runtime/ — Каталог runtime.
@@ -2026,6 +2032,7 @@
   - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-post-video-lifecycle.js — Локальный скрипт/инструмент audit post video lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
@@ -2093,6 +2100,7 @@
 - media-ownership.audit.report.json — JSON-файл media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - mobile-matrix.report.json — JSON-файл mobile matrix.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - mode-contract.validation.report.json — JSON-файл mode contract.validation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- native-post-video.audit.report.json — JSON-файл native post video.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - observer-cleanup.report.json — JSON-файл observer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

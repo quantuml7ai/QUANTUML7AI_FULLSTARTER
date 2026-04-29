@@ -1,22 +1,22 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 824,
+    "score": 931,
     "counts": {
-      "playCalls": 2,
+      "playCalls": 3,
       "pauseCalls": 15,
-      "loadCalls": 6,
+      "loadCalls": 2,
       "srcSets": 7,
       "srcRemoves": 0,
-      "currentSrcReads": 12,
-      "pendingFlags": 56,
-      "hardUnload": 21,
-      "iframeOps": 158,
-      "io": 8,
+      "currentSrcReads": 18,
+      "pendingFlags": 86,
+      "hardUnload": 22,
+      "iframeOps": 165,
+      "io": 9,
       "ro": 0,
       "raf": 10,
       "scrollWrites": 0,
-      "layoutReads": 22
+      "layoutReads": 37
     },
     "flags": [
       "reload-thrash risk",
@@ -26,191 +26,187 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1913,
+          "line": 2405,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 1962,
+          "line": 2485,
           "text": "const retry = el.play?.();"
+        },
+        {
+          "line": 3569,
+          "text": "const p = media.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 1662,
+          "line": 2017,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1672,
+          "line": 2027,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1682,
+          "line": 2037,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 1775,
+          "line": 2155,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 187,
-          "text": "video.load?.();"
+          "line": 1290,
+          "text": "media.load?.();"
         },
         {
-          "line": 1486,
-          "text": "try { el.load?.(); } catch {}"
-        },
-        {
-          "line": 1517,
-          "text": "try { el.load?.(); } catch {}"
-        },
-        {
-          "line": 2815,
-          "text": "el.load?.();"
+          "line": 3993,
+          "text": "})) a.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 479,
+          "line": 486,
           "text": "try { el.setAttribute('src', src); } catch {}"
         },
         {
-          "line": 2587,
+          "line": 3200,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2604,
+          "line": 3217,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 2716,
+          "line": 3762,
           "text": "try { el.setAttribute('src', nextSrc); } catch {}"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 63,
+          "line": 65,
           "text": "video?.currentSrc ||"
         },
         {
-          "line": 177,
+          "line": 179,
           "text": "const cold = (video.readyState === 0 || !video.currentSrc);"
         },
         {
-          "line": 546,
+          "line": 553,
           "text": "el?.currentSrc ||"
         },
         {
-          "line": 602,
+          "line": 609,
           "text": "mediaEl?.currentSrc ||"
         }
       ],
       "pendingFlags": [
         {
-          "line": 74,
+          "line": 76,
           "text": "loadPending: String(video?.dataset?.__loadPending || ''),"
         },
         {
-          "line": 77,
+          "line": 79,
           "text": "prewarm: String(video?.dataset?.__prewarm || ''),"
         },
         {
-          "line": 154,
+          "line": 156,
           "text": "video.dataset.__resident = '1';"
         },
         {
-          "line": 162,
+          "line": 164,
           "text": "if (video.dataset?.__loadPending === '1') return;"
         }
       ],
       "hardUnload": [
         {
-          "line": 12,
+          "line": 14,
           "text": "__restoreVideoEl,"
         },
         {
-          "line": 166,
+          "line": 168,
           "text": "__restoreVideoEl(video);"
         },
         {
-          "line": 202,
+          "line": 209,
           "text": "__restoreVideoEl(video);"
         },
         {
-          "line": 1431,
-          "text": "__restoreVideoEl(el);"
+          "line": 1283,
+          "text": "__restoreVideoEl(media);"
         }
       ],
       "iframeOps": [
         {
-          "line": 425,
+          "line": 432,
           "text": "// === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ==="
         },
         {
-          "line": 436,
+          "line": 443,
           "text": "// По умолчанию legacy iframe-прогрев выключен:"
         },
         {
-          "line": 443,
+          "line": 450,
           "text": "const selector = 'iframe[data-forum-media=\"youtube\"],iframe[data-forum-media=\"tiktok\"],iframe[data-forum-media=\"iframe\"]';"
         },
         {
-          "line": 520,
+          "line": 527,
           "text": "// Расширено для video + audio + iframe (YouTube/TikTok best-effort)."
         }
       ],
       "io": [
         {
-          "line": 343,
+          "line": 350,
           "text": "// если нет IntersectionObserver — готовим всё сразу"
         },
         {
-          "line": 354,
+          "line": 361,
           "text": "const io = new IntersectionObserver("
         },
         {
-          "line": 428,
+          "line": 435,
           "text": "if (!('IntersectionObserver' in window)) return;"
         },
         {
-          "line": 485,
+          "line": 492,
           "text": "const io = new IntersectionObserver("
         }
       ],
       "raf": [
         {
-          "line": 103,
+          "line": 105,
           "text": "const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;"
         },
         {
-          "line": 109,
+          "line": 111,
           "text": "if (job?.rafId) cancelAnimationFrame(job.rafId);"
         },
         {
-          "line": 286,
+          "line": 293,
           "text": "try { cancelAnimationFrame(warmSweepRaf); } catch {}"
         },
         {
-          "line": 337,
+          "line": 344,
           "text": "warmSweepRaf = requestAnimationFrame(runner);"
         }
       ],
       "layoutReads": [
         {
-          "line": 249,
+          "line": 256,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         },
         {
-          "line": 256,
+          "line": 263,
           "text": "const rect = video.getBoundingClientRect?.();"
         },
         {
-          "line": 302,
+          "line": 309,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
         },
         {
-          "line": 397,
+          "line": 404,
           "text": "if (el && el.scrollHeight > el.clientHeight + 1) return el;"
         }
       ]
@@ -218,22 +214,22 @@
   },
   {
     "file": "app/forum/ForumAds.js",
-    "score": 135,
+    "score": 198,
     "counts": {
-      "playCalls": 2,
+      "playCalls": 8,
       "pauseCalls": 5,
       "loadCalls": 3,
-      "srcSets": 0,
+      "srcSets": 1,
       "srcRemoves": 2,
-      "currentSrcReads": 0,
+      "currentSrcReads": 6,
       "pendingFlags": 0,
       "hardUnload": 0,
-      "iframeOps": 28,
-      "io": 5,
+      "iframeOps": 30,
+      "io": 6,
       "ro": 0,
       "raf": 0,
       "scrollWrites": 0,
-      "layoutReads": 0
+      "layoutReads": 3
     },
     "flags": [
       "reload-thrash risk",
@@ -242,217 +238,147 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1686,
-          "text": "v.play?.().catch(() => {"
+          "line": 2172,
+          "text": "const playAttempt = v.play?.();"
         },
         {
-          "line": 1823,
-          "text": "if (v.paused && !next && shouldPlayRef.current) v.play?.().catch(() => {});"
+          "line": 2188,
+          "text": "v.play?.().catch(() => {});"
+        },
+        {
+          "line": 2255,
+          "text": "const p = v.play?.();"
+        },
+        {
+          "line": 2261,
+          "text": "v.play?.().catch(() => {});"
         }
       ],
       "pauseCalls": [
         {
-          "line": 1132,
-          "text": "try { node.pause?.(); } catch {}"
+          "line": 313,
+          "text": "try { videoEl.pause?.(); } catch {}"
         },
         {
-          "line": 1144,
-          "text": "try { node.pause?.(); } catch {}"
+          "line": 345,
+          "text": "try { videoEl.pause?.(); } catch {}"
         },
         {
-          "line": 1160,
-          "text": "try { node?.pause?.(); } catch {}"
+          "line": 2164,
+          "text": "try { v.pause?.(); } catch {}"
         },
         {
-          "line": 1676,
+          "line": 2202,
           "text": "try { v.pause?.(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 1134,
-          "text": "try { node.load?.(); } catch {}"
+          "line": 323,
+          "text": "try { videoEl.load?.(); } catch {}"
         },
         {
-          "line": 1146,
-          "text": "try { node.load?.(); } catch {}"
+          "line": 360,
+          "text": "videoEl.load?.();"
         },
         {
-          "line": 1162,
-          "text": "try { node?.load?.(); } catch {}"
+          "line": 1632,
+          "text": "v.load?.();"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 348,
+          "text": "try { videoEl.setAttribute('src', nextSrc); } catch {}"
         }
       ],
       "srcRemoves": [
         {
-          "line": 1133,
-          "text": "try { node.removeAttribute('src'); } catch {}"
+          "line": 314,
+          "text": "try { videoEl.removeAttribute('src'); } catch {}"
         },
         {
-          "line": 1145,
-          "text": "try { node.removeAttribute('src'); } catch {}"
+          "line": 2200,
+          "text": "// Пауза без removeAttribute('src') и без load()."
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 285,
+          "text": "return String(videoEl.currentSrc || videoEl.getAttribute('src') || '').trim();"
+        },
+        {
+          "line": 296,
+          "text": "return !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || videoEl.dataset?.adNativeSrc || '').trim();"
+        },
+        {
+          "line": 334,
+          "text": "const currentSrc = getAdVideoNodeSrc(videoEl);"
+        },
+        {
+          "line": 340,
+          "text": "if (currentSrc === nextSrc || attachedSrc === nextSrc) {"
         }
       ],
       "iframeOps": [
         {
-          "line": 935,
+          "line": 1307,
           "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
         },
         {
-          "line": 987,
+          "line": 1359,
           "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
         },
         {
-          "line": 990,
+          "line": 1362,
           "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
         },
         {
-          "line": 1024,
+          "line": 1422,
           "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
         }
       ],
       "io": [
         {
-          "line": 1197,
+          "line": 1573,
+          "text": "// Скролл и IntersectionObserver не должны менять <video src>."
+        },
+        {
+          "line": 1664,
           "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')"
         },
         {
-          "line": 1201,
+          "line": 1668,
           "text": "const nearObs = new IntersectionObserver("
         },
         {
-          "line": 1207,
+          "line": 1675,
           "text": "const focusObs = new IntersectionObserver("
-        },
-        {
-          "line": 1724,
-          "text": "typeof IntersectionObserver === 'undefined' ||"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/media/components/VideoMedia.jsx",
-    "score": 130,
-    "counts": {
-      "playCalls": 1,
-      "pauseCalls": 3,
-      "loadCalls": 3,
-      "srcSets": 2,
-      "srcRemoves": 1,
-      "currentSrcReads": 1,
-      "pendingFlags": 34,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 1,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 1
-    },
-    "flags": [
-      "reload-thrash risk",
-      "pending-state churn"
-    ],
-    "samples": {
-      "playCalls": [
-        {
-          "line": 1109,
-          "text": "const p = el.play?.()"
-        }
-      ],
-      "pauseCalls": [
-        {
-          "line": 893,
-          "text": "el.pause?.()"
-        },
-        {
-          "line": 1007,
-          "text": "el.pause?.()"
-        },
-        {
-          "line": 1117,
-          "text": "try { el.pause?.() } catch {}"
-        }
-      ],
-      "loadCalls": [
-        {
-          "line": 610,
-          "text": "el.load?.()"
-        },
-        {
-          "line": 870,
-          "text": "el.load?.()"
-        },
-        {
-          "line": 1023,
-          "text": "el.load?.()"
-        }
-      ],
-      "srcSets": [
-        {
-          "line": 596,
-          "text": "el.setAttribute('src', s)"
-        },
-        {
-          "line": 1022,
-          "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
-        }
-      ],
-      "srcRemoves": [
-        {
-          "line": 1010,
-          "text": "el.removeAttribute('src')"
-        }
-      ],
-      "currentSrcReads": [
-        {
-          "line": 865,
-          "text": "(el.readyState === 0 || !el.currentSrc) &&"
-        }
-      ],
-      "pendingFlags": [
-        {
-          "line": 533,
-          "text": "el.dataset?.__prewarm === '1' ||"
-        },
-        {
-          "line": 535,
-          "text": "el.dataset?.__resident === '1'"
-        },
-        {
-          "line": 576,
-          "text": "delete el.dataset.__loadPendingSince"
-        },
-        {
-          "line": 598,
-          "text": "el.dataset.__prewarm = '1'"
-        }
-      ],
-      "io": [
-        {
-          "line": 910,
-          "text": "io = new IntersectionObserver("
         }
       ],
       "layoutReads": [
         {
-          "line": 477,
-          "text": "const vh = Number(window?.innerHeight || 0)"
+          "line": 374,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "line": 375,
+          "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         }
       ]
     }
   },
   {
     "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-    "score": 116,
+    "score": 150,
     "counts": {
       "playCalls": 0,
-      "pauseCalls": 1,
+      "pauseCalls": 3,
       "loadCalls": 4,
       "srcSets": 1,
       "srcRemoves": 1,
       "currentSrcReads": 2,
-      "pendingFlags": 14,
+      "pendingFlags": 28,
       "hardUnload": 6,
       "iframeOps": 0,
       "io": 0,
@@ -468,90 +394,218 @@
     "samples": {
       "pauseCalls": [
         {
-          "line": 192,
+          "line": 226,
+          "text": "victim.pause?.()"
+        },
+        {
+          "line": 295,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 333,
           "text": "el.pause?.()"
         }
       ],
       "loadCalls": [
         {
-          "line": 257,
+          "line": 398,
           "text": "el.load?.()"
         },
         {
-          "line": 325,
+          "line": 478,
+          "text": "try { el.load?.() } catch {}"
+        },
+        {
+          "line": 492,
           "text": "el.load?.()"
         },
         {
-          "line": 386,
+          "line": 571,
           "text": "if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()"
-        },
-        {
-          "line": 388,
-          "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 349,
+          "line": 540,
           "text": "el.setAttribute('src', src)"
         }
       ],
       "srcRemoves": [
         {
-          "line": 238,
+          "line": 365,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 233,
+          "line": 360,
           "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
         }
       ],
       "pendingFlags": [
         {
-          "line": 196,
+          "line": 205,
+          "text": "const victimLoadPending = String(victim?.dataset?.__loadPending || '') === '1'"
+        },
+        {
+          "line": 230,
+          "text": "victim.dataset.__prewarm = '0'"
+        },
+        {
+          "line": 300,
           "text": "el.dataset.__loadPending = '0'"
         },
         {
-          "line": 198,
+          "line": 302,
           "text": "el.dataset.__resident = '0'"
-        },
-        {
-          "line": 226,
-          "text": "el.dataset.__resident = isPostFeedVideo ? '1' : '0'"
-        },
-        {
-          "line": 323,
-          "text": "el.dataset.__loadPending = '1'"
         }
       ],
       "hardUnload": [
         {
-          "line": 144,
+          "line": 235,
           "text": "__unloadVideoEl(victim)"
         },
         {
-          "line": 173,
+          "line": 276,
           "text": "export function __unloadVideoEl(el) {"
         },
         {
-          "line": 261,
+          "line": 403,
           "text": "export function __restoreVideoEl(el) {"
         },
         {
-          "line": 427,
+          "line": 612,
           "text": "restoreVideoEl={__restoreVideoEl}"
         }
       ],
       "layoutReads": [
         {
-          "line": 113,
+          "line": 175,
           "text": "const r = el.getBoundingClientRect?.()"
         },
         {
-          "line": 115,
+          "line": 177,
           "text": "const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/VideoMedia.jsx",
+    "score": 139,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 3,
+      "loadCalls": 3,
+      "srcSets": 1,
+      "srcRemoves": 2,
+      "currentSrcReads": 3,
+      "pendingFlags": 36,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 1,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [
+      "reload-thrash risk",
+      "pending-state churn"
+    ],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 1161,
+          "text": "const p = el.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 914,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 1028,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 1169,
+          "text": "try { el.pause?.() } catch {}"
+        }
+      ],
+      "loadCalls": [
+        {
+          "line": 891,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 1044,
+          "text": "el.load?.()"
+        },
+        {
+          "line": 1155,
+          "text": "el.load?.()"
+        }
+      ],
+      "srcSets": [
+        {
+          "line": 1043,
+          "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
+        }
+      ],
+      "srcRemoves": [
+        {
+          "line": 597,
+          "text": "try { el.removeAttribute('src') } catch {}"
+        },
+        {
+          "line": 1031,
+          "text": "el.removeAttribute('src')"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 783,
+          "text": "const hasAttachedSrc = !!String(el.getAttribute('src') || el.currentSrc || '')"
+        },
+        {
+          "line": 886,
+          "text": "(el.readyState === 0 || !el.currentSrc) &&"
+        },
+        {
+          "line": 1138,
+          "text": "const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()"
+        }
+      ],
+      "pendingFlags": [
+        {
+          "line": 535,
+          "text": "el.dataset?.__prewarm === '1' ||"
+        },
+        {
+          "line": 537,
+          "text": "el.dataset?.__resident === '1'"
+        },
+        {
+          "line": 578,
+          "text": "delete el.dataset.__loadPendingSince"
+        },
+        {
+          "line": 600,
+          "text": "try { el.dataset.__loadPending = '0' } catch {}"
+        }
+      ],
+      "io": [
+        {
+          "line": 931,
+          "text": "io = new IntersectionObserver("
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 479,
+          "text": "const vh = Number(window?.innerHeight || 0)"
         }
       ]
     }
@@ -737,57 +791,57 @@
     "samples": {
       "ro": [
         {
-          "line": 246,
+          "line": 254,
           "text": "if (typeof ResizeObserver !== 'undefined') {"
         },
         {
-          "line": 259,
+          "line": 267,
           "text": "const ro = new ResizeObserver(schedule)"
         }
       ],
       "raf": [
         {
-          "line": 149,
+          "line": 154,
           "text": "requestAnimationFrame(tick)"
         },
         {
-          "line": 158,
+          "line": 163,
           "text": "requestAnimationFrame(tick)"
         },
         {
-          "line": 252,
+          "line": 260,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
-          "line": 271,
+          "line": 279,
           "text": "cancelAnimationFrame(rafId)"
         }
       ],
       "scrollWrites": [
         {
-          "line": 111,
+          "line": 113,
           "text": "window.scrollTo({ top: nextY, behavior })"
         },
         {
-          "line": 114,
+          "line": 116,
           "text": "window.scrollTo(0, nextY)"
         }
       ],
       "layoutReads": [
         {
-          "line": 17,
+          "line": 19,
           "text": "const dr = dock.getBoundingClientRect?.()"
         },
         {
-          "line": 46,
-          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
-        },
-        {
-          "line": 79,
+          "line": 48,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
         },
         {
           "line": 81,
+          "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
+        },
+        {
+          "line": 83,
           "text": "const r = node.getBoundingClientRect()"
         }
       ]
@@ -1008,44 +1062,117 @@
     "samples": {
       "raf": [
         {
-          "line": 61,
+          "line": 63,
           "text": "requestAnimationFrame(() => requestAnimationFrame(apply))"
         }
       ],
       "scrollWrites": [
         {
-          "line": 48,
+          "line": 50,
           "text": "scrollEl.scrollTop = y"
         },
         {
-          "line": 52,
+          "line": 54,
           "text": "window.scrollTo({ top: y, behavior: 'auto' })"
         },
         {
-          "line": 55,
+          "line": 57,
           "text": "window.scrollTo(0, y)"
         },
         {
-          "line": 95,
+          "line": 100,
           "text": "el.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
         }
       ],
       "layoutReads": [
         {
-          "line": 9,
+          "line": 11,
           "text": "const useInner = !!scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1"
         },
         {
-          "line": 25,
+          "line": 27,
           "text": "const rect = el.getBoundingClientRect()"
         },
         {
-          "line": 28,
+          "line": 30,
           "text": "const contRect = scrollEl?.getBoundingClientRect?.() || { top: 0 }"
         },
         {
-          "line": 88,
+          "line": 93,
           "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/shared/hooks/useForumWindowing.js",
+    "score": 48,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 2,
+      "raf": 6,
+      "scrollWrites": 2,
+      "layoutReads": 6
+    },
+    "flags": [
+      "resize/layout churn"
+    ],
+    "samples": {
+      "ro": [
+        {
+          "line": 569,
+          "text": "if (!rosRef.current.get(key) && typeof ResizeObserver !== 'undefined') {"
+        }
+      ],
+      "raf": [
+        {
+          "line": 272,
+          "text": "rafRef.current = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 683,
+          "text": "try { cancelAnimationFrame(rafRef.current) } catch {}"
+        },
+        {
+          "line": 718,
+          "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}"
+        },
+        {
+          "line": 722,
+          "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}"
+        }
+      ],
+      "scrollWrites": [
+        {
+          "line": 753,
+          "text": "if (hasInnerScrollable(el)) el.scrollTop = 0"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 227,
+          "text": "const clientH = Number(el.clientHeight || 0)"
+        },
+        {
+          "line": 243,
+          "text": "const winH = Number(window.innerHeight || 0) || 0"
+        },
+        {
+          "line": 250,
+          "text": "vh: Number(el.clientHeight || 0) || winH,"
+        },
+        {
+          "line": 286,
+          "text": "const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800"
         }
       ]
     }
@@ -1433,39 +1560,39 @@
     "samples": {
       "raf": [
         {
-          "line": 142,
+          "line": 159,
           "text": "rafA = requestAnimationFrame(() => scheduleAlign(0, baselineTop))"
         },
         {
-          "line": 156,
+          "line": 173,
           "text": "try { if (rafA) cancelAnimationFrame(rafA) } catch {}"
         }
       ],
       "scrollWrites": [
         {
-          "line": 102,
+          "line": 119,
           "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
         },
         {
-          "line": 105,
+          "line": 122,
           "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
         }
       ],
       "layoutReads": [
         {
-          "line": 72,
+          "line": 89,
           "text": "if (scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)) {"
         },
         {
-          "line": 95,
+          "line": 112,
           "text": "const rect = marker.getBoundingClientRect?.()"
         },
         {
-          "line": 97,
+          "line": 114,
           "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
         },
         {
-          "line": 100,
+          "line": 117,
           "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
         }
       ]
@@ -1704,6 +1831,69 @@
     }
   },
   {
+    "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
+    "score": 25,
+    "counts": {
+      "playCalls": 1,
+      "pauseCalls": 3,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 3,
+      "scrollWrites": 0,
+      "layoutReads": 1
+    },
+    "flags": [],
+    "samples": {
+      "playCalls": [
+        {
+          "line": 216,
+          "text": "if (a.paused) a.play?.()"
+        }
+      ],
+      "pauseCalls": [
+        {
+          "line": 14,
+          "text": "if (!node.paused) node.pause()"
+        },
+        {
+          "line": 143,
+          "text": "a.pause?.()"
+        },
+        {
+          "line": 217,
+          "text": "else a.pause?.()"
+        }
+      ],
+      "raf": [
+        {
+          "line": 74,
+          "text": "if (rafRef.current) cancelAnimationFrame(rafRef.current)"
+        },
+        {
+          "line": 121,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        },
+        {
+          "line": 123,
+          "text": "rafRef.current = requestAnimationFrame(tick)"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 236,
+          "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
     "file": "app/forum/features/ui/hooks/useComposerScrollMemory.js",
     "score": 25,
     "counts": {
@@ -1771,89 +1961,30 @@
     "samples": {
       "scrollWrites": [
         {
-          "line": 33,
+          "line": 34,
           "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
         },
         {
-          "line": 39,
+          "line": 40,
           "text": "window.scrollTo({ top: Math.max(0, y), behavior: 'auto' })"
         },
         {
-          "line": 41,
+          "line": 42,
           "text": "try { window.scrollTo(0, Math.max(0, y)) } catch {}"
         }
       ],
       "layoutReads": [
         {
-          "line": 26,
+          "line": 27,
           "text": "const rect = node.getBoundingClientRect?.()"
         },
         {
-          "line": 28,
+          "line": 29,
           "text": "const useInner = !!scrollEl && (scrollEl.scrollHeight > scrollEl.clientHeight + 1)"
         },
         {
-          "line": 30,
+          "line": 31,
           "text": "const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/dm/components/DmVoicePlayer.jsx",
-    "score": 22,
-    "counts": {
-      "playCalls": 1,
-      "pauseCalls": 2,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 0,
-      "raf": 3,
-      "scrollWrites": 0,
-      "layoutReads": 1
-    },
-    "flags": [],
-    "samples": {
-      "playCalls": [
-        {
-          "line": 196,
-          "text": "if (a.paused) a.play?.()"
-        }
-      ],
-      "pauseCalls": [
-        {
-          "line": 124,
-          "text": "a.pause?.()"
-        },
-        {
-          "line": 197,
-          "text": "else a.pause?.()"
-        }
-      ],
-      "raf": [
-        {
-          "line": 59,
-          "text": "if (rafRef.current) cancelAnimationFrame(rafRef.current)"
-        },
-        {
-          "line": 102,
-          "text": "rafRef.current = requestAnimationFrame(tick)"
-        },
-        {
-          "line": 104,
-          "text": "rafRef.current = requestAnimationFrame(tick)"
-        }
-      ],
-      "layoutReads": [
-        {
-          "line": 216,
-          "text": "const rect = el.getBoundingClientRect()"
         }
       ]
     }
@@ -2106,17 +2237,17 @@
     "samples": {
       "raf": [
         {
-          "line": 45,
+          "line": 49,
           "text": "requestAnimationFrame(() => {"
         }
       ],
       "scrollWrites": [
         {
-          "line": 24,
+          "line": 28,
           "text": "node.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
         },
         {
-          "line": 27,
+          "line": 31,
           "text": "node.scrollIntoView()"
         }
       ]
@@ -3008,7 +3139,7 @@
     "samples": {
       "scrollWrites": [
         {
-          "line": 31,
+          "line": 34,
           "text": "document.getElementById(`post_${post.id}`)?.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
         }
       ]
@@ -3039,35 +3170,6 @@
         {
           "line": 242,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
-    "score": 4,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 2
-    },
-    "flags": [],
-    "samples": {
-      "layoutReads": [
-        {
-          "line": 104,
-          "text": "if (routeScroller && routeScroller.scrollHeight > routeScroller.clientHeight + 1) {"
         }
       ]
     }
@@ -3192,6 +3294,35 @@
         {
           "line": 71,
           "text": "const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 4"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
+    "score": 3,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 1,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "pauseCalls": [
+        {
+          "line": 31,
+          "text": "if (!node.paused) node.pause()"
         }
       ]
     }
@@ -3526,28 +3657,6 @@
   },
   {
     "file": "app/forum/features/dm/components/DmThreadLoadMore.jsx",
-    "score": 0,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 0
-    },
-    "flags": [],
-    "samples": {}
-  },
-  {
-    "file": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
     "score": 0,
     "counts": {
       "playCalls": 0,
@@ -5044,6 +5153,28 @@
   },
   {
     "file": "app/forum/features/media/hooks/useVideoFeedState.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
     "score": 0,
     "counts": {
       "playCalls": 0,
@@ -7596,6 +7727,50 @@
   },
   {
     "file": "app/forum/shared/utils/forumLocale.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/forumWindowingPresets.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/shared/utils/forumWindowingRegistry.js",
     "score": 0,
     "counts": {
       "playCalls": 0,

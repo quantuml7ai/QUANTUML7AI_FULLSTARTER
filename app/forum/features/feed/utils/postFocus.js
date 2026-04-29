@@ -1,5 +1,7 @@
 'use client'
 
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
+
 function normalizeFocusOptions(options) {
   if (typeof options === 'string') {
     return { behavior: options }
@@ -139,6 +141,9 @@ export function centerPostAfterDom(postId, options = {}) {
   const maxTries = 5
   const tick = () => {
     tries += 1
+    try {
+      revealForumWindowedDomId(`post_${pid}`, { holdMs: 1800 })
+    } catch {}
     const node = document.getElementById(`post_${pid}`)
     if (node) {
       centerNodeInScrollFn(node, behavior)
@@ -190,6 +195,9 @@ export function centerAndFlashPostAfterDom(postId, options = {}) {
   const maxTries = 8
   const tick = () => {
     tries += 1
+    try {
+      revealForumWindowedDomId(`post_${pid}`, { holdMs: 1800 })
+    } catch {}
     const node = document.getElementById(`post_${pid}`)
     if (node) {
       const baseScroll = readScrollState(getScrollEl)

@@ -68,20 +68,24 @@ describe('forum media contracts', () => {
     expect(src).toContain('data-stable-shell="1"')
   })
 
-  test('post cards publish composited media safe-mode markers and text frame shell', () => {
+  test('post cards keep the shared post body frame shell for card and inline text content', () => {
     const cardSrc = read('app/forum/features/feed/components/ForumPostCard.jsx')
     const bodySrc = read('app/forum/features/feed/components/PostBodyContent.jsx')
-    expect(cardSrc).toContain('data-composited-media-card={hasCompositedMedia ? \'1\' : undefined}')
-    expect(cardSrc).toContain('data-composited-frame={hasCompositedMedia ? \'1\' : undefined}')
-    expect(bodySrc).toContain('className="postTextFrame"')
-    expect(bodySrc).not.toContain('className="postBodyFrame"')
+    expect(cardSrc).toContain('data-forum-post-card="1"')
+    expect(cardSrc).toContain('<div className="postBodyFrame">')
+    expect(bodySrc).toContain('className="postBodyFrame"')
+    expect(bodySrc).toContain('className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"')
+    expect(bodySrc).not.toContain('className="postTextFrame"')
   })
 
-  test('video feed cards disable hover transform to reduce desktop compositor churn', () => {
+  test('forum styles keep the shared post body frame treatment and video-feed root hooks', () => {
     const src = read('app/forum/styles/ForumStyles.jsx')
-    expect(src).toContain('html[data-video-feed="1"] article[data-forum-post-card="1"].item:hover{ transform:none }')
-    expect(src).toContain('.forum_root .item[data-composited-media-card="1"] .mediaBox[data-kind="video"]')
-    expect(src).toContain('.postTextFrame{')
+    expect(src).toContain('.postBodyFrame{')
+    expect(src).toContain('.postBodyFrame .postImages,')
+    expect(src).toContain('.postBodyFrame .postVideo,')
+    expect(src).toContain('.postBodyFrame .postAudio{')
+    expect(src).toContain('html[data-video-feed="1"] .head.head--collapsed{')
+    expect(src).toContain('html[data-video-feed="1"] .forum_root .body{ padding-top:0; }')
   })
 
   test('coordinator and ads keep existing fetches instead of reloading empty shells', () => {
@@ -95,13 +99,18 @@ describe('forum media contracts', () => {
     expect(adsSrc).toContain("videoEl.dataset.__adWarmOwner = '0';")
   })
 
-  test('video feed windowing keeps a narrower render budget and real anchored scroll compensation', () => {
-    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
-    expect(src).toContain('const VF_OVERSCAN_PX_MOBILE = 620')
-    expect(src).toContain('const VF_OVERSCAN_PX_TABLET = 760')
-    expect(src).toContain('const vfAdjustScrollBy = useCallback((delta) => {')
-    expect(src).toContain('if (coarse) return 5')
-    expect(src).toContain('return 8')
+  test('video feed windowing routes through the shared forum windowing core with reveal safety', () => {
+    const videoSrc = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
+    const coreSrc = read('app/forum/shared/hooks/useForumWindowing.js')
+    const focusSrc = read('app/forum/features/feed/utils/postFocus.js')
+    expect(videoSrc).toContain('useForumWindowing')
+    expect(videoSrc).toContain("diagPrefix: 'video_feed'")
+    expect(videoSrc).toContain("listId: 'forum:video-feed'")
+    expect(coreSrc).toContain('targetLockRef')
+    expect(coreSrc).toContain("emitWindowingDiag('anchor_adjust_suppressed'")
+    expect(coreSrc).toContain('const stickyItems = velocity > 1.2 ? 2 : 1')
+    expect(coreSrc).toContain('registerForumWindowingTarget')
+    expect(focusSrc).toContain('revealForumWindowedDomId')
   })
 
   test('mute document sync does not write hydration-sensitive body dataset flags', () => {

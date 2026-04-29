@@ -45,18 +45,20 @@ describe('coordinator runtime contract', () => {
   })
 
   test('video feed windowing keeps a sticky hold before shrinking the rendered window', () => {
-    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
-    expect(src).toContain('VF_WINDOW_STICKY_MS')
+    const src = read('app/forum/shared/hooks/useForumWindowing.js')
+    expect(src).toContain('windowStickyMs = DEFAULT_WINDOW_STICKY_MS')
     expect(src).toContain('recentWindowChange')
     expect(src).toContain('stickyItems')
   })
 
-  test('video feed windowing keeps anchored scroll compensation narrow instead of deferred suppression', () => {
-    const src = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
-    expect(src).toContain('const vfAdjustScrollBy = useCallback((delta) => {')
-    expect(src).toContain('vfAdjustScrollBy(delta)')
-    expect(src).not.toContain('video_feed_anchor_adjust_suppressed')
-    expect(src).not.toContain('video_feed_anchor_deferred_drop')
+  test('shared forum windowing suppresses scrollTop compensation and uses reveal locks for targets', () => {
+    const src = read('app/forum/shared/hooks/useForumWindowing.js')
+    const deeplinkSrc = read('app/forum/features/feed/hooks/useForumDeepLinkFlow.js')
+    expect(src).toContain("emitWindowingDiag('anchor_adjust_suppressed'")
+    expect(src).toContain("emitWindowingDiag('anchor_deferred_drop'")
+    expect(src).toContain('targetLockRef')
+    expect(src).toContain('registerForumWindowingTarget')
+    expect(deeplinkSrc).toContain('revealForumWindowedDomId')
   })
 
   test('media lifecycle runtime exports touch marker for resident policy', () => {

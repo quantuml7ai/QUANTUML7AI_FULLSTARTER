@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
 
 export default function useThreadOpenNavigation({
   selId,
@@ -124,6 +125,9 @@ export default function useThreadOpenNavigation({
         const threadStart = document.querySelector('[data-forum-thread-start="1"]')
         const threadRootNode = document.querySelector('[data-thread-branch-root="1"]')
         const threadRootId = String(threadRoot?.id || '')
+        try {
+          revealForumWindowedDomId(`post_${pendingId}`, { holdMs: 1800 })
+        } catch {}
         const targetPost = document.getElementById('post_' + pendingId)
         if (threadRootId && threadRootId === String(pendingId)) {
           if (threadRootNode) {

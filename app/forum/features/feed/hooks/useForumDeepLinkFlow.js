@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useEvent } from '../../../shared/hooks/useEvent'
+import { revealForumWindowedDomId } from '../../../shared/utils/forumWindowingRegistry'
 import {
   DEEPLINK_MAX_DEPTH,
   DEEPLINK_TIMEOUT_MS,
@@ -279,14 +280,20 @@ export default function useForumDeepLinkFlow({
           } catch {}
 
           await waitFor(
-            () => !!document.getElementById(`post_${curId}`),
+            () => {
+              try { revealForumWindowedDomId(`post_${curId}`, { holdMs: 2200 }) } catch {}
+              return !!document.getElementById(`post_${curId}`)
+            },
             Math.min(1600, remainingMs())
           )
 
           await bumpSlice()
 
           const nextOk = await waitFor(
-            () => !!document.getElementById(`post_${nextId}`),
+            () => {
+              try { revealForumWindowedDomId(`post_${nextId}`, { holdMs: 2200 }) } catch {}
+              return !!document.getElementById(`post_${nextId}`)
+            },
             Math.min(2400, remainingMs())
           )
           if (!nextOk) return fail()
@@ -295,7 +302,10 @@ export default function useForumDeepLinkFlow({
 
       await bumpSlice()
       const targetOk = await waitFor(
-        () => !!document.getElementById(`post_${postId}`),
+        () => {
+          try { revealForumWindowedDomId(`post_${postId}`, { holdMs: 2400 }) } catch {}
+          return !!document.getElementById(`post_${postId}`)
+        },
         Math.min(2600, remainingMs())
       )
       if (!targetOk) return fail()

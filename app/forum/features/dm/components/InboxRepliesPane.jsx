@@ -2,6 +2,12 @@
 
 import React from 'react'
 import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+import useForumWindowing from '../../../shared/hooks/useForumWindowing'
+import {
+  readForumCardEstimate,
+  readForumWindowingMaxRender,
+  readForumWindowingOverscan,
+} from '../../../shared/utils/forumWindowingPresets'
 
 const CLOSE_INBOX_THREAD_OPTIONS = Object.freeze({
   closeInbox: true,
@@ -65,9 +71,29 @@ export default function InboxRepliesPane({
     [adEvery, debugAdsSlots, interleaveAds, visibleRepliesToMe],
   )
 
+  const { win: replyWin, measureRef: replyMeasureRef } = useForumWindowing({
+    active: true,
+    items: replySlots,
+    getItemKey: (slot, index) => String(slot?.key || `inbox:${slot?.item?.id || index}`),
+    getItemDomId: (slot) => (
+      slot?.type === 'item' && slot?.item?.id
+        ? `post_${slot.item.id}`
+        : ''
+    ),
+    estimateItemHeight: ({ item }) => (
+      item?.type === 'item'
+        ? readForumCardEstimate('post')
+        : readForumCardEstimate('ad')
+    ),
+    maxRender: () => readForumWindowingMaxRender('post'),
+    overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
+    listId: 'forum:inbox-replies',
+  })
+
   return (
     <>
-      {replySlots.map((slot) => {
+      {replyWin.top > 0 && <div aria-hidden="true" style={{ height: replyWin.top }} />}
+      {replySlots.slice(replyWin.start, replyWin.end).map((slot) => {
         if (slot.type === 'item') {
           const p = slot.item
           const parent = postsById.get(String(p.parentId)) || null
@@ -77,6 +103,7 @@ export default function InboxRepliesPane({
           return (
             <div
               key={slot.key}
+              ref={replyMeasureRef(slot.key)}
               id={`post_${p.id}`}
               className="inboxReplyItem"
               data-reply-id={String(p.id || '')}
@@ -116,26 +143,35 @@ export default function InboxRepliesPane({
           return (
             <div
               key={slot.key}
-              className="forumAdSlotPlaceholder mediaBox"
-              data-kind="ad"
-              data-slotkind="inbox"
-              data-slotkey={slot.key}
-              aria-hidden="true"
-            />
+              ref={replyMeasureRef(slot.key)}
+            >
+              <div
+                className="forumAdSlotPlaceholder mediaBox"
+                data-kind="ad"
+                data-slotkind="inbox"
+                data-slotkey={slot.key}
+                aria-hidden="true"
+              />
+            </div>
           )
         }
 
         return (
-          <ForumAdSlot
+          <div
             key={slot.key}
-            slotKey={slot.key}
-            url={url}
-            slotKind="inbox"
-            nearId={slot.nearId}
-            onResizeDelta={compensateScrollOnResize}
-          />
+            ref={replyMeasureRef(slot.key)}
+          >
+            <ForumAdSlot
+              slotKey={slot.key}
+              url={url}
+              slotKind="inbox"
+              nearId={slot.nearId}
+              onResizeDelta={compensateScrollOnResize}
+            />
+          </div>
         )
       })}
+      {replyWin.bottom > 0 && <div aria-hidden="true" style={{ height: replyWin.bottom }} />}
 
       {repliesHasMore && (
         <div className="loadMoreFooter">

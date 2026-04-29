@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-21T20:31:47.911Z",
+  "generatedAt": "2026-04-29T13:45:01.042Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -7,8 +7,8 @@
         "dataSrc": 28,
         "setSrc": 7,
         "removeSrc": 0,
-        "restore": 41,
-        "postMessagePause": 12,
+        "restore": 54,
+        "postMessagePause": 11,
         "ytPlayers": 12
       }
     },
@@ -18,7 +18,7 @@
         "dataSrc": 7,
         "setSrc": 1,
         "removeSrc": 1,
-        "restore": 13,
+        "restore": 15,
         "postMessagePause": 0,
         "ytPlayers": 0
       }
@@ -38,9 +38,9 @@
       "file": "app/forum/features/media/components/VideoMedia.jsx",
       "counts": {
         "dataSrc": 3,
-        "setSrc": 2,
-        "removeSrc": 1,
-        "restore": 7,
+        "setSrc": 1,
+        "removeSrc": 2,
+        "restore": 9,
         "postMessagePause": 0,
         "ytPlayers": 0
       }

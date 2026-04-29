@@ -1,12 +1,12 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:31:50.700Z",
+  "generatedAt": "2026-04-29T13:45:03.452Z",
   "summary": {
-    "scannedFiles": 367,
+    "scannedFiles": 370,
     "filesWithSyncKeys": 141,
     "keyFrequency": {
       "accountId": 410,
-      "userId": 381,
+      "userId": 385,
       "authorId": 106,
       "wallet": 20,
       "telegramId": 5,
@@ -6397,52 +6397,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 74,
+          "line": 100,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 74,
+          "line": 100,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 74,
+          "line": 100,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 75,
+          "line": 101,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 76,
+          "line": 102,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 89,
+          "line": 116,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "userId",
-          "line": 89,
+          "line": 116,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "nickname",
-          "line": 89,
+          "line": 116,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "accountId",
-          "line": 101,
+          "line": 128,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         },
         {
           "key": "userId",
-          "line": 101,
+          "line": 128,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         }
       ],
@@ -6582,52 +6582,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 51,
+          "line": 69,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 51,
+          "line": 69,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 51,
+          "line": 69,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 52,
+          "line": 70,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 53,
+          "line": 71,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 59,
+          "line": 83,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "userId",
-          "line": 59,
+          "line": 83,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "nickname",
-          "line": 59,
+          "line": 83,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "accountId",
-          "line": 71,
+          "line": 95,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         },
         {
           "key": "userId",
-          "line": 71,
+          "line": 95,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         }
       ],
@@ -6644,52 +6644,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 83,
+          "line": 109,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 83,
+          "line": 109,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 83,
+          "line": 109,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 84,
+          "line": 110,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 85,
+          "line": 111,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 107,
+          "line": 134,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "userId",
-          "line": 107,
+          "line": 134,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "nickname",
-          "line": 107,
+          "line": 134,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "accountId",
-          "line": 118,
+          "line": 145,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         },
         {
           "key": "userId",
-          "line": 118,
+          "line": 145,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         }
       ],
@@ -6706,52 +6706,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 182,
+          "line": 201,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 182,
+          "line": 201,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 182,
+          "line": 201,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 183,
+          "line": 202,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 184,
+          "line": 203,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 196,
+          "line": 216,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "userId",
-          "line": 196,
+          "line": 216,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "nickname",
-          "line": 196,
+          "line": 216,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : ''}"
         },
         {
           "key": "accountId",
-          "line": 208,
+          "line": 228,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         },
         {
           "key": "userId",
-          "line": 208,
+          "line": 228,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         }
       ],
@@ -6768,52 +6768,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 93,
+          "line": 92,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 93,
+          "line": 92,
+          "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
+        },
+        {
+          "key": "authorId",
+          "line": 92,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
           "line": 93,
-          "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
-        },
-        {
-          "key": "authorId",
-          "line": 94,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 95,
+          "line": 94,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 107,
+          "line": 106,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "userId",
-          "line": 107,
+          "line": 106,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "nickname",
-          "line": 107,
+          "line": 106,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "accountId",
-          "line": 119,
+          "line": 118,
           "text": "isBanned={bannedSet.has(p?.accountId || p?.userId)}"
         },
         {
           "key": "userId",
-          "line": 119,
+          "line": 118,
           "text": "isBanned={bannedSet.has(p?.accountId || p?.userId)}"
         }
       ],
@@ -8087,6 +8087,40 @@
       "score": 5
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogsPane.jsx",
+      "hits": [
+        {
+          "key": "userId",
+          "line": 36,
+          "text": "getItemKey: (dialog, index) => String(dialog?.userId || `dm:${index}`),"
+        },
+        {
+          "key": "userId",
+          "line": 38,
+          "text": "dialog?.userId"
+        },
+        {
+          "key": "userId",
+          "line": 39,
+          "text": "? `dm_${String(dialog.userId).trim()}`"
+        },
+        {
+          "key": "userId",
+          "line": 53,
+          "text": "key={`dm:${String(d?.userId || '')}`}"
+        },
+        {
+          "key": "userId",
+          "line": 54,
+          "text": "ref={dialogsMeasureRef(String(d?.userId || ''))}"
+        }
+      ],
+      "uniq": [
+        "userId"
+      ],
+      "score": 5
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\services\\sendDmComposerMessage.js",
       "hits": [
         {
@@ -8125,27 +8159,27 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 53,
+          "line": 72,
           "text": "const authorId = String(resolveProfileAccountId(topic?.userId || topic?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 53,
+          "line": 72,
           "text": "const authorId = String(resolveProfileAccountId(topic?.userId || topic?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 53,
+          "line": 72,
           "text": "const authorId = String(resolveProfileAccountId(topic?.userId || topic?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 54,
+          "line": 73,
           "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
         },
         {
           "key": "authorId",
-          "line": 55,
+          "line": 74,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         }
       ],
@@ -8571,17 +8605,17 @@
       "hits": [
         {
           "key": "userId",
-          "line": 181,
+          "line": 199,
           "text": "userId={fromId}"
         },
         {
           "key": "vip",
-          "line": 202,
+          "line": 220,
           "text": "<div key={`${m?.id || 'm'}:stk:${i}`} className=\"vipMediaBox dmMediaBox\" data-kind=\"sticker\">"
         },
         {
           "key": "vip",
-          "line": 210,
+          "line": 228,
           "text": "className={s.kind === 'mozi' ? 'moziEmojiBig emojiPostBig' : 'vipEmojiBig emojiPostBig'}"
         }
       ],
@@ -9148,20 +9182,6 @@
       ],
       "uniq": [
         "accountId"
-      ],
-      "score": 1
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogsPane.jsx",
-      "hits": [
-        {
-          "key": "userId",
-          "line": 31,
-          "text": "key={`dm:${String(d?.userId || '')}`}"
-        }
-      ],
-      "uniq": [
-        "userId"
       ],
       "score": 1
     },

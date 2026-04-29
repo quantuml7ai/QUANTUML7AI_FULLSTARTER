@@ -6,6 +6,12 @@ import DmThreadAlerts from './DmThreadAlerts'
 import DmThreadLoadMore from './DmThreadLoadMore'
 import DmThreadMessageRow from './DmThreadMessageRow'
 import DmDialogsPane from './DmDialogsPane'
+import useForumWindowing from '../../../shared/hooks/useForumWindowing'
+import {
+  readForumCardEstimate,
+  readForumWindowingMaxRender,
+  readForumWindowingOverscan,
+} from '../../../shared/utils/forumWindowingPresets'
 
 export default function DmMessagesPane({
   dmWithUserId,
@@ -46,6 +52,17 @@ export default function DmMessagesPane({
   dmDialogsLoaded,
   LoadMoreSentinel,
 }) {
+  const { win: dmThreadWin, measureRef: dmThreadMeasureRef } = useForumWindowing({
+    active: !!dmWithUserId,
+    items: dmThreadItems || [],
+    getItemKey: (message, index) => String(message?.id || `${message?.ts || 0}:${index}`),
+    getItemDomId: (message) => (message?.id ? `dm_msg_${message.id}` : ''),
+    estimateItemHeight: () => readForumCardEstimate('dm_message'),
+    maxRender: () => readForumWindowingMaxRender('dm_message'),
+    overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_message', velocity),
+    listId: 'forum:dm-thread',
+  })
+
   if (dmWithUserId) {
     return (
       <>
@@ -73,27 +90,33 @@ export default function DmMessagesPane({
             t={t}
             LoadMoreSentinel={LoadMoreSentinel}
           />
-          {(dmThreadItems || []).map((m) => (
-            <DmThreadMessageRow
-              key={m?.id || `${m?.ts || 0}`}
-              m={m}
-              dmDeletedMsgMap={dmDeletedMsgMap}
-              dmWithUserId={dmWithUserId}
-              meId={meId}
-              dmThreadSeenTs={dmThreadSeenTs}
-              dmBlockedMap={dmBlockedMap}
-              dmTranslateMap={dmTranslateMap}
-              setDmTranslateMap={setDmTranslateMap}
-              resolveProfileAccountId={resolveProfileAccountId}
-              resolveNickForDisplay={resolveNickForDisplay}
-              resolveIconForDisplay={resolveIconForDisplay}
-              handleUserInfoToggle={handleUserInfoToggle}
-              openDmDeletePopover={openDmDeletePopover}
-              toggleDmBlock={toggleDmBlock}
-              locale={locale}
-              t={t}
-            />
+          {dmThreadWin.top > 0 && <div aria-hidden="true" style={{ height: dmThreadWin.top }} />}
+          {(dmThreadItems || []).slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => (
+            <div
+              key={m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`}
+              ref={dmThreadMeasureRef(String(m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`))}
+            >
+              <DmThreadMessageRow
+                m={m}
+                dmDeletedMsgMap={dmDeletedMsgMap}
+                dmWithUserId={dmWithUserId}
+                meId={meId}
+                dmThreadSeenTs={dmThreadSeenTs}
+                dmBlockedMap={dmBlockedMap}
+                dmTranslateMap={dmTranslateMap}
+                setDmTranslateMap={setDmTranslateMap}
+                resolveProfileAccountId={resolveProfileAccountId}
+                resolveNickForDisplay={resolveNickForDisplay}
+                resolveIconForDisplay={resolveIconForDisplay}
+                handleUserInfoToggle={handleUserInfoToggle}
+                openDmDeletePopover={openDmDeletePopover}
+                toggleDmBlock={toggleDmBlock}
+                locale={locale}
+                t={t}
+              />
+            </div>
           ))}
+          {dmThreadWin.bottom > 0 && <div aria-hidden="true" style={{ height: dmThreadWin.bottom }} />}
           {(dmThreadItems || []).length === 0 && !dmThreadLoading && (
             <div className="meta">{t('empty_messages')}</div>
           )}
@@ -126,4 +149,3 @@ export default function DmMessagesPane({
     />
   )
 }
-

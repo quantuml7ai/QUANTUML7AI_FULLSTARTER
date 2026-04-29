@@ -2,6 +2,12 @@
 
 import React from 'react'
 import { resolveProfileAccountId } from '../../profile/utils/profileCache'
+import useForumWindowing from '../../../shared/hooks/useForumWindowing'
+import {
+  readForumCardEstimate,
+  readForumWindowingMaxRender,
+  readForumWindowingOverscan,
+} from '../../../shared/utils/forumWindowingPresets'
 
 export default function ThreadRepliesPane({
   visibleFlat,
@@ -62,9 +68,29 @@ export default function ThreadRepliesPane({
     [adEvery, debugAdsSlots, interleaveAds, visibleFlat],
   )
 
+  const { win: threadWin, measureRef: threadMeasureRef } = useForumWindowing({
+    active: true,
+    items: threadSlots,
+    getItemKey: (slot, index) => String(slot?.key || `thread:${slot?.item?.id || index}`),
+    getItemDomId: (slot) => (
+      slot?.type === 'item' && slot?.item?.id
+        ? `post_${slot.item.id}`
+        : ''
+    ),
+    estimateItemHeight: ({ item }) => (
+      item?.type === 'item'
+        ? readForumCardEstimate('post')
+        : readForumCardEstimate('ad')
+    ),
+    maxRender: () => readForumWindowingMaxRender('post'),
+    overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
+    listId: 'forum:thread-replies',
+  })
+
   return (
     <div className="grid gap-2 threadRepliesPane">
-      {threadSlots.map((slot) => {
+      {threadWin.top > 0 && <div aria-hidden="true" style={{ height: threadWin.top }} />}
+      {threadSlots.slice(threadWin.start, threadWin.end).map((slot) => {
         if (slot.type === 'item') {
           const p = slot.item
           const isThreadBranchRoot =
@@ -87,6 +113,7 @@ export default function ThreadRepliesPane({
           return (
             <div
               key={slot.key}
+              ref={threadMeasureRef(slot.key)}
               id={`post_${p.id}`}
               data-feed-card="1"
               data-feed-kind="post"
@@ -139,26 +166,35 @@ export default function ThreadRepliesPane({
           return (
             <div
               key={slot.key}
-              className="forumAdSlotPlaceholder mediaBox"
-              data-kind="ad"
-              data-slotkind="replies"
-              data-slotkey={slot.key}
-              aria-hidden="true"
-            />
+              ref={threadMeasureRef(slot.key)}
+            >
+              <div
+                className="forumAdSlotPlaceholder mediaBox"
+                data-kind="ad"
+                data-slotkind="replies"
+                data-slotkey={slot.key}
+                aria-hidden="true"
+              />
+            </div>
           )
         }
 
         return (
-          <ForumAdSlot
+          <div
             key={slot.key}
-            slotKey={slot.key}
-            url={url}
-            slotKind="replies"
-            nearId={slot.nearId}
-            onResizeDelta={compensateScrollOnResize}
-          />
+            ref={threadMeasureRef(slot.key)}
+          >
+            <ForumAdSlot
+              slotKey={slot.key}
+              url={url}
+              slotKind="replies"
+              nearId={slot.nearId}
+              onResizeDelta={compensateScrollOnResize}
+            />
+          </div>
         )
       })}
+      {threadWin.bottom > 0 && <div aria-hidden="true" style={{ height: threadWin.bottom }} />}
       {threadHasMore && (
         <div className="loadMoreFooter">
           <div className="loadMoreShimmer">

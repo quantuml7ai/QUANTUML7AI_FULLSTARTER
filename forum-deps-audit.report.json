@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-21T20:30:57.758Z",
+  "generatedAt": "2026-04-29T13:44:30.421Z",
   "summary": {
-    "scannedFiles": 378,
-    "internalEdges": 500,
+    "scannedFiles": 381,
+    "internalEdges": 522,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 117,
+    "crossDomainEdgeCount": 138,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -27,6 +27,30 @@
       "from": "app/forum/features/dm/components/DmDialogRow.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmDialogsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmDialogsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmMessagesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/DmMessagesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
       "toDomain": "forum-shared"
     },
     {
@@ -69,6 +93,18 @@
       "from": "app/forum/features/dm/components/DmThreadMessageRow.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/api/translate.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/InboxRepliesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/dm/components/InboxRepliesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
       "toDomain": "forum-shared"
     },
     {
@@ -108,6 +144,30 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/feed/components/PublishedPostsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PublishedPostsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/feed/components/TopicItem.jsx",
       "fromDomain": "forum-ui",
       "to": "components/i18n.js",
@@ -129,6 +189,30 @@
       "from": "app/forum/features/feed/components/TopicItem.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/UserPostsPane.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingPresets.js",
       "toDomain": "forum-shared"
     },
     {
@@ -156,9 +240,21 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/feed/hooks/useForumDeepLinkFlow.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/feed/hooks/useForumFeedRuntime.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/hooks/usePostParentReplyNav.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
       "toDomain": "forum-shared"
     },
     {
@@ -168,10 +264,34 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/utils/navScroll.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/utils/openThreadFromPost.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/feed/utils/postEvents.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/events/bus.js",
       "toDomain": "forum-events"
+    },
+    {
+      "from": "app/forum/features/feed/utils/postFocus.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
+      "toDomain": "forum-shared"
     },
     {
       "from": "app/forum/features/media/components/VideoLimitOverlay.jsx",
@@ -219,6 +339,12 @@
       "from": "app/forum/features/media/hooks/useForumVideoFeedRuntime.js",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/hooks/useEvent.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useForumWindowing.js",
       "toDomain": "forum-shared"
     },
     {
@@ -786,9 +912,11 @@
       "file": "app/forum/features/dm/components/DmDialogsPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/dm/components/DmDialogRow.jsx"
+        "app/forum/features/dm/components/DmDialogRow.jsx",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -802,9 +930,11 @@
         "app/forum/features/dm/components/DmThreadAlerts.jsx",
         "app/forum/features/dm/components/DmThreadLoadMore.jsx",
         "app/forum/features/dm/components/DmThreadMessageRow.jsx",
-        "app/forum/features/dm/components/DmDialogsPane.jsx"
+        "app/forum/features/dm/components/DmDialogsPane.jsx",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 5,
+      "importCount": 7,
       "external": [
         "react"
       ],
@@ -898,9 +1028,11 @@
       "file": "app/forum/features/dm/components/InboxRepliesPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/profile/utils/profileCache.js"
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1277,9 +1409,11 @@
       "file": "app/forum/features/feed/components/PublishedPostsPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/profile/utils/profileCache.js"
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1289,9 +1423,11 @@
       "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/profile/utils/profileCache.js"
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1364,9 +1500,11 @@
       "file": "app/forum/features/feed/components/TopicsPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/profile/utils/profileCache.js"
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1390,9 +1528,11 @@
       "file": "app/forum/features/feed/components/UserPostsPane.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/features/profile/utils/profileCache.js"
+        "app/forum/features/profile/utils/profileCache.js",
+        "app/forum/shared/hooks/useForumWindowing.js",
+        "app/forum/shared/utils/forumWindowingPresets.js"
       ],
-      "importCount": 1,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1477,9 +1617,10 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/shared/hooks/useEvent.js",
+        "app/forum/shared/utils/forumWindowingRegistry.js",
         "app/forum/features/feed/constants/deeplink.js"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -1636,8 +1777,10 @@
     {
       "file": "app/forum/features/feed/hooks/usePostParentReplyNav.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1668,8 +1811,10 @@
     {
       "file": "app/forum/features/feed/hooks/useThreadOpenNavigation.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1756,8 +1901,10 @@
     {
       "file": "app/forum/features/feed/utils/navScroll.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
       "external": [],
       "externalCount": 0
     },
@@ -1772,8 +1919,10 @@
     {
       "file": "app/forum/features/feed/utils/openThreadFromPost.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
       "external": [],
       "externalCount": 0
     },
@@ -1790,8 +1939,10 @@
     {
       "file": "app/forum/features/feed/utils/postFocus.js",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
       "external": [],
       "externalCount": 0
     },
@@ -2026,10 +2177,11 @@
       "file": "app/forum/features/media/hooks/useVideoFeedWindowing.js",
       "domain": "forum-ui",
       "imports": [
+        "app/forum/shared/hooks/useForumWindowing.js",
         "app/forum/shared/config/runtime.js",
         "app/forum/features/feed/utils/interleaveRecommendationRails.js"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -3599,6 +3751,18 @@
       "externalCount": 1
     },
     {
+      "file": "app/forum/shared/hooks/useForumWindowing.js",
+      "domain": "forum-shared",
+      "imports": [
+        "app/forum/shared/utils/forumWindowingRegistry.js"
+      ],
+      "importCount": 1,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/forum/shared/hooks/useHtmlFlag.js",
       "domain": "forum-shared",
       "imports": [],
@@ -3670,6 +3834,22 @@
     },
     {
       "file": "app/forum/shared/utils/forumLocale.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/forumWindowingPresets.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/shared/utils/forumWindowingRegistry.js",
       "domain": "forum-shared",
       "imports": [],
       "importCount": 0,
@@ -4649,9 +4829,10 @@
       "imports": [],
       "importCount": 0,
       "external": [
+        "next/image",
         "react"
       ],
-      "externalCount": 1
+      "externalCount": 2
     },
     {
       "file": "components/ForumBootSplash.jsx",
