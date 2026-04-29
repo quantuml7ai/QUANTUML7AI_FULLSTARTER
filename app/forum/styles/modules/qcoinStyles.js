@@ -470,32 +470,32 @@ const qcoinStyles = String.raw`/* === Q COIN (инлайн + модалка) ===
    pointer-events: auto;     /* на случай если родитель/оверлей вмешивается */
  }
 .kebabBtn{
-  width:56px; height:56px; border:0; border-radius:12px;
+  width:38px; height:38px; border:0; border-radius:8px;
   background:rgba(255,255,255,.06); color:#eaf4ff; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
-  font-size:24px; line-height:1;
+  font-size:16px; line-height:1;
   pointer-events: auto;
   touch-action: manipulation; /* быстрее/чище клик на мобиле */  
 }
 .kebabBtn:hover{ filter:brightness(1.1); }
 .ownerMenu{
-position:absolute; right:60px; top:0px; display:flex; flex-direction:column; gap:12px; 
-padding:16px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.14);
-  border-radius:20px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
+position:absolute; right:40px; top:0px; display:flex; flex-direction:column; gap:8px; 
+padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.14);
+  border-radius:13px; box-shadow:0 8px 24px rgba(0,0,0,.35); z-index:20; visibility:hidden;
  pointer-events: auto;
   }
  /* RTL: зеркалим позиционирование ⋮ и выпадающего меню */
  [dir="rtl"] .ownerKebab{ right:auto; left:8px; }
- [dir="rtl"] .ownerMenu{ right:auto; left:60px; }
+ [dir="rtl"] .ownerMenu{ right:auto; left:40px; }
 
 .ownerKebab:focus-within .ownerMenu,
 .ownerKebab:hover .ownerMenu{ visibility:visible; }
 
 .ownerMenu button{
-  width:56px; height:56px;
+  width:38px; height:38px;
   display:inline-flex; align-items:center; justify-content:center;
-  font-size:24px; line-height:1;
-  border-radius:12px;
+  font-size:16px; line-height:1;
+  border-radius:8px;
   border:1px solid rgba(170,200,255,.14);
 }
 
@@ -507,7 +507,7 @@ padding:16px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
    appearance: none;
  }
 .ownerMenu .danger{
-  padding:0; border-radius:12px; background:rgba(255,60,60,.12); color:#ff6a6a; border:1px solid rgba(255,80,80,.25);
+  padding:0; border-radius:8px; background:rgba(255,60,60,.12); color:#ff6a6a; border:1px solid rgba(255,80,80,.25);
 }
 .ownerMenu .danger:hover{ filter:brightness(1.1) saturate(1.05); }
 
