@@ -47,9 +47,11 @@ describe('forum media contracts', () => {
     expect(src).toContain("setMutedPref(!!el.muted, 'video')")
   })
 
-  test('post video restore path avoids immediate duplicate load after src reattach', () => {
+  test('post video restore path avoids immediate duplicate load after src reattach and keeps connected nodes on soft unload', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
+    expect(src).toContain('const connectedPostVideoSoftUnload =')
+    expect(src).toContain('if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVideo) {')
     expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
     expect(src).toContain('__isVideoNearViewport(el, 900)')
   })

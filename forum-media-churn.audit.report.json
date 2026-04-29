@@ -34,7 +34,7 @@
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 3569,
+          "line": 3629,
           "text": "const p = media.play?.();"
         }
       ],
@@ -62,7 +62,7 @@
           "text": "media.load?.();"
         },
         {
-          "line": 3993,
+          "line": 4053,
           "text": "})) a.load?.();"
         }
       ],
@@ -72,15 +72,15 @@
           "text": "try { el.setAttribute('src', src); } catch {}"
         },
         {
-          "line": 3200,
+          "line": 3260,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3217,
+          "line": 3277,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3762,
+          "line": 3822,
           "text": "try { el.setAttribute('src', nextSrc); } catch {}"
         }
       ],
@@ -370,14 +370,14 @@
   },
   {
     "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
-    "score": 150,
+    "score": 154,
     "counts": {
       "playCalls": 0,
       "pauseCalls": 3,
       "loadCalls": 4,
       "srcSets": 1,
       "srcRemoves": 1,
-      "currentSrcReads": 2,
+      "currentSrcReads": 4,
       "pendingFlags": 28,
       "hardUnload": 6,
       "iframeOps": 0,
@@ -402,43 +402,47 @@
           "text": "el.pause?.()"
         },
         {
-          "line": 333,
+          "line": 339,
           "text": "el.pause?.()"
         }
       ],
       "loadCalls": [
         {
-          "line": 398,
+          "line": 407,
           "text": "el.load?.()"
         },
         {
-          "line": 478,
+          "line": 487,
           "text": "try { el.load?.() } catch {}"
         },
         {
-          "line": 492,
+          "line": 501,
           "text": "el.load?.()"
         },
         {
-          "line": 571,
+          "line": 580,
           "text": "if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 540,
+          "line": 549,
           "text": "el.setAttribute('src', src)"
         }
       ],
       "srcRemoves": [
         {
-          "line": 365,
+          "line": 374,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 360,
+          "line": 342,
+          "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
+        },
+        {
+          "line": 369,
           "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
         }
       ],
@@ -470,11 +474,11 @@
           "text": "export function __unloadVideoEl(el) {"
         },
         {
-          "line": 403,
+          "line": 412,
           "text": "export function __restoreVideoEl(el) {"
         },
         {
-          "line": 612,
+          "line": 621,
           "text": "restoreVideoEl={__restoreVideoEl}"
         }
       ],
@@ -492,15 +496,15 @@
   },
   {
     "file": "app/forum/features/media/components/VideoMedia.jsx",
-    "score": 139,
+    "score": 152,
     "counts": {
       "playCalls": 1,
-      "pauseCalls": 3,
+      "pauseCalls": 4,
       "loadCalls": 3,
       "srcSets": 1,
       "srcRemoves": 2,
       "currentSrcReads": 3,
-      "pendingFlags": 36,
+      "pendingFlags": 41,
       "hardUnload": 0,
       "iframeOps": 0,
       "io": 1,
@@ -516,41 +520,45 @@
     "samples": {
       "playCalls": [
         {
-          "line": 1161,
+          "line": 1177,
           "text": "const p = el.play?.()"
         }
       ],
       "pauseCalls": [
         {
-          "line": 914,
+          "line": 834,
           "text": "el.pause?.()"
         },
         {
-          "line": 1028,
+          "line": 929,
           "text": "el.pause?.()"
         },
         {
-          "line": 1169,
+          "line": 1044,
+          "text": "el.pause?.()"
+        },
+        {
+          "line": 1185,
           "text": "try { el.pause?.() } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 891,
+          "line": 906,
           "text": "el.load?.()"
         },
         {
-          "line": 1044,
+          "line": 1060,
           "text": "el.load?.()"
         },
         {
-          "line": 1155,
+          "line": 1171,
           "text": "el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 1043,
+          "line": 1059,
           "text": "if (!el.getAttribute('src')) el.setAttribute('src', srcSafe)"
         }
       ],
@@ -560,7 +568,7 @@
           "text": "try { el.removeAttribute('src') } catch {}"
         },
         {
-          "line": 1031,
+          "line": 1047,
           "text": "el.removeAttribute('src')"
         }
       ],
@@ -570,11 +578,11 @@
           "text": "const hasAttachedSrc = !!String(el.getAttribute('src') || el.currentSrc || '')"
         },
         {
-          "line": 886,
+          "line": 901,
           "text": "(el.readyState === 0 || !el.currentSrc) &&"
         },
         {
-          "line": 1138,
+          "line": 1154,
           "text": "const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()"
         }
       ],
@@ -598,7 +606,7 @@
       ],
       "io": [
         {
-          "line": 931,
+          "line": 946,
           "text": "io = new IntersectionObserver("
         }
       ],

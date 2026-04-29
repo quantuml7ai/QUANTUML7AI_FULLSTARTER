@@ -828,6 +828,21 @@ React.useEffect(() => {
           if (recoverTimerRef.current) clearTimeout(recoverTimerRef.current)
         } catch {}
         recoverTimerRef.current = 0
+        if (!isPostVideo) return
+        dropActiveVideoFn(el)
+        try {
+          el.pause?.()
+        } catch {}
+        try {
+          el.dataset.__active = '0'
+          el.dataset.__prewarm = '0'
+          el.dataset.__resident = '0'
+          el.dataset.__playRequested = '0'
+          el.dataset.__loadPending = '0'
+          el.dataset.__warmReady = '0'
+          delete el.dataset.__loadPendingSince
+          el.preload = 'metadata'
+        } catch {}
       }
     }
 
@@ -968,6 +983,7 @@ React.useEffect(() => {
     dataForumVideo,
     dropActiveVideoFn,
     enforceActiveVideoCapFn,
+    isPostVideo,
     isVideoNearViewportFn,
     mediaVisMargin,
     restoreVideoElFn,

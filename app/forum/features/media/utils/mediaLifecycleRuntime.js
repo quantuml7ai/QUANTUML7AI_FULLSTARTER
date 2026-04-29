@@ -320,19 +320,28 @@ const canHardUnload = (() => {
   }
 })()
 
+const connectedPostVideoSoftUnload =
+  isPostFeedVideo &&
+  !hardUnloadRequested &&
+  !!el?.isConnected
+
 const shellVisible = isPostFeedVideo ? __isVideoNearViewport(el, 220) : false
 const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
 
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
+  !hardUnloadRequested &&
   __SOFT_RESIDENT_POST_VIDEO &&
   !!el?.isConnected &&
   (nearViewport || shellVisible)
-if (!canHardUnload || shouldKeepResidentPostVideo) {
+if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVideo) {
   try {
     el.pause?.()
   } catch {}
   try {
+    if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
+    if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
+    if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = '0'
     el.preload = 'metadata'

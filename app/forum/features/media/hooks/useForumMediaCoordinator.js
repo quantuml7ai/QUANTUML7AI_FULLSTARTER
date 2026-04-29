@@ -2958,11 +2958,63 @@ const shouldRetainHtmlMedia = (el) => {
         return { total: 0, loaded: 0 };
       }
     };
+    const isEmergencyHtmlMediaUnloadReason = (reason = 'timeout') => {
+      const next = String(reason || 'timeout');
+      return (
+        next === 'cleanup' ||
+        next === 'resident_cap' ||
+        next === 'error_blocked' ||
+        next === 'forceHardUnload'
+      );
+    };
+    const isSoftPostVideoUnloadReason = (reason = 'timeout') => {
+      const next = String(reason || 'timeout');
+      if (
+        next === 'timeout' ||
+        next === 'out_of_view' ||
+        next === 'focus_switch' ||
+        next === 'below_stop_ratio' ||
+        next === 'candidate_replace' ||
+        next === 'native_prewarm_replace'
+      ) {
+        return true;
+      }
+      return next.endsWith('_external_play');
+    };
+    const isConnectedPostVideoOwner = (el) => {
+      try {
+        const media = getMediaStateNode(el);
+        return (
+          media instanceof HTMLVideoElement &&
+          media.isConnected &&
+          String(media?.getAttribute?.('data-forum-video') || '') === 'post' &&
+          String(media?.getAttribute?.('data-forum-media') || '') === 'video'
+        );
+      } catch {
+        return false;
+      }
+    };
+    const setPendingHardUnload = (el, next = false) => {
+      const applyFlag = (node) => {
+        if (!(node instanceof Element) || !node.dataset) return;
+        try {
+          if (next) node.dataset.__pendingHardUnload = '1';
+          else delete node.dataset.__pendingHardUnload;
+        } catch {}
+      };
+      try {
+        const media = getMediaStateNode(el);
+        const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
+        applyFlag(media);
+        if (owner !== media) applyFlag(owner);
+      } catch {}
+    };
 
     const cancelUnload = (el) => {
       const id = unloadTimers.get(el);
       if (id) clearTimeout(id);
       unloadTimers.delete(el);
+      setPendingHardUnload(el, false);
     };
     const settlingUntil = new WeakMap();
     const markSettling = (el, ms = null, reason = 'settling') => {
@@ -3132,19 +3184,26 @@ const pauseForeignMedia = (keepEl = null) => {
       const unloadReason = String(args?.[1] || 'unknown');
       if (!el) return;
       clearReadyReplay(el);
-      trace('hard_unload', el, { reason: unloadReason });
+      const emergencyHtmlMediaUnload = isEmergencyHtmlMediaUnloadReason(unloadReason);
+      const connectedPostVideoOwner = isConnectedPostVideoOwner(el);
+      trace(
+        connectedPostVideoOwner && !emergencyHtmlMediaUnload && isSoftPostVideoUnloadReason(unloadReason)
+          ? 'soft_post_video_unload'
+          : 'hard_unload',
+        el,
+        { reason: unloadReason },
+      );
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         invalidatePlayRequest(el);
         try { el.dataset.__coordinatorUnloadUntil = String(Date.now() + 2500); } catch {}
         try {
-          const farOutOfView = unloadReason === 'out_of_view' && !isNearViewportElement(el, isIOSUi ? 2200 : (isCoarseUi ? 1500 : 1200));
           const forceHard =
-            unloadReason === 'cleanup' ||
-            unloadReason === 'resident_cap' ||
-            unloadReason === 'error_blocked' ||
-            (farOutOfView && (isIOSUi || isCoarseUi));
+            emergencyHtmlMediaUnload ||
+            String(el?.dataset?.__forceHardUnload || '') === '1';
           if (forceHard) el.dataset.__forceHardUnload = '1';
           else delete el.dataset.__forceHardUnload;
+          if (forceHard) el.dataset.__pendingHardUnload = '1';
+          else delete el.dataset.__pendingHardUnload;
         } catch {}
         try { __dropActiveVideoEl(el); } catch {}
         if (el instanceof HTMLVideoElement) {
@@ -3157,6 +3216,7 @@ const pauseForeignMedia = (keepEl = null) => {
           });
           try { el.dataset.__active = '0'; } catch {}
         }
+        try { delete el.dataset.__pendingHardUnload; } catch {}
         return;
       }
       const kind = el.getAttribute('data-forum-media');
@@ -3263,6 +3323,8 @@ const pauseForeignMedia = (keepEl = null) => {
     const scheduleHardUnload = (el, ms = null, reason = 'timeout') => {
       if (!el) return;
       cancelUnload(el);
+      const emergencyHtmlMediaUnload = isEmergencyHtmlMediaUnloadReason(reason);
+      setPendingHardUnload(el, emergencyHtmlMediaUnload);
       if (
         ms == null &&
         reason !== 'cleanup' &&
@@ -3283,9 +3345,7 @@ const pauseForeignMedia = (keepEl = null) => {
             el,
             isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100),
           );
-          const protectedReason =
-            reason !== 'cleanup' &&
-            reason !== 'error_blocked';
+          const protectedReason = !emergencyHtmlMediaUnload;
 
           if (protectedReason && (visiblePx > 48 || nearVisible)) {
             if (isIframeLike(el)) {

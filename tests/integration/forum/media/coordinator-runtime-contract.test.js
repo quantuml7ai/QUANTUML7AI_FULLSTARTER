@@ -11,10 +11,27 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)")
   })
 
+  test('VideoMedia post-video cleanup stays on soft windowing teardown without hard unload', () => {
+    const src = read('app/forum/features/media/components/VideoMedia.jsx')
+    expect(src).toContain('if (!isPostVideo) return')
+    expect(src).toContain("el.dataset.__resident = '0'")
+    expect(src).toContain("el.dataset.__playRequested = '0'")
+    expect(src).toContain("el.preload = 'metadata'")
+  })
+
   test('coordinator defers hard unload during settling', () => {
     const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     expect(src).toContain('hard_unload_deferred_settling')
     expect(src).toContain('markSettling')
+  })
+
+  test('coordinator keeps connected post-video on soft unload reasons and reserves hard src unload for emergencies', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).toContain("const isEmergencyHtmlMediaUnloadReason = (reason = 'timeout') => {")
+    expect(src).toContain("const isSoftPostVideoUnloadReason = (reason = 'timeout') => {")
+    expect(src).toContain("next === 'native_prewarm_replace'")
+    expect(src).toContain("connectedPostVideoOwner && !emergencyHtmlMediaUnload && isSoftPostVideoUnloadReason(unloadReason)")
+    expect(src).not.toContain('(farOutOfView && (isIOSUi || isCoarseUi))')
   })
 
   test('iframe resident cap keeps visible and near-viewport embeds off the victim list', () => {

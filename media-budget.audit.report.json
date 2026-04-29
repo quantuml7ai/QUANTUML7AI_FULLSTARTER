@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T13:45:00.943Z",
+  "generatedAt": "2026-04-29T14:24:43.285Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -39,10 +39,10 @@
         "playCall": 0,
         "pauseCall": 0,
         "loadCall": 0,
-        "preloadAttr": 11,
-        "prewarmFlag": 8,
-        "residentFlag": 4,
-        "loadPendingFlag": 18,
+        "preloadAttr": 12,
+        "prewarmFlag": 9,
+        "residentFlag": 5,
+        "loadPendingFlag": 20,
         "userPauseFlag": 3,
         "systemPauseFlag": 0,
         "manualLeaseFlag": 2,
@@ -55,7 +55,7 @@
         "pause-semantics",
         "viewport-orchestration"
       ],
-      "score": 54
+      "score": 58
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
