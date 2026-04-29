@@ -12,6 +12,7 @@ import {
 import useHtmlFlag from './shared/hooks/useHtmlFlag'
 import useForumToast from './shared/hooks/useForumToast'
 import { isBrowser } from './shared/utils/browser'
+import { revealForumWindowedDomId } from './shared/utils/forumWindowingRegistry'
 import { formatCount } from './shared/utils/counts'
 import { rich } from './shared/utils/richText'
 import {
@@ -904,6 +905,117 @@ useForumHeadCollapse({
 
   // === Режим редактирования поста (owner) ===
   const [editPostId, setEditPostId] = React.useState(null)
+  const editModeAlignTimersRef = React.useRef([])
+  const editModeAlignRafsRef = React.useRef([])
+  const clearEditModeAlignHandles = React.useCallback(() => {
+    try {
+      editModeAlignTimersRef.current.forEach((timerId) => clearTimeout(timerId))
+      editModeAlignTimersRef.current = []
+    } catch {}
+    try {
+      editModeAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))
+      editModeAlignRafsRef.current = []
+    } catch {}
+  }, [])
+  React.useEffect(() => clearEditModeAlignHandles, [clearEditModeAlignHandles])
+
+  const scheduleEditModeBranchAlign = React.useCallback((postId) => {
+    const targetPostId = String(postId || '').trim()
+    if (!targetPostId || !isBrowser()) return
+
+    clearEditModeAlignHandles()
+
+    const startedAt = Date.now()
+    const baselineUserScrollTs = (() => {
+      try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
+    })()
+
+    const alignAttempt = (attempt = 0) => {
+      try {
+        if ((Date.now() - startedAt) > 3000) return
+        const currentUserScrollTs = Number(window.__forumUserScrollTs || 0)
+        if (attempt > 0 && currentUserScrollTs > baselineUserScrollTs) return
+
+        try {
+          revealForumWindowedDomId(`post_${targetPostId}`, { holdMs: 2200 })
+        } catch {}
+
+        const threadRootNode = document.querySelector('[data-thread-branch-root="1"]')
+        const targetPostNode = document.getElementById(`post_${targetPostId}`)
+        const threadStartNode = document.querySelector('[data-forum-thread-start="1"]')
+        const targetNode = threadRootNode || targetPostNode || threadStartNode || null
+
+        if (targetNode instanceof Element) {
+          alignNodeToTop(targetNode)
+          return
+        }
+
+        if (attempt >= 14) return
+        const delay = attempt <= 3 ? 64 : (attempt <= 9 ? 120 : 180)
+        const timerId = window.setTimeout(() => alignAttempt(attempt + 1), delay)
+        editModeAlignTimersRef.current.push(timerId)
+      } catch {}
+    }
+
+    try {
+      const rafA = requestAnimationFrame(() => {
+        const rafB = requestAnimationFrame(() => alignAttempt(0))
+        editModeAlignRafsRef.current.push(rafB)
+      })
+      editModeAlignRafsRef.current.push(rafA)
+    } catch {
+      const timerId = window.setTimeout(() => alignAttempt(0), 0)
+      editModeAlignTimersRef.current.push(timerId)
+    }
+  }, [alignNodeToTop, clearEditModeAlignHandles])
+
+  const prepareEditMode = React.useCallback((detail) => {
+    const targetPostId = String(detail?.postId || '').trim()
+    if (!targetPostId) return
+
+    const detailPost = detail?.post && String(detail?.post?.id || '') === targetPostId
+      ? detail.post
+      : null
+    const topicId = String(detailPost?.topicId || detail?.topicId || '').trim()
+    const targetPost =
+      (data?.posts || []).find((item) => String(item?.id || '') === targetPostId) ||
+      (detailPost && topicId ? { ...detailPost, topicId } : null) ||
+      (topicId ? { id: targetPostId, topicId, text: String(detail?.text || '') } : null)
+
+    try { setReplyTo(null) } catch {}
+    try { if (profileBranchMode) clearProfileBranch() } catch {}
+    try { if (questOpen) setQuestOpen(false) } catch {}
+    try { if (questSel) setQuestSel(null) } catch {}
+
+    if (targetPost?.topicId) {
+      try {
+        openThreadForPost(targetPost, {
+          closeInbox: true,
+          closeVideoFeed: true,
+          entryId: `post_${targetPostId}`,
+        })
+      } catch {}
+      scheduleEditModeBranchAlign(targetPostId)
+      return
+    }
+
+    try { setInboxOpen(false) } catch {}
+    try { setVideoFeedOpenBridge(false) } catch {}
+  }, [
+    clearProfileBranch,
+    data?.posts,
+    openThreadForPost,
+    profileBranchMode,
+    questOpen,
+    questSel,
+    scheduleEditModeBranchAlign,
+    setInboxOpen,
+    setQuestOpen,
+    setQuestSel,
+    setReplyTo,
+    setVideoFeedOpenBridge,
+  ])
+
   useForumEditMode({
     t,
     toast,
@@ -911,6 +1023,7 @@ useForumHeadCollapse({
     setEditPostId,
     setText,
     setComposerActive,
+    prepareEditMode,
   })
 
 const {

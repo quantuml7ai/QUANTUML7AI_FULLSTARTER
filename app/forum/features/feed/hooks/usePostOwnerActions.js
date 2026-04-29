@@ -15,13 +15,15 @@ export default function usePostOwnerActions({ post, onOwnerDelete }) {
           new CustomEvent('forum:edit', {
             detail: {
               postId: post?.id,
+              topicId: post?.topicId,
               text: post?.text,
+              post,
             },
           }),
         )
       } catch {}
     },
-    [post?.id, post?.text],
+    [post],
   )
 
   const requestOwnerDelete = React.useCallback((e) => {

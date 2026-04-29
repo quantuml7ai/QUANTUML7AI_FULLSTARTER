@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T14:24:10.928Z",
+  "generatedAt": "2026-04-29T14:48:36.412Z",
   "summary": {
     "scannedFiles": 381,
-    "internalEdges": 522,
+    "internalEdges": 523,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 138,
+    "crossDomainEdgeCount": 139,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -549,6 +549,12 @@
       "from": "app/forum/ForumRoot.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/browser.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumRoot.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/forumWindowingRegistry.js",
       "toDomain": "forum-shared"
     },
     {
@@ -3554,6 +3560,7 @@
         "app/forum/shared/hooks/useHtmlFlag.js",
         "app/forum/shared/hooks/useForumToast.js",
         "app/forum/shared/utils/browser.js",
+        "app/forum/shared/utils/forumWindowingRegistry.js",
         "app/forum/shared/utils/counts.js",
         "app/forum/shared/utils/richText.js",
         "app/forum/shared/constants/media.js",
@@ -3612,7 +3619,7 @@
         "app/forum/features/moderation/hooks/useForumModerationRuntime.js",
         "app/forum/ForumAds.js"
       ],
-      "importCount": 64,
+      "importCount": 65,
       "external": [
         "react"
       ],

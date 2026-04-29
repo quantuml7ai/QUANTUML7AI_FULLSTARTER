@@ -108,4 +108,23 @@ describe('Forum hook contracts', () => {
     expect(topicItemSource).toContain('const isStarred = !!isStarredAuthor')
     expect(topicItemSource).not.toContain('starredAuthors')
   })
+
+  it('routes owner edit mode through thread-open preparation and mounted composer focus retries', () => {
+    const ownerActionsSource = readRepoFile('app/forum/features/feed/hooks/usePostOwnerActions.js')
+    const editModeSource = readRepoFile('app/forum/features/ui/hooks/useForumEditMode.js')
+    const forumRootSource = readRepoFile('app/forum/ForumRoot.jsx')
+    const composeDockSource = readRepoFile('app/forum/features/ui/components/ComposeDock.jsx')
+
+    expect(ownerActionsSource).toContain('topicId: post?.topicId')
+    expect(ownerActionsSource).toContain('post,')
+    expect(editModeSource).toContain('prepareEditMode')
+    expect(editModeSource).toContain('scheduleComposerFocus')
+    expect(editModeSource).toContain("document.getElementById('forum-composer')")
+    expect(forumRootSource).toContain('const prepareEditMode = React.useCallback((detail) => {')
+    expect(forumRootSource).toContain('openThreadForPost(targetPost, {')
+    expect(forumRootSource).toContain('scheduleEditModeBranchAlign(targetPostId)')
+    expect(forumRootSource).toContain('revealForumWindowedDomId(`post_${targetPostId}`')
+    expect(forumRootSource).toContain('if (profileBranchMode) clearProfileBranch()')
+    expect(composeDockSource).toContain('id="forum-composer"')
+  })
 })

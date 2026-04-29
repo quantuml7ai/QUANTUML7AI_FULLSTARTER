@@ -2186,6 +2186,47 @@
     }
   },
   {
+    "file": "app/forum/ForumRoot.jsx",
+    "score": 18,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 6,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 443,
+          "text": "sortRefreshAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))"
+        },
+        {
+          "line": 800,
+          "text": "const rafA = requestAnimationFrame(() => {"
+        },
+        {
+          "line": 916,
+          "text": "editModeAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))"
+        },
+        {
+          "line": 961,
+          "text": "const rafA = requestAnimationFrame(() => {"
+        }
+      ]
+    }
+  },
+  {
     "file": "app/forum/features/dm/hooks/useDmSeenObservers.js",
     "score": 16,
     "counts": {
@@ -2429,49 +2470,6 @@
         {
           "line": 138,
           "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/ui/hooks/useForumEditMode.js",
-    "score": 14,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 0,
-      "raf": 3,
-      "scrollWrites": 1,
-      "layoutReads": 0
-    },
-    "flags": [],
-    "samples": {
-      "raf": [
-        {
-          "line": 29,
-          "text": "cancelAnimationFrame(focusRaf)"
-        },
-        {
-          "line": 32,
-          "text": "focusRaf = requestAnimationFrame(() => {"
-        },
-        {
-          "line": 62,
-          "text": "try { cancelAnimationFrame(focusRaf) } catch {}"
-        }
-      ],
-      "scrollWrites": [
-        {
-          "line": 36,
-          "text": "root.scrollIntoView({ behavior: 'auto', block: 'nearest' })"
         }
       ]
     }
@@ -2747,39 +2745,6 @@
         {
           "line": 55,
           "text": "if (!v.currentSrc) return"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/ForumRoot.jsx",
-    "score": 9,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 0,
-      "io": 0,
-      "ro": 0,
-      "raf": 3,
-      "scrollWrites": 0,
-      "layoutReads": 0
-    },
-    "flags": [],
-    "samples": {
-      "raf": [
-        {
-          "line": 442,
-          "text": "sortRefreshAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))"
-        },
-        {
-          "line": 799,
-          "text": "const rafA = requestAnimationFrame(() => {"
         }
       ]
     }
@@ -3125,6 +3090,39 @@
     }
   },
   {
+    "file": "app/forum/features/ui/hooks/useForumEditMode.js",
+    "score": 6,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 2,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {
+      "raf": [
+        {
+          "line": 20,
+          "text": "try { cancelAnimationFrame(id) } catch {}"
+        },
+        {
+          "line": 58,
+          "text": "const rafId = requestAnimationFrame(() => {"
+        }
+      ]
+    }
+  },
+  {
     "file": "app/forum/features/feed/utils/openThreadFromPost.js",
     "score": 5,
     "counts": {
@@ -3416,7 +3414,7 @@
     "samples": {
       "layoutReads": [
         {
-          "line": 32,
+          "line": 34,
           "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
         }
       ]

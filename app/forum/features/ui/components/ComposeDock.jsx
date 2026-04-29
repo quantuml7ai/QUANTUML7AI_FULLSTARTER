@@ -19,7 +19,7 @@ export default function ComposeDock({
   if (!visible) return null
   return (
     <div className="composeDock">
-      <div className="composer" data-active={composerActive} ref={composerRef}>
+      <div id="forum-composer" className="composer" data-active={composerActive} ref={composerRef}>
         <ComposerStatusMeta
           replyTo={replyTo}
           threadRoot={threadRoot}
@@ -35,4 +35,3 @@ export default function ComposeDock({
     </div>
   )
 }
-

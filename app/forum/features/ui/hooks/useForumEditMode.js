@@ -9,13 +9,72 @@ export default function useForumEditMode({
   setEditPostId,
   setText,
   setComposerActive,
+  prepareEditMode,
 }) {
   useEffect(() => {
-    let focusRaf = 0
+    const focusRafs = new Set()
+    const focusTimers = new Set()
+    const clearFocusSchedule = () => {
+      try {
+        focusRafs.forEach((id) => {
+          try { cancelAnimationFrame(id) } catch {}
+        })
+      } catch {}
+      focusRafs.clear()
+      try {
+        focusTimers.forEach((id) => {
+          try { clearTimeout(id) } catch {}
+        })
+      } catch {}
+      focusTimers.clear()
+    }
+
+    const focusComposer = () => {
+      try {
+        const root = (composerRef && composerRef.current) || document.getElementById('forum-composer')
+        if (!root) return false
+        const ta = root.querySelector?.('.taInput') || root.querySelector?.('textarea')
+        if (!(ta instanceof HTMLElement) || typeof ta.focus !== 'function') return false
+        const active = document.activeElement
+        const activeInsideComposer = !!(active && root?.contains?.(active))
+        if (!activeInsideComposer) {
+          try {
+            ta.focus({ preventScroll: true })
+          } catch {
+            ta.focus()
+          }
+        }
+        return true
+      } catch {}
+      return false
+    }
+
+    const scheduleComposerFocus = () => {
+      clearFocusSchedule()
+      const delays = [0, 48, 96, 160, 240, 360, 520, 760, 1080]
+      delays.forEach((delay, index) => {
+        const timerId = window.setTimeout(() => {
+          focusTimers.delete(timerId)
+          const rafId = requestAnimationFrame(() => {
+            focusRafs.delete(rafId)
+            if (focusComposer()) {
+              clearFocusSchedule()
+            }
+          })
+          focusRafs.add(rafId)
+        }, delay + (index === 0 ? 0 : 12))
+        focusTimers.add(timerId)
+      })
+    }
+
     const onEdit = (e) => {
       try {
         const d = e?.detail || {}
         if (!d?.postId || typeof d?.text !== 'string') return
+
+        try {
+          prepareEditMode?.(d)
+        } catch {}
 
         setEditPostId(String(d.postId))
         setText(String(d.text))
@@ -25,27 +84,7 @@ export default function useForumEditMode({
         } catch {}
 
         try {
-          if (focusRaf) {
-            cancelAnimationFrame(focusRaf)
-            focusRaf = 0
-          }
-          focusRaf = requestAnimationFrame(() => {
-            focusRaf = 0
-            const root = (composerRef && composerRef.current) || document.getElementById('forum-composer')
-            if (root && root.scrollIntoView) {
-              root.scrollIntoView({ behavior: 'auto', block: 'nearest' })
-            }
-            const ta = root?.querySelector?.('.taInput') || root?.querySelector?.('textarea')
-            const active = document.activeElement
-            const activeInsideComposer = !!(active && root?.contains?.(active))
-            if (ta && typeof ta.focus === 'function' && !activeInsideComposer) {
-              try {
-                ta.focus({ preventScroll: true })
-              } catch {
-                ta.focus()
-              }
-            }
-          })
+          scheduleComposerFocus()
         } catch {}
 
         try {
@@ -58,12 +97,9 @@ export default function useForumEditMode({
       window.addEventListener('forum:edit', onEdit)
       return () => {
         window.removeEventListener('forum:edit', onEdit)
-        if (focusRaf) {
-          try { cancelAnimationFrame(focusRaf) } catch {}
-          focusRaf = 0
-        }
+        clearFocusSchedule()
       }
     }
     return undefined
-  }, [t, toast, composerRef, setEditPostId, setText, setComposerActive])
+  }, [t, toast, composerRef, setEditPostId, setText, setComposerActive, prepareEditMode])
 }

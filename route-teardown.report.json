@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-29T14:24:46.316Z",
+  "generatedAt": "2026-04-29T14:49:11.356Z",
   "report": [
     {
       "file": "app/page.js",
@@ -56,15 +56,15 @@
     {
       "file": "app/forum/ForumRoot.jsx",
       "counts": {
-        "timers": 2,
-        "timerCleanup": 1,
+        "timers": 4,
+        "timerCleanup": 2,
         "observers": 0,
         "observerCleanup": 0,
         "listeners": 0,
         "listenerCleanup": 0,
         "destroyCalls": 0
       },
-      "teardownScore": 1
+      "teardownScore": 2
     },
     {
       "file": "components/ForumBootSplash.jsx",
@@ -82,15 +82,15 @@
     {
       "file": "app/forum/ForumRoot.jsx",
       "counts": {
-        "timers": 2,
-        "timerCleanup": 1,
+        "timers": 4,
+        "timerCleanup": 2,
         "observers": 0,
         "observerCleanup": 0,
         "listeners": 0,
         "listenerCleanup": 0,
         "destroyCalls": 0
       },
-      "teardownScore": 1
+      "teardownScore": 2
     },
     {
       "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",

@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T14:24:45.745Z",
+  "generatedAt": "2026-04-29T14:49:10.794Z",
   "summary": {
     "scannedFiles": 370,
     "filesWithSyncKeys": 141,
@@ -5247,67 +5247,67 @@
       "hits": [
         {
           "key": "vip",
-          "line": 106,
+          "line": 107,
           "text": "import { VIP_EMOJI, VIP_AVATARS } from './features/profile/constants/vipAssets'"
         },
         {
           "key": "vip",
-          "line": 256,
+          "line": 257,
           "text": "vipOpen,"
-        },
-        {
-          "key": "vip",
-          "line": 258,
-          "text": "vipBtnRef,"
         },
         {
           "key": "vip",
           "line": 259,
-          "text": "vipActive,"
-        },
-        {
-          "key": "accountId",
-          "line": 400,
-          "text": "authAccountId: auth?.accountId,"
-        },
-        {
-          "key": "vip",
-          "line": 1083,
-          "text": "vipActive,"
-        },
-        {
-          "key": "accountId",
-          "line": 1115,
-          "text": "authAccountId: auth?.accountId,"
-        },
-        {
-          "key": "vip",
-          "line": 1335,
-          "text": "vipActive,"
-        },
-        {
-          "key": "vip",
-          "line": 1514,
-          "text": "vipActive,"
-        },
-        {
-          "key": "vip",
-          "line": 1524,
-          "text": "vipAvatars: VIP_AVATARS,"
-        },
-        {
-          "key": "vip",
-          "line": 1539,
           "text": "vipBtnRef,"
         },
         {
           "key": "vip",
-          "line": 1540,
+          "line": 260,
+          "text": "vipActive,"
+        },
+        {
+          "key": "accountId",
+          "line": 401,
+          "text": "authAccountId: auth?.accountId,"
+        },
+        {
+          "key": "vip",
+          "line": 1196,
+          "text": "vipActive,"
+        },
+        {
+          "key": "accountId",
+          "line": 1228,
+          "text": "authAccountId: auth?.accountId,"
+        },
+        {
+          "key": "vip",
+          "line": 1448,
+          "text": "vipActive,"
+        },
+        {
+          "key": "vip",
+          "line": 1627,
+          "text": "vipActive,"
+        },
+        {
+          "key": "vip",
+          "line": 1637,
+          "text": "vipAvatars: VIP_AVATARS,"
+        },
+        {
+          "key": "vip",
+          "line": 1652,
+          "text": "vipBtnRef,"
+        },
+        {
+          "key": "vip",
+          "line": 1653,
           "text": "vipOpen,"
         },
         {
           "key": "vip",
-          "line": 1707,
+          "line": 1820,
           "text": "vipEmoji: VIP_EMOJI,"
         }
       ],
