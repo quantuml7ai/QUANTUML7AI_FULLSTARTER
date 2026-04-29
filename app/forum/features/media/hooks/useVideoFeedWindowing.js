@@ -2,9 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 
-const VF_OVERSCAN_PX = 1120
-const VF_OVERSCAN_PX_MOBILE = 860
-const VF_OVERSCAN_PX_TABLET = 980
+// Safe memory/load profile: ~30-35% less live window pressure.
+// Do not reduce below these values without re-testing back-scroll stability.
+const VF_OVERSCAN_PX = 780
+const VF_OVERSCAN_PX_MOBILE = 660
+const VF_OVERSCAN_PX_TABLET = 720
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
@@ -79,18 +81,23 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
 
-  const vfGetMaxRender = useCallback(() => {
-    try {
-      if (!isBrowserFn()) return 6
-      const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
-      const dm = Number(window?.navigator?.deviceMemory || 0)
-      if (coarse) return 8
-      if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 8
-      return 10
-    } catch {
-      return 6
-    }
-  }, [isBrowserFn])
+const vfGetMaxRender = useCallback(() => {
+  try {
+    if (!isBrowserFn()) return 5
+
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const dm = Number(window?.navigator?.deviceMemory || 0)
+    const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
+
+    // Было: coarse/lowMem = 8, desktop = 10.
+    // Стало: coarse/lowMem = 6, desktop = 7.
+    // Это главный выигрыш по DOM/media memory без изменения scroll mechanics.
+    if (coarse || lowMem) return 6
+    return 7
+  } catch {
+    return 5
+  }
+}, [isBrowserFn])
 
   const vfGetOverscanPx = useCallback((velocity = 0) => {
     try {
@@ -104,10 +111,14 @@ export default function useVideoFeedWindowing({
             ? VF_OVERSCAN_PX_TABLET
             : VF_OVERSCAN_PX
 
-      const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.6)
-      const boost = coarse ? 0.28 : 0.55
+const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.8)
 
-      return Math.round(base * (1 + v * boost))
+// Было: desktop boost до +55%, coarse до +28%.
+// Стало: desktop до +32%, coarse до +18%.
+// Это снижает резкое раздувание окна на быстром скролле.
+const boost = coarse ? 0.18 : 0.32
+
+return Math.round(base * (1 + v * boost))
     } catch {
       return VF_OVERSCAN_PX_MOBILE
     }
@@ -268,9 +279,7 @@ export default function useVideoFeedWindowing({
       end++
     }
 
-    const vfMaxRender =
-      vfGetMaxRender() +
-      (velocity > 1.0 && !(window?.matchMedia?.('(pointer: coarse)')?.matches) ? 1 : 0)
+const vfMaxRender = vfGetMaxRender()
 
     if ((end - start) > vfMaxRender) {
       // Stable centered trim. Direction-aware trim caused backward-scroll teleport:
@@ -300,8 +309,11 @@ export default function useVideoFeedWindowing({
         if (scrollActiveNow) return prev
         
         const recentWindowChange = (now - Number(vfWinMetaRef.current?.ts || 0)) < VF_WINDOW_STICKY_MS
-        const stickyItems = velocity > 1.2 ? 3 : velocity > 0.55 ? 2 : 2
-        const stickyMaxRender = vfMaxRender + stickyItems
+// Было: +2 / +3 карточки.
+// Стало: +1 / +2 карточки.
+// Sticky logic остаётся, но держит меньше старых карточек в памяти.
+const stickyItems = velocity > 1.2 ? 2 : 1
+const stickyMaxRender = vfMaxRender + stickyItems
         const leadingTrim = Math.max(0, nextStart - prev.start)
         const trailingTrim = Math.max(0, prev.end - nextEnd)
         const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
