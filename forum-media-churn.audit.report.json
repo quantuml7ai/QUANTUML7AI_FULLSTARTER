@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 941,
+    "score": 931,
     "counts": {
       "playCalls": 3,
       "pauseCalls": 15,
@@ -10,8 +10,8 @@
       "srcRemoves": 0,
       "currentSrcReads": 18,
       "pendingFlags": 86,
-      "hardUnload": 23,
-      "iframeOps": 167,
+      "hardUnload": 22,
+      "iframeOps": 165,
       "io": 9,
       "ro": 0,
       "raf": 10,
@@ -26,43 +26,43 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2420,
+          "line": 2405,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2500,
+          "line": 2485,
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 3644,
+          "line": 3629,
           "text": "const p = media.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 2032,
+          "line": 2017,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2042,
+          "line": 2027,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2052,
+          "line": 2037,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2170,
+          "line": 2155,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 1305,
+          "line": 1290,
           "text": "media.load?.();"
         },
         {
-          "line": 4068,
+          "line": 4053,
           "text": "})) a.load?.();"
         }
       ],
@@ -72,15 +72,15 @@
           "text": "try { el.setAttribute('src', src); } catch {}"
         },
         {
-          "line": 3275,
+          "line": 3260,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3292,
+          "line": 3277,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3837,
+          "line": 3822,
           "text": "try { el.setAttribute('src', nextSrc); } catch {}"
         }
       ],
@@ -134,7 +134,7 @@
           "text": "__restoreVideoEl(video);"
         },
         {
-          "line": 1298,
+          "line": 1283,
           "text": "__restoreVideoEl(media);"
         }
       ],
@@ -214,11 +214,11 @@
   },
   {
     "file": "app/forum/ForumAds.js",
-    "score": 192,
+    "score": 198,
     "counts": {
       "playCalls": 8,
       "pauseCalls": 5,
-      "loadCalls": 2,
+      "loadCalls": 3,
       "srcSets": 1,
       "srcRemoves": 2,
       "currentSrcReads": 6,
@@ -238,63 +238,67 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2199,
+          "line": 2172,
           "text": "const playAttempt = v.play?.();"
         },
         {
-          "line": 2215,
+          "line": 2188,
           "text": "v.play?.().catch(() => {});"
         },
         {
-          "line": 2282,
+          "line": 2255,
           "text": "const p = v.play?.();"
         },
         {
-          "line": 2288,
+          "line": 2261,
           "text": "v.play?.().catch(() => {});"
         }
       ],
       "pauseCalls": [
         {
-          "line": 323,
+          "line": 313,
           "text": "try { videoEl.pause?.(); } catch {}"
         },
         {
-          "line": 367,
+          "line": 345,
           "text": "try { videoEl.pause?.(); } catch {}"
         },
         {
-          "line": 2191,
+          "line": 2164,
           "text": "try { v.pause?.(); } catch {}"
         },
         {
-          "line": 2229,
+          "line": 2202,
           "text": "try { v.pause?.(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 382,
+          "line": 323,
+          "text": "try { videoEl.load?.(); } catch {}"
+        },
+        {
+          "line": 360,
           "text": "videoEl.load?.();"
         },
         {
-          "line": 1659,
+          "line": 1632,
           "text": "v.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 370,
+          "line": 348,
           "text": "try { videoEl.setAttribute('src', nextSrc); } catch {}"
         }
       ],
       "srcRemoves": [
         {
-          "line": 341,
-          "text": "// - removeAttribute('src')"
+          "line": 314,
+          "text": "try { videoEl.removeAttribute('src'); } catch {}"
         },
         {
-          "line": 2227,
+          "line": 2200,
           "text": "// Пауза без removeAttribute('src') и без load()."
         }
       ],
@@ -308,57 +312,57 @@
           "text": "return !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || videoEl.dataset?.adNativeSrc || '').trim();"
         },
         {
-          "line": 354,
+          "line": 334,
           "text": "const currentSrc = getAdVideoNodeSrc(videoEl);"
         },
         {
-          "line": 360,
+          "line": 340,
           "text": "if (currentSrc === nextSrc || attachedSrc === nextSrc) {"
         }
       ],
       "iframeOps": [
         {
-          "line": 1329,
+          "line": 1307,
           "text": "'&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';"
         },
         {
-          "line": 1381,
+          "line": 1359,
           "text": "/^(?:https?:\\/\\/)?(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([A-Za-z0-9_-]{6,})/i;"
         },
         {
-          "line": 1384,
+          "line": 1362,
           "text": "/^(?:https?:\\/\\/)?(?:www\\.)?tiktok\\.com\\/(?:@[\\w.\\-]+\\/video\\/(\\d+)|t\\/[A-Za-z0-9]+)(?:[?#].*)?$/i;"
         },
         {
-          "line": 1444,
+          "line": 1422,
           "text": "// текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)"
         }
       ],
       "io": [
         {
-          "line": 1595,
+          "line": 1573,
           "text": "// Скролл и IntersectionObserver не должны менять <video src>."
         },
         {
-          "line": 1691,
+          "line": 1664,
           "text": "if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')"
         },
         {
-          "line": 1695,
+          "line": 1668,
           "text": "const nearObs = new IntersectionObserver("
         },
         {
-          "line": 1702,
+          "line": 1675,
           "text": "const focusObs = new IntersectionObserver("
         }
       ],
       "layoutReads": [
         {
-          "line": 396,
+          "line": 374,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
-          "line": 397,
+          "line": 375,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         }
       ]

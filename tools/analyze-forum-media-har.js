@@ -62,7 +62,7 @@ function classifyMediaUrl(url) {
 
 function isCancelled(entry) {
   const status = Number(entry?.response?.status || 0);
-  const err = String(entry?._error || entry?.response?._error || '');
+  const err = String(entry?._error || '');
   const timings = entry?.timings || {};
   return (
     status === 0 ||
