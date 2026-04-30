@@ -276,7 +276,7 @@ const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
 // Native video must be attached imperatively, not through React `src` state.
 // Otherwise every visibility / preload re-render may reset the <video src>
 // and Chrome starts a new set of HTTP Range / 206 requests.
-const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'none';
+const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 
 function getAdVideoNodeSrc(videoEl) {
@@ -291,36 +291,35 @@ function getAdVideoNodeSrc(videoEl) {
 function detachAdNativeVideo(videoEl) {
   if (!videoEl) return;
 
-  const hadSrc = (() => {
-    try {
-      return !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || videoEl.dataset?.adNativeSrc || '').trim();
-    } catch {
-      return false;
-    }
-  })();
-
-  if (!hadSrc) {
-    try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
-    try {
-      if (videoEl.dataset) {
-        videoEl.dataset.__adLoadPending = '0';
-        videoEl.dataset.__adWarmOwner = '0';
-      }
-    } catch {}
-    return;
-  }
+  // IMPORTANT:
+  // Native ad video is windowing-owned now.
+  // Do NOT remove src on scroll/near/focus changes.
+  // The slot/card unmount must be the only normal resource release mechanism.
+  //
+  // Previously this function removed src and called load(), which could leave
+  // a visible ad slot as an empty/black collapsed video surface after scrolling back.
 
   try { videoEl.pause?.(); } catch {}
-  try { videoEl.removeAttribute('src'); } catch {}
-  try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
+
   try {
     if (videoEl.dataset) {
       videoEl.dataset.__adLoadPending = '0';
       videoEl.dataset.__adWarmOwner = '0';
+      videoEl.dataset.__adDetachedSoft = '1';
+      videoEl.dataset.__adDetachedSoftTs = String(Date.now());
     }
   } catch {}
-  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
-  try { videoEl.load?.(); } catch {}
+
+  try {
+    // Keep src attached. Only reduce eagerness.
+    // Using metadata is safer than none because the browser can preserve the first frame/surface.
+    videoEl.preload = 'metadata';
+  } catch {}
+
+  // Do NOT:
+  // - removeAttribute('src')
+  // - removeAttribute('data-ad-native-src')
+  // - call load() after clearing src
 }
 
 function ensureAdNativeVideoSrc(videoEl, src, muted) {
@@ -337,10 +336,12 @@ function ensureAdNativeVideoSrc(videoEl, src, muted) {
     catch { return ''; }
   })();
 
-  if (currentSrc === nextSrc || attachedSrc === nextSrc) {
-    try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
-    return true;
-  }
+if (currentSrc === nextSrc) {
+  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
+  try { videoEl.dataset.adNativeSrc = nextSrc; } catch {}
+  try { videoEl.removeAttribute('data-ad-detached-soft'); } catch {}
+  return true;
+}
 
   try { videoEl.pause?.(); } catch {}
   try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
@@ -1572,10 +1573,11 @@ useEffect(() => {
   // Не привязываем native video к isNear / shouldPlay.
   // Скролл и IntersectionObserver не должны менять <video src>.
   // Если URL реально сменился — очищаем старый ресурс один раз.
-  if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
-    attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(node);
-  }
+if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
+  // Do not detach/remove src here.
+  // The next near/play pass will replace video.src through ensureAdNativeVideoSrc().
+  attachedVideoSrcRef.current = '';
+}
 
   return undefined;
 }, [media.kind, media.src]);
@@ -1601,14 +1603,18 @@ useEffect(() => {
   // near = src/load/preload for ONE ad native video only; no play(), no site-media-play.
   if (!shouldPlayRef.current) {
     const canOwnWarm = claimAdNativeWarmSlot(v, srcKey, rootRef.current);
-    if (!canOwnWarm) {
-      // This ad card is near, but another card owns the single native warm slot.
-      // Keep this node network-cold to avoid parallel ADS.mp4 206/cancel chains.
-      try {
-        if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') detachAdNativeVideo(v);
-      } catch {}
-      return undefined;
+if (!canOwnWarm) {
+  // Another ad owns warm priority.
+  // Do not remove src anymore; windowing owns real resource release.
+  try {
+    if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
+      v.dataset.__adWarmOwner = '0';
+      v.dataset.__adLoadPending = '0';
+      v.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE;
     }
+  } catch {}
+  return undefined;
+}
     const nextMuted = normalizeForumAdMuted(mutedRef.current);
     const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
     if (attached) attachedVideoSrcRef.current = srcKey;
