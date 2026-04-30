@@ -380,6 +380,7 @@ export default function AuthNavClient() {
         data-auth={isAuthedWallet ? 'true' : 'false'}
         title={isAuthedWallet ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
         translate="no"
+        dir="auto"
       >
         {authLabel}
       </button>

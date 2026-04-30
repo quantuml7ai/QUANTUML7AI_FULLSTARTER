@@ -1877,6 +1877,16 @@ h1, h2, h3, h4, h5, h6{
   flex: 0 0 auto;
   flex-shrink: 0;
 }
+
+/* при арабском UI держим физический topbar-layout как в ltr:
+   логотип/орбита/селекторы не зеркалятся, меняется только сам текст */
+[dir="rtl"] .topbar,
+[dir="rtl"] .topbar-nav,
+[dir="rtl"] .nav-orbit-shell,
+[dir="rtl"] .nav-orbit-controls{
+  direction:ltr;
+}
+
 /* на маленьких экранах поведение то же: всё справа,
    если хочешь по центру – тут можно поменять align-items / justify-content */
 @media (max-width:640px){
