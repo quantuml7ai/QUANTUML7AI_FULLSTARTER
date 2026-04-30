@@ -285,7 +285,7 @@ function Ql7IconBad(props) {
 
 export default function VideoMedia({
   src,
-  poster,
+  poster: nativeVideoPoster,
   className,
   style,
   preload = 'none',
@@ -330,9 +330,9 @@ export default function VideoMedia({
 const isPostVideo = String(dataForumVideo || '') === 'post'
 const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
 const coordinatorOwnsPostLifecycle = isPostVideo && coordinatorOwnsLifecycle
-const posterSrc = typeof poster === 'string' ? poster.trim() : ''
 const renderControls = isPostVideo ? false : controls
 const renderPreload = isPostVideo ? 'metadata' : preload
+void nativeVideoPoster
 
   const readMuted = React.useCallback(() => {
     try {
@@ -594,23 +594,13 @@ try {
   // Для post-video больше НЕ делаем eager attach/load на mount.
   // Единственный владелец lifecycle — coordinator.
   if (isNewMediaNode && isPostVideo) {
-    try { el.removeAttribute('src') } catch {}
+    try {
+      const attachedSrc = String(el.getAttribute('src') || '')
+      if (attachedSrc && attachedSrc !== s) el.removeAttribute('src')
+    } catch {}
     try { delete el.dataset.__bootAttachedSrc } catch {}
     try { delete el.dataset.__bootMetadataPrimed } catch {}
-    try { el.dataset.__loadPending = '0' } catch {}
-    try { el.dataset.__warmReady = '0' } catch {}
-    try { el.dataset.__active = '0' } catch {}
-    try { el.dataset.__prewarm = '0' } catch {}
-    try { el.dataset.__resident = '0' } catch {}
-    try { delete el.dataset.__loadPendingSince } catch {}
     try { el.preload = 'metadata' } catch {}
-
-    try {
-      if (posterSrc) {
-        el.setAttribute('data-poster', posterSrc)
-        if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-      }
-    } catch {}
   }
 } catch {}
 }, [
@@ -619,7 +609,6 @@ try {
   defaultMutedProp,
   isPostVideo,
   playsInline,
-  posterSrc,
   preloadMode,
   readMuted,
   src,
@@ -843,6 +832,9 @@ React.useEffect(() => {
           delete el.dataset.__loadPendingSince
           el.preload = 'metadata'
         } catch {}
+        try { el.dataset.__forceHardUnload = '1' } catch {}
+        try { unloadVideoElFn(el) } catch {}
+        try { delete el.dataset.__forceHardUnload } catch {}
       }
     }
 
@@ -1212,8 +1204,6 @@ const videoNode = (
     ref={ref}
     data-forum-media={dataForumMedia}
     data-forum-video={dataForumVideo}
-    data-poster={posterSrc || undefined}
-    poster={posterSrc || undefined}
     playsInline={playsInline}
     disableRemotePlayback
     preload={renderPreload}

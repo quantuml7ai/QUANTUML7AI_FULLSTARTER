@@ -30,7 +30,8 @@ checks.push(runCheck(
       !src.includes('el.dataset.__bootAttachedSrc = s') &&
       !src.includes('const shouldBootstrapAttach = isPostVideo && !!s') &&
       src.includes("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)") &&
-      src.includes("if (coordinatorOwnsLifecycle) return undefined")
+      src.includes('const leafMayWriteLifecycle = !coordinatorOwnsPostLifecycle') &&
+      !src.includes('data-poster=')
     )
   },
   { file: 'app/forum/features/media/components/VideoMedia.jsx' },

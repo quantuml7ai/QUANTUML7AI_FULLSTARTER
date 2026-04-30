@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-04-24T10:11:07.925Z",
-  "status": "warn",
+  "generatedAt": "2026-04-30T14:58:10.755Z",
+  "status": "pass",
   "files": {
     "runtime": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
     "coordinator": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -9,74 +9,55 @@
     "policy": "app/forum/features/media/utils/mediaStatePolicy.js"
   },
   "signals": {
-    "softReleaseHelper": true,
-    "hardUnloadPolicyGate": true,
-    "coordinatorSoftReleaseBridge": true,
-    "detachedPostLoadKickGuard": true,
-    "candidateWaitRestore": true,
-    "orphanShellDump": true,
-    "restoreSharesKickClock": true,
-    "restoreSeedsPendingSince": true,
-    "recentRestoreLoadHold": true,
-    "softPauseUsesSoftRelease": true,
-    "foreignPauseUsesSoftRelease": true,
-    "postPrewarmMetadataResident": true,
-    "postPrewarmDetachedHold": true,
-    "autoplayRetryWatchdog": true,
-    "pendingActivateUsesPlayMedia": false,
+    "legacyWarmSweepRemoved": true,
+    "legacyIframePrewarmRemoved": true,
+    "coordinatorSingleOwner": true,
+    "nativePriorityPrewarm": true,
+    "predictiveNativePrewarm": true,
+    "existingFetchHold": true,
+    "pendingActivateUsesPlayMedia": true,
+    "restoreDelegatesPostLoad": true,
+    "runtimePostRunwayUnload": true,
+    "runtimeNativePosterRemoved": true,
     "leafCoordinatorGuard": true,
-    "leafCoordinatorPostSrcDetached": false,
-    "leafPostPreloadNone": false,
-    "leafCoordinatorLoadStateGuard": false,
-    "leafCoordinatorLoadedHandlerGuard": false,
-    "leafPosterAttr": false,
-    "leafPosterDatasetSync": false,
-    "postMediaPosterForward": true,
-    "leafPostMountLifecycleReset": true,
-    "leafPostMountSrcDetach": true
+    "leafPostPreloadMetadata": true,
+    "leafCoordinatorLoadStateGuard": true,
+    "leafCoordinatorLoadedHandlerGuard": true,
+    "leafNativePosterRemoved": true,
+    "postMediaPosterRemoved": true,
+    "leafPostMountLifecycleReset": false
   },
   "ownershipWrites": {
     "coordinator": {
-      "active": 5,
+      "active": 6,
       "prewarm": 6,
-      "resident": 8,
-      "loadPending": 13,
-      "warmReady": 4
+      "resident": 6,
+      "loadPending": 8,
+      "warmReady": 3
     },
     "runtime": {
       "active": 2,
-      "prewarm": 2,
-      "resident": 1,
-      "loadPending": 4,
-      "warmReady": 4
+      "prewarm": 3,
+      "resident": 2,
+      "loadPending": 5,
+      "warmReady": 3
     },
     "videoLeaf": {
       "active": 6,
       "prewarm": 5,
       "resident": 3,
-      "loadPending": 6,
+      "loadPending": 7,
       "warmReady": 5
     }
   },
-  "issues": [
-    "pending-activate-path-does-not-promote-candidate-into-play-pipeline",
-    "video-leaf-still-forwards-src-to-coordinator-owned-post-video",
-    "video-leaf-post-preload-is-not-none",
-    "video-leaf-loadstate-effect-still-writes-coordinator-owned-flags",
-    "video-leaf-loaded-handler-still-writes-coordinator-owned-flags",
-    "video-leaf-missing-poster-attr",
-    "video-leaf-missing-poster-dataset-sync",
-    "leaf-post-video-reset-still-mutates-owner-flags",
-    "leaf-post-video-reset-still-detaches-src"
-  ],
+  "issues": [],
   "notes": [
-    "Coordinator remains the decision layer; runtime owns side-effect helpers such as soft release and restore.",
-    "VideoMedia must not detach src or zero owner-flags for new post-video mounts.",
-    "Restore-originated load kicks must share the same recent-kick guard as coordinator cold-load retries.",
-    "PostMediaStack and VideoMedia must keep poster wired through to the DOM video element, otherwise poster-preserve logic is a no-op.",
-    "Coordinator-owned post-video should render without a live src attribute until the coordinator explicitly restores it.",
-    "Soft pause and foreign pause must demote video state via soft release, otherwise hot resident flags linger and keep churn alive.",
-    "Low-priority post-video prewarm should stay metadata-resident; aggressive load kicks are only allowed near actual activation.",
-    "Late-loaded active media should keep retrying autoplay through the coordinator until a real play succeeds or the owner loses focus."
+    "Coordinator is the single decision layer for native post-video prewarm, first-frame priming, focus playback, and unload.",
+    "Native post-video prewarm has a predictive one-slot scan so the next candidate starts before viewport/focus.",
+    "Runtime restore may attach/reconcile src, but native post-video network starts must go through coordinator load gates.",
+    "Post-video soft residency is bounded to the viewport/prewarm runway; far connected videos must hard detach src.",
+    "Poster forwarding/preservation for native post video is intentionally removed to avoid competing with warmup/playback.",
+    "VideoMedia should not zero coordinator-owned active/prewarm/resident flags on mount.",
+    "Existing fetches must be held instead of restarted to avoid Range 206 cancel loops."
   ]
 }

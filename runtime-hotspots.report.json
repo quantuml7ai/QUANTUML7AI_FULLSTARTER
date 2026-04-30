@@ -1,30 +1,24 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T15:11:21.220Z",
+  "generatedAt": "2026-04-30T15:01:09.923Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 17,
-        "while-loop": 2,
+        "for-loop": 14,
+        "while-loop": 1,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 23,
+        "layout-read": 21,
         "sync-json": 0,
         "local-storage": 2,
         "session-storage": 0,
         "network-call": 0,
-        "raf": 4,
+        "raf": 3,
         "interval": 2
       },
-      "longLines": [
-        {
-          "i": 501,
-          "len": 190,
-          "text": "rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,"
-        }
-      ],
-      "score": 122
+      "longLines": [],
+      "score": 104
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",

@@ -320,21 +320,53 @@ const canHardUnload = (() => {
   }
 })()
 
-const connectedPostVideoSoftUnload =
-  isPostFeedVideo &&
-  !hardUnloadRequested &&
-  !!el?.isConnected
-
 const shellVisible = isPostFeedVideo ? __isVideoNearViewport(el, 220) : false
 const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
+const postPrewarmRunway = isPostFeedVideo
+  ? __isVideoNearViewport(
+    el,
+    __MEDIA_RUNTIME_PROFILE.isIOS ? 2200 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1900 : 1700),
+  )
+  : false
+const freshPostLoadPending = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    if (String(el.dataset?.__loadPending || '') !== '1') return false
+    const since = Number(el.dataset?.__loadPendingSince || 0)
+    return since > 0 && (Date.now() - since) < (__MEDIA_RUNTIME_PROFILE.isIOS ? 9000 : 7000)
+  } catch {
+    return false
+  }
+})()
+const activePostPipeline = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    return (
+      String(el.dataset?.__active || '') === '1' ||
+      String(el.dataset?.__nativePrewarm || '') === '1' ||
+      String(el.dataset?.__playRequested || '') === '1'
+    )
+  } catch {
+    return false
+  }
+})()
 
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
   !hardUnloadRequested &&
   __SOFT_RESIDENT_POST_VIDEO &&
   !!el?.isConnected &&
-  (nearViewport || shellVisible)
-if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVideo) {
+  (
+    nearViewport ||
+    shellVisible ||
+    (postPrewarmRunway && (freshPostLoadPending || activePostPipeline))
+  )
+
+const shouldSoftUnload =
+  (!isPostFeedVideo && !canHardUnload) ||
+  shouldKeepResidentPostVideo
+
+if (shouldSoftUnload) {
   try {
     el.pause?.()
   } catch {}
@@ -347,21 +379,6 @@ if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVide
     el.preload = 'metadata'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
-
-  if (isPostFeedVideo) {
-    try {
-      const posterSrc = String(
-        el?.getAttribute?.('poster') ||
-        el?.getAttribute?.('data-poster') ||
-        el?.dataset?.poster ||
-        ''
-      )
-      if (posterSrc) {
-        el.setAttribute('data-poster', posterSrc)
-        if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-      }
-    } catch {}
-  }
 
   return
 }
@@ -382,24 +399,6 @@ if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVide
     el.preload = isPostFeedVideo ? 'metadata' : 'none'
   } catch {}
 try {
-  if (!isPostFeedVideo) {
-    el.removeAttribute('poster')
-    delete el.dataset.__posterOriginal
-    delete el.dataset.__posterMediaKey
-    delete el.dataset.__posterRevealed
-    delete el.dataset.__needsPosterRestore
-  } else {
-    const posterSrc = String(
-      el?.getAttribute?.('poster') ||
-      el?.getAttribute?.('data-poster') ||
-      el?.dataset?.poster ||
-      ''
-    )
-    if (posterSrc) {
-      el.setAttribute('data-poster', posterSrc)
-      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-    }
-  }
   el.dataset.__lastHardUnloadTs = String(nowTs)
 } catch {}
   if (!isPostFeedVideo) {
@@ -469,27 +468,26 @@ if (cur === src) {
     const isNetworkEmpty =
       typeof HTMLMediaElement !== 'undefined' &&
       networkStateNow === HTMLMediaElement.NETWORK_EMPTY
+    const isNetworkLoading =
+      typeof HTMLMediaElement !== 'undefined' &&
+      networkStateNow === HTMLMediaElement.NETWORK_LOADING
 
     if (isPostFeedVideo) {
-      const shouldKickLoad =
-        (readyStateNow === 0 || isNetworkEmpty) &&
+      // Native post-video network starts are owned by the coordinator load gate.
+      // Restore only reconciles DOM state so repeated restore() calls cannot abort
+      // an in-flight Range request with another load().
+      const hadPending = String(el.dataset?.__loadPending || '') === '1'
+      const stillFetching =
+        !isNetworkEmpty &&
         (
-          String(el.dataset?.__active || '') === '1' ||
-          String(el.dataset?.__prewarm || '') === '1' ||
-          String(el.dataset?.__resident || '') === '1' ||
-          __isVideoNearViewport(el, 900)
+          isNetworkLoading ||
+          readyStateNow >= 1
         )
-
-      if (shouldKickLoad && canRestoreLoad()) {
-        el.dataset.__loadPending = '1'
-        el.dataset.__loadPendingSince = String(Date.now())
-        el.dataset.__warmReady = '0'
-        try { el.load?.() } catch {}
-      } else {
+      if (!(hadPending && stillFetching && readyStateNow < 2)) {
         el.dataset.__loadPending = '0'
         delete el.dataset.__loadPendingSince
-        el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
       }
+      el.dataset.__warmReady = readyStateNow >= 2 && !isNetworkEmpty ? '1' : '0'
       return
     }
 
@@ -513,28 +511,9 @@ try {
     )
 
   // Feed native video is network-started only by the coordinator.
-  // Restore may put src back, but must not make an offscreen video preload auto.
-  el.preload = shouldAutoPreload ? 'auto' : 'metadata'
-} catch {}
-try {
-  if (!isPostFeedVideo) {
-    el.removeAttribute('poster')
-    delete el.dataset.__posterOriginal
-    delete el.dataset.__posterMediaKey
-    delete el.dataset.__posterRevealed
-    delete el.dataset.__needsPosterRestore
-  } else {
-    const posterSrc = String(
-      el?.getAttribute?.('poster') ||
-      el?.getAttribute?.('data-poster') ||
-      el?.dataset?.poster ||
-      ''
-    )
-    if (posterSrc) {
-      el.setAttribute('data-poster', posterSrc)
-      if (!el.getAttribute('poster')) el.setAttribute('poster', posterSrc)
-    }
-  }
+  // Attach src under preload=none so the browser cannot begin a metadata Range
+  // request that is immediately aborted by the coordinator's explicit load().
+  el.preload = isPostFeedVideo ? 'none' : (shouldAutoPreload ? 'auto' : 'metadata')
 } catch {}
 try {
   if (isPostFeedVideo) {

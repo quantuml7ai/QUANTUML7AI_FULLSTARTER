@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
 import { upload as blobUpload } from '@vercel/blob/client'
+import { optimizeForumVideoFastStart } from '../../lib/forumVideoTrim'
+import { FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES } from '../forum/shared/constants/media'
 import GeoTargetingPicker from './GeoTargetingPicker'
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
@@ -1408,6 +1410,8 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
     if (videoFile) {
       const file = videoFile
       const mediaType = 'video'
+      let uploadFile = file
+      let uploadContentType = String(file?.type || '').split(';')[0].trim().toLowerCase()
 
       // Берём оригинальное имя или "ad", если его нет
       const rawName = (file.name && String(file.name)) || 'ad'
@@ -1415,7 +1419,37 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       // Выделяем базу и расширение (как в uploadMedia на бэке)
       const lastDot = rawName.lastIndexOf('.')
       const base = lastDot > 0 ? rawName.slice(0, lastDot) : rawName
-      const ext = lastDot > 0 ? rawName.slice(lastDot) : ''
+      const rawExt = lastDot > 0 ? rawName.slice(lastDot) : ''
+      if (!uploadContentType) {
+        if (/\.webm$/i.test(rawName)) uploadContentType = 'video/webm'
+        else if (/\.mov$/i.test(rawName)) uploadContentType = 'video/quicktime'
+        else if (/\.mp4$/i.test(rawName)) uploadContentType = 'video/mp4'
+      }
+
+      try {
+        const shouldFaststart =
+          (
+            /^(video\/mp4|video\/quicktime)$/i.test(uploadContentType) ||
+            /\.(mp4|mov)$/i.test(rawName)
+          ) &&
+          Number(file?.size || 0) > 0 &&
+          Number(file?.size || 0) <= FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES
+
+        if (shouldFaststart) {
+          const fast = await optimizeForumVideoFastStart(file, {
+            allowTranscode: true,
+            maxTranscodeBytes: FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES,
+          })
+          if (fast?.blob && fast.blob !== file) {
+            uploadFile = fast.blob
+            uploadContentType = String(fast?.mime || 'video/mp4').toLowerCase()
+          }
+        }
+      } catch {}
+
+      const ext = uploadContentType.includes('mp4')
+        ? '.mp4'
+        : (uploadContentType.includes('quicktime') ? '.mov' : (rawExt || '.webm'))
 
       // Чистим базу от странных символов
       const safeBase = base.replace(/[^\w.-]+/g, '_') || 'ad'
@@ -1428,9 +1462,10 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       // Итоговое имя: <уникальный_префикс>-<база><расширение>
       const uniqueName = `${prefix}-${safeBase}${ext}`
 
-      const res = await blobUpload(uniqueName, file, {
+      const res = await blobUpload(uniqueName, uploadFile, {
         access: 'public',
         handleUploadUrl: '/api/forum/blobUploadUrl',
+        contentType: uploadContentType || file.type || 'video/mp4',
         headers: { 'x-forum-user-id': String(accountId || '') },        
       })
 

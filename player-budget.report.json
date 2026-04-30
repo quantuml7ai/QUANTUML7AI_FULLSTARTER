@@ -1,8 +1,6 @@
 {
-  "generatedAt": "2026-04-29T15:11:58.922Z",
-  "issues": [
-    "legacy-iframe-prewarm-still-present"
-  ],
+  "generatedAt": "2026-04-30T15:02:06.168Z",
+  "issues": [],
   "files": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
@@ -13,7 +11,7 @@
         "coordinatorOwnsLifecycle": 0,
         "siteMediaPlay": 5,
         "legacyWarmSweep": 0,
-        "legacyIframePrewarm": 2,
+        "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
         "restoreGuard": 5,
         "sameSrcGuard": 0,
@@ -31,7 +29,7 @@
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
-        "restoreGuard": 10,
+        "restoreGuard": 9,
         "sameSrcGuard": 4,
         "sharedMute": 11
       }

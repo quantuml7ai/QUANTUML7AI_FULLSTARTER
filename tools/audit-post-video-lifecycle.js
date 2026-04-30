@@ -29,38 +29,48 @@ function main() {
   const coordinator = read(FILES.coordinator);
   const videoLeaf = read(FILES.videoLeaf);
   const postMediaStack = read(FILES.postMediaStack);
-  const policy = read(FILES.policy);
-
   const signals = {
-    softReleaseHelper: /export function __softReleaseVideoEl/.test(runtime),
-    hardUnloadPolicyGate: /shouldHardUnloadPostVideo/.test(runtime) && /shouldHardUnloadPostVideo/.test(policy),
-    coordinatorSoftReleaseBridge: /__softReleaseVideoEl\(el,\s*`coordinator:\$\{unloadReason\}`\)/.test(coordinator),
-    detachedPostLoadKickGuard: /load_kick_skip_detached_post/.test(coordinator),
-    candidateWaitRestore: /candidate_wait_restore/.test(coordinator),
-    orphanShellDump: /orphanPostVideoShells/.test(coordinator) && /dumpForumVideoLifecycleDiag/.test(runtime),
-    restoreSharesKickClock: /__lastLoadKickTs = String\(now\)/.test(runtime),
-    restoreSeedsPendingSince: /__loadPendingSince = String\(nowTs\)/.test(runtime),
-    recentRestoreLoadHold: /load_kick_skip_recent_restore/.test(coordinator),
-    softPauseUsesSoftRelease: /__softReleaseVideoEl\(el,\s*`soft_pause:\$\{reason\}`\)/.test(coordinator),
-    foreignPauseUsesSoftRelease: /__softReleaseVideoEl\(node,\s*'foreign_pause'\)/.test(coordinator),
-    postPrewarmMetadataResident:
-      /const lowPriorityPostPrepare = isPostVideo && !highPriorityReason;/.test(coordinator) &&
-      /el\.preload = lowPriorityPostPrepare \? 'metadata' : 'auto'/.test(coordinator),
-    postPrewarmDetachedHold: /if \(lowPriorityPostPrepare\) \{[\s\S]{0,220}candidate_metadata_hold[\s\S]{0,220}return false;[\s\S]{0,80}\}/.test(coordinator),
-    autoplayRetryWatchdog: /scheduleAutoplayRetry/.test(coordinator) && /load_ready_autoplay/.test(coordinator),
-    pendingActivateUsesPlayMedia: /candidate_activate_pending[\s\S]{0,240}pending_ready_play_request[\s\S]{0,220}playMedia\(candidate\)/.test(coordinator),
+    legacyWarmSweepRemoved:
+      !/legacyWarmSweep|NEXT_PUBLIC_FORUM_LEGACY_WARM_SWEEP|warmSweepMode/.test(coordinator),
+    legacyIframePrewarmRemoved:
+      !/legacyIframePrewarm|NEXT_PUBLIC_FORUM_LEGACY_IFRAME_PREWARM|legacyIframePrewarmMode/.test(coordinator),
+    coordinatorSingleOwner: /Single owner for forum media warmup/.test(coordinator),
+    nativePriorityPrewarm:
+      /let nativePrewarmEl = null/.test(coordinator) &&
+      /const prepareNativePriorityPrewarm =/.test(coordinator) &&
+      /const primeNativeFirstFrame =/.test(coordinator),
+    predictiveNativePrewarm:
+      /const scheduleNativePrewarmScan =/.test(coordinator) &&
+      /candidate_predictive_native_prewarm/.test(coordinator) &&
+      /native_prewarm_hold_loading_slot/.test(coordinator) &&
+      /const maxBatch = 1/.test(coordinator),
+    existingFetchHold:
+      /const isHtmlMediaLoadingOrBuffered = \(el\) =>/.test(coordinator) &&
+      /load_kick_hold_existing_fetch/.test(coordinator),
+    pendingActivateUsesPlayMedia:
+      /candidate_activate_native_pending_play[\s\S]{0,520}playMedia\(active\)/.test(coordinator),
+    restoreDelegatesPostLoad:
+      /Native post-video network starts are owned by the coordinator load gate\./.test(runtime) &&
+      !/const shouldKickLoad =/.test(runtime) &&
+      !/__isVideoNearViewport\(el, 900\)/.test(runtime),
+    runtimePostRunwayUnload:
+      /const postPrewarmRunway =/.test(runtime) &&
+      /const shouldSoftUnload =/.test(runtime) &&
+      /\(!isPostFeedVideo && !canHardUnload\) \|\|/.test(runtime),
+    runtimeNativePosterRemoved: !/data-poster|__posterOriginal|__posterMediaKey|__posterRevealed/.test(runtime),
     leafCoordinatorGuard: /coordinatorOwnsLifecycle/.test(videoLeaf),
-    leafCoordinatorPostSrcDetached: /const renderSrc = coordinatorOwnsLifecycle && isPostVideo \? undefined : src/.test(videoLeaf),
-    leafPostPreloadNone: /const renderPreload = isPostVideo \? 'none' : preload/.test(videoLeaf),
-    leafCoordinatorLoadStateGuard:
-      /if \(coordinatorOwnsLifecycle\) \{\s*return undefined\s*\}/.test(videoLeaf) ||
-      /if \(coordinatorOwnsLifecycleRef\.current\) \{\s*return undefined\s*\}/.test(videoLeaf),
-    leafCoordinatorLoadedHandlerGuard: /if \(!coordinatorOwnsLifecycle\) \{[\s\S]{0,260}__loadPending/.test(videoLeaf),
-    leafPosterAttr: /<video[\s\S]{0,320}poster=\{poster \|\| undefined\}/.test(videoLeaf),
-    leafPosterDatasetSync: /__posterOriginal/.test(videoLeaf) && /dataset\.poster/.test(videoLeaf),
-    postMediaPosterForward: /<VideoMediaComponent[\s\S]{0,420}poster=\{posterUrl \|\| undefined\}/.test(postMediaStack),
+    leafPostPreloadMetadata: /const renderPreload = isPostVideo \? 'metadata' : preload/.test(videoLeaf),
+    leafCoordinatorLoadStateGuard: /const leafMayWriteLifecycle = !coordinatorOwnsPostLifecycle/.test(videoLeaf),
+    leafCoordinatorLoadedHandlerGuard:
+      /if \(!coordinatorOwnsPostLifecycle\) \{[\s\S]{0,260}__loadPending/.test(videoLeaf),
+    leafNativePosterRemoved:
+      /poster: nativeVideoPoster/.test(videoLeaf) &&
+      !/data-poster/.test(videoLeaf) &&
+      !/poster=\{/.test(videoLeaf),
+    postMediaPosterRemoved:
+      !/<VideoMediaComponent[\s\S]{0,420}poster=\{posterUrl \|\| undefined\}/.test(postMediaStack) &&
+      !/data-poster/.test(postMediaStack),
     leafPostMountLifecycleReset: /isNewMediaNode\s*&&\s*isPostVideo[\s\S]{0,600}__active\s*=\s*'0'/.test(videoLeaf),
-    leafPostMountSrcDetach: /isNewMediaNode\s*&&\s*isPostVideo[\s\S]{0,400}removeAttribute\('src'\)/.test(videoLeaf),
   };
 
   const ownershipWrites = {
@@ -88,30 +98,22 @@ function main() {
   };
 
   const issues = [];
-  if (!signals.softReleaseHelper) issues.push('missing-soft-release-helper');
-  if (!signals.hardUnloadPolicyGate) issues.push('missing-post-hard-unload-gate');
-  if (!signals.coordinatorSoftReleaseBridge) issues.push('coordinator-hard-unload-missing-soft-release-bridge');
-  if (!signals.detachedPostLoadKickGuard) issues.push('missing-detached-post-load-kick-guard');
-  if (!signals.candidateWaitRestore) issues.push('missing-candidate-wait-restore-guard');
-  if (!signals.orphanShellDump) issues.push('missing-orphan-shell-diagnostics');
-  if (!signals.restoreSharesKickClock) issues.push('restore-load-does-not-share-load-kick-clock');
-  if (!signals.restoreSeedsPendingSince) issues.push('restore-does-not-seed-load-pending-since');
-  if (!signals.recentRestoreLoadHold) issues.push('missing-recent-restore-load-hold');
-  if (!signals.softPauseUsesSoftRelease) issues.push('coordinator-soft-pause-does-not-soft-release-video');
-  if (!signals.foreignPauseUsesSoftRelease) issues.push('foreign-pause-does-not-soft-release-video');
-  if (!signals.postPrewarmMetadataResident) issues.push('post-video-prewarm-still-uses-hot-auto-preload');
-  if (!signals.postPrewarmDetachedHold) issues.push('post-video-prewarm-still-restores-detached-src-too-early');
-  if (!signals.autoplayRetryWatchdog) issues.push('missing-autoplay-retry-watchdog');
+  if (!signals.legacyWarmSweepRemoved) issues.push('legacy-warm-sweep-still-present');
+  if (!signals.legacyIframePrewarmRemoved) issues.push('legacy-iframe-prewarm-still-present');
+  if (!signals.coordinatorSingleOwner) issues.push('missing-single-owner-coordinator-marker');
+  if (!signals.nativePriorityPrewarm) issues.push('missing-native-priority-prewarm');
+  if (!signals.predictiveNativePrewarm) issues.push('missing-predictive-native-prewarm');
+  if (!signals.existingFetchHold) issues.push('missing-existing-fetch-hold');
+  if (!signals.restoreDelegatesPostLoad) issues.push('post-restore-still-owns-network-load');
+  if (!signals.runtimePostRunwayUnload) issues.push('post-video-runtime-unload-not-runway-bounded');
+  if (!signals.runtimeNativePosterRemoved) issues.push('runtime-native-poster-logic-still-present');
   if (!signals.pendingActivateUsesPlayMedia) issues.push('pending-activate-path-does-not-promote-candidate-into-play-pipeline');
-  if (!signals.leafCoordinatorPostSrcDetached) issues.push('video-leaf-still-forwards-src-to-coordinator-owned-post-video');
-  if (!signals.leafPostPreloadNone) issues.push('video-leaf-post-preload-is-not-none');
+  if (!signals.leafPostPreloadMetadata) issues.push('video-leaf-post-preload-is-not-metadata');
   if (!signals.leafCoordinatorLoadStateGuard) issues.push('video-leaf-loadstate-effect-still-writes-coordinator-owned-flags');
   if (!signals.leafCoordinatorLoadedHandlerGuard) issues.push('video-leaf-loaded-handler-still-writes-coordinator-owned-flags');
-  if (!signals.leafPosterAttr) issues.push('video-leaf-missing-poster-attr');
-  if (!signals.leafPosterDatasetSync) issues.push('video-leaf-missing-poster-dataset-sync');
-  if (!signals.postMediaPosterForward) issues.push('post-media-stack-missing-poster-forward');
+  if (!signals.leafNativePosterRemoved) issues.push('video-leaf-native-poster-logic-still-present');
+  if (!signals.postMediaPosterRemoved) issues.push('post-media-stack-still-forwards-native-poster');
   if (signals.leafPostMountLifecycleReset) issues.push('leaf-post-video-reset-still-mutates-owner-flags');
-  if (signals.leafPostMountSrcDetach) issues.push('leaf-post-video-reset-still-detaches-src');
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -121,14 +123,13 @@ function main() {
     ownershipWrites,
     issues,
     notes: [
-      'Coordinator remains the decision layer; runtime owns side-effect helpers such as soft release and restore.',
-      'VideoMedia must not detach src or zero owner-flags for new post-video mounts.',
-      'Restore-originated load kicks must share the same recent-kick guard as coordinator cold-load retries.',
-      'PostMediaStack and VideoMedia must keep poster wired through to the DOM video element, otherwise poster-preserve logic is a no-op.',
-      'Coordinator-owned post-video should render without a live src attribute until the coordinator explicitly restores it.',
-      'Soft pause and foreign pause must demote video state via soft release, otherwise hot resident flags linger and keep churn alive.',
-      'Low-priority post-video prewarm should stay metadata-resident; aggressive load kicks are only allowed near actual activation.',
-      'Late-loaded active media should keep retrying autoplay through the coordinator until a real play succeeds or the owner loses focus.',
+      'Coordinator is the single decision layer for native post-video prewarm, first-frame priming, focus playback, and unload.',
+      'Native post-video prewarm has a predictive one-slot scan so the next candidate starts before viewport/focus.',
+      'Runtime restore may attach/reconcile src, but native post-video network starts must go through coordinator load gates.',
+      'Post-video soft residency is bounded to the viewport/prewarm runway; far connected videos must hard detach src.',
+      'Poster forwarding/preservation for native post video is intentionally removed to avoid competing with warmup/playback.',
+      'VideoMedia should not zero coordinator-owned active/prewarm/resident flags on mount.',
+      'Existing fetches must be held instead of restarted to avoid Range 206 cancel loops.',
     ],
   };
 

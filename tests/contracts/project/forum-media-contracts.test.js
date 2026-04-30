@@ -47,13 +47,16 @@ describe('forum media contracts', () => {
     expect(src).toContain("setMutedPref(!!el.muted, 'video')")
   })
 
-  test('post video restore path avoids immediate duplicate load after src reattach and keeps connected nodes on soft unload', () => {
+  test('post video restore path delegates native network starts and keeps connected nodes on soft unload', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
-    expect(src).toContain('const connectedPostVideoSoftUnload =')
-    expect(src).toContain('if (connectedPostVideoSoftUnload || !canHardUnload || shouldKeepResidentPostVideo) {')
+    expect(src).toContain('const postPrewarmRunway =')
+    expect(src).toContain('const shouldSoftUnload =')
+    expect(src).toContain('(!isPostFeedVideo && !canHardUnload) ||')
+    expect(src).toContain('if (shouldSoftUnload) {')
+    expect(src).toContain('Native post-video network starts are owned by the coordinator load gate.')
     expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
-    expect(src).toContain('__isVideoNearViewport(el, 900)')
+    expect(src).not.toContain('__isVideoNearViewport(el, 900)')
   })
 
   test('boot splash publishes an active gate marker for forum media policy', () => {
@@ -97,8 +100,21 @@ describe('forum media contracts', () => {
     expect(coordinatorSrc).toContain("trace('load_kick_hold_existing_fetch', media, {")
     expect(coordinatorSrc).toContain('const allowNearViewportRestore =')
     expect(coordinatorSrc).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
-    expect(adsSrc).toContain('const hadSrc = (() => {')
+    expect(adsSrc).toContain('const playAdNativeVideo = React.useCallback')
     expect(adsSrc).toContain("videoEl.dataset.__adWarmOwner = '0';")
+    expect(adsSrc).toContain('function detachAdNativeVideo(videoEl, opts = {})')
+    expect(adsSrc).toContain('videoEl.removeAttribute(\'src\')')
+    expect(adsSrc).toContain("detachAdNativeVideo(node, { hard: true, reason: 'src_change' })")
+    expect(adsSrc).toContain("videoEl.preload = 'none';")
+    expect(adsSrc).toContain("detachAdNativeVideo(v, { hard: true, reason: 'warm_owner_denied' })")
+  })
+
+  test('ads video upload uses the shared faststart path before blob storage', () => {
+    const src = read('app/ads/home.js')
+    expect(src).toContain("import { optimizeForumVideoFastStart } from '../../lib/forumVideoTrim'")
+    expect(src).toContain('FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES')
+    expect(src).toContain('const fast = await optimizeForumVideoFastStart(file, {')
+    expect(src).toContain('contentType: uploadContentType || file.type || \'video/mp4\'')
   })
 
   test('video feed windowing routes through the shared forum windowing core with reveal safety', () => {

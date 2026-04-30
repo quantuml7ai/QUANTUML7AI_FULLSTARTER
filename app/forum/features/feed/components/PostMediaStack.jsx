@@ -210,7 +210,6 @@ export default function PostMediaStack({
   QCastPlayerComponent,
   ytEmbedParams,
   postId,
-  posterUrl,
   YT_RE,
 }) {
   const mediaKeyBase = String(postId || 'post')
@@ -279,8 +278,6 @@ export default function PostMediaStack({
   data-lifecycle-state={lifecycleState}
   data-stable-shell="1"
   src={src}
-  poster={posterUrl || undefined}
-  data-poster={posterUrl || undefined}
   loading="lazy"
   playsInline
   controls={false}

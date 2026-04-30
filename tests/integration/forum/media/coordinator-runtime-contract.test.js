@@ -11,12 +11,14 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain("if (String(dataForumVideo || '') === 'post' || coordinatorOwnsLifecycle)")
   })
 
-  test('VideoMedia post-video cleanup stays on soft windowing teardown without hard unload', () => {
+  test('VideoMedia post-video cleanup hard unloads only during component unmount', () => {
     const src = read('app/forum/features/media/components/VideoMedia.jsx')
     expect(src).toContain('if (!isPostVideo) return')
     expect(src).toContain("el.dataset.__resident = '0'")
     expect(src).toContain("el.dataset.__playRequested = '0'")
     expect(src).toContain("el.preload = 'metadata'")
+    expect(src).toContain("el.dataset.__forceHardUnload = '1'")
+    expect(src).toContain('unloadVideoElFn(el)')
   })
 
   test('coordinator defers hard unload during settling', () => {
@@ -25,13 +27,16 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('markSettling')
   })
 
-  test('coordinator keeps connected post-video on soft unload reasons and reserves hard src unload for emergencies', () => {
+  test('coordinator keeps post-video resident only inside the prewarm runway', () => {
     const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     expect(src).toContain("const isEmergencyHtmlMediaUnloadReason = (reason = 'timeout') => {")
     expect(src).toContain("const isSoftPostVideoUnloadReason = (reason = 'timeout') => {")
-    expect(src).toContain("next === 'native_prewarm_replace'")
+    expect(src).toContain("next === 'native_warm_owner_lost'")
     expect(src).toContain("connectedPostVideoOwner && !emergencyHtmlMediaUnload && isSoftPostVideoUnloadReason(unloadReason)")
-    expect(src).not.toContain('(farOutOfView && (isIOSUi || isCoarseUi))')
+    const runtimeSrc = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    expect(runtimeSrc).toContain('const postPrewarmRunway =')
+    expect(runtimeSrc).toContain('const shouldSoftUnload =')
+    expect(runtimeSrc).toContain('(!isPostFeedVideo && !canHardUnload) ||')
   })
 
   test('iframe resident cap keeps visible and near-viewport embeds off the victim list', () => {
@@ -85,13 +90,14 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain("const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'")
   })
 
-  test('post-video restore kicks load when src is attached but the element is still network-empty near the viewport', () => {
+  test('post-video restore delegates network kicks to the coordinator load gate', () => {
     const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
-    expect(src).toContain('const shouldKickLoad =')
     expect(src).toContain("String(el.dataset?.__resident || '') === '1'")
-    expect(src).toContain('__isVideoNearViewport(el, 900)')
-    expect(src).toContain("el.dataset.__loadPending = '1'")
-    expect(src).toContain('try { el.load?.() } catch {}')
+    expect(src).toContain('Native post-video network starts are owned by the coordinator load gate.')
+    expect(src).toContain("el.preload = isPostFeedVideo ? 'none' : (shouldAutoPreload ? 'auto' : 'metadata')")
+    expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
+    expect(src).not.toContain('const shouldKickLoad =')
+    expect(src).not.toContain('__isVideoNearViewport(el, 900)')
   })
 
   test('coordinator sorts near-prewarm by scroll direction and DOM order, then repeats viewport kicks for external media', () => {
@@ -109,5 +115,11 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
     expect(src).toContain('getOwnerViewportGapPx(el) <= (isIOSUi ? 280 : (isCoarseUi ? 320 : 220))')
     expect(src).toContain('if (!primeNativeFirstFrame(media, reason)) {')
+    expect(src).toContain('const scheduleNativePrewarmScan =')
+    expect(src).toContain('candidate_predictive_native_prewarm')
+    expect(src).toContain('native_prewarm_hold_loading_slot')
+    expect(src).toContain("scheduleHardUnload(prev, isIOSUi ? 260 : 220, 'native_warm_owner_lost')")
+    expect(src).toContain('const warmupOnlyPrime =')
+    expect(src).toContain('const maxBatch = 1')
   })
 })

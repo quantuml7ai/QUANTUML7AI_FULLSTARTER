@@ -6,7 +6,7 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-29T13:44:22.858Z
+Сгенерировано автоматически: 2026-04-30T14:58:30.762Z
 Файлов в реестре: 1753
 
 ## Исключенные каталоги
@@ -131,7 +131,7 @@
     - page.js — Next.js страница маршрута /academy. Связи: импортирует app/academy/AcademyExamBlock.js, app/ads.js, components/i18n.js.
   - ads/ — Страницы и модули рекламного раздела.
     - GeoTargetingPicker.jsx — JSX-файл Geo Targeting Picker сегмента ads. Связи: импортирует components/i18n.js, lib/geo/countries.js, lib/geo/regions.js; используется в app/ads/home.js.
-    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, components/i18n.js; используется в app/ads/page.jsx.
+    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, forum/shared/constants/media.js, components/i18n.js; используется в app/ads/page.jsx.
     - layout.js — Next.js layout для сегмента /ads. Связи: импортирует lib/metadataCache.js.
     - page.jsx — JSX-файл page сегмента ads. Связи: импортирует app/ads/home.js, components/i18n.js.
   - api/ — Серверные API-маршруты и их внутренние хелперы.
@@ -619,7 +619,7 @@
       - config/ — Каталог shared-слоя форума: config.
         - runtime.js — Shared конфиг runtime форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/shared/config/runtime.test.js.
       - constants/ — Каталог shared-слоя форума: constants.
-        - media.js — Shared константа media форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoTrimPopover.jsx.
+        - media.js — Shared константа media форума. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx, forum/features/media/components/VideoLimitOverlay.jsx.
       - docs/ — Каталог shared-слоя форума: docs.
         - phase-01-shared-foundation.md — Shared документ phase 01 shared foundation форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - hooks/ — Каталог shared-слоя форума: hooks.
@@ -640,7 +640,7 @@
         - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
         - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
         - forumWindowingPresets.js — Shared утилита forum Windowing Presets форума. Связи: используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
-        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js, forum/features/feed/hooks/useThreadOpenNavigation.js.
+        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js.
         - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
         - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx.
         - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
@@ -906,7 +906,7 @@
   - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js, app/exchange/page.js.
   - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js.
   - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в forum/SharePopover.jsx.
-  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/utils/mediaRuntime.js.
+  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx.
   - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
   - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/telegram/link/confirm/route.js, app/api/telegram/link/resolve/route.js, app/api/telegram/link/start/route.js.
