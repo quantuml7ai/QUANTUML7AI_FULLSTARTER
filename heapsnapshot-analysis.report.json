@@ -1,126 +1,126 @@
 {
-  "file": "C:\\Users\\staro\\Downloads\\Heap-20260421T231239.heapsnapshot",
-  "fileSizeMB": 164.89,
+  "file": "C:\\Users\\staro\\Downloads\\Heap-20260430T130433.heapsnapshot",
+  "fileSizeMB": 130.91,
   "snapshot": {
-    "nodeCount": 1584828,
-    "edgeCount": 8028085,
-    "extraNativeBytesMB": 2.56
+    "nodeCount": 1386305,
+    "edgeCount": 6882412,
+    "extraNativeBytesMB": 6.49
   },
   "nodes": {
-    "totalNodes": 1584828,
-    "totalSelfSize": 276033666,
-    "totalSelfSizeMB": 263.25,
-    "detachedNodes": 298,
-    "detachedSelfSize": 57416,
-    "detachedSelfSizeMB": 0.05,
+    "totalNodes": 1386305,
+    "totalSelfSize": 75674115,
+    "totalSelfSizeMB": 72.17,
+    "detachedNodes": 1282,
+    "detachedSelfSize": 242376,
+    "detachedSelfSizeMB": 0.23,
     "typeTotals": {
       "native": {
-        "count": 20270,
-        "selfSize": 192752486,
-        "selfSizeMB": 183.82,
-        "detachedCount": 298,
-        "detachedSelfSize": 57416,
-        "detachedSelfSizeMB": 0.05
+        "count": 56124,
+        "selfSize": 20453123,
+        "selfSizeMB": 19.51,
+        "detachedCount": 1282,
+        "detachedSelfSize": 242376,
+        "detachedSelfSizeMB": 0.23
       },
-      "string": {
-        "count": 140993,
-        "selfSize": 28926000,
-        "selfSizeMB": 27.59,
+      "code": {
+        "count": 213886,
+        "selfSize": 15295748,
+        "selfSizeMB": 14.59,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "closure": {
-        "count": 683799,
-        "selfSize": 18309128,
-        "selfSizeMB": 17.46,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "detachedSelfSizeMB": 0
-      },
-      "code": {
-        "count": 234635,
-        "selfSize": 14164496,
-        "selfSizeMB": 13.51,
+        "count": 555945,
+        "selfSize": 14075264,
+        "selfSizeMB": 13.42,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "array": {
-        "count": 24935,
-        "selfSize": 7426936,
-        "selfSizeMB": 7.08,
+        "count": 23381,
+        "selfSize": 5806732,
+        "selfSizeMB": 5.54,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "object": {
-        "count": 216713,
-        "selfSize": 6900048,
-        "selfSizeMB": 6.58,
+        "count": 159964,
+        "selfSize": 5566388,
+        "selfSizeMB": 5.31,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "detachedSelfSizeMB": 0
+      },
+      "string": {
+        "count": 106630,
+        "selfSize": 5176636,
+        "selfSizeMB": 4.94,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "object shape": {
-        "count": 63118,
-        "selfSize": 3448144,
-        "selfSizeMB": 3.29,
+        "count": 84294,
+        "selfSize": 4926456,
+        "selfSizeMB": 4.7,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "hidden": {
-        "count": 150774,
-        "selfSize": 3165004,
-        "selfSizeMB": 3.02,
+        "count": 149221,
+        "selfSize": 3736800,
+        "selfSizeMB": 3.56,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "concatenated string": {
-        "count": 41496,
-        "selfSize": 829920,
-        "selfSizeMB": 0.79,
+        "count": 27551,
+        "selfSize": 551020,
+        "selfSizeMB": 0.53,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "number": {
-        "count": 5498,
-        "selfSize": 49980,
-        "selfSizeMB": 0.05,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "detachedSelfSizeMB": 0
-      },
-      "bigint": {
-        "count": 1179,
-        "selfSize": 28296,
+        "count": 6975,
+        "selfSize": 35472,
         "selfSizeMB": 0.03,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "regexp": {
-        "count": 898,
-        "selfSize": 25144,
+        "count": 844,
+        "selfSize": 23632,
         "selfSizeMB": 0.02,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
+      "bigint": {
+        "count": 658,
+        "selfSize": 13904,
+        "selfSizeMB": 0.01,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "detachedSelfSizeMB": 0
+      },
       "symbol": {
-        "count": 355,
-        "selfSize": 5424,
+        "count": 701,
+        "selfSize": 10960,
         "selfSizeMB": 0.01,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "detachedSelfSizeMB": 0
       },
       "sliced string": {
-        "count": 133,
-        "selfSize": 2660,
+        "count": 99,
+        "selfSize": 1980,
         "selfSizeMB": 0,
         "detachedCount": 0,
         "detachedSelfSize": 0,
@@ -138,129 +138,118 @@
     "topTypesBySelfSize": [
       {
         "type": "native",
-        "count": 20270,
-        "selfSize": 192752486,
-        "detachedCount": 298,
-        "detachedSelfSize": 57416,
-        "maxSelfSize": 25656628,
-        "selfSizeMB": 183.82,
-        "detachedSelfSizeMB": 0.05,
-        "maxSelfSizeKB": 25055.3
-      },
-      {
-        "type": "string",
-        "count": 140993,
-        "selfSize": 28926000,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 5406008,
-        "selfSizeMB": 27.59,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 5279.3
-      },
-      {
-        "type": "closure",
-        "count": 683799,
-        "selfSize": 18309128,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 32,
-        "selfSizeMB": 17.46,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 0.03
+        "count": 56124,
+        "selfSize": 20453123,
+        "detachedCount": 1282,
+        "detachedSelfSize": 242376,
+        "maxSelfSize": 2577874,
+        "selfSizeMB": 19.51,
+        "detachedSelfSizeMB": 0.23,
+        "maxSelfSizeKB": 2517.46
       },
       {
         "type": "code",
-        "count": 234635,
-        "selfSize": 14164496,
+        "count": 213886,
+        "selfSize": 15295748,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 154496,
-        "selfSizeMB": 13.51,
+        "selfSizeMB": 14.59,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 150.88
       },
       {
+        "type": "closure",
+        "count": 555945,
+        "selfSize": 14075264,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 32,
+        "selfSizeMB": 13.42,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.03
+      },
+      {
         "type": "array",
-        "count": 24935,
-        "selfSize": 7426936,
+        "count": 23381,
+        "selfSize": 5806732,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 98336,
-        "selfSizeMB": 7.08,
+        "selfSizeMB": 5.54,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 96.03
       },
       {
         "type": "object",
-        "count": 216713,
-        "selfSize": 6900048,
+        "count": 159964,
+        "selfSize": 5566388,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 10056,
-        "selfSizeMB": 6.58,
+        "maxSelfSize": 10112,
+        "selfSizeMB": 5.31,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 9.82
+        "maxSelfSizeKB": 9.88
+      },
+      {
+        "type": "string",
+        "count": 106630,
+        "selfSize": 5176636,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 381600,
+        "selfSizeMB": 4.94,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 372.66
       },
       {
         "type": "object shape",
-        "count": 63118,
-        "selfSize": 3448144,
+        "count": 84294,
+        "selfSize": 4926456,
         "detachedCount": 0,
         "detachedSelfSize": 0,
-        "maxSelfSize": 12316,
-        "selfSizeMB": 3.29,
+        "maxSelfSize": 10712,
+        "selfSizeMB": 4.7,
         "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 12.03
+        "maxSelfSizeKB": 10.46
       },
       {
         "type": "hidden",
-        "count": 150774,
-        "selfSize": 3165004,
+        "count": 149221,
+        "selfSize": 3736800,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 49160,
-        "selfSizeMB": 3.02,
+        "selfSizeMB": 3.56,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 48.01
       },
       {
         "type": "concatenated string",
-        "count": 41496,
-        "selfSize": 829920,
+        "count": 27551,
+        "selfSize": 551020,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 20,
-        "selfSizeMB": 0.79,
+        "selfSizeMB": 0.53,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.02
       },
       {
         "type": "number",
-        "count": 5498,
-        "selfSize": 49980,
+        "count": 6975,
+        "selfSize": 35472,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 12,
-        "selfSizeMB": 0.05,
+        "selfSizeMB": 0.03,
         "detachedSelfSizeMB": 0,
         "maxSelfSizeKB": 0.01
       },
       {
-        "type": "bigint",
-        "count": 1179,
-        "selfSize": 28296,
-        "detachedCount": 0,
-        "detachedSelfSize": 0,
-        "maxSelfSize": 80,
-        "selfSizeMB": 0.03,
-        "detachedSelfSizeMB": 0,
-        "maxSelfSizeKB": 0.08
-      },
-      {
         "type": "regexp",
-        "count": 898,
-        "selfSize": 25144,
+        "count": 844,
+        "selfSize": 23632,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 28,
@@ -269,9 +258,20 @@
         "maxSelfSizeKB": 0.03
       },
       {
+        "type": "bigint",
+        "count": 658,
+        "selfSize": 13904,
+        "detachedCount": 0,
+        "detachedSelfSize": 0,
+        "maxSelfSize": 80,
+        "selfSizeMB": 0.01,
+        "detachedSelfSizeMB": 0,
+        "maxSelfSizeKB": 0.08
+      },
+      {
         "type": "symbol",
-        "count": 355,
-        "selfSize": 5424,
+        "count": 701,
+        "selfSize": 10960,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 16,
@@ -281,8 +281,8 @@
       },
       {
         "type": "sliced string",
-        "count": 133,
-        "selfSize": 2660,
+        "count": 99,
+        "selfSize": 1980,
         "detachedCount": 0,
         "detachedSelfSize": 0,
         "maxSelfSize": 20,
@@ -305,65 +305,65 @@
     "topTypesByDetachedSize": [
       {
         "type": "native",
-        "count": 20270,
-        "selfSize": 192752486,
-        "detachedCount": 298,
-        "detachedSelfSize": 57416,
-        "maxSelfSize": 25656628,
-        "selfSizeMB": 183.82,
-        "detachedSelfSizeMB": 0.05,
-        "maxSelfSizeKB": 25055.3
+        "count": 56124,
+        "selfSize": 20453123,
+        "detachedCount": 1282,
+        "detachedSelfSize": 242376,
+        "maxSelfSize": 2577874,
+        "selfSizeMB": 19.51,
+        "detachedSelfSizeMB": 0.23,
+        "maxSelfSizeKB": 2517.46
       }
     ]
   },
   "keywordHits": [
     {
-      "keyword": "web3modal",
-      "count": 2914
-    },
-    {
-      "keyword": "wagmi",
-      "count": 1782
-    },
-    {
       "keyword": "htmliframeelement",
-      "count": 27
+      "count": 134
     },
     {
       "keyword": "youtube",
-      "count": 25
-    },
-    {
-      "keyword": "tiktok",
-      "count": 22
-    },
-    {
-      "keyword": "intersectionobserver",
-      "count": 21
-    },
-    {
-      "keyword": "detached",
-      "count": 18
+      "count": 109
     },
     {
       "keyword": "htmlvideoelement",
+      "count": 42
+    },
+    {
+      "keyword": "detached",
+      "count": 37
+    },
+    {
+      "keyword": "htmlaudioelement",
+      "count": 33
+    },
+    {
+      "keyword": "__forum",
+      "count": 23
+    },
+    {
+      "keyword": "intersectionobserver",
+      "count": 20
+    },
+    {
+      "keyword": "tiktok",
+      "count": 18
+    },
+    {
+      "keyword": "wagmi",
+      "count": 18
+    },
+    {
+      "keyword": "web3modal",
+      "count": 18
+    },
+    {
+      "keyword": "resizeobserver",
       "count": 17
     },
     {
       "keyword": "forumads",
-      "count": 11
-    },
-    {
-      "keyword": "htmlaudioelement",
-      "count": 5
-    },
-    {
-      "keyword": "resizeobserver",
       "count": 4
-    },
-    {
-      "keyword": "__forum",
-      "count": 1
     },
     {
       "keyword": "useforummediacoordinator",

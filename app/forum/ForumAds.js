@@ -291,6 +291,27 @@ function getAdVideoNodeSrc(videoEl) {
 function detachAdNativeVideo(videoEl) {
   if (!videoEl) return;
 
+  const hadSrc = (() => {
+    try {
+      return !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || videoEl.dataset?.adNativeSrc || '').trim();
+    } catch {
+      return false;
+    }
+  })();
+
+  if (!hadSrc) {
+    try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+    try {
+      if (videoEl.dataset) {
+        videoEl.dataset.__adLoadPending = '0';
+        videoEl.dataset.__adWarmOwner = '0';
+        videoEl.dataset.__adDetachedSoft = '1';
+        videoEl.dataset.__adDetachedSoftTs = String(Date.now());
+      }
+    } catch {}
+    return;
+  }
+
   // IMPORTANT:
   // Native ad video is windowing-owned now.
   // Do NOT remove src on scroll/near/focus changes.
@@ -336,7 +357,7 @@ function ensureAdNativeVideoSrc(videoEl, src, muted) {
     catch { return ''; }
   })();
 
-if (currentSrc === nextSrc) {
+if (currentSrc === nextSrc || attachedSrc === nextSrc) {
   try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
   try { videoEl.dataset.adNativeSrc = nextSrc; } catch {}
   try { videoEl.removeAttribute('data-ad-detached-soft'); } catch {}

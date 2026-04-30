@@ -1232,6 +1232,21 @@ const isHtmlMediaLoadingOrBuffered = (el) => {
     if (!snap.hasSrc) return false;
     if (snap.readyState >= 1) return true;
     if (snap.networkState === HTMLMediaElement.NETWORK_LOADING) return true;
+    const lastFetchTouchTs = Math.max(
+      Number(media.dataset?.__lastLoadKickTs || 0),
+      Number(media.dataset?.__lastRestoreLoadTs || 0),
+    );
+    const recentFetchHoldMs = isIOSUi ? 2600 : (isCoarseUi ? 2200 : 1800);
+    if (
+      lastFetchTouchTs > 0 &&
+      (Date.now() - lastFetchTouchTs) < recentFetchHoldMs &&
+      (
+        snap.networkState === HTMLMediaElement.NETWORK_IDLE ||
+        snap.networkState === HTMLMediaElement.NETWORK_EMPTY
+      )
+    ) {
+      return true;
+    }
     if (snap.loadPending && snap.pendingForMs < (isIOSUi ? 12000 : (isCoarseUi ? 10000 : 8000))) return true;
   } catch {}
   return false;
@@ -3387,7 +3402,7 @@ const pauseForeignMedia = (keepEl = null) => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
       if (isIOSUi) return Math.max(620, Math.min(980, Math.round(viewportH * 1.04)));
       if (isCoarseUi) return Math.max(520, Math.min(860, Math.round(viewportH * 0.92)));
-      return Math.max(440, Math.min(940, Math.round(viewportH * 0.8)));
+      return Math.max(720, Math.min(1500, Math.round(viewportH * 1.25)));
     };
 
     const getNativePrimeGapLimit = () => {
@@ -4723,7 +4738,7 @@ return;
         rootMargin: `${
           Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.22)))
         }px 0px ${
-          Math.max(isIOSUi ? 920 : (isCoarseUi ? 760 : 940), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.38 : 1.9)))
+          Math.max(isIOSUi ? 920 : (isCoarseUi ? 760 : 1320), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.38 : (isCoarseUi ? 1.9 : 3.2))))
         }px 0px`,
       },
     );
@@ -4797,37 +4812,55 @@ return;
         traceCandidate('candidate_external_promote', candidate, { reason });
       } catch {}
     };
-const onExternalMediaPlay = (e) => {
-  const source = String(e?.detail?.source || '');
- 
-  const isAdSource =
-    source === 'ad' ||
-    source === 'forum_ads' ||
-    source === 'forum-ads' ||
-    source === 'forum-ads-toggle' ||
-    source.startsWith('ad_');
+    const onExternalMediaPlay = (e) => {
+      const source = String(e?.detail?.source || '');
+      const isAdPlaybackSource =
+        source === 'ad' ||
+        source === 'forum_ads' ||
+        source === 'forum-ads' ||
+        source === 'ad_video' ||
+        source === 'ad_youtube' ||
+        source === 'ad_tiktok';
 
-  if (isAdSource) return;
+      if (isAdPlaybackSource) {
+        try {
+          if (active instanceof Element) {
+            const prev = active;
+            softPauseMedia(prev, source);
+            scheduleHardUnload(prev, null, `${source}_external_play`);
+            active = null;
+            activeSinceTs = 0;
+          }
+        } catch {}
+        try { releaseNativePrewarmExcept(null, `${source}_external_play`); } catch {}
+        return;
+      }
 
-  if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
+      const isAdSource =
+        source === 'forum-ads-toggle' ||
+        source.startsWith('ad_');
 
-  const candidate = e?.detail?.element || null;
-  const manual = !!e?.detail?.manual;
+      if (isAdSource) return;
 
-  if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
-    traceCandidate('candidate_external_ignored', candidate, { reason: source });
-    return;
-  }
+      if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
 
-  if (!manual && active && candidate && active !== candidate) {
-    traceCandidate('candidate_external_hold_active', candidate, {
-      reason: source,
-    });
-    return;
-  }
+      const candidate = e?.detail?.element || null;
+      const manual = !!e?.detail?.manual;
 
-  promoteExternalActive(candidate, `${source}_external_play`, { manual });
-};
+      if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
+        traceCandidate('candidate_external_ignored', candidate, { reason: source });
+        return;
+      }
+
+      if (!manual && active && candidate && active !== candidate) {
+        traceCandidate('candidate_external_hold_active', candidate, {
+          reason: source,
+        });
+        return;
+      }
+
+      promoteExternalActive(candidate, `${source}_external_play`, { manual });
+    };
 
     observeAll();
     const recoverVisibleHtmlMedia = (reason = 'visibility_recover') => {

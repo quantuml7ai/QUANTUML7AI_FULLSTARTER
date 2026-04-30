@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-29T15:11:55.106Z",
+  "generatedAt": "2026-04-30T10:17:25.758Z",
   "scannedFiles": 277,
   "report": [
     {
@@ -569,12 +569,12 @@
         },
         {
           "key": "scrollRead",
-          "line": 2684,
+          "line": 2699,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) return Number(scrollEl.scrollTop || 0);"
         },
         {
           "key": "scrollRead",
-          "line": 2686,
+          "line": 2701,
           "text": "try { return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0); } catch {}"
         },
         {
@@ -589,32 +589,32 @@
         },
         {
           "key": "rectReads",
-          "line": 2370,
+          "line": 2385,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2707,
+          "line": 2722,
           "text": "const rect = el?.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2770,
+          "line": 2785,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3095,
+          "line": 3110,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3112,
+          "line": 3127,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3375,
+          "line": 3390,
           "text": "const rect = owner.getBoundingClientRect?.();"
         }
       ]
@@ -1941,37 +1941,37 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 374,
+          "line": 396,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "key": "timers",
-          "line": 1139,
+          "line": 1161,
           "text": "const timer = setTimeout(() => finish(false), timeoutMs);"
         },
         {
           "key": "timers",
-          "line": 1218,
+          "line": 1240,
           "text": "const timer = setTimeout(() => controller.abort(), timeoutMs);"
         },
         {
           "key": "timers",
-          "line": 1785,
+          "line": 1812,
           "text": "const timer = setInterval(pickNext, rotateMs);"
         },
         {
           "key": "timers",
-          "line": 2270,
+          "line": 2297,
           "text": "timer = window.setInterval(() => {"
         },
         {
           "key": "timers",
-          "line": 2309,
+          "line": 2336,
           "text": "timer = setTimeout(() => {"
         },
         {
           "key": "timers",
-          "line": 2831,
+          "line": 2858,
           "text": "const timer = setTimeout(() => {"
         }
       ]
