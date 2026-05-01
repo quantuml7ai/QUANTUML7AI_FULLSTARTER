@@ -443,9 +443,16 @@ let nativePrewarmTs = 0;
 const nativePauseRecovery = new WeakMap();
 const POST_NATIVE_SRC_CAP = (() => {
       try {
-        return 2;
+        const ua = String(navigator?.userAgent || '');
+        const ios = /iP(hone|ad|od)/i.test(ua);
+        const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+        const dm = Number(navigator?.deviceMemory || 0);
+        const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3;
+        if (lowMem) return 2;
+        if (ios || coarse || /Android/i.test(ua)) return 3;
+        return 4;
       } catch {
-        return 2;
+        return 3;
       }
     })();
 const readPendingLoads = (force = false) => {
@@ -1312,7 +1319,7 @@ try {
       (() => {
         try {
           if (getOwnerVisiblePx(el) > 16) return true;
-          return getOwnerViewportGapPx(el) <= (isIOSUi ? 760 : (isCoarseUi ? 640 : 420));
+          return getOwnerViewportGapPx(el) <= getNativePrimeGapLimit();
         } catch {
           return false;
         }
@@ -3104,7 +3111,7 @@ const pauseForeignMedia = (keepEl = null) => {
             const gapPx = getOwnerViewportGapPx(el);
             const nearPostSurface =
               visiblePx > 0 ||
-              gapPx <= (isIOSUi ? 1400 : (isCoarseUi ? 1220 : 880));
+              gapPx <= (isIOSUi ? 1700 : (isCoarseUi ? 1500 : 980));
             if (nearPostSurface) {
               setPendingHardUnload(el, false);
               try {
@@ -3160,16 +3167,16 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(1040, Math.min(1700, Math.round(viewportH * 1.55)));
-      if (isCoarseUi) return Math.max(860, Math.min(1400, Math.round(viewportH * 1.22)));
-      return Math.max(520, Math.min(960, Math.round(viewportH * 0.82)));
+      if (isIOSUi) return Math.max(1280, Math.min(2300, Math.round(viewportH * 2.05)));
+      if (isCoarseUi) return Math.max(1040, Math.min(1800, Math.round(viewportH * 1.48)));
+      return Math.max(620, Math.min(1150, Math.round(viewportH * 0.94)));
     };
 
     const getNativePrimeGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(620, Math.min(1040, Math.round(viewportH * 1.02)));
-      if (isCoarseUi) return Math.max(500, Math.min(820, Math.round(viewportH * 0.82)));
-      return Math.max(0, Math.min(300, Math.round(viewportH * 0.26)));
+      if (isIOSUi) return Math.max(860, Math.min(1500, Math.round(viewportH * 1.32)));
+      if (isCoarseUi) return Math.max(680, Math.min(1120, Math.round(viewportH * 1.02)));
+      return Math.max(180, Math.min(420, Math.round(viewportH * 0.36)));
     };
 
     const isNativePostVideoCandidate = (el) => {
