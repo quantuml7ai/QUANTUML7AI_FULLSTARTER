@@ -3174,12 +3174,16 @@ const pauseForeignMedia = (keepEl = null) => {
       return Math.max(620, Math.min(1150, Math.round(viewportH * 0.94)));
     };
 
-    const getNativePrimeGapLimit = () => {
-      const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(860, Math.min(1500, Math.round(viewportH * 1.32)));
-      if (isCoarseUi) return Math.max(680, Math.min(1120, Math.round(viewportH * 1.02)));
-      return Math.max(180, Math.min(420, Math.round(viewportH * 0.36)));
-    };
+const getNativePrimeGapLimit = () => {
+  const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+  // iOS/WebKit needs the muted play/pause decode tick a little earlier than
+  // normal visibility activation, otherwise the card can enter viewport before
+  // the first frame is decoded. Keep this smaller than full prewarm runway so
+  // only one close native post owns the real playback-prime pipeline.
+  if (isIOSUi) return Math.max(1040, Math.min(1850, Math.round(viewportH * 1.62)));
+  if (isCoarseUi) return Math.max(680, Math.min(1120, Math.round(viewportH * 1.02)));
+  return Math.max(180, Math.min(420, Math.round(viewportH * 0.36)));
+};
 
     const isNativePostVideoCandidate = (el) => {
       try {
@@ -3433,10 +3437,12 @@ const pauseForeignMedia = (keepEl = null) => {
         });
         return false;
       }
-      const now = Date.now();
-      const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
-      if (lastPrimeTs > 0 && (now - lastPrimeTs) < (isIOSUi ? 2200 : 1800)) return false;
-      if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
+const now = Date.now();
+const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
+// iOS prime now starts earlier, so allow one safe retry before the card reaches
+// viewport if WebKit rejected or stalled the first muted decode tick.
+if (lastPrimeTs > 0 && (now - lastPrimeTs) < (isIOSUi ? 1800 : 1800)) return false;
+if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
       const wantedMutedBeforePrime = desiredMuted();
       try {
         media.dataset.__nativePrimeTs = String(now);
@@ -3479,10 +3485,13 @@ const pauseForeignMedia = (keepEl = null) => {
         return ready;
       };
 
-      const finishPrime = (state = 'done') => {
-        try { media.dataset.__nativePrimePending = '0'; } catch {}
-        try {
-          const holdMs = warmupOnlyPrime ? (isIOSUi ? 5200 : (isCoarseUi ? 3800 : 2400)) : 0;
+let primeFinished = false;
+const finishPrime = (state = 'done') => {
+  if (primeFinished) return;
+  primeFinished = true;
+  try { media.dataset.__nativePrimePending = '0'; } catch {}
+  try {
+    const holdMs = warmupOnlyPrime ? (isIOSUi ? 6400 : (isCoarseUi ? 3800 : 2400)) : 0;
           const warmedReady = rememberPrimeReady(holdMs);
           const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
           const nowVisiblePx = getOwnerVisiblePx(media);
@@ -3518,23 +3527,34 @@ const pauseForeignMedia = (keepEl = null) => {
       };
 
       try {
-        const p = media.play?.();
-        if (p && typeof p.then === 'function') {
-          p.then(() => {
-            const holdDelay = warmupOnlyPrime ? (isIOSUi ? 520 : 380) : (isIOSUi ? 180 : 110);
-            setTimeout(() => finishPrime('played'), holdDelay);
-          }).catch((err) => {
-            try { media.dataset.__nativePrimePending = '0'; } catch {}
-            trace('native_prime_reject', media, {
-              reason,
-              name: String(err?.name || ''),
-              message: String(err?.message || ''),
-            });
-          });
-        } else {
-          setTimeout(() => finishPrime('sync_play'), 120);
-        }
-        return true;
+const p = media.play?.();
+if (p && typeof p.then === 'function') {
+  p.then(() => {
+    let frameCallbackArmed = false;
+    if (warmupOnlyPrime && typeof media.requestVideoFrameCallback === 'function') {
+      try {
+        frameCallbackArmed = true;
+        media.requestVideoFrameCallback(() => {
+          setTimeout(() => finishPrime('first_frame'), isIOSUi ? 48 : 32);
+        });
+      } catch {
+        frameCallbackArmed = false;
+      }
+    }
+    const holdDelay = warmupOnlyPrime ? (isIOSUi ? 640 : 380) : (isIOSUi ? 180 : 110);
+    setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), holdDelay);
+  }).catch((err) => {
+    try { media.dataset.__nativePrimePending = '0'; } catch {}
+    trace('native_prime_reject', media, {
+      reason,
+      name: String(err?.name || ''),
+      message: String(err?.message || ''),
+    });
+  });
+} else {
+  setTimeout(() => finishPrime('sync_play'), 120);
+}
+return true;
       } catch (err) {
         try { media.dataset.__nativePrimePending = '0'; } catch {}
         trace('native_prime_throw', media, { reason, message: String(err?.message || err || '') });
