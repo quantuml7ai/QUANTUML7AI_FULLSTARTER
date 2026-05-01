@@ -85,6 +85,10 @@ describe('forum media contracts', () => {
     expect(layoutSrc).toContain('useTelegramVerticalSwipesGuard(true)')
     expect(telegramGuardSrc).toContain('disableVerticalSwipes')
     expect(telegramGuardSrc).toContain('enableVerticalSwipes')
+    expect(telegramGuardSrc).toContain('isTelegramMiniAppRuntime')
+    expect(telegramGuardSrc).toContain('tgwebappdata=')
+    expect(telegramGuardSrc).toContain('data-telegram-mini-app')
+    expect(telegramGuardSrc).toContain('isVersionAtLeast')
     expect(telegramGuardSrc).not.toMatch(/addEventListener\s*\(\s*['"](?:touchstart|touchmove|wheel|mousewheel)/)
 
     expect(pageLockSrc).not.toMatch(/addEventListener\s*\(\s*['"](?:touchstart|touchmove|wheel|mousewheel)/)
@@ -100,6 +104,8 @@ describe('forum media contracts', () => {
     expect(forumStylesSrc).toContain('.iframeTouchShield{')
     expect(forumStylesSrc).toContain('@media (pointer:fine)')
     expect(forumStylesSrc).toContain('@media (pointer:coarse)')
+    expect(forumStylesSrc).toContain('html[data-telegram-mini-app="1"]')
+    expect(forumStylesSrc).toContain('html:not([data-telegram-mini-app="1"]) .iframeTouchShield')
     expect(forumStylesSrc).toContain('[data-iframe-touch-locked="1"]')
     expect(forumStylesSrc).toContain('[data-iframe-interactive="1"]')
 

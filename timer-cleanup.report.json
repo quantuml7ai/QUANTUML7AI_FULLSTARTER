@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T15:02:04.274Z",
+  "generatedAt": "2026-05-01T16:20:49.175Z",
   "report": [
     {
       "file": "app/page.js",
@@ -43,8 +43,8 @@
     },
     {
       "file": "app/forum/features/feed/components/PostMediaStack.jsx",
-      "timers": 0,
-      "timerCleanup": 0
+      "timers": 1,
+      "timerCleanup": 2
     },
     {
       "file": "app/about/page.js",

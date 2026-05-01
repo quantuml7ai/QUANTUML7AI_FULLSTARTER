@@ -600,6 +600,14 @@ export const FORUM_STYLES = `
   -webkit-tap-highlight-color:transparent;
 }
 
+html:not([data-telegram-mini-app="1"]) .iframeTouchShield{
+  display:none !important;
+  pointer-events:none !important;
+}
+html:not([data-telegram-mini-app="1"]) .mediaBox[data-kind="iframe"] > iframe{
+  pointer-events:auto;
+}
+
 @media (pointer:fine){
   .iframeTouchShield{
     display:none !important;
@@ -610,18 +618,18 @@ export const FORUM_STYLES = `
 }
 
 @media (pointer:coarse){
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > iframe[data-forum-media="youtube"]{
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > iframe[data-forum-media="youtube"]{
     pointer-events:none;
   }
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > .iframeTouchShield{
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > .iframeTouchShield{
     display:flex;
   }
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > iframe[data-forum-media="youtube"],
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > iframe[data-forum-media="youtube"]{
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > iframe[data-forum-media="youtube"],
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > iframe[data-forum-media="youtube"]{
     pointer-events:auto;
   }
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > .iframeTouchShield,
-  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > .iframeTouchShield{
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > .iframeTouchShield,
+  html[data-telegram-mini-app="1"] .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > .iframeTouchShield{
     display:none;
   }
   .mediaBox[data-kind="iframe"]:not([data-subkind="youtube"]) > iframe{

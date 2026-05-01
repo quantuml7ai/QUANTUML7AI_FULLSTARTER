@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-30T15:01:12.152Z",
+  "generatedAt": "2026-05-01T16:20:15.414Z",
   "summary": {
-    "scannedFiles": 381,
-    "internalEdges": 523,
+    "scannedFiles": 382,
+    "internalEdges": 524,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 139,
+    "crossDomainEdgeCount": 140,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -519,6 +519,12 @@
       "from": "app/forum/ForumHeaderPanel.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/ForumLayout.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js",
       "toDomain": "forum-shared"
     },
     {
@@ -3531,9 +3537,10 @@
         "app/forum/features/feed/components/TopicsSection.jsx",
         "app/forum/features/feed/components/ThreadSection.jsx",
         "app/forum/features/ui/components/ComposeDock.jsx",
-        "app/forum/features/ui/components/ForumOverlayStack.jsx"
+        "app/forum/features/ui/components/ForumOverlayStack.jsx",
+        "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js"
       ],
-      "importCount": 6,
+      "importCount": 7,
       "external": [
         "react"
       ],
@@ -3781,6 +3788,16 @@
     },
     {
       "file": "app/forum/shared/hooks/usePageLock.js",
+      "domain": "forum-shared",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
+      "file": "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js",
       "domain": "forum-shared",
       "imports": [],
       "importCount": 0,

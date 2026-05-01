@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-30T15:02:04.273Z",
+  "generatedAt": "2026-05-01T16:20:49.175Z",
   "report": [
     {
       "file": "app/page.js",
@@ -108,15 +108,15 @@
     {
       "file": "app/forum/features/feed/components/PostMediaStack.jsx",
       "counts": {
-        "timers": 0,
-        "timerCleanup": 0,
+        "timers": 1,
+        "timerCleanup": 2,
         "observers": 0,
         "observerCleanup": 0,
         "listeners": 0,
         "listenerCleanup": 0,
         "destroyCalls": 0
       },
-      "teardownScore": 0
+      "teardownScore": 2
     },
     {
       "file": "app/about/page.js",

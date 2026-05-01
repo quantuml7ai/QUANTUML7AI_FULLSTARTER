@@ -1,15 +1,15 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-04-30T15:01:09.923Z",
+  "generatedAt": "2026-05-01T16:20:13.689Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 14,
+        "for-loop": 15,
         "while-loop": 1,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 21,
+        "layout-read": 23,
         "sync-json": 0,
         "local-storage": 2,
         "session-storage": 0,
@@ -18,12 +18,12 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 104
+      "score": 112
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "counts": {
-        "for-loop": 15,
+        "for-loop": 16,
         "while-loop": 1,
         "map-chain": 0,
         "filter-map": 0,
@@ -36,7 +36,7 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 53
+      "score": 55
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -2347,32 +2347,32 @@
       },
       "longLines": [
         {
-          "i": 921,
+          "i": 999,
           "len": 190,
           "text": ".emojiBtn{ width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); font-size:22px; color:#fff; transition: transform .06s }"
         },
         {
-          "i": 1000,
+          "i": 1078,
           "len": 188,
           "text": ".avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }"
         },
         {
-          "i": 1441,
+          "i": 1519,
           "len": 196,
           "text": ".iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }"
         },
         {
-          "i": 1600,
+          "i": 1678,
           "len": 184,
           "text": ".sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }"
         },
         {
-          "i": 1735,
+          "i": 1813,
           "len": 208,
           "text": ".qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }"
         },
         {
-          "i": 5445,
+          "i": 5523,
           "len": 183,
           "text": ".dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; animation: dmPulse 2.6s ease-in-out infinite; }"
         }
@@ -4001,6 +4001,24 @@
       "score": 2
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\adsSlots.js",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\api\\http.js",
       "counts": {
         "for-loop": 0,
@@ -4012,6 +4030,24 @@
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 1,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useTelegramVerticalSwipesGuard.js",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
@@ -7235,24 +7271,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumViewState.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\utils\\adsSlots.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

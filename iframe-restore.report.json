@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-30T15:02:00.487Z",
+  "generatedAt": "2026-05-01T16:20:46.452Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "counts": {
-        "dataSrc": 26,
+        "dataSrc": 27,
         "setSrc": 6,
         "removeSrc": 0,
-        "restore": 49,
+        "restore": 51,
         "postMessagePause": 11,
         "ytPlayers": 12
       }
