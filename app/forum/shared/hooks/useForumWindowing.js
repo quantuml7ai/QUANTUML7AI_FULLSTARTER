@@ -15,6 +15,17 @@ const DEFAULT_REVEAL_HOLD_MS = 1800
 const DEFAULT_MIN_SCROLLABLE_HEIGHT = 120
 const DEFAULT_FALLBACK_MAX_RENDER = 8
 const DEFAULT_FALLBACK_OVERSCAN_PX = 960
+const STABLE_MEDIA_SHELL_SELECTOR = [
+  '[data-stable-shell="1"]',
+  '[data-ads="1"]',
+  '.forum-ad-card',
+  '.forum-ad-media-slot',
+  '.mediaBox[data-kind="video"]',
+  '.mediaBox[data-kind="iframe"]',
+  'video[data-forum-video="post"]',
+  'iframe[data-forum-media]',
+  '[data-forum-embed-kind]',
+].join(', ')
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
@@ -67,12 +78,23 @@ function readDefaultLayoutKey(isBrowserFn) {
 function hasStableMediaShell(node) {
   try {
     if (!(node instanceof Element)) return false
-    if (node.matches?.('[data-stable-shell="1"], [data-ads="1"], .forum-ad-card')) return true
-    return !!node.querySelector?.(
-      '[data-stable-shell="1"], [data-ads="1"], .forum-ad-card, video[data-forum-video="post"], [data-forum-embed-kind="native-video"], .forum-ad-media-slot',
-    )
+    if (node.matches?.(STABLE_MEDIA_SHELL_SELECTOR)) return true
+    return !!node.querySelector?.(STABLE_MEDIA_SHELL_SELECTOR)
   } catch {
     return false
+  }
+}
+
+function readRecentScrollAgeMs() {
+  try {
+    const now = Date.now()
+    const last = Math.max(
+      Number(window?.__forumUserScrollTs || 0),
+      Number(window?.__forumProgrammaticScrollTs || 0),
+    )
+    return last > 0 ? now - last : Number.POSITIVE_INFINITY
+  } catch {
+    return Number.POSITIVE_INFINITY
   }
 }
 
@@ -111,6 +133,7 @@ export default function useForumWindowing({
   const scrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const pendingAnchorDeltaRef = useRef(0)
   const pendingHeightsRef = useRef(new Map())
+  const stableShrinkRef = useRef(new Map())
   const anchorFlushTimerRef = useRef(0)
   const winMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const winRef = useRef({ start: 0, end: 0, top: 0, bottom: 0 })
@@ -551,6 +574,7 @@ export default function useForumWindowing({
         }
         rosRef.current.delete(key)
         pendingHeightsRef.current.delete(key)
+        stableShrinkRef.current.delete(key)
         return
       }
 
@@ -564,12 +588,47 @@ export default function useForumWindowing({
 
           const nextHeight = Math.round(h)
           const prev = Number(heightsRef.current.get(key) || 0)
+          const stableMediaShell = hasStableMediaShell(node)
+
+          if (
+            stableMediaShell &&
+            Number.isFinite(prev) &&
+            prev > 0 &&
+            nextHeight < prev &&
+            (prev - nextHeight) >= Math.max(48, layoutJitterPx)
+          ) {
+            const now = Date.now()
+            const prevShrink = stableShrinkRef.current.get(key)
+            const sameShrink =
+              prevShrink &&
+              Math.abs(Number(prevShrink.height || 0) - nextHeight) < heightDeltaIgnorePx
+            const firstSeenTs = sameShrink ? Number(prevShrink.firstSeenTs || now) : now
+            stableShrinkRef.current.set(key, { height: nextHeight, firstSeenTs })
+
+            const recentScroll = readRecentScrollAgeMs() < Math.max(520, scrollSettleMs * 2)
+            const stableForMs = now - firstSeenTs
+            const mayApplyShrink = !recentScroll && stableForMs >= Math.max(520, scrollSettleMs)
+
+            if (!mayApplyShrink) {
+              pendingHeightsRef.current.set(key, prev)
+              emitWindowingDiag('stable_media_height_shrink_deferred', {
+                key,
+                prev: Math.round(prev),
+                next: nextHeight,
+                recentScroll,
+              })
+              scheduleAnchorFlush(scrollSettleMs)
+              return
+            }
+          } else {
+            stableShrinkRef.current.delete(key)
+          }
 
           if (Number.isFinite(prev) && prev > 0 && Math.abs(prev - nextHeight) < heightDeltaIgnorePx) {
             return
           }
 
-          if (Number.isFinite(prev) && prev > 0 && isScrollActiveNow() && hasStableMediaShell(node)) {
+          if (Number.isFinite(prev) && prev > 0 && isScrollActiveNow() && stableMediaShell) {
             pendingHeightsRef.current.set(key, nextHeight)
             emitWindowingDiag('media_height_deferred_during_scroll', {
               key,
@@ -626,6 +685,7 @@ export default function useForumWindowing({
     emitWindowingDiag,
     heightDeltaIgnorePx,
     isScrollActiveNow,
+    layoutJitterPx,
     scheduleAnchorFlush,
     scheduleRecalc,
     scrollSettleMs,
@@ -640,6 +700,10 @@ export default function useForumWindowing({
 
     pendingHeightsRef.current.forEach((_, key) => {
       if (!activeKeys.has(key)) pendingHeightsRef.current.delete(key)
+    })
+
+    stableShrinkRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) stableShrinkRef.current.delete(key)
     })
 
     rosRef.current.forEach((ro, key) => {
@@ -662,6 +726,7 @@ export default function useForumWindowing({
     layoutKeyRef.current = normalizeKey(getLayoutKey?.(), readDefaultLayoutKey(isBrowserFn))
     const scrollActivity = scrollActivityRef.current
     const pendingHeights = pendingHeightsRef.current
+    const stableShrinks = stableShrinkRef.current
     const doc = document
 
     const onScroll = () => {
@@ -701,6 +766,7 @@ export default function useForumWindowing({
           layoutKeyRef.current = nextLayoutKey
           try { heightsRef.current.clear() } catch {}
           try { pendingHeights.clear() } catch {}
+          try { stableShrinks.clear() } catch {}
           emitWindowingDiag('breakpoint_reset', {
             prevBp: prevLayoutKey,
             nextBp: nextLayoutKey,
@@ -750,6 +816,7 @@ export default function useForumWindowing({
 
       pendingAnchorDeltaRef.current = 0
       try { pendingHeights.clear() } catch {}
+      try { stableShrinks.clear() } catch {}
       scrollActivity.activeUntil = 0
       scrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
@@ -791,6 +858,7 @@ export default function useForumWindowing({
 
       try { heightsRef.current.clear() } catch {}
       try { pendingHeightsRef.current.clear() } catch {}
+      try { stableShrinkRef.current.clear() } catch {}
       try { pendingAnchorDeltaRef.current = 0 } catch {}
       try {
         if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
@@ -856,6 +924,7 @@ export default function useForumWindowing({
   useEffect(() => {
     const ros = rosRef.current
     const pendingHeights = pendingHeightsRef.current
+    const stableShrinks = stableShrinkRef.current
     return () => {
       try {
         ros.forEach((ro) => {
@@ -868,6 +937,7 @@ export default function useForumWindowing({
         anchorFlushTimerRef.current = 0
         pendingAnchorDeltaRef.current = 0
         pendingHeights.clear()
+        stableShrinks.clear()
       } catch {}
     }
   }, [])

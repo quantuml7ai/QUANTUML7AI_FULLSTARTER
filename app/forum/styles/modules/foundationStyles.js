@@ -73,20 +73,20 @@ const foundationStyles = String.raw`
       --mb-video-h-tablet: 550px;
       --mb-video-h-desktop: 550px;
   /* Video: минимальная высота */
-  --mb-video-min-h-mobile: 420px;
+  --mb-video-min-h-mobile: 650px;
   --mb-video-min-h-tablet: 550px;
   --mb-video-min-h-desktop: 550px;      
-      --mb-image-h-mobile: 700px;
+      --mb-image-h-mobile: 650px;
       --mb-image-h-tablet: 550px;
       --mb-image-h-desktop: 550px;
-      --mb-iframe-h-mobile: 700px;
+      --mb-iframe-h-mobile: 650px;
       --mb-iframe-h-tablet: 550px;
       --mb-iframe-h-desktop: 550px;
   /* YouTube iframe: минимальная высота (моб/планш/десктоп)
      - max-height уже управляется через --mb-iframe-h-*
      - это именно нижняя граница, чтобы карточка YouTube не была «слишком низкой»
   */
-  --mb-yt-iframe-min-h-mobile: 420px;
+  --mb-yt-iframe-min-h-mobile: 650px;
   --mb-yt-iframe-min-h-tablet: 550px;
   --mb-yt-iframe-min-h-desktop: 550px;      
       --mb-audio-h-mobile: 630px;

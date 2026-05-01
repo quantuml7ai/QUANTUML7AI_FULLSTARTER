@@ -667,7 +667,7 @@ React.useEffect(() => {
 
   const onEnded = () => {
     try {
-      el.dataset.__endedHold = '1'
+      delete el.dataset.__endedHold
       el.dataset.__playRequested = '0'
       el.dataset.__loadPending = '0'
     } catch {}
@@ -1223,7 +1223,7 @@ const videoNode = (
     data-default-muted={isPostVideo ? '1' : undefined}
     controls={isPostVideo ? undefined : renderControls}
     autoPlay={isPostVideo ? undefined : autoPlay}
-    loop={isPostVideo ? false : loop}
+    loop={isPostVideo ? true : loop}
     controlsList={controlsList}
     disablePictureInPicture={disablePictureInPicture}
     referrerPolicy="no-referrer"

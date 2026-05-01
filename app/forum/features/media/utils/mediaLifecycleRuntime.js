@@ -194,7 +194,9 @@ export function __enforceActiveVideoCap(exceptEl) {
 
       const victimIsPostFeedVideo =
         String(victim?.getAttribute?.('data-forum-video') || '') === 'post'
-      const protectMargin = victimIsPostFeedVideo ? 700 : 180
+      const protectMargin = victimIsPostFeedVideo
+        ? (__MEDIA_RUNTIME_PROFILE.isIOS ? 1600 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1300 : 760))
+        : 180
 
       if (victim === exceptEl) {
         __activeVideoLRU.shift()
@@ -320,12 +322,17 @@ const canHardUnload = (() => {
   }
 })()
 
-const shellVisible = isPostFeedVideo ? __isVideoNearViewport(el, 220) : false
-const nearViewport = __isVideoNearViewport(el, isPostFeedVideo ? 560 : 420)
+const shellVisible = isPostFeedVideo ? __isVideoNearViewport(el, 520) : false
+const nearViewport = __isVideoNearViewport(
+  el,
+  isPostFeedVideo
+    ? (__MEDIA_RUNTIME_PROFILE.isIOS ? 1600 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1300 : 760))
+    : 420,
+)
 const postPrewarmRunway = isPostFeedVideo
   ? __isVideoNearViewport(
     el,
-    __MEDIA_RUNTIME_PROFILE.isIOS ? 2200 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1900 : 1700),
+    __MEDIA_RUNTIME_PROFILE.isIOS ? 1700 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1400 : 960),
   )
   : false
 const freshPostLoadPending = (() => {
@@ -359,6 +366,18 @@ const nativePrimeHoldActive = (() => {
     return false
   }
 })()
+const readyPostPipeline = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    return (
+      String(el.dataset?.__warmReady || '') === '1' ||
+      Number(el.readyState || 0) >= 1 ||
+      !!String(el.currentSrc || el.getAttribute?.('src') || '').trim()
+    )
+  } catch {
+    return false
+  }
+})()
 
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
@@ -369,7 +388,7 @@ const shouldKeepResidentPostVideo =
     nativePrimeHoldActive ||
     nearViewport ||
     shellVisible ||
-    (postPrewarmRunway && (freshPostLoadPending || activePostPipeline))
+    (postPrewarmRunway && (freshPostLoadPending || activePostPipeline || readyPostPipeline))
   )
 
 const shouldSoftUnload =

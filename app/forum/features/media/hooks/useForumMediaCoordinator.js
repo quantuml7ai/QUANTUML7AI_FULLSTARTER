@@ -443,9 +443,7 @@ let nativePrewarmTs = 0;
 const nativePauseRecovery = new WeakMap();
 const POST_NATIVE_SRC_CAP = (() => {
       try {
-        if (isIOSUi) return 2;
-        if (isCoarseUi) return 2;
-        return 3;
+        return 2;
       } catch {
         return 2;
       }
@@ -773,7 +771,7 @@ const clampPostNativeWarmBuffer = (el, reason = 'warm_buffer_clamp') => {
       media.dataset.__resident = '1';
       media.dataset.__prewarm = '1';
       media.dataset.__nativeWarmClampedReason = String(reason || 'warm_buffer_clamp');
-      const holdMs = isIOSUi ? 5200 : (isCoarseUi ? 4200 : 3200);
+      const holdMs = isIOSUi ? 4200 : (isCoarseUi ? 3000 : 1800);
       const until = Date.now() + holdMs;
       const prevUntil = Number(media.dataset?.__nativePrimeHoldUntil || 0);
       media.dataset.__nativePrimeHoldUntil = String(Math.max(prevUntil, until));
@@ -807,11 +805,11 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
     const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
     const nearProtectPx = (() => {
       try {
-        if (isIOSUi) return Math.max(1320, Math.min(2400, Math.round(viewportH * 1.55)));
-        if (isCoarseUi) return Math.max(1120, Math.min(2100, Math.round(viewportH * 1.35)));
-        return Math.max(820, Math.min(1500, Math.round(viewportH * 0.92)));
+        if (isIOSUi) return Math.max(1120, Math.min(1800, Math.round(viewportH * 1.35)));
+        if (isCoarseUi) return Math.max(920, Math.min(1500, Math.round(viewportH * 1.08)));
+        return Math.max(560, Math.min(980, Math.round(viewportH * 0.72)));
       } catch {
-        return isIOSUi ? 1320 : (isCoarseUi ? 1120 : 820);
+        return isIOSUi ? 1120 : (isCoarseUi ? 920 : 560);
       }
     })();
     const keepMedia = getMediaStateNode(keepEl);
@@ -839,6 +837,7 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
           visiblePx > 0 ||
           holdActive ||
           Number(gapPx || Number.POSITIVE_INFINITY) <= nearProtectPx;
+        const hardProtected = isKeep || playing || visiblePx > 0 || holdActive;
         const priority =
           (isKeep ? -1000000 : 0) +
           (playing ? -900000 : 0) +
@@ -847,14 +846,14 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
           (ready ? -40000 : 0) +
           Math.max(0, Number(gapPx || 0)) -
           (visiblePx * 24);
-        return { node, owner, isKeep, playing, priority, visiblePx, gapPx, holdActive, nearProtected, ready };
+        return { node, owner, isKeep, playing, priority, visiblePx, gapPx, holdActive, nearProtected, hardProtected, ready };
       })
       .sort((a, b) => b.priority - a.priority);
 
     let attached = nodes.length;
     for (const item of scored) {
       if (attached <= POST_NATIVE_SRC_CAP) break;
-      if (item.isKeep || item.playing || item.nearProtected) {
+      if (item.hardProtected || (item.nearProtected && attached <= POST_NATIVE_SRC_CAP)) {
         if (item.nearProtected) {
           try {
             item.node.preload = item.playing ? 'auto' : 'metadata';
@@ -1259,7 +1258,7 @@ const kickMediaLoad = (
           el.playsInline = true;
           if (el instanceof HTMLVideoElement) {
             const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
-            try { el.loop = !isPostVideo; } catch {}
+            try { el.loop = true; } catch {}
           }
           if (el.paused) startHtmlMedia(el, 'ready_replay');
         } catch {}
@@ -1312,8 +1311,8 @@ try {
       !highPriorityReason &&
       (() => {
         try {
-          if (getOwnerVisiblePx(el) > 24) return true;
-          return getOwnerViewportGapPx(el) <= (isIOSUi ? 280 : (isCoarseUi ? 320 : 220));
+          if (getOwnerVisiblePx(el) > 16) return true;
+          return getOwnerViewportGapPx(el) <= (isIOSUi ? 760 : (isCoarseUi ? 640 : 420));
         } catch {
           return false;
         }
@@ -3161,16 +3160,16 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(1180, Math.min(2200, Math.round(viewportH * 2.15)));
-      if (isCoarseUi) return Math.max(980, Math.min(1900, Math.round(viewportH * 1.85)));
-      return Math.max(840, Math.min(1700, Math.round(viewportH * 1.45)));
+      if (isIOSUi) return Math.max(1040, Math.min(1700, Math.round(viewportH * 1.55)));
+      if (isCoarseUi) return Math.max(860, Math.min(1400, Math.round(viewportH * 1.22)));
+      return Math.max(520, Math.min(960, Math.round(viewportH * 0.82)));
     };
 
     const getNativePrimeGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(680, Math.min(1180, Math.round(viewportH * 1.18)));
-      if (isCoarseUi) return Math.max(540, Math.min(920, Math.round(viewportH * 0.95)));
-      return Math.max(0, Math.min(360, Math.round(viewportH * 0.32)));
+      if (isIOSUi) return Math.max(620, Math.min(1040, Math.round(viewportH * 1.02)));
+      if (isCoarseUi) return Math.max(500, Math.min(820, Math.round(viewportH * 0.82)));
+      return Math.max(0, Math.min(300, Math.round(viewportH * 0.26)));
     };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3412,11 +3411,13 @@ const pauseForeignMedia = (keepEl = null) => {
         }
       })();
 
-      if (!ownerMatchesActiveNow && (foreignPlaying || (activeOwnerNow instanceof Element && !allowHiddenWarmupPrime))) {
+      const foreignPlaybackBlocksPrime = foreignPlaying && !allowHiddenWarmupPrime;
+      if (!ownerMatchesActiveNow && (foreignPlaybackBlocksPrime || (activeOwnerNow instanceof Element && !allowHiddenWarmupPrime))) {
         trace('native_prime_skip_active_playing', media, {
           reason,
           warmupOnlyPrime,
           foreignPlaying,
+          allowHiddenWarmupPrime,
           activeKind,
           gapPx,
           visiblePx,
@@ -3472,7 +3473,7 @@ const pauseForeignMedia = (keepEl = null) => {
       const finishPrime = (state = 'done') => {
         try { media.dataset.__nativePrimePending = '0'; } catch {}
         try {
-          const holdMs = warmupOnlyPrime ? (isIOSUi ? 9000 : 6500) : 0;
+          const holdMs = warmupOnlyPrime ? (isIOSUi ? 5200 : (isCoarseUi ? 3800 : 2400)) : 0;
           const warmedReady = rememberPrimeReady(holdMs);
           const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
           const nowVisiblePx = getOwnerVisiblePx(media);
@@ -3810,15 +3811,6 @@ const isPostNativeVideo =
   el instanceof HTMLVideoElement &&
   String(el?.getAttribute?.('data-forum-video') || '') === 'post';
 
-if (isPostNativeVideo && el.ended && !hasGesture && !manualLease) {
-  trace('play_skip_native_ended_hold', el, {
-    visiblePx: visiblePxNow,
-    centerDist: centerDistNow,
-  });
-  try { el.loop = false; } catch {}
-  return;
-}
-
 if (el instanceof HTMLVideoElement) {
   const hasSrc = !!el.getAttribute('src');
   const isPostVideo = isPostNativeVideo;
@@ -3876,7 +3868,7 @@ if (el instanceof HTMLVideoElement) {
 
   applyMutedPref(el);
   el.playsInline = true;
-  el.loop = !isPostNativeVideo;
+  el.loop = true;
 
   if ((el.readyState || 0) < 2) {
     ensurePendingHtmlMediaReady(el, 'play_wait_ready');
@@ -4729,9 +4721,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.22)))
+          Math.max(isIOSUi ? 760 : (isCoarseUi ? 620 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.78 : 1.24)))
         }px 0px ${
-          Math.max(isIOSUi ? 920 : (isCoarseUi ? 760 : 940), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.38 : 1.9)))
+          Math.max(isIOSUi ? 1450 : (isCoarseUi ? 1180 : 900), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 3.35 : 2.35)))
         }px 0px`,
       },
     );

@@ -133,10 +133,19 @@ describe('forum media contracts', () => {
     expect(coreSrc).toContain("emitWindowingDiag('anchor_adjust_suppressed'")
     expect(coreSrc).toContain('const stickyItems = velocity > 1.2 ? 2 : 1')
     expect(coreSrc).toContain('function hasStableMediaShell(node)')
+    expect(coreSrc).toContain('STABLE_MEDIA_SHELL_SELECTOR')
+    expect(coreSrc).toContain("emitWindowingDiag('stable_media_height_shrink_deferred'")
     expect(coreSrc).toContain("emitWindowingDiag('media_height_deferred_during_scroll'")
     expect(coreSrc).toContain("applyPendingMeasuredHeights('scroll_settled')")
     expect(coreSrc).toContain('registerForumWindowingTarget')
     expect(focusSrc).toContain('revealForumWindowedDomId')
+  })
+
+  test('interleaved forum feed slots keep stable item keys by content id', () => {
+    const src = read('app/forum/ForumAds.js')
+    expect(src).toContain('const resolveItemKey = (item, index) => {')
+    expect(src).toContain("return { type: 'item', item, key: `item:${itemKey}` };")
+    expect(src).not.toContain("key: `i:${i}`")
   })
 
   test('forum ad heights use one shared windowing contract for real slots and placeholders', () => {
@@ -158,18 +167,16 @@ describe('forum media contracts', () => {
     expect(adsSrc).toContain('desktop: 650')
   })
 
-  test('native videos do not force autoplay loops that refetch fragmented MP4 ranges', () => {
+  test('native videos keep loop playback without ended-hold refetch traps', () => {
     const coordinatorSrc = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
     const videoMediaSrc = read('app/forum/features/media/components/VideoMedia.jsx')
     const adsSrc = read('app/forum/ForumAds.js')
-    expect(coordinatorSrc).toContain('play_skip_native_ended_hold')
-    expect(coordinatorSrc).toContain('el.loop = !isPostNativeVideo')
-    expect(coordinatorSrc).toContain('el.loop = !isPostVideo')
-    expect(videoMediaSrc).toContain('loop={isPostVideo ? false : loop}')
-    expect(videoMediaSrc).toContain("el.dataset.__endedHold = '1'")
-    expect(adsSrc).not.toContain('\n  loop\n  playsInline')
-    expect(adsSrc).toContain('__adEndedHold')
-    expect(adsSrc).toContain("if (reason === 'focus_retry') return false")
+    expect(coordinatorSrc).not.toContain('play_skip_native_ended_hold')
+    expect(coordinatorSrc).toContain('el.loop = true')
+    expect(videoMediaSrc).toContain('loop={isPostVideo ? true : loop}')
+    expect(videoMediaSrc).not.toContain("el.dataset.__endedHold = '1'")
+    expect(adsSrc).toMatch(/\n\s+loop\s*\n\s+onPlaying/)
+    expect(adsSrc).not.toContain("if (reason === 'focus_retry') return false")
   })
 
   test('faststart worker defragments fragmented MP4 instead of preserving moof ranges', () => {

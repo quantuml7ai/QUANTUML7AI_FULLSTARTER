@@ -838,8 +838,25 @@ export function interleaveAds(items, EVERY, opts = {}) {
 
   if (!Array.isArray(items) || !items.length) return [];
 
+  const resolveItemKey = (item, index) => {
+    const raw =
+      (typeof getId === 'function' && getId(item)) ||
+      item?.id ||
+      item?.postId ||
+      item?._id ||
+      item?.uuid ||
+      item?.key ||
+      item?.topicId ||
+      `idx${index}`;
+    const stable = String(raw || `idx${index}`).trim();
+    return stable || `idx${index}`;
+  };
+
   if (!EVERY || EVERY <= 0) {
-    return items.map((item, i) => ({ type: 'item', item, key: `i:${i}` }));
+    return items.map((item, i) => {
+      const itemKey = resolveItemKey(item, i);
+      return { type: 'item', item, key: `item:${itemKey}` };
+    });
   }
 
   let contentCount = 0;
@@ -847,7 +864,8 @@ export function interleaveAds(items, EVERY, opts = {}) {
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    out.push({ type: 'item', item, key: `i:${i}` });
+    const itemKey = resolveItemKey(item, i);
+    out.push({ type: 'item', item, key: `item:${itemKey}` });
 
     const skip =
       typeof isSkippable === 'function' ? !!isSkippable(item) : false;
@@ -1622,7 +1640,6 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
     }
 
     if (v.ended) {
-      if (reason === 'focus_retry') return false;
       try { v.currentTime = 0; } catch {}
       try { delete v.dataset.__adEndedHold; } catch {}
     }
@@ -2867,6 +2884,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   playsInline 
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
+  loop
   onPlaying={() => {
     try {
       const v = videoRef.current;
@@ -2943,9 +2961,15 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       if (v?.dataset) {
         v.dataset.__adLoadPending = '0';
         v.dataset.__adWarmReady = '1';
-        v.dataset.__adEndedHold = '1';
+        delete v.dataset.__adEndedHold;
       }
-      if (v) v.preload = 'metadata';
+      if (v) {
+        v.preload = shouldPlayRef.current ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
+        if (shouldPlayRef.current) {
+          try { v.currentTime = 0; } catch {}
+          v.play?.().catch(() => {});
+        }
+      }
     } catch {}
   }}
 onError={() => {
