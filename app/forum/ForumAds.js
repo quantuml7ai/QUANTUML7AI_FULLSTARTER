@@ -272,12 +272,35 @@ const adMediaResolveCache = new Map();
 const adMediaResolveInflight = new Map();
 const AD_MEDIA_RESOLVE_CACHE_OK_MS = 12 * 60 * 1000;
 const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
+const AD_SLOT_MEMORY_CAP = 640;
 
 // Native video must be attached imperatively, not through React `src` state.
 // Otherwise every visibility / preload re-render may reset the <video src>
 // and Chrome starts a new set of HTTP Range / 206 requests.
 const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
+const AD_NATIVE_WARM_STICKY_MS = 2600;
+const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
+const AD_NATIVE_PREWARM_MARGIN_TOP_PX = 1500;
+const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;
+const AD_NATIVE_PRIME_GAP_PX = 1700;
+const AD_NATIVE_TRANSFER_PREV_GAP_PX = 520;
+const AD_NATIVE_TRANSFER_NEXT_GAP_PX = 3400;
+const AD_NATIVE_SURFACE_HOLD_GAP_PX = 760;
+const AD_NATIVE_FAR_RELEASE_GAP_PX = 2100;
+const AD_NATIVE_FAR_RELEASE_DELAY_MS = 2200;
+let adNativeWarmSlot = { video: null, src: '', ts: 0 };
+let adNativeWarmReleaseTimer = 0;
+
+function trimMapToCap(map, cap = AD_SLOT_MEMORY_CAP) {
+  if (!map || typeof map.size !== 'number' || map.size <= cap) return;
+  let drop = map.size - cap;
+  for (const key of map.keys()) {
+    map.delete(key);
+    drop -= 1;
+    if (drop <= 0) break;
+  }
+}
 
 function getAdVideoNodeSrc(videoEl) {
   if (!videoEl) return '';
@@ -388,10 +411,6 @@ if (currentSrc === nextSrc) {
 
   return true;
 }
-const AD_NATIVE_WARM_STICKY_MS = 4200;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
-let adNativeWarmSlot = { video: null, src: '', ts: 0 };
-
 function getAdViewportState(el) {
   try {
     if (!el?.isConnected) {
@@ -431,22 +450,57 @@ function isAdNativeVideoLoadingOrReady(videoEl) {
   }
 }
 
+function clearAdNativeWarmFarReleaseTimer() {
+  if (!adNativeWarmReleaseTimer) return;
+  try { clearTimeout(adNativeWarmReleaseTimer); } catch {}
+  adNativeWarmReleaseTimer = 0;
+}
+
+function scheduleAdNativeWarmFarRelease(videoEl, reason = 'near_exit') {
+  if (!isBrowser() || !videoEl) return;
+  clearAdNativeWarmFarReleaseTimer();
+  adNativeWarmReleaseTimer = window.setTimeout(() => {
+    adNativeWarmReleaseTimer = 0;
+    try {
+      if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
+      const state = getAdViewportState(videoEl);
+      const shouldDetach =
+        !videoEl.isConnected ||
+        (!state.inViewport && state.gapPx > AD_NATIVE_FAR_RELEASE_GAP_PX);
+
+      if (!shouldDetach) {
+        scheduleAdNativeWarmFarRelease(videoEl, reason);
+        return;
+      }
+
+      adNativeWarmSlot = { video: null, src: '', ts: 0 };
+      detachAdNativeVideo(videoEl, { hard: true, reason: `far_${reason}` });
+    } catch {}
+  }, AD_NATIVE_FAR_RELEASE_DELAY_MS);
+}
+
 function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
   try {
     if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
 
     const reasonKey = String(reason || 'release');
     const state = getAdViewportState(videoEl);
+    const canHoldNearExitSurface =
+      reasonKey === 'near_exit' &&
+      (state.inViewport || state.gapPx <= AD_NATIVE_SURFACE_HOLD_GAP_PX);
+    const canHoldVisibleReplaceSurface =
+      (reasonKey === 'replace' || reasonKey === 'release') &&
+      state.inViewport;
     const keepVisibleSurface =
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
-      (state.inViewport || state.gapPx <= 1280) &&
+      (canHoldNearExitSurface || canHoldVisibleReplaceSurface) &&
       (reasonKey === 'near_exit' || reasonKey === 'replace' || reasonKey === 'release');
     const keepNearExitWarm =
       reasonKey === 'near_exit' &&
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
-      state.gapPx <= 2600;
+      state.gapPx <= AD_NATIVE_FAR_RELEASE_GAP_PX;
 
     // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
     // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
@@ -465,9 +519,11 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
         }
         videoEl.preload = keepNearExitWarm ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
       } catch {}
+      if (keepNearExitWarm) scheduleAdNativeWarmFarRelease(videoEl, reasonKey);
       return;
     }
 
+    clearAdNativeWarmFarReleaseTimer();
     adNativeWarmSlot = { video: null, src: '', ts: 0 };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '0'; } catch {}
 
@@ -484,6 +540,7 @@ function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
 
     const prev = adNativeWarmSlot.video;
     if (prev === videoEl && adNativeWarmSlot.src === nextSrc) {
+      clearAdNativeWarmFarReleaseTimer();
       adNativeWarmSlot.ts = Date.now();
       return true;
     }
@@ -499,11 +556,15 @@ const prevGap = prevState.gapPx;
 const nextGap = nextState.gapPx;
 const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
-const nextInsideRunway = nextGap <= 2100;
+const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX;
+const nextInsideRunway = nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX;
+const nextIsForwardCandidate =
+  (prevState.isAbove && nextState.isBelow && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX && nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX) ||
+  (prevState.isBelow && nextState.isAbove && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX && nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX);
 const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
 const nextClearlyCloser =
   nextShouldWinViewport ||
+  nextIsForwardCandidate ||
   nextGap + 160 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
@@ -520,6 +581,7 @@ if (age < AD_NATIVE_WARM_STICKY_MS && !nextClearlyCloser) {
       releaseAdNativeWarmSlot(prev, 'replace');
     }
 
+    clearAdNativeWarmFarReleaseTimer();
     adNativeWarmSlot = { video: videoEl, src: nextSrc, ts: Date.now() };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1'; } catch {}
     return true;
@@ -971,6 +1033,7 @@ class AdsCoordinatorImpl {
   setLastForSeed(seedKey, url) {
     if (!seedKey || !url) return;
     this.lastBySeedKey.set(String(seedKey), url);
+    trimMapToCap(this.lastBySeedKey, AD_SLOT_MEMORY_CAP);
   }
 
   getLastForSeed(seedKey) {
@@ -1624,6 +1687,8 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
   adNativeFocusKickTsRef.current = now;
 
   try {
+    claimAdNativeWarmSlot(v, srcKey, rootRef.current);
+
     const nextMuted = normalizeForumAdMuted(mutedRef.current);
     const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
     if (attached) attachedVideoSrcRef.current = srcKey;
@@ -1676,6 +1741,81 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
     return false;
   }
 }, [emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
+
+const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
+  const v = videoRef.current;
+  const srcKey = String(media.src || '').trim();
+  if (media.kind !== 'video' || !v || !srcKey) return false;
+  if (shouldPlayRef.current || !isPageActive || isVideoSrcTemporarilyBlocked(srcKey)) return false;
+
+  try {
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+    const mobileUa = /iP(hone|ad|od)|Android/i.test(String(navigator?.userAgent || ''));
+    if (!coarse && !mobileUa) return false;
+  } catch {
+    return false;
+  }
+
+  try {
+    if (Number(v.readyState || 0) >= 2 || String(v.dataset?.__adWarmReady || '') === '1') return true;
+    if (String(v.dataset?.__adPrimePending || '') === '1') return true;
+
+    const state = getAdViewportState(rootRef.current || v);
+    if (!state.inViewport && state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
+
+    const now = Date.now();
+    if ((now - Number(adNativePrimeTsRef.current || 0)) < 3200) return false;
+    adNativePrimeTsRef.current = now;
+
+    v.dataset.__adPrimePending = '1';
+    v.dataset.__adPrimeReason = String(reason || 'near_prewarm');
+    v.dataset.__adPrimeTs = String(now);
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+
+    // Mobile WebKit often needs a muted play/pause tick to decode the first frame
+    // before the card reaches focus. Keep this local: it must not rewrite global sound.
+    applyForumAdMutedToVideo(v, true);
+    const restoreDesiredMute = () => {
+      try { applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current)); } catch {}
+    };
+    const finishPrime = (stateKey = 'done') => {
+      try {
+        v.dataset.__adPrimePending = '0';
+        v.dataset.__adPrimeState = stateKey;
+        if (Number(v.readyState || 0) >= 2) {
+          v.dataset.__adWarmReady = '1';
+          v.dataset.__adLoadPending = '0';
+        }
+        if (!shouldPlayRef.current && !v.paused) {
+          try { v.pause?.(); } catch {}
+        }
+        if (!shouldPlayRef.current) {
+          v.preload = Number(v.readyState || 0) >= 2 ? 'metadata' : AD_NATIVE_VIDEO_PRELOAD_PLAY;
+          restoreDesiredMute();
+        }
+      } catch {}
+    };
+
+    const p = v.play?.();
+    if (p && typeof p.then === 'function') {
+      p.then(() => {
+        window.setTimeout(() => finishPrime('played'), 220);
+      }).catch(() => {
+        try { v.dataset.__adPrimePending = '0'; } catch {}
+        restoreDesiredMute();
+      });
+    } else {
+      window.setTimeout(() => finishPrime('sync_play'), 180);
+    }
+    return true;
+  } catch {
+    try { if (v?.dataset) v.dataset.__adPrimePending = '0'; } catch {}
+    return false;
+  }
+}, [isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
 useEffect(() => {
   const node = videoRef.current;
@@ -1735,7 +1875,7 @@ if (!canOwnWarm) {
       const hasExistingSurface =
         existingSrc === srcKey &&
         isAdNativeVideoLoadingOrReady(v);
-      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
+      if ((viewportState.inViewport || viewportState.gapPx <= AD_NATIVE_SURFACE_HOLD_GAP_PX) && hasExistingSurface) {
         v.dataset.__adSurfaceHeld = '1';
         v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
         v.preload = 'metadata';
@@ -1770,11 +1910,12 @@ if (!canOwnWarm) {
         v.dataset.__adLoadPending = '1';
         v.load?.();
       }
+      primeAdNativeFirstFrame('near_prewarm');
     } catch {}
   }
 
   return undefined;
-}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
+}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src, primeAdNativeFirstFrame]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1807,7 +1948,7 @@ if (!canOwnWarm) {
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: '820px 0px 1650px 0px', threshold: 0 }
+      { rootMargin: `${AD_NATIVE_PREWARM_MARGIN_TOP_PX}px 0px ${AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1909,6 +2050,7 @@ useEffect(() => {
         idx = next;
       }
       lastMediaIndexByKey.set(mediaKey, idx);
+      trimMapToCap(lastMediaIndexByKey, AD_SLOT_MEMORY_CAP);
       setMediaHref(list[idx]);
     };
 

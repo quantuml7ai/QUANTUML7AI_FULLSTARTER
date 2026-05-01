@@ -68,9 +68,9 @@ export function readForumWindowingOverscan(kind = 'post', velocity = 0) {
   const { breakpoint, coarse } = readWindowingDeviceProfile()
   const profile = {
     post: {
-      mobile: 1400,
-      tablet: 1500,
-      desktop: 1600,
+      mobile: 1900,
+      tablet: 2000,
+      desktop: 2100,
       boost: coarse ? 0.16 : 0.22,
     },
     topic: {

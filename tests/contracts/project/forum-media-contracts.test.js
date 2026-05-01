@@ -148,6 +148,15 @@ describe('forum media contracts', () => {
     expect(adsSrc).toContain('const keepVisibleSurface =')
     expect(adsSrc).toContain("videoEl.dataset.__adSurfaceHeld = keepVisibleSurface ? '1' : '0';")
     expect(adsSrc).toContain("v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';")
+    expect(adsSrc).toContain('const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;')
+    expect(adsSrc).toContain('const AD_NATIVE_PRIME_GAP_PX = 1700;')
+    expect(adsSrc).toContain('function scheduleAdNativeWarmFarRelease(videoEl, reason = \'near_exit\')')
+    expect(adsSrc).toContain("detachAdNativeVideo(videoEl, { hard: true, reason: `far_${reason}` })")
+    expect(adsSrc).toContain('claimAdNativeWarmSlot(v, srcKey, rootRef.current);')
+    expect(adsSrc).toContain('const primeAdNativeFirstFrame = React.useCallback')
+    expect(adsSrc).toContain("primeAdNativeFirstFrame('near_prewarm')")
+    expect(adsSrc).toContain('trimMapToCap(lastMediaIndexByKey, AD_SLOT_MEMORY_CAP);')
+    expect(adsSrc).toContain('trimMapToCap(this.lastBySeedKey, AD_SLOT_MEMORY_CAP);')
   })
 
   test('ads video upload uses the shared faststart path before blob storage', () => {
@@ -165,6 +174,9 @@ describe('forum media contracts', () => {
     expect(videoSrc).toContain('useForumWindowing')
     expect(videoSrc).toContain("diagPrefix: 'video_feed'")
     expect(videoSrc).toContain("listId: 'forum:video-feed'")
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX = 1480')
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX_MOBILE = 1260')
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX_TABLET = 1360')
     expect(coreSrc).toContain('targetLockRef')
     expect(coreSrc).toContain("emitWindowingDiag('anchor_adjust_suppressed'")
     expect(coreSrc).toContain('const stickyItems = velocity > 1.2 ? 2 : 1')
@@ -215,6 +227,7 @@ describe('forum media contracts', () => {
     const inboxSrc = read('app/forum/features/dm/components/InboxPane.jsx')
     const dmMessagesSrc = read('app/forum/features/dm/components/DmMessagesPane.jsx')
     const slotsSrc = read('app/forum/features/ui/utils/adsSlots.js')
+    const presetsSrc = read('app/forum/shared/utils/forumWindowingPresets.js')
 
     expect(publishedSrc).toContain("debugAdsSlots(\n        'published'")
     expect(publishedSrc).toContain("slotKind=\"published\"")
@@ -226,6 +239,10 @@ describe('forum media contracts', () => {
     expect(dmMessagesSrc).not.toContain('interleaveAds')
     expect(slotsSrc).toContain('const stableSlotKey =')
     expect(slotsSrc).toContain('sess.bySlot.has(stableSlotKey)')
+    expect(slotsSrc).toContain('if (sess.bySlot.size > 640)')
+    expect(presetsSrc).toContain('mobile: 1900')
+    expect(presetsSrc).toContain('tablet: 2000')
+    expect(presetsSrc).toContain('desktop: 2100')
   })
 
   test('native videos keep loop playback without ended-hold refetch traps', () => {

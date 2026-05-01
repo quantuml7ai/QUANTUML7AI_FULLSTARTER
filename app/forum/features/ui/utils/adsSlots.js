@@ -57,5 +57,13 @@ export function pickAdUrlForSlot({
   sess.used.add(url)
   if (!sess.bySlot) sess.bySlot = new Map()
   sess.bySlot.set(stableSlotKey, url)
+  if (sess.bySlot.size > 640) {
+    let drop = sess.bySlot.size - 640
+    for (const oldKey of sess.bySlot.keys()) {
+      sess.bySlot.delete(oldKey)
+      drop -= 1
+      if (drop <= 0) break
+    }
+  }
   return url
 }

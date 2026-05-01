@@ -165,7 +165,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
           url={url}
           slotKind={effectiveSlotKind}
           nearId={internalSlotKey}
-           layout="fluid"
+           layout="flex"
         />
       </section>
 
@@ -174,16 +174,16 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         /* Любой медиа-контент внутри рекламного секшена:
            - старается занять всю ширину
            - если меньше, то по центру с одинаковыми отступами слева/справа */
-        section[data-ads-slot] :global(img),
-        section[data-ads-slot] :global(video) {
-          display: block;
-          margin-left: auto;
-          margin-right: auto;
-          width: 100%;
-          max-width: 100%;
-          height: auto;
-          object-fit: contain;
-        }
+section[data-ads-slot] :global(img),
+section[data-ads-slot] :global(video) {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
 
         /* Для iframe / svg / canvas — только центрируем и ограничиваем ширину,
            размеры (width/height) берём из inline-стилей AdCard (YouTube и т.п.) */
