@@ -285,7 +285,9 @@ const AD_NATIVE_PREWARM_MARGIN_TOP_PX = 1500;
 const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;
 const AD_NATIVE_RESOLVE_MARGIN_TOP_PX = 2600;
 const AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX = 5200;
-const AD_NATIVE_PRIME_GAP_PX = 1700;
+// Minimum real viewport overlap required before any ad autoplay is allowed.
+// Prewarm may attach/load offscreen, but it must never call play() before viewport.
+const AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO = 0.01;
 const AD_NATIVE_TRANSFER_PREV_GAP_PX = 520;
 const AD_NATIVE_TRANSFER_NEXT_GAP_PX = 3400;
 const AD_NATIVE_SURFACE_HOLD_GAP_PX = 760;
@@ -1545,8 +1547,7 @@ useEffect(() => {
 
 const rootRef = useRef(null);
 const videoRef = useRef(null);
-const attachedVideoSrcRef = useRef('');
-const adNativePrimeTsRef = useRef(0);
+const attachedVideoSrcRef = useRef(''); 
 const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
 const adNativeFocusKickTsRef = useRef(0);
 const ytIframeRef = useRef(null);
@@ -1583,7 +1584,7 @@ const ytPlayerRef = useRef(null);
   }, []);
   // ===== Focus / attention gating =====
   // isNear: блок рядом (можно подгружать, но не играть)
-  // isFocused: блок реально в зоне внимания (играем)
+  // isFocused: блок реально пересёк viewport; только здесь разрешён autoplay.
   // isPageActive: вкладка/окно активно (иначе всегда пауза)
   const [isResolveNear, setIsResolveNear] = useState(false);
   const [isNear, setIsNear] = useState(false);
@@ -1762,69 +1763,31 @@ const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
   if (media.kind !== 'video' || !v || !srcKey) return false;
   if (shouldPlayRef.current || !isPageActive || isVideoSrcTemporarilyBlocked(srcKey)) return false;
 
-  try {
-    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-    const mobileUa = /iP(hone|ad|od)|Android/i.test(String(navigator?.userAgent || ''));
-    if (!coarse && !mobileUa) return false;
-  } catch {
-    return false;
-  }
-
-  try {
-    if (Number(v.readyState || 0) >= 2 || String(v.dataset?.__adWarmReady || '') === '1') return true;
-    if (String(v.dataset?.__adPrimePending || '') === '1') return true;
+  try { 
 
     const state = getAdViewportState(rootRef.current || v);
-    if (!state.inViewport && state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
-
-    const now = Date.now();
-    if ((now - Number(adNativePrimeTsRef.current || 0)) < 3200) return false;
-    adNativePrimeTsRef.current = now;
-
-    v.dataset.__adPrimePending = '1';
+    v.dataset.__adPrimePending = '0';
     v.dataset.__adPrimeReason = String(reason || 'near_prewarm');
-    v.dataset.__adPrimeTs = String(now);
+    v.dataset.__adPrimeTs = String(Date.now());
     v.playsInline = true;
     v.setAttribute('playsinline', '');
     v.setAttribute('webkit-playsinline', '');
     v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
 
-    // Mobile WebKit often needs a muted play/pause tick to decode the first frame
-    // before the card reaches focus. Keep this local: it must not rewrite global sound.
-    applyForumAdMutedToVideo(v, true);
-    const restoreDesiredMute = () => {
-      try { applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current)); } catch {}
-    };
-    const finishPrime = (stateKey = 'done') => {
-      try {
-        v.dataset.__adPrimePending = '0';
-        v.dataset.__adPrimeState = stateKey;
-        if (Number(v.readyState || 0) >= 2) {
-          v.dataset.__adWarmReady = '1';
-          v.dataset.__adLoadPending = '0';
-        }
-        if (!shouldPlayRef.current && !v.paused) {
-          try { v.pause?.(); } catch {}
-        }
-        if (!shouldPlayRef.current) {
-          v.preload = Number(v.readyState || 0) >= 2 ? 'metadata' : AD_NATIVE_VIDEO_PRELOAD_PLAY;
-          restoreDesiredMute();
-        }
-      } catch {}
-    };
-
-    const p = v.play?.();
-    if (p && typeof p.then === 'function') {
-      p.then(() => {
-        window.setTimeout(() => finishPrime('played'), 220);
-      }).catch(() => {
-        try { v.dataset.__adPrimePending = '0'; } catch {}
-        restoreDesiredMute();
-      });
-    } else {
-      window.setTimeout(() => finishPrime('sync_play'), 180);
+    if (!state.inViewport) {
+      // Critical: offscreen prewarm is network/decode preparation only.
+      // No play()/pause() tick here — otherwise the ad starts several cards before viewport.
+      v.dataset.__adPrimeState = 'offscreen_warm_only';
+      if (!v.paused) {
+        try { v.pause?.(); } catch {}
+      }
+      return Number(v.readyState || 0) >= 1 || isAdNativeVideoLoadingOrReady(v);
     }
-    return true;
+
+    // Once the slot is actually in viewport, the normal shouldPlay effect owns play().
+    // Keeping this function play-free prevents double play attempts and hidden coordinator events.
+    v.dataset.__adPrimeState = 'viewport_wait_play_gate';
+    return Number(v.readyState || 0) >= 1 || isAdNativeVideoLoadingOrReady(v);
   } catch {
     try { if (v?.dataset) v.dataset.__adPrimePending = '0'; } catch {}
     return false;
@@ -1972,10 +1935,14 @@ if (!canOwnWarm) {
       { rootMargin: `${AD_NATIVE_PREWARM_MARGIN_TOP_PX}px 0px ${AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
     );
 
-    // focused: реально видно (>= 60% площади)
+    // focused/play-gate: autoplay разрешён только после реального входа в viewport.
+    // 0.01 отсекает ложные нулевые касания, но больше не ждёт 60% площади.
     const focusObs = new IntersectionObserver(
-      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
-      { threshold: [0, 0.25, 0.6, 0.75, 1] }
+      ([e]) => {
+        const ratio = Number(e?.intersectionRatio || 0);
+        setIsFocused(!!e?.isIntersecting && ratio >= AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO);
+      },
+      { threshold: [0, AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO, 0.25, 0.6, 0.75, 1] }
     );
     
     resolveObs.observe(el);
