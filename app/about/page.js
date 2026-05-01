@@ -218,11 +218,7 @@ export default function AboutPage() {
               </a>
             </div>
           )}
-     {/* Реклама сразу после биржевого стакана (Order Book) */}
-     <HomeBetweenBlocksAd
-      slotKey="about_after"
-       slotKind="about_after"
-     />          
+       
         </section>
 
         {/* Локальные стили страницы (оставлены без изменений) */}
@@ -262,10 +258,15 @@ export default function AboutPage() {
           }
         `}</style>
       </main>
-
+      <div className="wrap">
+     {/* Реклама сразу после биржевого стакана (Order Book) */}
+     <HomeBetweenBlocksAd
+      slotKey="about_after"
+       slotKind="about_after"
+     />   
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />
-
+    </div>
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (БЕЗ БЛОКА) — как на главной ===== */}
       <div
         id="about-icons"
