@@ -193,7 +193,15 @@ const foundationStyles = String.raw`
       align-items:center;
       justify-content:center;
     }
-    .mediaBox[data-kind="video"]{ --mb-h: var(--mb-video-h); height: var(--mb-video-h); max-height: var(--mb-video-h); background:#000; }
+    .mediaBox[data-kind="video"]{
+      --mb-h: var(--mb-video-h);
+      height: var(--mb-video-h);
+      min-height: var(--mb-video-h);
+      max-height: var(--mb-video-h);
+      background:#000;
+      align-items:stretch;
+      justify-content:stretch;
+    }
     .mediaBox[data-kind="image"]{ --mb-h: var(--mb-image-h); }
     .mediaBox[data-kind="iframe"]{
       --mb-h: var(--mb-iframe-h);
@@ -215,6 +223,8 @@ const foundationStyles = String.raw`
       height:auto;
       max-width:100%;
       max-height:100%;
+      min-width:0;
+      min-height:0;      
     }
 
     .mediaBox > img,
@@ -229,11 +239,33 @@ const foundationStyles = String.raw`
       background:#000;
     }
 
-    /* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера */
-    .mediaBox[data-kind="video"] > video{
+    /* Video/iframe cards: фиксируем внутренний плеер по высоте контейнера.
+       VideoMedia.jsx возвращает .ql7VideoSurface как shell между .mediaBox и <video>,
+       поэтому direct-child селектор на один <video> больше не достаточен. */
+    .mediaBox[data-kind="video"] > video,
+    .mediaBox[data-kind="video"] > .ql7VideoSurface{
       height:100%;
       min-height:100%;
+      width:100%;
     }
+    .mediaBox[data-kind="video"] > .ql7VideoSurface{
+      position:relative;
+      display:block;
+      overflow:hidden;
+      border-radius:inherit;
+      background:#000;
+    }
+    .mediaBox[data-kind="video"] > .ql7VideoSurface > video,
+    .mediaBox[data-kind="video"] > .ql7VideoSurface > .mediaBoxItem{
+      position:absolute;
+      inset:0;
+      width:100%;
+       height:100%;
+       min-height:100%;
+      max-height:100%;
+      object-fit:contain;
+      background:#000;
+     }
 
     /* iframe: по умолчанию 16:9, для TikTok — 9:16 */
     .mediaBox > iframe{

@@ -448,11 +448,13 @@ const POST_NATIVE_SRC_CAP = (() => {
         const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
         const dm = Number(navigator?.deviceMemory || 0);
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3;
-        if (lowMem) return 2;
-        if (ios || coarse || /Android/i.test(ua)) return 3;
-        return 4;
-      } catch {
+        // One active native video + one prepared neighbor is the stable mobile budget.
+        // Diagnostics show pressure from live media/iframe residency, not a detached-DOM leak.
+        if (lowMem) return 1;
+        if (ios || coarse || /Android/i.test(ua)) return 2;
         return 3;
+      } catch {
+        return 2;
       }
     })();
 const readPendingLoads = (force = false) => {

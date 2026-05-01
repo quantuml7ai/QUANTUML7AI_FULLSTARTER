@@ -106,8 +106,7 @@ export default function ForumPage() {
         </div>
       </div>
 
-      {/* Нижняя маркиза */}
-      
+      {/* Нижняя маркиза */} 
        <section className="marquee-wrap no-gutters" aria-hidden="true">
           <div className="marquee" ref={marqueeRef}>
             <span>{t('marquee')}</span>
@@ -115,9 +114,8 @@ export default function ForumPage() {
             <span>{t('marquee')}</span>
             <span>{t('marquee')}</span>
           </div>
-        </section>
-      
-
+       </section>
+       
       {/* Иконки после маркизы */}
       <div className="icons-row">
         <Link 
@@ -161,7 +159,7 @@ export default function ForumPage() {
             <div className="fr-attn-bar">
               <span className="fr-attn-ico">⚠️</span>
               <span className="fr-attn-label">
-                {t('forum_rules_attention') || 'ВНИМАНИЕ'}
+                {t('forum_rules_attention') || 'WARNING'}
               </span>
               <span className="fr-attn-ico">⚠️</span>
             </div>
@@ -169,7 +167,7 @@ export default function ForumPage() {
             {/* Краткий текст по центру */}
             <div className="fr-lead">
               {t('forum_rules_lead') ||
-                'Нарушение правил форума приведёт к пожизненной блокировке и аннулированию баланса.'}
+                'Violation of forum rules will result in a lifetime ban and cancellation of your balance.'}
             </div>
 
             {/* Скроллируемое тело правил */}

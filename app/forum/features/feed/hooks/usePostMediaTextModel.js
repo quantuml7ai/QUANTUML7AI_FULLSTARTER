@@ -73,8 +73,8 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
   const ytInline = React.useMemo(() => collectMatches(allLines, YT_RE), [allLines])
   const tiktokInline = React.useMemo(() => collectMatches(allLines, TIKTOK_RE), [allLines])
 
-  const ytLines = React.useMemo(() => Array.from(new Set(ytInline)), [ytInline])
-  const tiktokLines = React.useMemo(() => Array.from(new Set(tiktokInline)), [tiktokInline])
+  const ytLinesRaw = React.useMemo(() => Array.from(new Set(ytInline)), [ytInline])
+  const tiktokLinesRaw = React.useMemo(() => Array.from(new Set(tiktokInline)), [tiktokInline])
   const mediaCacheKey = React.useMemo(() => {
     const id = String(postId || '').trim()
     return id ? `id:${id}` : ''
@@ -87,48 +87,7 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
     return Array.from(new Set(keys))
   }, [mediaCacheKey, mediaTextKey])
 
-  const ytLinesStable = React.useMemo(() => {
-    if (ytLines.length > 0) return ytLines
-    for (const key of cacheKeys) {
-      const cached = POST_MEDIA_URL_CACHE.get(key)
-      if (cached?.yt?.length) return cached.yt
-    }
-    return ytLines
-  }, [ytLines, cacheKeys])
-
-  const tiktokLinesStable = React.useMemo(() => {
-    if (tiktokLines.length > 0) return tiktokLines
-    for (const key of cacheKeys) {
-      const cached = POST_MEDIA_URL_CACHE.get(key)
-      if (cached?.tiktok?.length) return cached.tiktok
-    }
-    return tiktokLines
-  }, [tiktokLines, cacheKeys])
-
-  React.useEffect(() => {
-    if (!cacheKeys.length) return
-    const hasYt = ytLines.length > 0
-    const hasTiktok = tiktokLines.length > 0
-    if (!hasYt && !hasTiktok) return
-    const nowTs = Date.now()
-    cacheKeys.forEach((key) => {
-      const prev = POST_MEDIA_URL_CACHE.get(key) || {}
-      const next = {
-        yt: hasYt ? ytLines : (prev.yt || []),
-        tiktok: hasTiktok ? tiktokLines : (prev.tiktok || []),
-        ts: nowTs,
-      }
-      POST_MEDIA_URL_CACHE.set(key, next)
-    })
-    if (POST_MEDIA_URL_CACHE.size > 2400) {
-      const keys = Array.from(POST_MEDIA_URL_CACHE.keys())
-      for (let i = 0; i < keys.length - 1800; i += 1) {
-        POST_MEDIA_URL_CACHE.delete(keys[i])
-      }
-    }
-  }, [cacheKeys, ytLines, tiktokLines])
-
-  const imgLines = React.useMemo(
+const imgLinesRaw = React.useMemo(
     () =>
       Array.from(
         new Set([
@@ -139,32 +98,96 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
     [trimmed, imgInline],
   )
 
-  const imgSet = React.useMemo(() => new Set(imgLines), [imgLines])
+  const imgRawSet = React.useMemo(() => new Set(imgLinesRaw), [imgLinesRaw])
 
-  const videoLines = React.useMemo(
+  const videoLinesRaw = React.useMemo(
     () =>
       Array.from(
         new Set([
           ...trimmed.filter((s) => VIDEO_RE.test(s)),
           ...videoInline,
         ]),
-      ).filter((u) => !imgSet.has(u)),
-    [trimmed, videoInline, imgSet],
+      ).filter((u) => !imgRawSet.has(u)),
+    [trimmed, videoInline, imgRawSet],
   )
 
-  const videoSet = React.useMemo(() => new Set(videoLines), [videoLines])
+  const videoRawSet = React.useMemo(() => new Set(videoLinesRaw), [videoLinesRaw])
 
-  const audioLines = React.useMemo(
+  const audioLinesRaw = React.useMemo(
     () =>
       Array.from(
         new Set([
           ...trimmed.filter(isAudioLine).filter((s) => !VIDEO_RE.test(s)),
           ...audioInline.filter((u) => !VIDEO_RE.test(u)),
         ]),
-      ).filter((u) => !imgSet.has(u) && !videoSet.has(u)),
-    [trimmed, audioInline, imgSet, videoSet],
+      ).filter((u) => !imgRawSet.has(u) && !videoRawSet.has(u)),
+    [trimmed, audioInline, imgRawSet, videoRawSet],
   )
+  const resolvedMediaLines = React.useMemo(() => {
+    const next = {
+      img: imgLinesRaw,
+      video: videoLinesRaw,
+      audio: audioLinesRaw,
+      yt: ytLinesRaw,
+      tiktok: tiktokLinesRaw,
+    }
 
+    // Важно: стабилизируем не только YouTube/TikTok, но и native img/video/audio.
+    // Когда серверная/клиентская синхронизация поста на один тик отдаёт текст без media URL,
+    // PostMediaStack не должен демонтировать shell видеоплеера на глазах у пользователя.
+    for (const key of cacheKeys) {
+      const cached = POST_MEDIA_URL_CACHE.get(key)
+      if (!cached) continue
+      if (!next.img.length && Array.isArray(cached.img) && cached.img.length) next.img = cached.img
+      if (!next.video.length && Array.isArray(cached.video) && cached.video.length) next.video = cached.video
+      if (!next.audio.length && Array.isArray(cached.audio) && cached.audio.length) next.audio = cached.audio
+      if (!next.yt.length && Array.isArray(cached.yt) && cached.yt.length) next.yt = cached.yt
+      if (!next.tiktok.length && Array.isArray(cached.tiktok) && cached.tiktok.length) next.tiktok = cached.tiktok
+    }
+
+    return next
+  }, [cacheKeys, imgLinesRaw, videoLinesRaw, audioLinesRaw, ytLinesRaw, tiktokLinesRaw])
+
+  React.useEffect(() => {
+    if (!cacheKeys.length) return
+    const hasAny =
+      imgLinesRaw.length > 0 ||
+      videoLinesRaw.length > 0 ||
+      audioLinesRaw.length > 0 ||
+      ytLinesRaw.length > 0 ||
+      tiktokLinesRaw.length > 0
+    if (!hasAny) return
+
+    const nowTs = Date.now()
+    cacheKeys.forEach((key) => {
+      const prev = POST_MEDIA_URL_CACHE.get(key) || {}
+      const next = {
+        img: imgLinesRaw.length ? imgLinesRaw : (prev.img || []),
+        video: videoLinesRaw.length ? videoLinesRaw : (prev.video || []),
+        audio: audioLinesRaw.length ? audioLinesRaw : (prev.audio || []),
+        yt: ytLinesRaw.length ? ytLinesRaw : (prev.yt || []),
+        tiktok: tiktokLinesRaw.length ? tiktokLinesRaw : (prev.tiktok || []),
+        ts: nowTs,
+      }
+      POST_MEDIA_URL_CACHE.set(key, next)
+    })
+
+    if (POST_MEDIA_URL_CACHE.size > 1200) {
+      const keys = Array.from(POST_MEDIA_URL_CACHE.keys())
+      for (let i = 0; i < keys.length - 900; i += 1) {
+        POST_MEDIA_URL_CACHE.delete(keys[i])
+      }
+    }
+  }, [cacheKeys, imgLinesRaw, videoLinesRaw, audioLinesRaw, ytLinesRaw, tiktokLinesRaw])
+
+  const imgLines = resolvedMediaLines.img
+  const videoLines = resolvedMediaLines.video
+  const audioLines = resolvedMediaLines.audio
+  const ytLines = resolvedMediaLines.yt
+  const tiktokLines = resolvedMediaLines.tiktok
+
+  const imgSet = React.useMemo(() => new Set(imgLines), [imgLines])
+  const videoSet = React.useMemo(() => new Set(videoLines), [videoLines])
   const cleanedText = React.useMemo(
     () =>
       allLines
@@ -196,8 +219,8 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
               isAudioLine(uTrim) ||
               YT_RE.test(uTrim) ||
               TIKTOK_RE.test(uTrim) ||
-              ytLinesStable.some((x) => x === uTrim) ||
-              tiktokLinesStable.some((x) => x === uTrim)
+              ytLines.some((x) => x === uTrim) ||
+              tiktokLines.some((x) => x === uTrim)
             ) {
               return ''
             }
@@ -220,7 +243,7 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
           )
         })
         .join('\n'),
-    [allLines, isVideoFeed, ytLinesStable, tiktokLinesStable],
+    [allLines, isVideoFeed, ytLines, tiktokLines],
   )
 
   const ytOrigin = React.useMemo(
@@ -244,8 +267,8 @@ export default function usePostMediaTextModel({ text, postId = null, isVideoFeed
     stickerEntries,
     imgLines,
     videoLines,
-    ytLines: ytLinesStable,
-    tiktokLines: tiktokLinesStable,
+    ytLines,
+    tiktokLines,
     audioLines,
     ytEmbedParams,
     YT_RE,

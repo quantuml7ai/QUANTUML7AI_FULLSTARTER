@@ -283,6 +283,8 @@ const AD_NATIVE_WARM_STICKY_MS = 2600;
 const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
 const AD_NATIVE_PREWARM_MARGIN_TOP_PX = 1500;
 const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;
+const AD_NATIVE_RESOLVE_MARGIN_TOP_PX = 2600;
+const AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX = 5200;
 const AD_NATIVE_PRIME_GAP_PX = 1700;
 const AD_NATIVE_TRANSFER_PREV_GAP_PX = 520;
 const AD_NATIVE_TRANSFER_NEXT_GAP_PX = 3400;
@@ -1583,14 +1585,26 @@ const ytPlayerRef = useRef(null);
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
   // isPageActive: вкладка/окно активно (иначе всегда пауза)
+  const [isResolveNear, setIsResolveNear] = useState(false);
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
+  const [adVideoReady, setAdVideoReady] = useState(false);
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(normalizeForumAdMuted(muted));
   const adPlayEventTsRef = useRef(0);
+
+  useEffect(() => {
+    if (media.kind !== 'video' || !media.src) {
+      setAdVideoReady(false);
+      return;
+    }
+    const v = videoRef.current;
+    setAdVideoReady(Number(v?.readyState || 0) >= 2);
+  }, [media.kind, media.src]);
+
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
   if (!isBrowser()) return;
 
@@ -1943,6 +1957,13 @@ if (!canOwnWarm) {
     const el = rootRef.current;
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
+ 
+    // resolve: ещё не создаём второй native-pipeline, но заранее определяем тип медиа,
+    // чтобы карточка входила в near-zone уже с готовым kind/src, а не со skeleton.
+    const resolveObs = new IntersectionObserver(
+      ([e]) => setIsResolveNear(!!e?.isIntersecting),
+      { rootMargin: `${AD_NATIVE_RESOLVE_MARGIN_TOP_PX}px 0px ${AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
+    );
 
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
@@ -1956,11 +1977,13 @@ if (!canOwnWarm) {
       ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
       { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
-
+    
+    resolveObs.observe(el);
     nearObs.observe(el);
     focusObs.observe(el);
 
     return () => {
+      resolveObs.disconnect();
       nearObs.disconnect();
       focusObs.disconnect();
     };
@@ -2076,7 +2099,7 @@ useEffect(() => {
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
-    const canResolveNow = !!isNear || !!isFocused;
+    const canResolveNow = !!isResolveNear || !!isNear || !!isFocused;
     if (!canResolveNow) {
       if (isLikelyVideoUrl(mediaHref)) {
         setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
@@ -2350,7 +2373,7 @@ async function run() {
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind, mediaHref, isNear, isFocused]);
+  }, [safeClick, conf, slotKind, mediaHref, isResolveNear, isNear, isFocused]);
 
   // YouTube Iframe API для управления звуком
 useEffect(() => {
@@ -2763,6 +2786,41 @@ const handleToggleSound = (e) => {
     display: block;
   }
 
+  .forum-ad-video-wait {
+    position:absolute;
+    inset:0;
+    z-index:4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.55rem;
+    pointer-events:none;
+    color:rgba(226,242,255,.88);
+    font-size:.78rem;
+    font-weight:700;
+    letter-spacing:.01em;
+    background:
+      radial-gradient(circle at 50% 45%, rgba(78,205,255,.16), rgba(2,8,23,0) 36%),
+      linear-gradient(180deg, rgba(2,8,23,.28), rgba(2,8,23,.58));
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .forum-ad-video-wait__orb {
+    width:10px;
+    height:10px;
+    border-radius:999px;
+    background:rgba(111,231,255,.92);
+    box-shadow:0 0 14px rgba(111,231,255,.75);
+    animation: forumAdVideoWaitPulse 960ms ease-in-out infinite;
+  }
+  .forum-ad-video-wait__text {
+    text-shadow:0 1px 8px rgba(0,0,0,.55);
+  }
+  @keyframes forumAdVideoWaitPulse {
+    0%, 100% { transform:scale(.72); opacity:.55; }
+    50% { transform:scale(1); opacity:1; }
+  }
+ 
   .forum-ad-lens {
     position: absolute;
     right: var(--forum-ad-lens-right, 10px);
@@ -3056,7 +3114,9 @@ const handleToggleSound = (e) => {
           {/* media: заполняет карточку */}
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
-data-layout={isFluid ? 'fluid' : 'fixed'}
+  data-layout={isFluid ? 'fluid' : 'fixed'}
+  data-media-kind={media.kind || 'none'}
+  data-video-ready={media.kind === 'video' && adVideoReady ? '1' : '0'}
 >
           
  {media.kind === 'skeleton' && (
@@ -3078,6 +3138,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) delete v.dataset.__adEndedHold;
+      if (Number(v?.readyState || 0) >= 2) setAdVideoReady(true);
       if (!shouldPlayRef.current) {
         // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
         // и не отправляем site-media-play, чтобы не выключать активное видео форума.
@@ -3123,6 +3184,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
+      setAdVideoReady(true);
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
@@ -3134,6 +3196,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
+      setAdVideoReady(true);
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
@@ -3162,6 +3225,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   }}
 onError={() => {
   try {
+    setAdVideoReady(false);
     const v = videoRef.current;
     const code = Number(v?.error?.code || 0);
     const now = Date.now();
@@ -3183,6 +3247,12 @@ onError={() => {
   } catch {}
 }}
 />
+    {!adVideoReady && (
+      <div className="forum-ad-video-wait" aria-hidden="true">
+        <div className="forum-ad-video-wait__orb" />
+        <div className="forum-ad-video-wait__text">ADS LOADING…</div>
+      </div>
+    )}
   </div>
 )}
  
@@ -3348,7 +3418,7 @@ onError={() => {
               </svg>
             </div>
 
-            <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
+            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
           </div>
         </div> 
       </a>
