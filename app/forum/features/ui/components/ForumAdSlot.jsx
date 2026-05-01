@@ -5,6 +5,7 @@ import { AdCard } from '../../../ForumAds'
 
 export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDelta }) {
   const hostRef = useRef(null)
+  const stableSlotKey = `${String(slotKind || 'slot').trim() || 'slot'}:${String(slotKey || '').trim() || 'slot'}`
   const lastHRef = useRef(0)
   const initedRef = useRef(false)
   const pendingDeltaRef = useRef(0)
@@ -84,7 +85,15 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
   }, [slotKind, slotKey, onResizeDelta])
 
   return (
-    <div ref={hostRef} className="forumAdSlot" data-slotkind={slotKind} data-slotkey={slotKey}>
+    <div
+      ref={hostRef}
+      className="forumAdSlot"
+      data-kind="ad"
+      data-stable-shell="1"
+      data-slotkind={slotKind}
+      data-slotkey={stableSlotKey}
+      style={{ minHeight: 'var(--mb-ad-h)', height: 'var(--mb-ad-h)', maxHeight: 'var(--mb-ad-h)' }}
+    >
       <AdCard url={url} slotKind={slotKind} nearId={nearId} />
     </div>
   )

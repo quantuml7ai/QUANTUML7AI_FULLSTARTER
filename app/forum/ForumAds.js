@@ -1731,10 +1731,11 @@ if (!canOwnWarm) {
   try {
     if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
       const viewportState = getAdViewportState(rootRef.current || v);
-      if (viewportState.inViewport || viewportState.gapPx <= 1280) {
-        const nextMuted = normalizeForumAdMuted(mutedRef.current);
-        const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
-        if (attached) attachedVideoSrcRef.current = srcKey;
+      const existingSrc = getAdVideoNodeSrc(v);
+      const hasExistingSurface =
+        existingSrc === srcKey &&
+        isAdNativeVideoLoadingOrReady(v);
+      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
         v.dataset.__adSurfaceHeld = '1';
         v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
         v.preload = 'metadata';
@@ -2513,9 +2514,48 @@ const handleToggleSound = (e) => {
   className="item forum-ad-card"
   data-slot-kind={slotKind}
   data-ads="1"
+  data-stable-shell="1"
   style={slotCssVars}
 >
 <style jsx>{`
+  .forum-ad-card {
+    width: 100%;
+    min-height: var(--ad-slot-h-m);
+    height: var(--ad-slot-h-m);
+    max-height: var(--ad-slot-h-m);
+    overflow: hidden;
+    contain: layout paint;
+  }
+  @media (min-width: 640px) {
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-t);
+      height: var(--ad-slot-h-t);
+      max-height: var(--ad-slot-h-t);
+    }
+  }
+  @media (min-width: 1024px) {
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-d);
+      height: var(--ad-slot-h-d);
+      max-height: var(--ad-slot-h-d);
+    }
+  }
+  .forum-ad-link {
+    display: block;
+    height: 100%;
+    min-height: 0;
+  }
+  .forum-ad-card-body {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  .forum-ad-header {
+    flex: 0 0 auto;
+    min-height: 30px;
+  }
   .forum-ad-media-slot {
     width: 100%; 
     position: relative;         /* ключ: якорь для absolute медиа */
@@ -2540,6 +2580,12 @@ const handleToggleSound = (e) => {
   }
 
   /* ===== FLUID (для рендера по всему сайту) ===== */
+  .forum-ad-card .forum-ad-media-slot[data-layout="fixed"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
   .forum-ad-media-slot[data-layout="fluid"] {
     height: auto;
     overflow: visible;
@@ -2821,12 +2867,12 @@ const handleToggleSound = (e) => {
         rel="noopener noreferrer nofollow ugc"
         onClick={handleClick}
         aria-label={`${label} • ${host}`}
-        className="block no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+        className="forum-ad-link no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
       >
-        <div className="flex flex-col gap-1 h-full">
+        <div className="forum-ad-card-body">
           {/* header: только бейдж + домен, без url-строки */}
           <div
-            className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
+            className="forum-ad-header flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -2851,7 +2897,7 @@ const handleToggleSound = (e) => {
               onClick={handleOpenAdsPage}
               className="btn"
               style={{
-                fontSize: '12x',
+                fontSize: '12px',
                 padding: '6px 12px',
                 borderRadius: 999,
                 marginLeft: 'auto',

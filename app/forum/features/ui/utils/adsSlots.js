@@ -15,6 +15,7 @@ export function pickAdUrlForSlot({
   AdsCoordinator,
 }) {
   if (!adConf) return null
+  const stableSlotKey = `${String(slotKind || 'slot').trim() || 'slot'}:${String(slotKey || '').trim() || 'slot'}`
   const now = Date.now()
   const rotateMin = Number(adConf.ROTATE_MIN || 1)
   const periodMs = Math.max(1, rotateMin) * 60_000
@@ -27,8 +28,8 @@ export function pickAdUrlForSlot({
     sess.bySlot = new Map()
   }
 
-  if (sess.bySlot && sess.bySlot.has(slotKey)) {
-    const stable = sess.bySlot.get(slotKey)
+  if (sess.bySlot && sess.bySlot.has(stableSlotKey)) {
+    const stable = sess.bySlot.get(stableSlotKey)
     if (stable) return stable
   }
 
@@ -36,7 +37,7 @@ export function pickAdUrlForSlot({
     adConf,
     clientId,
     now,
-    slotKey,
+    stableSlotKey,
     AdsCoordinator,
   )
 
@@ -55,6 +56,6 @@ export function pickAdUrlForSlot({
 
   sess.used.add(url)
   if (!sess.bySlot) sess.bySlot = new Map()
-  sess.bySlot.set(slotKey, url)
+  sess.bySlot.set(stableSlotKey, url)
   return url
 }

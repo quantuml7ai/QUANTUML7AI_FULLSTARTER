@@ -179,6 +179,9 @@ export default function InboxPane({
         {inboxTab === 'published' && (
           <PublishedPostsPane
             visiblePublishedPosts={visiblePublishedPosts}
+            adEvery={adEvery}
+            interleaveAds={interleaveAds}
+            debugAdsSlots={debugAdsSlots}
             dataPosts={dataPosts}
             resolveNickForDisplay={resolveNickForDisplay}
             openReportPopover={openReportPopover}
@@ -197,11 +200,14 @@ export default function InboxPane({
             starredAuthors={starredAuthors}
             toggleAuthorStar={toggleAuthorStar}
             handleUserInfoToggle={handleUserInfoToggle}
+            pickAdUrlForSlot={pickAdUrlForSlot}
+            compensateScrollOnResize={compensateScrollOnResize}
             publishedHasMore={publishedHasMore}
             setVisiblePublishedCount={setVisiblePublishedCount}
             publishedPageSize={publishedPageSize}
             myPublishedPostsLength={myPublishedPosts.length}
             PostCard={PostCard}
+            ForumAdSlot={ForumAdSlot}
             LoadMoreSentinel={LoadMoreSentinel}
           />
         )}
@@ -209,4 +215,3 @@ export default function InboxPane({
     </>
   )
 }
-

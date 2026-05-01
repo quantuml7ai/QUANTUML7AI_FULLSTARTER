@@ -15,6 +15,9 @@ const CLOSE_INBOX_THREAD_OPTIONS = Object.freeze({
 
 export default function PublishedPostsPane({
   visiblePublishedPosts,
+  adEvery,
+  interleaveAds,
+  debugAdsSlots,
   dataPosts,
   resolveNickForDisplay,
   openReportPopover,
@@ -33,11 +36,14 @@ export default function PublishedPostsPane({
   starredAuthors,
   toggleAuthorStar,
   handleUserInfoToggle,
+  pickAdUrlForSlot,
+  compensateScrollOnResize,
   publishedHasMore,
   setVisiblePublishedCount,
   publishedPageSize,
   myPublishedPostsLength,
   PostCard,
+  ForumAdSlot,
   LoadMoreSentinel,
 }) {
   const postsById = React.useMemo(() => {
@@ -50,12 +56,45 @@ export default function PublishedPostsPane({
     return map
   }, [dataPosts])
 
+  const publishedSlots = React.useMemo(
+    () => {
+      const items = visiblePublishedPosts || []
+      if (typeof interleaveAds !== 'function' || typeof debugAdsSlots !== 'function') {
+        return items.map((item, index) => ({
+          type: 'item',
+          item,
+          key: `item:${String(item?.id || `published:${index}`)}`,
+        }))
+      }
+      return debugAdsSlots(
+        'published',
+        interleaveAds(
+          items,
+          adEvery,
+          {
+            isSkippable: (p) => !p || !p.id,
+            getId: (p) => p?.id,
+          },
+        ),
+      )
+    },
+    [adEvery, debugAdsSlots, interleaveAds, visiblePublishedPosts],
+  )
+
   const { win: publishedWin, measureRef: publishedMeasureRef } = useForumWindowing({
     active: true,
-    items: visiblePublishedPosts || [],
-    getItemKey: (post, index) => String(post?.id || `published:${index}`),
-    getItemDomId: (post) => (post?.id ? `post_${post.id}` : ''),
-    estimateItemHeight: () => readForumCardEstimate('post'),
+    items: publishedSlots,
+    getItemKey: (slot, index) => String(slot?.key || `published:${slot?.item?.id || index}`),
+    getItemDomId: (slot) => (
+      slot?.type === 'item' && slot?.item?.id
+        ? `post_${slot.item.id}`
+        : ''
+    ),
+    estimateItemHeight: ({ item }) => (
+      item?.type === 'item'
+        ? readForumCardEstimate('post')
+        : readForumCardEstimate('ad')
+    ),
     maxRender: () => readForumWindowingMaxRender('post'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
     listId: 'forum:published-posts',
@@ -64,15 +103,47 @@ export default function PublishedPostsPane({
   return (
     <>
       {publishedWin.top > 0 && <div aria-hidden="true" style={{ height: publishedWin.top }} />}
-      {(visiblePublishedPosts || []).slice(publishedWin.start, publishedWin.end).map((p) => {
+      {publishedSlots.slice(publishedWin.start, publishedWin.end).map((slot) => {
+        if (slot.type !== 'item') {
+          const url = pickAdUrlForSlot?.(slot.key, 'published')
+          if (!url || !ForumAdSlot) {
+            return (
+              <div key={slot.key} ref={publishedMeasureRef(slot.key)}>
+                <div
+                  className="forumAdSlotPlaceholder mediaBox"
+                  data-kind="ad"
+                  data-slotkind="published"
+                  data-slotkey={slot.key}
+                  aria-hidden="true"
+                />
+              </div>
+            )
+          }
+
+          return (
+            <div key={slot.key} ref={publishedMeasureRef(slot.key)}>
+              {ForumAdSlot ? (
+                <ForumAdSlot
+                  slotKey={slot.key}
+                  url={url}
+                  slotKind="published"
+                  nearId={slot.nearId}
+                  onResizeDelta={compensateScrollOnResize}
+                />
+              ) : null}
+            </div>
+          )
+        }
+
+        const p = slot.item
         const parent = p?.parentId ? (postsById.get(String(p.parentId)) || null) : null
         const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
         const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
         const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
         return (
           <div
-            key={`pub:${p?.id || ''}`}
-            ref={publishedMeasureRef(String(p?.id || ''))}
+            key={slot.key}
+            ref={publishedMeasureRef(slot.key)}
             id={`post_${p?.id || ''}`}
             data-feed-card="1"
             data-feed-kind="post"

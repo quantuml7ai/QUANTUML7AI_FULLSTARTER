@@ -19,6 +19,9 @@ export default function UserPostsPane({
   branchUserId,
   onClearBranch,
   visibleUserPosts,
+  adEvery,
+  interleaveAds,
+  debugAdsSlots,
   dataPosts,
   resolveNickForDisplay,
   openReportPopover,
@@ -36,11 +39,14 @@ export default function UserPostsPane({
   starredAuthors,
   toggleAuthorStar,
   handleUserInfoToggle,
+  pickAdUrlForSlot,
+  compensateScrollOnResize,
   userPostsHasMore,
   setVisibleUserPostsCount,
   userPostsPageSize,
   allUserPostsLength,
   PostCard,
+  ForumAdSlot,
   LoadMoreSentinel,
 }) {
   const userLabel = String(branchUserNick || resolveNickForDisplay?.(branchUserId, '') || branchUserId || '').trim()
@@ -55,12 +61,45 @@ export default function UserPostsPane({
     return map
   }, [dataPosts])
 
+  const userPostSlots = React.useMemo(
+    () => {
+      const items = visibleUserPosts || []
+      if (typeof interleaveAds !== 'function' || typeof debugAdsSlots !== 'function') {
+        return items.map((item, index) => ({
+          type: 'item',
+          item,
+          key: `item:${String(item?.id || `uprofile:${index}`)}`,
+        }))
+      }
+      return debugAdsSlots(
+        'profile',
+        interleaveAds(
+          items,
+          adEvery,
+          {
+            isSkippable: (p) => !p || !p.id,
+            getId: (p) => p?.id,
+          },
+        ),
+      )
+    },
+    [adEvery, debugAdsSlots, interleaveAds, visibleUserPosts],
+  )
+
   const { win: userPostsWin, measureRef: userPostsMeasureRef } = useForumWindowing({
     active: true,
-    items: visibleUserPosts || [],
-    getItemKey: (post, index) => String(post?.id || `uprofile:${index}`),
-    getItemDomId: (post) => (post?.id ? `post_${post.id}` : ''),
-    estimateItemHeight: () => readForumCardEstimate('post'),
+    items: userPostSlots,
+    getItemKey: (slot, index) => String(slot?.key || `uprofile:${slot?.item?.id || index}`),
+    getItemDomId: (slot) => (
+      slot?.type === 'item' && slot?.item?.id
+        ? `post_${slot.item.id}`
+        : ''
+    ),
+    estimateItemHeight: ({ item }) => (
+      item?.type === 'item'
+        ? readForumCardEstimate('post')
+        : readForumCardEstimate('ad')
+    ),
     maxRender: () => readForumWindowingMaxRender('post'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
     listId: 'forum:profile-posts',
@@ -195,16 +234,46 @@ export default function UserPostsPane({
       </div>
 
       {userPostsWin.top > 0 && <div aria-hidden="true" style={{ height: userPostsWin.top }} />}
-      {(visibleUserPosts || []).slice(userPostsWin.start, userPostsWin.end).map((p, indexInWindow) => {
+      {userPostSlots.slice(userPostsWin.start, userPostsWin.end).map((slot, indexInWindow) => {
         const idx = userPostsWin.start + indexInWindow
+        if (slot.type !== 'item') {
+          const url = pickAdUrlForSlot?.(slot.key, 'profile')
+          if (!url || !ForumAdSlot) {
+            return (
+              <div key={slot.key} ref={userPostsMeasureRef(slot.key)}>
+                <div
+                  className="forumAdSlotPlaceholder mediaBox"
+                  data-kind="ad"
+                  data-slotkind="profile"
+                  data-slotkey={slot.key}
+                  aria-hidden="true"
+                />
+              </div>
+            )
+          }
+
+          return (
+            <div key={slot.key} ref={userPostsMeasureRef(slot.key)}>
+              <ForumAdSlot
+                slotKey={slot.key}
+                url={url}
+                slotKind="profile"
+                nearId={slot.nearId}
+                onResizeDelta={compensateScrollOnResize}
+              />
+            </div>
+          )
+        }
+
+        const p = slot.item
         const parent = p?.parentId ? (postsById.get(String(p.parentId)) || null) : null
         const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()
         const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId
         const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)
         return (
           <div
-            key={`uprofile:${p?.id || ''}`}
-            ref={userPostsMeasureRef(String(p?.id || ''))}
+            key={slot.key}
+            ref={userPostsMeasureRef(slot.key)}
             id={`post_${p?.id || ''}`}
             data-feed-card="1"
             data-feed-kind="post"

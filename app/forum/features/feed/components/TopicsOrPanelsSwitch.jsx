@@ -30,6 +30,9 @@ export default function TopicsOrPanelsSwitch({
   starredAuthors,
   toggleAuthorStar,
   handleUserInfoToggle,
+  adEvery,
+  interleaveAds,
+  debugAdsSlots,
   pickAdUrlForSlot,
   compensateScrollOnResize,
   videoHasMore,
@@ -158,6 +161,9 @@ export default function TopicsOrPanelsSwitch({
         branchUserId={profileBranchUserId}
         onClearBranch={clearProfileBranch}
         visibleUserPosts={visibleProfilePosts}
+        adEvery={adEvery}
+        interleaveAds={interleaveAds}
+        debugAdsSlots={debugAdsSlots}
         dataPosts={dataPosts}
         resolveNickForDisplay={resolveNickForDisplay}
         openReportPopover={openReportPopover}
@@ -175,11 +181,14 @@ export default function TopicsOrPanelsSwitch({
         starredAuthors={starredAuthors}
         toggleAuthorStar={toggleAuthorStar}
         handleUserInfoToggle={handleUserInfoToggle}
+        pickAdUrlForSlot={pickAdUrlForSlot}
+        compensateScrollOnResize={compensateScrollOnResize}
         userPostsHasMore={profilePostsHasMore}
         setVisibleUserPostsCount={setVisibleProfilePostsCount}
         userPostsPageSize={profilePostsPageSize}
         allUserPostsLength={profilePostsLength}
         PostCard={PostCard}
+        ForumAdSlot={ForumAdSlot}
         LoadMoreSentinel={LoadMoreSentinel}
       />
     )

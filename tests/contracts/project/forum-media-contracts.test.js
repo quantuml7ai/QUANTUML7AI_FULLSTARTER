@@ -153,6 +153,7 @@ describe('forum media contracts', () => {
     const forumStylesSrc = read('app/forum/styles/ForumStyles.jsx')
     const foundationSrc = read('app/forum/styles/modules/foundationStyles.js')
     const adsSrc = read('app/forum/ForumAds.js')
+    const adSlotSrc = read('app/forum/features/ui/components/ForumAdSlot.jsx')
     expect(presetsSrc).toContain('mobile: 520')
     expect(presetsSrc).toContain('tablet: 620')
     expect(presetsSrc).toContain('desktop: 650')
@@ -165,6 +166,30 @@ describe('forum media contracts', () => {
     expect(adsSrc).toContain('mobile: 520')
     expect(adsSrc).toContain('tablet: 620')
     expect(adsSrc).toContain('desktop: 650')
+    expect(adsSrc).toContain('data-stable-shell="1"')
+    expect(adsSrc).toContain('height: var(--ad-slot-h-m);')
+    expect(adsSrc).toContain('.forum-ad-card .forum-ad-media-slot[data-layout="fixed"]')
+    expect(adSlotSrc).toContain('data-stable-shell="1"')
+    expect(adSlotSrc).toContain("height: 'var(--mb-ad-h)'")
+  })
+
+  test('forum ads are interleaved into public post-card branches but not private dm messages', () => {
+    const publishedSrc = read('app/forum/features/feed/components/PublishedPostsPane.jsx')
+    const userPostsSrc = read('app/forum/features/feed/components/UserPostsPane.jsx')
+    const inboxSrc = read('app/forum/features/dm/components/InboxPane.jsx')
+    const dmMessagesSrc = read('app/forum/features/dm/components/DmMessagesPane.jsx')
+    const slotsSrc = read('app/forum/features/ui/utils/adsSlots.js')
+
+    expect(publishedSrc).toContain("debugAdsSlots(\n        'published'")
+    expect(publishedSrc).toContain("slotKind=\"published\"")
+    expect(userPostsSrc).toContain("debugAdsSlots(\n        'profile'")
+    expect(userPostsSrc).toContain("slotKind=\"profile\"")
+    expect(inboxSrc).toContain('adEvery={adEvery}')
+    expect(inboxSrc).toContain('ForumAdSlot={ForumAdSlot}')
+    expect(dmMessagesSrc).not.toContain('ForumAdSlot')
+    expect(dmMessagesSrc).not.toContain('interleaveAds')
+    expect(slotsSrc).toContain('const stableSlotKey =')
+    expect(slotsSrc).toContain('sess.bySlot.has(stableSlotKey)')
   })
 
   test('native videos keep loop playback without ended-hold refetch traps', () => {
