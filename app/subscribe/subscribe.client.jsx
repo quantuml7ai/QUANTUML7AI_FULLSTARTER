@@ -416,10 +416,10 @@ export default function SubscribePage() {
           }
         `}</style>
       </main>
-
+<div className="wrap">
       {/* Хвост страницы: бегущая строка */}
       <PageMarqueeTail />
-
+</div>
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ — заменено на next/image ===== */}
       <div className="ql7-icons-row">
         <Link

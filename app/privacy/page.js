@@ -90,9 +90,10 @@ export default function PrivacyPage() {
           </section>
         )}
       </main>
-
+<div className="wrap">
       {/* Хвост страницы: бегущая строка во всю ширину */}
       <PageMarqueeTail />
+</div>      
       {/* ===== ИКОНКИ ПОСЛЕ МАРКИЗЫ (глобальные стили ql7-*, как на главной/subscribe) ===== */}
       <div className="ql7-icons-row">
         <Link

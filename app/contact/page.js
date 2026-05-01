@@ -315,10 +315,10 @@ export default function Contact() {
           </div>
         </section>
       </div>
-
+<div className="wrap">
       {/* Маркиза внизу */}
       <PageMarqueeTail />
-
+</div>
       {/* Нижние большие иконки — как были */}
       <div className="ql7-icons-row">
         <Link
