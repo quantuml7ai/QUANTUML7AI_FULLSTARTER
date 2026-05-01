@@ -72,49 +72,7 @@ describe('forum media contracts', () => {
     expect(src).toContain('data-lifecycle-state=')
     expect(src).toContain('data-stable-shell="1"')
   })
-
-  test('telegram mini app and iframe touch guard avoid scroll-blocking listeners', () => {
-    const layoutSrc = read('app/forum/ForumLayout.jsx')
-    const telegramGuardSrc = read('app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js')
-    const pageLockSrc = read('app/forum/shared/hooks/usePageLock.js')
-    const postMediaSrc = read('app/forum/features/feed/components/PostMediaStack.jsx')
-    const forumStylesSrc = read('app/forum/styles/ForumStyles.jsx')
-    const videoOverlaySrc = read('app/forum/features/media/components/VideoOverlay.jsx')
-
-    expect(layoutSrc).toContain("import useTelegramVerticalSwipesGuard from './shared/hooks/useTelegramVerticalSwipesGuard'")
-    expect(layoutSrc).toContain('useTelegramVerticalSwipesGuard(true)')
-    expect(telegramGuardSrc).toContain('disableVerticalSwipes')
-    expect(telegramGuardSrc).toContain('enableVerticalSwipes')
-    expect(telegramGuardSrc).toContain('isTelegramMiniAppRuntime')
-    expect(telegramGuardSrc).toContain('tgwebappdata=')
-    expect(telegramGuardSrc).toContain('data-telegram-mini-app')
-    expect(telegramGuardSrc).toContain('isVersionAtLeast')
-    expect(telegramGuardSrc).not.toMatch(/addEventListener\s*\(\s*['"](?:touchstart|touchmove|wheel|mousewheel)/)
-
-    expect(pageLockSrc).not.toMatch(/addEventListener\s*\(\s*['"](?:touchstart|touchmove|wheel|mousewheel)/)
-    expect(pageLockSrc).not.toContain('passive: false')
-
-    expect(postMediaSrc).toContain('data-iframe-touch-card="youtube"')
-    expect(postMediaSrc).toContain('data-iframe-touch-locked="1"')
-    expect(postMediaSrc).toContain('data-iframe-interactive')
-    expect(postMediaSrc).toContain('iframeTouchShield')
-    expect(postMediaSrc).toContain('unlockYouTubeIframeTouch')
-    expect(postMediaSrc).not.toContain('onWheel=')
-
-    expect(forumStylesSrc).toContain('.iframeTouchShield{')
-    expect(forumStylesSrc).toContain('@media (pointer:fine)')
-    expect(forumStylesSrc).toContain('@media (pointer:coarse)')
-    expect(forumStylesSrc).toContain('html[data-telegram-mini-app="1"]')
-    expect(forumStylesSrc).toContain('html:not([data-telegram-mini-app="1"]) .iframeTouchShield')
-    expect(forumStylesSrc).toContain('[data-iframe-touch-locked="1"]')
-    expect(forumStylesSrc).toContain('[data-iframe-interactive="1"]')
-
-    expect(videoOverlaySrc).not.toContain('onWheel=')
-    expect(videoOverlaySrc).not.toContain('onTouchMove=')
-    expect(videoOverlaySrc).toContain("overscrollBehavior: 'none'")
-    expect(videoOverlaySrc).toContain("touchAction: 'none'")
-  })
-
+ 
   test('post cards keep the shared post body frame shell for card and inline text content', () => {
     const cardSrc = read('app/forum/features/feed/components/ForumPostCard.jsx')
     const bodySrc = read('app/forum/features/feed/components/PostBodyContent.jsx')

@@ -7,8 +7,7 @@ import TopicsSection from './features/feed/components/TopicsSection'
 import ThreadSection from './features/feed/components/ThreadSection'
 import ComposeDock from './features/ui/components/ComposeDock'
 import ForumOverlayStack from './features/ui/components/ForumOverlayStack'
-import useTelegramVerticalSwipesGuard from './shared/hooks/useTelegramVerticalSwipesGuard'
-
+ 
 function useHeadStyle(styleId, cssText) {
   React.useEffect(() => {
     if (typeof document === 'undefined') return undefined
@@ -43,7 +42,7 @@ export default function ForumLayout({
   threadRepliesPaneProps,
   composerDockProps,
 }) {
-  useTelegramVerticalSwipesGuard(true)
+
   useHeadStyle('forum-fx-styles', FORUM_FX_STYLES)
   useHeadStyle('forum-main-styles', FORUM_STYLES)
   return (
