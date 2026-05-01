@@ -285,7 +285,11 @@ const AD_NATIVE_PREWARM_MARGIN_TOP_PX = 1500;
 const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;
 const AD_NATIVE_RESOLVE_MARGIN_TOP_PX = 2600;
 const AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX = 5200;
-const AD_NATIVE_PRIME_GAP_PX = 1700;
+// iOS/WebKit first-frame prime is allowed only shortly before viewport.
+// Network prewarm may happen earlier, but muted play/pause must not run several cards away.
+const AD_NATIVE_PRIME_GAP_PX = 520;
+const AD_NATIVE_PRIME_PLAY_PAUSE_HOLD_MS = 160;
+const AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO = 0.01;
 const AD_NATIVE_TRANSFER_PREV_GAP_PX = 520;
 const AD_NATIVE_TRANSFER_NEXT_GAP_PX = 3400;
 const AD_NATIVE_SURFACE_HOLD_GAP_PX = 760;
@@ -1547,6 +1551,7 @@ const rootRef = useRef(null);
 const videoRef = useRef(null);
 const attachedVideoSrcRef = useRef('');
 const adNativePrimeTsRef = useRef(0);
+const adNativeSilentPrimeRef = useRef({ active: false, timer: 0, src: '', token: '', ts: 0 });
 const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
 const adNativeFocusKickTsRef = useRef(0);
 const ytIframeRef = useRef(null);
@@ -1675,6 +1680,11 @@ useEffect(() => {
 useEffect(() => {
   const node = videoRef.current;
   return () => {
+    try {
+      const st = adNativeSilentPrimeRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
+    } catch {}    
     try { releaseAdNativeWarmSlot(node, 'unmount'); } catch {}
   };
 }, []);
@@ -1701,6 +1711,16 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
   adNativeFocusKickTsRef.current = now;
 
   try {
+    const prime = adNativeSilentPrimeRef.current || {};
+    if (prime.timer) clearTimeout(prime.timer);
+    adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
+    if (v.dataset) {
+      v.dataset.__adSilentPrime = '0';
+      v.dataset.__adPrimePending = '0';
+    }
+  } catch {}
+
+  try {    
     claimAdNativeWarmSlot(v, srcKey, rootRef.current);
 
     const nextMuted = normalizeForumAdMuted(mutedRef.current);
@@ -1763,9 +1783,14 @@ const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
   if (shouldPlayRef.current || !isPageActive || isVideoSrcTemporarilyBlocked(srcKey)) return false;
 
   try {
-    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-    const mobileUa = /iP(hone|ad|od)|Android/i.test(String(navigator?.userAgent || ''));
-    if (!coarse && !mobileUa) return false;
+    const ua = String(navigator?.userAgent || '');
+    const isiOSWebKit =
+      /iP(hone|ad|od)/i.test(ua) ||
+      (/Macintosh/i.test(ua) && Number(navigator?.maxTouchPoints || 0) > 1);
+
+    // Android/desktop do not need an offscreen play/pause tick for first frame.
+    // Keeping this iOS-only prevents hidden ad playback from touching global media state.
+    if (!isiOSWebKit) return false;
   } catch {
     return false;
   }
@@ -1775,13 +1800,17 @@ const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
     if (String(v.dataset?.__adPrimePending || '') === '1') return true;
 
     const state = getAdViewportState(rootRef.current || v);
-    if (!state.inViewport && state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
+    if (state.inViewport || state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
 
     const now = Date.now();
     if ((now - Number(adNativePrimeTsRef.current || 0)) < 3200) return false;
     adNativePrimeTsRef.current = now;
+    const token = `${srcKey}:${now}`;
+    const previousPrime = adNativeSilentPrimeRef.current || {};
+    if (previousPrime.timer) clearTimeout(previousPrime.timer);
 
     v.dataset.__adPrimePending = '1';
+    v.dataset.__adSilentPrime = '1';
     v.dataset.__adPrimeReason = String(reason || 'near_prewarm');
     v.dataset.__adPrimeTs = String(now);
     v.playsInline = true;
@@ -1789,40 +1818,89 @@ const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
     v.setAttribute('webkit-playsinline', '');
     v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
 
-    // Mobile WebKit often needs a muted play/pause tick to decode the first frame
-    // before the card reaches focus. Keep this local: it must not rewrite global sound.
+    // iOS/WebKit first-frame unlock must be muted and local. It must not rewrite
+    // global sound state and must not notify the forum media coordinator.
     applyForumAdMutedToVideo(v, true);
+
     const restoreDesiredMute = () => {
       try { applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current)); } catch {}
     };
+
     const finishPrime = (stateKey = 'done') => {
       try {
+        const currentPrime = adNativeSilentPrimeRef.current || {};
+        if (currentPrime.token && currentPrime.token !== token) return;
+        if (currentPrime.timer) clearTimeout(currentPrime.timer);
+
+        if (!shouldPlayRef.current && !v.paused) {
+          try { v.pause?.(); } catch {}
+        }
+        
         v.dataset.__adPrimePending = '0';
+        v.dataset.__adSilentPrime = '0';
         v.dataset.__adPrimeState = stateKey;
+
         if (Number(v.readyState || 0) >= 2) {
           v.dataset.__adWarmReady = '1';
           v.dataset.__adLoadPending = '0';
         }
-        if (!shouldPlayRef.current && !v.paused) {
-          try { v.pause?.(); } catch {}
-        }
+
         if (!shouldPlayRef.current) {
           v.preload = Number(v.readyState || 0) >= 2 ? 'metadata' : AD_NATIVE_VIDEO_PRELOAD_PLAY;
           restoreDesiredMute();
         }
+
+        adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };        
       } catch {}
     };
+    const maxTimer = window.setTimeout(
+      () => finishPrime('timeout_pause'),
+      AD_NATIVE_PRIME_PLAY_PAUSE_HOLD_MS
+    );
+
+    adNativeSilentPrimeRef.current = {
+      active: true,
+      timer: maxTimer,
+      src: srcKey,
+      token,
+      ts: now,
+    };
+
+    const stopAfterFrame = (stateKey) => {
+      try {
+        window.setTimeout(() => finishPrime(stateKey), 32);
+      } catch {
+        finishPrime(stateKey);
+      }
+    };
+
+    try {
+      if (typeof v.requestVideoFrameCallback === 'function') {
+        v.requestVideoFrameCallback(() => stopAfterFrame('first_frame'));
+      }
+    } catch {}
 
     const p = v.play?.();
     if (p && typeof p.then === 'function') {
       p.then(() => {
-        window.setTimeout(() => finishPrime('played'), 220);
+        try {
+          if (Number(v.readyState || 0) >= 2) stopAfterFrame('played_ready');
+        } catch {}
       }).catch(() => {
-        try { v.dataset.__adPrimePending = '0'; } catch {}
+        try {
+          if (adNativeSilentPrimeRef.current?.token === token) {
+            const st = adNativeSilentPrimeRef.current || {};
+            if (st.timer) clearTimeout(st.timer);
+            adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
+          }
+          v.dataset.__adPrimePending = '0';
+          v.dataset.__adSilentPrime = '0';
+          v.dataset.__adPrimeState = 'play_blocked';
+        } catch {}
         restoreDesiredMute();
       });
     } else {
-      window.setTimeout(() => finishPrime('sync_play'), 180);
+      stopAfterFrame('sync_play');
     }
     return true;
   } catch {
@@ -1972,10 +2050,14 @@ if (!canOwnWarm) {
       { rootMargin: `${AD_NATIVE_PREWARM_MARGIN_TOP_PX}px 0px ${AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
     );
 
-    // focused: реально видно (>= 60% площади)
+    // focused/play-gate: реальная реклама стартует только после входа в viewport.
+    // 0.01 отсекает ложные нулевые касания, но не ждёт 60% площади.
     const focusObs = new IntersectionObserver(
-      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
-      { threshold: [0, 0.25, 0.6, 0.75, 1] }
+      ([e]) => {
+        const ratio = Number(e?.intersectionRatio || 0);
+        setIsFocused(!!e?.isIntersecting && ratio >= AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO);
+      },
+      { threshold: [0, AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO, 0.25, 0.6, 0.75, 1] }
     );
     
     resolveObs.observe(el);
@@ -3139,6 +3221,14 @@ const handleToggleSound = (e) => {
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) delete v.dataset.__adEndedHold;
       if (Number(v?.readyState || 0) >= 2) setAdVideoReady(true);
+
+      const silentPrime = adNativeSilentPrimeRef.current || {};
+      if (silentPrime.active && silentPrime.src === String(media?.src || '').trim()) {
+        // Это iOS/WebKit muted first-frame prime, а не реальный старт рекламы.
+        // Prime-функция сама поставит pause() через requestVideoFrameCallback/таймер.
+        return;
+      }
+      
       if (!shouldPlayRef.current) {
         // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
         // и не отправляем site-media-play, чтобы не выключать активное видео форума.
@@ -3185,10 +3275,11 @@ const handleToggleSound = (e) => {
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
       setAdVideoReady(true);
-      applyForumAdMutedToVideo(v, isAdMuted);
+      const silentPrime = String(v?.dataset?.__adSilentPrime || '') === '1';
+      applyForumAdMutedToVideo(v, silentPrime ? true : isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v) v.preload = 'metadata';
+      else if (v && !silentPrime) v.preload = 'metadata';
     } catch {}
   }}
   onCanPlay={() => {
@@ -3197,10 +3288,11 @@ const handleToggleSound = (e) => {
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
       setAdVideoReady(true);
-      applyForumAdMutedToVideo(v, isAdMuted);
+      const silentPrime = String(v?.dataset?.__adSilentPrime || '') === '1';
+      applyForumAdMutedToVideo(v, silentPrime ? true : isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v) v.preload = 'metadata';
+      else if (v && !silentPrime) v.preload = 'metadata';
     } catch {}
   }}
   onEnded={() => {
