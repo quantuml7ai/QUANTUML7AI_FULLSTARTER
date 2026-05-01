@@ -282,30 +282,53 @@ const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 function getAdVideoNodeSrc(videoEl) {
   if (!videoEl) return '';
   try {
-    return String(videoEl.currentSrc || videoEl.getAttribute('src') || '').trim();
+    return String(videoEl.getAttribute('src') || videoEl.dataset?.adNativeSrc || '').trim();
   } catch {
     return '';
   }
 }
 
-function detachAdNativeVideo(videoEl) {
+function detachAdNativeVideo(videoEl, opts = {}) {
   if (!videoEl) return;
+  const hard = !!(opts === true || opts?.hard);
+  const reason = String(opts?.reason || (hard ? 'hard_detach' : 'soft_detach'));
  
   // IMPORTANT:
-  // Native ad video is windowing-owned now.
-  // Do NOT remove src on scroll/near/focus changes.
-  // The slot/card unmount must be the only normal resource release mechanism.
+  // Soft detach keeps the first frame during near/focus jitter.
+  // Hard detach is used when the ad loses the single native warm owner,
+  // changes media, errors, or unmounts. That prevents hidden <video> nodes
+  // from keeping Blob MP4 pipelines and Range cache state alive.
   //
-  // Previously this function removed src and called load(), which could leave
-  // a visible ad slot as an empty/black collapsed video surface after scrolling back.
+  // Do not call load() after removing src here. The browser will reconcile the
+  // media element from the attribute change, and explicit load() is the path
+  // that caused extra 206/cancel churn on scroll/focus.
 
   try { videoEl.pause?.(); } catch {}
+
+  if (hard) {
+    try {
+      if (videoEl.dataset) {
+        videoEl.dataset.__adLoadPending = '0';
+        videoEl.dataset.__adWarmOwner = '0';
+        videoEl.dataset.__adDetachedSoft = '0';
+        videoEl.dataset.__adDetachedHard = '1';
+        videoEl.dataset.__adDetachedReason = reason;
+        videoEl.dataset.__adDetachedHardTs = String(Date.now());
+        delete videoEl.dataset.adNativeSrc;
+      }
+    } catch {}
+    try { videoEl.removeAttribute('src'); } catch {}
+    try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
+    try { videoEl.preload = 'none'; } catch {}
+    return;
+  }
 
   try {
     if (videoEl.dataset) {
       videoEl.dataset.__adLoadPending = '0';
       videoEl.dataset.__adWarmOwner = '0';
       videoEl.dataset.__adDetachedSoft = '1';
+      videoEl.dataset.__adDetachedReason = reason;
       videoEl.dataset.__adDetachedSoftTs = String(Date.now());
     }
   } catch {}
@@ -316,10 +339,7 @@ function detachAdNativeVideo(videoEl) {
     videoEl.preload = 'metadata';
   } catch {}
 
-  // Do NOT:
-  // - removeAttribute('src')
-  // - removeAttribute('data-ad-native-src')
-  // - call load() after clearing src
+  // Do NOT soft-detach by removing src or calling load().
 }
 
 function ensureAdNativeVideoSrc(videoEl, src, muted) {
@@ -331,24 +351,28 @@ function ensureAdNativeVideoSrc(videoEl, src, muted) {
   applyForumAdMutedToVideo(videoEl, muted);
 
   const currentSrc = getAdVideoNodeSrc(videoEl);
-  const attachedSrc = (() => {
-    try { return String(videoEl.dataset?.adNativeSrc || '').trim(); }
-    catch { return ''; }
-  })();
-
 if (currentSrc === nextSrc) {
   try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
-  try { videoEl.dataset.adNativeSrc = nextSrc; } catch {}
-  try { videoEl.removeAttribute('data-ad-detached-soft'); } catch {}
+  try {
+    videoEl.dataset.adNativeSrc = nextSrc;
+    delete videoEl.dataset.__adDetachedSoft;
+    delete videoEl.dataset.__adDetachedHard;
+    delete videoEl.dataset.__adDetachedReason;
+  } catch {}
   return true;
-}
+  }
 
   try { videoEl.pause?.(); } catch {}
-  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
+  try { videoEl.preload = 'none'; } catch {}
   try { videoEl.src = nextSrc; } catch {
     try { videoEl.setAttribute('src', nextSrc); } catch {}
   }
-  try { videoEl.dataset.adNativeSrc = nextSrc; } catch {}
+  try {
+    videoEl.dataset.adNativeSrc = nextSrc;
+    delete videoEl.dataset.__adDetachedSoft;
+    delete videoEl.dataset.__adDetachedHard;
+    delete videoEl.dataset.__adDetachedReason;
+  } catch {}
 
   // load() разрешён только при реальной смене URL, не на scroll/focus jitter.
   try {
@@ -358,6 +382,7 @@ if (currentSrc === nextSrc) {
       videoEl.dataset.__adLastAttachTs = String(now);
       videoEl.dataset.__adLastWarmLoadTs = String(now);
     }
+    videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
     videoEl.load?.();
   } catch {}
 
@@ -394,12 +419,13 @@ function isAdNativeVideoLoadingOrReady(videoEl) {
     if (!videoEl) return false;
     const hasSrc = !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || '').trim();
     if (!hasSrc) return false;
-    if (Number(videoEl.readyState || 0) >= 1) return true;
+    const readyState = Number(videoEl.readyState || 0);
+    if (readyState >= 1) return true;
     const ns = Number(videoEl.networkState || 0);
     if (typeof HTMLMediaElement !== 'undefined') {
-      return ns === HTMLMediaElement.NETWORK_LOADING || ns === HTMLMediaElement.NETWORK_IDLE;
+      return ns === HTMLMediaElement.NETWORK_LOADING;
     }
-    return ns === 2 || ns === 1;
+    return ns === 2;
   } catch {
     return false;
   }
@@ -411,6 +437,11 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
 
     const reasonKey = String(reason || 'release');
     const state = getAdViewportState(videoEl);
+    const keepVisibleSurface =
+      videoEl.paused &&
+      isAdNativeVideoLoadingOrReady(videoEl) &&
+      (state.inViewport || state.gapPx <= 1280) &&
+      (reasonKey === 'near_exit' || reasonKey === 'replace' || reasonKey === 'release');
     const keepNearExitWarm =
       reasonKey === 'near_exit' &&
       videoEl.paused &&
@@ -420,15 +451,19 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
     // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
     // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
     // Поэтому near_exit не убивает живой близкий warm; replace/unmount/bad_src по-прежнему освобождают.
-    if (keepNearExitWarm) {
+    if (keepNearExitWarm || keepVisibleSurface) {
       adNativeWarmSlot = {
         video: videoEl,
         src: String(videoEl.dataset?.adNativeSrc || videoEl.currentSrc || videoEl.getAttribute?.('src') || adNativeWarmSlot.src || ''),
         ts: Date.now(),
       };
       try {
-        if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1';
-        videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (videoEl.dataset) {
+          videoEl.dataset.__adWarmOwner = keepNearExitWarm ? '1' : '0';
+          videoEl.dataset.__adSurfaceHeld = keepVisibleSurface ? '1' : '0';
+          videoEl.dataset.__adSurfaceHeldReason = reasonKey;
+        }
+        videoEl.preload = keepNearExitWarm ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
       } catch {}
       return;
     }
@@ -438,7 +473,7 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
 
     // Single-source rule: when a slot really loses the controlled warm owner and is not playing,
     // detach it. Only the near_exit jitter path above is allowed to keep the single warm alive.
-    if (videoEl.paused) detachAdNativeVideo(videoEl);
+    if (videoEl.paused) detachAdNativeVideo(videoEl, { hard: true, reason: reasonKey });
   } catch {}
 }
 
@@ -466,7 +501,9 @@ const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
 const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
 const nextInsideRunway = nextGap <= 2100;
+const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
 const nextClearlyCloser =
+  nextShouldWinViewport ||
   nextGap + 160 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
@@ -801,8 +838,25 @@ export function interleaveAds(items, EVERY, opts = {}) {
 
   if (!Array.isArray(items) || !items.length) return [];
 
+  const resolveItemKey = (item, index) => {
+    const raw =
+      (typeof getId === 'function' && getId(item)) ||
+      item?.id ||
+      item?.postId ||
+      item?._id ||
+      item?.uuid ||
+      item?.key ||
+      item?.topicId ||
+      `idx${index}`;
+    const stable = String(raw || `idx${index}`).trim();
+    return stable || `idx${index}`;
+  };
+
   if (!EVERY || EVERY <= 0) {
-    return items.map((item, i) => ({ type: 'item', item, key: `i:${i}` }));
+    return items.map((item, i) => {
+      const itemKey = resolveItemKey(item, i);
+      return { type: 'item', item, key: `item:${itemKey}` };
+    });
   }
 
   let contentCount = 0;
@@ -810,7 +864,8 @@ export function interleaveAds(items, EVERY, opts = {}) {
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    out.push({ type: 'item', item, key: `i:${i}` });
+    const itemKey = resolveItemKey(item, i);
+    out.push({ type: 'item', item, key: `item:${itemKey}` });
 
     const skip =
       typeof isSkippable === 'function' ? !!isSkippable(item) : false;
@@ -1432,7 +1487,7 @@ const adNativeFocusKickTsRef = useRef(0);
 const ytIframeRef = useRef(null);
 const ytPlayerRef = useRef(null);
   const videoErrorUntilRef = useRef(new Map());
-  const isVideoSrcTemporarilyBlocked = (src) => {
+  const isVideoSrcTemporarilyBlocked = React.useCallback((src) => {
     const key = String(src || '').trim();
     if (!key) return false;
     const until = Number(videoErrorUntilRef.current.get(key) || 0);
@@ -1442,8 +1497,8 @@ const ytPlayerRef = useRef(null);
       return false;
     }
     return true;
-  };
-  const markVideoSrcTemporarilyBlocked = (src, ms = 20000) => {
+  }, []);
+  const markVideoSrcTemporarilyBlocked = React.useCallback((src, ms = 20000) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.set(key, Date.now() + Math.max(2500, Number(ms || 0)));
@@ -1455,12 +1510,12 @@ const ytPlayerRef = useRef(null);
         if (drop <= 0) break;
       }
     }
-  };
-  const clearVideoSrcBlock = (src) => {
+  }, []);
+  const clearVideoSrcBlock = React.useCallback((src) => {
     const key = String(src || '').trim();
     if (!key) return;
     videoErrorUntilRef.current.delete(key);
-  };
+  }, []);
   // ===== Focus / attention gating =====
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
@@ -1553,12 +1608,81 @@ useEffect(() => {
   applyForumAdMutedToVideo(videoRef.current, next);
 }, [muted]);
 
+const playAdNativeVideo = React.useCallback((reason = 'focus') => {
+  const v = videoRef.current;
+  const srcKey = String(media.src || '').trim();
+
+  if (media.kind !== 'video') return false;
+  if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return false;
+  if (!shouldPlayRef.current || !isPageActive) return false;
+
+  const now = Date.now();
+  const minGapMs = reason === 'focus_retry' ? 520 : 260;
+  if ((now - Number(adNativeFocusKickTsRef.current || 0)) < minGapMs) {
+    return false;
+  }
+  adNativeFocusKickTsRef.current = now;
+
+  try {
+    const nextMuted = normalizeForumAdMuted(mutedRef.current);
+    const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+    if (attached) attachedVideoSrcRef.current = srcKey;
+
+    applyForumAdMutedToVideo(v, nextMuted);
+    v.playsInline = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+
+    if (!v.paused && !v.ended) {
+      emitAdPlayToCoordinator('ad_video');
+      return true;
+    }
+
+    if (v.ended) {
+      try { v.currentTime = 0; } catch {}
+      try { delete v.dataset.__adEndedHold; } catch {}
+    }
+
+    const playAttempt = v.play?.();
+    if (playAttempt && typeof playAttempt.then === 'function') {
+      playAttempt
+        .then(() => {
+          try {
+            const st = adNativePauseRecoveryRef.current || {};
+            if (st.timer) clearTimeout(st.timer);
+            adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+          } catch {}
+          emitAdPlayToCoordinator('ad_video');
+        })
+        .catch(() => {
+          try {
+            if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
+            applyForumAdMutedToVideo(v, true);
+            v.play?.().catch(() => {});
+          } catch {}
+        });
+    } else {
+      try {
+        const st = adNativePauseRecoveryRef.current || {};
+        if (st.timer) clearTimeout(st.timer);
+        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+      } catch {}
+      emitAdPlayToCoordinator('ad_video');
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}, [emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
+
 useEffect(() => {
   const node = videoRef.current;
 
   if (media.kind !== 'video') {
     attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(node);
+    detachAdNativeVideo(node, { hard: true, reason: 'kind_change' });
     return undefined;
   }
 
@@ -1566,7 +1690,7 @@ useEffect(() => {
 
   if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) {
     attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(node);
+    detachAdNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src' });
     return undefined;
   }
 
@@ -1574,12 +1698,11 @@ useEffect(() => {
   // Скролл и IntersectionObserver не должны менять <video src>.
   // Если URL реально сменился — очищаем старый ресурс один раз.
 if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
-  // Do not detach/remove src here.
-  // The next near/play pass will replace video.src through ensureAdNativeVideoSrc().
+  detachAdNativeVideo(node, { hard: true, reason: 'src_change' });
   attachedVideoSrcRef.current = '';
 } 
   return undefined;
-}, [media.kind, media.src]);
+}, [isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
 useEffect(() => {
   
@@ -1603,13 +1726,24 @@ useEffect(() => {
   if (!shouldPlayRef.current) {
     const canOwnWarm = claimAdNativeWarmSlot(v, srcKey, rootRef.current);
 if (!canOwnWarm) {
-  // Another ad owns warm priority.
-  // Do not remove src anymore; windowing owns real resource release.
+  // Another ad owns warm priority. This node must not keep a second native
+  // media pipeline alive.
   try {
     if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
+      const viewportState = getAdViewportState(rootRef.current || v);
+      const existingSrc = getAdVideoNodeSrc(v);
+      const hasExistingSurface =
+        existingSrc === srcKey &&
+        isAdNativeVideoLoadingOrReady(v);
+      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
+        v.dataset.__adSurfaceHeld = '1';
+        v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
+        v.preload = 'metadata';
+        return undefined;
+      }
       v.dataset.__adWarmOwner = '0';
       v.dataset.__adLoadPending = '0';
-      v.preload = AD_NATIVE_VIDEO_PRELOAD_IDLE;
+      detachAdNativeVideo(v, { hard: true, reason: 'warm_owner_denied' });
     }
   } catch {}
   return undefined;
@@ -1640,7 +1774,7 @@ if (!canOwnWarm) {
   }
 
   return undefined;
-}, [isNear, isPageActive, media.kind, media.src]);
+}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -1802,6 +1936,10 @@ useEffect(() => {
     }
     const canResolveNow = !!isNear || !!isFocused;
     if (!canResolveNow) {
+      if (isLikelyVideoUrl(mediaHref)) {
+        setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
+        return;
+      }
       const cachedOnly = readCachedAdResolvedMedia(String(mediaHref || '').trim());
       if (cachedOnly) setMedia(cachedOnly);
       else setMedia({ kind: 'skeleton', src: null });
@@ -2171,36 +2309,7 @@ if (media.kind === 'video' && videoRef.current) {
   }
 
   if (shouldPlay) {
-    const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
-    if (attached) attachedVideoSrcRef.current = srcKey;
-
-    const playAttempt = v.play?.();
-
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt      
-        .then(() => {
-          try {
-            const st = adNativePauseRecoveryRef.current || {};
-            if (st.timer) clearTimeout(st.timer);
-            adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-          } catch {}          
-          emitAdPlayToCoordinator('ad_video');
-        })
-        .catch(() => {
-          try {
-            if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
-            applyForumAdMutedToVideo(v, true);
-            v.play?.().catch(() => {});
-          } catch {}
-        });
-    } else {
-      try {
-        const st = adNativePauseRecoveryRef.current || {};
-        if (st.timer) clearTimeout(st.timer);
-        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-      } catch {}      
-      emitAdPlayToCoordinator('ad_video');
-    }
+    playAdNativeVideo('focus');
   } else {
     // Пауза без removeAttribute('src') и без load().
     // Так браузер не начинает новый набор 206 при каждом повторном входе в viewport.
@@ -2228,7 +2337,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     if (media.kind === 'tiktok' && shouldPlay) {
       emitAdPlayToCoordinator('ad_tiktok');
     }
-  }, [emitAdPlayToCoordinator, shouldPlay, media.kind, media.src, muted]);
+  }, [emitAdPlayToCoordinator, isVideoSrcTemporarilyBlocked, playAdNativeVideo, shouldPlay, media.kind, media.src, muted]);
   // Focus-only autoplay retry for mobile ads.
   // Работает только когда карточка реально в focus-zone; near/offscreen не играет.
   useEffect(() => {
@@ -2240,42 +2349,14 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
 
     const kick = () => {
       if (cancelled) return;
-      const v = videoRef.current;
-      const srcKey = String(media.src || '').trim();
-      if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
-      const now = Date.now();
-      if ((now - Number(adNativeFocusKickTsRef.current || 0)) < 420) return;
-      adNativeFocusKickTsRef.current = now;
-
-      try {
-        const nextMuted = normalizeForumAdMuted(mutedRef.current);
-        const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
-        if (attached) attachedVideoSrcRef.current = srcKey;
-        applyForumAdMutedToVideo(v, nextMuted);
-        v.playsInline = true;
-        v.setAttribute('playsinline', '');
-        v.setAttribute('webkit-playsinline', '');
-        v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-        if (v.paused) {
-          const p = v.play?.();
-          if (p && typeof p.catch === 'function') {
-            p.catch(() => {
-              try {
-                if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
-                applyForumAdMutedToVideo(v, true);
-                v.play?.().catch(() => {});
-              } catch {}
-            });
-          }
-        }
-      } catch {}
+      playAdNativeVideo('focus_retry');
     };
 
     kick();
     timer = window.setInterval(() => {
       try {
         const v = videoRef.current;
-        if (!shouldPlayRef.current || !v || !v.paused) {
+        if (!shouldPlayRef.current || !v || !v.paused || v.ended) {
           if (timer) window.clearInterval(timer);
           timer = 0;
           return;
@@ -2288,7 +2369,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
       cancelled = true;
       if (timer) window.clearInterval(timer);
     };
-  }, [isPageActive, media.kind, media.src, shouldPlay]);
+  }, [isPageActive, media.kind, media.src, playAdNativeVideo, shouldPlay]);
   // Impression tracking
   useEffect(() => {
     const el = rootRef.current;
@@ -2433,9 +2514,48 @@ const handleToggleSound = (e) => {
   className="item forum-ad-card"
   data-slot-kind={slotKind}
   data-ads="1"
+  data-stable-shell="1"
   style={slotCssVars}
 >
 <style jsx>{`
+  .forum-ad-card {
+    width: 100%;
+    min-height: var(--ad-slot-h-m);
+    height: var(--ad-slot-h-m);
+    max-height: var(--ad-slot-h-m);
+    overflow: hidden;
+    contain: layout paint;
+  }
+  @media (min-width: 640px) {
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-t);
+      height: var(--ad-slot-h-t);
+      max-height: var(--ad-slot-h-t);
+    }
+  }
+  @media (min-width: 1024px) {
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-d);
+      height: var(--ad-slot-h-d);
+      max-height: var(--ad-slot-h-d);
+    }
+  }
+  .forum-ad-link {
+    display: block;
+    height: 100%;
+    min-height: 0;
+  }
+  .forum-ad-card-body {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+  }
+  .forum-ad-header {
+    flex: 0 0 auto;
+    min-height: 30px;
+  }
   .forum-ad-media-slot {
     width: 100%; 
     position: relative;         /* ключ: якорь для absolute медиа */
@@ -2460,6 +2580,12 @@ const handleToggleSound = (e) => {
   }
 
   /* ===== FLUID (для рендера по всему сайту) ===== */
+  .forum-ad-card .forum-ad-media-slot[data-layout="fixed"] {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+  }
+
   .forum-ad-media-slot[data-layout="fluid"] {
     height: auto;
     overflow: visible;
@@ -2741,12 +2867,12 @@ const handleToggleSound = (e) => {
         rel="noopener noreferrer nofollow ugc"
         onClick={handleClick}
         aria-label={`${label} • ${host}`}
-        className="block no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+        className="forum-ad-link no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
       >
-        <div className="flex flex-col gap-1 h-full">
+        <div className="forum-ad-card-body">
           {/* header: только бейдж + домен, без url-строки */}
           <div
-            className="flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
+            className="forum-ad-header flex items-center gap-2 text-[9px] uppercase tracking-wide text-[color:var(--muted-fore,#9ca3af)]"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -2771,7 +2897,7 @@ const handleToggleSound = (e) => {
               onClick={handleOpenAdsPage}
               className="btn"
               style={{
-                fontSize: '12x',
+                fontSize: '12px',
                 padding: '6px 12px',
                 borderRadius: 999,
                 marginLeft: 'auto',
@@ -2801,14 +2927,15 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   ref={videoRef} 
   className="forum-ad-fit"
   muted={isAdMuted}
-  loop
   playsInline 
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
+  loop
   onPlaying={() => {
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) delete v.dataset.__adEndedHold;
       if (!shouldPlayRef.current) {
         // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
         // и не отправляем site-media-play, чтобы не выключать активное видео форума.
@@ -2826,6 +2953,12 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       const v = videoRef.current;
       const srcKey = String(media?.src || '').trim();
       if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
+      if (v.ended) {
+        const st = adNativePauseRecoveryRef.current || {};
+        if (st.timer) clearTimeout(st.timer);
+        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+        return;
+      }
 
       const prev = adNativePauseRecoveryRef.current || { timer: 0, ts: 0, count: 0 };
       const now = Date.now();
@@ -2847,25 +2980,64 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) v.dataset.__adWarmReady = '1';
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
+      else if (v) v.preload = 'metadata';
     } catch {}
   }}
   onCanPlay={() => {
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) v.dataset.__adWarmReady = '1';
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
+      else if (v) v.preload = 'metadata';
+    } catch {}
+  }}
+  onEnded={() => {
+    try {
+      const st = adNativePauseRecoveryRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+      const v = videoRef.current;
+      if (v?.dataset) {
+        v.dataset.__adLoadPending = '0';
+        v.dataset.__adWarmReady = '1';
+        delete v.dataset.__adEndedHold;
+      }
+      if (v) {
+        v.preload = shouldPlayRef.current ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
+        if (shouldPlayRef.current) {
+          try { v.currentTime = 0; } catch {}
+          v.play?.().catch(() => {});
+        }
+      }
     } catch {}
   }}
 onError={() => {
   try {
+    const v = videoRef.current;
+    const code = Number(v?.error?.code || 0);
+    const now = Date.now();
+    const recentAttach = (now - Number(v?.dataset?.__adLastAttachTs || 0)) < 6500;
+    const loading =
+      typeof HTMLMediaElement !== 'undefined' &&
+      Number(v?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
+    const hasFrame = Number(v?.readyState || 0) >= 1;
+    if (code <= 1 || recentAttach || loading || hasFrame) {
+      if (v?.dataset) {
+        v.dataset.__adLoadPending = '0';
+        v.dataset.__adTransientErrorTs = String(now);
+      }
+      return;
+    }
     markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
     attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(videoRef.current);
+    detachAdNativeVideo(videoRef.current, { hard: true, reason: 'error' });
   } catch {}
 }}
 />
