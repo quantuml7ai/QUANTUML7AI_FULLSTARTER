@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-04-30T14:58:30.762Z
-Файлов в реестре: 1753
+Сгенерировано автоматически: 2026-05-01T15:21:01.614Z
+Файлов в реестре: 1754
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -29,7 +29,7 @@
 - `adaptive-actions.report.json` — 1 файлов
 - `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 386 файлов
+- `app` — 387 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `auth-cascade.report.json` — 1 файлов
@@ -629,6 +629,7 @@
         - useForumWindowing.js — Shared хук use Forum Windowing форума. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
         - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
         - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+        - useTelegramVerticalSwipesGuard.js — Shared хук use Telegram Vertical Swipes Guard форума. Связи: используется в forum/ForumLayout.jsx.
       - storage/ — Каталог shared-слоя форума: storage.
         - localStorage.js — Shared storage-обертка local Storage форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/profile/hooks/useForumProfileSync.js.
       - telemetry/ — Каталог shared-слоя форума: telemetry.

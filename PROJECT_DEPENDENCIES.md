@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-04-30T14:58:30.063Z
-Исходных файлов в анализе: 811
-Локальных зависимостей: 732
+Сгенерировано автоматически: 2026-05-01T15:21:01.053Z
+Исходных файлов в анализе: 812
+Локальных зависимостей: 733
 
 ## Охват
 
@@ -67,7 +67,7 @@
 - `forum/qcoin` — 5 файлов
 - `forum/quests` — 11 файлов
 - `forum/root` — 14 файлов
-- `forum/shared` — 24 файлов
+- `forum/shared` — 25 файлов
 - `forum/styles` — 10 файлов
 - `forum/subscriptions` — 3 файлов
 - `forum/ui` — 51 файлов
@@ -108,7 +108,7 @@
 - `forum/dm` -> `forum/shared` — 16 локальных импортов
 - `forum/feed` -> `forum/profile` — 16 локальных импортов
 - `api/dm` -> `api/dm` — 15 локальных импортов
-- `forum/root` -> `forum/shared` — 14 локальных импортов
+- `forum/root` -> `forum/shared` — 15 локальных импортов
 - `api/profile` -> `api/forum` — 13 локальных импортов
 - `forum/profile` -> `forum/shared` — 13 локальных импортов
 - `forum/root` -> `forum/feed` — 13 локальных импортов
@@ -406,7 +406,7 @@
 ### forum/root
 
 - `forum/ui` — 18
-- `forum/shared` — 14
+- `forum/shared` — 15
 - `forum/feed` — 13
 - `forum/media` — 12
 - `forum/profile` — 9

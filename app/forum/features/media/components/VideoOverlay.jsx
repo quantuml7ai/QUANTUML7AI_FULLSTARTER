@@ -289,9 +289,6 @@ export default function VideoOverlay({
       onKeyDown={(e) => {
         if (e.key === 'Escape') onResetConfirm?.()
       }}
-      onWheel={stopAll}
-      onTouchMove={stopAll}
-      onPointerDown={stopAll}
       style={{
         position: 'fixed',
         inset: 0,
@@ -302,10 +299,13 @@ export default function VideoOverlay({
         isolation: 'isolate',
         transform: 'translateZ(0)',
         willChange: 'opacity, transform',
+        overscrollBehavior: 'none',
+        touchAction: 'none',
       }}
     >
       <div
         onClick={stopAll}
+        onPointerDown={stopAll}
         style={{
           position: 'absolute',
           inset: 0,

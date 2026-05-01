@@ -206,6 +206,8 @@ export const FORUM_STYLES = `
   background:#000;
   position:relative;
   overflow:hidden;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior: contain;
 }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
     /* QCast: отдельная максимальная высота */
@@ -556,8 +558,76 @@ export const FORUM_STYLES = `
       border:0;
       aspect-ratio:16/9;
       display:block;
-      background:#000; 
+      background:#000;
+      touch-action: pan-y pinch-zoom;
     }
+
+.iframeTouchShield{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:flex-end;
+  justify-content:flex-end;
+  padding:12px;
+  pointer-events:auto;
+  touch-action:pan-y pinch-zoom;
+  z-index:6;
+  background:linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.18));
+}
+.iframeTouchShieldGesture{
+  position:absolute;
+  inset:0;
+  pointer-events:auto;
+  touch-action:pan-y pinch-zoom;
+  background:transparent;
+}
+.iframeTouchShieldAction{
+  position:relative;
+  z-index:2;
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(255,255,255,.24);
+  background:rgba(2,8,23,.62);
+  color:rgba(255,255,255,.94);
+  box-shadow:0 10px 28px rgba(0,0,0,.32), 0 0 18px rgba(86,184,255,.2);
+  pointer-events:auto;
+  touch-action:manipulation;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+@media (pointer:fine){
+  .iframeTouchShield{
+    display:none !important;
+  }
+  .mediaBox[data-kind="iframe"] > iframe{
+    pointer-events:auto;
+  }
+}
+
+@media (pointer:coarse){
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > iframe[data-forum-media="youtube"]{
+    pointer-events:none;
+  }
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="1"] > .iframeTouchShield{
+    display:flex;
+  }
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > iframe[data-forum-media="youtube"],
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > iframe[data-forum-media="youtube"]{
+    pointer-events:auto;
+  }
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-touch-locked="0"] > .iframeTouchShield,
+  .mediaBox[data-kind="iframe"][data-subkind="youtube"][data-iframe-interactive="1"] > .iframeTouchShield{
+    display:none;
+  }
+  .mediaBox[data-kind="iframe"]:not([data-subkind="youtube"]) > iframe{
+    pointer-events:auto;
+  }
+}
 
 /* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
 .mediaBox > iframe[data-forum-media="youtube"]{

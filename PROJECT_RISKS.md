@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-04-30T14:58:30.430Z
-Исходных файлов в анализе: 811
+Сгенерировано автоматически: 2026-05-01T15:21:01.360Z
+Исходных файлов в анализе: 812
 Route-aware файлов: 96
 
 ## Что Считается Риском
@@ -164,16 +164,16 @@ Route-aware файлов: 96
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
 - `app/forum/features/ui/utils/buildForumRootPropBundles.js` — импортирует 7 локальных модулей
+- `app/forum/ForumLayout.jsx` — импортирует 7 локальных модулей
 - `src/shared/runtime/mode/runtimeMode.js` — импортирует 7 локальных модулей
 - `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — импортирует 6 локальных модулей
 - `app/forum/features/profile/components/ProfilePopover.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js` — импортирует 6 локальных модулей
-- `app/forum/ForumLayout.jsx` — импортирует 6 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 11; плотность: 11
-- `forum/root` — файлов: 14; исходящих связей: 88; плотность: 6.29
+- `forum/root` — файлов: 14; исходящих связей: 89; плотность: 6.36
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `app/ads` — файлов: 4; исходящих связей: 10; плотность: 2.5
 - `api/profile` — файлов: 9; исходящих связей: 19; плотность: 2.11

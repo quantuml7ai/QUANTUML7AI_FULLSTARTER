@@ -2519,18 +2519,24 @@ const handleToggleSound = (e) => {
 >
 <style jsx>{`
   .forum-ad-card {
-    width: 100%;  
+    width: 100%;
+    min-height: var(--ad-slot-h-m);
+    height: var(--ad-slot-h-m);
     max-height: var(--ad-slot-h-m);
     overflow: hidden;
     contain: layout paint;
   }
   @media (min-width: 640px) {
-    .forum-ad-card {  
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-t);
+      height: var(--ad-slot-h-t);
       max-height: var(--ad-slot-h-t);
     }
   }
   @media (min-width: 1024px) {
-    .forum-ad-card {  
+    .forum-ad-card {
+      min-height: var(--ad-slot-h-d);
+      height: var(--ad-slot-h-d);
       max-height: var(--ad-slot-h-d);
     }
   }
