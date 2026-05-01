@@ -245,46 +245,7 @@ export default function PostMediaStack({
 
   const ytLinesStable = stableEmbeds?.yt || []
   const tiktokLinesStable = stableEmbeds?.tiktok || []
-  const iframeTouchTimersRef = React.useRef(new Map())
-
-  React.useEffect(() => {
-    const timers = iframeTouchTimersRef.current
-    return () => {
-      timers.forEach((timerId) => {
-        try { window.clearTimeout(timerId) } catch {}
-      })
-      timers.clear()
-    }
-  }, [])
-
-  const unlockYouTubeIframeTouch = React.useCallback((event) => {
-    try { event?.stopPropagation?.() } catch {}
-    const target = event?.currentTarget || event?.target || null
-    const card = target?.closest?.('[data-iframe-touch-card="youtube"], [data-iframe-touch-locked]')
-    if (!card) return
-
-    const timers = iframeTouchTimersRef.current
-    const prevTimer = timers.get(card)
-    if (prevTimer) {
-      try { window.clearTimeout(prevTimer) } catch {}
-      timers.delete(card)
-    }
-
-    const unlockedAt = String(Date.now())
-    card.setAttribute('data-iframe-touch-locked', '0')
-    card.setAttribute('data-iframe-interactive', '1')
-    card.setAttribute('data-iframe-touch-unlocked-at', unlockedAt)
-
-    const timerId = window.setTimeout(() => {
-      timers.delete(card)
-      if (card.getAttribute('data-iframe-touch-unlocked-at') !== unlockedAt) return
-      card.setAttribute('data-iframe-touch-locked', '1')
-      card.removeAttribute('data-iframe-interactive')
-      card.removeAttribute('data-iframe-touch-unlocked-at')
-    }, 9000)
-    timers.set(card, timerId)
-  }, [])
-
+ 
   return (
     <>
       {imgLines.length > 0 && (
@@ -347,9 +308,7 @@ export default function PostMediaStack({
                 key={`yt:${mediaKeyBase}:${videoId}:${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
-                data-subkind="youtube"
-                data-iframe-touch-card="youtube"
-                data-iframe-touch-locked="1"
+                data-subkind="youtube" 
                 data-owner-id={ownerId}
                 data-forum-embed-kind="youtube"
                 data-lifecycle-state={lifecycleState}
@@ -372,22 +331,7 @@ export default function PostMediaStack({
                   allowFullScreen
                   className="mediaBoxItem"
                 />
-                <div
-                  className="iframeTouchShield"
-                  data-iframe-touch-shield="youtube"
-                >
-                  <div className="iframeTouchShieldGesture" />
-                  <button
-                    type="button"
-                    className="iframeTouchShieldAction"
-                    aria-label="Включить управление YouTube"
-                    title="Включить управление YouTube"
-                    onPointerDown={unlockYouTubeIframeTouch}
-                    onClick={unlockYouTubeIframeTouch}
-                  >
-                    ▶
-                  </button>
-                </div>
+
               </div>
             )
           })}

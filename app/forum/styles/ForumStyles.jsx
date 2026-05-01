@@ -205,9 +205,7 @@ export const FORUM_STYLES = `
   max-height: var(--mb-iframe-h);
   background:#000;
   position:relative;
-  overflow:hidden;
-  touch-action: pan-y pinch-zoom;
-  overscroll-behavior: contain;
+  overflow:hidden; 
 }
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
     /* QCast: отдельная максимальная высота */
@@ -558,10 +556,9 @@ export const FORUM_STYLES = `
       border:0;
       aspect-ratio:16/9;
       display:block;
-      background:#000;
-      touch-action: pan-y pinch-zoom;
+      background:#000; 
     }
- 
+
 /* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
 .mediaBox > iframe[data-forum-media="youtube"]{
   min-height: var(--mb-yt-iframe-min-h, 0px);
