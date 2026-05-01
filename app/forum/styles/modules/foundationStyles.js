@@ -278,6 +278,27 @@ const foundationStyles = String.raw`
       display:block;
       background:#000;
     }
+.mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  max-height:100%;
+}
+
+.ql7ExternalVideoSurface > iframe{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  max-height:100%;
+  border:0;
+  display:block;
+  background:#000;
+  pointer-events:none;
+}
+
+.ql7ExternalVideoSurface[data-forum-external-kind="youtube"] > iframe{ aspect-ratio:16/9; }
+
+.ql7ExternalVideoSurface[data-forum-external-kind="tiktok"] > iframe{ aspect-ratio:9/16; }      
 /* YouTube iframe: минимальная высота отдельно (переменная под моб/десктоп) */
 .mediaBox > iframe[data-forum-media="youtube"]{
   min-height: var(--mb-yt-iframe-min-h, 0px);

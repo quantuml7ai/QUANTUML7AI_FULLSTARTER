@@ -11,7 +11,7 @@ export function isTikTokUrl(u) {
   const s = String(u || '').trim()
   if (!s) return false
   // only /@user/video/123.. path (supported embed source)
-  return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i.test(s)
+   return /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/\d+|(?:embed\/v2|player\/v1)\/\d+)(?:[?#].*)?$/i.test(s)
 }
 
 export function getYouTubeId(u) {
@@ -28,8 +28,8 @@ export function shortVideoMeta(u) {
   const ytId = getYouTubeId(s)
   if (ytId) return { label: 'YouTube', short: `youtu.be/${ytId}` }
   if (isTikTokUrl(s)) {
-    const m = s.match(/tiktok\.com\/(@[\w.\-]+\/video\/\d+)/i)
-    return { label: 'TikTok', short: m ? m[1] : s.replace(/^https?:\/\//i, '').slice(0, 40) }
+    const m = s.match(/tiktok\.com\/(?:(@[\w.\-]+\/video\/\d+)|((?:embed\/v2|player\/v1)\/\d+))/i)
+    return { label: 'TikTok', short: m ? (m[1] || m[2]) : s.replace(/^https?:\/\//i, '').slice(0, 40) }
   }
   if (/\.(mp4)(?:$|[?#])/i.test(s)) {
     return { label: 'MP4', short: s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').slice(0, 44) }

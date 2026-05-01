@@ -17,7 +17,13 @@ import {
   __isVideoNearViewport,
   __MEDIA_VIS_MARGIN_PX,
 } from '../utils/mediaLifecycleRuntime'
-
+import {
+  commandExternalVideo,
+  emitExternalVideoState,
+  ensureExternalVideoSrc,
+  ensureTikTokPlayerSrc,
+  ensureYouTubeEmbedSrc as normalizeYouTubeEmbedSrc,
+} from '../utils/externalVideoBridge'
 export default function useForumMediaCoordinator({ emitDiag }) {
   // Single owner for forum media warmup, focus playback, pause, and unload policy.
   useEffect(() => {
@@ -1549,6 +1555,8 @@ const onMutedEvent = (e) => {
     source === 'forum-splash' ||
     source === 'video' ||
     source === 'youtube' ||
+    source === 'tiktok' ||
+    source === 'iframe' ||    
     source === 'qcast' ||
     source === 'forum-ads' ||
     source === 'forum-ads-toggle';
@@ -2369,6 +2377,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                 try {
                   if (desiredMuted()) player?.mute?.();
                   else player?.unMute?.();
+                  emitExternalVideoState(iframe, { ready: true, muted: desiredMuted(), paused: true });
                 } catch {}
                 resolve(player);
               },
@@ -2383,18 +2392,21 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                   const state = evt?.data; 
                   if (state === YT.PlayerState?.PLAYING) { 
                     startYtMutePoll(player);
+                    emitExternalVideoState(iframe, { paused: false, muted: !!player?.isMuted?.() });
                     window.dispatchEvent(new CustomEvent('site-media-play', {
                       detail: { source: 'youtube', element: iframe }
                     }));
                   }
                   // LOOP: когда ролик закончился — стартуем заново без reload iframe
                   if (state === YT.PlayerState?.ENDED) {
+                    emitExternalVideoState(iframe, { paused: true });
                     try { player?.seekTo?.(0, true); } catch {}
                     try { player?.playVideo?.(); } catch {}
                     return;
                   }
                   if (state === YT.PlayerState?.PAUSED) {
                     stopYtMutePoll(player);
+                    emitExternalVideoState(iframe, { paused: true, muted: !!player?.isMuted?.() });
                   }
                 } catch {}
               }
@@ -2818,17 +2830,13 @@ const shouldRetainHtmlMedia = (el) => {
         markSuppressedPlayback(el, 1400);
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
+        try { emitExternalVideoState(el, { paused: true }); } catch {}
         try { stopYtMutePoll(player); } catch {}
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
         markSuppressedPlayback(el, 1400);
-        try {
-          el.contentWindow?.postMessage?.({ method: 'pause' }, '*');
-        } catch {}
-        try {
-          el.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*');
-        } catch {}
+      try { commandExternalVideo(el, 'pause'); } catch {}
       }
     };
     const getOwnerVisiblePx = (el) => {
@@ -3717,27 +3725,7 @@ return true;
         return src;
       }
     };
-    const ensureYouTubeEmbedSrc = (src) => {
-      try {
-        const next = String(src || '').trim();
-        if (!next) return '';
-        const u = new URL(next, window.location.href);
-        const host = String(u.hostname || '').toLowerCase();
-        if (!host.includes('youtube.com') && !host.includes('youtube-nocookie.com') && !host.includes('youtu.be')) return next;
-        if ((host.includes('youtube.com') || host.includes('youtu.be')) && !host.includes('youtube-nocookie.com')) {
-          u.hostname = 'www.youtube-nocookie.com';
-        }
-        if (!u.searchParams.has('enablejsapi')) u.searchParams.set('enablejsapi', '1');
-        if (!u.searchParams.has('playsinline')) u.searchParams.set('playsinline', '1');
-        if (!u.searchParams.has('mute')) u.searchParams.set('mute', '1');
-        if (!u.searchParams.has('rel')) u.searchParams.set('rel', '0');
-        if (!u.searchParams.has('modestbranding')) u.searchParams.set('modestbranding', '1');
-        if (!u.searchParams.has('origin')) u.searchParams.set('origin', window.location.origin);
-        return u.toString();
-      } catch {
-        return String(src || '');
-      }
-    };
+    const ensureYouTubeEmbedSrc = (src) => normalizeYouTubeEmbedSrc(src);
     const prepareExternalMedia = (el, reason = 'prewarm') => {
       if (!(el instanceof HTMLIFrameElement)) return false;
       const kind = String(el.getAttribute('data-forum-media') || '');
@@ -3752,7 +3740,7 @@ return true;
       const nextSrc =
         kind === 'youtube'
           ? ensureYouTubeEmbedSrc(raw)
-          : ensureIframeLoopParam(raw);
+          : (kind === 'tiktok' ? ensureTikTokPlayerSrc(raw) : ensureIframeLoopParam(raw));
       if (!nextSrc) return false;
       try {
         if (el.getAttribute('data-src') !== nextSrc) el.setAttribute('data-src', nextSrc);
@@ -4026,11 +4014,7 @@ return;
         if (!player) return;
         try {
           const kickYoutube = () => {
-            try {
-              if (desiredMuted()) player?.mute?.();
-              else player?.unMute?.();
-              player?.playVideo?.();
-            } catch {}
+            try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
           };
           kickYoutube();
           scheduleExternalPlayKick(el, kickYoutube, 'youtube_viewport_autoplay');
@@ -4043,7 +4027,7 @@ return;
       if (kind === 'tiktok' || kind === 'iframe') {
         // ВАЖНО: НЕ делаем force-reset на каждом "фокусе" — это и есть перезапуск при микроскролле.
         const rawSrc = el.getAttribute('data-src') || el.getAttribute('src') || '';
-        const src = rawSrc ? ensureIframeLoopParam(rawSrc) : '';
+        const src = rawSrc ? ensureExternalVideoSrc(kind, rawSrc) : '';
         if (!src) return;
         // сохраняем уже "loop-версию" в data-src, чтобы дальше не мутить url повторно
         if (!el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
@@ -4056,9 +4040,7 @@ return;
         }
         try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
         const kickExternalFrame = () => {
-          try { el.contentWindow?.postMessage?.({ method: 'play' }, '*'); } catch {}
-          try { el.contentWindow?.postMessage?.({ event: 'command', func: 'playVideo', args: '' }, '*'); } catch {}
-          try { el.contentWindow?.postMessage?.('play', '*'); } catch {}
+        try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
         };
         kickExternalFrame();
         scheduleExternalPlayKick(el, kickExternalFrame, `${kind}_viewport_autoplay`);

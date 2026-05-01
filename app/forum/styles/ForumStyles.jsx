@@ -207,6 +207,7 @@ export const FORUM_STYLES = `
   position:relative;
   overflow:hidden; 
 }
+
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
     /* QCast: отдельная максимальная высота */
     .mediaBox[data-kind="qcast"]{ --mb-h: var(--mb-qcast-h); background:#000; }
@@ -289,6 +290,49 @@ export const FORUM_STYLES = `
       -webkit-appearance:none !important;
       appearance:none !important;
     }
+.mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  max-height:100%;
+}
+
+.ql7ExternalVideoSurface > iframe,
+.ql7ExternalFrame{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  max-height:100%;
+  display:block;
+  border:0;
+  background:#000;
+  pointer-events:none !important;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+.ql7ExternalProviderShield{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  opacity:1;
+  background:transparent !important;
+  transition:none;
+}
+
+.ql7ExternalProviderShield.isVisible{
+  opacity:1;
+  background:transparent !important;
+}
+
+.ql7ExternalVideoSurface[data-forum-external-kind="youtube"] > iframe{
+  aspect-ratio:16/9;
+}
+
+.ql7ExternalVideoSurface[data-forum-external-kind="tiktok"] > iframe{
+  aspect-ratio:9/16;
+}      
     .ql7VideoSurface > video::-webkit-media-controls{ display:none !important; }
     .ql7VideoSurface > video::-webkit-media-controls-enclosure{ display:none !important; }
     .ql7VideoSurface > video::-webkit-media-controls-panel{ display:none !important; }

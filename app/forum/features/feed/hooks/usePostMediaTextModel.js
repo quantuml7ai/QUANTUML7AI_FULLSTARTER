@@ -6,10 +6,10 @@ import { extractDmStickersFromText } from '../../dm/utils/mediaParsing'
 const IMG_RE = /^(?:\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif)|https?:\/\/[^\s]+?\.(?:webp|png|jpe?g|gif))(?:[?#].*)?$/i
 const VIDEO_RE = /^(?:blob:[^\s]+|https?:\/\/[^\s]+(?:\/video-\d+\.(?:webm|mp4)|\.mp4)(?:[?#].*)?)$/i
 const YT_RE = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i
-const TIKTOK_RE = /^(?:https?:\/\/)?(?:www\.)?tiktok\.com\/(@[\w.\-]+\/video\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i
+const TIKTOK_RE = /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/(\d+)|(?:embed\/v2|player\/v1)\/(\d+)|t\/[A-Za-z0-9]+)(?:[?#].*)?$/i
 const AUDIO_EXT = /\.(?:webm|ogg|mp3|m4a|wav)(?:$|[?#])/i
 const URL_RE = /(https?:\/\/[^\s<>'")]+)/gi
-const TIKTOK_PLAYABLE_RE = /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/@[\w.\-]+\/video\/\d+(?:[?#].*)?$/i
+const TIKTOK_PLAYABLE_RE = /^(?:https?:\/\/)?(?:(?:www|m)\.)?tiktok\.com\/(?:@[\w.\-]+\/video\/\d+|(?:embed\/v2|player\/v1)\/\d+)(?:[?#].*)?$/i
 const POST_MEDIA_URL_CACHE = new Map()
 
 function isAudioLine(s) {

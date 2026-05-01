@@ -2,6 +2,8 @@
 
 import React from 'react'
 import Image from 'next/image'
+import ExternalVideoPlayer from '../../media/components/ExternalVideoPlayer'
+import { buildTikTokPlayerSrc, buildYouTubeEmbedSrc } from '../../media/utils/externalVideoBridge'
 
 const POST_MEDIA_EMBED_CACHE = new Map()
 
@@ -315,21 +317,14 @@ export default function PostMediaStack({
                 data-stable-shell="1"
                 style={{ margin: 0 }}
               >
-                <iframe
-                  data-src={`https://www.youtube-nocookie.com/embed/${videoId}?${ytEmbedParams}`}
+                <ExternalVideoPlayer
+                  kind="youtube"
+                  src={buildYouTubeEmbedSrc(videoId, ytEmbedParams)}
                   title="YouTube video"
                   id={`yt_${postId || 'post'}_${i}`}
-                  data-yt-id={videoId}
-                  data-forum-media="youtube"
-                  data-owner-id={ownerId}
-                  data-forum-embed-kind="youtube"
-                  data-lifecycle-state={lifecycleState}
-                  data-stable-shell="1"
-                  loading="lazy"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="mediaBoxItem"
+                  videoId={videoId}
+                  ownerId={ownerId}
+                  lifecycleState={lifecycleState}
                 />
 
               </div>
@@ -344,7 +339,7 @@ export default function PostMediaStack({
             let videoId = null
             try {
               const url = new URL(src)
-              const match = url.pathname.match(/\/video\/(\d+)/)
+              const match = url.pathname.match(/(?:\/video\/|\/embed\/v2\/|\/player\/v1\/)(\d+)/)
               if (match) videoId = match[1]
             } catch {}
 
@@ -407,19 +402,14 @@ export default function PostMediaStack({
                 data-stable-shell="1"
                 style={{ margin: 0 }}
               >
-                <iframe
+                <ExternalVideoPlayer
+                  kind="tiktok"
+                  src={buildTikTokPlayerSrc(videoId)}
                   title="TikTok video"
-                  data-forum-media="tiktok"
-                  data-src={`https://www.tiktok.com/embed/v2/${videoId}`}
-                  data-owner-id={ownerId}
-                  data-forum-embed-kind="tiktok"
-                  data-lifecycle-state={lifecycleState}
-                  data-stable-shell="1"
-                  loading="lazy"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="mediaBoxItem"
+                  id={`tt_${postId || 'post'}_${i}`}
+                  videoId={videoId}
+                  ownerId={ownerId}
+                  lifecycleState={lifecycleState}
                 />
 
               </div>
