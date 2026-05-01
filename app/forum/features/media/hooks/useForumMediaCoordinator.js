@@ -19,7 +19,512 @@ import {
 } from '../utils/mediaLifecycleRuntime'
 
 export default function useForumMediaCoordinator({ emitDiag }) {
-  // Single owner for forum media warmup, focus playback, pause, and unload policy.
+  // === Ленивая подгрузка превью видео в постах ===
+  useEffect(() => { 
+    if (!isBrowser()) return;
+    const warmSweepMode = (() => {
+      let explicit = '';
+      try {
+        const env = String(process.env.NEXT_PUBLIC_FORUM_LEGACY_WARM_SWEEP || '').trim().toLowerCase();
+        if (env === '1' || env === 'true' || env === 'on') explicit = 'on';
+        if (env === '0' || env === 'false' || env === 'off') explicit = 'off';
+      } catch {}
+      // По умолчанию legacy-контур выключен:
+      // единым владельцем прогрева/старта является боевой координатор ниже.
+      return explicit || 'off';
+    })();
+    if (warmSweepMode !== 'on') return;
+
+    const selector = 'video[data-forum-video="post"]';
+
+    const pending = new Map();
+    let warmSweepRaf = 0;
+    let warmSweepTimeout = 0;
+    let warmSweepSettleTimer = 0;
+    let lastWarmSweepTs = 0;
+    let lastWarmSweepTop = -1;
+    const warmLeaseUntil = new WeakMap();
+    const traceEnabled = (() => {
+      try {
+        if (String(process.env.NEXT_PUBLIC_FORUM_VIDEO_TRACE || '') === '1') return true;
+      } catch {}
+      try {
+        const qs = new URLSearchParams(window.location.search || '');
+        const fromQuery = String(qs.get('videoTrace') || '').trim();
+        if (fromQuery === '1' || fromQuery.toLowerCase() === 'true') return true;
+      } catch {}
+      return false;
+    })();
+    const trace = (event, video, extra = {}) => {
+      if (!traceEnabled) return;
+      try {
+        const bucket = Array.isArray(window.__forumVideoTrace) ? window.__forumVideoTrace : [];
+        const src = String(
+          video?.dataset?.__src ||
+          video?.getAttribute?.('data-src') ||
+          video?.currentSrc ||
+          video?.getAttribute?.('src') ||
+          ''
+        );
+        bucket.push({
+          ts: Date.now(),
+          event,
+          id: String(video?.dataset?.__mid || ''),
+          src,
+          readyState: Number(video?.readyState || 0),
+          networkState: Number(video?.networkState || 0),
+          loadPending: String(video?.dataset?.__loadPending || ''),
+          warmReady: String(video?.dataset?.__warmReady || ''),
+          active: String(video?.dataset?.__active || ''),
+          prewarm: String(video?.dataset?.__prewarm || ''),
+          resident: String(video?.dataset?.__resident || ''),
+          ...extra,
+        });
+        while (bucket.length > 320) bucket.shift();
+        window.__forumVideoTrace = bucket;
+      } catch {}
+    };
+    try {
+      if (traceEnabled && typeof window.dumpForumVideoTrace !== 'function') {
+        window.dumpForumVideoTrace = () => {
+          try {
+            return Array.isArray(window.__forumVideoTrace) ? [...window.__forumVideoTrace] : [];
+          } catch {
+            return [];
+          }
+        };
+      }
+    } catch {}
+    const schedulePrepare = (fn) => {
+      let done = false;
+      const run = () => {
+        if (done) return;
+        done = true;
+        try { fn(); } catch {}
+      };
+      const rafId = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(run) : 0;
+      const timeoutId = setTimeout(run, 12);
+      return { rafId, timeoutId };
+    };
+    const cancelPrepare = (job) => {
+      try {
+        if (job?.rafId) cancelAnimationFrame(job.rafId);
+      } catch {}
+      try {
+        if (job?.timeoutId) clearTimeout(job.timeoutId);
+      } catch {}
+    };
+
+    const isIOSWarm = (() => {
+      try {
+        return /iP(hone|ad|od)/i.test(String(navigator?.userAgent || ''));
+      } catch {
+        return false;
+      }
+    })();
+    const isCoarseWarm = (() => {
+      try {
+        return !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      } catch {
+        return false;
+      }
+    })();
+    const warmMarginTop = Math.max(isIOSWarm ? 560 : 420, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 1.9 : 1.6)));
+    const warmMarginBottom = Math.max(isIOSWarm ? 1120 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSWarm ? 2.85 : 2.35)));
+    const poolMargin = Math.max(warmMarginTop, warmMarginBottom);
+    const warmResidentCap = isIOSWarm ? 4 : (isCoarseWarm ? 2 : 4);
+    const eagerWarmCount = isIOSWarm ? 2 : 2;
+    const warmLeaseMs = isIOSWarm ? 2200 : (isCoarseWarm ? 1500 : 1700);
+    const residentLeaseMs = isIOSWarm ? 1800 : (isCoarseWarm ? 1200 : 1350);
+    const farUnloadMargin = isIOSWarm
+      ? Math.max(Math.round(poolMargin * 2.4), 2400)
+      : isCoarseWarm
+        ? Math.max(Math.round(poolMargin * 1.9), 1800)
+        : Math.max(Math.round(poolMargin * 2.6), 2400);
+
+    const extendWarmLease = (video, ms) => {
+      try {
+        warmLeaseUntil.set(video, Date.now() + Math.max(120, Number(ms || 0)));
+      } catch {}
+    };
+
+    const warm = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+
+      try {
+        // Более ранний prewarm: к зоне фокуса хотим уже готовый первый кадр.
+        video.dataset.__resident = '1';
+        video.dataset.__prewarm = '1';
+        video.preload = 'auto';
+        extendWarmLease(video, warmLeaseMs);
+        trace('warm', video);
+
+        // Если первый кадр/данные уже готовы — ничего не делаем
+        if (video.readyState >= 2) return;
+        if (video.dataset?.__loadPending === '1') return;
+        if (__hasLazyVideoSourceWithoutSrc(video)) {
+          // Prime the lazy source before entering the autoplay focus zone for TikTok-like instant start.
+          trace('warm_restore', video);
+          __restoreVideoEl(video);
+          return;
+        }
+
+        // Подготовка должна происходить заранее, а не ждать idle во время скролла.
+        if (pending.has(video)) return;
+        const job = schedulePrepare(() => {
+          pending.delete(video);
+          try {
+            if (!video.isConnected) return;
+            if (__hasLazyVideoSourceWithoutSrc(video)) return;
+            const cold = (video.readyState === 0 || !video.currentSrc);
+            const safe = cold && video.paused && (video.currentTime === 0);
+if (safe && video.dataset?.__loadPending !== '1') {
+  const now = Date.now();
+  const minWarmGap = isIOSWarm ? 2200 : (isCoarseWarm ? 1900 : 1600);
+  const lastWarmKickTs = Number(video.dataset?.__lastWarmLoadKickTs || 0);
+  if (lastWarmKickTs > 0 && (now - lastWarmKickTs) < minWarmGap) return;
+  try { video.dataset.__lastWarmLoadKickTs = String(now); } catch {}
+  trace('warm_load', video);
+  kickMediaLoad(video, {
+    channel: 'warm_load',
+    minGapMs: minWarmGap,
+    burstWindowMs: isIOSWarm ? 22000 : 16000,
+    burstLimit: isIOSWarm ? 2 : 3,
+    blockMs: isIOSWarm ? 12000 : 9000,
+  });
+}
+          } catch {}
+        });
+        pending.set(video, job);
+      } catch {}
+    };
+
+    const keepResident = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      try {
+        video.dataset.__resident = '1';
+        if (video.dataset?.__active !== '1') video.dataset.__prewarm = '0';
+        extendWarmLease(video, residentLeaseMs);
+        if (__hasLazyVideoSourceWithoutSrc(video)) {
+          __restoreVideoEl(video);
+        }
+        if (video.dataset?.__active !== '1') {
+          video.preload = 'metadata';
+        }
+        trace('resident', video);
+      } catch {}
+    };
+
+    const cool = (video) => {
+      if (!(video instanceof HTMLVideoElement)) return;
+      const now = Date.now();
+      try {
+        video.dataset.__prewarm = '0';
+        video.dataset.__resident = '0';
+        trace('cool', video);
+      } catch {}
+      try {
+        if (video.dataset?.__active === '1') return;
+        const hasLease = Number(warmLeaseUntil.get(video) || 0) > now;
+        const nearViewport = __isVideoNearViewport(video, poolMargin);
+        const farViewport = !__isVideoNearViewport(video, farUnloadMargin);
+        const loadPending = video.dataset?.__loadPending === '1';
+        const lastRestoreTs = Number(video.dataset?.__lastRestoreTs || 0);
+        const lastHardUnloadTs = Number(video.dataset?.__lastHardUnloadTs || 0);
+        const restoredRecently =
+          lastRestoreTs > 0 &&
+          (now - lastRestoreTs) < (isIOSWarm ? 22000 : (isCoarseWarm ? 18000 : 15000));
+        const unloadedRecently =
+          lastHardUnloadTs > 0 &&
+          (now - lastHardUnloadTs) < (isIOSWarm ? 10000 : (isCoarseWarm ? 8200 : 7000));
+        if (loadPending && (nearViewport || hasLease)) {
+          video.dataset.__resident = '1';
+          video.preload = 'auto';
+          return;
+        }
+        video.preload = 'metadata';
+        if (!farViewport) return;
+        if (restoredRecently || unloadedRecently) return;
+        if (hasLease && loadPending) return;
+        // Hard-unload здесь не делаем: это зона ответственности
+        // боевого контура координатора ниже (единственный владелец unload).
+      } catch {}
+    };
+
+    const runWarmSweep = () => {
+      try {
+        const vh = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        const centerY = vh / 2;
+        const keepCount = Math.max(eagerWarmCount, warmResidentCap);
+        const ranked = Array.from(document.querySelectorAll(selector))
+          .filter((video) => video instanceof HTMLVideoElement && video.isConnected)
+          .map((video) => {
+            try {
+              const rect = video.getBoundingClientRect?.();
+              const center = rect ? ((rect.top + rect.bottom) / 2) : 0;
+              const dist = Math.abs(center - centerY);
+              const near = __isVideoNearViewport(video, poolMargin);
+              return { video, dist, near };
+            } catch {
+              return { video, dist: Number.MAX_SAFE_INTEGER, near: false };
+            }
+          })
+          .filter((item) => item.near)
+          .sort((a, b) => a.dist - b.dist);
+
+        const keep = ranked.slice(0, keepCount);
+        const keepSet = new Set(keep.map((item) => item.video));
+
+        keep.forEach(({ video }, index) => {
+          if (index < eagerWarmCount) warm(video);
+          else keepResident(video);
+        });
+
+        Array.from(document.querySelectorAll(selector)).forEach((video) => {
+          if (!(video instanceof HTMLVideoElement)) return;
+          if (keepSet.has(video)) return;
+          cool(video);
+        });
+      } catch {}
+    };
+
+    const cancelWarmSweepSchedule = () => {
+      if (warmSweepRaf) {
+        try { cancelAnimationFrame(warmSweepRaf); } catch {}
+        warmSweepRaf = 0;
+      }
+      if (warmSweepTimeout) {
+        try { clearTimeout(warmSweepTimeout); } catch {}
+        warmSweepTimeout = 0;
+      }
+      if (warmSweepSettleTimer) {
+        try { clearTimeout(warmSweepSettleTimer); } catch {}
+        warmSweepSettleTimer = 0;
+      }
+    };
+
+    const readWarmSweepScrollTop = () => {
+      try {
+        const scrollEl = document.querySelector?.('[data-forum-scroll="1"]') || null;
+        if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+          return Number(scrollEl.scrollTop || 0);
+        }
+      } catch {}
+      try {
+        return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0);
+      } catch {}
+      return 0;
+    };
+
+    const scheduleWarmSweep = (mode = 'debounce') => {
+      if (mode === 'debounce') {
+        if (warmSweepSettleTimer) {
+          try { clearTimeout(warmSweepSettleTimer); } catch {}
+          warmSweepSettleTimer = 0;
+        }
+        warmSweepSettleTimer = setTimeout(() => {
+          warmSweepSettleTimer = 0;
+          scheduleWarmSweep('immediate');
+        }, isCoarseWarm ? 220 : 128);
+        return;
+      }
+      if (warmSweepRaf || warmSweepTimeout) return;
+      const runner = () => {
+        warmSweepRaf = 0;
+        warmSweepTimeout = 0;
+        const now = Date.now();
+        const top = readWarmSweepScrollTop();
+        const topDelta = Math.abs(top - lastWarmSweepTop);
+        if ((now - lastWarmSweepTs) < (isCoarseWarm ? 280 : 180) && topDelta < (isCoarseWarm ? 420 : 220)) return;
+        lastWarmSweepTs = now;
+        lastWarmSweepTop = top;
+        runWarmSweep();
+      };
+      try {
+        warmSweepRaf = requestAnimationFrame(runner);
+      } catch {
+        warmSweepTimeout = setTimeout(runner, 32);
+      }
+    };
+
+    // если нет IntersectionObserver — готовим всё сразу
+    if (!('IntersectionObserver' in window)) {
+      document.querySelectorAll(selector).forEach(warm);
+      return () => {
+        try {
+          pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
+          pending.clear();
+        } catch {}
+      };
+    }
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            runWarmSweep();
+            return;
+          }
+          cool(entry.target);
+        });
+      },
+      {
+        // Чуть раньше подготавливаем медиа, чтобы автоплей не "спотыкался"
+        // при входе в зону фокуса на мобильных.
+        threshold: 0.01,
+        rootMargin: `${warmMarginTop}px 0px ${warmMarginBottom}px 0px`,
+      }
+    );
+
+    document.querySelectorAll(selector).forEach((v) => {
+      io.observe(v);
+    });
+    runWarmSweep();
+
+    const onWarmSweepResize = () => runWarmSweep();
+    const onWarmSweepScroll = () => {
+      const now = Date.now();
+      const top = readWarmSweepScrollTop();
+      const topDelta = Math.abs(top - lastWarmSweepTop);
+      if (lastWarmSweepTop >= 0 && topDelta < (isCoarseWarm ? 72 : 24)) return;
+      if (topDelta > (isCoarseWarm ? 900 : 1400) && (now - lastWarmSweepTs) > (isCoarseWarm ? 260 : 320)) {
+        scheduleWarmSweep('immediate');
+        return;
+      }
+      scheduleWarmSweep('debounce');
+    };
+    const onWarmSweepVisibility = () => {
+      try {
+        if (document.visibilityState === 'visible') runWarmSweep();
+      } catch {}
+    };
+    const scrollEl = (() => {
+      try {
+        const el = document.querySelector?.('[data-forum-scroll="1"]') || null;
+        if (el && el.scrollHeight > el.clientHeight + 1) return el;
+      } catch {}
+      return null;
+    })();
+    try { window.addEventListener('resize', onWarmSweepResize, { passive: true }); } catch {}
+    if (scrollEl) {
+      try { scrollEl.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}
+    } else {
+      try { window.addEventListener('scroll', onWarmSweepScroll, { passive: true }); } catch {}
+    }
+    try { document.addEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
+
+    return () => {
+      io.disconnect();
+      try { window.removeEventListener('resize', onWarmSweepResize); } catch {}
+      if (scrollEl) {
+        try { scrollEl.removeEventListener('scroll', onWarmSweepScroll); } catch {}
+      } else {
+        try { window.removeEventListener('scroll', onWarmSweepScroll); } catch {}
+      }
+      try { document.removeEventListener('visibilitychange', onWarmSweepVisibility); } catch {}
+      cancelWarmSweepSchedule();
+      try {
+        pending.forEach((job) => { try { cancelPrepare(job); } catch {} });
+        pending.clear();
+      } catch {}
+    };
+  }, []);
+  // === Ранний prewarm iframe (YouTube/TikTok/other embeds) для более быстрого старта в зоне фокуса ===
+  useEffect(() => {
+    if (!isBrowser()) return;
+    if (!('IntersectionObserver' in window)) return;
+    const legacyIframePrewarmMode = (() => {
+      let explicit = '';
+      try {
+        const env = String(process.env.NEXT_PUBLIC_FORUM_LEGACY_IFRAME_PREWARM || '').trim().toLowerCase();
+        if (env === '1' || env === 'true' || env === 'on') explicit = 'on';
+        if (env === '0' || env === 'false' || env === 'off') explicit = 'off';
+      } catch {}
+      // По умолчанию legacy iframe-прогрев выключен:
+      // чтобы не конкурировать с основным near/focus контуром.
+      return explicit || 'off';
+    })();
+    // Этот контур legacy; основной owner — нижний coordinator.
+    if (legacyIframePrewarmMode !== 'on') return;
+
+    const selector = 'iframe[data-forum-media="youtube"],iframe[data-forum-media="tiktok"],iframe[data-forum-media="iframe"]';
+    const isCoarseUi = (() => {
+      try {
+        const ua = String(navigator?.userAgent || '');
+        return /iP(hone|ad|od)|Android/i.test(ua) || !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+      } catch {
+        return false;
+      }
+    })();
+    const prewarmCap = isCoarseUi ? 3 : 4;
+
+    const getLoadedIframeCount = () => {
+      try {
+        return Array.from(document.querySelectorAll(selector)).filter((el) => {
+          try { return !!el.getAttribute('src'); } catch { return false; }
+        }).length;
+      } catch {
+        return 0;
+      }
+    };
+
+    const prewarm = (node) => {
+      const el = node instanceof HTMLIFrameElement ? node : null;
+      if (!el) return;
+      const now = Date.now();
+      const lastPrewarmTs = Number(el.dataset?.forumPrewarmTs || 0);
+      if (lastPrewarmTs > 0 && (now - lastPrewarmTs) < 900) return;
+      const src = String(el.getAttribute('data-src') || '').trim();
+      if (!src) return;
+      const cur = String(el.getAttribute('src') || '').trim();
+      if (cur) {
+        el.dataset.forumPrewarmInit = '1';
+        el.dataset.forumPrewarmTs = String(now);
+        return;
+      }
+      if (getLoadedIframeCount() >= prewarmCap) return;
+      try { el.setAttribute('src', src); } catch {}
+      try { el.setAttribute('data-forum-last-active-ts', String(now)); } catch {}
+      try { el.dataset.forumPrewarmInit = '1'; } catch {}
+      try { el.dataset.forumPrewarmTs = String(now); } catch {}
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          prewarm(entry.target);
+        }
+      },
+      {
+        threshold: 0.01,
+        rootMargin: `${Math.max(isCoarseUi ? 420 : 340, Math.round(__MEDIA_VIS_MARGIN_PX * 1.35))}px 0px ${Math.max(isCoarseUi ? 980 : 760, Math.round(__MEDIA_VIS_MARGIN_PX * 2.35))}px 0px`,
+      }
+    );
+
+    try { document.querySelectorAll(selector).forEach((el) => io.observe(el)); } catch {}
+
+    let mo = null;
+    try {
+      mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          for (const n of (m.addedNodes || [])) {
+            if (!(n instanceof Element)) continue;
+            if (n.matches?.(selector)) io.observe(n);
+            try { n.querySelectorAll?.(selector)?.forEach?.((el) => io.observe(el)); } catch {}
+          }
+        }
+      });
+      mo.observe(document.body, { childList: true, subtree: true });
+    } catch {}
+
+    return () => {
+      try { mo?.disconnect?.(); } catch {}
+      try { io.disconnect(); } catch {}
+    };
+  }, []);
+  // === Shorts-like autoplay: play when in focus, pause when out ===
+  // Расширено для video + audio + iframe (YouTube/TikTok best-effort).
   useEffect(() => {
     if (!isBrowser()) return;
 
@@ -430,8 +935,8 @@ const applyMutedPrefToAll = () => {
 
         if (ios) return 1;
         if (lowMem) return 1;
-        if (coarse) return 1;
-        return 2;
+        if (coarse) return 2;
+        return 4;
       } catch {
         return 2;
       }
@@ -441,13 +946,6 @@ let pendingLoadsCacheVal = 0;
 let nativePrewarmEl = null;
 let nativePrewarmTs = 0;
 const nativePauseRecovery = new WeakMap();
-const POST_NATIVE_SRC_CAP = (() => {
-      try {
-        return 2;
-      } catch {
-        return 2;
-      }
-    })();
 const readPendingLoads = (force = false) => {
       try {
         const now = Date.now();
@@ -739,161 +1237,6 @@ const isHtmlMediaLoadingOrBuffered = (el) => {
   return false;
 };
 
-const clampPostNativeWarmBuffer = (el, reason = 'warm_buffer_clamp') => {
-  const media = getMediaStateNode(el);
-  if (!(media instanceof HTMLVideoElement)) return false;
-  try {
-    if (String(media?.getAttribute?.('data-forum-video') || '') !== 'post') return false;
-    if (String(media?.getAttribute?.('data-forum-media') || '') !== 'video') return false;
-
-    const owner = getOwnerNode(media) || media;
-    const activeOwner = active instanceof Element ? active : null;
-    const ownerMatchesActive =
-      !!(owner instanceof Element && activeOwner && (
-        activeOwner === owner ||
-        activeOwner.contains?.(owner) ||
-        owner.contains?.(activeOwner)
-      ));
-    const wantsRealPlayback =
-      ownerMatchesActive ||
-      String(media?.dataset?.__active || '') === '1' ||
-      String(media?.dataset?.__playRequested || '') === '1' ||
-      hasUserGestureIntent(owner || media) ||
-      hasUserGestureIntent(media) ||
-      hasManualLease(owner || media) ||
-      hasManualLease(media);
-
-    if (wantsRealPlayback) return false;
-
-    const ready = Number(media.readyState || 0) >= 2;
-    if (ready) {
-      media.dataset.__warmReady = '1';
-      media.dataset.__resident = '1';
-      media.dataset.__prewarm = '1';
-      media.dataset.__nativeWarmClampedReason = String(reason || 'warm_buffer_clamp');
-      const holdMs = isIOSUi ? 4200 : (isCoarseUi ? 3000 : 1800);
-      const until = Date.now() + holdMs;
-      const prevUntil = Number(media.dataset?.__nativePrimeHoldUntil || 0);
-      media.dataset.__nativePrimeHoldUntil = String(Math.max(prevUntil, until));
-    }
-
-    if (media.paused || String(media?.dataset?.__nativePrimeWarmupOnly || '') === '1') {
-      media.preload = 'metadata';
-    }
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') => {
-  try {
-    const nodes = Array.from(document.querySelectorAll('video[data-forum-media="video"][data-forum-video="post"]'))
-      .filter((node) => {
-        try {
-          return (
-            node instanceof HTMLVideoElement &&
-            node.isConnected &&
-            !!String(node.currentSrc || node.getAttribute?.('src') || '').trim()
-          );
-        } catch {
-          return false;
-        }
-      });
-    if (nodes.length <= POST_NATIVE_SRC_CAP) return;
-
-    const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-    const nearProtectPx = (() => {
-      try {
-        if (isIOSUi) return Math.max(1120, Math.min(1800, Math.round(viewportH * 1.35)));
-        if (isCoarseUi) return Math.max(920, Math.min(1500, Math.round(viewportH * 1.08)));
-        return Math.max(560, Math.min(980, Math.round(viewportH * 0.72)));
-      } catch {
-        return isIOSUi ? 1120 : (isCoarseUi ? 920 : 560);
-      }
-    })();
-    const keepMedia = getMediaStateNode(keepEl);
-    const activeOwner = active instanceof Element ? active : null;
-    const scored = nodes
-      .map((node) => {
-        const owner = getOwnerNode(node) || node;
-        const isKeep =
-          node === keepEl ||
-          node === keepMedia ||
-          node === nativePrewarmEl ||
-          !!(activeOwner && owner instanceof Element && (
-            activeOwner === owner ||
-            activeOwner === node ||
-            activeOwner.contains?.(owner) ||
-            owner.contains?.(activeOwner)
-          ));
-        const playing = !node.paused && !node.ended;
-        const visiblePx = getOwnerVisiblePx(owner || node);
-        const gapPx = getOwnerViewportGapPx(owner || node);
-        const holdUntil = Number(node.dataset?.__nativePrimeHoldUntil || 0);
-        const holdActive = holdUntil > Date.now();
-        const ready = Number(node.readyState || 0) >= 2 || String(node.dataset?.__warmReady || '') === '1';
-        const nearProtected =
-          visiblePx > 0 ||
-          holdActive ||
-          Number(gapPx || Number.POSITIVE_INFINITY) <= nearProtectPx;
-        const hardProtected = isKeep || playing || visiblePx > 0 || holdActive;
-        const priority =
-          (isKeep ? -1000000 : 0) +
-          (playing ? -900000 : 0) +
-          (nearProtected ? -760000 : 0) +
-          (holdActive ? -120000 : 0) +
-          (ready ? -40000 : 0) +
-          Math.max(0, Number(gapPx || 0)) -
-          (visiblePx * 24);
-        return { node, owner, isKeep, playing, priority, visiblePx, gapPx, holdActive, nearProtected, hardProtected, ready };
-      })
-      .sort((a, b) => b.priority - a.priority);
-
-    let attached = nodes.length;
-    for (const item of scored) {
-      if (attached <= POST_NATIVE_SRC_CAP) break;
-      if (item.hardProtected || (item.nearProtected && attached <= POST_NATIVE_SRC_CAP)) {
-        if (item.nearProtected) {
-          try {
-            item.node.preload = item.playing ? 'auto' : 'metadata';
-            item.node.dataset.__resident = '1';
-          } catch {}
-          trace('post_native_src_cap_keep_near', item.node, {
-            reason,
-            attachedBefore: nodes.length,
-            cap: POST_NATIVE_SRC_CAP,
-            visiblePx: item.visiblePx,
-            gapPx: item.gapPx,
-            nearProtectPx,
-            holdActive: item.holdActive,
-            ready: item.ready,
-          });
-        }
-        continue;
-      }
-      try {
-        item.node.dataset.__nativeSrcCapReason = String(reason || 'post_native_src_cap');
-        item.node.dataset.__nativePrimeHoldUntil = '0';
-        item.node.dataset.__prewarm = '0';
-        item.node.dataset.__resident = '0';
-      } catch {}
-      scheduleHardUnload(item.node, 0, 'resident_cap');
-      attached -= 1;
-      trace('post_native_src_cap_release', item.node, {
-        reason,
-        attachedBefore: nodes.length,
-        cap: POST_NATIVE_SRC_CAP,
-        visiblePx: item.visiblePx,
-        gapPx: item.gapPx,
-        nearProtectPx,
-        holdActive: item.holdActive,
-        ready: item.ready,
-      });
-    }
-  } catch {}
-};
-
 const kickMediaLoad = (
   el,
   {
@@ -941,17 +1284,9 @@ const kickMediaLoad = (
     }
   } catch {}
 
-  try {
-    if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim()) {
-      trace('load_kick_missing_src_after_restore', media, { channel });
-      return false;
-    }
-  } catch {}
-
   markLoadPending(media, channel);
 
   try {
-    if (media instanceof HTMLVideoElement) media.preload = 'auto';
     media.load?.();
     return true;
   } catch {
@@ -1257,7 +1592,6 @@ const kickMediaLoad = (
           applyMutedPref(el);
           el.playsInline = true;
           if (el instanceof HTMLVideoElement) {
-            const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
             try { el.loop = true; } catch {}
           }
           if (el.paused) startHtmlMedia(el, 'ready_replay');
@@ -1311,8 +1645,8 @@ try {
       !highPriorityReason &&
       (() => {
         try {
-          if (getOwnerVisiblePx(el) > 16) return true;
-          return getOwnerViewportGapPx(el) <= (isIOSUi ? 760 : (isCoarseUi ? 640 : 420));
+          if (getOwnerVisiblePx(el) > 24) return true;
+          return getOwnerViewportGapPx(el) <= (isIOSUi ? 280 : (isCoarseUi ? 320 : 220));
         } catch {
           return false;
         }
@@ -1781,66 +2115,6 @@ const onMutedEvent = (e) => {
         trace('media_error_ignore', target, { code: errCode, reason: 'coordinator_unload_window' });
         return;
       }
-      const isPostVideoError =
-        target instanceof HTMLVideoElement &&
-        String(target?.getAttribute?.('data-forum-video') || '') === 'post';
-      if (isPostVideoError && errCode >= 2 && errCode <= 4) {
-        const now = Date.now();
-        const readyState = Number(target?.readyState || 0);
-        const networkState = Number(target?.networkState || 0);
-        const visiblePx = owner instanceof Element ? getOwnerVisiblePx(owner) : getOwnerVisiblePx(target);
-        const gapPx = owner instanceof Element ? getOwnerViewportGapPx(owner) : getOwnerViewportGapPx(target);
-        const nearErrorSurface =
-          visiblePx > 0 ||
-          gapPx <= (isIOSUi ? 1400 : (isCoarseUi ? 1220 : 880));
-        const lastLifecycleTs = Math.max(
-          Number(target?.dataset?.__lastLoadKickTs || 0),
-          Number(target?.dataset?.__lastWarmLoadKickTs || 0),
-          Number(target?.dataset?.__lastRestoreLoadTs || 0),
-          Number(target?.dataset?.__attachedSrcTs || 0),
-          Number(target?.dataset?.__lastLifecycleTouchTs || 0),
-        );
-        const recentLifecycle = lastLifecycleTs > 0 && (now - lastLifecycleTs) < (isIOSUi ? 9000 : 6200);
-        const loadingState =
-          typeof HTMLMediaElement !== 'undefined' &&
-          networkState === HTMLMediaElement.NETWORK_LOADING;
-        const srcNow = String(target.getAttribute('src') || target.currentSrc || '').trim();
-        const lazySrc = String(target.dataset?.__src || target.getAttribute('data-src') || '').trim();
-        const transientPostSurfaceError =
-          !!(srcNow || lazySrc) &&
-          (
-            nearErrorSurface ||
-            recentLifecycle ||
-            loadingState ||
-            readyState >= 1 ||
-            String(target?.dataset?.__loadPending || '') === '1'
-          );
-
-        if (transientPostSurfaceError) {
-          try {
-            target.dataset.__loadPending = '0';
-            target.dataset.__warmReady = readyState >= 2 ? '1' : String(target.dataset?.__warmReady || '0');
-            target.dataset.__transientPostMediaErrorTs = String(now);
-            target.dataset.__transientPostMediaErrorCode = String(errCode || 0);
-            delete target.dataset.__blockedMediaUntil;
-          } catch {}
-          clearMediaSrcBlocked(target, 'transient_post_media_error');
-          clearReadyReplay(target);
-          if (owner instanceof Element) cancelUnload(owner);
-          try { target.preload = readyState >= 2 ? 'metadata' : 'auto'; } catch {}
-          trace('media_error_ignore', target, {
-            code: errCode,
-            reason: 'transient_post_surface_error',
-            readyState,
-            networkState,
-            visiblePx,
-            gapPx,
-            recentLifecycle,
-            loadingState,
-          });
-          return;
-        }
-      }
       if (errCode === 2) {
         const now = Date.now();
         const lastKickTs = Math.max(
@@ -1933,11 +2207,6 @@ const onMediaLoadedCaptured = (e) => {
       : true;
 
     const readyPlayAttemptTs = Number(target?.dataset?.__readyPlayAttemptTs || 0);
-
-    if (isPostVideo && !wantsAutoplay) {
-      clampPostNativeWarmBuffer(target, `loaded_${e?.type || 'ready'}`);
-      enforcePostNativeSrcCap(target, 'loaded_warm_ready');
-    }
 
     if (
       wantsAutoplay &&
@@ -2173,7 +2442,6 @@ try { restoreUserSoundAfterSafeAutoplay(el, reason); } catch {}
 if (String(el?.dataset?.__warmReady || '') === '1') {
   try { __touchActiveVideoEl(el); } catch {}
   try { __enforceActiveVideoCap(el); } catch {}
-  try { enforcePostNativeSrcCap(el, 'play_started'); } catch {}
 }
           }).catch((err) => {
             if (!canContinue()) {
@@ -2254,7 +2522,6 @@ try { restoreUserSoundAfterSafeAutoplay(el, reason); } catch {}
 if (String(el?.dataset?.__warmReady || '') === '1') {
   try { __touchActiveVideoEl(el); } catch {}
   try { __enforceActiveVideoCap(el); } catch {}
-  try { enforcePostNativeSrcCap(el, 'play_retry_started'); } catch {}
 }                 
                 }).catch((retryErr) => {
                   try { el.dataset.__playRequested = '0'; } catch {}
@@ -2697,8 +2964,7 @@ const shouldRetainHtmlMedia = (el) => {
         next === 'cleanup' ||
         next === 'resident_cap' ||
         next === 'error_blocked' ||
-        next === 'forceHardUnload' ||
-        next === 'native_warm_owner_lost'
+        next === 'forceHardUnload'
       );
     };
     const isSoftPostVideoUnloadReason = (reason = 'timeout') => {
@@ -2934,10 +3200,9 @@ const pauseForeignMedia = (keepEl = null) => {
           const forceHard =
             emergencyHtmlMediaUnload ||
             String(el?.dataset?.__forceHardUnload || '') === '1';
-          const detachHard = forceHard && unloadReason !== 'native_warm_owner_lost';
-          if (detachHard) el.dataset.__forceHardUnload = '1';
+          if (forceHard) el.dataset.__forceHardUnload = '1';
           else delete el.dataset.__forceHardUnload;
-          if (detachHard) el.dataset.__pendingHardUnload = '1';
+          if (forceHard) el.dataset.__pendingHardUnload = '1';
           else delete el.dataset.__pendingHardUnload;
         } catch {}
         try { __dropActiveVideoEl(el); } catch {}
@@ -3093,46 +3358,6 @@ const pauseForeignMedia = (keepEl = null) => {
               return;
             }
           }
-
-          if (
-            emergencyHtmlMediaUnload &&
-            reason !== 'cleanup' &&
-            reason !== 'forceHardUnload' &&
-            isConnectedPostVideoOwner(el)
-          ) {
-            const media = getMediaStateNode(el);
-            const gapPx = getOwnerViewportGapPx(el);
-            const nearPostSurface =
-              visiblePx > 0 ||
-              gapPx <= (isIOSUi ? 1400 : (isCoarseUi ? 1220 : 880));
-            if (nearPostSurface) {
-              setPendingHardUnload(el, false);
-              try {
-                if (media?.dataset) {
-                  delete media.dataset.__forceHardUnload;
-                  delete media.dataset.__pendingHardUnload;
-                  media.dataset.__resident = '1';
-                  media.dataset.__prewarm = '0';
-                  media.dataset.__loadPending = '0';
-                  if (Number(media.readyState || 0) >= 2) media.dataset.__warmReady = '1';
-                }
-              } catch {}
-              try {
-                if (media instanceof HTMLMediaElement && !media.paused) {
-                  withSystemPause(media, () => {
-                    try { media.pause?.(); } catch {}
-                  });
-                }
-                if (media instanceof HTMLVideoElement) media.preload = 'metadata';
-              } catch {}
-              trace('hard_unload_softened_visible_post_video', media || el, {
-                reason,
-                visiblePx,
-                gapPx,
-              });
-              return;
-            }
-          }
         } catch {}
 
         if (!isIframeLike(el) && shouldRetainHtmlMedia(el)) {
@@ -3160,16 +3385,16 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(1040, Math.min(1700, Math.round(viewportH * 1.55)));
-      if (isCoarseUi) return Math.max(860, Math.min(1400, Math.round(viewportH * 1.22)));
-      return Math.max(520, Math.min(960, Math.round(viewportH * 0.82)));
+      if (isIOSUi) return Math.max(620, Math.min(980, Math.round(viewportH * 1.04)));
+      if (isCoarseUi) return Math.max(520, Math.min(860, Math.round(viewportH * 0.92)));
+      return Math.max(440, Math.min(940, Math.round(viewportH * 0.8)));
     };
 
     const getNativePrimeGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(620, Math.min(1040, Math.round(viewportH * 1.02)));
-      if (isCoarseUi) return Math.max(500, Math.min(820, Math.round(viewportH * 0.82)));
-      return Math.max(0, Math.min(300, Math.round(viewportH * 0.26)));
+      if (isIOSUi) return Math.max(320, Math.min(520, Math.round(viewportH * 0.55)));
+      if (isCoarseUi) return Math.max(260, Math.min(440, Math.round(viewportH * 0.46)));
+      return Math.max(0, Math.min(300, Math.round(viewportH * 0.24)));
     };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3183,36 +3408,6 @@ const pauseForeignMedia = (keepEl = null) => {
       } catch {
         return false;
       }
-    };
-
-    const getNativePrewarmPipelineState = (el) => {
-      const media = getMediaStateNode(el);
-      const state = {
-        media,
-        hasSrc: false,
-        ready: false,
-        loading: false,
-        loadPending: false,
-        pendingForMs: 0,
-      };
-      if (!(media instanceof HTMLVideoElement)) return state;
-      try {
-        state.hasSrc = !!String(media.getAttribute?.('src') || media.currentSrc || '').trim();
-        state.ready = Number(media.readyState || 0) >= 2 || String(media.dataset?.__warmReady || '') === '1';
-        state.loadPending = String(media.dataset?.__loadPending || '') === '1';
-        const since = Number(media.dataset?.__loadPendingSince || 0);
-        state.pendingForMs = since > 0 ? Date.now() - since : 0;
-        const networkState = Number(media.networkState || 0);
-        state.loading =
-          state.hasSrc &&
-          (
-            state.ready ||
-            state.loadPending ||
-            networkState === HTMLMediaElement.NETWORK_LOADING ||
-            Number(media.readyState || 0) >= 1
-          );
-      } catch {}
-      return state;
     };
 
     const isNativePrewarmEligible = (el) => {
@@ -3310,28 +3505,6 @@ const pauseForeignMedia = (keepEl = null) => {
         return false;
       }
     };
-    const getNativeWarmOwnerLostDelay = (media) => {
-      try {
-        const now = Date.now();
-        const visiblePx = getOwnerVisiblePx(media);
-        const gapPx = getOwnerViewportGapPx(media);
-        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-        const holdUntil = Number(media?.dataset?.__nativePrimeHoldUntil || 0);
-        const holdLeft = holdUntil > now ? holdUntil - now : 0;
-        const nearOneCard =
-          visiblePx > 0 ||
-          gapPx <= Math.max(
-            getNativePrimeGapLimit(),
-            Math.round(viewportH * (isIOSUi ? 1.05 : (isCoarseUi ? 0.92 : 0.72))),
-          );
-        const runwayDelay = nearOneCard
-          ? (isIOSUi ? 2600 : (isCoarseUi ? 2200 : 1500))
-          : (isIOSUi ? 900 : (isCoarseUi ? 760 : 560));
-        return Math.max(runwayDelay, Math.min(holdLeft, isIOSUi ? 3200 : (isCoarseUi ? 2600 : 1800)));
-      } catch {
-        return isIOSUi ? 900 : (isCoarseUi ? 760 : 560);
-      }
-    };
     const releaseNativePrewarmExcept = (keepEl = null, reason = 'native_prewarm_replace') => {
       try {
         const prev = nativePrewarmEl;
@@ -3345,10 +3518,11 @@ const pauseForeignMedia = (keepEl = null) => {
           prev.dataset.__nativePrewarm = '0';
         } catch {}
 
-        // Keep one strict warm owner, but do not tear down the previous source
-        // inside the one-card mobile runway: it is the window where first frames
-        // are most often reused during small scroll corrections.
-        scheduleHardUnload(prev, getNativeWarmOwnerLostDelay(prev), 'native_warm_owner_lost');
+        if (!isNearViewportElement(prev, isIOSUi ? 420 : 520)) {
+          scheduleHardUnload(prev, isIOSUi ? 900 : 800, reason);
+        } else {
+          try { prev.preload = 'metadata'; } catch {}
+        }
       } catch {}
     };
 
@@ -3370,29 +3544,6 @@ const pauseForeignMedia = (keepEl = null) => {
         activeOwnerNow.contains?.(owner) ||
         owner.contains?.(activeOwnerNow)
       ));
-      const reasonLooksWarmup = /prewarm|candidate|early|predictive|near|priority/i.test(String(reason || ''));
-      const warmupOnlyPrime =
-        !ownerMatchesActiveNow &&
-        !hasUserGestureIntent(media) &&
-        !hasCoordinatorPlayIntent(media) &&
-        reasonLooksWarmup;
-      const activeKind = (() => {
-        try { return String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''); } catch { return ''; }
-      })();
-      const activeHasNativePostVideo = (() => {
-        try {
-          return !!(
-            activeOwnerNow instanceof Element &&
-            activeOwnerNow.querySelector?.('video[data-forum-video="post"][data-forum-media="video"]')
-          );
-        } catch {
-          return false;
-        }
-      })();
-      const allowHiddenWarmupPrime =
-        warmupOnlyPrime &&
-        (isIOSUi || isCoarseUi) &&
-        (!activeOwnerNow || !activeKind || activeHasNativePostVideo);
 
       // Mobile WebKit/Chrome often allow only one real playing media pipeline.
       // Prewarm may attach src/load, but it must not play-prime while splash, BG audio,
@@ -3411,14 +3562,11 @@ const pauseForeignMedia = (keepEl = null) => {
         }
       })();
 
-      const foreignPlaybackBlocksPrime = foreignPlaying && !allowHiddenWarmupPrime;
-      if (!ownerMatchesActiveNow && (foreignPlaybackBlocksPrime || (activeOwnerNow instanceof Element && !allowHiddenWarmupPrime))) {
+      if (!ownerMatchesActiveNow && (foreignPlaying || activeOwnerNow instanceof Element)) {
         trace('native_prime_skip_active_playing', media, {
           reason,
-          warmupOnlyPrime,
           foreignPlaying,
-          allowHiddenWarmupPrime,
-          activeKind,
+          activeKind: String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''),
           gapPx,
           visiblePx,
         });
@@ -3433,7 +3581,6 @@ const pauseForeignMedia = (keepEl = null) => {
         media.dataset.__nativePrimeTs = String(now);
         media.dataset.__nativePrimePending = '1';
         media.dataset.__nativePrimeReason = String(reason || 'native_prime');
-        media.dataset.__nativePrimeWarmupOnly = warmupOnlyPrime ? '1' : '0';
       } catch {}
 
       try { markSkipMutePersist(media, 2600); } catch {}
@@ -3447,41 +3594,17 @@ const pauseForeignMedia = (keepEl = null) => {
         media.preload = 'auto';
       } catch {}
 
-      try { markCoordinatorPlayIntent(media, warmupOnlyPrime ? (isIOSUi ? 3600 : 2800) : (isIOSUi ? 1800 : 1500)); } catch {}
-
-      const rememberPrimeReady = (holdMs = 0) => {
-        let ready = false;
-        try {
-          ready = Number(media.readyState || 0) >= 2;
-          if (ready) {
-            media.dataset.__warmReady = '1';
-            media.dataset.__loadPending = '0';
-            delete media.dataset.__loadPendingSince;
-            media.dataset.__nativePrimeReadyTs = String(Date.now());
-          }
-          if (holdMs > 0) {
-            const until = Date.now() + holdMs;
-            const prevUntil = Number(media.dataset?.__nativePrimeHoldUntil || 0);
-            media.dataset.__nativePrimeHoldUntil = String(Math.max(prevUntil, until));
-            media.dataset.__resident = '1';
-            media.dataset.__prewarm = '1';
-          }
-        } catch {}
-        return ready;
-      };
+      try { markCoordinatorPlayIntent(media, isIOSUi ? 1800 : 1500); } catch {}
 
       const finishPrime = (state = 'done') => {
         try { media.dataset.__nativePrimePending = '0'; } catch {}
         try {
-          const holdMs = warmupOnlyPrime ? (isIOSUi ? 5200 : (isCoarseUi ? 3800 : 2400)) : 0;
-          const warmedReady = rememberPrimeReady(holdMs);
           const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
           const nowVisiblePx = getOwnerVisiblePx(media);
           const nowCenterDist = getOwnerCenterDist(media);
           const shouldKeepPlaying =
             stillActive ||
             (
-              !warmupOnlyPrime &&
               nowVisiblePx >= getAutoplayMinVisiblePx(media) &&
               nowCenterDist <= getPriorityCenterMaxDist(media)
             );
@@ -3489,12 +3612,6 @@ const pauseForeignMedia = (keepEl = null) => {
             withSystemPause(media, () => {
               try { media.pause?.(); } catch {}
             });
-          }
-          if (!shouldKeepPlaying && warmupOnlyPrime && warmedReady) {
-            try { media.preload = 'metadata'; } catch {}
-          }
-          if (warmupOnlyPrime && warmedReady) {
-            try { enforcePostNativeSrcCap(media, 'native_prime_finish'); } catch {}
           }
           if (!shouldKeepPlaying && wantedMutedBeforePrime === false && media.paused) {
             try { markSkipMutePersist(media, 900); } catch {}
@@ -3512,8 +3629,7 @@ const pauseForeignMedia = (keepEl = null) => {
         const p = media.play?.();
         if (p && typeof p.then === 'function') {
           p.then(() => {
-            const holdDelay = warmupOnlyPrime ? (isIOSUi ? 520 : 380) : (isIOSUi ? 180 : 110);
-            setTimeout(() => finishPrime('played'), holdDelay);
+            setTimeout(() => finishPrime('played'), isIOSUi ? 180 : 110);
           }).catch((err) => {
             try { media.dataset.__nativePrimePending = '0'; } catch {}
             trace('native_prime_reject', media, {
@@ -3547,37 +3663,12 @@ const pauseForeignMedia = (keepEl = null) => {
         const nextGap = getOwnerViewportGapPx(media);
         const prevVisible = getOwnerVisiblePx(prev);
         const nextVisible = getOwnerVisiblePx(media);
-        const prevPipeline = getNativePrewarmPipelineState(prev);
-        const prevStillInRunway =
-          prevVisible > 0 ||
-          prevGap <= Math.round(getNativePrewarmGapLimit() * (isIOSUi ? 1.18 : 1.12));
-        const nextInFocusRunway =
-          nextVisible > Math.max(46, Math.round(getStartVisiblePx(media) * 0.44)) ||
-          nextGap <= Math.max(getNativePrimeGapLimit(), 360);
         const nextClearlyBetter =
           nextVisible > Math.max(0, prevVisible + 36) ||
           nextGap + (isIOSUi ? 180 : 140) < prevGap ||
           getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
-        const holdLoadingPrev =
-          prevPipeline.loading &&
-          !prevPipeline.ready &&
-          prevStillInRunway &&
-          !nextInFocusRunway &&
-          age < (isIOSUi ? 7200 : (isCoarseUi ? 6200 : 5200));
-        if (holdLoadingPrev) {
-          trace('native_prewarm_hold_loading_slot', prev, {
-            reason,
-            age,
-            prevGap,
-            nextGap,
-            prevVisible,
-            nextVisible,
-            pendingForMs: prevPipeline.pendingForMs,
-          });
-          return true;
-        }
         const canHoldPrev =
-          age < (isIOSUi ? 2400 : (isCoarseUi ? 1900 : 1600)) &&
+          age < (isIOSUi ? 1250 : 950) &&
           isNativePrewarmEligible(prev) &&
           !nextClearlyBetter;
         if (canHoldPrev) {
@@ -3608,7 +3699,6 @@ const pauseForeignMedia = (keepEl = null) => {
 
       nativePrewarmEl = media;
       nativePrewarmTs = Date.now();
-      try { enforcePostNativeSrcCap(media, 'native_prewarm_claim'); } catch {}
 
       if (Number(media.readyState || 0) >= 2 || String(media.dataset?.__warmReady || '') === '1') {
         trace('native_prewarm_ready', media, { reason });
@@ -3620,11 +3710,7 @@ const pauseForeignMedia = (keepEl = null) => {
           const hasSrc = !!String(media.getAttribute?.('src') || media.currentSrc || '').trim();
           const networkState = Number(media.networkState || 0);
           const loadPending = String(media.dataset?.__loadPending || '') === '1';
-          return hasSrc && (
-            loadPending ||
-            networkState === HTMLMediaElement.NETWORK_LOADING ||
-            Number(media.readyState || 0) >= 1
-          );
+          return hasSrc && (loadPending || networkState === HTMLMediaElement.NETWORK_LOADING || networkState === HTMLMediaElement.NETWORK_IDLE);
         } catch {
           return false;
         }
@@ -3807,13 +3893,9 @@ const pauseForeignMedia = (keepEl = null) => {
 try {
   clearSuppressedPlayback(el);
 
-const isPostNativeVideo =
-  el instanceof HTMLVideoElement &&
-  String(el?.getAttribute?.('data-forum-video') || '') === 'post';
-
 if (el instanceof HTMLVideoElement) {
   const hasSrc = !!el.getAttribute('src');
-  const isPostVideo = isPostNativeVideo;
+  const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
   let restoredNow = false;
 
   if (!hasSrc) {
@@ -4574,87 +4656,6 @@ return;
       return ensurePendingHtmlMediaReady(el, reason);
     }; 
 
-    let nativePrewarmScanRaf = 0;
-    let nativePrewarmScanLastTs = 0;
-    const pickPredictiveNativePrewarmTarget = (dir = 1) => {
-      try {
-        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-        if (viewportH <= 0) return null;
-        const runway = getNativePrewarmGapLimit();
-        const nodes = Array.from(document.querySelectorAll('video[data-forum-media="video"][data-forum-video="post"]'));
-        const rows = nodes
-          .map((node) => {
-            if (!(node instanceof HTMLVideoElement)) return null;
-            if (!node.isConnected) return null;
-            if (isUserPaused(node) || hasSuppressedPlayback(node) || isMediaSrcBlocked(node)) return null;
-            const owner = getOwnerNode(node) || node;
-            if (!(owner instanceof Element)) return null;
-            if (active && (active === node || active === owner || active.contains?.(node) || owner.contains?.(active))) {
-              return null;
-            }
-            const rect = owner.getBoundingClientRect?.();
-            if (!rect) return null;
-            const top = Number(rect.top || 0);
-            const bottom = Number(rect.bottom || 0);
-            if (bottom < -Math.round(runway * 0.42) || top > viewportH + runway) return null;
-            const visiblePx = Math.max(0, Math.min(bottom, viewportH) - Math.max(top, 0));
-            const gapPx = getOwnerViewportGapPx(node);
-            if (visiblePx <= 0 && gapPx > runway) return null;
-            const ahead =
-              dir < 0
-                ? bottom <= viewportH * 0.94
-                : top >= viewportH * 0.06;
-            const inViewport = visiblePx > 0;
-            const band = ahead ? 0 : (inViewport ? 1 : 2);
-            const pipeline = getNativePrewarmPipelineState(node);
-            const readyBonus = pipeline.ready ? -420 : 0;
-            const pendingBonus = pipeline.loading ? -180 : 0;
-            const distance = dir < 0
-              ? Math.max(0, viewportH - bottom)
-              : Math.max(0, top);
-            const score =
-              (band * 100000) +
-              distance +
-              (getOwnerCenterDist(node) * 0.18) -
-              (visiblePx * 2.2) +
-              readyBonus +
-              pendingBonus +
-              (getMediaDomOrder(owner) * 0.001);
-            return { node, score, gapPx, visiblePx, top, bottom, band };
-          })
-          .filter(Boolean)
-          .sort((a, b) => a.score - b.score);
-        return rows[0] || null;
-      } catch {
-        return null;
-      }
-    };
-    const scheduleNativePrewarmScan = (reason = 'predictive_native_scan') => {
-      try {
-        const now = Date.now();
-        if (nativePrewarmScanRaf) return;
-        if ((now - Number(nativePrewarmScanLastTs || 0)) < (isIOSUi ? 90 : 120)) return;
-        nativePrewarmScanLastTs = now;
-        nativePrewarmScanRaf = requestAnimationFrame(() => {
-          nativePrewarmScanRaf = 0;
-          const dir = updateCoordinatorScrollDirection();
-          const picked = pickPredictiveNativePrewarmTarget(dir);
-          if (!picked?.node) return;
-          const prepared = prewarmAhead(picked.node, reason);
-          traceCandidate('candidate_predictive_native_prewarm', picked.node, {
-            reason,
-            prepared,
-            dir,
-            gapPx: picked.gapPx,
-            visiblePx: picked.visiblePx,
-            band: picked.band,
-          });
-        });
-      } catch {
-        nativePrewarmScanRaf = 0;
-      }
-    };
-
     nearIo = new IntersectionObserver(
       (entries) => {
         const dir = updateCoordinatorScrollDirection();
@@ -4684,9 +4685,8 @@ return;
             return b.visiblePx - a.visiblePx;
           });
         if (!intersecting.length) return;
-        scheduleNativePrewarmScan('near_io_predictive_native');
 
-        const maxBatch = 1;
+        const maxBatch = isIOSUi ? 1 : (isCoarseUi ? 1 : 2);
         let preparedCount = 0;
         for (const item of intersecting) {
           if (preparedCount >= maxBatch) break;
@@ -4721,9 +4721,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 760 : (isCoarseUi ? 620 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.78 : 1.24)))
+          Math.max(isIOSUi ? 520 : (isCoarseUi ? 420 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.45 : 1.22)))
         }px 0px ${
-          Math.max(isIOSUi ? 1450 : (isCoarseUi ? 1180 : 900), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 3.35 : 2.35)))
+          Math.max(isIOSUi ? 920 : (isCoarseUi ? 760 : 940), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.38 : 1.9)))
         }px 0px`,
       },
     );
@@ -4757,32 +4757,6 @@ return;
  
         io?.observe?.(el);
         nearIo?.observe?.(el);
-
-        if (isNativePostVideoCandidate(el)) {
-          const media = getMediaStateNode(el);
-          const visiblePx = getOwnerVisiblePx(el);
-          const gapPx = getOwnerViewportGapPx(el);
-          const shouldRestoreSurface =
-            visiblePx > 0 ||
-            gapPx <= Math.max(getNativePrimeGapLimit(), isCoarseUi ? 520 : 420);
-          if (
-            shouldRestoreSurface &&
-            media instanceof HTMLVideoElement &&
-            !isUserPaused(media) &&
-            !hasSuppressedPlayback(media) &&
-            !isMediaSrcBlocked(media)
-          ) {
-            if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim() && __hasLazyVideoSourceWithoutSrc(media)) {
-              trace('observe_native_visible_restore', media, { visiblePx, gapPx });
-              try { __restoreVideoEl(media); } catch {}
-            }
-            if (visiblePx > Math.max(40, Math.round(getStartVisiblePx(media) * 0.32))) {
-              try { prepareNativePriorityPrewarm(media, 'observe_visible_native'); } catch {}
-            } else {
-              try { scheduleNativePrewarmScan('observe_near_native_predictive_scan'); } catch {}
-            }
-          }
-        }
       } catch {}
     };
 
@@ -4856,17 +4830,6 @@ const onExternalMediaPlay = (e) => {
 };
 
     observeAll();
-    scheduleNativePrewarmScan('initial_native_predictive_scan');
-    const onCoordinatorScroll = () => {
-      updateCoordinatorScrollDirection();
-      scheduleNativePrewarmScan('scroll_native_predictive_scan');
-    };
-    let coordinatorScrollEl = null;
-    try {
-      coordinatorScrollEl = document.querySelector?.('[data-forum-scroll="1"]') || null;
-      coordinatorScrollEl?.addEventListener?.('scroll', onCoordinatorScroll, { passive: true });
-    } catch {}
-    window.addEventListener('scroll', onCoordinatorScroll, { passive: true });
     const recoverVisibleHtmlMedia = (reason = 'visibility_recover') => {
       try {
         document.querySelectorAll(selector).forEach((owner) => {
@@ -4913,16 +4876,13 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
         return;
       }
       try { observeAll(); } catch {}
-      scheduleNativePrewarmScan('visibility_native_predictive_scan');
       recoverVisibleHtmlMedia('visibility_visible');
     };
     const onPageShowRecover = () => {
       try { observeAll(); } catch {}
-      scheduleNativePrewarmScan('pageshow_native_predictive_scan');
       recoverVisibleHtmlMedia('pageshow');
     };
     const onWindowFocusRecover = () => {
-      scheduleNativePrewarmScan('focus_native_predictive_scan');
       recoverVisibleHtmlMedia('window_focus');
     };
 
@@ -4982,7 +4942,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
         if (!touchedMedia) return;
         mutationSweepPending = true;
         scheduleMutationSweep();
-        scheduleNativePrewarmScan('mutation_native_predictive_scan');
       });
       mo.observe(document.body, { childList: true, subtree: true });
     } catch { mo = null; }
@@ -5009,8 +4968,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       mutationSweepPending = false;
       window.removeEventListener(MEDIA_MUTED_EVENT, onMutedEvent);
       window.removeEventListener('site-media-play', onExternalMediaPlay);
-      try { coordinatorScrollEl?.removeEventListener?.('scroll', onCoordinatorScroll); } catch {}
-      window.removeEventListener('scroll', onCoordinatorScroll);
       document.removeEventListener('visibilitychange', onVisibilityRecover, true);
       window.removeEventListener('pageshow', onPageShowRecover);
       window.removeEventListener('focus', onWindowFocusRecover, true);
@@ -5023,10 +4980,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       try { if (rafId) cancelAnimationFrame(rafId); } catch {}
       io?.disconnect?.();
       nearIo?.disconnect?.();
-      if (nativePrewarmScanRaf) {
-        try { cancelAnimationFrame(nativePrewarmScanRaf); } catch {}
-        nativePrewarmScanRaf = 0;
-      }
       try { releaseNativePrewarmExcept(null, 'cleanup'); } catch {}
       try { sweepDetachedMediaState('cleanup', true); } catch {}
 
