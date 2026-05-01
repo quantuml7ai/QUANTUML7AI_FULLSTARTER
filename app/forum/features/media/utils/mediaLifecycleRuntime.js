@@ -350,6 +350,15 @@ const activePostPipeline = (() => {
     return false
   }
 })()
+const nativePrimeHoldActive = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    const until = Number(el.dataset?.__nativePrimeHoldUntil || 0)
+    return until > Date.now()
+  } catch {
+    return false
+  }
+})()
 
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
@@ -357,6 +366,7 @@ const shouldKeepResidentPostVideo =
   __SOFT_RESIDENT_POST_VIDEO &&
   !!el?.isConnected &&
   (
+    nativePrimeHoldActive ||
     nearViewport ||
     shellVisible ||
     (postPrewarmRunway && (freshPostLoadPending || activePostPipeline))

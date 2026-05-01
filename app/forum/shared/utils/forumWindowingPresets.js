@@ -37,9 +37,9 @@ export function readForumCardEstimate(kind = 'post') {
       desktop: 300,
     },
     ad: {
-      mobile: 200,
-      tablet: 260,
-      desktop: 320,
+      mobile: 520,
+      tablet: 620,
+      desktop: 650,
     },
   }
 

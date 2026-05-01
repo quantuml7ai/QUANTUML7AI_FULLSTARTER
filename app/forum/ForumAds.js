@@ -437,6 +437,11 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
 
     const reasonKey = String(reason || 'release');
     const state = getAdViewportState(videoEl);
+    const keepVisibleSurface =
+      videoEl.paused &&
+      isAdNativeVideoLoadingOrReady(videoEl) &&
+      (state.inViewport || state.gapPx <= 1280) &&
+      (reasonKey === 'near_exit' || reasonKey === 'replace' || reasonKey === 'release');
     const keepNearExitWarm =
       reasonKey === 'near_exit' &&
       videoEl.paused &&
@@ -446,15 +451,19 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
     // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
     // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
     // Поэтому near_exit не убивает живой близкий warm; replace/unmount/bad_src по-прежнему освобождают.
-    if (keepNearExitWarm) {
+    if (keepNearExitWarm || keepVisibleSurface) {
       adNativeWarmSlot = {
         video: videoEl,
         src: String(videoEl.dataset?.adNativeSrc || videoEl.currentSrc || videoEl.getAttribute?.('src') || adNativeWarmSlot.src || ''),
         ts: Date.now(),
       };
       try {
-        if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1';
-        videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
+        if (videoEl.dataset) {
+          videoEl.dataset.__adWarmOwner = keepNearExitWarm ? '1' : '0';
+          videoEl.dataset.__adSurfaceHeld = keepVisibleSurface ? '1' : '0';
+          videoEl.dataset.__adSurfaceHeldReason = reasonKey;
+        }
+        videoEl.preload = keepNearExitWarm ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
       } catch {}
       return;
     }
@@ -492,7 +501,9 @@ const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
 const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
 const nextInsideRunway = nextGap <= 2100;
+const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
 const nextClearlyCloser =
+  nextShouldWinViewport ||
   nextGap + 160 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
@@ -1610,6 +1621,12 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
       return true;
     }
 
+    if (v.ended) {
+      if (reason === 'focus_retry') return false;
+      try { v.currentTime = 0; } catch {}
+      try { delete v.dataset.__adEndedHold; } catch {}
+    }
+
     const playAttempt = v.play?.();
     if (playAttempt && typeof playAttempt.then === 'function') {
       playAttempt
@@ -1696,6 +1713,16 @@ if (!canOwnWarm) {
   // media pipeline alive.
   try {
     if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
+      const viewportState = getAdViewportState(rootRef.current || v);
+      if (viewportState.inViewport || viewportState.gapPx <= 1280) {
+        const nextMuted = normalizeForumAdMuted(mutedRef.current);
+        const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
+        if (attached) attachedVideoSrcRef.current = srcKey;
+        v.dataset.__adSurfaceHeld = '1';
+        v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
+        v.preload = 'metadata';
+        return undefined;
+      }
       v.dataset.__adWarmOwner = '0';
       v.dataset.__adLoadPending = '0';
       detachAdNativeVideo(v, { hard: true, reason: 'warm_owner_denied' });
@@ -1891,6 +1918,10 @@ useEffect(() => {
     }
     const canResolveNow = !!isNear || !!isFocused;
     if (!canResolveNow) {
+      if (isLikelyVideoUrl(mediaHref)) {
+        setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
+        return;
+      }
       const cachedOnly = readCachedAdResolvedMedia(String(mediaHref || '').trim());
       if (cachedOnly) setMedia(cachedOnly);
       else setMedia({ kind: 'skeleton', src: null });
@@ -2307,7 +2338,7 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     timer = window.setInterval(() => {
       try {
         const v = videoRef.current;
-        if (!shouldPlayRef.current || !v || !v.paused) {
+        if (!shouldPlayRef.current || !v || !v.paused || v.ended) {
           if (timer) window.clearInterval(timer);
           timer = 0;
           return;
@@ -2833,7 +2864,6 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   ref={videoRef} 
   className="forum-ad-fit"
   muted={isAdMuted}
-  loop
   playsInline 
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
@@ -2841,6 +2871,7 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) delete v.dataset.__adEndedHold;
       if (!shouldPlayRef.current) {
         // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
         // и не отправляем site-media-play, чтобы не выключать активное видео форума.
@@ -2858,6 +2889,12 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
       const v = videoRef.current;
       const srcKey = String(media?.src || '').trim();
       if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
+      if (v.ended) {
+        const st = adNativePauseRecoveryRef.current || {};
+        if (st.timer) clearTimeout(st.timer);
+        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+        return;
+      }
 
       const prev = adNativePauseRecoveryRef.current || { timer: 0, ts: 0, count: 0 };
       const now = Date.now();
@@ -2879,22 +2916,55 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) v.dataset.__adWarmReady = '1';
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
+      else if (v) v.preload = 'metadata';
     } catch {}
   }}
   onCanPlay={() => {
     try {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
+      if (v?.dataset) v.dataset.__adWarmReady = '1';
       applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
+      else if (v) v.preload = 'metadata';
+    } catch {}
+  }}
+  onEnded={() => {
+    try {
+      const st = adNativePauseRecoveryRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+      const v = videoRef.current;
+      if (v?.dataset) {
+        v.dataset.__adLoadPending = '0';
+        v.dataset.__adWarmReady = '1';
+        v.dataset.__adEndedHold = '1';
+      }
+      if (v) v.preload = 'metadata';
     } catch {}
   }}
 onError={() => {
   try {
+    const v = videoRef.current;
+    const code = Number(v?.error?.code || 0);
+    const now = Date.now();
+    const recentAttach = (now - Number(v?.dataset?.__adLastAttachTs || 0)) < 6500;
+    const loading =
+      typeof HTMLMediaElement !== 'undefined' &&
+      Number(v?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
+    const hasFrame = Number(v?.readyState || 0) >= 1;
+    if (code <= 1 || recentAttach || loading || hasFrame) {
+      if (v?.dataset) {
+        v.dataset.__adLoadPending = '0';
+        v.dataset.__adTransientErrorTs = String(now);
+      }
+      return;
+    }
     markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
     attachedVideoSrcRef.current = '';
     detachAdNativeVideo(videoRef.current, { hard: true, reason: 'error' });

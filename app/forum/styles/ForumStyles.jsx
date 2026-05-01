@@ -98,9 +98,9 @@ export const FORUM_STYLES = `
       --mb-qcast-h-mobile: 400px;
       --mb-qcast-h-tablet: 650px;
       --mb-qcast-h-desktop: 650px;      
-      --mb-ad-h-mobile: 200px;
-      --mb-ad-h-tablet: 260px;
-      --mb-ad-h-desktop: 320px;
+      --mb-ad-h-mobile: 520px;
+      --mb-ad-h-tablet: 620px;
+      --mb-ad-h-desktop: 650px;
 
   /* VIP emoji / MOZI sticker cards fixed height (как mediaBox) */
   --mb-vip-emoji-h-mobile: 260px;

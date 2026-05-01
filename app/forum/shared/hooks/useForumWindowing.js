@@ -64,6 +64,18 @@ function readDefaultLayoutKey(isBrowserFn) {
   }
 }
 
+function hasStableMediaShell(node) {
+  try {
+    if (!(node instanceof Element)) return false
+    if (node.matches?.('[data-stable-shell="1"], [data-ads="1"], .forum-ad-card')) return true
+    return !!node.querySelector?.(
+      '[data-stable-shell="1"], [data-ads="1"], .forum-ad-card, video[data-forum-video="post"], [data-forum-embed-kind="native-video"], .forum-ad-media-slot',
+    )
+  } catch {
+    return false
+  }
+}
+
 export default function useForumWindowing({
   active = true,
   items = [],
@@ -98,6 +110,7 @@ export default function useForumWindowing({
   const scrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const scrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const pendingAnchorDeltaRef = useRef(0)
+  const pendingHeightsRef = useRef(new Map())
   const anchorFlushTimerRef = useRef(0)
   const winMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const winRef = useRef({ start: 0, end: 0, top: 0, bottom: 0 })
@@ -429,6 +442,26 @@ export default function useForumWindowing({
     })
   }, [anchorDeltaIgnorePx, emitWindowingDiag])
 
+  const applyPendingMeasuredHeights = useCallback((reason = 'flush') => {
+    let applied = 0
+    try {
+      pendingHeightsRef.current.forEach((height, key) => {
+        const nextHeight = Math.round(Number(height || 0))
+        if (!key || !Number.isFinite(nextHeight) || nextHeight <= 1) return
+        heightsRef.current.set(key, nextHeight)
+        applied += 1
+      })
+      pendingHeightsRef.current.clear()
+      if (applied > 0) {
+        emitWindowingDiag('media_height_deferred_apply', {
+          reason,
+          applied,
+        })
+      }
+    } catch {}
+    return applied
+  }, [emitWindowingDiag])
+
   const scheduleAnchorFlush = useCallback((delay = anchorFlushMs) => {
     try {
       if (anchorFlushTimerRef.current) {
@@ -443,6 +476,8 @@ export default function useForumWindowing({
           anchorFlushTimerRef.current = setTimeout(flush, anchorActiveRetryMs)
           return
         }
+
+        applyPendingMeasuredHeights('scroll_settled')
 
         const pending = Number(pendingAnchorDeltaRef.current || 0)
         pendingAnchorDeltaRef.current = 0
@@ -463,6 +498,7 @@ export default function useForumWindowing({
     anchorActiveRetryMs,
     anchorDeltaIgnorePx,
     anchorFlushMs,
+    applyPendingMeasuredHeights,
     emitWindowingDiag,
     isScrollActiveNow,
     scheduleRecalc,
@@ -514,6 +550,7 @@ export default function useForumWindowing({
           try { ro.disconnect() } catch {}
         }
         rosRef.current.delete(key)
+        pendingHeightsRef.current.delete(key)
         return
       }
 
@@ -529,6 +566,17 @@ export default function useForumWindowing({
           const prev = Number(heightsRef.current.get(key) || 0)
 
           if (Number.isFinite(prev) && prev > 0 && Math.abs(prev - nextHeight) < heightDeltaIgnorePx) {
+            return
+          }
+
+          if (Number.isFinite(prev) && prev > 0 && isScrollActiveNow() && hasStableMediaShell(node)) {
+            pendingHeightsRef.current.set(key, nextHeight)
+            emitWindowingDiag('media_height_deferred_during_scroll', {
+              key,
+              prev: Math.round(prev),
+              next: nextHeight,
+            })
+            scheduleAnchorFlush(scrollSettleMs)
             return
           }
 
@@ -590,6 +638,10 @@ export default function useForumWindowing({
       if (!activeKeys.has(key)) heightsRef.current.delete(key)
     })
 
+    pendingHeightsRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) pendingHeightsRef.current.delete(key)
+    })
+
     rosRef.current.forEach((ro, key) => {
       if (activeKeys.has(key)) return
       try { ro.disconnect() } catch {}
@@ -609,6 +661,7 @@ export default function useForumWindowing({
 
     layoutKeyRef.current = normalizeKey(getLayoutKey?.(), readDefaultLayoutKey(isBrowserFn))
     const scrollActivity = scrollActivityRef.current
+    const pendingHeights = pendingHeightsRef.current
     const doc = document
 
     const onScroll = () => {
@@ -647,6 +700,7 @@ export default function useForumWindowing({
         if (prevLayoutKey !== nextLayoutKey) {
           layoutKeyRef.current = nextLayoutKey
           try { heightsRef.current.clear() } catch {}
+          try { pendingHeights.clear() } catch {}
           emitWindowingDiag('breakpoint_reset', {
             prevBp: prevLayoutKey,
             nextBp: nextLayoutKey,
@@ -695,6 +749,7 @@ export default function useForumWindowing({
       }
 
       pendingAnchorDeltaRef.current = 0
+      try { pendingHeights.clear() } catch {}
       scrollActivity.activeUntil = 0
       scrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
     }
@@ -735,6 +790,7 @@ export default function useForumWindowing({
       }, { force: true })
 
       try { heightsRef.current.clear() } catch {}
+      try { pendingHeightsRef.current.clear() } catch {}
       try { pendingAnchorDeltaRef.current = 0 } catch {}
       try {
         if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
@@ -799,6 +855,7 @@ export default function useForumWindowing({
 
   useEffect(() => {
     const ros = rosRef.current
+    const pendingHeights = pendingHeightsRef.current
     return () => {
       try {
         ros.forEach((ro) => {
@@ -810,6 +867,7 @@ export default function useForumWindowing({
         if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
         anchorFlushTimerRef.current = 0
         pendingAnchorDeltaRef.current = 0
+        pendingHeights.clear()
       } catch {}
     }
   }, [])

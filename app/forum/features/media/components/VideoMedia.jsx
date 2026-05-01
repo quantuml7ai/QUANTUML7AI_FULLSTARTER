@@ -630,6 +630,9 @@ React.useEffect(() => {
 
   const onPlay = () => {
     clearNativeControlsForPost()
+    try {
+      delete el.dataset.__endedHold
+    } catch {}
 
     if (!coordinatorOwnsPostLifecycle) {
       try {
@@ -663,6 +666,11 @@ React.useEffect(() => {
   }
 
   const onEnded = () => {
+    try {
+      el.dataset.__endedHold = '1'
+      el.dataset.__playRequested = '0'
+      el.dataset.__loadPending = '0'
+    } catch {}
     setPausedState(true)
     setHudVisible(true)
     setCenterGlyph('play')
@@ -1143,6 +1151,10 @@ const onVideoLoaded = React.useCallback(() => {
       showCenterGlyph('play', 760)
 
       if (isPostVideo) {
+        if (el.ended) {
+          try { el.currentTime = 0 } catch {}
+          try { delete el.dataset.__endedHold } catch {}
+        }
         const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
 
         if (!hasSrc) {
@@ -1211,7 +1223,7 @@ const videoNode = (
     data-default-muted={isPostVideo ? '1' : undefined}
     controls={isPostVideo ? undefined : renderControls}
     autoPlay={isPostVideo ? undefined : autoPlay}
-    loop={loop}
+    loop={isPostVideo ? false : loop}
     controlsList={controlsList}
     disablePictureInPicture={disablePictureInPicture}
     referrerPolicy="no-referrer"
