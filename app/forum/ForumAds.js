@@ -272,41 +272,12 @@ const adMediaResolveCache = new Map();
 const adMediaResolveInflight = new Map();
 const AD_MEDIA_RESOLVE_CACHE_OK_MS = 12 * 60 * 1000;
 const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
-const AD_SLOT_MEMORY_CAP = 640;
 
 // Native video must be attached imperatively, not through React `src` state.
 // Otherwise every visibility / preload re-render may reset the <video src>
 // and Chrome starts a new set of HTTP Range / 206 requests.
 const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
-const AD_NATIVE_WARM_STICKY_MS = 2600;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
-const AD_NATIVE_PREWARM_MARGIN_TOP_PX = 1500;
-const AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX = 3200;
-const AD_NATIVE_RESOLVE_MARGIN_TOP_PX = 2600;
-const AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX = 5200;
-// iOS/WebKit first-frame prime is allowed only shortly before viewport.
-// Network prewarm may happen earlier, but muted play/pause must not run several cards away.
-const AD_NATIVE_PRIME_GAP_PX = 520;
-const AD_NATIVE_PRIME_PLAY_PAUSE_HOLD_MS = 160;
-const AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO = 0.01;
-const AD_NATIVE_TRANSFER_PREV_GAP_PX = 520;
-const AD_NATIVE_TRANSFER_NEXT_GAP_PX = 3400;
-const AD_NATIVE_SURFACE_HOLD_GAP_PX = 760;
-const AD_NATIVE_FAR_RELEASE_GAP_PX = 2100;
-const AD_NATIVE_FAR_RELEASE_DELAY_MS = 2200;
-let adNativeWarmSlot = { video: null, src: '', ts: 0 };
-let adNativeWarmReleaseTimer = 0;
-
-function trimMapToCap(map, cap = AD_SLOT_MEMORY_CAP) {
-  if (!map || typeof map.size !== 'number' || map.size <= cap) return;
-  let drop = map.size - cap;
-  for (const key of map.keys()) {
-    map.delete(key);
-    drop -= 1;
-    if (drop <= 0) break;
-  }
-}
 
 function getAdVideoNodeSrc(videoEl) {
   if (!videoEl) return '';
@@ -417,6 +388,10 @@ if (currentSrc === nextSrc) {
 
   return true;
 }
+const AD_NATIVE_WARM_STICKY_MS = 4200;
+const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
+let adNativeWarmSlot = { video: null, src: '', ts: 0 };
+
 function getAdViewportState(el) {
   try {
     if (!el?.isConnected) {
@@ -456,57 +431,22 @@ function isAdNativeVideoLoadingOrReady(videoEl) {
   }
 }
 
-function clearAdNativeWarmFarReleaseTimer() {
-  if (!adNativeWarmReleaseTimer) return;
-  try { clearTimeout(adNativeWarmReleaseTimer); } catch {}
-  adNativeWarmReleaseTimer = 0;
-}
-
-function scheduleAdNativeWarmFarRelease(videoEl, reason = 'near_exit') {
-  if (!isBrowser() || !videoEl) return;
-  clearAdNativeWarmFarReleaseTimer();
-  adNativeWarmReleaseTimer = window.setTimeout(() => {
-    adNativeWarmReleaseTimer = 0;
-    try {
-      if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
-      const state = getAdViewportState(videoEl);
-      const shouldDetach =
-        !videoEl.isConnected ||
-        (!state.inViewport && state.gapPx > AD_NATIVE_FAR_RELEASE_GAP_PX);
-
-      if (!shouldDetach) {
-        scheduleAdNativeWarmFarRelease(videoEl, reason);
-        return;
-      }
-
-      adNativeWarmSlot = { video: null, src: '', ts: 0 };
-      detachAdNativeVideo(videoEl, { hard: true, reason: `far_${reason}` });
-    } catch {}
-  }, AD_NATIVE_FAR_RELEASE_DELAY_MS);
-}
-
 function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
   try {
     if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
 
     const reasonKey = String(reason || 'release');
     const state = getAdViewportState(videoEl);
-    const canHoldNearExitSurface =
-      reasonKey === 'near_exit' &&
-      (state.inViewport || state.gapPx <= AD_NATIVE_SURFACE_HOLD_GAP_PX);
-    const canHoldVisibleReplaceSurface =
-      (reasonKey === 'replace' || reasonKey === 'release') &&
-      state.inViewport;
     const keepVisibleSurface =
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
-      (canHoldNearExitSurface || canHoldVisibleReplaceSurface) &&
+      (state.inViewport || state.gapPx <= 1280) &&
       (reasonKey === 'near_exit' || reasonKey === 'replace' || reasonKey === 'release');
     const keepNearExitWarm =
       reasonKey === 'near_exit' &&
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
-      state.gapPx <= AD_NATIVE_FAR_RELEASE_GAP_PX;
+      state.gapPx <= 2600;
 
     // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
     // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
@@ -525,11 +465,9 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
         }
         videoEl.preload = keepNearExitWarm ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
       } catch {}
-      if (keepNearExitWarm) scheduleAdNativeWarmFarRelease(videoEl, reasonKey);
       return;
     }
 
-    clearAdNativeWarmFarReleaseTimer();
     adNativeWarmSlot = { video: null, src: '', ts: 0 };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '0'; } catch {}
 
@@ -546,7 +484,6 @@ function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
 
     const prev = adNativeWarmSlot.video;
     if (prev === videoEl && adNativeWarmSlot.src === nextSrc) {
-      clearAdNativeWarmFarReleaseTimer();
       adNativeWarmSlot.ts = Date.now();
       return true;
     }
@@ -562,15 +499,11 @@ const prevGap = prevState.gapPx;
 const nextGap = nextState.gapPx;
 const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX;
-const nextInsideRunway = nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX;
-const nextIsForwardCandidate =
-  (prevState.isAbove && nextState.isBelow && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX && nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX) ||
-  (prevState.isBelow && nextState.isAbove && prevGap > AD_NATIVE_TRANSFER_PREV_GAP_PX && nextGap <= AD_NATIVE_TRANSFER_NEXT_GAP_PX);
+const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
+const nextInsideRunway = nextGap <= 2100;
 const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
 const nextClearlyCloser =
   nextShouldWinViewport ||
-  nextIsForwardCandidate ||
   nextGap + 160 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
@@ -587,7 +520,6 @@ if (age < AD_NATIVE_WARM_STICKY_MS && !nextClearlyCloser) {
       releaseAdNativeWarmSlot(prev, 'replace');
     }
 
-    clearAdNativeWarmFarReleaseTimer();
     adNativeWarmSlot = { video: videoEl, src: nextSrc, ts: Date.now() };
     try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1'; } catch {}
     return true;
@@ -1039,7 +971,6 @@ class AdsCoordinatorImpl {
   setLastForSeed(seedKey, url) {
     if (!seedKey || !url) return;
     this.lastBySeedKey.set(String(seedKey), url);
-    trimMapToCap(this.lastBySeedKey, AD_SLOT_MEMORY_CAP);
   }
 
   getLastForSeed(seedKey) {
@@ -1551,7 +1482,6 @@ const rootRef = useRef(null);
 const videoRef = useRef(null);
 const attachedVideoSrcRef = useRef('');
 const adNativePrimeTsRef = useRef(0);
-const adNativeSilentPrimeRef = useRef({ active: false, timer: 0, src: '', token: '', ts: 0 });
 const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
 const adNativeFocusKickTsRef = useRef(0);
 const ytIframeRef = useRef(null);
@@ -1590,26 +1520,14 @@ const ytPlayerRef = useRef(null);
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
   // isPageActive: вкладка/окно активно (иначе всегда пауза)
-  const [isResolveNear, setIsResolveNear] = useState(false);
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
-  const [adVideoReady, setAdVideoReady] = useState(false);
 
   const shouldPlay = isFocused && isPageActive;
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(normalizeForumAdMuted(muted));
   const adPlayEventTsRef = useRef(0);
-
-  useEffect(() => {
-    if (media.kind !== 'video' || !media.src) {
-      setAdVideoReady(false);
-      return;
-    }
-    const v = videoRef.current;
-    setAdVideoReady(Number(v?.readyState || 0) >= 2);
-  }, [media.kind, media.src]);
-
   const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
   if (!isBrowser()) return;
 
@@ -1680,11 +1598,6 @@ useEffect(() => {
 useEffect(() => {
   const node = videoRef.current;
   return () => {
-    try {
-      const st = adNativeSilentPrimeRef.current || {};
-      if (st.timer) clearTimeout(st.timer);
-      adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
-    } catch {}    
     try { releaseAdNativeWarmSlot(node, 'unmount'); } catch {}
   };
 }, []);
@@ -1711,18 +1624,6 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
   adNativeFocusKickTsRef.current = now;
 
   try {
-    const prime = adNativeSilentPrimeRef.current || {};
-    if (prime.timer) clearTimeout(prime.timer);
-    adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
-    if (v.dataset) {
-      v.dataset.__adSilentPrime = '0';
-      v.dataset.__adPrimePending = '0';
-    }
-  } catch {}
-
-  try {    
-    claimAdNativeWarmSlot(v, srcKey, rootRef.current);
-
     const nextMuted = normalizeForumAdMuted(mutedRef.current);
     const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
     if (attached) attachedVideoSrcRef.current = srcKey;
@@ -1775,139 +1676,6 @@ const playAdNativeVideo = React.useCallback((reason = 'focus') => {
     return false;
   }
 }, [emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
-
-const primeAdNativeFirstFrame = React.useCallback((reason = 'near_prewarm') => {
-  const v = videoRef.current;
-  const srcKey = String(media.src || '').trim();
-  if (media.kind !== 'video' || !v || !srcKey) return false;
-  if (shouldPlayRef.current || !isPageActive || isVideoSrcTemporarilyBlocked(srcKey)) return false;
-
-  try {
-    const ua = String(navigator?.userAgent || '');
-    const isiOSWebKit =
-      /iP(hone|ad|od)/i.test(ua) ||
-      (/Macintosh/i.test(ua) && Number(navigator?.maxTouchPoints || 0) > 1);
-
-    // Android/desktop do not need an offscreen play/pause tick for first frame.
-    // Keeping this iOS-only prevents hidden ad playback from touching global media state.
-    if (!isiOSWebKit) return false;
-  } catch {
-    return false;
-  }
-
-  try {
-    if (Number(v.readyState || 0) >= 2 || String(v.dataset?.__adWarmReady || '') === '1') return true;
-    if (String(v.dataset?.__adPrimePending || '') === '1') return true;
-
-    const state = getAdViewportState(rootRef.current || v);
-    if (state.inViewport || state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
-
-    const now = Date.now();
-    if ((now - Number(adNativePrimeTsRef.current || 0)) < 3200) return false;
-    adNativePrimeTsRef.current = now;
-    const token = `${srcKey}:${now}`;
-    const previousPrime = adNativeSilentPrimeRef.current || {};
-    if (previousPrime.timer) clearTimeout(previousPrime.timer);
-
-    v.dataset.__adPrimePending = '1';
-    v.dataset.__adSilentPrime = '1';
-    v.dataset.__adPrimeReason = String(reason || 'near_prewarm');
-    v.dataset.__adPrimeTs = String(now);
-    v.playsInline = true;
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
-    v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-
-    // iOS/WebKit first-frame unlock must be muted and local. It must not rewrite
-    // global sound state and must not notify the forum media coordinator.
-    applyForumAdMutedToVideo(v, true);
-
-    const restoreDesiredMute = () => {
-      try { applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current)); } catch {}
-    };
-
-    const finishPrime = (stateKey = 'done') => {
-      try {
-        const currentPrime = adNativeSilentPrimeRef.current || {};
-        if (currentPrime.token && currentPrime.token !== token) return;
-        if (currentPrime.timer) clearTimeout(currentPrime.timer);
-
-        if (!shouldPlayRef.current && !v.paused) {
-          try { v.pause?.(); } catch {}
-        }
-        
-        v.dataset.__adPrimePending = '0';
-        v.dataset.__adSilentPrime = '0';
-        v.dataset.__adPrimeState = stateKey;
-
-        if (Number(v.readyState || 0) >= 2) {
-          v.dataset.__adWarmReady = '1';
-          v.dataset.__adLoadPending = '0';
-        }
-
-        if (!shouldPlayRef.current) {
-          v.preload = Number(v.readyState || 0) >= 2 ? 'metadata' : AD_NATIVE_VIDEO_PRELOAD_PLAY;
-          restoreDesiredMute();
-        }
-
-        adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };        
-      } catch {}
-    };
-    const maxTimer = window.setTimeout(
-      () => finishPrime('timeout_pause'),
-      AD_NATIVE_PRIME_PLAY_PAUSE_HOLD_MS
-    );
-
-    adNativeSilentPrimeRef.current = {
-      active: true,
-      timer: maxTimer,
-      src: srcKey,
-      token,
-      ts: now,
-    };
-
-    const stopAfterFrame = (stateKey) => {
-      try {
-        window.setTimeout(() => finishPrime(stateKey), 32);
-      } catch {
-        finishPrime(stateKey);
-      }
-    };
-
-    try {
-      if (typeof v.requestVideoFrameCallback === 'function') {
-        v.requestVideoFrameCallback(() => stopAfterFrame('first_frame'));
-      }
-    } catch {}
-
-    const p = v.play?.();
-    if (p && typeof p.then === 'function') {
-      p.then(() => {
-        try {
-          if (Number(v.readyState || 0) >= 2) stopAfterFrame('played_ready');
-        } catch {}
-      }).catch(() => {
-        try {
-          if (adNativeSilentPrimeRef.current?.token === token) {
-            const st = adNativeSilentPrimeRef.current || {};
-            if (st.timer) clearTimeout(st.timer);
-            adNativeSilentPrimeRef.current = { active: false, timer: 0, src: '', token: '', ts: 0 };
-          }
-          v.dataset.__adPrimePending = '0';
-          v.dataset.__adSilentPrime = '0';
-          v.dataset.__adPrimeState = 'play_blocked';
-        } catch {}
-        restoreDesiredMute();
-      });
-    } else {
-      stopAfterFrame('sync_play');
-    }
-    return true;
-  } catch {
-    try { if (v?.dataset) v.dataset.__adPrimePending = '0'; } catch {}
-    return false;
-  }
-}, [isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
 useEffect(() => {
   const node = videoRef.current;
@@ -1967,7 +1735,7 @@ if (!canOwnWarm) {
       const hasExistingSurface =
         existingSrc === srcKey &&
         isAdNativeVideoLoadingOrReady(v);
-      if ((viewportState.inViewport || viewportState.gapPx <= AD_NATIVE_SURFACE_HOLD_GAP_PX) && hasExistingSurface) {
+      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
         v.dataset.__adSurfaceHeld = '1';
         v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
         v.preload = 'metadata';
@@ -2002,12 +1770,11 @@ if (!canOwnWarm) {
         v.dataset.__adLoadPending = '1';
         v.load?.();
       }
-      primeAdNativeFirstFrame('near_prewarm');
     } catch {}
   }
 
   return undefined;
-}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src, primeAdNativeFirstFrame]);
+}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
   // Page visibility + focus/blur
   useEffect(() => {
@@ -2035,37 +1802,24 @@ if (!canOwnWarm) {
     const el = rootRef.current;
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
- 
-    // resolve: ещё не создаём второй native-pipeline, но заранее определяем тип медиа,
-    // чтобы карточка входила в near-zone уже с готовым kind/src, а не со skeleton.
-    const resolveObs = new IntersectionObserver(
-      ([e]) => setIsResolveNear(!!e?.isIntersecting),
-      { rootMargin: `${AD_NATIVE_RESOLVE_MARGIN_TOP_PX}px 0px ${AD_NATIVE_RESOLVE_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
-    );
 
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: `${AD_NATIVE_PREWARM_MARGIN_TOP_PX}px 0px ${AD_NATIVE_PREWARM_MARGIN_BOTTOM_PX}px 0px`, threshold: 0 }
+      { rootMargin: '820px 0px 1650px 0px', threshold: 0 }
     );
 
-    // focused/play-gate: реальная реклама стартует только после входа в viewport.
-    // 0.01 отсекает ложные нулевые касания, но не ждёт 60% площади.
+    // focused: реально видно (>= 60% площади)
     const focusObs = new IntersectionObserver(
-      ([e]) => {
-        const ratio = Number(e?.intersectionRatio || 0);
-        setIsFocused(!!e?.isIntersecting && ratio >= AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO);
-      },
-      { threshold: [0, AD_NATIVE_VIEWPORT_PLAY_MIN_RATIO, 0.25, 0.6, 0.75, 1] }
+      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
+      { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
-    
-    resolveObs.observe(el);
+
     nearObs.observe(el);
     focusObs.observe(el);
 
     return () => {
-      resolveObs.disconnect();
       nearObs.disconnect();
       focusObs.disconnect();
     };
@@ -2155,7 +1909,6 @@ useEffect(() => {
         idx = next;
       }
       lastMediaIndexByKey.set(mediaKey, idx);
-      trimMapToCap(lastMediaIndexByKey, AD_SLOT_MEMORY_CAP);
       setMediaHref(list[idx]);
     };
 
@@ -2181,7 +1934,7 @@ useEffect(() => {
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
-    const canResolveNow = !!isResolveNear || !!isNear || !!isFocused;
+    const canResolveNow = !!isNear || !!isFocused;
     if (!canResolveNow) {
       if (isLikelyVideoUrl(mediaHref)) {
         setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
@@ -2455,7 +2208,7 @@ async function run() {
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind, mediaHref, isResolveNear, isNear, isFocused]);
+  }, [safeClick, conf, slotKind, mediaHref, isNear, isFocused]);
 
   // YouTube Iframe API для управления звуком
 useEffect(() => {
@@ -2868,41 +2621,6 @@ const handleToggleSound = (e) => {
     display: block;
   }
 
-  .forum-ad-video-wait {
-    position:absolute;
-    inset:0;
-    z-index:4;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:.55rem;
-    pointer-events:none;
-    color:rgba(226,242,255,.88);
-    font-size:.78rem;
-    font-weight:700;
-    letter-spacing:.01em;
-    background:
-      radial-gradient(circle at 50% 45%, rgba(78,205,255,.16), rgba(2,8,23,0) 36%),
-      linear-gradient(180deg, rgba(2,8,23,.28), rgba(2,8,23,.58));
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-  }
-  .forum-ad-video-wait__orb {
-    width:10px;
-    height:10px;
-    border-radius:999px;
-    background:rgba(111,231,255,.92);
-    box-shadow:0 0 14px rgba(111,231,255,.75);
-    animation: forumAdVideoWaitPulse 960ms ease-in-out infinite;
-  }
-  .forum-ad-video-wait__text {
-    text-shadow:0 1px 8px rgba(0,0,0,.55);
-  }
-  @keyframes forumAdVideoWaitPulse {
-    0%, 100% { transform:scale(.72); opacity:.55; }
-    50% { transform:scale(1); opacity:1; }
-  }
- 
   .forum-ad-lens {
     position: absolute;
     right: var(--forum-ad-lens-right, 10px);
@@ -3196,9 +2914,7 @@ const handleToggleSound = (e) => {
           {/* media: заполняет карточку */}
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
-  data-layout={isFluid ? 'fluid' : 'fixed'}
-  data-media-kind={media.kind || 'none'}
-  data-video-ready={media.kind === 'video' && adVideoReady ? '1' : '0'}
+data-layout={isFluid ? 'fluid' : 'fixed'}
 >
           
  {media.kind === 'skeleton' && (
@@ -3220,15 +2936,6 @@ const handleToggleSound = (e) => {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) delete v.dataset.__adEndedHold;
-      if (Number(v?.readyState || 0) >= 2) setAdVideoReady(true);
-
-      const silentPrime = adNativeSilentPrimeRef.current || {};
-      if (silentPrime.active && silentPrime.src === String(media?.src || '').trim()) {
-        // Это iOS/WebKit muted first-frame prime, а не реальный старт рекламы.
-        // Prime-функция сама поставит pause() через requestVideoFrameCallback/таймер.
-        return;
-      }
-      
       if (!shouldPlayRef.current) {
         // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
         // и не отправляем site-media-play, чтобы не выключать активное видео форума.
@@ -3274,12 +2981,10 @@ const handleToggleSound = (e) => {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
-      setAdVideoReady(true);
-      const silentPrime = String(v?.dataset?.__adSilentPrime || '') === '1';
-      applyForumAdMutedToVideo(v, silentPrime ? true : isAdMuted);
+      applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v && !silentPrime) v.preload = 'metadata';
+      else if (v) v.preload = 'metadata';
     } catch {}
   }}
   onCanPlay={() => {
@@ -3287,12 +2992,10 @@ const handleToggleSound = (e) => {
       const v = videoRef.current;
       if (v?.dataset) v.dataset.__adLoadPending = '0';
       if (v?.dataset) v.dataset.__adWarmReady = '1';
-      setAdVideoReady(true);
-      const silentPrime = String(v?.dataset?.__adSilentPrime || '') === '1';
-      applyForumAdMutedToVideo(v, silentPrime ? true : isAdMuted);
+      applyForumAdMutedToVideo(v, isAdMuted);
       clearVideoSrcBlock(media?.src);
       if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v && !silentPrime) v.preload = 'metadata';
+      else if (v) v.preload = 'metadata';
     } catch {}
   }}
   onEnded={() => {
@@ -3317,7 +3020,6 @@ const handleToggleSound = (e) => {
   }}
 onError={() => {
   try {
-    setAdVideoReady(false);
     const v = videoRef.current;
     const code = Number(v?.error?.code || 0);
     const now = Date.now();
@@ -3339,12 +3041,6 @@ onError={() => {
   } catch {}
 }}
 />
-    {!adVideoReady && (
-      <div className="forum-ad-video-wait" aria-hidden="true">
-        <div className="forum-ad-video-wait__orb" />
-        <div className="forum-ad-video-wait__text">ADS LOADING…</div>
-      </div>
-    )}
   </div>
 )}
  
@@ -3510,7 +3206,7 @@ onError={() => {
               </svg>
             </div>
 
-            <div className="pointer-events-none absolute inset-0 rounded-lg border border-transparent qshine" />
+            <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
         </div> 
       </a>
