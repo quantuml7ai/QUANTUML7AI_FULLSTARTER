@@ -233,7 +233,7 @@ export default function BgAudio({
     if (!a || !locked) return () => {}
 
     let detached = false
-    const captureOptions = true
+    const captureOptions = { passive: true, capture: true }
  
     const detach = () => {
       if (detached) return
