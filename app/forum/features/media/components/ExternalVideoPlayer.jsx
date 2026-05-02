@@ -16,10 +16,12 @@ const GOOD_EMOJIS = ['🔥', '✨', '🚀', '💎', '⚡', '👏', '🤩', '💯
 const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '🙃', '😬', '🧊']
 
 // Telegram Mini App swipe guard for YouTube/TikTok iframe cards.
-// It never creates a mouse/wheel blocker. It only reacts to real downward touch movement.
+// Important: Telegram starts the collapse gesture before our first direction threshold can be reached,
+// so the lock is armed on touchstart, then released if the gesture is clearly not a downward pull.
+// Mouse, wheel, hover and desktop Chrome are untouched: this runs only from real touch events.
 const TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED = true
-const TELEGRAM_EXTERNAL_TOUCH_SWIPE_DOWN_THRESHOLD_PX = 10
-const TELEGRAM_EXTERNAL_TOUCH_SWIPE_UNLOCK_DELAY_MS = 720
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_DIRECTION_RELEASE_PX = 16
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_UNLOCK_DELAY_MS = 420
 
 function IconPlay() {
   return (
@@ -262,6 +264,7 @@ const stopControlPointer = React.useCallback((event) => {
 const lockTelegramSwipeForTouchScroll = React.useCallback(() => {
   if (!TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED) return
   if (!isExternalProvider) return
+  if (!isTelegramMiniAppRuntime()) return
   if (telegramSwipeReleaseRef.current) return
 
   telegramSwipeReleaseRef.current = acquireTelegramVerticalSwipeLock(telegramSwipeLockKeyRef.current, {
@@ -300,8 +303,10 @@ const cleanupTimers = React.useCallback(() => {
 }, [])
 
   React.useEffect(() => {
+    // Keep listeners mounted for external providers even if Telegram.WebApp arrives a little late.
+    // The actual swipe lock still checks isTelegramMiniAppRuntime(), so normal browsers stay untouched.    
     setTelegramTouchSwipeGuardActive(
-      TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED && isExternalProvider && isTelegramMiniAppRuntime()
+      TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED && isExternalProvider
     )
   }, [isExternalProvider])
 
@@ -312,6 +317,7 @@ const cleanupTimers = React.useCallback(() => {
 const resetTouchGesture = () => {
   touchStartPointRef.current = { x: 0, y: 0 }
   touchSwipeLockedRef.current = false
+  touchDirectionResolvedRef.current = false
   releaseTelegramSwipeForTouchScroll()
 }
 
@@ -319,23 +325,34 @@ const onTouchStart = (event) => {
   const touch = event?.touches?.[0]
   if (!touch) return
   touchStartPointRef.current = { x: Number(touch.clientX) || 0, y: Number(touch.clientY) || 0 }
-  touchSwipeLockedRef.current = false
+  touchSwipeLockedRef.current = true
+  touchDirectionResolvedRef.current = false
+
+  // Telegram decides whether to collapse Mini App immediately at the beginning of the gesture.
+  // Waiting until touchmove/down-threshold is too late, so we arm the official Telegram lock here.
+  // This is still touch-only and Telegram-only; it never handles mouse wheel or desktop hover.
+  lockTelegramSwipeForTouchScroll()
 }
 
 const onTouchMove = (event) => {
   const touch = event?.touches?.[0]
-  if (!touch || touchSwipeLockedRef.current) return
+  if (!touch || !touchSwipeLockedRef.current || touchDirectionResolvedRef.current) return
 
   const start = touchStartPointRef.current || { x: 0, y: 0 }
   const dx = Math.abs((Number(touch.clientX) || 0) - start.x)
   const dy = (Number(touch.clientY) || 0) - start.y
+  const absDy = Math.abs(dy)
+  const threshold = TELEGRAM_EXTERNAL_TOUCH_SWIPE_DIRECTION_RELEASE_PX
 
-  // Finger moved down over YouTube/TikTok: block Telegram Mini App collapse swipe only now.
-  // Upward page scroll, mouse wheel, hover, click and desktop pointer events are untouched.
-  if (dy >= TELEGRAM_EXTERNAL_TOUCH_SWIPE_DOWN_THRESHOLD_PX && dy > dx * 0.7) {
-    touchSwipeLockedRef.current = true
-    lockTelegramSwipeForTouchScroll()
-  }
+  if (Math.max(dx, absDy) < threshold) return
+
+  touchDirectionResolvedRef.current = true
+  // Keep the lock for a real downward pull.
+  if (dy > 0 && dy > dx * 0.7) return
+
+  // Not a downward pull: release immediately so ordinary Telegram gestures remain native.
+  touchSwipeLockedRef.current = false
+  releaseTelegramSwipeForTouchScroll()
 }
 
     try { node.addEventListener('touchstart', onTouchStart, { passive: true }) } catch {}

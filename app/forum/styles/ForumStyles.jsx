@@ -326,10 +326,14 @@ export const FORUM_STYLES = `
   background:transparent !important;
 }
 .ql7ExternalVideoSurface[data-tma-touch-swipe-guard="1"]{
-  /* No overlay and no pointer-events:auto here. Mouse wheel/hover/click must stay native.
-     Telegram Mini App collapse protection is handled by passive touch listeners in ExternalVideoPlayer. */
+  /* No overlay and no pointer-events:auto here. Mouse wheel/hover/click stay native.
+     Telegram Mini App collapse protection is handled by touch listeners in ExternalVideoPlayer. */
   overscroll-behavior-y:auto;
 }
+html[data-tma="1"] .ql7ExternalVideoSurface[data-tma-touch-swipe-guard="1"]{
+  overscroll-behavior-y:contain;
+  touch-action:pan-y pinch-zoom;
+}  
 .ql7ExternalVideoSurface[data-forum-external-kind="youtube"] > iframe{
   aspect-ratio:16/9;
 }
