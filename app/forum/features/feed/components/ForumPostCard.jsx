@@ -163,6 +163,8 @@ export default function ForumPostCard({
           onJumpToParent={jumpToParent}
           t={t}
         />
+        </div>
+
         <PostMediaStack
           imgLines={imgLines}
           videoLines={videoLines}
@@ -178,7 +180,7 @@ export default function ForumPostCard({
           posterUrl={p?.posterUrl}
           YT_RE={YT_RE}
         />
-
+<div className="postBodyFrame">
         <PostBodyContent
           displayText={displayText}
           renderRich={richRenderer}
@@ -205,7 +207,7 @@ export default function ForumPostCard({
           onBanUser={onBanUser}
         />
         <div className="forumDividerRail forumDividerRail--gold" aria-hidden="true" />
-
+</div>
         <PostTranslateToggle
           hasCleanedText={hasCleanedText}
           isTranslated={isTranslated}
@@ -213,7 +215,7 @@ export default function ForumPostCard({
           translateBtnLabel={translateBtnLabel}
           onToggleTranslate={handleToggleTranslate}
         />
-      </div>
+      
     </article>
   )
 }
