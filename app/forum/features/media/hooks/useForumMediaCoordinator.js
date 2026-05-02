@@ -2348,9 +2348,59 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
         } catch {}
       }, 650);
       ytMutePolls.set(player, id);
-    };    
+    }; 
+ const normalizeExternalUrlForCompare = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try { return new URL(raw, window.location.href).href; } catch {}
+  return raw;
+};
+
+const isYouTubeIframeReadyForApi = (iframe, expectedSrc = '') => {
+  if (!(iframe instanceof HTMLIFrameElement)) return false;
+  const src = normalizeExternalUrlForCompare(iframe.getAttribute('src') || '');
+  const expected = normalizeExternalUrlForCompare(expectedSrc || iframe.getAttribute('data-src') || src);
+  if (!src || !expected || src !== expected) return false;
+  try {
+    const url = new URL(src, window.location.href);
+    if (!/(^|\.)youtube(?:-nocookie)?\.com$/i.test(url.hostname || '')) return false;
+    if (url.searchParams.get('enablejsapi') !== '1') return false;
+  } catch {
+    return false;
+  }
+  try {
+    const loaded = iframe.getAttribute('data-forum-iframe-loaded') === '1';
+    const loadedSrc = normalizeExternalUrlForCompare(iframe.getAttribute('data-forum-loaded-src') || '');
+    if (!loaded || loadedSrc !== src) return false;
+  } catch {
+    return false;
+  }
+  return true;
+};
+
+const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
+  try {
+    if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) return;
+    const now = Date.now();
+    const last = Number(iframe.getAttribute('data-forum-yt-api-retry-ts') || 0);
+    if (last > 0 && now - last < 180) return;
+    iframe.setAttribute('data-forum-yt-api-retry-ts', String(now));
+    setTimeout(() => {
+      try {
+        if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) return;
+        if (isUserPaused(iframe)) return;
+        playMedia(iframe);
+      } catch {}
+    }, reason === 'yt_api_load_timeout' ? 260 : 160);
+  } catch {}
+};      
     const initYouTubePlayer = async (iframe) => {
       if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
+      const expectedSrc = ensureYouTubeEmbedSrc(iframe.getAttribute('data-src') || iframe.getAttribute('src') || '');
+      if (!isYouTubeIframeReadyForApi(iframe, expectedSrc)) {
+        scheduleYouTubeApiInitRetry(iframe, 'yt_api_not_ready');
+        return null;
+      }      
       if (ytPlayers.has(iframe)) {
         const existing = ytPlayers.get(iframe);
         if (isAttachedYtPlayer(existing, iframe)) return existing;
@@ -4044,15 +4094,20 @@ return;
           if (ds && el.getAttribute('data-src') !== ds) {
             try { el.setAttribute('data-src', ds); } catch {}
           }
+          let readyForYouTubeApi = false;
           if (ds && (!cur || cur !== ds)) {
             try {
               el.setAttribute('data-forum-iframe-loaded', '0');
               el.removeAttribute('data-forum-loaded-src');
             } catch {}
             el.setAttribute('src', ds);
-            await waitExternalIframeLoad(el, ds, isIOSUi ? 1800 : 1400);
+            readyForYouTubeApi = await waitExternalIframeLoad(el, ds, isIOSUi ? 2200 : 1800);
           } else if (ds) {
-            await waitExternalIframeLoad(el, ds, 420);
+            readyForYouTubeApi = await waitExternalIframeLoad(el, ds, 700);
+          }
+          if (ds && !readyForYouTubeApi && !isYouTubeIframeReadyForApi(el, ds)) {
+            scheduleYouTubeApiInitRetry(el, 'yt_api_load_timeout');
+            return;
           }
           el.setAttribute('data-forum-last-active-ts', String(Date.now()));
         } catch {}
