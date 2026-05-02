@@ -20,7 +20,7 @@ const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '�
 // so the lock is armed on touchstart, then released if the gesture is clearly not a downward pull.
 // Mouse, wheel, hover and desktop Chrome are untouched: this runs only from real touch events.
 const TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED = true
-const TELEGRAM_EXTERNAL_TOUCH_SWIPE_DIRECTION_RELEASE_PX = 16
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_DIRECTION_RELEASE_PX = 8
 const TELEGRAM_EXTERNAL_TOUCH_SWIPE_UNLOCK_DELAY_MS = 420
 
 function IconPlay() {
@@ -115,7 +115,10 @@ export default function ExternalVideoPlayer({
   const telegramSwipeReleaseRef = React.useRef(null)
   const telegramSwipeLockKeyRef = React.useRef(Symbol('ql7-external-video-touch-swipe'))
   const touchStartPointRef = React.useRef({ x: 0, y: 0 })
-  const touchSwipeLockedRef = React.useRef(false)  
+  const touchLastPointRef = React.useRef({ x: 0, y: 0 })
+  const touchScrollTargetRef = React.useRef(null)
+  const touchSwipeLockedRef = React.useRef(false)
+  const touchDirectionResolvedRef = React.useRef(false)   
   const hudTimerRef = React.useRef(0)
   const centerTimerRef = React.useRef(0)
   const fxTimersRef = React.useRef([])
@@ -261,6 +264,40 @@ const stopControlPointer = React.useCallback((event) => {
   try { event?.preventDefault?.(); event?.stopPropagation?.() } catch {}
 }, [])
 
+const findTouchScrollTarget = React.useCallback((startNode) => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null
+  try {
+    let node = startNode?.parentElement || null
+    while (node && node !== document.body && node !== document.documentElement) {
+      const style = window.getComputedStyle(node)
+      const overflowY = String(style?.overflowY || '')
+      const canScrollY = /(auto|scroll|overlay)/i.test(overflowY)
+      if (canScrollY && node.scrollHeight > node.clientHeight + 1) return node
+      node = node.parentElement
+    }
+  } catch {}
+  try { return document.scrollingElement || document.documentElement } catch { return null }
+}, [])
+
+const manualTouchScroll = React.useCallback((deltaY) => {
+  const target = touchScrollTargetRef.current
+  const amount = Number(deltaY) || 0
+  if (!target || Math.abs(amount) < 0.5) return
+
+  try {
+    if (target === document.body || target === document.documentElement || target === document.scrollingElement) {
+      window.scrollBy(0, amount)
+      return
+    }
+    target.scrollTop += amount
+  } catch {}
+}, [])
+
+const cancelTelegramTouchDefault = React.useCallback((event) => {
+  try { if (event?.cancelable) event.preventDefault() } catch {}
+  try { event?.stopPropagation?.() } catch {}
+}, [])
+
 const lockTelegramSwipeForTouchScroll = React.useCallback(() => {
   if (!TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED) return
   if (!isExternalProvider) return
@@ -303,11 +340,35 @@ const cleanupTimers = React.useCallback(() => {
 }, [])
 
   React.useEffect(() => {
-    // Keep listeners mounted for external providers even if Telegram.WebApp arrives a little late.
-    // The actual swipe lock still checks isTelegramMiniAppRuntime(), so normal browsers stay untouched.    
-    setTelegramTouchSwipeGuardActive(
-      TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED && isExternalProvider
-    )
+let alive = true
+let timers = []
+
+const isTouchRuntime = () => {
+  if (typeof window === 'undefined') return false
+  try {
+    return ('ontouchstart' in window) || Number(window.navigator?.maxTouchPoints || 0) > 0
+  } catch {
+    return false
+  }
+}
+
+const refreshGuard = () => {
+  if (!alive) return
+  setTelegramTouchSwipeGuardActive(
+    TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED
+    && isExternalProvider
+    && isTouchRuntime()
+    && isTelegramMiniAppRuntime()
+  )
+}
+
+refreshGuard()
+try { timers = [window.setTimeout(refreshGuard, 250), window.setTimeout(refreshGuard, 1200)] } catch {}
+
+return () => {
+  alive = false
+  try { timers.forEach((timer) => clearTimeout(timer)) } catch {}
+}
   }, [isExternalProvider])
 
   React.useEffect(() => {
@@ -316,6 +377,8 @@ const cleanupTimers = React.useCallback(() => {
 
 const resetTouchGesture = () => {
   touchStartPointRef.current = { x: 0, y: 0 }
+  touchLastPointRef.current = { x: 0, y: 0 }
+  touchScrollTargetRef.current = null  
   touchSwipeLockedRef.current = false
   touchDirectionResolvedRef.current = false
   releaseTelegramSwipeForTouchScroll()
@@ -324,39 +387,57 @@ const resetTouchGesture = () => {
 const onTouchStart = (event) => {
   const touch = event?.touches?.[0]
   if (!touch) return
-  touchStartPointRef.current = { x: Number(touch.clientX) || 0, y: Number(touch.clientY) || 0 }
+
+  const point = { x: Number(touch.clientX) || 0, y: Number(touch.clientY) || 0 }
+  touchStartPointRef.current = point
+  touchLastPointRef.current = point
+  touchScrollTargetRef.current = findTouchScrollTarget(node)
   touchSwipeLockedRef.current = true
   touchDirectionResolvedRef.current = false
 
-  // Telegram decides whether to collapse Mini App immediately at the beginning of the gesture.
-  // Waiting until touchmove/down-threshold is too late, so we arm the official Telegram lock here.
-  // This is still touch-only and Telegram-only; it never handles mouse wheel or desktop hover.
+  // Telegram can start the Mini App collapse gesture immediately.
+  // Arm the official lock at touchstart, before the first visible movement.
   lockTelegramSwipeForTouchScroll()
 }
 
 const onTouchMove = (event) => {
   const touch = event?.touches?.[0]
-  if (!touch || !touchSwipeLockedRef.current || touchDirectionResolvedRef.current) return
-
+  if (!touch || !touchSwipeLockedRef.current) return
+ 
+  const x = Number(touch.clientX) || 0
+  const y = Number(touch.clientY) || 0
   const start = touchStartPointRef.current || { x: 0, y: 0 }
-  const dx = Math.abs((Number(touch.clientX) || 0) - start.x)
-  const dy = (Number(touch.clientY) || 0) - start.y
+  const last = touchLastPointRef.current || start
+  const dx = Math.abs(x - start.x)
+  const dy = y - start.y
   const absDy = Math.abs(dy)
+  const stepDeltaY = last.y - y
   const threshold = TELEGRAM_EXTERNAL_TOUCH_SWIPE_DIRECTION_RELEASE_PX
 
-  if (Math.max(dx, absDy) < threshold) return
+  touchLastPointRef.current = { x, y }
 
-  touchDirectionResolvedRef.current = true
-  // Keep the lock for a real downward pull.
-  if (dy > 0 && dy > dx * 0.7) return
+  if (!touchDirectionResolvedRef.current) {
+    if (Math.max(dx, absDy) < threshold) return
+ 
+    touchDirectionResolvedRef.current = true
 
-  // Not a downward pull: release immediately so ordinary Telegram gestures remain native.
-  touchSwipeLockedRef.current = false
-  releaseTelegramSwipeForTouchScroll()
+    // Horizontal gesture: do not hijack it.
+    if (dx > absDy * 1.15) {
+      touchSwipeLockedRef.current = false
+      releaseTelegramSwipeForTouchScroll()
+      return
+    }
+  }
+
+  // Vertical touch over YouTube/TikTok in Telegram: block Telegram's native collapse,
+  // then manually scroll the nearest scroll container so the feed still moves normally.
+  lockTelegramSwipeForTouchScroll()
+  cancelTelegramTouchDefault(event)
+  manualTouchScroll(stepDeltaY)
 }
 
-    try { node.addEventListener('touchstart', onTouchStart, { passive: true }) } catch {}
-    try { node.addEventListener('touchmove', onTouchMove, { passive: true }) } catch {}
+    try { node.addEventListener('touchstart', onTouchStart, { passive: false }) } catch {}
+    try { node.addEventListener('touchmove', onTouchMove, { passive: false }) } catch {}
     try { node.addEventListener('touchend', resetTouchGesture, { passive: true }) } catch {}
     try { node.addEventListener('touchcancel', resetTouchGesture, { passive: true }) } catch {}
 
@@ -367,7 +448,7 @@ const onTouchMove = (event) => {
       try { node.removeEventListener('touchcancel', resetTouchGesture) } catch {}
      resetTouchGesture()
     }
-  }, [lockTelegramSwipeForTouchScroll, releaseTelegramSwipeForTouchScroll, telegramTouchSwipeGuardActive])
+  }, [cancelTelegramTouchDefault, findTouchScrollTarget, lockTelegramSwipeForTouchScroll, manualTouchScroll, releaseTelegramSwipeForTouchScroll, telegramTouchSwipeGuardActive])
 
 React.useEffect(() => cleanupTimers, [cleanupTimers])
 
