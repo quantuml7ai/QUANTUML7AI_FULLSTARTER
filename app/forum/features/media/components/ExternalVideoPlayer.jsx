@@ -15,10 +15,11 @@ import {
 const GOOD_EMOJIS = ['🔥', '✨', '🚀', '💎', '⚡', '👏', '🤩', '💯', '🫶', '🎉']
 const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '🙃', '😬', '🧊']
 
-// Telegram Mini App touch-scroll guard for YouTube/TikTok iframe cards.
-// This does not affect mouse/desktop scroll. It only arms on real touch events.
-const TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED = true
-const TELEGRAM_EXTERNAL_TOUCH_SCROLL_UNLOCK_DELAY_MS = 720
+// Telegram Mini App swipe guard for YouTube/TikTok iframe cards.
+// It never creates a mouse/wheel blocker. It only reacts to real downward touch movement.
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED = true
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_DOWN_THRESHOLD_PX = 10
+const TELEGRAM_EXTERNAL_TOUCH_SWIPE_UNLOCK_DELAY_MS = 720
 
 function IconPlay() {
   return (
@@ -108,9 +109,11 @@ export default function ExternalVideoPlayer({
   allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
 }) {
   const frameRef = React.useRef(null)
-  const touchScrollShieldRef = React.useRef(null)
+  const surfaceRef = React.useRef(null)
   const telegramSwipeReleaseRef = React.useRef(null)
-  const telegramSwipeLockKeyRef = React.useRef(Symbol('ql7-external-video-touch-scroll'))  
+  const telegramSwipeLockKeyRef = React.useRef(Symbol('ql7-external-video-touch-swipe'))
+  const touchStartPointRef = React.useRef({ x: 0, y: 0 })
+  const touchSwipeLockedRef = React.useRef(false)  
   const hudTimerRef = React.useRef(0)
   const centerTimerRef = React.useRef(0)
   const fxTimersRef = React.useRef([])
@@ -120,7 +123,7 @@ export default function ExternalVideoPlayer({
   const [mutedState, setMutedState] = React.useState(true)
   const [centerGlyph, setCenterGlyph] = React.useState('play')
   const [fxBursts, setFxBursts] = React.useState([])
-  const [telegramTouchShieldActive, setTelegramTouchShieldActive] = React.useState(false)
+  const [telegramTouchSwipeGuardActive, setTelegramTouchSwipeGuardActive] = React.useState(false)
   
   const normalizedKind = String(kind || '').toLowerCase()
   const isExternalProvider = normalizedKind === 'youtube' || normalizedKind === 'tiktok'
@@ -257,12 +260,12 @@ const stopControlPointer = React.useCallback((event) => {
 }, [])
 
 const lockTelegramSwipeForTouchScroll = React.useCallback(() => {
-  if (!TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED) return
+  if (!TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED) return
   if (!isExternalProvider) return
   if (telegramSwipeReleaseRef.current) return
 
   telegramSwipeReleaseRef.current = acquireTelegramVerticalSwipeLock(telegramSwipeLockKeyRef.current, {
-    restoreDelayMs: TELEGRAM_EXTERNAL_TOUCH_SCROLL_UNLOCK_DELAY_MS,
+    restoreDelayMs: TELEGRAM_EXTERNAL_TOUCH_SWIPE_UNLOCK_DELAY_MS,
   })
 }, [isExternalProvider])
 
@@ -297,32 +300,57 @@ const cleanupTimers = React.useCallback(() => {
 }, [])
 
   React.useEffect(() => {
-    setTelegramTouchShieldActive(
-      TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED && isExternalProvider && isTelegramMiniAppRuntime()
+    setTelegramTouchSwipeGuardActive(
+      TELEGRAM_EXTERNAL_TOUCH_SWIPE_GUARD_ENABLED && isExternalProvider && isTelegramMiniAppRuntime()
     )
   }, [isExternalProvider])
 
   React.useEffect(() => {
-    const node = touchScrollShieldRef.current
-    if (!node || !telegramTouchShieldActive) return undefined
+    const node = surfaceRef.current
+    if (!node || !telegramTouchSwipeGuardActive) return undefined
 
-    const onTouchStart = () => lockTelegramSwipeForTouchScroll()
-    const onTouchMove = () => lockTelegramSwipeForTouchScroll()
-    const onTouchEnd = () => releaseTelegramSwipeForTouchScroll()
+const resetTouchGesture = () => {
+  touchStartPointRef.current = { x: 0, y: 0 }
+  touchSwipeLockedRef.current = false
+  releaseTelegramSwipeForTouchScroll()
+}
+
+const onTouchStart = (event) => {
+  const touch = event?.touches?.[0]
+  if (!touch) return
+  touchStartPointRef.current = { x: Number(touch.clientX) || 0, y: Number(touch.clientY) || 0 }
+  touchSwipeLockedRef.current = false
+}
+
+const onTouchMove = (event) => {
+  const touch = event?.touches?.[0]
+  if (!touch || touchSwipeLockedRef.current) return
+
+  const start = touchStartPointRef.current || { x: 0, y: 0 }
+  const dx = Math.abs((Number(touch.clientX) || 0) - start.x)
+  const dy = (Number(touch.clientY) || 0) - start.y
+
+  // Finger moved down over YouTube/TikTok: block Telegram Mini App collapse swipe only now.
+  // Upward page scroll, mouse wheel, hover, click and desktop pointer events are untouched.
+  if (dy >= TELEGRAM_EXTERNAL_TOUCH_SWIPE_DOWN_THRESHOLD_PX && dy > dx * 0.7) {
+    touchSwipeLockedRef.current = true
+    lockTelegramSwipeForTouchScroll()
+  }
+}
 
     try { node.addEventListener('touchstart', onTouchStart, { passive: true }) } catch {}
     try { node.addEventListener('touchmove', onTouchMove, { passive: true }) } catch {}
-    try { node.addEventListener('touchend', onTouchEnd, { passive: true }) } catch {}
-    try { node.addEventListener('touchcancel', onTouchEnd, { passive: true }) } catch {}
+    try { node.addEventListener('touchend', resetTouchGesture, { passive: true }) } catch {}
+    try { node.addEventListener('touchcancel', resetTouchGesture, { passive: true }) } catch {}
 
     return () => {
       try { node.removeEventListener('touchstart', onTouchStart) } catch {}
       try { node.removeEventListener('touchmove', onTouchMove) } catch {}
-      try { node.removeEventListener('touchend', onTouchEnd) } catch {}
-      try { node.removeEventListener('touchcancel', onTouchEnd) } catch {}
-      releaseTelegramSwipeForTouchScroll()
+      try { node.removeEventListener('touchend', resetTouchGesture) } catch {}
+      try { node.removeEventListener('touchcancel', resetTouchGesture) } catch {}
+     resetTouchGesture()
     }
-  }, [lockTelegramSwipeForTouchScroll, releaseTelegramSwipeForTouchScroll, telegramTouchShieldActive])
+  }, [lockTelegramSwipeForTouchScroll, releaseTelegramSwipeForTouchScroll, telegramTouchSwipeGuardActive])
 
 React.useEffect(() => cleanupTimers, [cleanupTimers])
 
@@ -359,10 +387,11 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
 
   return (
     <div
+      ref={surfaceRef}
       className={`ql7VideoSurface ql7ExternalVideoSurface ${className || ''}`.trim()}
       data-forum-external-video="1"
       data-forum-external-kind={normalizedKind}
-      data-tma-touch-scroll-shield={telegramTouchShieldActive ? '1' : undefined}
+      data-tma-touch-swipe-guard={telegramTouchSwipeGuardActive ? '1' : undefined}
       onPointerDown={handleSurfacePointerDown}
       onClick={handleSurfaceClick}
     >
@@ -401,11 +430,7 @@ onLoad={() => {
         className={`ql7ExternalProviderShield ${providerShieldVisible ? 'isVisible' : ''}`}
         aria-hidden="true"
       />
-      <div
-        ref={touchScrollShieldRef}
-        className={`ql7ExternalTouchScrollShield ${telegramTouchShieldActive ? 'isTelegramMiniAppActive' : ''}`}
-        aria-hidden="true"
-      />
+
       <div className={`ql7VideoHud ${hudVisible ? 'isVisible' : ''}`}>
         <button
           type="button"
