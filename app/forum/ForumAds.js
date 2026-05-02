@@ -279,6 +279,21 @@ const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
 const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 
+const AD_NATIVE_TERMINAL_RELEASE_REASONS = new Set([
+  'unmount',
+  'replace',
+  'kind_change',
+  'src_change',
+  'blocked_or_empty_src',
+  'bad_src',
+  'error',
+  'warm_owner_denied',
+]);
+
+function isAdNativeTerminalRelease(reason) {
+  return AD_NATIVE_TERMINAL_RELEASE_REASONS.has(String(reason || ''));
+}
+
 function getAdVideoNodeSrc(videoEl) {
   if (!videoEl) return '';
   try {
@@ -290,18 +305,14 @@ function getAdVideoNodeSrc(videoEl) {
 
 function detachAdNativeVideo(videoEl, opts = {}) {
   if (!videoEl) return;
+
   const hard = !!(opts === true || opts?.hard);
   const reason = String(opts?.reason || (hard ? 'hard_detach' : 'soft_detach'));
- 
-  // IMPORTANT:
-  // Soft detach keeps the first frame during near/focus jitter.
-  // Hard detach is used when the ad loses the single native warm owner,
-  // changes media, errors, or unmounts. That prevents hidden <video> nodes
-  // from keeping Blob MP4 pipelines and Range cache state alive.
-  //
-  // Do not call load() after removing src here. The browser will reconcile the
-  // media element from the attribute change, and explicit load() is the path
-  // that caused extra 206/cancel churn on scroll/focus.
+  const resetPipeline = !!(
+    opts?.resetPipeline ||
+    opts?.terminal ||
+    isAdNativeTerminalRelease(reason)
+  );
 
   try { videoEl.pause?.(); } catch {}
 
@@ -314,12 +325,20 @@ function detachAdNativeVideo(videoEl, opts = {}) {
         videoEl.dataset.__adDetachedHard = '1';
         videoEl.dataset.__adDetachedReason = reason;
         videoEl.dataset.__adDetachedHardTs = String(Date.now());
+        videoEl.dataset.__adPipelineReset = resetPipeline ? '1' : '0';
         delete videoEl.dataset.adNativeSrc;
       }
     } catch {}
     try { videoEl.removeAttribute('src'); } catch {}
     try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
     try { videoEl.preload = 'none'; } catch {}
+
+    // Не дергаем load() на scroll/near jitter.
+    // Но на terminal cleanup он нужен, чтобы Safari/iOS отпустил native decoder/compositor pipeline.
+    if (resetPipeline) {
+      try { videoEl.load?.(); } catch {}
+    }
+
     return;
   }
 
@@ -392,6 +411,23 @@ const AD_NATIVE_WARM_STICKY_MS = 4200;
 const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
 let adNativeWarmSlot = { video: null, src: '', ts: 0 };
 
+function clearAdNativeWarmSlotOwner(videoEl, reason = 'clear') {
+  try {
+    if (!videoEl) return;
+
+    if (adNativeWarmSlot.video === videoEl) {
+      adNativeWarmSlot = { video: null, src: '', ts: 0 };
+    }
+
+    if (videoEl.dataset) {
+      videoEl.dataset.__adWarmOwner = '0';
+      videoEl.dataset.__adLoadPending = '0';
+      videoEl.dataset.__adWarmClearReason = String(reason || 'clear');
+      videoEl.dataset.__adWarmClearTs = String(Date.now());
+    }
+  } catch {}
+}
+
 function getAdViewportState(el) {
   try {
     if (!el?.isConnected) {
@@ -436,44 +472,60 @@ function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
     if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
 
     const reasonKey = String(reason || 'release');
+    const terminalRelease = isAdNativeTerminalRelease(reasonKey);
+    const allowNearHold = reasonKey === 'near_exit';
+
     const state = getAdViewportState(videoEl);
-    const keepVisibleSurface =
+    const canKeepSurface =
+      allowNearHold &&
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
-      (state.inViewport || state.gapPx <= 1280) &&
-      (reasonKey === 'near_exit' || reasonKey === 'replace' || reasonKey === 'release');
+      (state.inViewport || state.gapPx <= 1280);
+
     const keepNearExitWarm =
-      reasonKey === 'near_exit' &&
+      allowNearHold &&
       videoEl.paused &&
       isAdNativeVideoLoadingOrReady(videoEl) &&
       state.gapPx <= 2600;
 
-    // Near observer может мигнуть на резком scroll/windowing. Если в этот момент оборвать
-    // единственный warm-slot, Chrome отменяет текущий Range и при возврате начинает новый 206.
-    // Поэтому near_exit не убивает живой близкий warm; replace/unmount/bad_src по-прежнему освобождают.
-    if (keepNearExitWarm || keepVisibleSurface) {
+    // Только near_exit имеет право держать surface/warm.
+    // replace/unmount/src_change/bad_src/error обязаны освободить старый owner.
+    if (keepNearExitWarm || canKeepSurface) {
       adNativeWarmSlot = {
         video: videoEl,
-        src: String(videoEl.dataset?.adNativeSrc || videoEl.currentSrc || videoEl.getAttribute?.('src') || adNativeWarmSlot.src || ''),
+        src: String(
+          videoEl.dataset?.adNativeSrc ||
+          videoEl.currentSrc ||
+          videoEl.getAttribute?.('src') ||
+          adNativeWarmSlot.src ||
+          ''
+        ),
         ts: Date.now(),
       };
+
       try {
         if (videoEl.dataset) {
           videoEl.dataset.__adWarmOwner = keepNearExitWarm ? '1' : '0';
-          videoEl.dataset.__adSurfaceHeld = keepVisibleSurface ? '1' : '0';
+          videoEl.dataset.__adSurfaceHeld = canKeepSurface ? '1' : '0';
           videoEl.dataset.__adSurfaceHeldReason = reasonKey;
         }
-        videoEl.preload = keepNearExitWarm ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
+        videoEl.preload = keepNearExitWarm
+          ? AD_NATIVE_VIDEO_PRELOAD_PLAY
+          : 'metadata';
       } catch {}
+
       return;
     }
 
-    adNativeWarmSlot = { video: null, src: '', ts: 0 };
-    try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '0'; } catch {}
+    clearAdNativeWarmSlotOwner(videoEl, reasonKey);
 
-    // Single-source rule: when a slot really loses the controlled warm owner and is not playing,
-    // detach it. Only the near_exit jitter path above is allowed to keep the single warm alive.
-    if (videoEl.paused) detachAdNativeVideo(videoEl, { hard: true, reason: reasonKey });
+    if (videoEl.paused || terminalRelease) {
+      detachAdNativeVideo(videoEl, {
+        hard: true,
+        reason: reasonKey,
+        resetPipeline: terminalRelease,
+      });
+    }
   } catch {}
 }
 
@@ -482,7 +534,13 @@ function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
     const nextSrc = String(src || '').trim();
     if (!videoEl || !nextSrc) return false;
 
-    const prev = adNativeWarmSlot.video;
+    let prev = adNativeWarmSlot.video;
+
+    if (prev && prev !== videoEl && !prev.isConnected) {
+      clearAdNativeWarmSlotOwner(prev, 'stale_disconnected_owner');
+      prev = null;
+    }
+
     if (prev === videoEl && adNativeWarmSlot.src === nextSrc) {
       adNativeWarmSlot.ts = Date.now();
       return true;
@@ -1597,8 +1655,24 @@ useEffect(() => {
 
 useEffect(() => {
   const node = videoRef.current;
+
   return () => {
     try { releaseAdNativeWarmSlot(node, 'unmount'); } catch {}
+    try {
+      const st = adNativePauseRecoveryRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativePauseRecoveryRef.current = { timer: 0, ts: 0, count: 0 };
+    } catch {}
+
+    attachedVideoSrcRef.current = '';
+
+    try {
+      detachAdNativeVideo(node, {
+        hard: true,
+        reason: 'unmount',
+        resetPipeline: true,
+      });
+    } catch {}
   };
 }, []);
 
@@ -1682,7 +1756,12 @@ useEffect(() => {
 
   if (media.kind !== 'video') {
     attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(node, { hard: true, reason: 'kind_change' });
+    clearAdNativeWarmSlotOwner(node, 'kind_change');
+    detachAdNativeVideo(node, {
+      hard: true,
+      reason: 'kind_change',
+      resetPipeline: true,
+    });
     return undefined;
   }
 
@@ -1690,17 +1769,27 @@ useEffect(() => {
 
   if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) {
     attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src' });
+    clearAdNativeWarmSlotOwner(node, 'blocked_or_empty_src');
+    detachAdNativeVideo(node, {
+      hard: true,
+      reason: 'blocked_or_empty_src',
+      resetPipeline: true,
+    });
     return undefined;
   }
 
   // Не привязываем native video к isNear / shouldPlay.
   // Скролл и IntersectionObserver не должны менять <video src>.
   // Если URL реально сменился — очищаем старый ресурс один раз.
-if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
-  detachAdNativeVideo(node, { hard: true, reason: 'src_change' });
-  attachedVideoSrcRef.current = '';
-} 
+  if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
+    clearAdNativeWarmSlotOwner(node, 'src_change');
+    detachAdNativeVideo(node, {
+      hard: true,
+      reason: 'src_change',
+      resetPipeline: true,
+    });
+    attachedVideoSrcRef.current = '';
+  }
   return undefined;
 }, [isVideoSrcTemporarilyBlocked, media.kind, media.src]);
 
@@ -1741,9 +1830,12 @@ if (!canOwnWarm) {
         v.preload = 'metadata';
         return undefined;
       }
-      v.dataset.__adWarmOwner = '0';
-      v.dataset.__adLoadPending = '0';
-      detachAdNativeVideo(v, { hard: true, reason: 'warm_owner_denied' });
+      clearAdNativeWarmSlotOwner(v, 'warm_owner_denied');
+      detachAdNativeVideo(v, {
+        hard: true,
+        reason: 'warm_owner_denied',
+        resetPipeline: true,
+      });
     }
   } catch {}
   return undefined;
@@ -2515,6 +2607,8 @@ const handleToggleSound = (e) => {
   data-slot-kind={slotKind}
   data-ads="1"
   data-stable-shell="1"
+  data-windowing-keepalive="media"
+  data-forum-windowing-stable="1"
   style={slotCssVars}
 >
 <style jsx>{`

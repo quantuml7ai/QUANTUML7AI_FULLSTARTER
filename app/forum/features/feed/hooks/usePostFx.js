@@ -164,6 +164,25 @@ export default function usePostFx({ cardRef, rearmPooledFxNode }) {
     [extractEmojiFromEl, spawnPostBoom, spawnPostFx],
   )
 
+  React.useEffect(() => {
+    return () => {
+      const cleanupNode = (el) => {
+        try {
+          if (!el) return
+          el.classList?.remove?.('isLive')
+          el.textContent = ''
+          el.removeAttribute?.('style')
+        } catch {}
+      }
+
+      try { fxNodesRef.current.forEach(cleanupNode) } catch {}
+      try { boomNodesRef.current.forEach(cleanupNode) } catch {}
+
+      fxNodesRef.current = []
+      boomNodesRef.current = []
+    }
+  }, [])
+
   return {
     FX_POOL,
     BOOM_POOL,

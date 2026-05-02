@@ -925,6 +925,21 @@ React.useEffect(() => {
     if (tid) {
       try { clearTimeout(tid); } catch {}
     }
+
+    const cleanupNode = (el) => {
+      try {
+        if (!el) return;
+        el.classList?.remove?.('isLive');
+        el.textContent = '';
+        el.removeAttribute?.('style');
+      } catch {}
+    };
+
+    try { fxNodesRef.current.forEach(cleanupNode); } catch {}
+    try { boomNodesRef.current.forEach(cleanupNode); } catch {}
+
+    fxNodesRef.current = [];
+    boomNodesRef.current = [];
   };
 }, []);
 

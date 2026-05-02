@@ -90,6 +90,8 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
       className="forumAdSlot"
       data-kind="ad"
       data-stable-shell="1"
+      data-windowing-keepalive="media"
+      data-forum-windowing-stable="1"
       data-slotkind={slotKind}
       data-slotkey={stableSlotKey}
       style={{ minHeight: 'var(--mb-ad-h)', height: 'var(--mb-ad-h)', maxHeight: 'var(--mb-ad-h)' }}

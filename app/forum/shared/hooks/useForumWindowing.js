@@ -17,6 +17,8 @@ const DEFAULT_FALLBACK_MAX_RENDER = 8
 const DEFAULT_FALLBACK_OVERSCAN_PX = 960
 const STABLE_MEDIA_SHELL_SELECTOR = [
   '[data-stable-shell="1"]',
+  '[data-windowing-keepalive="media"]',
+  '[data-forum-windowing-stable="1"]',
   '[data-ads="1"]',
   '.forum-ad-card',
   '.forum-ad-media-slot',
@@ -341,12 +343,31 @@ export default function useForumWindowing({
         }
 
         const nextMaxRender = resolveMaxRender(velocity)
+
         if ((end - start) > nextMaxRender) {
-          const mid = Math.floor((start + end) / 2)
-          const half = Math.floor(nextMaxRender / 2)
-          start = Math.max(0, mid - half)
-          end = Math.min(total, start + nextMaxRender)
-          if ((end - start) < nextMaxRender) start = Math.max(0, end - nextMaxRender)
+          const windowSize = clamp(nextMaxRender, 1, total)
+
+          if (direction < 0) {
+            // При скролле назад нельзя центрировать окно:
+            // иначе верхний/предыдущий media shell размонтируется прямо перед входом во viewport.
+            const reverseBias = Math.min(2, Math.max(1, Math.floor(windowSize * 0.18)))
+            start = Math.max(0, start - reverseBias)
+            end = Math.min(total, start + windowSize)
+          } else if (direction > 0) {
+            // При скролле вперёд держим нижний край, чтобы не резать runway.
+            const forwardBias = Math.min(1, Math.max(0, Math.floor(windowSize * 0.12)))
+            end = Math.min(total, end + forwardBias)
+            start = Math.max(0, end - windowSize)
+          } else {
+            const mid = Math.floor((start + end) / 2)
+            const half = Math.floor(windowSize / 2)
+            start = Math.max(0, mid - half)
+            end = Math.min(total, start + windowSize)
+          }
+
+          if ((end - start) < windowSize) {
+            start = Math.max(0, end - windowSize)
+          }
         }
 
         const lock = targetLockRef.current
@@ -458,12 +479,71 @@ export default function useForumWindowing({
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < anchorDeltaIgnorePx) return
 
-    emitWindowingDiag('anchor_adjust_suppressed', {
+    if (Math.abs(raw) > anchorDeltaMaxPx) {
+      emitWindowingDiag('anchor_large_delta_drop', {
+        reason,
+        delta: Math.round(raw),
+      })
+      return
+    }
+
+    if (isScrollActiveNow()) {
+      emitWindowingDiag('anchor_adjust_deferred_active_scroll', {
+        reason,
+        delta: Math.round(raw),
+        applied: 0,
+      })
+      return
+    }
+
+    let applied = 0
+
+    try {
+      const el = readScrollEl()
+      const now = Date.now()
+
+      if (hasInnerScrollable(el)) {
+        const before = Number(el.scrollTop || 0)
+        const maxScroll = Math.max(
+          0,
+          Number(el.scrollHeight || 0) - Number(el.clientHeight || 0),
+        )
+        const next = clamp(before + raw, 0, maxScroll || before + raw)
+
+        el.scrollTop = next
+        applied = Number(el.scrollTop || 0) - before
+      } else if (typeof window !== 'undefined') {
+        const doc = document.documentElement
+        const body = document.body
+        const before = Number(window.scrollY || window.pageYOffset || 0)
+        const maxScroll = Math.max(
+          0,
+          Math.max(
+            Number(doc?.scrollHeight || 0),
+            Number(body?.scrollHeight || 0),
+          ) - Number(window.innerHeight || 0),
+        )
+        const next = clamp(before + raw, 0, maxScroll || before + raw)
+
+        window.__forumProgrammaticScrollTs = now
+        window.scrollTo(0, next)
+        applied = next - before
+      }
+    } catch {}
+
+    emitWindowingDiag('anchor_adjust_apply', {
       reason,
       delta: Math.round(raw),
-      applied: 0,
+      applied: Math.round(applied),
     })
-  }, [anchorDeltaIgnorePx, emitWindowingDiag])
+  }, [
+    anchorDeltaIgnorePx,
+    anchorDeltaMaxPx,
+    emitWindowingDiag,
+    hasInnerScrollable,
+    isScrollActiveNow,
+    readScrollEl,
+  ])
 
   const applyPendingMeasuredHeights = useCallback((reason = 'flush') => {
     let applied = 0
@@ -506,10 +586,14 @@ export default function useForumWindowing({
         pendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= anchorDeltaIgnorePx) {
-          emitWindowingDiag('anchor_deferred_drop', {
-            reason: 'drop_deferred_scrolltop_teleport_guard',
-            pending: Math.round(pending),
-          })
+          if (Math.abs(pending) <= anchorDeltaMaxPx) {
+            applyAnchoredScrollDelta(pending, 'deferred_height_above_window')
+          } else {
+            emitWindowingDiag('anchor_large_delta_drop', {
+              reason: 'large_deferred_height_delta_above_window',
+              pending: Math.round(pending),
+            })
+          }
         }
 
         scheduleRecalc()
@@ -520,7 +604,9 @@ export default function useForumWindowing({
   }, [
     anchorActiveRetryMs,
     anchorDeltaIgnorePx,
+    anchorDeltaMaxPx,
     anchorFlushMs,
+    applyAnchoredScrollDelta,
     applyPendingMeasuredHeights,
     emitWindowingDiag,
     isScrollActiveNow,

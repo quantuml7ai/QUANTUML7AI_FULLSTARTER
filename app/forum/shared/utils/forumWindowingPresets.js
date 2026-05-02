@@ -60,7 +60,7 @@ export function readForumWindowingMaxRender(kind = 'post') {
       return constrained ? 12 : 14
     case 'post':
     default:
-      return constrained ? 9 : 11
+      return constrained ? 11 : 14
   }
 }
 
