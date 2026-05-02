@@ -79,9 +79,10 @@ export default function ForumActionRow({
               width={inviteGifSize}
               height={inviteGifSize}
               unoptimized
+              sizes={`${inviteGifSize}px`}
               style={{
-                width: '100%',
-                height: '100%',
+                width: inviteGifSize,
+                height: inviteGifSize,
                 objectFit: 'cover',
                 display: 'block',
               }}

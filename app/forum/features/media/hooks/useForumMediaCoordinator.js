@@ -3746,11 +3746,17 @@ return true;
         if (el.getAttribute('data-src') !== nextSrc) el.setAttribute('data-src', nextSrc);
       } catch {}
       let hadSrc = false;
+      let curSrc = '';
       try {
-        hadSrc = !!String(el.getAttribute('src') || '').trim();
+        curSrc = String(el.getAttribute('src') || '').trim();
+        hadSrc = !!curSrc;
       } catch {}
-      if (!hadSrc) {
-        try { el.setAttribute('src', nextSrc); } catch {}
+      if (!hadSrc || curSrc !== nextSrc) {
+        try {
+          el.setAttribute('data-forum-iframe-loaded', '0');
+          el.removeAttribute('data-forum-loaded-src');
+          el.setAttribute('src', nextSrc);
+        } catch {}
       }
       try { el.setAttribute('data-forum-last-active-ts', String(now)); } catch {}
       try { el.setAttribute('data-forum-prewarm-ts', String(now)); } catch {}
@@ -3758,6 +3764,37 @@ return true;
       trace('iframe_prewarm', el, { kind, reason, hadSrc });
       emitMediaDiag('iframe_prewarm', { kind, reason, hadSrc, ...getIframeSnapshot() });
       return !!String(el.getAttribute('src') || '').trim();
+};
+
+const waitExternalIframeLoad = (iframe, expectedSrc = '', timeoutMs = 1400) => {
+  if (!(iframe instanceof HTMLIFrameElement)) return Promise.resolve(false);
+  const src = String(expectedSrc || iframe.getAttribute('src') || '').trim();
+  if (!src) return Promise.resolve(false);
+  try {
+    const loaded = iframe.getAttribute('data-forum-iframe-loaded') === '1';
+    const loadedSrc = String(iframe.getAttribute('data-forum-loaded-src') || '').trim();
+    if (loaded && loadedSrc === src) return Promise.resolve(true);
+  } catch {}
+  return new Promise((resolve) => {
+    let done = false;
+    let timer = 0;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      try { if (timer) clearTimeout(timer); } catch {}
+      try { iframe.removeEventListener('load', onLoad); } catch {}
+      resolve(!!ok);
+    };
+    const onLoad = () => {
+      try {
+        iframe.setAttribute('data-forum-iframe-loaded', '1');
+        iframe.setAttribute('data-forum-loaded-src', iframe.getAttribute('src') || src);
+      } catch {}
+      finish(true);
+    };
+    try { iframe.addEventListener('load', onLoad, { once: true }); } catch {}
+    try { timer = setTimeout(() => finish(false), timeoutMs); } catch { finish(false); }
+  });      
     };
     const isSplashGateActive = () => {
       try {
@@ -4007,7 +4044,16 @@ return;
           if (ds && el.getAttribute('data-src') !== ds) {
             try { el.setAttribute('data-src', ds); } catch {}
           }
-          if (ds && (!cur || cur !== ds)) el.setAttribute('src', ds);
+          if (ds && (!cur || cur !== ds)) {
+            try {
+              el.setAttribute('data-forum-iframe-loaded', '0');
+              el.removeAttribute('data-forum-loaded-src');
+            } catch {}
+            el.setAttribute('src', ds);
+            await waitExternalIframeLoad(el, ds, isIOSUi ? 1800 : 1400);
+          } else if (ds) {
+            await waitExternalIframeLoad(el, ds, 420);
+          }
           el.setAttribute('data-forum-last-active-ts', String(Date.now()));
         } catch {}
         const player = await initYouTubePlayer(el);

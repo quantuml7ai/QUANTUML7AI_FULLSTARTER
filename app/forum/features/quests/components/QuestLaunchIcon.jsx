@@ -36,6 +36,8 @@ export default function QuestLaunchIcon({
         ['--quest-h']: 'auto',
         ['--quest-cursor']: questEnabled ? 'pointer' : 'default',
         ['--quest-y']: '-14px',
+        width: 'var(--quest-w)',
+        height: 'var(--quest-h)',        
       }}
     />
   )

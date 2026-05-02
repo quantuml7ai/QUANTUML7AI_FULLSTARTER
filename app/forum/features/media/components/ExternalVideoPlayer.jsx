@@ -322,9 +322,16 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
         referrerPolicy="strict-origin-when-cross-origin"
         tabIndex={-1}
         className="ql7ExternalFrame"
-        onLoad={() => {
-          emitExternalVideoState(frameRef.current, { ready: true, muted: mutedState, paused: pausedState })
-        }}
+onLoad={() => {
+  const frame = frameRef.current
+  try {
+    if (frame) {
+      frame.setAttribute('data-forum-iframe-loaded', '1')
+      frame.setAttribute('data-forum-loaded-src', frame.getAttribute('src') || frame.getAttribute('data-src') || '')
+    }
+  } catch {}
+  emitExternalVideoState(frame, { ready: true, muted: mutedState, paused: pausedState })
+}}
       />
       <div
         className={`ql7ExternalProviderShield ${providerShieldVisible ? 'isVisible' : ''}`}
