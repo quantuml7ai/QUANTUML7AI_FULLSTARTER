@@ -7,9 +7,18 @@ import {
   commandExternalVideo,
   emitExternalVideoState,
 } from '../utils/externalVideoBridge'
+import {
+  acquireTelegramVerticalSwipeLock,
+  isTelegramMiniAppRuntime,
+} from '../utils/telegramMiniAppSwipeLock'
 
 const GOOD_EMOJIS = ['🔥', '✨', '🚀', '💎', '⚡', '👏', '🤩', '💯', '🫶', '🎉']
 const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '🙃', '😬', '🧊']
+
+// Telegram Mini App touch-scroll guard for YouTube/TikTok iframe cards.
+// This does not affect mouse/desktop scroll. It only arms on real touch events.
+const TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED = true
+const TELEGRAM_EXTERNAL_TOUCH_SCROLL_UNLOCK_DELAY_MS = 720
 
 function IconPlay() {
   return (
@@ -99,6 +108,9 @@ export default function ExternalVideoPlayer({
   allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
 }) {
   const frameRef = React.useRef(null)
+  const touchScrollShieldRef = React.useRef(null)
+  const telegramSwipeReleaseRef = React.useRef(null)
+  const telegramSwipeLockKeyRef = React.useRef(Symbol('ql7-external-video-touch-scroll'))  
   const hudTimerRef = React.useRef(0)
   const centerTimerRef = React.useRef(0)
   const fxTimersRef = React.useRef([])
@@ -108,11 +120,13 @@ export default function ExternalVideoPlayer({
   const [mutedState, setMutedState] = React.useState(true)
   const [centerGlyph, setCenterGlyph] = React.useState('play')
   const [fxBursts, setFxBursts] = React.useState([])
-
+  const [telegramTouchShieldActive, setTelegramTouchShieldActive] = React.useState(false)
+  
   const normalizedKind = String(kind || '').toLowerCase()
+  const isExternalProvider = normalizedKind === 'youtube' || normalizedKind === 'tiktok'
   const centerIsVisible = pausedState || !!centerGlyph || hudVisible
   const centerIcon = pausedState ? 'play' : (centerGlyph || 'pause')
-  const providerShieldVisible = (normalizedKind === 'youtube' || normalizedKind === 'tiktok') && pausedState
+  const providerShieldVisible = isExternalProvider && pausedState
   const revealHud = React.useCallback((ms = 2200) => {
     setHudVisible(true)
     try { if (hudTimerRef.current) clearTimeout(hudTimerRef.current) } catch {}
@@ -242,6 +256,22 @@ const stopControlPointer = React.useCallback((event) => {
   try { event?.preventDefault?.(); event?.stopPropagation?.() } catch {}
 }, [])
 
+const lockTelegramSwipeForTouchScroll = React.useCallback(() => {
+  if (!TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED) return
+  if (!isExternalProvider) return
+  if (telegramSwipeReleaseRef.current) return
+
+  telegramSwipeReleaseRef.current = acquireTelegramVerticalSwipeLock(telegramSwipeLockKeyRef.current, {
+    restoreDelayMs: TELEGRAM_EXTERNAL_TOUCH_SCROLL_UNLOCK_DELAY_MS,
+  })
+}, [isExternalProvider])
+
+const releaseTelegramSwipeForTouchScroll = React.useCallback(() => {
+  const release = telegramSwipeReleaseRef.current
+  telegramSwipeReleaseRef.current = null
+  try { release?.() } catch {}
+}, [])
+
 const cleanupTimers = React.useCallback(() => {
   try {
     if (hudTimerRef.current) {
@@ -259,7 +289,40 @@ const cleanupTimers = React.useCallback(() => {
     const timers = fxTimersRef.current.splice(0)
     timers.forEach((timer) => clearTimeout(timer))
   } catch {}
+  try {
+    const release = telegramSwipeReleaseRef.current
+    telegramSwipeReleaseRef.current = null
+    release?.()
+  } catch {}  
 }, [])
+
+  React.useEffect(() => {
+    setTelegramTouchShieldActive(
+      TELEGRAM_EXTERNAL_TOUCH_SCROLL_SHIELD_ENABLED && isExternalProvider && isTelegramMiniAppRuntime()
+    )
+  }, [isExternalProvider])
+
+  React.useEffect(() => {
+    const node = touchScrollShieldRef.current
+    if (!node || !telegramTouchShieldActive) return undefined
+
+    const onTouchStart = () => lockTelegramSwipeForTouchScroll()
+    const onTouchMove = () => lockTelegramSwipeForTouchScroll()
+    const onTouchEnd = () => releaseTelegramSwipeForTouchScroll()
+
+    try { node.addEventListener('touchstart', onTouchStart, { passive: true }) } catch {}
+    try { node.addEventListener('touchmove', onTouchMove, { passive: true }) } catch {}
+    try { node.addEventListener('touchend', onTouchEnd, { passive: true }) } catch {}
+    try { node.addEventListener('touchcancel', onTouchEnd, { passive: true }) } catch {}
+
+    return () => {
+      try { node.removeEventListener('touchstart', onTouchStart) } catch {}
+      try { node.removeEventListener('touchmove', onTouchMove) } catch {}
+      try { node.removeEventListener('touchend', onTouchEnd) } catch {}
+      try { node.removeEventListener('touchcancel', onTouchEnd) } catch {}
+      releaseTelegramSwipeForTouchScroll()
+    }
+  }, [lockTelegramSwipeForTouchScroll, releaseTelegramSwipeForTouchScroll, telegramTouchShieldActive])
 
 React.useEffect(() => cleanupTimers, [cleanupTimers])
 
@@ -299,6 +362,7 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
       className={`ql7VideoSurface ql7ExternalVideoSurface ${className || ''}`.trim()}
       data-forum-external-video="1"
       data-forum-external-kind={normalizedKind}
+      data-tma-touch-scroll-shield={telegramTouchShieldActive ? '1' : undefined}
       onPointerDown={handleSurfacePointerDown}
       onClick={handleSurfaceClick}
     >
@@ -337,7 +401,11 @@ onLoad={() => {
         className={`ql7ExternalProviderShield ${providerShieldVisible ? 'isVisible' : ''}`}
         aria-hidden="true"
       />
-
+      <div
+        ref={touchScrollShieldRef}
+        className={`ql7ExternalTouchScrollShield ${telegramTouchShieldActive ? 'isTelegramMiniAppActive' : ''}`}
+        aria-hidden="true"
+      />
       <div className={`ql7VideoHud ${hudVisible ? 'isVisible' : ''}`}>
         <button
           type="button"

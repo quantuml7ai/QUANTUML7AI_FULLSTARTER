@@ -325,7 +325,28 @@ export const FORUM_STYLES = `
   opacity:1;
   background:transparent !important;
 }
+.ql7ExternalTouchScrollShield{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  opacity:0;
+  background:transparent !important;
+  touch-action:auto;
+  -webkit-tap-highlight-color:transparent;
+}
 
+.ql7ExternalVideoSurface[data-tma-touch-scroll-shield="1"]{
+  touch-action:pan-y pinch-zoom;
+  overscroll-behavior-y:contain;
+}
+
+@media (hover:none) and (pointer:coarse){
+  .ql7ExternalVideoSurface[data-tma-touch-scroll-shield="1"] .ql7ExternalTouchScrollShield.isTelegramMiniAppActive{
+    pointer-events:auto;
+    touch-action:pan-y pinch-zoom;
+  }
+}
 .ql7ExternalVideoSurface[data-forum-external-kind="youtube"] > iframe{
   aspect-ratio:16/9;
 }
