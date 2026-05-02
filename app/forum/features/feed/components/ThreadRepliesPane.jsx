@@ -93,12 +93,13 @@ export default function ThreadRepliesPane({
       {threadSlots.slice(threadWin.start, threadWin.end).map((slot) => {
         if (slot.type === 'item') {
           const p = slot.item
-          const isThreadBranchRoot =
-            !!threadRoot &&
-            String(p?.id || '') === String(threadRoot?.id || '')
-          const visualLevel = Number(p?._lvl || 0)
-          const offsetLevel = threadRoot ? Math.max(0, visualLevel - 1) : visualLevel
-          const replyIndent = Math.min(64, 12 + (Math.max(1, offsetLevel) * 14))
+const isThreadBranchRoot =
+  !!threadRoot &&
+  String(p?.id || '') === String(threadRoot?.id || '')
+const isThreadBranchReply = !!threadRoot && !isThreadBranchRoot
+const visualLevel = Number(p?._lvl || 0)
+const offsetLevel = threadRoot ? Math.max(0, visualLevel - 1) : visualLevel
+const replyIndent = Math.min(64, 12 + (Math.max(1, offsetLevel) * 14))
           const parent = p.parentId
             ? (
               isThreadBranchRoot
@@ -117,16 +118,20 @@ export default function ThreadRepliesPane({
               id={`post_${p.id}`}
               data-feed-card="1"
               data-feed-kind="post"
-              data-thread-branch-root={isThreadBranchRoot ? '1' : undefined}
-              data-thread-branch-child={isThreadBranchRoot ? undefined : '1'}
-              className={isThreadBranchRoot ? 'threadBranchRootCard' : 'threadBranchReplyEntry'}
-              style={
-                isThreadBranchRoot
-                  ? undefined
-                  : {
-                      '--thread-reply-indent': `${replyIndent}px`,
-                    }
-              }
+data-thread-branch-root={isThreadBranchRoot ? '1' : undefined}
+data-thread-branch-child={isThreadBranchReply ? '1' : undefined}
+className={
+  isThreadBranchRoot
+    ? 'threadBranchRootCard'
+    : (isThreadBranchReply ? 'threadBranchReplyEntry' : undefined)
+}
+style={
+  isThreadBranchReply
+    ? {
+        '--thread-reply-indent': `${replyIndent}px`,
+      }
+    : undefined
+}
             >
               <PostCard
                 p={p}
