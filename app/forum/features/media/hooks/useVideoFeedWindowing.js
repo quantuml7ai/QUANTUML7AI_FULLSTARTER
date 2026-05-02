@@ -3,8 +3,8 @@ import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
-const VF_OVERSCAN_PX = 1180
-const VF_OVERSCAN_PX_MOBILE = 560
+const VF_OVERSCAN_PX = 1380
+const VF_OVERSCAN_PX_MOBILE = 820
 const VF_OVERSCAN_PX_TABLET = 920
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
