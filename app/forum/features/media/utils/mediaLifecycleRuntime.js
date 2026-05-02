@@ -125,7 +125,7 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
   }
 })()
 
-const __SOFT_RESIDENT_POST_VIDEO = true
+const __SOFT_RESIDENT_POST_VIDEO = false
 
 const __MEDIA_RUNTIME_PROFILE = (() => {
   try {
@@ -425,16 +425,17 @@ if (shouldSoftUnload) {
     }
   } catch {}
   try {
-    el.preload = isPostFeedVideo ? 'metadata' : 'none'
+    el.preload = 'none'
   } catch {}
 try {
   el.dataset.__lastHardUnloadTs = String(nowTs)
 } catch {}
-  if (!isPostFeedVideo) {
-    try {
-      el.load?.()
-    } catch {}
-  }
+  try {
+    // Hard detach must reset the browser media pipeline for post videos too.
+    // Without load() after removing src, Safari/Chrome may keep decoded frames and
+    // Range state alive behind a visually empty shell.
+    el.load?.()
+  } catch {}
 }
 
 export function __restoreVideoEl(el) {

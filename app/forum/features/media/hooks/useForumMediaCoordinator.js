@@ -457,8 +457,8 @@ const POST_NATIVE_SRC_CAP = (() => {
         // One active native video + one prepared neighbor is the stable mobile budget.
         // Diagnostics show pressure from live media/iframe residency, not a detached-DOM leak.
         if (lowMem) return 1;
-        if (ios || coarse || /Android/i.test(ua)) return 2;
-        return 3;
+        if (ios || coarse || /Android/i.test(ua)) return 1;
+        return 2;
       } catch {
         return 2;
       }
@@ -3227,20 +3227,20 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      if (isIOSUi) return Math.max(1280, Math.min(2300, Math.round(viewportH * 2.05)));
-      if (isCoarseUi) return Math.max(1040, Math.min(1800, Math.round(viewportH * 1.48)));
-      return Math.max(620, Math.min(1150, Math.round(viewportH * 0.94)));
+      // Keep native post-video prewarm close to the viewport. Large runways attach
+      // several MP4 sources, grow renderer memory, and create repeated 206 churn.
+      if (isIOSUi) return Math.max(720, Math.min(1250, Math.round(viewportH * 1.08)));
+      if (isCoarseUi) return Math.max(520, Math.min(920, Math.round(viewportH * 0.82)));
+      return Math.max(220, Math.min(460, Math.round(viewportH * 0.42)));
     };
 
 const getNativePrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-  // iOS/WebKit needs the muted play/pause decode tick a little earlier than
-  // normal visibility activation, otherwise the card can enter viewport before
-  // the first frame is decoded. Keep this smaller than full prewarm runway so
-  // only one close native post owns the real playback-prime pipeline.
-  if (isIOSUi) return Math.max(1040, Math.min(1850, Math.round(viewportH * 1.62)));
-  if (isCoarseUi) return Math.max(680, Math.min(1120, Math.round(viewportH * 1.02)));
-  return Math.max(180, Math.min(420, Math.round(viewportH * 0.36)));
+  // Real decode/play priming is allowed only for the current card or its nearest
+  // neighbour. Anything further must stay as a stable shell without native src.
+  if (isIOSUi) return Math.max(460, Math.min(860, Math.round(viewportH * 0.72)));
+  if (isCoarseUi) return Math.max(320, Math.min(560, Math.round(viewportH * 0.52)));
+  return Math.max(120, Math.min(260, Math.round(viewportH * 0.24)));
 };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3396,9 +3396,9 @@ const getNativePrimeGapLimit = () => {
             Math.round(viewportH * (isIOSUi ? 1.05 : (isCoarseUi ? 0.92 : 0.72))),
           );
         const runwayDelay = nearOneCard
-          ? (isIOSUi ? 2600 : (isCoarseUi ? 2200 : 1500))
-          : (isIOSUi ? 900 : (isCoarseUi ? 760 : 560));
-        return Math.max(runwayDelay, Math.min(holdLeft, isIOSUi ? 3200 : (isCoarseUi ? 2600 : 1800)));
+          ? (isIOSUi ? 900 : (isCoarseUi ? 760 : 520))
+          : (isIOSUi ? 360 : (isCoarseUi ? 300 : 240));
+        return Math.max(runwayDelay, Math.min(holdLeft, isIOSUi ? 1100 : (isCoarseUi ? 900 : 650)));
       } catch {
         return isIOSUi ? 900 : (isCoarseUi ? 760 : 560);
       }
@@ -3520,7 +3520,7 @@ if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
         media.preload = 'auto';
       } catch {}
 
-      try { markCoordinatorPlayIntent(media, warmupOnlyPrime ? (isIOSUi ? 3600 : 2800) : (isIOSUi ? 1800 : 1500)); } catch {}
+      try { markCoordinatorPlayIntent(media, warmupOnlyPrime ? (isIOSUi ? 1800 : 1400) : (isIOSUi ? 1800 : 1500)); } catch {}
 
       const rememberPrimeReady = (holdMs = 0) => {
         let ready = false;
@@ -3549,7 +3549,7 @@ const finishPrime = (state = 'done') => {
   primeFinished = true;
   try { media.dataset.__nativePrimePending = '0'; } catch {}
   try {
-    const holdMs = warmupOnlyPrime ? (isIOSUi ? 6400 : (isCoarseUi ? 3800 : 2400)) : 0;
+    const holdMs = warmupOnlyPrime ? (isIOSUi ? 1800 : (isCoarseUi ? 1400 : 900)) : 0;
           const warmedReady = rememberPrimeReady(holdMs);
           const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
           const nowVisiblePx = getOwnerVisiblePx(media);
@@ -3583,6 +3583,23 @@ const finishPrime = (state = 'done') => {
           trace('native_prime_finish', media, { reason, state, readyState: Number(media.readyState || 0) });
         } catch {}
       };
+
+      if (warmupOnlyPrime && visiblePx <= 0) {
+        try {
+          media.dataset.__nativePrimePending = '0';
+          media.dataset.__nativePrimeWarmupOnly = '1';
+          media.dataset.__nativePrimeSkipped = 'offscreen_warmup';
+          media.dataset.__resident = '0';
+          media.dataset.__prewarm = '0';
+          media.preload = 'metadata';
+        } catch {}
+        trace('native_prime_skip_offscreen_warmup', media, {
+          reason,
+          gapPx,
+          visiblePx,
+        });
+        return true;
+      }
 
       try {
 const p = media.play?.();
@@ -4833,9 +4850,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 760 : (isCoarseUi ? 620 : 420), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.78 : 1.24)))
+          Math.max(isIOSUi ? 420 : (isCoarseUi ? 340 : 220), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 0.95 : 0.7)))
         }px 0px ${
-          Math.max(isIOSUi ? 1450 : (isCoarseUi ? 1180 : 900), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 3.35 : 2.35)))
+          Math.max(isIOSUi ? 720 : (isCoarseUi ? 560 : 360), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.55 : 0.95)))
         }px 0px`,
       },
     );
