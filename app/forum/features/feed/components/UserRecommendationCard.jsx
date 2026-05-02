@@ -6,6 +6,8 @@ import { formatCount } from '../../../shared/utils/counts'
 import AvatarEmoji from '../../profile/components/AvatarEmoji'
 import VipFlipBadge from '../../profile/components/VipFlipBadge'
 
+const RECOMMENDATION_CARD_STYLE_ID = 'ql7-user-recommendation-card-style'
+
 function resolveNicknameFontSize(nickname) {
   const length = String(nickname || '').trim().length
   if (length > 30) return 9
@@ -359,6 +361,20 @@ const styles = `
   }
 `
 
+function useSingletonStyle(id, css) {
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+    if (document.getElementById(id)) return undefined
+
+    const styleNode = document.createElement('style')
+    styleNode.id = id
+    styleNode.dataset.ql7SingletonStyle = '1'
+    styleNode.textContent = css
+    document.head.appendChild(styleNode)
+    return undefined
+  }, [id, css])
+}
+
 export default function UserRecommendationCard({
   user,
   t,
@@ -374,6 +390,8 @@ export default function UserRecommendationCard({
   const nickWrapRef = React.useRef(null)
   const nickTextRef = React.useRef(null)
   const [adaptiveNickSize, setAdaptiveNickSize] = React.useState(nicknameFontSize)
+
+  useSingletonStyle(RECOMMENDATION_CARD_STYLE_ID, styles)
 
   React.useEffect(() => {
     setAdaptiveNickSize(nicknameFontSize)
@@ -520,8 +538,6 @@ export default function UserRecommendationCard({
         ),
       ),
     ),
-    React.createElement('style', {
-      dangerouslySetInnerHTML: { __html: styles },
-    }),
+
   )
 }
