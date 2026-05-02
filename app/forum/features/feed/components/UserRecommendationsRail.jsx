@@ -5,7 +5,6 @@ import { cls } from '../../../shared/utils/classnames'
 import UserRecommendationCard from './UserRecommendationCard'
 
 const SKELETON_COUNT = 8
-const RECOMMENDATIONS_RAIL_STYLE_ID = 'ql7-user-recommendations-rail-style'
 
 const styles = `
   .recommendationsRail {
@@ -337,20 +336,6 @@ const styles = `
   }
 `
 
-function useSingletonStyle(id, css) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return undefined
-    if (document.getElementById(id)) return undefined
-
-    const styleNode = document.createElement('style')
-    styleNode.id = id
-    styleNode.dataset.ql7SingletonStyle = '1'
-    styleNode.textContent = css
-    document.head.appendChild(styleNode)
-    return undefined
-  }, [id, css])
-}
-
 function createArrowButton({ className, ariaLabel, onClick, path, disabled }) {
   return React.createElement(
     'button',
@@ -376,8 +361,6 @@ export default function UserRecommendationsRail({
   hideScrollbar = true,
   desktopArrows = true,
 }) {
-  useSingletonStyle(RECOMMENDATIONS_RAIL_STYLE_ID, styles)
-
   const scrollerRef = useRef(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(false)
@@ -578,6 +561,8 @@ export default function UserRecommendationsRail({
       className: 'forumDividerRail forumDividerRail--gold recommendationsRailDivider',
       'aria-hidden': 'true',
     }),
-
+    React.createElement('style', {
+      dangerouslySetInnerHTML: { __html: styles },
+    }),
   )
 }

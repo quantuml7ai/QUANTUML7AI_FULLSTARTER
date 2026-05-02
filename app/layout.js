@@ -7,9 +7,9 @@ import Providers from './providers'
 import HeroAvatar from '../components/HeroAvatar'
 import ForumShellGate from '../components/ForumShellGate'
 import { SITE_ORIGIN, toAbsoluteSiteUrl, withAssetVersion } from '../lib/metadataCache'
-// Forum routes produce a lot of scroll/input PerformanceEventTiming entries.
-// Keep Vercel telemetry route-aware so the heavy forum feed is not observed twice.
-import TelemetryGate from './TelemetryGate'
+// ✅ Vercel Analytics & Speed Insights
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // ⬇️ добавлено для автозапуска
 import Script from 'next/script'
@@ -555,8 +555,9 @@ export default function RootLayout({ children }) {
     minSize={10}
     maxSize={80}
   /> */}
-        {/* ✅ Включаем аналитику Vercel route-aware: Speed Insights выключен на /forum */}
-        <TelemetryGate />
+        {/* ✅ Включаем аналитику Vercel */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

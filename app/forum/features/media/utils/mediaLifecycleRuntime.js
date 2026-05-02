@@ -154,25 +154,8 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
-function __pruneActiveVideoRegistry() {
-  try {
-    for (const video of Array.from(__activeVideoEls)) {
-      if (!(video instanceof HTMLVideoElement) || !video.isConnected) {
-        __activeVideoEls.delete(video)
-      }
-    }
-    for (let i = __activeVideoLRU.length - 1; i >= 0; i -= 1) {
-      const video = __activeVideoLRU[i]
-      if (!(video instanceof HTMLVideoElement) || !video.isConnected || !__activeVideoEls.has(video)) {
-        __activeVideoLRU.splice(i, 1)
-      }
-    }
-  } catch {}
-}
-
 export function __touchActiveVideoEl(el) {
   if (!el) return
-  __pruneActiveVideoRegistry()
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
@@ -184,7 +167,6 @@ export function __dropActiveVideoEl(el) {
   __activeVideoEls.delete(el)
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
-  __pruneActiveVideoRegistry()
 }
 
 export function __isVideoNearViewport(el, marginPx = 120) {
@@ -204,7 +186,6 @@ export function __isVideoNearViewport(el, marginPx = 120) {
 
 export function __enforceActiveVideoCap(exceptEl) {
   try {
-    __pruneActiveVideoRegistry()
     let guard = 0
     while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 128) {
       guard += 1
@@ -244,16 +225,14 @@ export function __enforceActiveVideoCap(exceptEl) {
 
       if (victimIsPostFeedVideo) {
         try {
-          victim.dataset.__forceHardUnload = '1'
-          victim.dataset.__active = '0'
-          victim.dataset.__prewarm = '0'
-          victim.dataset.__resident = '0'
+          victim.pause?.()
         } catch {}
         try {
-          __unloadVideoEl(victim)
-        } finally {
-          try { delete victim.dataset.__forceHardUnload } catch {}
-        }
+          victim.dataset.__active = '0'
+          victim.dataset.__prewarm = '0'
+          victim.dataset.__resident = '1'
+          victim.preload = 'metadata'
+        } catch {}
       } else {
         __unloadVideoEl(victim)
       }
@@ -317,7 +296,6 @@ export function __unloadVideoEl(el) {
   try {
     el.pause?.()
   } catch {}
-  try { if (el instanceof HTMLVideoElement) __dropActiveVideoEl(el) } catch {}
   try {
     el.dataset.__active = '0'
     el.dataset.__playRequested = '0'
@@ -326,22 +304,6 @@ export function __unloadVideoEl(el) {
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
-    delete el.dataset.__nativePrewarm
-    delete el.dataset.__nativePrimeHoldUntil
-    delete el.dataset.__coordinatorPlayUntil
-    delete el.dataset.__suppressedPlayUntil
-    delete el.dataset.__userGestureUntil
-    delete el.dataset.__manualLeaseUntil
-    delete el.dataset.__restoreLoadBlockedUntil
-    delete el.dataset.__restoreLoadWindowStart
-    delete el.dataset.__restoreLoadCount
-    delete el.dataset.__lastRestoreLoadTs
-    delete el.dataset.__attachedSrc
-    delete el.dataset.__attachedSrcTs
-    delete el.dataset.__blockedMediaUntil
-    delete el.dataset.__errorStreak
-    delete el.dataset.__loadPendingSince
-    delete el.dataset.__pendingHardUnload
   } catch {}
 const hardUnloadRequested = (() => {
   try {

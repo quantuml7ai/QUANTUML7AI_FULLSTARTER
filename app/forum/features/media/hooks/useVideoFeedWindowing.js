@@ -3,9 +3,9 @@ import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
-const VF_OVERSCAN_PX = 1180
-const VF_OVERSCAN_PX_MOBILE = 820
-const VF_OVERSCAN_PX_TABLET = 980
+const VF_OVERSCAN_PX = 1480
+const VF_OVERSCAN_PX_MOBILE = 1260
+const VF_OVERSCAN_PX_TABLET = 1360
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
@@ -36,13 +36,12 @@ export default function useVideoFeedWindowing({
     try {
       if (!isBrowserFn()) return 5
 
-      const w = Number(window?.innerWidth || 0)
       const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
       const dm = Number(window?.navigator?.deviceMemory || 0)
       const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
 
-      if (lowMem || coarse || w < 640) return 4
-      return 5
+      if (coarse || lowMem) return 6
+      return 7
     } catch {
       return 5
     }
@@ -60,8 +59,8 @@ export default function useVideoFeedWindowing({
             ? VF_OVERSCAN_PX_TABLET
             : VF_OVERSCAN_PX
 
-      const v = Math.min(1, Math.abs(Number(velocity || 0)) / 3.2)
-      const boost = coarse ? 0.1 : 0.16
+      const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.8)
+      const boost = coarse ? 0.18 : 0.32
       return Math.round(base * (1 + v * boost))
     } catch {
       return VF_OVERSCAN_PX_MOBILE

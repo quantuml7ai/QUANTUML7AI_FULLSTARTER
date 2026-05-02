@@ -6,27 +6,6 @@ import ExternalVideoPlayer from '../../media/components/ExternalVideoPlayer'
 import { buildTikTokPlayerSrc, buildYouTubeEmbedSrc } from '../../media/utils/externalVideoBridge'
 
 const POST_MEDIA_EMBED_CACHE = new Map()
-const POST_MEDIA_EMBED_CACHE_MAX = 420
-const POST_MEDIA_EMBED_CACHE_KEEP = 260
-const POST_MEDIA_EMBED_CACHE_TTL_MS = 10 * 60 * 1000
-
-function prunePostMediaEmbedCache(now = Date.now()) {
-  try {
-    for (const [key, value] of POST_MEDIA_EMBED_CACHE.entries()) {
-      const ts = Number(value?.ts || 0)
-      if (ts > 0 && (now - ts) > POST_MEDIA_EMBED_CACHE_TTL_MS) {
-        POST_MEDIA_EMBED_CACHE.delete(key)
-      }
-    }
-    if (POST_MEDIA_EMBED_CACHE.size <= POST_MEDIA_EMBED_CACHE_MAX) return
-    const ordered = Array.from(POST_MEDIA_EMBED_CACHE.entries())
-      .sort((a, b) => Number(a?.[1]?.ts || 0) - Number(b?.[1]?.ts || 0))
-    const dropCount = Math.max(0, ordered.length - POST_MEDIA_EMBED_CACHE_KEEP)
-    for (let i = 0; i < dropCount; i += 1) {
-      POST_MEDIA_EMBED_CACHE.delete(ordered[i][0])
-    }
-  } catch {}
-}
 
 function uniqList(list) {
   return Array.from(new Set(Array.isArray(list) ? list.filter(Boolean) : []))
@@ -254,7 +233,12 @@ export default function PostMediaStack({
     const nextTiktok = directTiktok.length ? directTiktok : uniqList(cached.tiktok || [])
     const next = { yt: nextYt, tiktok: nextTiktok }
     POST_MEDIA_EMBED_CACHE.set(stableEmbedKey, { ...next, ts: Date.now() })
-    prunePostMediaEmbedCache()
+    if (POST_MEDIA_EMBED_CACHE.size > 2200) {
+      const keys = Array.from(POST_MEDIA_EMBED_CACHE.keys())
+      for (let i = 0; i < keys.length - 1600; i += 1) {
+        POST_MEDIA_EMBED_CACHE.delete(keys[i])
+      }
+    }
     setStableEmbeds((prev) => {
       if (sameList(prev?.yt, next.yt) && sameList(prev?.tiktok, next.tiktok)) return prev
       return next
