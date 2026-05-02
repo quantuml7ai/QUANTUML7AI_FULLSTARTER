@@ -434,7 +434,7 @@ const applyMutedPrefToAll = () => {
         const dm = Number(navigator?.deviceMemory || 0);
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3;
 
-        if (ios) return 1;
+        if (ios) return 2;
         if (lowMem) return 1;
         if (coarse) return 1;
         return 2;
