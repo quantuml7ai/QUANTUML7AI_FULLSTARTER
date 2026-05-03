@@ -9,7 +9,7 @@ import ForumShellGate from '../components/ForumShellGate'
 import { SITE_ORIGIN, toAbsoluteSiteUrl, withAssetVersion } from '../lib/metadataCache'
 // ✅ Vercel Analytics & Speed Insights
 import { Analytics } from '@vercel/analytics/react'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+// import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // ⬇️ добавлено для автозапуска
 import Script from 'next/script'
@@ -557,7 +557,7 @@ export default function RootLayout({ children }) {
   /> */}
         {/* ✅ Включаем аналитику Vercel */}
         <Analytics />
-        <SpeedInsights />
+        {/* <SpeedInsights /> */}
       </body>
     </html>
   )
