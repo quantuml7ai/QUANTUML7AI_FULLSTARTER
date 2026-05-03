@@ -7,8 +7,9 @@ import Providers from './providers'
 import HeroAvatar from '../components/HeroAvatar'
 import ForumShellGate from '../components/ForumShellGate'
 import { SITE_ORIGIN, toAbsoluteSiteUrl, withAssetVersion } from '../lib/metadataCache'
-// ✅ Vercel Analytics / Speed Insights are route-gated.
-import TelemetryGate from './TelemetryGate'
+// ✅ Vercel Analytics & Speed Insights
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // ⬇️ добавлено для автозапуска
 import Script from 'next/script'
@@ -555,7 +556,8 @@ export default function RootLayout({ children }) {
     maxSize={80}
   /> */}
         {/* ✅ Включаем аналитику Vercel */}
-        <TelemetryGate />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

@@ -268,12 +268,14 @@ const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 
 const AD_NATIVE_TERMINAL_RELEASE_REASONS = new Set([
-  'unmount', 
+  'unmount',
+  'replace',
   'kind_change',
   'src_change',
   'blocked_or_empty_src',
   'bad_src',
-  'error', 
+  'error',
+  'warm_owner_denied',
 ]);
 
 function isAdNativeTerminalRelease(reason) {
@@ -393,28 +395,9 @@ if (currentSrc === nextSrc) {
 
   return true;
 }
-const AD_NATIVE_WARM_STICKY_MS = 2200;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 9500;
-const AD_NATIVE_RESOLVE_RUNWAY_MARGIN = '4200px 0px 6200px 0px';
-const AD_NATIVE_WARM_RUNWAY_MARGIN = '1500px 0px 3400px 0px';
-const AD_SLOT_MEMORY_MAX = 900;
-const AD_SLOT_MEMORY_KEEP = 620;
-const AD_NATIVE_PRIME_GAP_PX = 3600;
-const AD_NATIVE_PRIME_MIN_GAP_MS = 1700;
+const AD_NATIVE_WARM_STICKY_MS = 4200;
+const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
 let adNativeWarmSlot = { video: null, src: '', ts: 0 };
-
-function pruneOldestMapEntries(map, maxSize = AD_SLOT_MEMORY_MAX, keepSize = AD_SLOT_MEMORY_KEEP) {
-  try {
-    if (!(map instanceof Map)) return;
-    if (map.size <= maxSize) return;
-    let drop = map.size - keepSize;
-    for (const key of map.keys()) {
-      map.delete(key);
-      drop -= 1;
-      if (drop <= 0) break;
-    }
-  } catch {}
-}
 
 function clearAdNativeWarmSlotOwner(videoEl, reason = 'clear') {
   try {
@@ -467,92 +450,6 @@ function isAdNativeVideoLoadingOrReady(videoEl) {
       return ns === HTMLMediaElement.NETWORK_LOADING;
     }
     return ns === 2;
-  } catch {
-    return false;
-  }
-}
-
-function primeAdNativeFirstFrame(videoEl, reason = 'ad_native_prime') {
-  try {
-    if (!(videoEl instanceof HTMLVideoElement)) return false;
-    if (!videoEl.isConnected) return false;
-    if (!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || '').trim()) return false;
-
-    const state = getAdViewportState(videoEl);
-    if (!state.inViewport && state.gapPx > AD_NATIVE_PRIME_GAP_PX) return false;
-
-    const now = Date.now();
-    const lastPrimeTs = Number(videoEl.dataset?.__adNativePrimeTs || 0);
-    if (String(videoEl.dataset?.__adNativePrimePending || '') === '1') return true;
-    if (lastPrimeTs > 0 && (now - lastPrimeTs) < AD_NATIVE_PRIME_MIN_GAP_MS) return false;
-
-    if (Number(videoEl.readyState || 0) >= 2) {
-      try { videoEl.dataset.__adWarmReady = '1'; } catch {}
-      return true;
-    }
-
-    try {
-      videoEl.dataset.__adNativePrimeTs = String(now);
-      videoEl.dataset.__adNativePrimePending = '1';
-      videoEl.dataset.__adNativePrimeReason = String(reason || 'ad_native_prime');
-      videoEl.dataset.__adLoadPending = '1';
-      videoEl.dataset.__adWarmOwner = String(videoEl.dataset?.__adWarmOwner || '0');
-    } catch {}
-
-    try {
-      videoEl.muted = true;
-      videoEl.defaultMuted = true;
-      videoEl.setAttribute('muted', '');
-      videoEl.playsInline = true;
-      videoEl.setAttribute('playsinline', '');
-      videoEl.setAttribute('webkit-playsinline', '');
-      videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-    } catch {}
-
-    let finished = false;
-    const finishPrime = (stateKey = 'done') => {
-      if (finished) return;
-      finished = true;
-      try {
-        videoEl.dataset.__adNativePrimePending = '0';
-        videoEl.dataset.__adNativePrimeState = String(stateKey || 'done');
-        videoEl.dataset.__adLoadPending = '0';
-        if (Number(videoEl.readyState || 0) >= 2) videoEl.dataset.__adWarmReady = '1';
-      } catch {}
-      try {
-        if (!videoEl.paused) videoEl.pause?.();
-        videoEl.preload = 'metadata';
-      } catch {}
-    };
-
-    const playAttempt = videoEl.play?.();
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt
-        .then(() => {
-          let frameCallbackArmed = false;
-          if (typeof videoEl.requestVideoFrameCallback === 'function') {
-            try {
-              frameCallbackArmed = true;
-              videoEl.requestVideoFrameCallback(() => {
-                setTimeout(() => finishPrime('first_frame'), 48);
-              });
-            } catch {
-              frameCallbackArmed = false;
-            }
-          }
-          setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), 220);
-        })
-        .catch((error) => {
-          try {
-            videoEl.dataset.__adNativePrimePending = '0';
-            videoEl.dataset.__adNativePrimeError = String(error?.name || error?.message || error || 'play_rejected').slice(0, 120);
-          } catch {}
-        });
-    } else {
-      setTimeout(() => finishPrime('sync_play'), 140);
-    }
-
-    return true;
   } catch {
     return false;
   }
@@ -649,11 +546,11 @@ const nextGap = nextState.gapPx;
 const prevLoading = isAdNativeVideoLoadingOrReady(prev);
 const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
 const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
-const nextInsideRunway = nextGap <= 3200;
+const nextInsideRunway = nextGap <= 2100;
 const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
 const nextClearlyCloser =
   nextShouldWinViewport ||
-  nextGap + 80 < prevGap ||
+  nextGap + 160 < prevGap ||
   (prevIsBehindRunway && nextInsideRunway);
 
 // Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
@@ -1101,7 +998,6 @@ class AdsCoordinatorImpl {
   setLastForSeed(seedKey, url) {
     if (!seedKey || !url) return;
     this.lastBySeedKey.set(String(seedKey), url);
-    pruneOldestMapEntries(this.lastBySeedKey);
   }
 
   getLastForSeed(seedKey) {
@@ -1570,7 +1466,6 @@ const ytPlayerRef = useRef(null);
   // isNear: блок рядом (можно подгружать, но не играть)
   // isFocused: блок реально в зоне внимания (играем)
   // isPageActive: вкладка/окно активно (иначе всегда пауза)
-  const [isResolveNear, setIsResolveNear] = useState(false);
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
@@ -1808,8 +1703,8 @@ useEffect(() => {
   if (!shouldPlayRef.current) {
     const canOwnWarm = claimAdNativeWarmSlot(v, srcKey, rootRef.current);
 if (!canOwnWarm) {
-  // Another ad owns warm priority. Do not destroy this slot pipeline on scroll jitter:
-  // hard reset here creates the 206/cancel storm and blank ad blocks.
+  // Another ad owns warm priority. This node must not keep a second native
+  // media pipeline alive.
   try {
     if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
       const viewportState = getAdViewportState(rootRef.current || v);
@@ -1817,30 +1712,18 @@ if (!canOwnWarm) {
       const hasExistingSurface =
         existingSrc === srcKey &&
         isAdNativeVideoLoadingOrReady(v);
-
-      if (viewportState.inViewport || viewportState.gapPx <= 620) {
-        const attachedNear = hasExistingSurface || ensureAdNativeVideoSrc(v, srcKey, normalizeForumAdMuted(mutedRef.current));
-        if (attachedNear) {
-          attachedVideoSrcRef.current = srcKey;
-          v.dataset.__adSurfaceHeld = '1';
-          v.dataset.__adSurfaceHeldReason = 'warm_owner_denied_near';
-          primeAdNativeFirstFrame(v, 'warm_owner_denied_near');
-          return undefined;
-        }
-      }
-
-      if ((viewportState.inViewport || viewportState.gapPx <= 1600) && hasExistingSurface) {
+      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
         v.dataset.__adSurfaceHeld = '1';
         v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
         v.preload = 'metadata';
         return undefined;
       }
-
       clearAdNativeWarmSlotOwner(v, 'warm_owner_denied');
       detachAdNativeVideo(v, {
-        hard: false,
+        hard: true,
         reason: 'warm_owner_denied',
-      }); 
+        resetPipeline: true,
+      });
     }
   } catch {}
   return undefined;
@@ -1867,8 +1750,6 @@ if (!canOwnWarm) {
         v.dataset.__adLoadPending = '1';
         v.load?.();
       }
-
-      primeAdNativeFirstFrame(v, 'near_warm_owner');
     } catch {}
   }
 
@@ -1902,17 +1783,11 @@ if (!canOwnWarm) {
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
       return;
 
-    // resolve: определить тип медиа заранее, чтобы слот не входил в viewport skeleton-блоком.
-    const resolveObs = new IntersectionObserver(
-      ([e]) => setIsResolveNear(!!e?.isIntersecting),
-      { rootMargin: AD_NATIVE_RESOLVE_RUNWAY_MARGIN, threshold: 0 }
-    );
-
     // near: заранее «подойти» к блоку (без игры)
     const nearObs = new IntersectionObserver(
       ([e]) => setIsNear(!!e?.isIntersecting),
       // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: AD_NATIVE_WARM_RUNWAY_MARGIN, threshold: 0 }
+      { rootMargin: '820px 0px 1650px 0px', threshold: 0 }
     );
 
     // focused: реально видно (>= 60% площади)
@@ -1921,12 +1796,10 @@ if (!canOwnWarm) {
       { threshold: [0, 0.25, 0.6, 0.75, 1] }
     );
 
-    resolveObs.observe(el);
     nearObs.observe(el);
     focusObs.observe(el);
 
     return () => {
-      resolveObs.disconnect();
       nearObs.disconnect();
       focusObs.disconnect();
     };
@@ -2016,7 +1889,6 @@ useEffect(() => {
         idx = next;
       }
       lastMediaIndexByKey.set(mediaKey, idx);
-      pruneOldestMapEntries(lastMediaIndexByKey);
       setMediaHref(list[idx]);
     };
 
@@ -2042,7 +1914,7 @@ useEffect(() => {
       setMedia({ kind: 'skeleton', src: null });
       return;
     }
-    const canResolveNow = !!isResolveNear || !!isNear || !!isFocused;
+    const canResolveNow = !!isNear || !!isFocused;
     if (!canResolveNow) {
       if (isLikelyVideoUrl(mediaHref)) {
         setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
@@ -2217,7 +2089,7 @@ async function run() {
     return () => {
       cancelled = true;
     };
-  }, [safeClick, conf, slotKind, mediaHref, isResolveNear, isNear, isFocused]);
+  }, [safeClick, conf, slotKind, mediaHref, isNear, isFocused]);
 
   // YouTube Iframe API для управления звуком
 useEffect(() => {

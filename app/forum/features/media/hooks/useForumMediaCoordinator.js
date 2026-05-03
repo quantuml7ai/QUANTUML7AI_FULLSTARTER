@@ -32,7 +32,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     const selector = '[data-forum-media]';
     const readyReplay = new Map();
     const pendingReadyGrace = new WeakMap();
-    const systemPauseTimers = new WeakMap();
     let lastDetachedSweepTs = 0;
     const traceEnabled = (() => {
       try {
@@ -177,8 +176,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           let detachedReadyReplay = 0;
           let detachedYtPlayers = 0;
           let detachedYtPolls = 0;
-          let detachedUnloadTimers = 0;
-          let detachedExternalPlayKickTimers = 0;
           try {
             ratios.forEach((_, el) => {
               if (!(el instanceof Element) || !el.isConnected) detachedRatios += 1;
@@ -199,16 +196,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               if (!ytValues.has(player)) detachedYtPolls += 1;
             });
           } catch {}
-          try {
-            unloadTimers.forEach((_, el) => {
-              if (!(el instanceof Element) || !el.isConnected) detachedUnloadTimers += 1;
-            });
-          } catch {}
-          try {
-            externalPlayKickTimers.forEach((_, el) => {
-              if (!(el instanceof Element) || !el.isConnected) detachedExternalPlayKickTimers += 1;
-            });
-          } catch {}
           return {
             ratiosSize: ratios.size,
             detachedRatios,
@@ -218,10 +205,6 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             detachedYtPlayers,
             ytMutePollsSize: ytMutePolls.size,
             detachedYtPolls,
-            unloadTimersSize: unloadTimers.size,
-            detachedUnloadTimers,
-            externalPlayKickTimersSize: externalPlayKickTimers.size,
-            detachedExternalPlayKickTimers,
             activeConnected: !!(active instanceof Element && active.isConnected),
           };
         } catch {
@@ -1226,18 +1209,12 @@ const kickMediaLoad = (
       } catch {}
       if (clearUser) clearUserPaused(el);
       try { fn?.(); } catch {}
-      try {
-        const prevTimer = systemPauseTimers.get(el);
-        if (prevTimer) clearTimeout(prevTimer);
-      } catch {}
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         try {
           delete el.dataset.__systemPause;
           delete el.dataset.__systemPauseUntil;
         } catch {}
-        try { systemPauseTimers.delete(el); } catch {}
       }, 1300);
-      try { systemPauseTimers.set(el, timer); } catch {}
     };
     const clearReadyReplay = (el) => {
       const cleanup = readyReplay.get(el);
@@ -2010,64 +1987,6 @@ const onMediaLoadedCaptured = (e) => {
         traceCandidate('candidate_external_ignored', iframe, { reason });
       } catch {}
     };
-    const releaseDetachedMediaPipeline = (owner, reason = 'detached') => {
-      try {
-        if (!(owner instanceof Element) || owner.isConnected) return false;
-        const media = getMediaStateNode(owner) || owner;
-
-        if (media instanceof HTMLVideoElement) {
-          try { clearReadyReplay(media); } catch {}
-          try {
-            const pauseTimer = systemPauseTimers.get(media);
-            if (pauseTimer) clearTimeout(pauseTimer);
-            systemPauseTimers.delete(media);
-          } catch {}
-          try { invalidatePlayRequest(media); } catch {}
-          try { __dropActiveVideoEl(media); } catch {}
-          try {
-            media.dataset.__forceHardUnload = '1';
-            media.dataset.__active = '0';
-            media.dataset.__prewarm = '0';
-            media.dataset.__resident = '0';
-            media.dataset.__loadPending = '0';
-            delete media.dataset.__loadPendingSince;
-            media.dataset.__detachedReleaseReason = String(reason || 'detached');
-          } catch {}
-          try { __unloadVideoEl(media); } finally {
-            try { delete media.dataset.__forceHardUnload; } catch {}
-          }
-          return true;
-        }
-
-        if (media instanceof HTMLAudioElement) {
-          try { clearReadyReplay(media); } catch {}
-          try {
-            const pauseTimer = systemPauseTimers.get(media);
-            if (pauseTimer) clearTimeout(pauseTimer);
-            systemPauseTimers.delete(media);
-          } catch {}
-          try { invalidatePlayRequest(media); } catch {}
-          try { media.pause?.(); } catch {}
-          try { media.removeAttribute('src'); } catch {}
-          try { media.load?.(); } catch {}
-          return true;
-        }
-
-        if (owner instanceof HTMLIFrameElement) {
-          const src = String(owner.getAttribute('src') || owner.getAttribute('data-src') || '').trim();
-          if (src && !owner.getAttribute('data-src')) {
-            try { owner.setAttribute('data-src', src); } catch {}
-          }
-          try { owner.removeAttribute('src'); } catch {}
-          try { owner.removeAttribute('data-forum-iframe-active'); } catch {}
-          try { owner.removeAttribute('data-forum-iframe-loaded'); } catch {}
-          try { owner.removeAttribute('data-forum-loaded-src'); } catch {}
-          return true;
-        }
-      } catch {}
-      return false;
-    };
-
     const cleanupObservedMediaNode = (node, reason = 'removed') => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
@@ -2097,7 +2016,6 @@ const onMediaLoadedCaptured = (e) => {
             try { __dropActiveVideoEl(owner); } catch {}
           }
         }
-        try { releaseDetachedMediaPipeline(owner, reason); } catch {}
       });
     };
     const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
@@ -2140,25 +2058,6 @@ const onMediaLoadedCaptured = (e) => {
             try { clearInterval(id); } catch {}
             ytMutePolls.delete(player);
             ytMuteLast.delete(player);
-          }
-        }
-      } catch {}
-      try {
-        for (const [el, id] of unloadTimers.entries()) {
-          if (!(el instanceof Element) || !el.isConnected) {
-            try { clearTimeout(id); } catch {}
-            unloadTimers.delete(el);
-            try { setPendingHardUnload(el, false); } catch {}
-            try { releaseDetachedMediaPipeline(el, reason); } catch {}
-          }
-        }
-      } catch {}
-      try {
-        for (const [el, id] of externalPlayKickTimers.entries()) {
-          if (!(el instanceof Element) || !el.isConnected) {
-            try { clearTimeout(id); } catch {}
-            externalPlayKickTimers.delete(el);
-            try { releaseDetachedMediaPipeline(el, reason); } catch {}
           }
         }
       } catch {}
@@ -2579,7 +2478,6 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
 
     const observed = new WeakSet();
     const unloadTimers = new Map(); // el -> timeoutId
-    const externalPlayKickTimers = new Map(); // external iframe -> deferred play timeoutId
     const mediaDomOrder = new WeakMap();
     let mediaDomOrderSeq = 1;
     let coordinatorLastScrollTop = 0;
@@ -2823,15 +2721,15 @@ const shouldRetainHtmlMedia = (el) => {
         if (reason === 'cleanup') return 0;
         if (reason === 'resident_cap' || reason === 'error_blocked') return 0;
         if (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace') {
-          if (isIOSUi) return 5000;
-          return isCoarseUi ? 4000 : 4600;
+          if (isIOSUi) return 5600;
+          return isCoarseUi ? 4600 : 5200;
         }
         if (reason === 'out_of_view') {
-          if (isIOSUi) return 6200;
-          return isCoarseUi ? 4600 : 5400;
+          if (isIOSUi) return 7000;
+          return isCoarseUi ? 5200 : 6200;
         }
-        if (isIOSUi) return 6000;
-        return isCoarseUi ? 4600 : 5200;
+        if (isIOSUi) return 6400;
+        return isCoarseUi ? 5000 : 5800;
       }
       if (reason === 'cleanup' || reason === 'resident_cap') return 0;
       if (!isCoarseUi && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
@@ -3686,9 +3584,22 @@ const finishPrime = (state = 'done') => {
         } catch {}
       };
 
-      // iOS/Safari needs a real muted decode tick before the card enters the viewport.
-      // The gap was already capped by getNativePrimeGapLimit(), so offscreen warmup
-      // here is limited to the nearest neighbour and is not treated as a real user play.
+      if (warmupOnlyPrime && visiblePx <= 0) {
+        try {
+          media.dataset.__nativePrimePending = '0';
+          media.dataset.__nativePrimeWarmupOnly = '1';
+          media.dataset.__nativePrimeSkipped = 'offscreen_warmup';
+          media.dataset.__resident = '0';
+          media.dataset.__prewarm = '0';
+          media.preload = 'metadata';
+        } catch {}
+        trace('native_prime_skip_offscreen_warmup', media, {
+          reason,
+          gapPx,
+          visiblePx,
+        });
+        return true;
+      }
 
       try {
 const p = media.play?.();
@@ -4313,7 +4224,8 @@ return;
     const SWITCH_SCORE_DELTA = 240;
     const PENDING_READY_GRACE_MS = isIOSUi ? 980 : (isCoarseUi ? 620 : 420);
     const PENDING_READY_GRACE_RATIO = 0.12;
-    const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || ''); 
+    const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
+    const externalPlayKickTimers = new Map();
     const clearExternalPlayKick = (el) => {
       try {
         const id = externalPlayKickTimers.get(el);

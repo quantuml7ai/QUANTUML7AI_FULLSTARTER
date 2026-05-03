@@ -154,26 +154,8 @@ const __MAX_ACTIVE_VIDEO_ELEMENTS = (() => {
 const __activeVideoEls = new Set()
 const __activeVideoLRU = []
 
-function __pruneActiveVideoRegistry() {
-  try {
-    for (const video of Array.from(__activeVideoEls)) {
-      if (!video || video.isConnected === false) {
-        __activeVideoEls.delete(video)
-      }
-    }
-    for (let i = __activeVideoLRU.length - 1; i >= 0; i -= 1) {
-      const video = __activeVideoLRU[i]
-      if (!video || video.isConnected === false || !__activeVideoEls.has(video)) {
-        __activeVideoLRU.splice(i, 1)
-      }
-    }
-  } catch {}
-}
-
 export function __touchActiveVideoEl(el) {
   if (!el) return
-  __pruneActiveVideoRegistry()
-  try { if (el.isConnected === false) return } catch {}
   if (!__activeVideoEls.has(el)) __activeVideoEls.add(el)
   const idx = __activeVideoLRU.indexOf(el)
   if (idx !== -1) __activeVideoLRU.splice(idx, 1)
@@ -204,7 +186,6 @@ export function __isVideoNearViewport(el, marginPx = 120) {
 
 export function __enforceActiveVideoCap(exceptEl) {
   try {
-    __pruneActiveVideoRegistry()
     let guard = 0
     while (__activeVideoLRU.length > __MAX_ACTIVE_VIDEO_ELEMENTS && guard < 128) {
       guard += 1
@@ -244,16 +225,14 @@ export function __enforceActiveVideoCap(exceptEl) {
 
       if (victimIsPostFeedVideo) {
         try {
-          victim.dataset.__forceHardUnload = '1'
-          victim.dataset.__active = '0'
-          victim.dataset.__prewarm = '0'
-          victim.dataset.__resident = '0'
+          victim.pause?.()
         } catch {}
         try {
-          __unloadVideoEl(victim)
-        } finally {
-          try { delete victim.dataset.__forceHardUnload } catch {}
-        }
+          victim.dataset.__active = '0'
+          victim.dataset.__prewarm = '0'
+          victim.dataset.__resident = '1'
+          victim.preload = 'metadata'
+        } catch {}
       } else {
         __unloadVideoEl(victim)
       }
