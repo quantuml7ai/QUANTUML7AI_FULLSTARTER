@@ -234,12 +234,6 @@ const AD_LENS_UI = Object.freeze({
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
 
-
-const DEFAULT_THUMB_SERVICES = [
-  'https://image.thum.io/get/width/960/{url}',
-  'https://s.wordpress.com/mshots/v1/{url}?w=960',
-  'https://image.microlink.io/?url={url}&screenshot=true&meta=false',
-];
  
 /**
  * ВАЖНО: только статические обращения к NEXT_PUBLIC_*
@@ -248,11 +242,9 @@ const DEFAULT_THUMB_SERVICES = [
 const ENV_AD = {
   EVERY: process.env.NEXT_PUBLIC_FORUM_AD_EVERY,
   ROTATE_MIN: process.env.NEXT_PUBLIC_FORUM_AD_ROTATE_MIN,
-  PREVIEW: process.env.NEXT_PUBLIC_FORUM_AD_PREVIEW,
-  DEBUG: process.env.NEXT_PUBLIC_FORUM_AD_DEBUG,
+  DEBUG: process.env.NEXT_PUBLIC_FORUM_AD_DEBUG, 
   LINKS: process.env.NEXT_PUBLIC_FORUM_AD_LINKS,
-  THUMB_SERVICES: process.env.NEXT_PUBLIC_FORUM_AD_THUMB_SERVICES,
-};
+}; 
 /* eslint-enable no-undef */
 
 let cachedClientConf = null;
@@ -264,11 +256,7 @@ const imageProbeCache = new Map();
 const imageProbeInflight = new Map();
 const IMAGE_PROBE_CACHE_OK_MS = 12 * 60 * 1000;
 const IMAGE_PROBE_CACHE_FAIL_MS = 75 * 1000;
-const microlinkMetaCache = new Map();
-const microlinkMetaInflight = new Map();
-const MICROLINK_META_CACHE_OK_MS = 10 * 60 * 1000;
-const MICROLINK_META_CACHE_FAIL_MS = 90 * 1000;
-const adMediaResolveCache = new Map();
+const adMediaResolveCache = new Map(); 
 const adMediaResolveInflight = new Map();
 const AD_MEDIA_RESOLVE_CACHE_OK_MS = 12 * 60 * 1000;
 const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
@@ -832,15 +820,7 @@ function parseLinks(raw) {
 
   return { links, mediaByClick };
 }
-
-function parseThumbs(raw) {
-  if (!raw) return [];
-  return String(raw)
-    .split(/[\s,;]+/)
-    .map((s) => s.replace(/#.*/, '').trim())
-    .filter(Boolean);
-}
-
+ 
 export function getForumAdConf() {
   if (isBrowser() && cachedClientConf) return cachedClientConf;
   // Параллельно пробуем подтянуть рекламные кампании из Redis
@@ -850,28 +830,19 @@ export function getForumAdConf() {
   }
   const EVERY = parseNumber(readRaw('EVERY'), 0);
   const ROTATE_MIN = parseNumber(readRaw('ROTATE_MIN'), 1);
-
-  const PREVIEW_RAW = (readRaw('PREVIEW') || 'auto').toLowerCase();
-  const PREVIEW =
-    PREVIEW_RAW === 'screenshot' || PREVIEW_RAW === 'favicon'
-      ? PREVIEW_RAW
-      : 'auto';
-
+ 
   const parsed = parseLinks(readRaw('LINKS') || '');
   const LINKS = parsed.links || [];
   const MEDIA_BY_CLICK = parsed.mediaByClick || {};
-
-  const THUMBS_RAW = parseThumbs(readRaw('THUMB_SERVICES') || '');
+ 
   const DEBUG = String(readRaw('DEBUG') || '').trim() === '1';
 
   const conf = {
     EVERY,
     ROTATE_MIN,
-    PREVIEW,
-    LINKS,
+    LINKS, 
     MEDIA_BY_CLICK,
-    THUMBS: THUMBS_RAW.length ? THUMBS_RAW : DEFAULT_THUMB_SERVICES.slice(),
-    DEBUG,
+    DEBUG, 
     seed: hash32(`${CAMPAIGN_ID}:${FALLBACK_CAMPAIGN_SEED}:${LINKS.length}`),
   };
 
@@ -879,10 +850,8 @@ export function getForumAdConf() {
 
   debugLog(conf, 'config_built', {
     EVERY,
-    ROTATE_MIN,
-    PREVIEW,
-    LINKS_LEN: LINKS.length,
-    THUMBS_LEN: conf.THUMBS.length,
+    ROTATE_MIN, 
+    LINKS_LEN: LINKS.length, 
   });
 
   return conf;
@@ -1128,51 +1097,11 @@ export function resolveCurrentAdUrl(
 
 /* ======================= PRECONNECT ======================= */
 
-let preconnectDone = false;
-
-export function useAdPreconnect(conf) {
-  conf = conf || getForumAdConf();
-
+export function useAdPreconnect() {
   useEffect(() => {
-    if (preconnectDone || !isBrowser()) return;
-    const doc = document;
-    if (!doc?.head) return;
-
-    const templates =
-      conf.THUMBS && conf.THUMBS.length
-        ? conf.THUMBS
-        : DEFAULT_THUMB_SERVICES;
-
-    const origins = new Set();
-    for (const tpl of templates) {
-      try {
-        const test = tpl.replace('{url}', 'https://example.com');
-        const u = new URL(test);
-        origins.add(u.origin);
-      } catch {}
-    }
-
-    origins.forEach((origin) => {
-      try {
-        if (doc.querySelector(`link[data-ads-preconnect="${origin}"]`)) return;
-
-        const l1 = doc.createElement('link');
-        l1.rel = 'preconnect';
-        l1.href = origin;
-        l1.setAttribute('data-ads-preconnect', origin);
-        doc.head.appendChild(l1);
-
-        const l2 = doc.createElement('link');
-        l2.rel = 'dns-prefetch';
-        l2.href = origin;
-        l2.setAttribute('data-ads-preconnect', origin + ':dns');
-        doc.head.appendChild(l2);
-      } catch {}
-    });
-
-    preconnectDone = true;
-  }, [conf]);
-}
+    // Direct-media-only mode: no external page-preview preconnects.
+  }, []);
+} 
 
 /* ======================= EVENTS & MEDIA ======================= */
 
@@ -1401,48 +1330,7 @@ function cacheAdResolvedMedia(key, media, ok = true) {
       if (drop <= 0) break;
     }
   }
-}
-
-async function fetchMicrolinkMeta(url) {
-  const key = String(url || '').trim();
-  if (!key || !isBrowser() || typeof fetch === 'undefined') return null;
-  const now = Date.now();
-  const cached = microlinkMetaCache.get(key);
-  if (cached && Number(cached.until || 0) > now) return cached.value || null;
-  if (cached) microlinkMetaCache.delete(key);
-  const inflight = microlinkMetaInflight.get(key);
-  if (inflight) return inflight;
-
-  const task = (async () => {
-    try {
-      const q =
-        'https://api.microlink.io/?url=' +
-        encodeURIComponent(key) +
-        '&screenshot=true&meta=true&video=false&audio=false&iframe=false&waitFor=2000';
-      const resp = await fetch(q).catch(() => null);
-      const data = await resp?.json().catch(() => null);
-      const meta = data?.data || null;
-      microlinkMetaCache.set(key, {
-        value: meta,
-        until: Date.now() + (meta ? MICROLINK_META_CACHE_OK_MS : MICROLINK_META_CACHE_FAIL_MS),
-      });
-      return meta;
-    } catch {
-      microlinkMetaCache.set(key, {
-        value: null,
-        until: Date.now() + MICROLINK_META_CACHE_FAIL_MS,
-      });
-      return null;
-    }
-  })();
-
-  microlinkMetaInflight.set(key, task);
-  try {
-    return await task;
-  } finally {
-    microlinkMetaInflight.delete(key);
-  }
-}
+} 
 
 function isLikelyVideoUrl(raw) {
   if (!raw) return false;
@@ -1481,9 +1369,9 @@ const lastMediaIndexByKey = new Map();
 
 /* ======================= AdCard ======================= */
 /**
- * OG video/screenshot/image → direct file → YouTube/TikTok → screenshot CDNs → favicon → placeholder
+ * Direct media only: native video → direct image → YouTube/TikTok → placeholder.
  * Бейдж "Реклама" из словаря: ключ forum_ad_label.
- * Превью тянет карточку на всю доступную высоту.
+ * Внешние page-preview ветки отключены: OpenGraph/Microlink/screenshot/favicon.
  */
 
 export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
@@ -2040,8 +1928,7 @@ useEffect(() => {
     let cancelled = false;
 
     const clickHref = safeClick.toString();
-    const landingHost = safeClick.hostname;
-    const mediaResolveKey = String(mediaHref || '').trim();
+    const mediaResolveKey = String(mediaHref || '').trim(); 
     const cachedResolved = readCachedAdResolvedMedia(mediaResolveKey);
     if (cachedResolved) {
       setMedia(cachedResolved);
@@ -2062,12 +1949,7 @@ useEffect(() => {
         cancelled = true;
       };
     }
-
-    const thumbs =
-      conf.THUMBS && conf.THUMBS.length
-        ? conf.THUMBS
-        : DEFAULT_THUMB_SERVICES;
-
+ 
     const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
       mediaHref
     );
@@ -2090,7 +1972,8 @@ async function run() {
     return;
   }
 
-  // 1) Content-Type probe оставляем для неочевидных image/video URL.
+  // 1) Content-Type probe оставляем только для прямых media-endpoint/blob/upload URL.
+  // Запрос идёт только к самому mediaHref, без внешних page-preview сервисов.
   // Range fallback выключен: он сам создавал лишний 206.
   if (!cancelled && shouldProbeMediaKind(mediaHref)) {
     const detected = await detectMediaKind(mediaHref, 3000, {
@@ -2120,177 +2003,83 @@ async function run() {
     }
   }
 
-      // 1) прямое видео (blob, mp4 и т.п.) по URL-эвристике
-      if (!cancelled && isLikelyVideoUrl(mediaHref)) {
-        publishResolved({ kind: 'video', src: mediaHref, step: 'env_video' }, true);
-        emitAdEvent(
-          'ad_fallback',
-          { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
-          conf
-        );
-        return;
-      }
-
-      // 2) YouTube
-      const ytMatch = mediaHref.match(YT_RE);
-      if (!cancelled && ytMatch) {
-        const videoId = ytMatch[1];
-        if (videoId) {
-          publishResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' }, true);
-          emitAdEvent(
-            'ad_fallback',
-            {
-              url: clickHref,
-              cascade_step: 'env_youtube',
-              slot_kind: slotKind,
-            },
-            conf
-          );
-          return;
-        }
-      }
-
-      // 3) TikTok
-      const ttMatch = mediaHref.match(TIKTOK_RE);
-      if (!cancelled && ttMatch) {
-        let videoId = null;
-        try {
-          const u = new URL(mediaHref);
-          const m = u.pathname.match(/\/video\/(\d+)/);
-          if (m) videoId = m[1];
-        } catch {}
-        if (videoId) {
-          publishResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' }, true);
-          emitAdEvent(
-            'ad_fallback',
-            {
-              url: clickHref,
-              cascade_step: 'env_tiktok',
-              slot_kind: slotKind,
-            },
-            conf
-          );
-          return;
-        }
-      }
-
-      // 4) Microlink (OG screenshot / image)
-      if (!cancelled && conf.PREVIEW !== 'favicon') {
-        try {
-          const meta = (await fetchMicrolinkMeta(mediaHref).catch(() => null)) || {};
-
-          const candShot = meta.screenshot?.url || meta.image?.url || null;
-          const candLogo = meta.logo?.url || null;
-
-          const ogList = [
-            candShot && { kind: 'image', src: candShot, step: 'og_screenshot' },
-            candLogo && { kind: 'image', src: candLogo, step: 'og_logo' },
-          ].filter(Boolean);
-
-          for (const c of ogList) {
-            if (cancelled) return;
-            try {
-              const cu = new URL(c.src);
-              if (cu.protocol !== 'https:') continue;
-
-              const ok = await tryLoadImage(cu.toString());
-              if (ok && !cancelled) {
-                publishResolved({ kind: 'image', src: cu.toString(), step: c.step }, true);
-                emitAdEvent(
-                  'ad_fallback',
-                  {
-                    url: clickHref,
-                    cascade_step: c.step,
-                    slot_kind: slotKind,
-                  },
-                  conf
-                );
-                return;
-              }
-            } catch {}
-          }
-        } catch {}
-      }
-
-      // 5) прямой файл-картинка
-      if (!cancelled && conf.PREVIEW !== 'favicon' && isDirectImg) {
-        const ok = await tryLoadImage(mediaHref);
-        if (ok && !cancelled) {
-          publishResolved({ kind: 'image', src: mediaHref, step: 'direct_image' }, true);
-          emitAdEvent(
-            'ad_fallback',
-            {
-              url: clickHref,
-              cascade_step: 'direct_image',
-              slot_kind: slotKind,
-            },
-            conf
-          );
-          return;
-        }
-      }
-
-      // 6) Screenshot CDNs
-      if (!cancelled && conf.PREVIEW !== 'favicon') {
-        for (const tpl of thumbs) {
-          if (cancelled) break;
-          try {
-            const shotUrl = tpl.replace('{url}', encodeURIComponent(mediaHref));
-            const uShot = new URL(shotUrl);
-            if (uShot.protocol !== 'https:') continue;
-            const ok = await tryLoadImage(uShot.toString());
-            if (ok && !cancelled) {
-              publishResolved({ kind: 'image', src: uShot.toString(), step: 'shot' }, true);
-              emitAdEvent(
-                'ad_fallback',
-                { url: clickHref, cascade_step: 'shot', slot_kind: slotKind },
-                conf
-              );
-              return;
-            }
-          } catch {}
-        }
-      }
-
-      // 7) Favicon
-      if (
-        !cancelled &&
-        (conf.PREVIEW === 'auto' || conf.PREVIEW === 'favicon')
-      ) {
-        try {
-          const ico =
-            'https://icons.duckduckgo.com/ip3/' + landingHost + '.ico';
-          const ok = await tryLoadImage(ico);
-          if (ok && !cancelled) {
-            publishResolved({ kind: 'favicon', src: ico, step: 'favicon' }, true);
-            emitAdEvent(
-              'ad_fallback',
-              {
-                url: clickHref,
-                cascade_step: 'favicon',
-                slot_kind: slotKind,
-              },
-              conf
-            );
-            return;
-          }
-        } catch {}
-      }
-
-      // 8) Placeholder
-      if (!cancelled) {
-        publishResolved({ kind: 'placeholder', src: null, step: 'placeholder' }, false);
-        emitAdEvent(
-          'ad_fallback',
-          {
-            url: clickHref,
-            cascade_step: 'placeholder',
-            slot_kind: slotKind,
-          },
-          conf
-        );
-      }
+  // 2) YouTube
+  const ytMatch = mediaHref.match(YT_RE);
+  if (!cancelled && ytMatch) {
+    const videoId = ytMatch[1];
+    if (videoId) {
+      publishResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' }, true);
+      emitAdEvent(
+        'ad_fallback',
+        {
+          url: clickHref,
+          cascade_step: 'env_youtube',
+          slot_kind: slotKind,
+        },
+        conf
+      );
+      return;
     }
+  }
+
+  // 3) TikTok
+  const ttMatch = mediaHref.match(TIKTOK_RE);
+  if (!cancelled && ttMatch) {
+    let videoId = null;
+    try {
+      const u = new URL(mediaHref);
+      const m = u.pathname.match(/\/video\/(\d+)/);
+      if (m) videoId = m[1];
+    } catch {}
+    if (videoId) {
+      publishResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' }, true);
+      emitAdEvent(
+        'ad_fallback',
+        {
+          url: clickHref,
+          cascade_step: 'env_tiktok',
+          slot_kind: slotKind,
+        },
+        conf
+      );
+      return;
+    }
+  }
+
+  // 4) Прямой файл-картинка.
+  // Берём только реальный image URL, без OG/Microlink/screenshot/favicon.
+  if (!cancelled && isDirectImg) {
+    const ok = await tryLoadImage(mediaHref);
+    if (ok && !cancelled) {
+      publishResolved({ kind: 'image', src: mediaHref, step: 'direct_image' }, true);
+      emitAdEvent(
+        'ad_fallback',
+        {
+          url: clickHref,
+          cascade_step: 'direct_image',
+          slot_kind: slotKind,
+        },
+        conf
+      );
+      return;
+    }
+  }
+
+  // 5) Placeholder для обычной landing-page / unknown URL.
+  // Важно: никаких внешних page-preview/card/icon probe.
+  if (!cancelled) {
+    publishResolved({ kind: 'placeholder', src: null, step: 'placeholder' }, false);
+    emitAdEvent(
+      'ad_fallback',
+      {
+        url: clickHref,
+        cascade_step: 'placeholder',
+        slot_kind: slotKind,
+      },
+      conf
+    );
+  }
+}
 
     const runPromise = Promise.resolve(run()).catch(() => {});
     adMediaResolveInflight.set(mediaResolveKey, runPromise);
@@ -3217,21 +3006,6 @@ onError={() => {
     )}
   </div>
 )}
-
-
-            {media.kind === 'favicon' && media.src && (
-              <div className="w-full h-full flex items-center justify-center bg-[color:var(--bg-soft,#020817)]">
-                <NextImage
-                  src={media.src}
-                  alt={host}
-                  width={64}
-                  height={64}
-                  className="object-contain"
-                  unoptimized
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-            )}
 
             {media.kind === 'placeholder' && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
