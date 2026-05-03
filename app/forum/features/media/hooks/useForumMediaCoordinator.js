@@ -176,6 +176,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           let detachedReadyReplay = 0;
           let detachedYtPlayers = 0;
           let detachedYtPolls = 0;
+          let detachedUnloadTimers = 0;
+          let detachedExternalPlayKickTimers = 0;
           try {
             ratios.forEach((_, el) => {
               if (!(el instanceof Element) || !el.isConnected) detachedRatios += 1;
@@ -196,6 +198,16 @@ export default function useForumMediaCoordinator({ emitDiag }) {
               if (!ytValues.has(player)) detachedYtPolls += 1;
             });
           } catch {}
+          try {
+            unloadTimers.forEach((_, el) => {
+              if (!(el instanceof Element) || !el.isConnected) detachedUnloadTimers += 1;
+            });
+          } catch {}
+          try {
+            externalPlayKickTimers.forEach((_, el) => {
+              if (!(el instanceof Element) || !el.isConnected) detachedExternalPlayKickTimers += 1;
+            });
+          } catch {}
           return {
             ratiosSize: ratios.size,
             detachedRatios,
@@ -205,6 +217,10 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             detachedYtPlayers,
             ytMutePollsSize: ytMutePolls.size,
             detachedYtPolls,
+            unloadTimersSize: unloadTimers.size,
+            detachedUnloadTimers,
+            externalPlayKickTimersSize: externalPlayKickTimers.size,
+            detachedExternalPlayKickTimers,
             activeConnected: !!(active instanceof Element && active.isConnected),
           };
         } catch {
@@ -1987,6 +2003,55 @@ const onMediaLoadedCaptured = (e) => {
         traceCandidate('candidate_external_ignored', iframe, { reason });
       } catch {}
     };
+    const releaseDetachedMediaPipeline = (owner, reason = 'detached') => {
+      try {
+        if (!(owner instanceof Element) || owner.isConnected) return false;
+        const media = getMediaStateNode(owner) || owner;
+
+        if (media instanceof HTMLVideoElement) {
+          try { clearReadyReplay(media); } catch {}
+          try { invalidatePlayRequest(media); } catch {}
+          try { __dropActiveVideoEl(media); } catch {}
+          try {
+            media.dataset.__forceHardUnload = '1';
+            media.dataset.__active = '0';
+            media.dataset.__prewarm = '0';
+            media.dataset.__resident = '0';
+            media.dataset.__loadPending = '0';
+            delete media.dataset.__loadPendingSince;
+          } catch {}
+          try { __unloadVideoEl(media); } catch {}
+          try { delete media.dataset.__forceHardUnload; } catch {}
+          trace('detached_video_pipeline_released', media, { reason });
+          return true;
+        }
+
+        if (media instanceof HTMLAudioElement) {
+          try { clearReadyReplay(media); } catch {}
+          try { invalidatePlayRequest(media); } catch {}
+          try { media.pause?.(); } catch {}
+          try { media.removeAttribute('src'); } catch {}
+          try { media.load?.(); } catch {}
+          trace('detached_audio_pipeline_released', media, { reason });
+          return true;
+        }
+
+        if (owner instanceof HTMLIFrameElement) {
+          try { detachYouTubePlayer(owner, reason); } catch {}
+          try {
+            const src = owner.getAttribute('src') || owner.getAttribute('data-src') || '';
+            if (src && !owner.getAttribute('data-src')) owner.setAttribute('data-src', src);
+            owner.removeAttribute('src');
+            owner.removeAttribute('data-forum-iframe-active');
+            owner.removeAttribute('data-forum-iframe-loaded');
+            owner.removeAttribute('data-forum-loaded-src');
+          } catch {}
+          traceCandidate('detached_iframe_pipeline_released', owner, { reason });
+          return true;
+        }
+      } catch {}
+      return false;
+    };
     const cleanupObservedMediaNode = (node, reason = 'removed') => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
@@ -2016,6 +2081,7 @@ const onMediaLoadedCaptured = (e) => {
             try { __dropActiveVideoEl(owner); } catch {}
           }
         }
+        try { releaseDetachedMediaPipeline(owner, reason); } catch {}
       });
     };
     const sweepDetachedMediaState = (reason = 'detached_sweep', force = false) => {
@@ -2058,6 +2124,25 @@ const onMediaLoadedCaptured = (e) => {
             try { clearInterval(id); } catch {}
             ytMutePolls.delete(player);
             ytMuteLast.delete(player);
+          }
+        }
+      } catch {}
+      try {
+        for (const [el, id] of unloadTimers.entries()) {
+          if (!(el instanceof Element) || !el.isConnected) {
+            try { clearTimeout(id); } catch {}
+            unloadTimers.delete(el);
+            try { setPendingHardUnload(el, false); } catch {}
+            try { releaseDetachedMediaPipeline(el, reason); } catch {}
+          }
+        }
+      } catch {}
+      try {
+        for (const [el, id] of externalPlayKickTimers.entries()) {
+          if (!(el instanceof Element) || !el.isConnected) {
+            try { clearTimeout(id); } catch {}
+            externalPlayKickTimers.delete(el);
+            try { releaseDetachedMediaPipeline(el, reason); } catch {}
           }
         }
       } catch {}
@@ -2478,6 +2563,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
 
     const observed = new WeakSet();
     const unloadTimers = new Map(); // el -> timeoutId
+    const externalPlayKickTimers = new Map(); // external media owner -> retry timeoutId
     const mediaDomOrder = new WeakMap();
     let mediaDomOrderSeq = 1;
     let coordinatorLastScrollTop = 0;
@@ -2721,26 +2807,26 @@ const shouldRetainHtmlMedia = (el) => {
         if (reason === 'cleanup') return 0;
         if (reason === 'resident_cap' || reason === 'error_blocked') return 0;
         if (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace') {
-          if (isIOSUi) return 5600;
-          return isCoarseUi ? 4600 : 5200;
+          if (isIOSUi) return 4600;
+          return isCoarseUi ? 3600 : 4200;
         }
         if (reason === 'out_of_view') {
-          if (isIOSUi) return 7000;
-          return isCoarseUi ? 5200 : 6200;
+          if (isIOSUi) return 5600;
+          return isCoarseUi ? 4200 : 4800;
         }
-        if (isIOSUi) return 6400;
-        return isCoarseUi ? 5000 : 5800;
+        if (isIOSUi) return 5200;
+        return isCoarseUi ? 4200 : 4800;
       }
       if (reason === 'cleanup' || reason === 'resident_cap') return 0;
       if (!isCoarseUi && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
-        return 5200;
+        return 4200;
       }
       if (isCoarseUi && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
-        return 4600;
+        return 3800;
       }
-      if (!isCoarseUi && reason === 'out_of_view') return 5200;
-      if (isCoarseUi && reason === 'out_of_view') return 5000;
-      return isCoarseUi ? 5000 : 5600;
+      if (!isCoarseUi && reason === 'out_of_view') return 4400;
+      if (isCoarseUi && reason === 'out_of_view') return 4200;
+      return isCoarseUi ? 4200 : 4800;
     };
     const getLoadedIframes = () => {
       try {
@@ -3145,7 +3231,7 @@ const pauseForeignMedia = (keepEl = null) => {
           const visiblePx = getOwnerVisiblePx(el);
           const nearVisible = isNearViewportElement(
             el,
-            isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100),
+            isIOSUi ? 1040 : (isCoarseUi ? 820 : 920),
           );
           const protectedReason = !emergencyHtmlMediaUnload;
 
@@ -3171,7 +3257,7 @@ const pauseForeignMedia = (keepEl = null) => {
             const gapPx = getOwnerViewportGapPx(el);
             const nearPostSurface =
               visiblePx > 0 ||
-              gapPx <= (isIOSUi ? 1700 : (isCoarseUi ? 1500 : 980));
+              gapPx <= (isIOSUi ? 1450 : (isCoarseUi ? 1180 : 820));
             if (nearPostSurface) {
               setPendingHardUnload(el, false);
               try {
@@ -4225,7 +4311,6 @@ return;
     const PENDING_READY_GRACE_MS = isIOSUi ? 980 : (isCoarseUi ? 620 : 420);
     const PENDING_READY_GRACE_RATIO = 0.12;
     const getMediaKind = (el) => String(el?.getAttribute?.('data-forum-media') || '');
-    const externalPlayKickTimers = new Map();
     const clearExternalPlayKick = (el) => {
       try {
         const id = externalPlayKickTimers.get(el);
