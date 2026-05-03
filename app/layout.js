@@ -8,7 +8,7 @@ import HeroAvatar from '../components/HeroAvatar'
 import ForumShellGate from '../components/ForumShellGate'
 import { SITE_ORIGIN, toAbsoluteSiteUrl, withAssetVersion } from '../lib/metadataCache'
 // ✅ Vercel Analytics & Speed Insights
-import { Analytics } from '@vercel/analytics/react'
+// import { Analytics } from '@vercel/analytics/react'
 // import { SpeedInsights } from '@vercel/speed-insights/next'
 
 // ⬇️ добавлено для автозапуска
@@ -389,9 +389,7 @@ const forumEarlyDiagBootstrap = `(function () {
     }
   } catch {}
 })();`
-
-
-
+ 
 // Рендерим тяжёлые/интерактивные вещи только на клиенте 
 const NotRobotHost = dynamic(() => import('../components/NotRobotHost'), { ssr: false })
 const InviteFriendHost = dynamic(() => import('../components/InviteFriendHost'), { ssr: false })
@@ -556,7 +554,7 @@ export default function RootLayout({ children }) {
     maxSize={80}
   /> */}
         {/* ✅ Включаем аналитику Vercel */}
-        <Analytics />
+        {/* <Analytics /> */}
         {/* <SpeedInsights /> */}
       </body>
     </html>
