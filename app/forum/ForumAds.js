@@ -2444,7 +2444,7 @@ const handleToggleSound = (e) => {
     position: relative;         /* ключ: якорь для absolute медиа */
     overflow: hidden;
     border-radius: 0.5rem;
-    background: var(--bg-soft, #020817);
+    background: var(--bg-soft, #000000);
   }
   /* ===== FIXED (как в форуме сейчас) ===== */
   .forum-ad-media-slot[data-layout="fixed"] { 
