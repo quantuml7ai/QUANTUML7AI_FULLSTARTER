@@ -30,6 +30,13 @@ export default function useForumMediaCoordinator({ emitDiag }) {
     if (!isBrowser()) return;
 
     const selector = '[data-forum-media]';
+    const AD_MEDIA_ATTR = 'data-ad-media';
+    const isAdMediaElement = (el) => String(el?.getAttribute?.(AD_MEDIA_ATTR) || '') === '1';
+    const managedForumVideoSelector = 'video[data-forum-media="video"][data-forum-video="post"],video[data-forum-media="video"][data-forum-video="ad"]';
+    const isManagedForumVideoKind = (el) => {
+      const kind = String(el?.getAttribute?.('data-forum-video') || '');
+      return kind === 'post' || kind === 'ad';
+    };
     const readyReplay = new Map();
     const pendingReadyGrace = new WeakMap();
     let lastDetachedSweepTs = 0;
@@ -59,6 +66,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
           ts: Date.now(),
           event,
           kind: String(el?.getAttribute?.('data-forum-media') || ''),
+          adMedia: isAdMediaElement(el) ? '1' : '0',
           id: String(el?.dataset?.__mid || ''),
           src,
           readyState: Number(el?.readyState || 0),
@@ -293,14 +301,14 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 
     const writeMutedPref = (val, userSet = false) => {
       const nextBool = !!val;
-      const next = nextBool ? '1' : '0';      
-      try { 
+      const next = nextBool ? '1' : '0';
+      try {
         localStorage.setItem(MEDIA_MUTED_KEY, next);
         localStorage.setItem(MEDIA_VIDEO_MUTED_KEY, next);
       } catch {}
       try {
         writeMutedPrefToDocument(nextBool, !!userSet);
-      } catch {}      
+      } catch {}
     };
     // Единственный runtime-документ звука для native/video/audio/QCast/YouTube/TikTok/iframe/Ads.
     // На каждый новый page load runtime сбрасывает документ в muted=true ради splash/BG-audio.
@@ -328,7 +336,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
 const writeQcastMutedPref = (next) => {
   setMutedPref(!!next, 'qcast');
 };
- 
+
 
     const applyMutedPref = (el) => {
       if (!(el instanceof HTMLMediaElement)) return;
@@ -339,7 +347,7 @@ const writeQcastMutedPref = (next) => {
         el.defaultMuted = want;
         if (want) el.setAttribute('muted', '');
         else el.removeAttribute('muted');
-      } catch {}      
+      } catch {}
     };
 const applyMutedPrefToAll = () => {
   try {
@@ -758,7 +766,7 @@ const clampPostNativeWarmBuffer = (el, reason = 'warm_buffer_clamp') => {
   const media = getMediaStateNode(el);
   if (!(media instanceof HTMLVideoElement)) return false;
   try {
-    if (String(media?.getAttribute?.('data-forum-video') || '') !== 'post') return false;
+    if (!isManagedForumVideoKind(media)) return false;
     if (String(media?.getAttribute?.('data-forum-media') || '') !== 'video') return false;
 
     const owner = getOwnerNode(media) || media;
@@ -803,7 +811,7 @@ const clampPostNativeWarmBuffer = (el, reason = 'warm_buffer_clamp') => {
 
 const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') => {
   try {
-    const nodes = Array.from(document.querySelectorAll('video[data-forum-media="video"][data-forum-video="post"]'))
+    const nodes = Array.from(document.querySelectorAll(managedForumVideoSelector))
       .filter((node) => {
         try {
           return (
@@ -973,7 +981,7 @@ const kickMediaLoad = (
     clearLoadPending(media, 'load_throw', false);
     return false;
   }
-};    
+};
     const getOwnerNode = (el) => {
       try {
         if (el instanceof Element) {
@@ -1272,7 +1280,7 @@ const kickMediaLoad = (
           applyMutedPref(el);
           el.playsInline = true;
           if (el instanceof HTMLVideoElement) {
-            const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+            const isPostVideo = isManagedForumVideoKind(el);
             try { el.loop = true; } catch {}
           }
           if (el.paused) startHtmlMedia(el, 'ready_replay');
@@ -1319,7 +1327,7 @@ try {
   el.playsInline = true;
 
   if (el instanceof HTMLVideoElement) {
-    const isPostVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+    const isPostVideo = isManagedForumVideoKind(el);
     const allowNearViewportRestore =
       isPostVideo &&
       isPrewarmOnly &&
@@ -1350,7 +1358,7 @@ try {
     if (!el.getAttribute('src')) {
       trace('candidate_restore', el, { reason });
       __restoreVideoEl(el);
-    } 
+    }
   } else {
     try { el.preload = 'auto'; } catch {}
   }
@@ -1358,7 +1366,7 @@ try {
   const readyState = Number(el.readyState || 0);
   if (readyState >= 2 || String(el.dataset?.__warmReady || '') === '1') return true;
 
-        const now = Date.now(); 
+        const now = Date.now();
         const lastBoostTs = Number(el.dataset?.__candidateBoostTs || 0);
         const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
@@ -1381,7 +1389,7 @@ const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
 if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
   const isPostVideo =
     el instanceof HTMLVideoElement &&
-    String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+    isManagedForumVideoKind(el);
 
   const allowDirectColdLoad =
     !isPostVideo ||
@@ -1413,7 +1421,7 @@ if (!kickMediaLoad(el, {
     armReadyReplay(el);
     return false;
   }
-} 
+}
         const stalledPending =
           String(el.dataset?.__loadPending || '') === '1' &&
           readyState === 0 &&
@@ -1424,7 +1432,7 @@ if (!kickMediaLoad(el, {
 if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs) > 900) {
   const isPostVideo =
     el instanceof HTMLVideoElement &&
-    String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+    isManagedForumVideoKind(el);
 
   if (isPostVideo) {
     const wantsRealPlayback =
@@ -1506,13 +1514,13 @@ if (networkState === HTMLMediaElement.NETWORK_LOADING && hasAttachedSrcForRetry)
     armReadyReplay(el);
     return false;
   }
-} 
+}
         armReadyReplay(el);
       } catch {}
       return false;
     };
     const volHandlers = new WeakMap();
-    const bindVolumeListener = (el) => { 
+    const bindVolumeListener = (el) => {
       const isMedia =
         el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
       if (!isMedia) return;
@@ -1533,7 +1541,7 @@ const h = () => {
       hasUserGestureIntent(owner);
 
     // Programmatic muted fallback / coordinator sync must not become a user sound choice.
-    if (!manualSoundChange) return;    
+    if (!manualSoundChange) return;
     const isQcastAudio =
       owner?.getAttribute?.('data-forum-media') === 'qcast' ||
       String(el?.dataset?.qcastAudio || '') === '1';
@@ -1556,7 +1564,7 @@ const onMutedEvent = (e) => {
     source === 'video' ||
     source === 'youtube' ||
     source === 'tiktok' ||
-    source === 'iframe' ||    
+    source === 'iframe' ||
     source === 'qcast' ||
     source === 'forum-ads' ||
     source === 'forum-ads-toggle';
@@ -1597,7 +1605,7 @@ const onMutedEvent = (e) => {
       }
       const isNativeAutoplayPause =
         target instanceof HTMLVideoElement &&
-        String(target?.getAttribute?.('data-forum-video') || '') === 'post' &&
+        isManagedForumVideoKind(target) &&
         !manualLease &&
         !hasGesture &&
         ownerMatchesActive &&
@@ -1620,7 +1628,7 @@ const onMutedEvent = (e) => {
         cancelUnload(owner);
         scheduleNativePauseRecovery(target, owner, 'pause_event_active_native');
         return;
-      }      
+      }
       if (!manualLease && !hasGesture && (coordinatorPlay || !ownerMatchesActive)) {
         trace('pause_ignore_non_user', target, {
           coordinatorPlay,
@@ -1729,7 +1737,7 @@ const onMutedEvent = (e) => {
       ));
       const isNativePrimePlay =
         target instanceof HTMLVideoElement &&
-        String(target?.getAttribute?.('data-forum-video') || '') === 'post' &&
+        isManagedForumVideoKind(target) &&
         String(target?.dataset?.__nativePrimePending || '') === '1' &&
         String(target?.dataset?.__nativePrewarm || '') === '1' &&
         coordinatorPlay &&
@@ -1744,7 +1752,7 @@ const onMutedEvent = (e) => {
           centerDist: getOwnerCenterDist(owner),
         });
         return;
-      }      
+      }
       clearSuppressedPlayback(target);
       clearSuppressedPlayback(owner);
       clearUserGestureIntent(target);
@@ -1800,7 +1808,7 @@ const onMutedEvent = (e) => {
       }
       const isPostVideoError =
         target instanceof HTMLVideoElement &&
-        String(target?.getAttribute?.('data-forum-video') || '') === 'post';
+        isManagedForumVideoKind(target);
       if (isPostVideoError && errCode >= 2 && errCode <= 4) {
         const now = Date.now();
         const readyState = Number(target?.readyState || 0);
@@ -1926,7 +1934,7 @@ const onMediaLoadedCaptured = (e) => {
   try {
     const isPostVideo =
       target instanceof HTMLVideoElement &&
-      String(target?.getAttribute?.('data-forum-video') || '') === 'post';
+      isManagedForumVideoKind(target);
 
     const wantsAutoplay =
       (
@@ -2272,7 +2280,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
   try { __touchActiveVideoEl(el); } catch {}
   try { __enforceActiveVideoCap(el); } catch {}
   try { enforcePostNativeSrcCap(el, 'play_retry_started'); } catch {}
-}                 
+}
                 }).catch((retryErr) => {
                   try { el.dataset.__playRequested = '0'; } catch {}
                   trace('play_retry_muted_fail', el, {
@@ -2316,7 +2324,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
     };
     const ytPlayers = new Map();
     const ytMutePolls = new Map();
-    const ytMuteLast = new Map();    
+    const ytMuteLast = new Map();
     try { window.__forumYtPlayers = ytPlayers; } catch {}
     const isAttachedYtPlayer = (player, iframeRef = null) => {
       try {
@@ -2348,7 +2356,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
         } catch {}
       }, 650);
       ytMutePolls.set(player, id);
-    }; 
+    };
  const normalizeExternalUrlForCompare = (value) => {
   const raw = String(value || '').trim();
   if (!raw) return '';
@@ -2393,14 +2401,14 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
       } catch {}
     }, reason === 'yt_api_load_timeout' ? 260 : 160);
   } catch {}
-};      
+};
     const initYouTubePlayer = async (iframe) => {
       if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
       const expectedSrc = ensureYouTubeEmbedSrc(iframe.getAttribute('data-src') || iframe.getAttribute('src') || '');
       if (!isYouTubeIframeReadyForApi(iframe, expectedSrc)) {
         scheduleYouTubeApiInitRetry(iframe, 'yt_api_not_ready');
         return null;
-      }      
+      }
       if (ytPlayers.has(iframe)) {
         const existing = ytPlayers.get(iframe);
         if (isAttachedYtPlayer(existing, iframe)) return existing;
@@ -2415,7 +2423,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
         try {
           const player = new YT.Player(iframe, {
             events: {
-              onReady: () => { 
+              onReady: () => {
                 if (!isAttachedYtPlayer(player, iframe)) {
                   try { stopYtMutePoll(player); } catch {}
                   try { player?.destroy?.(); } catch {}
@@ -2439,8 +2447,8 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
                     ytMuteLast.delete(player);
                     return;
                   }
-                  const state = evt?.data; 
-                  if (state === YT.PlayerState?.PLAYING) { 
+                  const state = evt?.data;
+                  if (state === YT.PlayerState?.PLAYING) {
                     startYtMutePoll(player);
                     emitExternalVideoState(iframe, { paused: false, muted: !!player?.isMuted?.() });
                     window.dispatchEvent(new CustomEvent('site-media-play', {
@@ -2792,7 +2800,7 @@ const shouldRetainHtmlMedia = (el) => {
         return (
           media instanceof HTMLVideoElement &&
           media.isConnected &&
-          String(media?.getAttribute?.('data-forum-video') || '') === 'post' &&
+          isManagedForumVideoKind(media) &&
           String(media?.getAttribute?.('data-forum-media') || '') === 'video'
         );
       } catch {
@@ -2977,9 +2985,9 @@ const pauseForeignMedia = (keepEl = null) => {
         // Не делаем отложенный hard-unload на обычном foreign pause:
         // это давало визуальное исчезновение iframe и дергания ленты.
       }
-    }); 
+    });
   } catch {}
-}; 
+};
     const hardUnloadMedia = (...args) => {
       const el = args?.[0];
       const unloadReason = String(args?.[1] || 'unknown');
@@ -3038,7 +3046,7 @@ const pauseForeignMedia = (keepEl = null) => {
         }
         return;
       }
-      if (kind === 'youtube') { 
+      if (kind === 'youtube') {
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
         try { stopYtMutePoll(player); } catch {}
@@ -3063,8 +3071,8 @@ const pauseForeignMedia = (keepEl = null) => {
         } catch {}
         emitMediaDiag('iframe_hard_unload', { kind, reason: unloadReason, ...getIframeSnapshot() });
         return;
-      } 
-      if (kind === 'tiktok' || kind === 'iframe') { 
+      }
+      if (kind === 'tiktok' || kind === 'iframe') {
         try { el.contentWindow?.postMessage?.({ method: 'pause' }, '*'); } catch {}
         try { el.contentWindow?.postMessage?.({ event: 'command', func: 'pauseVideo', args: '' }, '*'); } catch {}
         if (softIframeCooldown) {
@@ -3209,7 +3217,7 @@ const pauseForeignMedia = (keepEl = null) => {
         hardUnloadMedia(el, reason);
       }, delay);
       unloadTimers.set(el, id);
-    }; 
+    };
     const getOwnerViewportGapPx = (el) => {
       try {
         const owner = getOwnerNode(el) || (el instanceof Element ? el : null);
@@ -3248,7 +3256,7 @@ const getNativePrimeGapLimit = () => {
         const media = getMediaStateNode(el);
         return (
           media instanceof HTMLVideoElement &&
-          String(media?.getAttribute?.('data-forum-video') || '') === 'post' &&
+          isManagedForumVideoKind(media) &&
           String(media?.getAttribute?.('data-forum-media') || '') === 'video'
         );
       } catch {
@@ -3454,7 +3462,7 @@ const getNativePrimeGapLimit = () => {
         try {
           return !!(
             activeOwnerNow instanceof Element &&
-            activeOwnerNow.querySelector?.('video[data-forum-video="post"][data-forum-media="video"]')
+            activeOwnerNow.querySelector?.(managedForumVideoSelector)
           );
         } catch {
           return false;
@@ -3579,7 +3587,7 @@ const finishPrime = (state = 'done') => {
               media.defaultMuted = false;
               media.removeAttribute('muted');
             } catch {}
-          }    
+          }
           trace('native_prime_finish', media, { reason, state, readyState: Number(media.readyState || 0) });
         } catch {}
       };
@@ -3744,7 +3752,7 @@ return true;
         });
         armReadyReplay(media);
         return true;
-      }      
+      }
 
       const kicked = kickMediaLoad(media, {
         channel: 'native_priority_prewarm',
@@ -3780,7 +3788,7 @@ return true;
       }
       armReadyReplay(media);
       return true;
-    };    
+    };
     // Best-effort loop для iframe (Vimeo/встроенные плееры/прочее):
     // добавляем loop=1 ОДИН РАЗ (не на каждом фокусе), чтобы не было дергания.
     const ensureIframeLoopParam = (src) => {
@@ -3861,7 +3869,7 @@ const waitExternalIframeLoad = (iframe, expectedSrc = '', timeoutMs = 1400) => {
     };
     try { iframe.addEventListener('load', onLoad, { once: true }); } catch {}
     try { timer = setTimeout(() => finish(false), timeoutMs); } catch { finish(false); }
-  });      
+  });
     };
     const isSplashGateActive = () => {
       try {
@@ -3930,7 +3938,7 @@ try {
 
 const isPostNativeVideo =
   el instanceof HTMLVideoElement &&
-  String(el?.getAttribute?.('data-forum-video') || '') === 'post';
+  isManagedForumVideoKind(el);
 
 if (el instanceof HTMLVideoElement) {
   const hasSrc = !!el.getAttribute('src');
@@ -3983,7 +3991,7 @@ if (el instanceof HTMLVideoElement) {
         bypassSrcLimiter: userIntentKick,
         bypassPendingBudget: userIntentKick,
       })) return;
-    } 
+    }
   } catch {}
 }
 
@@ -3997,7 +4005,7 @@ if (el instanceof HTMLVideoElement) {
     armReadyReplay(el);
 
     const canNativeAutoplayKick =
-      el instanceof HTMLVideoElement && 
+      el instanceof HTMLVideoElement &&
       !isUserPaused(el) &&
       !hasSuppressedPlayback(el);
 
@@ -4149,10 +4157,10 @@ return;
         if (!src) return;
         // сохраняем уже "loop-версию" в data-src, чтобы дальше не мутить url повторно
         if (!el.getAttribute('data-src')) { try { el.setAttribute('data-src', src); } catch {} }
-      
+
         const alreadyActive = el.getAttribute('data-forum-iframe-active') === '1';
         const cur = el.getAttribute('src') || '';
-        if (!alreadyActive || !cur) { 
+        if (!alreadyActive || !cur) {
           try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
           try { el.setAttribute('src', src); } catch {}
         }
@@ -4365,7 +4373,7 @@ return;
               // iframe/youtube — освобождаем ресурсы с задержкой (анти-микроскролл)
               scheduleHardUnload(el, null, 'out_of_view');
               active = null;
-            } 
+            }
           } else {
             ratios.set(el, r);
           }
@@ -4387,7 +4395,7 @@ return;
             const externalVisibleGate = Math.max(
               36,
               Math.round(getStartVisiblePx(candidate) * (isIOSUi ? 0.42 : 0.5))
-            );            
+            );
             const externalCanPrepare =
               !isExternalCandidate ||
               (
@@ -4546,7 +4554,7 @@ return;
             softPauseMedia(active);
             scheduleHardUnload(active, null, 'below_stop_ratio');
             active = null;
-          } 
+          }
 
           const relaxedStartForIOS = (() => {
             if (!isIOSUi) return false;
@@ -4577,7 +4585,7 @@ return;
             }
             return;
           }
- 
+
 
           if (active && active !== candidate) {
             // старый — мягко стоп + hard unload с задержкой
@@ -4696,12 +4704,12 @@ return;
           visiblePx >= externalVisibleGate ||
           (gapPx <= externalRunwayPx && centerDist <= startCenter + externalRunwayPx);
         if (!canPrepareExternal) return false;
-       
+
         return prepareExternalMedia(el, reason);
       }
 
       return ensurePendingHtmlMediaReady(el, reason);
-    }; 
+    };
 
     let nativePrewarmScanRaf = 0;
     let nativePrewarmScanLastTs = 0;
@@ -4710,7 +4718,7 @@ return;
         const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
         if (viewportH <= 0) return null;
         const runway = getNativePrewarmGapLimit();
-        const nodes = Array.from(document.querySelectorAll('video[data-forum-media="video"][data-forum-video="post"]'));
+        const nodes = Array.from(document.querySelectorAll(managedForumVideoSelector));
         const rows = nodes
           .map((node) => {
             if (!(node instanceof HTMLVideoElement)) return null;
@@ -4824,7 +4832,7 @@ return;
           const isActiveItem = !!(active && (active === el || active === media || active.contains?.(el) || el.contains?.(active)));
           const isReadyActiveNative = isActiveItem && isNativePostVideoCandidate(el) && isReadyCandidate(el);
           if (isReadyActiveNative) continue;
-          
+
           const pendingLoads = readPendingLoads();
           if (
             pendingLoads >= Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0)) &&
@@ -4883,7 +4891,7 @@ return;
             try { el.setAttribute('data-src', src); } catch {}
           }
         }
- 
+
         io?.observe?.(el);
         nearIo?.observe?.(el);
 
@@ -4954,7 +4962,7 @@ return;
     };
 const onExternalMediaPlay = (e) => {
   const source = String(e?.detail?.source || '');
- 
+
   const isAdSource =
     source === 'ad' ||
     source === 'forum_ads' ||
@@ -5126,7 +5134,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
     document.addEventListener('error', onMediaErrorCaptured, true);
     document.addEventListener('loadeddata', onMediaLoadedCaptured, true);
     document.addEventListener('canplay', onMediaLoadedCaptured, true);
-    return () => { 
+    return () => {
       try { mo?.disconnect?.(); } catch {}
       if (mutationSweepRaf) {
         try {
@@ -5176,7 +5184,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       active = null;
       activeSinceTs = 0;
       ratios.clear();
- 
+
       try {
         document.querySelectorAll(selector).forEach((el) => {
           if (!(el instanceof HTMLVideoElement || el instanceof HTMLAudioElement)) return;
@@ -5184,11 +5192,11 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
           if (h) el.removeEventListener('volumechange', h);
         });
       } catch {}
-      try { 
+      try {
         if (window.__forumYtPlayers === ytPlayers) {
           delete window.__forumYtPlayers;
         }
-      } catch {}  
+      } catch {}
       // Полная очистка YouTube player'ов, чтобы не держать WebGL/GPU ресурсы
       try {
         ytPlayers.forEach((player, iframe) => {
@@ -5197,7 +5205,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
           try { if (iframe?.getAttribute?.('src')) iframe.setAttribute('src', ''); } catch {}
         });
       } catch {}
-      try { ytPlayers.clear(); } catch {}       
+      try { ytPlayers.clear(); } catch {}
       ytMutePolls.forEach((id) => clearInterval(id));
       ytMutePolls.clear();
       ytMuteLast.clear();
