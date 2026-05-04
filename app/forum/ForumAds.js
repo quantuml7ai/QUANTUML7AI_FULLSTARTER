@@ -9,199 +9,6 @@ import { useRouter } from 'next/navigation';
 /* ======================= CAMPAIGN META ======================= */
 const AD_LABEL_FONT_SIZE_PX = 20;
 
-/* ======================= GLOBAL SOUND MEMORY (Forum.jsx-compatible) ======================= */
-// ДОЛЖНО совпадать со схемой форума:
-const MEDIA_MUTED_KEY = 'forum:mediaMuted';
-const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted'; // fallback совместимости
-const MEDIA_MUTED_EVENT = 'forum:media-mute';
-
-function readMutedPrefFromStorage() {
-  if (!isBrowser()) return null;
-  try {
-    let v = window.localStorage?.getItem(MEDIA_MUTED_KEY);
-    if (v == null) v = window.localStorage?.getItem(MEDIA_VIDEO_MUTED_KEY);
-    if (v == null) return null;
-    return v === '1' || v === 'true';
-  } catch {
-    return null;
-  }
-}
-
-function readMutedPrefFromDocument() {
-  if (!isBrowser()) return null;
-
-  try {
-    if (typeof window.__FORUM_MEDIA_MUTED__ === 'boolean') {
-      return window.__FORUM_MEDIA_MUTED__;
-    }
-  } catch {}
-
-  try {
-    if (typeof window.__SITE_MEDIA_MUTED__ === 'boolean') {
-      return window.__SITE_MEDIA_MUTED__;
-    }
-  } catch {}
-
-  try {
-    const root = document?.documentElement;
-    const body = document?.body;
-
-    const raw =
-      root?.dataset?.forumMediaMuted ??
-      root?.dataset?.mediaMuted ??
-      body?.dataset?.forumMediaMuted ??
-      body?.dataset?.mediaMuted ??
-      null;
-
-    if (raw == null || raw === '') return null;
-    return raw === '1' || raw === 'true';
-  } catch {
-    return null;
-  }
-}
-
-function readMutedPref() {
-  const fromDocument = readMutedPrefFromDocument();
-  if (typeof fromDocument === 'boolean') return fromDocument;
-  return readMutedPrefFromStorage();
-}
-
-function writeMutedPrefToStorage(val) {
-  if (!isBrowser()) return;
-  const next = val ? '1' : '0';
-  try {
-    window.localStorage?.setItem(MEDIA_MUTED_KEY, next);
-    window.localStorage?.setItem(MEDIA_VIDEO_MUTED_KEY, next);
-  } catch {}
-}
-
-function writeMutedPrefToDocument(val, userSet = false) {
-  if (!isBrowser()) return;
-
-  const nextBool = !!val;
-  const nextStr = nextBool ? '1' : '0';
-
-  try {
-    window.__FORUM_MEDIA_MUTED__ = nextBool;
-  } catch {}
-
-  try {
-    window.__SITE_MEDIA_MUTED__ = nextBool;
-  } catch {}
-  try {
-    window.__FORUM_MEDIA_SOUND_UNLOCKED__ = !nextBool;
-  } catch {}
-
-  try {
-    window.__SITE_MEDIA_SOUND_UNLOCKED__ = !nextBool;
-  } catch {}
-
-  if (userSet) {
-    try { window.__FORUM_MEDIA_SOUND_USER_SET__ = true; } catch {}
-    try { window.__SITE_MEDIA_SOUND_USER_SET__ = true; } catch {}
-  }  
-  try {
-    const root = document?.documentElement;
-    if (root?.dataset) {
-      root.dataset.forumMediaMuted = nextStr;
-      root.dataset.mediaMuted = nextStr;
-      root.dataset.forumMediaSoundUnlocked = nextBool ? '0' : '1';
-      if (userSet) root.dataset.forumMediaSoundUserSet = '1';
-    }
-  } catch {}
-
-}
-
-function emitMutedPref(val, id, source = 'forum-ads') {
-  if (!isBrowser()) return;
-  try {
-    window.dispatchEvent(
-      new CustomEvent(MEDIA_MUTED_EVENT, {
-        detail: { muted: !!val, id, source },
-      })
-    );
-  } catch {}
-}
-
-function syncMutedPrefEverywhere(val, id, source = 'forum-ads') {
-  const userSet = source === 'forum-ads-toggle' || String(source || '').endsWith('-toggle');
-  writeMutedPrefToStorage(val);
-  writeMutedPrefToDocument(val, userSet);
-  emitMutedPref(val, id, source);
-}
-
-const FORUM_AD_DEFAULT_MUTED = true;
-
-function normalizeForumAdMuted(value) {
-  // Только явный false означает "звук включён".
-  // null / undefined / любое неизвестное состояние = безопасный muted.
-  return value === false ? false : true;
-}
-
-function resolveForumAdStartupMuted() {
-  // ВАЖНО:
-  // Для старта рекламы главным источником считаем именно document/window,
-  // потому что туда текущий модуль уже раскладывает глобальное состояние.
-  const fromDocument = readMutedPrefFromDocument();
-
-  if (typeof fromDocument === 'boolean') {
-    return {
-      muted: fromDocument,
-      source: 'document',
-      hadDocumentState: true,
-    };
-  }
-
-  return {
-    muted: FORUM_AD_DEFAULT_MUTED,
-    source: 'fallback-muted',
-    hadDocumentState: false,
-  };
-}
-
-function commitForumAdMutedState(val) {
-  const next = normalizeForumAdMuted(val);
-
-  // Оставляем текущую архитектуру совместимости:
-  // document/window — главный глобальный контур,
-  // storage — fallback/совместимость с форумом.
-  writeMutedPrefToDocument(next, false);
-  writeMutedPrefToStorage(next);
-
-  return next;
-}
-
-function applyForumAdMutedToVideo(videoEl, val) {
-  if (!videoEl) return;
-
-  const next = normalizeForumAdMuted(val);
-
-  try {
-    videoEl.muted = next;
-  } catch {}
-
-  try {
-    videoEl.defaultMuted = next;
-  } catch {}
-
-  try {
-    if (next) {
-      videoEl.setAttribute('muted', '');
-    } else {
-      videoEl.removeAttribute('muted');
-    }
-  } catch {}
-}
-
-function desiredMutedFromPref(pref) {
-  // Совместимость со старым вызовом.
-  // Раньше null означал "не форсим".
-  // Для рекламы null больше нельзя отдавать в video,
-  // потому что на мобильных autoplay должен стартовать muted.
-  return typeof pref === 'boolean'
-    ? pref
-    : FORUM_AD_DEFAULT_MUTED;
-}
 // ===== FIXED AD SLOT HEIGHT (px) =====
 // Контент внутри вписывается, но высота/ширина слота не растут.
 const AD_SLOT_HEIGHT_PX = {
@@ -234,7 +41,7 @@ const AD_LENS_UI = Object.freeze({
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
 
- 
+
 /**
  * ВАЖНО: только статические обращения к NEXT_PUBLIC_*
  */
@@ -242,9 +49,9 @@ const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
 const ENV_AD = {
   EVERY: process.env.NEXT_PUBLIC_FORUM_AD_EVERY,
   ROTATE_MIN: process.env.NEXT_PUBLIC_FORUM_AD_ROTATE_MIN,
-  DEBUG: process.env.NEXT_PUBLIC_FORUM_AD_DEBUG, 
+  DEBUG: process.env.NEXT_PUBLIC_FORUM_AD_DEBUG,
   LINKS: process.env.NEXT_PUBLIC_FORUM_AD_LINKS,
-}; 
+};
 /* eslint-enable no-undef */
 
 let cachedClientConf = null;
@@ -256,384 +63,253 @@ const imageProbeCache = new Map();
 const imageProbeInflight = new Map();
 const IMAGE_PROBE_CACHE_OK_MS = 12 * 60 * 1000;
 const IMAGE_PROBE_CACHE_FAIL_MS = 75 * 1000;
-const adMediaResolveCache = new Map(); 
+const adMediaResolveCache = new Map();
 const adMediaResolveInflight = new Map();
 const AD_MEDIA_RESOLVE_CACHE_OK_MS = 12 * 60 * 1000;
 const AD_MEDIA_RESOLVE_CACHE_FAIL_MS = 10 * 60 * 1000;
 
-// Native video must be attached imperatively, not through React `src` state.
-// Otherwise every visibility / preload re-render may reset the <video src>
-// and Chrome starts a new set of HTTP Range / 206 requests.
+// Visual default only. Runtime owners decide when to switch to auto/play.
 const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
-const AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 
-const AD_NATIVE_TERMINAL_RELEASE_REASONS = new Set([
-  'unmount',
-  'replace',
-  'kind_change',
-  'src_change',
-  'blocked_or_empty_src',
-  'bad_src',
-  'error',
-  'warm_owner_denied',
-]);
-
-function isAdNativeTerminalRelease(reason) {
-  return AD_NATIVE_TERMINAL_RELEASE_REASONS.has(String(reason || ''));
-}
-
-function getAdVideoNodeSrc(videoEl) {
-  if (!videoEl) return '';
-  try {
-    return String(videoEl.getAttribute('src') || videoEl.dataset?.adNativeSrc || '').trim();
-  } catch {
-    return '';
-  }
-}
-
-function detachAdNativeVideo(videoEl, opts = {}) {
-  if (!videoEl) return;
-
-  const hard = !!(opts === true || opts?.hard);
-  const reason = String(opts?.reason || (hard ? 'hard_detach' : 'soft_detach'));
-  const resetPipeline = !!(
-    opts?.resetPipeline ||
-    opts?.terminal ||
-    isAdNativeTerminalRelease(reason)
-  );
-
-  try { videoEl.pause?.(); } catch {}
-
-  if (hard) {
-    try {
-      if (videoEl.dataset) {
-        videoEl.dataset.__adLoadPending = '0';
-        videoEl.dataset.__adWarmOwner = '0';
-        videoEl.dataset.__adDetachedSoft = '0';
-        videoEl.dataset.__adDetachedHard = '1';
-        videoEl.dataset.__adDetachedReason = reason;
-        videoEl.dataset.__adDetachedHardTs = String(Date.now());
-        videoEl.dataset.__adPipelineReset = resetPipeline ? '1' : '0';
-        delete videoEl.dataset.adNativeSrc;
-      }
-    } catch {}
-    try { videoEl.removeAttribute('src'); } catch {}
-    try { videoEl.removeAttribute('data-ad-native-src'); } catch {}
-    try { videoEl.preload = 'none'; } catch {}
-
-    // Не дергаем load() на scroll/near jitter.
-    // Но на terminal cleanup он нужен, чтобы Safari/iOS отпустил native decoder/compositor pipeline.
-    if (resetPipeline) {
-      try { videoEl.load?.(); } catch {}
-    }
-
-    return;
-  }
-
-  try {
-    if (videoEl.dataset) {
-      videoEl.dataset.__adLoadPending = '0';
-      videoEl.dataset.__adWarmOwner = '0';
-      videoEl.dataset.__adDetachedSoft = '1';
-      videoEl.dataset.__adDetachedReason = reason;
-      videoEl.dataset.__adDetachedSoftTs = String(Date.now());
-    }
-  } catch {}
-
-  try {
-    // Keep src attached. Only reduce eagerness.
-    // Using metadata is safer than none because the browser can preserve the first frame/surface.
-    videoEl.preload = 'metadata';
-  } catch {}
-
-  // Do NOT soft-detach by removing src or calling load().
-}
-
-function ensureAdNativeVideoSrc(videoEl, src, muted) {
-  if (!videoEl) return false;
-
-  const nextSrc = String(src || '').trim();
-  if (!nextSrc) return false;
-
-  applyForumAdMutedToVideo(videoEl, muted);
-
-  const currentSrc = getAdVideoNodeSrc(videoEl);
-if (currentSrc === nextSrc) {
-  try { videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY; } catch {}
-  try {
-    videoEl.dataset.adNativeSrc = nextSrc;
-    delete videoEl.dataset.__adDetachedSoft;
-    delete videoEl.dataset.__adDetachedHard;
-    delete videoEl.dataset.__adDetachedReason;
-  } catch {}
-  return true;
-  }
-
-  try { videoEl.pause?.(); } catch {}
-  try { videoEl.preload = 'none'; } catch {}
-  try { videoEl.src = nextSrc; } catch {
-    try { videoEl.setAttribute('src', nextSrc); } catch {}
-  }
-  try {
-    videoEl.dataset.adNativeSrc = nextSrc;
-    delete videoEl.dataset.__adDetachedSoft;
-    delete videoEl.dataset.__adDetachedHard;
-    delete videoEl.dataset.__adDetachedReason;
-  } catch {}
-
-  // load() разрешён только при реальной смене URL, не на scroll/focus jitter.
-  try {
-    if (videoEl.dataset) {
-      const now = Date.now();
-      videoEl.dataset.__adLoadPending = '1';
-      videoEl.dataset.__adLastAttachTs = String(now);
-      videoEl.dataset.__adLastWarmLoadTs = String(now);
-    }
-    videoEl.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-    videoEl.load?.();
-  } catch {}
-
-  return true;
-}
-const AD_NATIVE_WARM_STICKY_MS = 4200;
-const AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
-let adNativeWarmSlot = { video: null, src: '', ts: 0 };
-
-function clearAdNativeWarmSlotOwner(videoEl, reason = 'clear') {
-  try {
-    if (!videoEl) return;
-
-    if (adNativeWarmSlot.video === videoEl) {
-      adNativeWarmSlot = { video: null, src: '', ts: 0 };
-    }
-
-    if (videoEl.dataset) {
-      videoEl.dataset.__adWarmOwner = '0';
-      videoEl.dataset.__adLoadPending = '0';
-      videoEl.dataset.__adWarmClearReason = String(reason || 'clear');
-      videoEl.dataset.__adWarmClearTs = String(Date.now());
-    }
-  } catch {}
-}
-
-function getAdViewportState(el) {
-  try {
-    if (!el?.isConnected) {
-      return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
-    }
-    const rect = el.getBoundingClientRect?.();
-    const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-    if (!rect || viewportH <= 0) {
-      return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
-    }
-    if (rect.bottom < 0) return { gapPx: Math.abs(Number(rect.bottom || 0)), isAbove: true, isBelow: false, inViewport: false };
-    if (rect.top > viewportH) return { gapPx: Number(rect.top || 0) - viewportH, isAbove: false, isBelow: true, inViewport: false };
-    return { gapPx: 0, isAbove: false, isBelow: false, inViewport: true };
-  } catch {
-    return { gapPx: Number.POSITIVE_INFINITY, isAbove: false, isBelow: false, inViewport: false };
-  }
-}
-
-function getAdViewportGapPx(el) {
-  return getAdViewportState(el).gapPx;
-}
-
-function isAdNativeVideoLoadingOrReady(videoEl) {
-  try {
-    if (!videoEl) return false;
-    const hasSrc = !!String(videoEl.currentSrc || videoEl.getAttribute?.('src') || '').trim();
-    if (!hasSrc) return false;
-    const readyState = Number(videoEl.readyState || 0);
-    if (readyState >= 1) return true;
-    const ns = Number(videoEl.networkState || 0);
-    if (typeof HTMLMediaElement !== 'undefined') {
-      return ns === HTMLMediaElement.NETWORK_LOADING;
-    }
-    return ns === 2;
-  } catch {
-    return false;
-  }
-}
-
-function releaseAdNativeWarmSlot(videoEl, reason = 'release') {
-  try {
-    if (!videoEl || adNativeWarmSlot.video !== videoEl) return;
-
-    const reasonKey = String(reason || 'release');
-    const terminalRelease = isAdNativeTerminalRelease(reasonKey);
-    const allowNearHold = reasonKey === 'near_exit';
-
-    const state = getAdViewportState(videoEl);
-    const canKeepSurface =
-      allowNearHold &&
-      videoEl.paused &&
-      isAdNativeVideoLoadingOrReady(videoEl) &&
-      (state.inViewport || state.gapPx <= 1280);
-
-    const keepNearExitWarm =
-      allowNearHold &&
-      videoEl.paused &&
-      isAdNativeVideoLoadingOrReady(videoEl) &&
-      state.gapPx <= 2600;
-
-    // Только near_exit имеет право держать surface/warm.
-    // replace/unmount/src_change/bad_src/error обязаны освободить старый owner.
-    if (keepNearExitWarm || canKeepSurface) {
-      adNativeWarmSlot = {
-        video: videoEl,
-        src: String(
-          videoEl.dataset?.adNativeSrc ||
-          videoEl.currentSrc ||
-          videoEl.getAttribute?.('src') ||
-          adNativeWarmSlot.src ||
-          ''
-        ),
-        ts: Date.now(),
-      };
-
-      try {
-        if (videoEl.dataset) {
-          videoEl.dataset.__adWarmOwner = keepNearExitWarm ? '1' : '0';
-          videoEl.dataset.__adSurfaceHeld = canKeepSurface ? '1' : '0';
-          videoEl.dataset.__adSurfaceHeldReason = reasonKey;
-        }
-        videoEl.preload = keepNearExitWarm
-          ? AD_NATIVE_VIDEO_PRELOAD_PLAY
-          : 'metadata';
-      } catch {}
-
-      return;
-    }
-
-    clearAdNativeWarmSlotOwner(videoEl, reasonKey);
-
-    if (videoEl.paused || terminalRelease) {
-      detachAdNativeVideo(videoEl, {
-        hard: true,
-        reason: reasonKey,
-        resetPipeline: terminalRelease,
-      });
-    }
-  } catch {}
-}
-
-function claimAdNativeWarmSlot(videoEl, src, ownerEl) {
-  try {
-    const nextSrc = String(src || '').trim();
-    if (!videoEl || !nextSrc) return false;
-
-    let prev = adNativeWarmSlot.video;
-
-    if (prev && prev !== videoEl && !prev.isConnected) {
-      clearAdNativeWarmSlotOwner(prev, 'stale_disconnected_owner');
-      prev = null;
-    }
-
-    if (prev === videoEl && adNativeWarmSlot.src === nextSrc) {
-      adNativeWarmSlot.ts = Date.now();
-      return true;
-    }
-
-    if (prev && prev !== videoEl && prev.isConnected) {
-      if (!prev.paused) return false;
-
-      const now = Date.now();
-      const age = now - Number(adNativeWarmSlot.ts || 0);
-const prevState = getAdViewportState(prev);
-const nextState = getAdViewportState(ownerEl || videoEl);
-const prevGap = prevState.gapPx;
-const nextGap = nextState.gapPx;
-const prevLoading = isAdNativeVideoLoadingOrReady(prev);
-const sameSrc = String(adNativeWarmSlot.src || '') === nextSrc;
-const prevIsBehindRunway = (prevState.isAbove || prevState.isBelow) && prevGap > 860;
-const nextInsideRunway = nextGap <= 2100;
-const nextShouldWinViewport = !!nextState.inViewport && !prevState.inViewport;
-const nextClearlyCloser =
-  nextShouldWinViewport ||
-  nextGap + 160 < prevGap ||
-  (prevIsBehindRunway && nextInsideRunway);
-
-// Если тот же ADS.mp4 уже греется, не переключаем owner при каждом jitter/scroll.
-// Но если прошлый owner уже уехал за runway, а следующий слот входит в runway — передаём warm.
-if (sameSrc && prevLoading && age < AD_NATIVE_WARM_RELOAD_GAP_MS && !nextClearlyCloser) {
-  return false;
-}
-
-if (age < AD_NATIVE_WARM_STICKY_MS && !nextClearlyCloser) {
-  return false;
-}
-
-      releaseAdNativeWarmSlot(prev, 'replace');
-    }
-
-    adNativeWarmSlot = { video: videoEl, src: nextSrc, ts: Date.now() };
-    try { if (videoEl.dataset) videoEl.dataset.__adWarmOwner = '1'; } catch {}
-    return true;
-  } catch {
-    return false;
-  }
-}
 // ======================= ADS LINKS FROM REDIS =======================
 
 let adsLinksMerged = false;
+let adsLinksMergePromise = null;
+let adsLinksLastAttemptTs = 0;
+const ADS_LINKS_RETRY_MS = 5000;
+export const FORUM_AD_LINKS_UPDATED_EVENT = 'forum:ads-links-updated';
+
+function emitForumAdLinksUpdated(conf, detail = {}) {
+  if (!isBrowser()) return;
+  try {
+    window.dispatchEvent(
+      new CustomEvent(FORUM_AD_LINKS_UPDATED_EVENT, {
+        detail: {
+          source: 'forum-ads',
+          links_len: Array.isArray(conf?.LINKS) ? conf.LINKS.length : 0,
+          ...detail,
+        },
+      })
+    );
+  } catch {}
+}
+
+function pushForumAdLinkToken(out, clickRaw, mediaRaw) {
+  const click = String(clickRaw || '').trim();
+  const media = String(mediaRaw || '').trim();
+  if (!click) return;
+  out.push(media ? `${click}|${media}` : click);
+}
+
+function collectForumAdLinkTokens(payload, out = []) {
+  if (!payload) return out;
+
+  if (typeof payload === 'string') {
+    if (payload.trim()) out.push(payload.trim());
+    return out;
+  }
+
+  if (Array.isArray(payload)) {
+    payload.forEach((item) => collectForumAdLinkTokens(item, out));
+    return out;
+  }
+
+  if (typeof payload !== 'object') return out;
+
+  const linksString =
+    payload.linksString ??
+    payload.links_string ??
+    payload.forumLinksString ??
+    payload.forum_links_string ??
+    payload.linksRaw ??
+    payload.links_raw ??
+    null;
+
+  if (typeof linksString === 'string' && linksString.trim()) {
+    out.push(linksString.trim());
+  }
+
+  const directCollections = [
+    payload.links,
+    payload.forumLinks,
+    payload.forum_links,
+    payload.items,
+    payload.campaigns,
+    payload.ads,
+    payload.activeAds,
+    payload.active_ads,
+    payload.activeCampaigns,
+    payload.active_campaigns,
+    payload.creatives,
+  ];
+
+  directCollections.forEach((value) => {
+    if (value) collectForumAdLinkTokens(value, out);
+  });
+
+  if (payload.data && payload.data !== payload) {
+    collectForumAdLinkTokens(payload.data, out);
+  }
+
+  if (payload.result && payload.result !== payload) {
+    collectForumAdLinkTokens(payload.result, out);
+  }
+
+  if (payload.campaign && payload.campaign !== payload) {
+    collectForumAdLinkTokens(payload.campaign, out);
+  }
+
+  if (payload.creative && payload.creative !== payload) {
+    collectForumAdLinkTokens(payload.creative, out);
+  }
+
+  const clickUrl =
+    payload.clickUrl ??
+    payload.click_url ??
+    payload.targetUrl ??
+    payload.target_url ??
+    payload.destinationUrl ??
+    payload.destination_url ??
+    payload.href ??
+    payload.link ??
+    payload.url ??
+    null;
+
+  const mediaUrl =
+    payload.mediaUrl ??
+    payload.media_url ??
+    payload.imageUrl ??
+    payload.image_url ??
+    payload.videoUrl ??
+    payload.video_url ??
+    payload.assetUrl ??
+    payload.asset_url ??
+    payload.creativeUrl ??
+    payload.creative_url ??
+    payload.previewUrl ??
+    payload.preview_url ??
+    payload.media ??
+    payload.image ??
+    payload.video ??
+    null;
+
+  pushForumAdLinkToken(out, clickUrl, mediaUrl);
+  return out;
+}
+
+function readForumAdLinksStringFromPayload(payload) {
+  const tokens = collectForumAdLinkTokens(payload, []);
+  return tokens.map((item) => String(item || '').trim()).filter(Boolean).join('\n');
+}
+
+async function fetchForumAdLinksPayload() {
+  const linksRes = await fetch('/api/ads?action=links', {
+    method: 'GET',
+    cache: 'no-store',
+  }).catch(() => null);
+
+  const linksPayload = linksRes?.ok
+    ? await linksRes.json().catch(() => null)
+    : null;
+
+  const linksString = readForumAdLinksStringFromPayload(linksPayload);
+  if (linksString) {
+    return { linksString, source: 'links', payload: linksPayload };
+  }
+
+  const serveRes = await fetch('/api/ads?action=serve', {
+    method: 'GET',
+    cache: 'no-store',
+  }).catch(() => null);
+
+  const servePayload = serveRes?.ok
+    ? await serveRes.json().catch(() => null)
+    : null;
+
+  const serveLinksString = readForumAdLinksStringFromPayload(servePayload);
+  if (serveLinksString) {
+    return { linksString: serveLinksString, source: 'serve', payload: servePayload };
+  }
+
+  return { linksString: '', source: 'empty', payload: linksPayload || servePayload };
+}
 
 async function mergeLinksFromRedisOnce() {
-  if (!isBrowser()) return;
-  if (adsLinksMerged) return;
-  adsLinksMerged = true;
+  if (!isBrowser()) return cachedClientConf;
+  if (adsLinksMerged) return cachedClientConf;
+  if (adsLinksMergePromise) return adsLinksMergePromise;
 
-  try {
-    // берём ссылки через универсальный /api/ads?action=links
-    const res = await fetch('/api/ads?action=links', {
-      method: 'GET',
-      cache: 'no-store',
-    });
-    if (!res.ok) return;
-    const j = await res.json().catch(() => null);
-    if (!j || !j.ok || !j.linksString) return;
-
-    const extraParsed = parseLinks(j.linksString);
-    if (!extraParsed.links || !extraParsed.links.length) return;
-
-    const base = getForumAdConf(); // берём текущий кэш
-    const baseLinks = Array.isArray(base.LINKS) ? base.LINKS : [];
-
-    // Если ENV пустые — baseLinks = [], значит используем только базу.
-    // Если ENV есть — объединяем ENV + база.
-    const mergedLinks = baseLinks.length
-      ? [...baseLinks, ...extraParsed.links]
-      : extraParsed.links;
-
-    // MEDIA_BY_CLICK теперь: clickUrl -> массив медиа
-    const mergedMedia = { ...(base.MEDIA_BY_CLICK || {}) };
-    const extraMedia = extraParsed.mediaByClick || {};
-
-    for (const [clickUrl, list] of Object.entries(extraMedia)) {
-      if (!Array.isArray(list) || !list.length) continue;
-      const prev = mergedMedia[clickUrl];
-      if (!prev) {
-        mergedMedia[clickUrl] = [...list];
-      } else if (Array.isArray(prev)) {
-        mergedMedia[clickUrl] = [...prev, ...list];
-      } else {
-        mergedMedia[clickUrl] = [prev, ...list];
-      }
-    }
-
-    // БОЛЬШЕ НЕ ДЕДУПИМ ссылки — оставляем все вхождения
-    const cleanedLinks = mergedLinks.filter(Boolean);
-
-    base.LINKS = cleanedLinks;
-    base.MEDIA_BY_CLICK = mergedMedia;
-
-    debugLog(base, 'merge_links_from_redis', {
-      env_len: baseLinks.length,
-      extra_len: extraParsed.links.length,
-      final_len: cleanedLinks.length,
-    });
-  } catch {
-    /* no-op */
+  const now = Date.now();
+  if (adsLinksLastAttemptTs && now - adsLinksLastAttemptTs < ADS_LINKS_RETRY_MS) {
+    return cachedClientConf;
   }
+  adsLinksLastAttemptTs = now;
+
+  adsLinksMergePromise = (async () => {
+    try {
+      // Read the main links endpoint first, then fallback to serve payload.
+      // Keep parseLinks / MEDIA_BY_CLICK / picker as the single source of truth.
+      const fetched = await fetchForumAdLinksPayload();
+      if (!fetched.linksString) return cachedClientConf;
+
+      const extraParsed = parseLinks(fetched.linksString);
+      if (!extraParsed.links || !extraParsed.links.length) return cachedClientConf;
+
+      const base = getForumAdConf(); // берём текущий кэш
+      const baseLinks = Array.isArray(base.LINKS) ? base.LINKS : [];
+
+      // Если ENV пустые — baseLinks = [], значит используем только базу.
+      // Если ENV есть — объединяем ENV + база.
+      const mergedLinks = baseLinks.length
+        ? [...baseLinks, ...extraParsed.links]
+        : extraParsed.links;
+
+      // MEDIA_BY_CLICK теперь: clickUrl -> массив медиа
+      const mergedMedia = { ...(base.MEDIA_BY_CLICK || {}) };
+      const extraMedia = extraParsed.mediaByClick || {};
+
+      for (const [clickUrl, list] of Object.entries(extraMedia)) {
+        if (!Array.isArray(list) || !list.length) continue;
+        const prev = mergedMedia[clickUrl];
+        if (!prev) {
+          mergedMedia[clickUrl] = [...list];
+        } else if (Array.isArray(prev)) {
+          mergedMedia[clickUrl] = [...prev, ...list];
+        } else {
+          mergedMedia[clickUrl] = [prev, ...list];
+        }
+      }
+
+      // БОЛЬШЕ НЕ ДЕДУПИМ ссылки — оставляем все вхождения
+      const cleanedLinks = mergedLinks.filter(Boolean);
+
+      base.LINKS = cleanedLinks;
+      base.MEDIA_BY_CLICK = mergedMedia;
+      cachedClientConf = base;
+      adsLinksMerged = true;
+
+      debugLog(base, 'merge_links_from_redis', {
+        env_len: baseLinks.length,
+        extra_len: extraParsed.links.length,
+        final_len: cleanedLinks.length,
+      });
+
+      emitForumAdLinksUpdated(base, {
+        source: fetched.source || 'redis',
+        env_len: baseLinks.length,
+        extra_len: extraParsed.links.length,
+        final_len: cleanedLinks.length,
+      });
+
+      return base;
+    } catch {
+      return cachedClientConf;
+    } finally {
+      adsLinksMergePromise = null;
+    }
+  })();
+
+  return adsLinksMergePromise;
 }
 
 /* ======================= UTILS ======================= */
@@ -820,29 +496,32 @@ function parseLinks(raw) {
 
   return { links, mediaByClick };
 }
- 
+
 export function getForumAdConf() {
-  if (isBrowser() && cachedClientConf) return cachedClientConf;
-  // Параллельно пробуем подтянуть рекламные кампании из Redis
+  // ENV-ссылки и Redis/DB-ссылки — независимые источники.
+  // Даже если cache уже создан из пустого NEXT_PUBLIC_FORUM_AD_LINKS,
+  // Redis merge всё равно должен иметь шанс наполнить тот же cache.
   if (isBrowser()) {
-    // fire-and-forget, результат мутирует cachedClientConf, когда готово
     mergeLinksFromRedisOnce().catch(() => {});
   }
+
+  if (isBrowser() && cachedClientConf) return cachedClientConf;
+
   const EVERY = parseNumber(readRaw('EVERY'), 0);
   const ROTATE_MIN = parseNumber(readRaw('ROTATE_MIN'), 1);
- 
+
   const parsed = parseLinks(readRaw('LINKS') || '');
   const LINKS = parsed.links || [];
   const MEDIA_BY_CLICK = parsed.mediaByClick || {};
- 
+
   const DEBUG = String(readRaw('DEBUG') || '').trim() === '1';
 
   const conf = {
     EVERY,
     ROTATE_MIN,
-    LINKS, 
+    LINKS,
     MEDIA_BY_CLICK,
-    DEBUG, 
+    DEBUG,
     seed: hash32(`${CAMPAIGN_ID}:${FALLBACK_CAMPAIGN_SEED}:${LINKS.length}`),
   };
 
@@ -850,8 +529,8 @@ export function getForumAdConf() {
 
   debugLog(conf, 'config_built', {
     EVERY,
-    ROTATE_MIN, 
-    LINKS_LEN: LINKS.length, 
+    ROTATE_MIN,
+    LINKS_LEN: LINKS.length,
   });
 
   return conf;
@@ -1028,7 +707,7 @@ export function resolveCurrentAdUrl(
   const conf = { ...baseConf };
 
   let links = Array.isArray(conf.LINKS) ? conf.LINKS.filter(Boolean) : [];
- 
+
   if (!links.length) {
     debugLog(conf, 'slot_no_links_no_fallback', { slotKey });
     return null;
@@ -1101,7 +780,7 @@ export function useAdPreconnect() {
   useEffect(() => {
     // Direct-media-only mode: no external page-preview preconnects.
   }, []);
-} 
+}
 
 /* ======================= EVENTS & MEDIA ======================= */
 
@@ -1330,7 +1009,7 @@ function cacheAdResolvedMedia(key, media, ok = true) {
       if (drop <= 0) break;
     }
   }
-} 
+}
 
 function isLikelyVideoUrl(raw) {
   if (!raw) return false;
@@ -1367,509 +1046,183 @@ const TIKTOK_RE =
 
 const lastMediaIndexByKey = new Map();
 
-/* ======================= AdCard ======================= */
-/**
- * Direct media only: native video → direct image → YouTube/TikTok → placeholder.
- * Бейдж "Реклама" из словаря: ключ forum_ad_label.
- * Внешние page-preview ветки отключены: OpenGraph/Microlink/screenshot/favicon.
- */
+/* ====== controlled visual helpers ====== */
 
-export function AdCard({ url, slotKind, nearId, layout = 'fixed' }) {
-  const conf = getForumAdConf();
-  useAdPreconnect(conf);
-  const i18n = useI18n();
-  const t = i18n?.t;
-  const router = useRouter();
-  const isFluid = layout === 'fluid';
+function normalizeAdMuted(value) {
+  // Only explicit false means sound is on. Safe default: muted.
+  return value === false ? false : true;
+}
+
+function mergeRefs(...refs) {
+  return (node) => {
+    refs.forEach((ref) => {
+      if (!ref) return;
+      if (typeof ref === 'function') {
+        try { ref(node); } catch {}
+      } else {
+        try { ref.current = node; } catch {}
+      }
+    });
+  };
+}
+
+function toSafeClickUrl(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u;
+  } catch {
+    return null;
+  }
+}
+
+function buildYouTubeEmbedSrc(videoId) {
+  const id = String(videoId || '').trim();
+  if (!id) return '';
+
+  const url = new URL(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`);
+  url.searchParams.set('enablejsapi', '1');
+  url.searchParams.set('controls', '0');
+  url.searchParams.set('rel', '0');
+  url.searchParams.set('fs', '0');
+  url.searchParams.set('modestbranding', '1');
+  url.searchParams.set('playsinline', '1');
+  url.searchParams.set('loop', '1');
+  url.searchParams.set('playlist', id);
+  url.searchParams.set('autoplay', '0');
+  url.searchParams.set('mute', '1');
+
+  try {
+    if (isBrowser() && window.location?.origin) {
+      url.searchParams.set('origin', window.location.origin);
+    }
+  } catch {}
+
+  return url.toString();
+}
+
+function buildTikTokEmbedSrc(videoId) {
+  const id = String(videoId || '').trim();
+  if (!id) return '';
+
+  const url = new URL(`https://www.tiktok.com/embed/v2/${encodeURIComponent(id)}`);
+  return url.toString();
+}
+
+function readMediaListForClick(conf, clickHref) {
+  const entry = conf?.MEDIA_BY_CLICK?.[clickHref] ?? null;
+
+  if (Array.isArray(entry) && entry.length) return entry.filter(Boolean);
+  if (typeof entry === 'string' && entry.trim()) return [entry.trim()];
+
+  return clickHref ? [clickHref] : [];
+}
+
+function emitAdFallback(conf, clickHref, slotKind, cascadeStep) {
+  emitAdEvent(
+    'ad_fallback',
+    { url: clickHref, cascade_step: cascadeStep, slot_kind: slotKind },
+    conf
+  );
+}
+
+export async function resolveAdMediaPayload(mediaHref, opts = {}) {
+  const key = String(mediaHref || '').trim();
+  if (!key) return { kind: 'skeleton', src: null };
+
+  const cached = readCachedAdResolvedMedia(key);
+  if (cached) return cached;
+
+  const inflight = adMediaResolveInflight.get(key);
+  if (inflight) return inflight;
+
+  const task = (async () => {
+    const conf = opts.conf || getForumAdConf();
+    const clickHref = String(opts.clickHref || key);
+    const slotKind = opts.slotKind;
+
+    const publish = (media, okCache = true, cascadeStep = '') => {
+      cacheAdResolvedMedia(key, media, okCache);
+      if (cascadeStep) emitAdFallback(conf, clickHref, slotKind, cascadeStep);
+      return media;
+    };
+
+    if (isLikelyVideoUrl(key)) {
+      return publish({ kind: 'video', src: key, step: 'env_video' }, true, 'env_video');
+    }
+
+    if (shouldProbeMediaKind(key)) {
+      const detected = await detectMediaKind(key, 3000, {
+        allowRangeFallback: false,
+      }).catch(() => null);
+
+      if (detected === 'video') {
+        return publish({ kind: 'video', src: key, step: 'head_video' }, true, 'head_video');
+      }
+
+      if (detected === 'image') {
+        return publish({ kind: 'image', src: key, step: 'head_image' }, true, 'head_image');
+      }
+    }
+
+    const ytMatch = key.match(YT_RE);
+    if (ytMatch?.[1]) {
+      return publish({ kind: 'youtube', src: ytMatch[1], step: 'env_youtube' }, true, 'env_youtube');
+    }
+
+    const ttMatch = key.match(TIKTOK_RE);
+    if (ttMatch) {
+      let videoId = ttMatch[1] || null;
+      if (!videoId) {
+        try {
+          videoId = new URL(key).pathname.match(/\/video\/(\d+)/)?.[1] || null;
+        } catch {}
+      }
+      if (videoId) {
+        return publish({ kind: 'tiktok', src: videoId, step: 'env_tiktok' }, true, 'env_tiktok');
+      }
+    }
+
+    if (/\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(key)) {
+      const ok = await tryLoadImage(key);
+      if (ok) return publish({ kind: 'image', src: key, step: 'direct_image' }, true, 'direct_image');
+    }
+
+    return publish({ kind: 'placeholder', src: null, step: 'placeholder' }, false, 'placeholder');
+  })();
+
+  adMediaResolveInflight.set(key, task);
+  try {
+    return await task;
+  } finally {
+    adMediaResolveInflight.delete(key);
+  }
+}
+
+export function useAdMediaPayload({ url, slotKind, nearId, conf: confProp } = {}) {
+  const conf = useMemo(() => confProp || getForumAdConf(), [confProp]);
+  const safeClick = useMemo(() => toSafeClickUrl(url), [url]);
+  const clickHref = safeClick ? safeClick.toString() : '';
+  const host = safeClick ? safeClick.hostname.replace(/^www\./i, '') : '';
+  const mediaKey = useMemo(
+    () => `${clickHref}::${slotKind || ''}::${nearId || ''}`,
+    [clickHref, slotKind, nearId]
+  );
+  const [mediaHref, setMediaHref] = useState(null);
   const [media, setMedia] = useState({ kind: 'skeleton', src: null });
 
-  // Стартовое состояние рекламы:
-  // 1) сначала читаем document/window;
-  // 2) если там пусто — fallback muted=true;
-  // 3) это состояние сразу используется первым render.
-  const startupMutedRef = useRef(null);
-  if (startupMutedRef.current == null) {
-    startupMutedRef.current = resolveForumAdStartupMuted();
-  }
-
-  const [muted, setMuted] = useState(() =>
-    normalizeForumAdMuted(startupMutedRef.current?.muted)
-  );
-
-  // уникальный id инстанса, чтобы не ловить свой же event
-  const playerIdRef = useRef(
-    `ad_${Math.random().toString(36).slice(2)}_${Date.now()}`
-  );
-
-  // init muted from global document/window state.
-  // Если document/window был пустой — сюда уже пришёл fallback muted=true,
-  // и мы сразу раскладываем его в общий document/window + storage.
-useEffect(() => {
-  const startup = startupMutedRef.current || resolveForumAdStartupMuted();
-  const next = commitForumAdMutedState(startup.muted);
-
-  setMuted((prev) => (prev === next ? prev : next));
-
-  // Если video уже существует — синхронизируем DOM property/attribute.
-  applyForumAdMutedToVideo(videoRef.current, next);
-
-  // Если YouTube player уже существует — синхронизируем его тоже.
-  if (ytPlayerRef.current) {
-    try {
-      if (next) ytPlayerRef.current.mute?.();
-      else ytPlayerRef.current.unMute?.();
-    } catch {}
-  }
-}, []);
-  // текущий выбранный mediaHref (конкретный youtube / картинка и т.п.)
-  const [mediaHref, setMediaHref] = useState(null);
-
-const rootRef = useRef(null);
-const videoRef = useRef(null);
-const attachedVideoSrcRef = useRef('');
-const adNativePrimeTsRef = useRef(0);
-const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
-const adNativeFocusKickTsRef = useRef(0);
-const ytIframeRef = useRef(null);
-const ytPlayerRef = useRef(null);
-  const videoErrorUntilRef = useRef(new Map());
-  const isVideoSrcTemporarilyBlocked = React.useCallback((src) => {
-    const key = String(src || '').trim();
-    if (!key) return false;
-    const until = Number(videoErrorUntilRef.current.get(key) || 0);
-    if (!until) return false;
-    if (until <= Date.now()) {
-      videoErrorUntilRef.current.delete(key);
-      return false;
-    }
-    return true;
-  }, []);
-  const markVideoSrcTemporarilyBlocked = React.useCallback((src, ms = 20000) => {
-    const key = String(src || '').trim();
-    if (!key) return;
-    videoErrorUntilRef.current.set(key, Date.now() + Math.max(2500, Number(ms || 0)));
-    if (videoErrorUntilRef.current.size > 120) {
-      let drop = videoErrorUntilRef.current.size - 120;
-      for (const oldKey of videoErrorUntilRef.current.keys()) {
-        videoErrorUntilRef.current.delete(oldKey);
-        drop -= 1;
-        if (drop <= 0) break;
-      }
-    }
-  }, []);
-  const clearVideoSrcBlock = React.useCallback((src) => {
-    const key = String(src || '').trim();
-    if (!key) return;
-    videoErrorUntilRef.current.delete(key);
-  }, []);
-  // ===== Focus / attention gating =====
-  // isNear: блок рядом (можно подгружать, но не играть)
-  // isFocused: блок реально в зоне внимания (играем)
-  // isPageActive: вкладка/окно активно (иначе всегда пауза)
-  const [isNear, setIsNear] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [isPageActive, setIsPageActive] = useState(true);
-
-  const shouldPlay = isFocused && isPageActive;
-  const shouldPlayRef = useRef(false);
-  const mutedRef = useRef(normalizeForumAdMuted(muted));
-  const adPlayEventTsRef = useRef(0);
-  const emitAdPlayToCoordinator = React.useCallback((source = 'ad') => {
-  if (!isBrowser()) return;
-
-  try {
-    const now = Date.now();
-    if ((now - Number(adPlayEventTsRef.current || 0)) < 320) return;
-    adPlayEventTsRef.current = now;
-
-        const isMutedNow = normalizeForumAdMuted(mutedRef.current);
-
-    let el = null;
-    if (source === 'ad_video') {
-      el = videoRef.current || rootRef.current || null;
-    } else if (source === 'ad_youtube') {
-      el = ytIframeRef.current || rootRef.current || null;
-    } else {
-      el = videoRef.current || ytIframeRef.current || rootRef.current || null;
-    }
-
-    window.dispatchEvent(
-      new CustomEvent('site-media-play', {
-        detail: {
-          source,
-          element: el,
-          manual: false,
-          id: playerIdRef.current,
-          muted: isMutedNow,
-          audible:
-            source === 'ad_video' || source === 'ad_youtube'
-              ? !isMutedNow
-              : undefined,
-        },
-      })
-    );
-  } catch {}
-}, []);
-const slotCssVars = {
-  '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
-  '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
-  '--ad-slot-h-d': `${AD_SLOT_HEIGHT_PX.desktop}px`,
-
-  '--forum-ad-lens-size': `${AD_LENS_UI.sizePx}px`,
-  '--forum-ad-lens-right': `${AD_LENS_UI.rightPx}px`,
-  '--forum-ad-lens-bottom': `${AD_LENS_UI.bottomPx}px`,
-
-  '--forum-ad-lens-stroke': AD_LENS_UI.strokeColor,
-  '--forum-ad-lens-handle': AD_LENS_UI.handleColor,
-  '--forum-ad-lens-outline': AD_LENS_UI.outlineColor,
-  '--forum-ad-lens-glow': AD_LENS_UI.glowColor,
-  '--forum-ad-lens-glow-2': AD_LENS_UI.glowColor2,
-
-  '--forum-ad-lens-opacity': String(AD_LENS_UI.opacity),
-  '--forum-ad-lens-outline-w': `${AD_LENS_UI.outlineWidth}px`,
-  '--forum-ad-lens-ring-w': `${AD_LENS_UI.ringWidth}px`,
-  '--forum-ad-lens-handle-w': `${AD_LENS_UI.handleWidth}px`,
-  '--forum-ad-lens-orbit-w': `${AD_LENS_UI.orbitWidth}px`,
-
-  '--forum-ad-lens-float-dur': `${AD_LENS_UI.floatDurationMs}ms`,
-  '--forum-ad-lens-sweep-dur': `${AD_LENS_UI.sweepDurationMs}ms`,
-  '--forum-ad-lens-pulse-dur': `${AD_LENS_UI.pulseDurationMs}ms`,
-  '--forum-ad-lens-sparkle-dur': `${AD_LENS_UI.sparkleDurationMs}ms`,
-};
-
-useEffect(() => {
-  shouldPlayRef.current = shouldPlay;
-}, [shouldPlay]);
-
-useEffect(() => {
-  const node = videoRef.current;
-
-  return () => {
-    try { releaseAdNativeWarmSlot(node, 'unmount'); } catch {}
-    try {
-      const st = adNativePauseRecoveryRef.current || {};
-      if (st.timer) clearTimeout(st.timer);
-      adNativePauseRecoveryRef.current = { timer: 0, ts: 0, count: 0 };
-    } catch {}
-
-    attachedVideoSrcRef.current = '';
-
-    try {
-      detachAdNativeVideo(node, {
-        hard: true,
-        reason: 'unmount',
-        resetPipeline: true,
-      });
-    } catch {}
-  };
-}, []);
-
-useEffect(() => {
-  const next = normalizeForumAdMuted(muted);
-  mutedRef.current = next;
-  applyForumAdMutedToVideo(videoRef.current, next);
-}, [muted]);
-
-const playAdNativeVideo = React.useCallback((reason = 'focus') => {
-  const v = videoRef.current;
-  const srcKey = String(media.src || '').trim();
-
-  if (media.kind !== 'video') return false;
-  if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return false;
-  if (!shouldPlayRef.current || !isPageActive) return false;
-
-  const now = Date.now();
-  const minGapMs = reason === 'focus_retry' ? 520 : 260;
-  if ((now - Number(adNativeFocusKickTsRef.current || 0)) < minGapMs) {
-    return false;
-  }
-  adNativeFocusKickTsRef.current = now;
-
-  try {
-    const nextMuted = normalizeForumAdMuted(mutedRef.current);
-    const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
-    if (attached) attachedVideoSrcRef.current = srcKey;
-
-    applyForumAdMutedToVideo(v, nextMuted);
-    v.playsInline = true;
-    v.setAttribute('playsinline', '');
-    v.setAttribute('webkit-playsinline', '');
-    v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-
-    if (!v.paused && !v.ended) {
-      emitAdPlayToCoordinator('ad_video');
-      return true;
-    }
-
-    if (v.ended) {
-      try { v.currentTime = 0; } catch {}
-      try { delete v.dataset.__adEndedHold; } catch {}
-    }
-
-    const playAttempt = v.play?.();
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt
-        .then(() => {
-          try {
-            const st = adNativePauseRecoveryRef.current || {};
-            if (st.timer) clearTimeout(st.timer);
-            adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-          } catch {}
-          emitAdPlayToCoordinator('ad_video');
-        })
-        .catch(() => {
-          try {
-            if (!shouldPlayRef.current || normalizeForumAdMuted(mutedRef.current) !== false) return;
-            applyForumAdMutedToVideo(v, true);
-            v.play?.().catch(() => {});
-          } catch {}
-        });
-    } else {
-      try {
-        const st = adNativePauseRecoveryRef.current || {};
-        if (st.timer) clearTimeout(st.timer);
-        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-      } catch {}
-      emitAdPlayToCoordinator('ad_video');
-    }
-
-    return true;
-  } catch {
-    return false;
-  }
-}, [emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
-
-useEffect(() => {
-  const node = videoRef.current;
-
-  if (media.kind !== 'video') {
-    attachedVideoSrcRef.current = '';
-    clearAdNativeWarmSlotOwner(node, 'kind_change');
-    detachAdNativeVideo(node, {
-      hard: true,
-      reason: 'kind_change',
-      resetPipeline: true,
-    });
-    return undefined;
-  }
-
-  const nextSrc = String(media.src || '').trim();
-
-  if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) {
-    attachedVideoSrcRef.current = '';
-    clearAdNativeWarmSlotOwner(node, 'blocked_or_empty_src');
-    detachAdNativeVideo(node, {
-      hard: true,
-      reason: 'blocked_or_empty_src',
-      resetPipeline: true,
-    });
-    return undefined;
-  }
-
-  // Не привязываем native video к isNear / shouldPlay.
-  // Скролл и IntersectionObserver не должны менять <video src>.
-  // Если URL реально сменился — очищаем старый ресурс один раз.
-  if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) {
-    clearAdNativeWarmSlotOwner(node, 'src_change');
-    detachAdNativeVideo(node, {
-      hard: true,
-      reason: 'src_change',
-      resetPipeline: true,
-    });
-    attachedVideoSrcRef.current = '';
-  }
-  return undefined;
-}, [isVideoSrcTemporarilyBlocked, media.kind, media.src]);
-
-useEffect(() => {
-  
-  const v = videoRef.current;
-
-  if (media.kind !== 'video' || !isPageActive || !isNear) {
-    if (v && !shouldPlayRef.current) releaseAdNativeWarmSlot(v, 'near_exit');
-    return undefined;
-  }
-
-  if (!v) return undefined;
-  
-  const srcKey = String(media.src || '').trim();
-  if (!srcKey || isVideoSrcTemporarilyBlocked(srcKey)) {
-    releaseAdNativeWarmSlot(v, 'bad_src');
-    return undefined;
-  }
-
-  // Controlled ad prewarm:
-  // near = src/load/preload for ONE ad native video only; no play(), no site-media-play.
-  if (!shouldPlayRef.current) {
-    const canOwnWarm = claimAdNativeWarmSlot(v, srcKey, rootRef.current);
-if (!canOwnWarm) {
-  // Another ad owns warm priority. This node must not keep a second native
-  // media pipeline alive.
-  try {
-    if (v.paused && String(v.dataset?.__adWarmOwner || '') !== '1') {
-      const viewportState = getAdViewportState(rootRef.current || v);
-      const existingSrc = getAdVideoNodeSrc(v);
-      const hasExistingSurface =
-        existingSrc === srcKey &&
-        isAdNativeVideoLoadingOrReady(v);
-      if ((viewportState.inViewport || viewportState.gapPx <= 1280) && hasExistingSurface) {
-        v.dataset.__adSurfaceHeld = '1';
-        v.dataset.__adSurfaceHeldReason = 'warm_owner_denied';
-        v.preload = 'metadata';
-        return undefined;
-      }
-      clearAdNativeWarmSlotOwner(v, 'warm_owner_denied');
-      detachAdNativeVideo(v, {
-        hard: true,
-        reason: 'warm_owner_denied',
-        resetPipeline: true,
-      });
-    }
-  } catch {}
-  return undefined;
-}
-    const nextMuted = normalizeForumAdMuted(mutedRef.current);
-    const attached = ensureAdNativeVideoSrc(v, srcKey, nextMuted);
-    if (attached) attachedVideoSrcRef.current = srcKey;
- 
-    try {
-      applyForumAdMutedToVideo(v, nextMuted);
-      v.playsInline = true;
-      v.setAttribute('playsinline', '');
-      v.setAttribute('webkit-playsinline', '');
-      v.preload = AD_NATIVE_VIDEO_PRELOAD_PLAY;
-
-      const now = Date.now();
-      const lastLoadTs = Number(v.dataset?.__adLastWarmLoadTs || 0);
-      const loadingOrReady = isAdNativeVideoLoadingOrReady(v);
-
-      // ensureAdNativeVideoSrc() уже вызывает load() при реальной смене URL.
-      // Повторный load() здесь разрешаем только если источник есть, но браузер не грузит и давно не было warm-kick.
-      if (!loadingOrReady && (now - lastLoadTs) > AD_NATIVE_WARM_RELOAD_GAP_MS) {
-        v.dataset.__adLastWarmLoadTs = String(now);
-        v.dataset.__adLoadPending = '1';
-        v.load?.();
-      }
-    } catch {}
-  }
-
-  return undefined;
-}, [isNear, isPageActive, isVideoSrcTemporarilyBlocked, media.kind, media.src]);
-
-  // Page visibility + focus/blur
   useEffect(() => {
-    if (!isBrowser()) return;
-
-    const sync = () => {
-      const visible = document.visibilityState === 'visible';
-      setIsPageActive(visible);
-    };
-
-    sync();
-    document.addEventListener('visibilitychange', sync);
-    window.addEventListener('focus', sync);
-    window.addEventListener('blur', sync);
-
-    return () => {
-      document.removeEventListener('visibilitychange', sync);
-      window.removeEventListener('focus', sync);
-      window.removeEventListener('blur', sync);
-    };
-  }, []);
-
-  // Intersection: near + focused
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined')
-      return;
-
-    // near: заранее «подойти» к блоку (без игры)
-    const nearObs = new IntersectionObserver(
-      ([e]) => setIsNear(!!e?.isIntersecting),
-      // Enough runway for first frame, while global warm slot prevents ad 206 storms.
-      { rootMargin: '820px 0px 1650px 0px', threshold: 0 }
-    );
-
-    // focused: реально видно (>= 60% площади)
-    const focusObs = new IntersectionObserver(
-      ([e]) => setIsFocused((e?.intersectionRatio || 0) >= 0.6),
-      { threshold: [0, 0.25, 0.6, 0.75, 1] }
-    );
-
-    nearObs.observe(el);
-    focusObs.observe(el);
-
-    return () => {
-      nearObs.disconnect();
-      focusObs.disconnect();
-    };
-  }, []);
-
-  // ===== Global mute sync from forum =====
-useEffect(() => {
-  if (!isBrowser()) return;
-
-  const onMuted = (e) => {
-    const d = e?.detail || {};
-    if (d?.id && d.id === playerIdRef.current) return; // ignore self
-    if (typeof d?.muted !== 'boolean') return;
-
-    const next = commitForumAdMutedState(d.muted);
-
-    mutedRef.current = next;
-    setMuted((prev) => (prev === next ? prev : next));
-
-    // HTML5
-    applyForumAdMutedToVideo(videoRef.current, next);
-
-    // YouTube
-    if (ytPlayerRef.current) {
-      try {
-        if (next) ytPlayerRef.current.mute?.();
-        else ytPlayerRef.current.unMute?.();
-      } catch {}
-    }
-  };
-
-  window.addEventListener(MEDIA_MUTED_EVENT, onMuted);
-  return () => window.removeEventListener(MEDIA_MUTED_EVENT, onMuted);
-}, []);
-  const safeClick = useMemo(() => {
-    try {
-      const u = new URL(url);
-      if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
-      return u;
-    } catch {
-      return null;
-    }
-  }, [url]);
-
-  // ключ для слота, чтобы не повторять одну и ту же медиу подряд
-  const mediaKey = useMemo(
-    () => `${url}::${slotKind || ''}::${nearId || ''}`,
-    [url, slotKind, nearId]
-  );
-
-  // 1) Выбор конкретного mediaHref из MEDIA_BY_CLICK[clickHref] по таймеру
-  useEffect(() => {
-    if (!safeClick) return;
-
-    const clickHref = safeClick.toString();
-    const entry = conf.MEDIA_BY_CLICK?.[clickHref] ?? null;
-
-    let list = [];
-    if (Array.isArray(entry) && entry.length) {
-      list = entry.filter(Boolean);
-    } else if (typeof entry === 'string' && entry.trim()) {
-      list = [entry.trim()];
-    } else {
-      // если нет отдельной медиы — крутим сам clickHref
-      list = [clickHref];
+    if (!clickHref) {
+      setMediaHref(null);
+      setMedia({ kind: 'skeleton', src: null });
+      return undefined;
     }
 
+    const list = readMediaListForClick(conf, clickHref);
     if (!list.length) {
       setMediaHref(null);
-      return;
+      setMedia({ kind: 'placeholder', src: null, step: 'placeholder' });
+      return undefined;
     }
 
     let idx = lastMediaIndexByKey.has(mediaKey)
@@ -1892,375 +1245,136 @@ useEffect(() => {
       setMediaHref(list[idx]);
     };
 
-    // сразу выбираем первую медиу
     pickNext();
 
-    // период ротации медиы — завязан на ROTATE_MIN,
-    // но не меньше 10 секунд, чтобы был заметен эффект
     const rotateMs = Math.max(
       10_000,
-      Number(conf.ROTATE_MIN || 1) * 60_000
+      Number(conf?.ROTATE_MIN || 1) * 60_000
     );
     const timer = setInterval(pickNext, rotateMs);
 
     return () => {
       clearInterval(timer);
     };
-  }, [safeClick, conf, mediaKey]);
+  }, [clickHref, conf, mediaKey]);
 
-  // 2) Каскад определения типа медиа для текущего mediaHref
   useEffect(() => {
-    if (!safeClick || !mediaHref) {
+    if (!clickHref || !mediaHref) {
       setMedia({ kind: 'skeleton', src: null });
-      return;
+      return undefined;
     }
-    const canResolveNow = !!isNear || !!isFocused;
-    if (!canResolveNow) {
-      if (isLikelyVideoUrl(mediaHref)) {
-        setMedia({ kind: 'video', src: mediaHref, step: 'env_video_idle' });
-        return;
-      }
-      const cachedOnly = readCachedAdResolvedMedia(String(mediaHref || '').trim());
-      if (cachedOnly) setMedia(cachedOnly);
-      else setMedia({ kind: 'skeleton', src: null });
-      return;
-    }
+
     let cancelled = false;
-
-    const clickHref = safeClick.toString();
-    const mediaResolveKey = String(mediaHref || '').trim(); 
-    const cachedResolved = readCachedAdResolvedMedia(mediaResolveKey);
-    if (cachedResolved) {
-      setMedia(cachedResolved);
-      return () => {
-        cancelled = true;
-      };
-    }
-    const inflightResolved = adMediaResolveInflight.get(mediaResolveKey);
-    if (inflightResolved) {
-      inflightResolved
-        .then(() => {
-          if (cancelled) return;
-          const synced = readCachedAdResolvedMedia(mediaResolveKey);
-          if (synced) setMedia(synced);
-        })
-        .catch(() => {});
-      return () => {
-        cancelled = true;
-      };
-    }
- 
-    const isDirectImg = /\.(jpe?g|png|webp|gif|avif)(?:$|[?#])/i.test(
-      mediaHref
-    );
-    const publishResolved = (next, okCache = true) => {
-      if (!next) return;
-      cacheAdResolvedMedia(mediaResolveKey, next, okCache);
-      if (!cancelled) setMedia(next);
-    };
-
-async function run() {
-  // 0) Прямое native-video определяем по URL ДО любых сетевых probe.
-  // Для .mp4/.webm это убирает лишний HEAD/GET Range перед установкой <video>.
-  if (!cancelled && isLikelyVideoUrl(mediaHref)) {
-    publishResolved({ kind: 'video', src: mediaHref, step: 'env_video' }, true);
-    emitAdEvent(
-      'ad_fallback',
-      { url: clickHref, cascade_step: 'env_video', slot_kind: slotKind },
-      conf
-    );
-    return;
-  }
-
-  // 1) Content-Type probe оставляем только для прямых media-endpoint/blob/upload URL.
-  // Запрос идёт только к самому mediaHref, без внешних page-preview сервисов.
-  // Range fallback выключен: он сам создавал лишний 206.
-  if (!cancelled && shouldProbeMediaKind(mediaHref)) {
-    const detected = await detectMediaKind(mediaHref, 3000, {
-      allowRangeFallback: false,
-    }).catch(() => null);
-
-    if (cancelled) return;
-
-    if (detected === 'video') {
-      publishResolved({ kind: 'video', src: mediaHref, step: 'head_video' }, true);
-      emitAdEvent(
-        'ad_fallback',
-        { url: clickHref, cascade_step: 'head_video', slot_kind: slotKind },
-        conf
-      );
-      return;
+    const key = String(mediaHref || '').trim();
+    const cached = readCachedAdResolvedMedia(key);
+    if (cached) {
+      setMedia(cached);
+      return undefined;
     }
 
-    if (detected === 'image') {
-      publishResolved({ kind: 'image', src: mediaHref, step: 'head_image' }, true);
-      emitAdEvent(
-        'ad_fallback',
-        { url: clickHref, cascade_step: 'head_image', slot_kind: slotKind },
-        conf
-      );
-      return;
-    }
-  }
+    if (isLikelyVideoUrl(key)) setMedia({ kind: 'video', src: key, step: 'env_video_idle' });
+    else setMedia({ kind: 'skeleton', src: null });
 
-  // 2) YouTube
-  const ytMatch = mediaHref.match(YT_RE);
-  if (!cancelled && ytMatch) {
-    const videoId = ytMatch[1];
-    if (videoId) {
-      publishResolved({ kind: 'youtube', src: videoId, step: 'env_youtube' }, true);
-      emitAdEvent(
-        'ad_fallback',
-        {
-          url: clickHref,
-          cascade_step: 'env_youtube',
-          slot_kind: slotKind,
-        },
-        conf
-      );
-      return;
-    }
-  }
-
-  // 3) TikTok
-  const ttMatch = mediaHref.match(TIKTOK_RE);
-  if (!cancelled && ttMatch) {
-    let videoId = null;
-    try {
-      const u = new URL(mediaHref);
-      const m = u.pathname.match(/\/video\/(\d+)/);
-      if (m) videoId = m[1];
-    } catch {}
-    if (videoId) {
-      publishResolved({ kind: 'tiktok', src: videoId, step: 'env_tiktok' }, true);
-      emitAdEvent(
-        'ad_fallback',
-        {
-          url: clickHref,
-          cascade_step: 'env_tiktok',
-          slot_kind: slotKind,
-        },
-        conf
-      );
-      return;
-    }
-  }
-
-  // 4) Прямой файл-картинка.
-  // Берём только реальный image URL, без OG/Microlink/screenshot/favicon.
-  if (!cancelled && isDirectImg) {
-    const ok = await tryLoadImage(mediaHref);
-    if (ok && !cancelled) {
-      publishResolved({ kind: 'image', src: mediaHref, step: 'direct_image' }, true);
-      emitAdEvent(
-        'ad_fallback',
-        {
-          url: clickHref,
-          cascade_step: 'direct_image',
-          slot_kind: slotKind,
-        },
-        conf
-      );
-      return;
-    }
-  }
-
-  // 5) Placeholder для обычной landing-page / unknown URL.
-  // Важно: никаких внешних page-preview/card/icon probe.
-  if (!cancelled) {
-    publishResolved({ kind: 'placeholder', src: null, step: 'placeholder' }, false);
-    emitAdEvent(
-      'ad_fallback',
-      {
-        url: clickHref,
-        cascade_step: 'placeholder',
-        slot_kind: slotKind,
-      },
-      conf
-    );
-  }
-}
-
-    const runPromise = Promise.resolve(run()).catch(() => {});
-    adMediaResolveInflight.set(mediaResolveKey, runPromise);
-    runPromise.finally(() => {
-      adMediaResolveInflight.delete(mediaResolveKey);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [safeClick, conf, slotKind, mediaHref, isNear, isFocused]);
-
-  // YouTube Iframe API для управления звуком
-useEffect(() => {
-  if (!isBrowser()) return;
-  if (media.kind !== 'youtube' || !media.src) {
-    const existing = ytPlayerRef.current;
-    if (existing) {
-      try { existing.destroy?.(); } catch {}
-      ytPlayerRef.current = null;
-    }
-    return;
-  }
-
-  let cancelled = false;
-  let localPlayer = null;
-
-  const cleanupPlayer = () => {
-    if (localPlayer) {
-      try { localPlayer.destroy?.(); } catch {}
-    }
-    if (ytPlayerRef.current === localPlayer) {
-      ytPlayerRef.current = null;
-    }
-  };
-
-  function createPlayer() {
-    if (cancelled) return;
-    if (!window.YT || !window.YT.Player || !ytIframeRef.current) return;
-
-    try {
-      localPlayer = new window.YT.Player(ytIframeRef.current, {
-        videoId: media.src,
-playerVars: {
-  autoplay: 0,
-  controls: 0,
-  rel: 0,
-  fs: 0,
-  modestbranding: 1,
-  playsinline: 1,
-  loop: 1,
-  playlist: media.src,
-},
-        events: {
-onReady: (ev) => {
-  if (cancelled) return;
-  ytPlayerRef.current = ev.target;
-  try {
-    if (mutedRef.current === true) {
-      ev.target.mute?.();
-    } else if (mutedRef.current === false) {
-      ev.target.unMute?.();
-    }
-    if (shouldPlayRef.current) ev.target.playVideo?.();
-    else ev.target.pauseVideo?.();
-  } catch {}
-},
-        },
+    resolveAdMediaPayload(key, { conf, clickHref, slotKind })
+      .then((next) => {
+        if (!cancelled && next) setMedia(next);
+      })
+      .catch(() => {
+        if (!cancelled) setMedia({ kind: 'placeholder', src: null, step: 'placeholder_error' });
       });
 
-      ytPlayerRef.current = localPlayer;
-    } catch {}
-  }
-
-  if (window.YT && window.YT.Player) {
-    createPlayer();
-  } else {
-    const prev = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = function () {
-      if (typeof prev === 'function') prev();
-      createPlayer();
-    };
-    if (!document.getElementById('yt-iframe-api')) {
-      const tag = document.createElement('script');
-      tag.id = 'yt-iframe-api';
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-    }
-  }
-
-  return () => {
-    cancelled = true;
-    cleanupPlayer();
-  };
-}, [media.kind, media.src]);
-  // ===== Hard stop / resume playback depending on attention =====
-  useEffect(() => {
-    // HTML5 video
-if (media.kind === 'video' && videoRef.current) {
-  const v = videoRef.current;
-  const srcKey = String(media.src || '').trim();
-  const nextMuted = normalizeForumAdMuted(muted);
-
-  applyForumAdMutedToVideo(v, nextMuted);
-
-  if (!srcKey || isVideoSrcTemporarilyBlocked(srcKey)) {
-    try { v.pause?.(); } catch {}
-    return;
-  }
-
-  if (shouldPlay) {
-    playAdNativeVideo('focus');
-  } else {
-    // Пауза без removeAttribute('src') и без load().
-    // Так браузер не начинает новый набор 206 при каждом повторном входе в viewport.
-    try { v.pause?.(); } catch {}
-  }
-}
-
-    // YouTube player (Iframe API)
-if (media.kind === 'youtube' && ytPlayerRef.current) {
-  const p = ytPlayerRef.current;
-  const nextMuted = normalizeForumAdMuted(muted);
-
-  try {
-    if (shouldPlay) {
-      if (nextMuted) p.mute?.();
-      else p.unMute?.();
-
-      emitAdPlayToCoordinator('ad_youtube');
-      p.playVideo?.();
-    } else {
-      p.pauseVideo?.();
-    }
-  } catch {}
-}
-    if (media.kind === 'tiktok' && shouldPlay) {
-      emitAdPlayToCoordinator('ad_tiktok');
-    }
-  }, [emitAdPlayToCoordinator, isVideoSrcTemporarilyBlocked, playAdNativeVideo, shouldPlay, media.kind, media.src, muted]);
-  // Focus-only autoplay retry for mobile ads.
-  // Работает только когда карточка реально в focus-zone; near/offscreen не играет.
-  useEffect(() => {
-    if (media.kind !== 'video') return undefined;
-    if (!shouldPlay || !isPageActive) return undefined;
-
-    let cancelled = false;
-    let timer = 0;
-
-    const kick = () => {
-      if (cancelled) return;
-      playAdNativeVideo('focus_retry');
-    };
-
-    kick();
-    timer = window.setInterval(() => {
-      try {
-        const v = videoRef.current;
-        if (!shouldPlayRef.current || !v || !v.paused || v.ended) {
-          if (timer) window.clearInterval(timer);
-          timer = 0;
-          return;
-        }
-        kick();
-      } catch {}
-    }, 520);
-
     return () => {
       cancelled = true;
-      if (timer) window.clearInterval(timer);
     };
-  }, [isPageActive, media.kind, media.src, playAdNativeVideo, shouldPlay]);
+  }, [clickHref, conf, mediaHref, slotKind]);
+
+  return { conf, safeClick, clickHref, host, mediaHref, media };
+}
+
+/* ======================= AdCard ======================= */
+/**
+ * Direct media only: native video → direct image → YouTube/TikTok → placeholder.
+ * Бейдж "Реклама" из словаря: ключ forum_ad_label.
+ * Внешние page-preview ветки отключены: OpenGraph/Microlink/screenshot/favicon.
+ */
+
+export function AdCard({
+  url,
+  slotKind,
+  nearId,
+  layout = 'fixed',
+  muted = true,
+  onSoundToggle,
+  rootRef,
+  videoRef,
+  iframeRef,
+  rootAttrs,
+  mediaSlotAttrs,
+  videoAttrs,
+  youtubeAttrs,
+  tiktokAttrs,
+  deferNativeSrc = false,
+  deferExternalSrc = false,
+  tiktokActive = true,
+  onMediaChange,
+}) {
+  const conf = getForumAdConf();
+  useAdPreconnect(conf);
+  const i18n = useI18n();
+  const t = i18n?.t;
+  const router = useRouter();
+  const isFluid = layout === 'fluid';
+  const localRootRef = useRef(null);
+  const localVideoRef = useRef(null);
+  const localIframeRef = useRef(null);
+  const { safeClick, clickHref, host, mediaHref, media } = useAdMediaPayload({
+    url,
+    slotKind,
+    nearId,
+    conf,
+  });
+
+  useEffect(() => {
+    onMediaChange?.({ media, mediaHref, clickHref, slotKind, nearId });
+  }, [clickHref, media, mediaHref, nearId, onMediaChange, slotKind]);
+
+  const slotCssVars = {
+    '--ad-slot-h-m': `${AD_SLOT_HEIGHT_PX.mobile}px`,
+    '--ad-slot-h-t': `${AD_SLOT_HEIGHT_PX.tablet}px`,
+    '--ad-slot-h-d': `${AD_SLOT_HEIGHT_PX.desktop}px`,
+
+    '--forum-ad-lens-size': `${AD_LENS_UI.sizePx}px`,
+    '--forum-ad-lens-right': `${AD_LENS_UI.rightPx}px`,
+    '--forum-ad-lens-bottom': `${AD_LENS_UI.bottomPx}px`,
+
+    '--forum-ad-lens-stroke': AD_LENS_UI.strokeColor,
+    '--forum-ad-lens-handle': AD_LENS_UI.handleColor,
+    '--forum-ad-lens-outline': AD_LENS_UI.outlineColor,
+    '--forum-ad-lens-glow': AD_LENS_UI.glowColor,
+    '--forum-ad-lens-glow-2': AD_LENS_UI.glowColor2,
+
+    '--forum-ad-lens-opacity': String(AD_LENS_UI.opacity),
+    '--forum-ad-lens-outline-w': `${AD_LENS_UI.outlineWidth}px`,
+    '--forum-ad-lens-ring-w': `${AD_LENS_UI.ringWidth}px`,
+    '--forum-ad-lens-handle-w': `${AD_LENS_UI.handleWidth}px`,
+    '--forum-ad-lens-orbit-w': `${AD_LENS_UI.orbitWidth}px`,
+
+    '--forum-ad-lens-float-dur': `${AD_LENS_UI.floatDurationMs}ms`,
+    '--forum-ad-lens-sweep-dur': `${AD_LENS_UI.sweepDurationMs}ms`,
+    '--forum-ad-lens-pulse-dur': `${AD_LENS_UI.pulseDurationMs}ms`,
+    '--forum-ad-lens-sparkle-dur': `${AD_LENS_UI.sparkleDurationMs}ms`,
+  };
+
   // Impression tracking
   useEffect(() => {
-    const el = rootRef.current;
+    const el = localRootRef.current;
     if (
       !el ||
       !isBrowser() ||
       typeof IntersectionObserver === 'undefined' ||
       !safeClick
     ) {
-      return;
+      return undefined;
     }
 
     let seen = false;
@@ -2305,8 +1419,6 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
 
   if (!safeClick) return null;
 
-  const clickHref = safeClick.toString();
-  const host = safeClick.hostname.replace(/^www\./i, '');
   const label =
     typeof t === 'function'
       ? t('forum_ad_label', 'Реклама')
@@ -2338,60 +1450,48 @@ if (media.kind === 'youtube' && ytPlayerRef.current) {
     );
   };
 
-const handleToggleSound = (e) => {
-  e.preventDefault();
-  e.stopPropagation();
+  const isAdMuted = normalizeAdMuted(muted);
 
-  const currentMuted = normalizeForumAdMuted(muted);
-  const next = !currentMuted;
-
-  // 1) сохранить и разложить состояние ВЕЗДЕ:
-  // storage + document/window + global event
-  syncMutedPrefEverywhere(next, playerIdRef.current, 'forum-ads-toggle');
-
-  // 2) локально
-  mutedRef.current = next;
-  setMuted((prev) => (prev === next ? prev : next));
-
-  // HTML5
-  if (media.kind === 'video' && videoRef.current) {
-    const v = videoRef.current;
-
-    applyForumAdMutedToVideo(v, next);
-
-    if (v.paused && shouldPlayRef.current) {
-      v.play?.().catch(() => {});
-    }
-
-    return;
-  }
-
-  // YouTube
-  if (media.kind === 'youtube' && ytPlayerRef.current) {
-    const p = ytPlayerRef.current;
-
-    try {
-      if (next) {
-        p.mute?.();
-      } else {
-        p.unMute?.();
-      }
-
-      if (shouldPlayRef.current) {
-        p.playVideo?.();
-      }
-    } catch {}
-  }
-};
-
-  const isAdMuted = normalizeForumAdMuted(muted);
+  const handleToggleSound = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSoundToggle?.(e, {
+      muted: isAdMuted,
+      nextMuted: !isAdMuted,
+      media,
+      mediaHref,
+      clickHref,
+      slotKind,
+      nearId,
+    });
+  };
 
   const showSoundButton =
-    media.kind === 'video' || media.kind === 'youtube';
+    (media.kind === 'video' || media.kind === 'youtube') &&
+    typeof onSoundToggle === 'function';
+
+  const videoAttrBag = videoAttrs || {};
+  const youtubeAttrBag = youtubeAttrs || {};
+  const tiktokAttrBag = tiktokAttrs || {};
+  const {
+    className: videoClassName,
+    ...restVideoAttrs
+  } = videoAttrBag;
+  const {
+    className: youtubeClassName,
+    ...restYoutubeAttrs
+  } = youtubeAttrBag;
+  const {
+    className: tiktokClassName,
+    ...restTiktokAttrs
+  } = tiktokAttrBag;
+
+  const youtubeSrc = media.kind === 'youtube' && media.src ? buildYouTubeEmbedSrc(media.src) : '';
+  const tiktokSrc = media.kind === 'tiktok' && media.src ? buildTikTokEmbedSrc(media.src) : '';
 
   return (
 <div
-  ref={rootRef}
+  ref={mergeRefs(localRootRef, rootRef)}
   className="item forum-ad-card"
   data-slot-kind={slotKind}
   data-ads="1"
@@ -2399,6 +1499,7 @@ const handleToggleSound = (e) => {
   data-windowing-keepalive="media"
   data-forum-windowing-stable="1"
   style={slotCssVars}
+  {...(rootAttrs || {})}
 >
 <style jsx>{`
   .forum-ad-card {
@@ -2440,24 +1541,24 @@ const handleToggleSound = (e) => {
     min-height: 30px;
   }
   .forum-ad-media-slot {
-    width: 100%; 
+    width: 100%;
     position: relative;         /* ключ: якорь для absolute медиа */
     overflow: hidden;
     border-radius: 0.5rem;
     background: var(--bg-soft, #000000);
   }
   /* ===== FIXED (как в форуме сейчас) ===== */
-  .forum-ad-media-slot[data-layout="fixed"] { 
+  .forum-ad-media-slot[data-layout="fixed"] {
     height: var(--ad-slot-h-m);
   }
   @media (min-width: 640px) {
-.forum-ad-media-slot[data-layout="fixed"] { 
+.forum-ad-media-slot[data-layout="fixed"] {
       height: var(--ad-slot-h-t);
     }
   }
 
   @media (min-width: 1024px) {
-    .forum-ad-media-slot[data-layout="fixed"] { 
+    .forum-ad-media-slot[data-layout="fixed"] {
       height: var(--ad-slot-h-d);
     }
   }
@@ -2798,8 +1899,9 @@ const handleToggleSound = (e) => {
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
 data-layout={isFluid ? 'fluid' : 'fixed'}
+{...(mediaSlotAttrs || {})}
 >
-          
+
  {media.kind === 'skeleton' && (
               <div className="animate-pulse w-full h-full bg-[color:var(--skeleton,#111827)]" />
             )}
@@ -2807,134 +1909,34 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
 {media.kind === 'video' && media.src && (
   <div className="forum-ad-media-fill">
 <video
-  ref={videoRef} 
-  className="forum-ad-fit"
+  ref={mergeRefs(localVideoRef, videoRef)}
+  className={['forum-ad-fit', videoClassName].filter(Boolean).join(' ')}
+  src={deferNativeSrc ? undefined : media.src}
+  data-src={media.src}
+  data-ad-media-src={media.src}
+  data-ad-media-kind="video"
   muted={isAdMuted}
-  playsInline 
+  playsInline
   referrerPolicy="no-referrer"
   preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}
   loop
-  onPlaying={() => {
-    try {
-      const v = videoRef.current;
-      if (v?.dataset) v.dataset.__adLoadPending = '0';
-      if (v?.dataset) delete v.dataset.__adEndedHold;
-      if (!shouldPlayRef.current) {
-        // Defensive: если браузер всё-таки стартанул рекламу до focus, гасим её молча
-        // и не отправляем site-media-play, чтобы не выключать активное видео форума.
-        try { v?.pause?.(); } catch {}
-        return;
-      }      
-      const st = adNativePauseRecoveryRef.current || {};
-      if (st.timer) clearTimeout(st.timer);
-      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-      emitAdPlayToCoordinator('ad_video');
-    } catch {}
-  }}
-  onPause={() => {
-    try {
-      const v = videoRef.current;
-      const srcKey = String(media?.src || '').trim();
-      if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
-      if (v.ended) {
-        const st = adNativePauseRecoveryRef.current || {};
-        if (st.timer) clearTimeout(st.timer);
-        adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-        return;
-      }
-
-      const prev = adNativePauseRecoveryRef.current || { timer: 0, ts: 0, count: 0 };
-      const now = Date.now();
-      const nextCount = prev.ts > 0 && (now - prev.ts) < 7000 ? Number(prev.count || 0) + 1 : 1;
-      if (nextCount > 2) return;
-
-      if (prev.timer) clearTimeout(prev.timer);
-      const timer = setTimeout(() => {
-        try {
-          if (!shouldPlayRef.current || !v.paused) return;
-          applyForumAdMutedToVideo(v, normalizeForumAdMuted(mutedRef.current));
-          v.play?.().catch(() => {});
-        } catch {}
-      }, 140);
-      adNativePauseRecoveryRef.current = { timer, ts: now, count: nextCount };
-    } catch {}
-  }}  
-  onLoadedData={() => {
-    try {
-      const v = videoRef.current;
-      if (v?.dataset) v.dataset.__adLoadPending = '0';
-      if (v?.dataset) v.dataset.__adWarmReady = '1';
-      applyForumAdMutedToVideo(v, isAdMuted);
-      clearVideoSrcBlock(media?.src);
-      if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v) v.preload = 'metadata';
-    } catch {}
-  }}
-  onCanPlay={() => {
-    try {
-      const v = videoRef.current;
-      if (v?.dataset) v.dataset.__adLoadPending = '0';
-      if (v?.dataset) v.dataset.__adWarmReady = '1';
-      applyForumAdMutedToVideo(v, isAdMuted);
-      clearVideoSrcBlock(media?.src);
-      if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {});
-      else if (v) v.preload = 'metadata';
-    } catch {}
-  }}
-  onEnded={() => {
-    try {
-      const st = adNativePauseRecoveryRef.current || {};
-      if (st.timer) clearTimeout(st.timer);
-      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
-      const v = videoRef.current;
-      if (v?.dataset) {
-        v.dataset.__adLoadPending = '0';
-        v.dataset.__adWarmReady = '1';
-        delete v.dataset.__adEndedHold;
-      }
-      if (v) {
-        v.preload = shouldPlayRef.current ? AD_NATIVE_VIDEO_PRELOAD_PLAY : 'metadata';
-        if (shouldPlayRef.current) {
-          try { v.currentTime = 0; } catch {}
-          v.play?.().catch(() => {});
-        }
-      }
-    } catch {}
-  }}
-onError={() => {
-  try {
-    const v = videoRef.current;
-    const code = Number(v?.error?.code || 0);
-    const now = Date.now();
-    const recentAttach = (now - Number(v?.dataset?.__adLastAttachTs || 0)) < 6500;
-    const loading =
-      typeof HTMLMediaElement !== 'undefined' &&
-      Number(v?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
-    const hasFrame = Number(v?.readyState || 0) >= 1;
-    if (code <= 1 || recentAttach || loading || hasFrame) {
-      if (v?.dataset) {
-        v.dataset.__adLoadPending = '0';
-        v.dataset.__adTransientErrorTs = String(now);
-      }
-      return;
-    }
-    markVideoSrcTemporarilyBlocked(media?.src, isNear ? 12000 : 20000);
-    attachedVideoSrcRef.current = '';
-    detachAdNativeVideo(videoRef.current, { hard: true, reason: 'error' });
-  } catch {}
-}}
+  {...restVideoAttrs}
 />
   </div>
 )}
- 
+
             {media.kind === 'youtube' && media.src && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '16 / 9' } : { width: '100%', height: '100%' }}
 >
   <iframe
-    ref={ytIframeRef}
-    src={`https://www.youtube-nocookie.com/embed/${media.src}?enablejsapi=1&controls=0&rel=0&fs=0&modestbranding=1&playsinline=1`}
+    ref={mergeRefs(localIframeRef, iframeRef)}
+    className={youtubeClassName || undefined}
+    src={deferExternalSrc ? undefined : youtubeSrc}
+    data-src={youtubeSrc}
+    data-ad-media-src={media.src}
+    data-ad-media-kind="youtube"
     title="YouTube video"
     frameBorder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -2947,18 +1949,24 @@ onError={() => {
       borderRadius: 10,
       pointerEvents: 'none',
     }}
+    {...restYoutubeAttrs}
   />
 </div>
 
             )}
 
-            {media.kind === 'tiktok' && media.src && shouldPlay && (
+            {media.kind === 'tiktok' && media.src && tiktokActive && (
 <div
   className="relative overflow-hidden rounded-lg"
   style={isFluid ? { width: '100%', aspectRatio: '9 / 16' } : { width: '100%', height: '100%' }}
 >
   <iframe
-    src={`https://www.tiktok.com/embed/v2/${media.src}`}
+    ref={mergeRefs(localIframeRef, iframeRef)}
+    className={tiktokClassName || undefined}
+    src={deferExternalSrc ? undefined : tiktokSrc}
+    data-src={tiktokSrc}
+    data-ad-media-src={media.src}
+    data-ad-media-kind="tiktok"
     title="TikTok video"
     frameBorder="0"
     allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
@@ -2970,12 +1978,13 @@ onError={() => {
       borderRadius: 10,
       pointerEvents: 'none',
     }}
+    {...restTiktokAttrs}
   />
 </div>
 
             )}
 
-            {media.kind === 'tiktok' && media.src && !shouldPlay && (
+            {media.kind === 'tiktok' && media.src && !tiktokActive && (
               <div className="w-full h-full flex items-center justify-center text-[11px] text-[color:var(--muted-fore,#9ca3af)]">
                 {host}
               </div>
@@ -3019,6 +2028,7 @@ onError={() => {
     onClick={handleToggleSound}
     className={`forum-ad-audio-toggle ${isAdMuted ? 'on' : 'off'}`}
     aria-label={isAdMuted ? 'muted' : 'unmuted'}
+    data-ad-sound-toggle="1"
   >
     <span className="ico" aria-hidden="true">
       {isAdMuted ? '🔇' : '🔊'}
@@ -3076,7 +2086,7 @@ onError={() => {
 
             <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
-        </div> 
+        </div>
       </a>
     </div>
   );
