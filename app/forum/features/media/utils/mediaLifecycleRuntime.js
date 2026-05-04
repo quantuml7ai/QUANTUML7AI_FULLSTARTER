@@ -15,10 +15,6 @@ function normalizeMutedRaw(raw) {
   if (s === '0' || s === 'false' || s === 'no' || s === 'unmuted') return false
   return null
 }
-function isManagedForumVideoKind(el) {
-  const kind = String(el?.getAttribute?.('data-forum-video') || '')
-  return kind === 'post' || kind === 'ad'
-}
 
 export function readMutedPrefFromDocument() {
   try {
@@ -59,7 +55,7 @@ export function writeMutedPrefToDocument(nextMuted, userSet = false) {
     if (userSet) {
       try { window.__FORUM_MEDIA_SOUND_USER_SET__ = true } catch {}
       try { window.__SITE_MEDIA_SOUND_USER_SET__ = true } catch {}
-    }
+    }    
     try {
       const root = document?.documentElement
       if (root?.dataset) {
@@ -197,7 +193,7 @@ export function __enforceActiveVideoCap(exceptEl) {
       if (!victim) break
 
       const victimIsPostFeedVideo =
-        isManagedForumVideoKind(victim)
+        String(victim?.getAttribute?.('data-forum-video') || '') === 'post'
       const protectMargin = victimIsPostFeedVideo
         ? (__MEDIA_RUNTIME_PROFILE.isIOS ? 1600 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1300 : 760))
         : 180
@@ -282,9 +278,9 @@ export function __markMediaLifecycleTouch(el, reason = 'runtime_touch') {
 export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = __markMediaLifecycleTouch(el, 'unload')
-  const isPostFeedVideo = isManagedForumVideoKind(el)
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   try {
-    if (isPostFeedVideo) {
+    if (isPostFeedVideo) { 
       // Для feed-видео не переносим seek-позицию между unload/restore:
       // это снижает range-шторм и нестабильные "серые" перезапуски.
       delete el.dataset.__resumeTime
@@ -446,7 +442,7 @@ export function __restoreVideoEl(el) {
   if (!el) return
   const nowTs = __markMediaLifecycleTouch(el, 'restore')
   const src = el.dataset.__src || el.getAttribute('data-src') || ''
-  const isPostFeedVideo = isManagedForumVideoKind(el)
+  const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
   if (!src) return
   try {
     delete el.dataset.__forceHardUnload
@@ -564,7 +560,7 @@ try {
   el.dataset.__attachedSrcTs = String(Date.now())
 } catch {}
   try {
-    const isPostFeedVideo = isManagedForumVideoKind(el)
+    const isPostFeedVideo = String(el?.getAttribute?.('data-forum-video') || '') === 'post'
     if (!isPostFeedVideo) {
       const resumeTo = Number(el.dataset?.__resumeTime || 0)
       if (Number.isFinite(resumeTo) && resumeTo > 0.18) {
