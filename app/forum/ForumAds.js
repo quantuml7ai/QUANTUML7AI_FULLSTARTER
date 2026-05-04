@@ -94,6 +94,146 @@ function emitForumAdLinksUpdated(conf, detail = {}) {
   } catch {}
 }
 
+function pushForumAdLinkToken(out, clickRaw, mediaRaw) {
+  const click = String(clickRaw || '').trim();
+  const media = String(mediaRaw || '').trim();
+  if (!click) return;
+  out.push(media ? `${click}|${media}` : click);
+}
+
+function collectForumAdLinkTokens(payload, out = []) {
+  if (!payload) return out;
+
+  if (typeof payload === 'string') {
+    if (payload.trim()) out.push(payload.trim());
+    return out;
+  }
+
+  if (Array.isArray(payload)) {
+    payload.forEach((item) => collectForumAdLinkTokens(item, out));
+    return out;
+  }
+
+  if (typeof payload !== 'object') return out;
+
+  const linksString =
+    payload.linksString ??
+    payload.links_string ??
+    payload.forumLinksString ??
+    payload.forum_links_string ??
+    payload.linksRaw ??
+    payload.links_raw ??
+    null;
+
+  if (typeof linksString === 'string' && linksString.trim()) {
+    out.push(linksString.trim());
+  }
+
+  const directCollections = [
+    payload.links,
+    payload.forumLinks,
+    payload.forum_links,
+    payload.items,
+    payload.campaigns,
+    payload.ads,
+    payload.activeAds,
+    payload.active_ads,
+    payload.activeCampaigns,
+    payload.active_campaigns,
+    payload.creatives,
+  ];
+
+  directCollections.forEach((value) => {
+    if (value) collectForumAdLinkTokens(value, out);
+  });
+
+  if (payload.data && payload.data !== payload) {
+    collectForumAdLinkTokens(payload.data, out);
+  }
+
+  if (payload.result && payload.result !== payload) {
+    collectForumAdLinkTokens(payload.result, out);
+  }
+
+  if (payload.campaign && payload.campaign !== payload) {
+    collectForumAdLinkTokens(payload.campaign, out);
+  }
+
+  if (payload.creative && payload.creative !== payload) {
+    collectForumAdLinkTokens(payload.creative, out);
+  }
+
+  const clickUrl =
+    payload.clickUrl ??
+    payload.click_url ??
+    payload.targetUrl ??
+    payload.target_url ??
+    payload.destinationUrl ??
+    payload.destination_url ??
+    payload.href ??
+    payload.link ??
+    payload.url ??
+    null;
+
+  const mediaUrl =
+    payload.mediaUrl ??
+    payload.media_url ??
+    payload.imageUrl ??
+    payload.image_url ??
+    payload.videoUrl ??
+    payload.video_url ??
+    payload.assetUrl ??
+    payload.asset_url ??
+    payload.creativeUrl ??
+    payload.creative_url ??
+    payload.previewUrl ??
+    payload.preview_url ??
+    payload.media ??
+    payload.image ??
+    payload.video ??
+    null;
+
+  pushForumAdLinkToken(out, clickUrl, mediaUrl);
+  return out;
+}
+
+function readForumAdLinksStringFromPayload(payload) {
+  const tokens = collectForumAdLinkTokens(payload, []);
+  return tokens.map((item) => String(item || '').trim()).filter(Boolean).join('\n');
+}
+
+async function fetchForumAdLinksPayload() {
+  const linksRes = await fetch('/api/ads?action=links', {
+    method: 'GET',
+    cache: 'no-store',
+  }).catch(() => null);
+
+  const linksPayload = linksRes?.ok
+    ? await linksRes.json().catch(() => null)
+    : null;
+
+  const linksString = readForumAdLinksStringFromPayload(linksPayload);
+  if (linksString) {
+    return { linksString, source: 'links', payload: linksPayload };
+  }
+
+  const serveRes = await fetch('/api/ads?action=serve', {
+    method: 'GET',
+    cache: 'no-store',
+  }).catch(() => null);
+
+  const servePayload = serveRes?.ok
+    ? await serveRes.json().catch(() => null)
+    : null;
+
+  const serveLinksString = readForumAdLinksStringFromPayload(servePayload);
+  if (serveLinksString) {
+    return { linksString: serveLinksString, source: 'serve', payload: servePayload };
+  }
+
+  return { linksString: '', source: 'empty', payload: linksPayload || servePayload };
+}
+
 async function mergeLinksFromRedisOnce() {
   if (!isBrowser()) return cachedClientConf;
   if (adsLinksMerged) return cachedClientConf;
@@ -107,16 +247,12 @@ async function mergeLinksFromRedisOnce() {
 
   adsLinksMergePromise = (async () => {
     try {
-      // берём ссылки через универсальный /api/ads?action=links
-      const res = await fetch('/api/ads?action=links', {
-        method: 'GET',
-        cache: 'no-store',
-      });
-      if (!res.ok) return cachedClientConf;
-      const j = await res.json().catch(() => null);
-      if (!j || !j.ok || !j.linksString) return cachedClientConf;
+      // Read the main links endpoint first, then fallback to serve payload.
+      // Keep parseLinks / MEDIA_BY_CLICK / picker as the single source of truth.
+      const fetched = await fetchForumAdLinksPayload();
+      if (!fetched.linksString) return cachedClientConf;
 
-      const extraParsed = parseLinks(j.linksString);
+      const extraParsed = parseLinks(fetched.linksString);
       if (!extraParsed.links || !extraParsed.links.length) return cachedClientConf;
 
       const base = getForumAdConf(); // берём текущий кэш
@@ -159,7 +295,7 @@ async function mergeLinksFromRedisOnce() {
       });
 
       emitForumAdLinksUpdated(base, {
-        source: 'redis',
+        source: fetched.source || 'redis',
         env_len: baseLinks.length,
         extra_len: extraParsed.links.length,
         final_len: cleanedLinks.length,
