@@ -24,6 +24,8 @@ const SITE_AD_DEFAULT_MUTED = true;
 const SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
 const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 6500;
+const SITE_AD_NATIVE_FOCUS_RETRY_MS = 900;
+const SITE_AD_NATIVE_LOADING_PLAY_RETRY_MS = 2400;
 const YOUTUBE_NOCOOKIE_HOST = 'youtube-nocookie';
 
 function normalizeSiteMuted(value) {
@@ -207,6 +209,25 @@ function ensureSiteNativeVideoSrc(videoEl, src, muted) {
   return true;
 }
 
+function getSiteAdLoadPendingForMs(videoEl) {
+  try {
+    const since = Number(videoEl?.dataset?.__siteAdLoadPendingSince || videoEl?.dataset?.__siteAdLastAttachTs || 0);
+    return since > 0 ? Math.max(0, Date.now() - since) : 0;
+  } catch { return 0; }
+}
+
+function isSiteNativeVideoActivelyFetching(videoEl) {
+  try {
+    if (!videoEl || !getSiteAdVideoNodeSrc(videoEl)) return false;
+    if (Number(videoEl.readyState || 0) >= 2) return false;
+    const ns = Number(videoEl.networkState || 0);
+    if (typeof HTMLMediaElement !== 'undefined') {
+      return ns === HTMLMediaElement.NETWORK_LOADING;
+    }
+    return ns === 2;
+  } catch { return false; }
+}
+
 function isSiteNativeVideoLoadingOrReady(videoEl) {
   try {
     if (!videoEl) return false;
@@ -214,12 +235,11 @@ function isSiteNativeVideoLoadingOrReady(videoEl) {
     if (!hasSrc) return false;
     const readyState = Number(videoEl.readyState || 0);
     if (readyState >= 2) return true;
-    const pendingSince = Number(videoEl.dataset?.__siteAdLoadPendingSince || videoEl.dataset?.__siteAdLastAttachTs || 0);
-    const pendingForMs = pendingSince > 0 ? Date.now() - pendingSince : 0;
+    const pendingForMs = getSiteAdLoadPendingForMs(videoEl);
     if (readyState >= 1 && pendingForMs > 0 && pendingForMs < 4200) return true;
-    const ns = Number(videoEl.networkState || 0);
-    if (typeof HTMLMediaElement !== 'undefined') return ns === HTMLMediaElement.NETWORK_LOADING;
-    return ns === 2;
+    if (isSiteNativeVideoActivelyFetching(videoEl)) return true;
+    const pending = String(videoEl.dataset?.__siteAdLoadPending || '') === '1';
+    return pending && pendingForMs > 0 && pendingForMs < SITE_AD_NATIVE_WARM_RELOAD_GAP_MS;
   } catch { return false; }
 }
 
@@ -290,6 +310,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   const attachedVideoSrcRef = useRef('');
   const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
   const adNativeFocusKickTsRef = useRef(0);
+  const adNativeLastPlayAttemptTsRef = useRef(0);
   const adPlayEventTsRef = useRef(0);
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(normalizeSiteMuted(readMutedPref()));
@@ -391,7 +412,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     if (!v || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return false;
     if (!shouldPlayRef.current || !isPageActive) return false;
     const now = Date.now();
-    const minGapMs = reason === 'focus_retry' ? 520 : 260;
+    const minGapMs = reason === 'focus_retry' ? SITE_AD_NATIVE_FOCUS_RETRY_MS : 260;
     if ((now - Number(adNativeFocusKickTsRef.current || 0)) < minGapMs) return false;
     adNativeFocusKickTsRef.current = now;
     try {
@@ -405,6 +426,17 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY;
       if (!v.paused && !v.ended) { emitAdPlayToCoordinator('site_ad_video'); return true; }
       if (v.ended) { try { v.currentTime = 0; } catch {}; try { delete v.dataset.__siteAdEndedHold; } catch {} }
+
+      const loadingButNotReady = isSiteNativeVideoActivelyFetching(v);
+      if (
+        reason === 'focus_retry' &&
+        loadingButNotReady &&
+        (now - Number(adNativeLastPlayAttemptTsRef.current || 0)) < SITE_AD_NATIVE_LOADING_PLAY_RETRY_MS
+      ) {
+        return false;
+      }
+
+      adNativeLastPlayAttemptTsRef.current = now;
       const playAttempt = v.play?.();
       if (playAttempt && typeof playAttempt.then === 'function') {
         playAttempt.then(() => {
@@ -530,6 +562,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         const now = Date.now();
         const lastLoadTs = Number(v.dataset?.__siteAdLastWarmLoadTs || 0);
         const loadingOrReady = isSiteNativeVideoLoadingOrReady(v);
+        if (isSiteNativeVideoActivelyFetching(v) && getSiteAdLoadPendingForMs(v) < SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) return;
         if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.dataset.__siteAdLoadPendingSince = String(now); v.load?.(); }
       } catch {}
     }
@@ -612,7 +645,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         if (!shouldPlayRef.current || !v || !v.paused || v.ended) { if (timer) window.clearInterval(timer); timer = 0; return; }
         kick();
       } catch {}
-    }, 520);
+    }, SITE_AD_NATIVE_FOCUS_RETRY_MS);
     return () => { cancelled = true; if (timer) window.clearInterval(timer); };
   }, [currentKind, currentSrc, isPageActive, playSiteNativeVideo, shouldPlay]);
 

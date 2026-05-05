@@ -297,16 +297,61 @@ export function __unloadVideoEl(el) {
       else delete el.dataset.__resumeTime
     }
   } catch {}
+const hadAttachedPostSrc = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    return !!String(el.currentSrc || el.getAttribute?.('src') || el.dataset?.__src || el.getAttribute?.('data-src') || '').trim()
+  } catch {
+    return false
+  }
+})()
+const hadReadyPostFrame = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    return String(el.dataset?.__warmReady || '') === '1' || Number(el.readyState || 0) >= 2
+  } catch {
+    return false
+  }
+})()
+const wasFreshPostLoadPending = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    if (String(el.dataset?.__loadPending || '') !== '1') return false
+    const since = Number(el.dataset?.__loadPendingSince || 0)
+    return since > 0 && (Date.now() - since) < (__MEDIA_RUNTIME_PROFILE.isIOS ? 9000 : 7000)
+  } catch {
+    return false
+  }
+})()
+const wasNativePrewarm = (() => {
+  try {
+    if (!isPostFeedVideo) return false
+    return (
+      String(el.dataset?.__prewarm || '') === '1' ||
+      String(el.dataset?.__nativePrewarm || '') === '1'
+    )
+  } catch {
+    return false
+  }
+})()
+
   try {
     el.pause?.()
   } catch {}
   try {
     el.dataset.__active = '0'
     el.dataset.__playRequested = '0'
-    el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '0'
-    el.dataset.__resident = '0'
-    el.dataset.__prewarm = '0'
+
+    if (isPostFeedVideo && wasFreshPostLoadPending && !hadReadyPostFrame) {
+      el.dataset.__loadPending = '1'
+    } else {
+      el.dataset.__loadPending = '0'
+      delete el.dataset.__loadPendingSince
+    }
+
+    el.dataset.__warmReady = hadReadyPostFrame ? '1' : '0'
+    el.dataset.__resident = isPostFeedVideo && (hadReadyPostFrame || wasFreshPostLoadPending || hadAttachedPostSrc) ? '1' : '0'
+    el.dataset.__prewarm = isPostFeedVideo && wasNativePrewarm && (hadReadyPostFrame || wasFreshPostLoadPending) ? '1' : '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 const hardUnloadRequested = (() => {
@@ -339,16 +384,7 @@ const postPrewarmRunway = isPostFeedVideo
     __MEDIA_RUNTIME_PROFILE.isIOS ? 1700 : (__MEDIA_RUNTIME_PROFILE.coarse ? 1400 : 960),
   )
   : false
-const freshPostLoadPending = (() => {
-  try {
-    if (!isPostFeedVideo) return false
-    if (String(el.dataset?.__loadPending || '') !== '1') return false
-    const since = Number(el.dataset?.__loadPendingSince || 0)
-    return since > 0 && (Date.now() - since) < (__MEDIA_RUNTIME_PROFILE.isIOS ? 9000 : 7000)
-  } catch {
-    return false
-  }
-})()
+const freshPostLoadPending = wasFreshPostLoadPending
 const activePostPipeline = (() => {
   try {
     if (!isPostFeedVideo) return false
@@ -374,8 +410,10 @@ const readyPostPipeline = (() => {
   try {
     if (!isPostFeedVideo) return false
     return (
+      hadReadyPostFrame ||
       String(el.dataset?.__warmReady || '') === '1' ||
       Number(el.readyState || 0) >= 1 ||
+      hadAttachedPostSrc ||
       !!String(el.currentSrc || el.getAttribute?.('src') || '').trim()
     )
   } catch {
@@ -408,8 +446,23 @@ if (shouldSoftUnload) {
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
-    el.dataset.__prewarm = '0'
-    el.preload = 'metadata'
+    el.dataset.__prewarm = isPostFeedVideo && (hadReadyPostFrame || wasFreshPostLoadPending) ? '1' : '0'
+    el.dataset.__warmReady = hadReadyPostFrame ? '1' : '0'
+
+    if (isPostFeedVideo && wasFreshPostLoadPending && !hadReadyPostFrame) {
+      el.dataset.__loadPending = '1'
+      el.preload = 'auto'
+    } else {
+      el.dataset.__loadPending = '0'
+      delete el.dataset.__loadPendingSince
+      el.preload = 'metadata'
+    }
+
+    if (isPostFeedVideo && hadReadyPostFrame) {
+      const prevUntil = Number(el.dataset?.__nativePrimeHoldUntil || 0)
+      el.dataset.__nativePrimeHoldUntil = String(Math.max(prevUntil, Date.now() + (__MEDIA_RUNTIME_PROFILE.isIOS ? 2200 : 1600)))
+    }
+
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 
@@ -432,6 +485,12 @@ if (shouldSoftUnload) {
     el.preload = 'none'
   } catch {}
 try {
+  el.dataset.__loadPending = '0'
+  delete el.dataset.__loadPendingSince
+  el.dataset.__warmReady = '0'
+  el.dataset.__resident = '0'
+  el.dataset.__prewarm = '0'
+  el.dataset.__nativePrewarm = '0'
   el.dataset.__lastHardUnloadTs = String(nowTs)
 } catch {}
   try {
