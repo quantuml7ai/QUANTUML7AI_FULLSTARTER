@@ -606,6 +606,7 @@ try {
 }, [
   autoPlay,
   clearNativeControlsForPost,
+  coordinatorOwnsPostLifecycle,
   defaultMutedProp,
   isPostVideo,
   playsInline,

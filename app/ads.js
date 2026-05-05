@@ -23,7 +23,7 @@ const SITE_MEDIA_PLAY_EVENT = 'site-media-play';
 const SITE_AD_DEFAULT_MUTED = true;
 const SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
-const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 15000;
+const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 6500;
 const YOUTUBE_NOCOOKIE_HOST = 'youtube-nocookie';
 
 function normalizeSiteMuted(value) {
@@ -197,6 +197,7 @@ function ensureSiteNativeVideoSrc(videoEl, src, muted) {
       videoEl.dataset.__siteAdLoadPending = '1';
       videoEl.dataset.__siteAdLastAttachTs = String(now);
       videoEl.dataset.__siteAdLastWarmLoadTs = String(now);
+      videoEl.dataset.__siteAdLoadPendingSince = String(now);
       videoEl.dataset.__siteAdDetachedSoft = '0';
       videoEl.dataset.__siteAdDetachedHard = '0';
       delete videoEl.dataset.__siteAdDetachedReason;
@@ -212,7 +213,10 @@ function isSiteNativeVideoLoadingOrReady(videoEl) {
     const hasSrc = !!getSiteAdVideoNodeSrc(videoEl);
     if (!hasSrc) return false;
     const readyState = Number(videoEl.readyState || 0);
-    if (readyState >= 1) return true;
+    if (readyState >= 2) return true;
+    const pendingSince = Number(videoEl.dataset?.__siteAdLoadPendingSince || videoEl.dataset?.__siteAdLastAttachTs || 0);
+    const pendingForMs = pendingSince > 0 ? Date.now() - pendingSince : 0;
+    if (readyState >= 1 && pendingForMs > 0 && pendingForMs < 4200) return true;
     const ns = Number(videoEl.networkState || 0);
     if (typeof HTMLMediaElement !== 'undefined') return ns === HTMLMediaElement.NETWORK_LOADING;
     return ns === 2;
@@ -526,7 +530,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         const now = Date.now();
         const lastLoadTs = Number(v.dataset?.__siteAdLastWarmLoadTs || 0);
         const loadingOrReady = isSiteNativeVideoLoadingOrReady(v);
-        if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.load?.(); }
+        if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.dataset.__siteAdLoadPendingSince = String(now); v.load?.(); }
       } catch {}
     }
     return undefined;
@@ -628,7 +632,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     onPlaying: () => {
       try {
         const v = videoRef.current;
-        if (v?.dataset) v.dataset.__siteAdLoadPending = '0';
+        if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; }
         if (v?.dataset) delete v.dataset.__siteAdEndedHold;
         if (!shouldPlayRef.current) { try { v?.pause?.(); } catch {}; return; }
         const st = adNativePauseRecoveryRef.current || {};
@@ -653,10 +657,10 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       } catch {}
     },
     onLoadedData: () => {
-      try { const v = videoRef.current; if (v?.dataset) v.dataset.__siteAdLoadPending = '0'; if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
     },
     onCanPlay: () => {
-      try { const v = videoRef.current; if (v?.dataset) v.dataset.__siteAdLoadPending = '0'; if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
     },
     onEnded: () => {
       try {
@@ -664,7 +668,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         if (st.timer) clearTimeout(st.timer);
         adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
         const v = videoRef.current;
-        if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; v.dataset.__siteAdWarmReady = '1'; delete v.dataset.__siteAdEndedHold; }
+        if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdWarmReady = '1'; delete v.dataset.__siteAdEndedHold; }
         if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }
       } catch {}
     },
@@ -676,7 +680,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         const recentAttach = (now - Number(v?.dataset?.__siteAdLastAttachTs || 0)) < 6500;
         const loading = typeof HTMLMediaElement !== 'undefined' && Number(v?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
         const hasFrame = Number(v?.readyState || 0) >= 1;
-        if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; v.dataset.__siteAdTransientErrorTs = String(now); } return; }
+        if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdTransientErrorTs = String(now); } return; }
         markVideoSrcTemporarilyBlocked(currentSrc, isNear ? 12000 : 20000);
         attachedVideoSrcRef.current = '';
         detachSiteNativeVideo(videoRef.current, { hard: true, reason: 'error', resetPipeline: true });

@@ -450,6 +450,15 @@ const applyMutedPrefToAll = () => {
         return 2;
       }
     })();
+    const getLoadPendingStaleMs = () => {
+      try {
+        if (isIOSUi) return 3600;
+        if (isCoarseUi) return 4800;
+        return 6200;
+      } catch {
+        return 5200;
+      }
+    };
 let pendingLoadsCacheTs = 0;
 let pendingLoadsCacheVal = 0;
 let nativePrewarmEl = null;
@@ -478,18 +487,7 @@ const readPendingLoads = (force = false) => {
         if (!force && (now - pendingLoadsCacheTs) < 140) return pendingLoadsCacheVal;
         pendingLoadsCacheTs = now;
         const nodes = Array.from(document.querySelectorAll('video[data-forum-media],audio[data-forum-media],audio[data-qcast-audio="1"]'));
-        const stalePendingMs = (() => {
-          try {
-            const ua = String(navigator?.userAgent || '');
-            const ios = /iP(hone|ad|od)/i.test(ua);
-            const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
-            if (ios) return 3600;
-            if (coarse) return 4800;
-            return 6200;
-          } catch {
-            return 5200;
-          }
-        })();
+        const stalePendingMs = getLoadPendingStaleMs();
         pendingLoadsCacheVal = nodes.reduce((acc, node) => {
           try {
             if (String(node?.dataset?.__loadPending || '') !== '1') return acc;
@@ -497,20 +495,31 @@ const readPendingLoads = (force = false) => {
             const readyState = Number(node?.readyState || 0);
             const networkState = Number(node?.networkState || 0);
             const pendingForMs = since > 0 ? (now - since) : 0;
+            const isNetworkLoading = networkState === HTMLMediaElement.NETWORK_LOADING;
+            const isNetworkIdleLike =
+              networkState === HTMLMediaElement.NETWORK_EMPTY ||
+              networkState === HTMLMediaElement.NETWORK_IDLE ||
+              networkState === HTMLMediaElement.NETWORK_NO_SOURCE;
             const mayBeStuck =
               pendingForMs > stalePendingMs &&
-              readyState === 0 &&
               (
-                networkState === HTMLMediaElement.NETWORK_LOADING ||
-                networkState === HTMLMediaElement.NETWORK_EMPTY ||
-                networkState === HTMLMediaElement.NETWORK_NO_SOURCE
+                readyState < 2 ||
+                isNetworkIdleLike ||
+                !isNetworkLoading
               );
             if (mayBeStuck) {
               try {
                 node.dataset.__loadPending = '0';
+                node.dataset.__warmReady = readyState >= 2 ? '1' : '0';
+                node.dataset.__loadPendingClearReason = 'stale_budget_reset';
                 delete node.dataset.__loadPendingSince;
               } catch {}
-              trace('load_pending_stale_reset', node, { pendingForMs, stalePendingMs });
+              trace('load_pending_stale_reset', node, {
+                pendingForMs,
+                stalePendingMs,
+                readyState,
+                networkState,
+              });
               return acc;
             }
             return acc + 1;
@@ -756,9 +765,31 @@ const isHtmlMediaLoadingOrBuffered = (el) => {
   if (!(media instanceof HTMLMediaElement)) return false;
   try {
     if (!snap.hasSrc) return false;
-    if (snap.readyState >= 1) return true;
-    if (snap.networkState === HTMLMediaElement.NETWORK_LOADING) return true;
-    if (snap.loadPending && snap.pendingForMs < (isIOSUi ? 12000 : (isCoarseUi ? 10000 : 8000))) return true;
+    if (snap.readyState >= 2) return true;
+
+    const staleMs = getLoadPendingStaleMs();
+    const isLoading = snap.networkState === HTMLMediaElement.NETWORK_LOADING;
+    const pendingFresh = snap.loadPending && snap.pendingForMs < staleMs;
+    const metadataFresh = snap.readyState >= 1 && snap.pendingForMs < Math.max(900, Math.round(staleMs * 0.55));
+
+    if (isLoading && (pendingFresh || snap.pendingForMs <= 0)) return true;
+    if (pendingFresh) return true;
+    if (metadataFresh) return true;
+
+    if (snap.loadPending && snap.pendingForMs >= staleMs) {
+      try {
+        media.dataset.__loadPending = '0';
+        media.dataset.__warmReady = snap.readyState >= 2 ? '1' : '0';
+        media.dataset.__loadPendingClearReason = 'stale_buffer_check';
+        delete media.dataset.__loadPendingSince;
+      } catch {}
+      trace('load_pending_stale_buffer_reset', media, {
+        pendingForMs: snap.pendingForMs,
+        staleMs,
+        readyState: snap.readyState,
+        networkState: snap.networkState,
+      });
+    }
   } catch {}
   return false;
 };
@@ -1372,19 +1403,21 @@ try {
         const pendingSince = Number(el.dataset?.__loadPendingSince || 0);
         const readyRetryCount = Number(el.dataset?.__readyRetryCount || 0);
         const networkState = Number(el.networkState || 0);
-        const stalePendingMs = isIOSUi ? 2400 : (isCoarseUi ? 3200 : 4200);
+        const stalePendingMs = getLoadPendingStaleMs();
 const pendingForMs = pendingSince > 0 ? (now - pendingSince) : 0;
         if (
           String(el.dataset?.__loadPending || '') === '1' &&
           pendingSince > 0 &&
-          readyState === 0 &&
+          readyState < 2 &&
           pendingForMs > stalePendingMs
         ) {
           try {
             el.dataset.__loadPending = '0';
+            el.dataset.__warmReady = readyState >= 2 ? '1' : '0';
+            el.dataset.__loadPendingClearReason = 'candidate_stale_reset';
             delete el.dataset.__loadPendingSince;
           } catch {}
-          trace('candidate_clear_stale_pending', el, { reason, pendingForMs });
+          trace('candidate_clear_stale_pending', el, { reason, pendingForMs, readyState, networkState });
         }
 const cold = networkState === HTMLMediaElement.NETWORK_EMPTY || !el.currentSrc;
 if (cold && (now - lastBoostTs) > 1500 && el.dataset?.__loadPending !== '1') {
@@ -3237,27 +3270,28 @@ const pauseForeignMedia = (keepEl = null) => {
 
     const getNativePrewarmGapLimit = () => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-      // Keep native post-video prewarm close to the viewport. Large runways attach
-      // several MP4 sources, grow renderer memory, and create repeated 206 churn.
-      if (isIOSUi) return Math.max(760, Math.min(1320, Math.round(viewportH * 1.18)));
-      if (isCoarseUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.88)));
-      return Math.max(220, Math.min(460, Math.round(viewportH * 0.42)));
+      // Prewarm must begin before the card is visible, but only one/two managed
+      // native pipelines are allowed to keep src, so this wider runway does not
+      // grow into a Range/decoder storm.
+      if (isIOSUi) return Math.max(900, Math.min(1580, Math.round(viewportH * 1.36)));
+      if (isCoarseUi) return Math.max(720, Math.min(1240, Math.round(viewportH * 1.08)));
+      return Math.max(320, Math.min(620, Math.round(viewportH * 0.58)));
     };
 
 const getNativePrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
   // Real decode/play priming is still close to the viewport, but must happen
   // before intersection so iPhone enters Viewport with a decoded first frame.
-  if (isIOSUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.82)));
-  if (isCoarseUi) return Math.max(360, Math.min(640, Math.round(viewportH * 0.58)));
-  return Math.max(120, Math.min(260, Math.round(viewportH * 0.24)));
+  if (isIOSUi) return Math.max(640, Math.min(1120, Math.round(viewportH * 0.92)));
+  if (isCoarseUi) return Math.max(440, Math.min(780, Math.round(viewportH * 0.7)));
+  return Math.max(160, Math.min(340, Math.round(viewportH * 0.32)));
 };
 
 const getNativeEarlyPrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-  if (isIOSUi) return Math.max(680, Math.min(1180, Math.round(viewportH * 0.98)));
-  if (isCoarseUi) return Math.max(420, Math.min(760, Math.round(viewportH * 0.68)));
-  return getNativePrimeGapLimit();
+  if (isIOSUi) return Math.max(820, Math.min(1420, Math.round(viewportH * 1.18)));
+  if (isCoarseUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.86)));
+  return Math.max(getNativePrimeGapLimit(), Math.min(440, Math.round(viewportH * 0.42)));
 };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3774,11 +3808,11 @@ return true;
 
       const kicked = kickMediaLoad(media, {
         channel: 'native_priority_prewarm',
-        minGapMs: isIOSUi ? 900 : (isCoarseUi ? 980 : 1100),
+        minGapMs: isIOSUi ? 720 : (isCoarseUi ? 820 : 980),
         burstWindowMs: isIOSUi ? 18000 : 16000,
-        burstLimit: isIOSUi ? 2 : 2,
-        blockMs: isIOSUi ? 7600 : 6800,
-        bypassSrcLimiter: false,
+        burstLimit: isIOSUi ? 3 : 3,
+        blockMs: isIOSUi ? 6200 : 5600,
+        bypassSrcLimiter: isAdMediaElement(media),
         bypassPendingBudget: false,
       });
 
@@ -4002,12 +4036,14 @@ if (el instanceof HTMLVideoElement) {
 
       if (!kickMediaLoad(el, {
         channel: shouldKickAfterRestore ? 'play_restore' : 'play_cold',
-        minGapMs: isIOSUi ? 1700 : (isCoarseUi ? 1500 : 1300),
-        burstWindowMs: isIOSUi ? 22000 : 15000,
-        burstLimit: isIOSUi ? 3 : 4,
-        blockMs: isIOSUi ? 12000 : 9000,
-        bypassSrcLimiter: userIntentKick,
-        bypassPendingBudget: userIntentKick,
+        minGapMs: isIOSUi ? 1100 : (isCoarseUi ? 950 : 900),
+        burstWindowMs: isIOSUi ? 18000 : 14000,
+        burstLimit: isIOSUi ? 4 : 5,
+        blockMs: isIOSUi ? 8000 : 6500,
+        // Focus/play is the user-visible path. It must not be blocked by a stale
+        // global source-key budget left from previous slots using the same MP4.
+        bypassSrcLimiter: true,
+        bypassPendingBudget: true,
       })) return;
     }
   } catch {}
@@ -4788,7 +4824,7 @@ return;
       try {
         const now = Date.now();
         if (nativePrewarmScanRaf) return;
-        if ((now - Number(nativePrewarmScanLastTs || 0)) < (isIOSUi ? 90 : 120)) return;
+        if ((now - Number(nativePrewarmScanLastTs || 0)) < (isIOSUi ? 60 : 80)) return;
         nativePrewarmScanLastTs = now;
         nativePrewarmScanRaf = requestAnimationFrame(() => {
           nativePrewarmScanRaf = 0;
@@ -4876,9 +4912,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 420 : (isCoarseUi ? 340 : 220), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 0.95 : 0.7)))
+          Math.max(isIOSUi ? 560 : (isCoarseUi ? 440 : 280), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.2 : 0.9)))
         }px 0px ${
-          Math.max(isIOSUi ? 720 : (isCoarseUi ? 560 : 360), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.55 : 0.95)))
+          Math.max(isIOSUi ? 980 : (isCoarseUi ? 820 : 520), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.05 : 1.35)))
         }px 0px`,
       },
     );
@@ -5193,6 +5229,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
       } catch {}
       try {
         readyReplay.forEach?.((cleanup) => { try { cleanup(); } catch {} });
+        readyReplay.clear?.();
       } catch {}
 
       if (active) {
