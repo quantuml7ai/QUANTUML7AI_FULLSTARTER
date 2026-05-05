@@ -464,7 +464,6 @@ let pendingLoadsCacheVal = 0;
 let nativePrewarmEl = null;
 let nativePrewarmTs = 0;
 const nativePauseRecovery = new WeakMap();
-const nativePrimeDeferred = new WeakMap();
 const POST_NATIVE_SRC_CAP = (() => {
       try {
         const ua = String(navigator?.userAgent || '');
@@ -795,98 +794,6 @@ const isHtmlMediaLoadingOrBuffered = (el) => {
   return false;
 };
 
-const clearNativePrimeDeferred = (el) => {
-  const media = getMediaStateNode(el);
-  if (!(media instanceof HTMLVideoElement)) return;
-  const cleanup = nativePrimeDeferred.get(media);
-  if (cleanup) {
-    try { cleanup(); } catch {}
-  }
-  nativePrimeDeferred.delete(media);
-  try {
-    media.dataset.__nativePrimeDeferred = '0';
-    delete media.dataset.__nativePrimeDeferredReason;
-  } catch {}
-};
-
-const armNativePrimeAfterMetadata = (el, reason = 'native_prime_deferred') => {
-  const media = getMediaStateNode(el);
-  if (!(media instanceof HTMLVideoElement)) return false;
-  try {
-    if (Number(media.readyState || 0) >= 1) {
-      clearNativePrimeDeferred(media);
-      return primeNativeFirstFrame(media, `${reason}_metadata_ready`);
-    }
-  } catch {}
-
-  if (nativePrimeDeferred.has(media)) return true;
-
-  const src = String(
-    media.currentSrc ||
-    media.getAttribute?.('src') ||
-    media.dataset?.__src ||
-    media.getAttribute?.('data-src') ||
-    ''
-  ).trim();
-  if (!src) return false;
-
-  const armedAt = Date.now();
-  let timer = 0;
-  const cleanup = () => {
-    try { media.removeEventListener('loadedmetadata', onReady); } catch {}
-    try { media.removeEventListener('loadeddata', onReady); } catch {}
-    try { media.removeEventListener('canplay', onReady); } catch {}
-    if (timer) {
-      try { window.clearTimeout(timer); } catch {}
-      timer = 0;
-    }
-  };
-  const onReady = () => {
-    cleanup();
-    nativePrimeDeferred.delete(media);
-    try { media.dataset.__nativePrimeDeferred = '0'; } catch {}
-    try {
-      if (!media.isConnected) return;
-      if (isUserPaused(media) || hasSuppressedPlayback(media)) return;
-      media.dataset.__nativePrimeDeferredReadyTs = String(Date.now());
-      primeNativeFirstFrame(media, `${reason}_metadata_ready`);
-    } catch {}
-  };
-
-  try { media.addEventListener('loadedmetadata', onReady, { once: true }); } catch {}
-  try { media.addEventListener('loadeddata', onReady, { once: true }); } catch {}
-  try { media.addEventListener('canplay', onReady, { once: true }); } catch {}
-  try {
-    media.dataset.__nativePrimeDeferred = '1';
-    media.dataset.__nativePrimeDeferredReason = String(reason || 'native_prime_deferred');
-    media.dataset.__nativePrimeDeferredTs = String(armedAt);
-  } catch {}
-  try {
-    timer = window.setTimeout(() => {
-      cleanup();
-      nativePrimeDeferred.delete(media);
-      try {
-        media.dataset.__nativePrimeDeferred = '0';
-        media.dataset.__nativePrimeDeferredTimeoutTs = String(Date.now());
-      } catch {}
-      trace('native_prime_deferred_timeout', media, {
-        reason,
-        armedForMs: Date.now() - armedAt,
-        readyState: Number(media.readyState || 0),
-        networkState: Number(media.networkState || 0),
-      });
-    }, isIOSUi ? 5200 : (isCoarseUi ? 4600 : 3600));
-  } catch {}
-
-  nativePrimeDeferred.set(media, cleanup);
-  trace('native_prime_deferred_until_metadata', media, {
-    reason,
-    readyState: Number(media.readyState || 0),
-    networkState: Number(media.networkState || 0),
-  });
-  return true;
-};
-
 const clampPostNativeWarmBuffer = (el, reason = 'warm_buffer_clamp') => {
   const media = getMediaStateNode(el);
   if (!(media instanceof HTMLVideoElement)) return false;
@@ -1088,30 +995,6 @@ const kickMediaLoad = (
       __restoreVideoEl(media);
     }
   } catch {}
-
-  const postRestoreSnap = getHtmlMediaNetworkSnapshot(media);
-  if (postRestoreSnap.hasSrc) {
-    if (postRestoreSnap.readyState >= 2) {
-      clearLoadPending(media, `${channel}_restore_ready`, true);
-      trace('load_kick_restore_ready', media, {
-        channel,
-        readyState: postRestoreSnap.readyState,
-        networkState: postRestoreSnap.networkState,
-      });
-      return true;
-    }
-
-    if (postRestoreSnap.networkState === HTMLMediaElement.NETWORK_LOADING) {
-      markLoadPending(media, `${channel}_restore_existing_fetch`);
-      trace('load_kick_restore_existing_fetch', media, {
-        channel,
-        readyState: postRestoreSnap.readyState,
-        networkState: postRestoreSnap.networkState,
-        pendingForMs: postRestoreSnap.pendingForMs,
-      });
-      return true;
-    }
-  }
 
   try {
     if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim()) {
@@ -3595,10 +3478,7 @@ const getNativeEarlyPrimeGapLimit = () => {
       const media = getMediaStateNode(el);
       if (!(media instanceof HTMLVideoElement)) return false;
       if (!(isIOSUi || isCoarseUi)) return false;
-      if (Number(media.readyState || 0) >= 2) {
-        clearNativePrimeDeferred(media);
-        return true;
-      }
+      if (Number(media.readyState || 0) >= 2) return true;
       if (isUserPaused(media) || hasSuppressedPlayback(media)) return false;
 
       const visiblePx = getOwnerVisiblePx(media);
@@ -3677,35 +3557,6 @@ const getNativeEarlyPrimeGapLimit = () => {
         });
         return false;
       }
-
-      const readyStateBeforePrime = Number(media.readyState || 0);
-      const networkStateBeforePrime = Number(media.networkState || 0);
-      const hasSrcBeforePrime = !!String(
-        media.getAttribute?.('src') ||
-        media.currentSrc ||
-        media.dataset?.__src ||
-        media.getAttribute?.('data-src') ||
-        ''
-      ).trim();
-      const loadingOrPendingBeforePrime =
-        networkStateBeforePrime === HTMLMediaElement.NETWORK_LOADING ||
-        String(media.dataset?.__loadPending || '') === '1';
-
-      if (readyStateBeforePrime < 1) {
-        if (hasSrcBeforePrime && loadingOrPendingBeforePrime) {
-          return armNativePrimeAfterMetadata(media, reason);
-        }
-        trace('native_prime_wait_for_metadata', media, {
-          reason,
-          readyState: readyStateBeforePrime,
-          networkState: networkStateBeforePrime,
-          hasSrc: hasSrcBeforePrime,
-          loadingOrPending: loadingOrPendingBeforePrime,
-        });
-        return false;
-      }
-      clearNativePrimeDeferred(media);
-
 const now = Date.now();
 const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
 // iOS prime now starts earlier, so allow one safe retry before the card reaches
@@ -3951,13 +3802,6 @@ return true;
           gapPx: getOwnerViewportGapPx(media),
           visiblePx: getOwnerVisiblePx(media),
         });
-        if (!primeNativeFirstFrame(media, reason)) {
-          trace('native_prewarm_prime_wait_loading', media, {
-            reason,
-            readyState: Number(media.readyState || 0),
-            networkState: Number(media.networkState || 0),
-          });
-        }
         armReadyReplay(media);
         return true;
       }
