@@ -600,7 +600,7 @@ try {
     } catch {}
     try { delete el.dataset.__bootAttachedSrc } catch {}
     try { delete el.dataset.__bootMetadataPrimed } catch {}
-    try { el.preload = coordinatorOwnsPostLifecycle ? 'none' : 'metadata' } catch {}
+    try { el.preload = 'metadata' } catch {}
   }
 } catch {}
 }, [
@@ -655,28 +655,13 @@ React.useEffect(() => {
     }
 
     setPausedState(false)
-    const isCoordinatorWarmupEvent =
-      coordinatorOwnsPostLifecycle &&
-      String(el.dataset?.__nativePrimeWarmupOnly || '') === '1' &&
-      String(el.dataset?.__active || '') !== '1'
-    if (isCoordinatorWarmupEvent) return
     showCenterGlyph('pause', 620)
     revealHud(1800)
   }
 
   const onPause = () => {
     clearNativeControlsForPost()
-    const systemPauseUntil = Number(el.dataset?.__systemPauseUntil || 0)
-    const isCoordinatorSystemPause = coordinatorOwnsPostLifecycle && systemPauseUntil > Date.now()
-    const isWarmupPrimePause =
-      coordinatorOwnsPostLifecycle &&
-      String(el.dataset?.__nativePrimeWarmupOnly || '') === '1' &&
-      String(el.dataset?.__active || '') !== '1'
     setPausedState(true)
-    if (isCoordinatorSystemPause || isWarmupPrimePause) {
-      if (!hudVisible) setCenterGlyph('')
-      return
-    }
     setHudVisible(true)
     setCenterGlyph('play')
   }
@@ -842,29 +827,24 @@ React.useEffect(() => {
         } catch {}
         recoverTimerRef.current = 0
         if (!isPostVideo) return
+        dropActiveVideoFn(el)
+        try {
+          el.pause?.()
+        } catch {}
+        try {
+          el.dataset.__active = '0'
+          el.dataset.__prewarm = '0'
+          el.dataset.__resident = '0'
+          el.dataset.__playRequested = '0'
+          el.dataset.__loadPending = '0'
+          el.dataset.__warmReady = '0'
+          delete el.dataset.__loadPendingSince
+          el.preload = 'none'
+        } catch {}
 
         const runDetachedUnload = () => {
           try {
-            if (el.isConnected) {
-              // React dev cleanup / dependency churn may run while the same
-              // DOM video is still alive. Do not zero coordinator state or
-              // pause it here: that creates Safari play/pause blinking and
-              // repeated Range restart cycles.
-              try { el.dataset.__leafConnectedCleanupTs = String(Date.now()) } catch {}
-              return
-            }
-            dropActiveVideoFn(el)
-            try { el.pause?.() } catch {}
-            try {
-              el.dataset.__active = '0'
-              el.dataset.__prewarm = '0'
-              el.dataset.__resident = '0'
-              el.dataset.__playRequested = '0'
-              el.dataset.__loadPending = '0'
-              el.dataset.__warmReady = '0'
-              delete el.dataset.__loadPendingSince
-              el.preload = 'none'
-            } catch {}
+            if (el.isConnected) return
             try { el.dataset.__forceHardUnload = '1' } catch {}
             unloadVideoElFn(el)
           } catch {} finally {
@@ -873,12 +853,16 @@ React.useEffect(() => {
         }
 
         try {
-          const raf = typeof window.requestAnimationFrame === 'function'
-            ? window.requestAnimationFrame
-            : (cb) => window.setTimeout(cb, 80)
-          raf(() => {
-            try { window.setTimeout(runDetachedUnload, 0) } catch { runDetachedUnload() }
-          })
+          if (el.isConnected) {
+            const raf = typeof window.requestAnimationFrame === 'function'
+              ? window.requestAnimationFrame
+              : (cb) => window.setTimeout(cb, 80)
+            raf(() => {
+              try { window.setTimeout(runDetachedUnload, 0) } catch { runDetachedUnload() }
+            })
+          } else {
+            runDetachedUnload()
+          }
         } catch {
           runDetachedUnload()
         }

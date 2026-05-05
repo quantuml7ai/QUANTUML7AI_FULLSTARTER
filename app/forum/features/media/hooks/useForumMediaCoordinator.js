@@ -2172,53 +2172,8 @@ const onMediaLoadedCaptured = (e) => {
         return true;
       }
     };
-    const shouldStartHtmlMediaNow = (el, reason = 'play') => {
-      if (!(el instanceof HTMLMediaElement)) return true;
-      const isNativePost = el instanceof HTMLVideoElement && isManagedForumVideoKind(el);
-      if (!isNativePost) return true;
-      try {
-        const owner = getOwnerNode(el);
-        const userIntent =
-          hasUserGestureIntent(el) ||
-          hasManualLease(el) ||
-          (owner instanceof Element && (hasUserGestureIntent(owner) || hasManualLease(owner)));
-        const now = Date.now();
-        const ready = Number(el.readyState || 0) >= 2;
-        const playRequested = String(el.dataset?.__playRequested || '') === '1';
-        const pendingUntil = Number(el.dataset?.__activePlayPendingUntil || 0);
-        if (!userIntent && playRequested && pendingUntil > now && el.paused) {
-          trace('play_start_skip_pending', el, {
-            reason,
-            pendingForMs: Math.max(0, pendingUntil - now),
-            readyState: Number(el.readyState || 0),
-          });
-          return false;
-        }
-
-        const lastAttemptTs = Number(el.dataset?.__lastPlayAttemptTs || 0);
-        const minGapMs = ready
-          ? (isIOSUi ? 520 : (isCoarseUi ? 460 : 320))
-          : (isIOSUi ? 1450 : (isCoarseUi ? 1150 : 860));
-        if (!userIntent && lastAttemptTs > 0 && (now - lastAttemptTs) < minGapMs) {
-          trace('play_start_skip_gap', el, {
-            reason,
-            age: now - lastAttemptTs,
-            minGapMs,
-            readyState: Number(el.readyState || 0),
-          });
-          return false;
-        }
-
-        el.dataset.__lastPlayAttemptTs = String(now);
-        if (!ready) el.dataset.__activePlayPendingUntil = String(now + (isIOSUi ? 1900 : (isCoarseUi ? 1500 : 1100)));
-        else delete el.dataset.__activePlayPendingUntil;
-      } catch {}
-      return true;
-    };
-
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
-      if (!shouldStartHtmlMediaNow(el, reason)) return;
       const playToken = bumpPlayRequestToken(el);
       const canContinue = () => {
         try {
@@ -2258,10 +2213,6 @@ const onMediaLoadedCaptured = (e) => {
             }
 trace('play_started', el, { reason, muted: !!el.muted });
 try {
-  delete el.dataset.__activePlayPendingUntil;
-  el.dataset.__lastPlayStartedTs = String(Date.now());
-} catch {}
-try {
   const confirmedReady =
     Number(el?.readyState || 0) >= 2 &&
     !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
@@ -2289,11 +2240,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
               trace('play_reject_stale', el, { reason });
               return;
             }
-            try {
-              el.dataset.__playRequested = '0';
-              el.dataset.__lastPlayRejectTs = String(Date.now());
-              el.dataset.__activePlayPendingUntil = String(Date.now() + (isIOSUi ? 900 : 650));
-            } catch {}
+            try { el.dataset.__playRequested = '0'; } catch {}
             trace('play_reject', el, {
               reason,
               name: String(err?.name || ''),
@@ -2347,10 +2294,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                   }
 trace('play_retry_muted_ok', el, { reason });
 try {
-  delete el.dataset.__activePlayPendingUntil;
-  el.dataset.__lastPlayStartedTs = String(Date.now());
-} catch {}
-try {
   const confirmedReady =
     Number(el?.readyState || 0) >= 2 &&
     !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
@@ -2373,11 +2316,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
   try { enforcePostNativeSrcCap(el, 'play_retry_started'); } catch {}
 }
                 }).catch((retryErr) => {
-                  try {
-                    el.dataset.__playRequested = '0';
-                    el.dataset.__lastPlayRejectTs = String(Date.now());
-                    el.dataset.__activePlayPendingUntil = String(Date.now() + (isIOSUi ? 900 : 650));
-                  } catch {}
+                  try { el.dataset.__playRequested = '0'; } catch {}
                   trace('play_retry_muted_fail', el, {
                     reason,
                     name: String(retryErr?.name || ''),
@@ -2699,20 +2638,20 @@ const shouldRetainHtmlMedia = (el) => {
     if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
 
     if (String(mediaDataset?.__prewarm || ownerDataset?.__prewarm || '') === '1') {
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 1500 : (isCoarseUi ? 1180 : 760));
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 520 : 760);
     }
 
     if (String(mediaDataset?.__resident || ownerDataset?.__resident || '') === '1') {
-      return isNearViewportElement(owner || mediaEl, isIOSUi ? 1150 : (isCoarseUi ? 980 : 640));
+      return isNearViewportElement(owner || mediaEl, isIOSUi ? 420 : 640);
     }
 
     if (String(mediaDataset?.__loadPending || ownerDataset?.__loadPending || '') === '1') {
       const since = Number(mediaDataset?.__loadPendingSince || ownerDataset?.__loadPendingSince || 0);
-      if (since > 0 && Date.now() - since < (isIOSUi ? 7200 : (isCoarseUi ? 5600 : 3600))) return true;
+      if (since > 0 && Date.now() - since < (isIOSUi ? 2600 : 3600)) return true;
       return false;
     }
 
-    if (isNearViewportElement(owner || mediaEl, isIOSUi ? 820 : (isCoarseUi ? 680 : 520))) return true;
+    if (isNearViewportElement(owner || mediaEl, isIOSUi ? 360 : 520)) return true;
   } catch {}
 
   return false;
@@ -3444,47 +3383,20 @@ const getNativeEarlyPrimeGapLimit = () => {
         if (!isActiveNativeOwner(media, targetOwner)) return false;
 
         const now = Date.now();
-        const systemPauseUntil = Math.max(
-          Number(media?.dataset?.__systemPauseUntil || 0),
-          Number(targetOwner?.dataset?.__systemPauseUntil || 0),
-        );
-        if (systemPauseUntil > now) {
-          trace('pause_recover_active_native_skip_system_pause', media, {
-            reason,
-            waitMs: Math.max(0, systemPauseUntil - now),
-          });
-          return false;
-        }
-        const lastPlayStartedTs = Number(media?.dataset?.__lastPlayStartedTs || 0);
-        if (lastPlayStartedTs > 0 && (now - lastPlayStartedTs) < (isIOSUi ? 900 : 620)) {
-          trace('pause_recover_active_native_skip_fresh_start', media, {
-            reason,
-            age: now - lastPlayStartedTs,
-          });
-          return false;
-        }
-        if (Number(media.readyState || 0) < 2 && String(media.dataset?.__loadPending || '') === '1') {
-          trace('pause_recover_active_native_wait_ready', media, {
-            reason,
-            readyState: Number(media.readyState || 0),
-          });
-          armReadyReplay(media);
-          return false;
-        }
         const prev = nativePauseRecovery.get(media) || { ts: 0, count: 0, timer: 0 };
         const windowMs = isIOSUi ? 9000 : 7000;
         const nextCount = prev.ts > 0 && (now - prev.ts) < windowMs
           ? Number(prev.count || 0) + 1
           : 1;
 
-        if (nextCount > 2) {
+        if (nextCount > (isIOSUi ? 3 : 2)) {
           trace('pause_recover_active_native_skip_limit', media, { reason, count: nextCount });
           return false;
         }
 
         try { if (prev.timer) clearTimeout(prev.timer); } catch {}
 
-        const delay = isIOSUi ? 420 : (isCoarseUi ? 260 : 120);
+        const delay = isIOSUi ? 140 : (isCoarseUi ? 120 : 90);
         const timer = setTimeout(() => {
           try {
             const currentOwner = getOwnerNode(media);
@@ -3550,18 +3462,9 @@ const getNativeEarlyPrimeGapLimit = () => {
         if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
         nativePrewarmEl = null;
         try {
-          const prevVisible = getOwnerVisiblePx(prev);
-          const prevGap = getOwnerViewportGapPx(prev);
-          const keepResident =
-            prevVisible > 0 ||
-            prevGap <= Math.max(getNativePrimeGapLimit(), isIOSUi ? 920 : (isCoarseUi ? 760 : 520)) ||
-            Number(prev.dataset?.__nativePrimeHoldUntil || 0) > Date.now() ||
-            String(prev.dataset?.__loadPending || '') === '1' ||
-            Number(prev.readyState || 0) >= 1;
-          prev.dataset.__prewarm = keepResident ? '1' : '0';
-          prev.dataset.__resident = keepResident ? '1' : '0';
+          prev.dataset.__prewarm = '0';
+          prev.dataset.__resident = '0';
           prev.dataset.__nativePrewarm = '0';
-          if (keepResident) prev.preload = String(prev.dataset?.__loadPending || '') === '1' ? 'auto' : 'metadata';
         } catch {}
 
         // Keep one strict warm owner, but do not tear down the previous source
@@ -3892,12 +3795,8 @@ return true;
       })();
 
       if (alreadyLoadingOrBuffered) {
-        const loadingPrime = Number(media.readyState || 0) < 2
-          ? primeNativeFirstFrame(media, `${reason}_loading_prime`)
-          : true;
         trace('native_prewarm_keep_loading', media, {
           reason,
-          loadingPrime,
           readyState: Number(media.readyState || 0),
           networkState: Number(media.networkState || 0),
           gapPx: getOwnerViewportGapPx(media),
