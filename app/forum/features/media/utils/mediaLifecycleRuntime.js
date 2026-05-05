@@ -107,8 +107,8 @@ export const __MEDIA_VIS_MARGIN_PX = (() => {
     const isIOS = /iP(hone|ad|od)/i.test(ua)
     const isAndroid = /Android/i.test(ua)
     const coarse = !!(typeof window !== 'undefined' && window?.matchMedia?.('(pointer: coarse)')?.matches)
-    if (isIOS) return 360
-    if (isAndroid || coarse) return 420
+    if (isIOS) return 520
+    if (isAndroid || coarse) return 460
     return 320
   } catch {
     return 320
@@ -283,6 +283,24 @@ export function __unloadVideoEl(el) {
   if (!el) return
   const nowTs = __markMediaLifecycleTouch(el, 'unload')
   const isPostFeedVideo = isManagedForumVideoKind(el)
+  const hardUnloadRequestedEarly = (() => {
+    try {
+      return String(el?.dataset?.__forceHardUnload || '') === '1'
+    } catch {
+      return false
+    }
+  })()
+  const readyStateAtUnload = (() => {
+    try { return Number(el.readyState || 0) } catch { return 0 }
+  })()
+  const hasAttachedSrcAtUnload = (() => {
+    try { return !!String(el.currentSrc || el.getAttribute?.('src') || '').trim() } catch { return false }
+  })()
+  const preserveWarmReadyAtUnload =
+    isPostFeedVideo &&
+    !hardUnloadRequestedEarly &&
+    hasAttachedSrcAtUnload &&
+    readyStateAtUnload >= 1
   try {
     if (isPostFeedVideo) {
       // Для feed-видео не переносим seek-позицию между unload/restore:
@@ -304,7 +322,7 @@ export function __unloadVideoEl(el) {
     el.dataset.__active = '0'
     el.dataset.__playRequested = '0'
     el.dataset.__loadPending = '0'
-    el.dataset.__warmReady = '0'
+    el.dataset.__warmReady = preserveWarmReadyAtUnload ? '1' : '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
@@ -407,9 +425,16 @@ if (shouldSoftUnload) {
     if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
+    const keepPrewarmResident =
+      isPostFeedVideo &&
+      (
+        nativePrimeHoldActive ||
+        (postPrewarmRunway && (freshPostLoadPending || activePostPipeline || readyPostPipeline))
+      )
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
-    el.dataset.__prewarm = '0'
-    el.preload = 'metadata'
+    el.dataset.__prewarm = keepPrewarmResident ? '1' : '0'
+    if (isPostFeedVideo && readyPostPipeline) el.dataset.__warmReady = '1'
+    el.preload = keepPrewarmResident ? 'auto' : 'metadata'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 
