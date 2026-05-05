@@ -463,10 +463,11 @@ const POST_NATIVE_SRC_CAP = (() => {
         const dm = Number(navigator?.deviceMemory || 0);
         const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 3;
         // One active native video + one prepared neighbor is the stable mobile budget.
-        // Diagnostics show pressure from live media/iframe residency, not a detached-DOM leak.
+        // cap=1 was tearing down the prewarm node right after it attached src,
+        // which caused repeat bytes=0-/tail Range cycles and black viewport entry.
         if (lowMem) return 1;
-        if (ios || coarse || /Android/i.test(ua)) return 1;
-        return 2;
+        if (ios || coarse || /Android/i.test(ua)) return 2;
+        return 3;
       } catch {
         return 2;
       }
@@ -1335,7 +1336,7 @@ try {
       (() => {
         try {
           if (getOwnerVisiblePx(el) > 16) return true;
-          return getOwnerViewportGapPx(el) <= getNativePrimeGapLimit();
+          return getOwnerViewportGapPx(el) <= getNativeEarlyPrimeGapLimit();
         } catch {
           return false;
         }
@@ -1344,7 +1345,7 @@ try {
 
     try { el.dataset.__resident = keepWarm ? '1' : '0'; } catch {}
     try { el.dataset.__prewarm = keepWarm ? '1' : '0'; } catch {}
-    try { el.preload = keepWarm ? 'auto' : 'metadata'; } catch {}
+    try { el.preload = keepWarm ? 'auto' : (isPostVideo ? 'none' : 'metadata'); } catch {}
 
     // Critical mobile fix:
     // low-priority near/prewarm must NOT attach src for post native video.
@@ -2550,6 +2551,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
         return false;
       }
     })();
+    const NATIVE_EARLY_PRIME_HOLD_MS = isIOSUi ? 3600 : (isCoarseUi ? 2800 : 1600);
     const IFRAME_HARD_UNLOAD_MS = isIOSUi ? 9800 : (isCoarseUi ? 7600 : 5200);
     const IFRAME_RESIDENT_CAP = (() => {
       try {
@@ -3237,18 +3239,25 @@ const pauseForeignMedia = (keepEl = null) => {
       const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
       // Keep native post-video prewarm close to the viewport. Large runways attach
       // several MP4 sources, grow renderer memory, and create repeated 206 churn.
-      if (isIOSUi) return Math.max(720, Math.min(1250, Math.round(viewportH * 1.08)));
-      if (isCoarseUi) return Math.max(520, Math.min(920, Math.round(viewportH * 0.82)));
+      if (isIOSUi) return Math.max(760, Math.min(1320, Math.round(viewportH * 1.18)));
+      if (isCoarseUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.88)));
       return Math.max(220, Math.min(460, Math.round(viewportH * 0.42)));
     };
 
 const getNativePrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-  // Real decode/play priming is allowed only for the current card or its nearest
-  // neighbour. Anything further must stay as a stable shell without native src.
-  if (isIOSUi) return Math.max(460, Math.min(860, Math.round(viewportH * 0.72)));
-  if (isCoarseUi) return Math.max(320, Math.min(560, Math.round(viewportH * 0.52)));
+  // Real decode/play priming is still close to the viewport, but must happen
+  // before intersection so iPhone enters Viewport with a decoded first frame.
+  if (isIOSUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.82)));
+  if (isCoarseUi) return Math.max(360, Math.min(640, Math.round(viewportH * 0.58)));
   return Math.max(120, Math.min(260, Math.round(viewportH * 0.24)));
+};
+
+const getNativeEarlyPrimeGapLimit = () => {
+  const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+  if (isIOSUi) return Math.max(680, Math.min(1180, Math.round(viewportH * 0.98)));
+  if (isCoarseUi) return Math.max(420, Math.min(760, Math.round(viewportH * 0.68)));
+  return getNativePrimeGapLimit();
 };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3441,7 +3450,7 @@ const getNativePrimeGapLimit = () => {
       const visiblePx = getOwnerVisiblePx(media);
       const gapPx = getOwnerViewportGapPx(media);
       const primeLimit = getNativePrimeGapLimit();
-      if (visiblePx <= 0 && gapPx > primeLimit) return false;
+      const earlyPrimeLimit = getNativeEarlyPrimeGapLimit();
       const owner = getOwnerNode(media);
       const activeOwnerNow = active instanceof Element ? active : null;
       const ownerMatchesActiveNow = !!(activeOwnerNow && owner instanceof Element && (
@@ -3455,6 +3464,17 @@ const getNativePrimeGapLimit = () => {
         !hasUserGestureIntent(media) &&
         !hasCoordinatorPlayIntent(media) &&
         reasonLooksWarmup;
+      const allowedPrimeGap = warmupOnlyPrime ? earlyPrimeLimit : primeLimit;
+      if (visiblePx <= 0 && gapPx > allowedPrimeGap) {
+        trace('native_prime_skip_far_offscreen', media, {
+          reason,
+          warmupOnlyPrime,
+          gapPx,
+          primeLimit,
+          earlyPrimeLimit,
+        });
+        return false;
+      }
       const activeKind = (() => {
         try { return String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''); } catch { return ''; }
       })();
@@ -3557,7 +3577,7 @@ const finishPrime = (state = 'done') => {
   primeFinished = true;
   try { media.dataset.__nativePrimePending = '0'; } catch {}
   try {
-    const holdMs = warmupOnlyPrime ? (isIOSUi ? 1800 : (isCoarseUi ? 1400 : 900)) : 0;
+    const holdMs = warmupOnlyPrime ? NATIVE_EARLY_PRIME_HOLD_MS : 0;
           const warmedReady = rememberPrimeReady(holdMs);
           const stillActive = !!(active && (active === media || active.contains?.(media) || media.contains?.(active)));
           const nowVisiblePx = getOwnerVisiblePx(media);
@@ -3594,19 +3614,17 @@ const finishPrime = (state = 'done') => {
 
       if (warmupOnlyPrime && visiblePx <= 0) {
         try {
-          media.dataset.__nativePrimePending = '0';
-          media.dataset.__nativePrimeWarmupOnly = '1';
-          media.dataset.__nativePrimeSkipped = 'offscreen_warmup';
-          media.dataset.__resident = '0';
-          media.dataset.__prewarm = '0';
-          media.preload = 'metadata';
+          media.dataset.__nativePrimeSkipped = '0';
+          media.dataset.__nativePrimeOffscreen = '1';
+          media.dataset.__resident = '1';
+          media.dataset.__prewarm = '1';
         } catch {}
-        trace('native_prime_skip_offscreen_warmup', media, {
+        trace('native_prime_offscreen_warmup_play', media, {
           reason,
           gapPx,
           visiblePx,
+          earlyPrimeLimit,
         });
-        return true;
       }
 
       try {
@@ -3665,7 +3683,7 @@ return true;
           prevGap <= Math.round(getNativePrewarmGapLimit() * (isIOSUi ? 1.18 : 1.12));
         const nextInFocusRunway =
           nextVisible > Math.max(46, Math.round(getStartVisiblePx(media) * 0.44)) ||
-          nextGap <= Math.max(getNativePrimeGapLimit(), 360);
+          nextGap <= Math.max(getNativeEarlyPrimeGapLimit(), isIOSUi ? 520 : 420);
         const nextClearlyBetter =
           nextVisible > Math.max(0, prevVisible + 36) ||
           nextGap + (isIOSUi ? 180 : 140) < prevGap ||
@@ -4901,7 +4919,7 @@ return;
           const gapPx = getOwnerViewportGapPx(el);
           const shouldRestoreSurface =
             visiblePx > 0 ||
-            gapPx <= Math.max(getNativePrimeGapLimit(), isCoarseUi ? 520 : 420);
+            gapPx <= Math.max(getNativeEarlyPrimeGapLimit(), isCoarseUi ? 560 : 460);
           if (
             shouldRestoreSurface &&
             media instanceof HTMLVideoElement &&

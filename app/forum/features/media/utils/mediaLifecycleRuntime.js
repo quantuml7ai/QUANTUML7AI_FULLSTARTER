@@ -129,7 +129,7 @@ const __VIDEO_HARD_CAP_ENABLED = (() => {
   }
 })()
 
-const __SOFT_RESIDENT_POST_VIDEO = false
+const __SOFT_RESIDENT_POST_VIDEO = true
 
 const __MEDIA_RUNTIME_PROFILE = (() => {
   try {

@@ -331,7 +331,7 @@ const isPostVideo = String(dataForumVideo || '') === 'post'
 const coordinatorOwnsLifecycle = !!String(dataForumMedia || '').trim()
 const coordinatorOwnsPostLifecycle = isPostVideo && coordinatorOwnsLifecycle
 const renderControls = isPostVideo ? false : controls
-const renderPreload = isPostVideo ? 'metadata' : preload
+const renderPreload = coordinatorOwnsPostLifecycle ? 'none' : (isPostVideo ? 'metadata' : preload)
 void nativeVideoPoster
 
   const readMuted = React.useCallback(() => {
@@ -538,7 +538,7 @@ React.useLayoutEffect(() => {
 
     const effectivePreload =
       isPostVideo
-        ? (wantsWarm ? 'auto' : 'metadata')
+        ? (wantsWarm ? 'auto' : (coordinatorOwnsPostLifecycle ? 'none' : 'metadata'))
         : (wantsWarm && preloadMode === 'none' ? 'auto' : preloadMode)
 
     el.preload = effectivePreload
@@ -838,11 +838,33 @@ React.useEffect(() => {
           el.dataset.__loadPending = '0'
           el.dataset.__warmReady = '0'
           delete el.dataset.__loadPendingSince
-          el.preload = 'metadata'
+          el.preload = 'none'
         } catch {}
-        try { el.dataset.__forceHardUnload = '1' } catch {}
-        try { unloadVideoElFn(el) } catch {}
-        try { delete el.dataset.__forceHardUnload } catch {}
+
+        const runDetachedUnload = () => {
+          try {
+            if (el.isConnected) return
+            try { el.dataset.__forceHardUnload = '1' } catch {}
+            unloadVideoElFn(el)
+          } catch {} finally {
+            try { delete el.dataset.__forceHardUnload } catch {}
+          }
+        }
+
+        try {
+          if (el.isConnected) {
+            const raf = typeof window.requestAnimationFrame === 'function'
+              ? window.requestAnimationFrame
+              : (cb) => window.setTimeout(cb, 80)
+            raf(() => {
+              try { window.setTimeout(runDetachedUnload, 0) } catch { runDetachedUnload() }
+            })
+          } else {
+            runDetachedUnload()
+          }
+        } catch {
+          runDetachedUnload()
+        }
       }
     }
 
@@ -1155,10 +1177,11 @@ const onVideoLoaded = React.useCallback(() => {
           try { el.currentTime = 0 } catch {}
           try { delete el.dataset.__endedHold } catch {}
         }
-        const hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
+        let hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
 
         if (!hasSrc) {
           restoreVideoElFn(el)
+          hasSrc = !!String(el.getAttribute('src') || el.currentSrc || '').trim()
         }
 
         try { el.playsInline = true } catch {}
@@ -1170,9 +1193,17 @@ const onVideoLoaded = React.useCallback(() => {
 
         if ((el.readyState || 0) < 2 && String(el.dataset?.__loadPending || '') !== '1') {
           try {
-            el.dataset.__loadPending = '1'
-            el.dataset.__loadPendingSince = String(Date.now())
-            el.load?.()
+            const networkEmpty = typeof HTMLMediaElement !== 'undefined'
+              ? HTMLMediaElement.NETWORK_EMPTY
+              : 0
+            const canDirectLoad =
+              !coordinatorOwnsPostLifecycle ||
+              (hasSrc && Number(el.networkState || 0) === networkEmpty)
+            if (canDirectLoad) {
+              el.dataset.__loadPending = '1'
+              el.dataset.__loadPendingSince = String(Date.now())
+              el.load?.()
+            }
           } catch {}
         }
       }
@@ -1191,6 +1222,7 @@ const onVideoLoaded = React.useCallback(() => {
     armUserIntentLease,
     clearNativeControlsForPost,
     isPostVideo,
+    coordinatorOwnsPostLifecycle,
     mutedState,
     restoreVideoElFn,
     revealHud,
