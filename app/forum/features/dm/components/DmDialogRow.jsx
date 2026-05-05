@@ -22,6 +22,41 @@ import {
 import { shortId, human } from '../../../shared/utils/formatters'
 import HydrateText from '../../../shared/components/HydrateText'
 
+function safeResolveDmId(value) {
+  const raw = String(value || '').trim()
+  if (!raw) return ''
+  try {
+    return String(resolveProfileAccountId(raw) || raw || '').trim()
+  } catch {
+    return raw
+  }
+}
+
+function readDialogSeenTs(dialog, dmSeenMap, meId) {
+  const last = dialog?.lastMessage || null
+  const ids = new Set()
+  const add = (value) => {
+    const raw = String(value || '').trim()
+    if (!raw) return
+    ids.add(raw)
+    const normalized = safeResolveDmId(raw)
+    if (normalized) ids.add(normalized)
+  }
+  add(dialog?.userId)
+
+  const me = String(meId || '').trim()
+  const fromRaw = String(last?.fromCanonical || last?.from || '').trim()
+  const toRaw = String(last?.toCanonical || last?.to || '').trim()
+  const from = safeResolveDmId(fromRaw)
+  const to = safeResolveDmId(toRaw)
+  if (from && from !== me) add(fromRaw || from)
+  if (to && to !== me) add(toRaw || to)
+
+  let seenTs = 0
+  for (const id of ids) seenTs = Math.max(seenTs, Number(dmSeenMap?.[id] || 0))
+  return seenTs
+}
+
 function DmPreviewKindIcon({ kind }) {
   if (kind === 'video') {
     return (
@@ -72,7 +107,7 @@ export default function DmDialogRow({
 
   const lastFromRaw = String(last?.fromCanonical || last?.from || '')
   const lastFrom = String(resolveProfileAccountId(lastFromRaw) || lastFromRaw || '').trim()
-  const seenTs = Number(dmSeenMap?.[uid] || 0)
+  const seenTs = readDialogSeenTs(dialog, dmSeenMap, meId)
   const unread = !!uid && lastFrom && lastFrom !== String(meId) && lastTs > seenTs
   const nick = resolveNickForDisplay(uid, '')
   const lastTextRaw = String(last?.text || '')

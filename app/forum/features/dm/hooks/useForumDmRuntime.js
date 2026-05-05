@@ -128,6 +128,7 @@ export default function useForumDmRuntime({
     dmDeletedMsgKey,
     dmSeenMap,
     markDmSeen,
+    markDmSeenMany,
     dmBlockedMap,
     setDmBlockedMap,
     dmDeletedMap,
@@ -317,10 +318,9 @@ export default function useForumDmRuntime({
     dmThreadItems,
     meId,
     markDmSeen,
+    markDmSeenMany,
     resolveProfileAccountIdFn,
     dmDialogs,
-    dmDeletedMap,
-    seenDmKey,
   })
 
   const {
