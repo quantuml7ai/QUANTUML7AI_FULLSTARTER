@@ -4,6 +4,7 @@ import React from 'react'
 import { resolveProfileAccountId } from '../../profile/utils/profileCache'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import {
+  estimateForumPostSlotHeight,
   readForumCardEstimate,
   readForumWindowingMaxRender,
   readForumWindowingOverscan,
@@ -79,7 +80,7 @@ export default function ThreadRepliesPane({
     ),
     estimateItemHeight: ({ item }) => (
       item?.type === 'item'
-        ? readForumCardEstimate('post')
+        ? estimateForumPostSlotHeight(item)
         : readForumCardEstimate('ad')
     ),
     maxRender: () => readForumWindowingMaxRender('post'),

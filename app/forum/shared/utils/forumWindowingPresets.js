@@ -99,3 +99,56 @@ export function readForumWindowingOverscan(kind = 'post', velocity = 0) {
   const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.8)
   return Math.round(base * (1 + (v * boost)))
 }
+
+function clampEstimate(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function readPostText(post) {
+  return String(
+    post?.text ||
+    post?.message ||
+    post?.body ||
+    post?.content ||
+    post?.html ||
+    '',
+  )
+}
+
+function postLooksMediaRich(post) {
+  const text = readPostText(post)
+
+  if (
+    post?.posterUrl ||
+    post?.mediaUrl ||
+    post?.videoUrl ||
+    post?.imageUrl ||
+    post?.audioUrl ||
+    post?.embedUrl
+  ) {
+    return true
+  }
+
+  return /(youtube\.com|youtu\.be|tiktok\.com|\.mp4|\.webm|\.mov|\.m4v|\.jpg|\.jpeg|\.png|\.webp|\.gif)/i.test(text)
+}
+
+export function estimateForumPostSlotHeight(slot) {
+  const { breakpoint } = readWindowingDeviceProfile()
+  const post = slot?.item || slot || {}
+  const text = readPostText(post)
+  const textLen = text.trim().length
+  const hasMedia = postLooksMediaRich(post)
+
+  const mediaH = breakpoint === 'mobile' ? 650 : 550
+  const chromeH = breakpoint === 'mobile' ? 250 : 225
+  const charsPerLine = breakpoint === 'mobile' ? 38 : (breakpoint === 'tablet' ? 58 : 72)
+  const textLines = textLen > 0 ? Math.ceil(textLen / charsPerLine) : 0
+  const textH = textLen > 0 ? 34 + Math.min(16, textLines) * 21 : 0
+  const mediaHFinal = hasMedia ? mediaH + 14 : 0
+
+  return clampEstimate(
+    chromeH + textH + mediaHFinal,
+    breakpoint === 'mobile' ? 360 : 320,
+    breakpoint === 'mobile' ? 1500 : 1350,
+  )
+}
