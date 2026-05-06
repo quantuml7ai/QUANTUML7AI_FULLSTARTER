@@ -17,16 +17,17 @@ export default function TopicsSection({
         {...forumHeaderPanelProps}
         actionCluster={<MainForumActionCluster {...actionClusterProps} />}
       />
-      <div data-forum-topics-start="1" />
-
-      <TopicsOrPanelsSwitch {...topicsSwitchProps} />
-
       <div
         className="body"
         data-forum-scroll="1"
+        data-forum-scroll-root="topics"
         ref={bodyRef}
         style={{ flex: '1 1 auto', minHeight: 0, height: '100%', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}
-      />
+      >
+        <div data-forum-topics-start="1" />
+
+        <TopicsOrPanelsSwitch {...topicsSwitchProps} />
+      </div>
     </section>
   )
 }

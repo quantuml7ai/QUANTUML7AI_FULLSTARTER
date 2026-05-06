@@ -9,6 +9,7 @@ import DmDialogsPane from './DmDialogsPane'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import {
   readForumCardEstimate,
+  readForumWindowingItemGap,
   readForumWindowingMaxRender,
   readForumWindowingOverscan,
 } from '../../../shared/utils/forumWindowingPresets'
@@ -60,6 +61,7 @@ export default function DmMessagesPane({
     estimateItemHeight: () => readForumCardEstimate('dm_message'),
     maxRender: () => readForumWindowingMaxRender('dm_message'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_message', velocity),
+    itemGapPx: () => readForumWindowingItemGap('dm_message'),
     listId: 'forum:dm-thread',
   })
 

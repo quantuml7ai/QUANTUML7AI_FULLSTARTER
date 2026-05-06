@@ -11,6 +11,7 @@ const DEFAULT_ANCHOR_DELTA_IGNORE_PX = 3
 const DEFAULT_ANCHOR_DELTA_MAX_PX = 64
 const DEFAULT_ANCHOR_FLUSH_MS = 140
 const DEFAULT_ANCHOR_ACTIVE_RETRY_MS = 120
+const DEFAULT_ITEM_GAP_PX = 0
 const DEFAULT_REVEAL_HOLD_MS = 1800
 const DEFAULT_MIN_SCROLLABLE_HEIGHT = 120
 const DEFAULT_FALLBACK_MAX_RENDER = 8
@@ -125,6 +126,7 @@ export default function useForumWindowing({
   anchorActiveRetryMs = DEFAULT_ANCHOR_ACTIVE_RETRY_MS,
   revealHoldMs = DEFAULT_REVEAL_HOLD_MS,
   minScrollableClientHeight = DEFAULT_MIN_SCROLLABLE_HEIGHT,
+  itemGapPx = DEFAULT_ITEM_GAP_PX,
   scrollToTopOnHardReset = true,
 }) {
   const heightsRef = useRef(new Map())
@@ -211,6 +213,14 @@ export default function useForumWindowing({
     return Math.max(80, Math.round(raw || DEFAULT_FALLBACK_OVERSCAN_PX))
   }, [itemList, overscanPx, totalItems])
 
+  const resolveItemGapPx = useCallback(() => {
+    const raw = resolveNumericConfig(itemGapPx, DEFAULT_ITEM_GAP_PX, {
+      items: itemList,
+      total: totalItems,
+    })
+    return Math.max(0, Math.round(raw || 0))
+  }, [itemGapPx, itemList, totalItems])
+
   const estimateHeightAtIndex = useCallback((index) => {
     const item = itemList[index]
     const raw = resolveNumericConfig(estimateItemHeight, DEFAULT_FALLBACK_OVERSCAN_PX / 2, {
@@ -231,15 +241,26 @@ export default function useForumWindowing({
     return estimateHeightAtIndex(index)
   }, [estimateHeightAtIndex])
 
+  const getItemStepAtIndex = useCallback((index, gapPx = 0) => {
+    const h = getHeightAtIndex(index)
+    const gap = Math.max(0, Number(gapPx || 0))
+    const total = Number(itemKeysRef.current?.length || 0)
+    return h + (index < Math.max(0, total - 1) ? gap : 0)
+  }, [getHeightAtIndex])
+
   const buildWindow = useCallback((start, end, total) => {
+    const gapPx = resolveItemGapPx()
     let top = 0
     for (let i = 0; i < start; i += 1) top += getHeightAtIndex(i)
+    if (start > 1 && gapPx > 0) top += gapPx * (start - 1)
 
     let bottom = 0
+    const hiddenAfter = Math.max(0, total - end)
     for (let i = end; i < total; i += 1) bottom += getHeightAtIndex(i)
+    if (hiddenAfter > 1 && gapPx > 0) bottom += gapPx * (hiddenAfter - 1)
 
     return { start, end, top, bottom }
-  }, [getHeightAtIndex])
+  }, [getHeightAtIndex, resolveItemGapPx])
 
   const buildInitialWindow = useCallback((total) => {
     const initialEnd = Math.min(resolveMaxRender(0), Math.max(0, Number(total || 0)))
@@ -325,20 +346,21 @@ export default function useForumWindowing({
         const velocity = Math.abs(Number(scrollStateRef.current?.velocity || 0))
         const direction = Number(scrollStateRef.current?.direction || 0)
         const nextOverscanPx = resolveOverscanPx(velocity)
+        const itemGap = resolveItemGapPx()
         const fromY = Math.max(0, st - nextOverscanPx)
         const toY = st + vh + nextOverscanPx
 
         let start = 0
         let acc = 0
-        while (start < total && (acc + getHeightAtIndex(start)) < fromY) {
-          acc += getHeightAtIndex(start)
+        while (start < total && (acc + getItemStepAtIndex(start, itemGap)) < fromY) {
+          acc += getItemStepAtIndex(start, itemGap)
           start += 1
         }
 
         let end = start
         let acc2 = acc
         while (end < total && acc2 < toY) {
-          acc2 += getHeightAtIndex(end)
+          acc2 += getItemStepAtIndex(end, itemGap)
           end += 1
         }
 
@@ -467,22 +489,29 @@ export default function useForumWindowing({
   }, [
     active,
     buildWindow,
-    getHeightAtIndex,
+    getItemStepAtIndex,
     layoutJitterPx,
     readViewportState,
+    resolveItemGapPx,
     resolveMaxRender,
     resolveOverscanPx,
     windowStickyMs,
   ])
 
-  const applyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta') => {
+  const applyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta', options = null) => {
     const raw = Number(delta || 0)
+    const maxAbs = Math.max(
+      anchorDeltaIgnorePx,
+      Number(options?.maxAbs ?? anchorDeltaMaxPx) || anchorDeltaMaxPx,
+    )
+
     if (!Number.isFinite(raw) || Math.abs(raw) < anchorDeltaIgnorePx) return
 
-    if (Math.abs(raw) > anchorDeltaMaxPx) {
+    if (Math.abs(raw) > maxAbs) {
       emitWindowingDiag('anchor_large_delta_drop', {
         reason,
         delta: Math.round(raw),
+        maxAbs: Math.round(maxAbs),
       })
       return
     }
@@ -545,25 +574,99 @@ export default function useForumWindowing({
     readScrollEl,
   ])
 
+  const getSafeAnchorMaxAbs = useCallback((candidate = 0) => {
+    const vh = Number(readViewportState()?.vh || 0) || Number(window?.innerHeight || 0) || 800
+    return Math.max(
+      anchorDeltaMaxPx,
+      Math.min(Math.max(900, vh * 1.25), Math.max(900, Number(candidate || 0))),
+    )
+  }, [anchorDeltaMaxPx, readViewportState])
+
+  const queuePendingMeasuredHeight = useCallback((key, height, prev = 0, index = -1, meta = null) => {
+    const nextHeight = Math.round(Number(height || 0))
+    if (!key || !Number.isFinite(nextHeight) || nextHeight <= 1) return
+
+    pendingHeightsRef.current.set(key, {
+      height: nextHeight,
+      prev: Number(prev || 0) || 0,
+      index: Number(index),
+      notBefore: Math.max(0, Number(meta?.notBefore || 0) || 0),
+      reason: String(meta?.reason || 'deferred_measure'),
+    })
+  }, [])
+
   const applyPendingMeasuredHeights = useCallback((reason = 'flush') => {
     let applied = 0
+    let deferred = 0
+    let anchorDelta = 0
+
     try {
-      pendingHeightsRef.current.forEach((height, key) => {
-        const nextHeight = Math.round(Number(height || 0))
+      const now = Date.now()
+      const winStart = Number(winRef.current?.start || 0)
+
+      pendingHeightsRef.current.forEach((entry, key) => {
+        const record = entry && typeof entry === 'object'
+          ? entry
+          : {
+            height: entry,
+            prev: heightsRef.current.get(key),
+            index: keyToIndexRef.current.get(key),
+            notBefore: 0,
+          }
+
+        const notBefore = Math.max(0, Number(record?.notBefore || 0) || 0)
+        if (notBefore > now) {
+          deferred += 1
+          return
+        }
+
+        const nextHeight = Math.round(Number(record?.height || 0))
         if (!key || !Number.isFinite(nextHeight) || nextHeight <= 1) return
+
+        const prevHeight = Number(record?.prev ?? heightsRef.current.get(key) ?? 0)
+        const index = Number.isFinite(Number(record?.index))
+          ? Number(record.index)
+          : Number(keyToIndexRef.current.get(key))
+
         heightsRef.current.set(key, nextHeight)
+        pendingHeightsRef.current.delete(key)
         applied += 1
+
+        if (
+          Number.isFinite(index) &&
+          index < winStart &&
+          Number.isFinite(prevHeight) &&
+          prevHeight > 0
+        ) {
+          anchorDelta += nextHeight - prevHeight
+        }
       })
-      pendingHeightsRef.current.clear()
-      if (applied > 0) {
+
+      if (Math.abs(anchorDelta) >= anchorDeltaIgnorePx) {
+        applyAnchoredScrollDelta(
+          anchorDelta,
+          `${reason}_pending_heights_above_window`,
+          { maxAbs: getSafeAnchorMaxAbs(Math.abs(anchorDelta) + 80) },
+        )
+      }
+
+      if (applied > 0 || deferred > 0) {
         emitWindowingDiag('media_height_deferred_apply', {
           reason,
           applied,
+          deferred,
+          anchorDelta: Math.round(anchorDelta),
         })
       }
     } catch {}
+
     return applied
-  }, [emitWindowingDiag])
+  }, [
+    anchorDeltaIgnorePx,
+    applyAnchoredScrollDelta,
+    emitWindowingDiag,
+    getSafeAnchorMaxAbs,
+  ])
 
   const scheduleAnchorFlush = useCallback((delay = anchorFlushMs) => {
     try {
@@ -586,14 +689,11 @@ export default function useForumWindowing({
         pendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= anchorDeltaIgnorePx) {
-          if (Math.abs(pending) <= anchorDeltaMaxPx) {
-            applyAnchoredScrollDelta(pending, 'deferred_height_above_window')
-          } else {
-            emitWindowingDiag('anchor_large_delta_drop', {
-              reason: 'large_deferred_height_delta_above_window',
-              pending: Math.round(pending),
-            })
-          }
+          applyAnchoredScrollDelta(
+            pending,
+            'deferred_height_above_window',
+            { maxAbs: getSafeAnchorMaxAbs(Math.abs(pending) + 80) },
+          )
         }
 
         scheduleRecalc()
@@ -604,11 +704,10 @@ export default function useForumWindowing({
   }, [
     anchorActiveRetryMs,
     anchorDeltaIgnorePx,
-    anchorDeltaMaxPx,
-    anchorFlushMs,
+    anchorFlushMs, 
     applyAnchoredScrollDelta,
     applyPendingMeasuredHeights,
-    emitWindowingDiag,
+    getSafeAnchorMaxAbs,
     isScrollActiveNow,
     scheduleRecalc,
   ])
@@ -696,7 +795,10 @@ export default function useForumWindowing({
             const mayApplyShrink = !recentScroll && stableForMs >= Math.max(520, scrollSettleMs)
 
             if (!mayApplyShrink) {
-              pendingHeightsRef.current.set(key, prev)
+              queuePendingMeasuredHeight(key, nextHeight, prev, index, {
+                notBefore: now + Math.max(560, scrollSettleMs),
+                reason: 'stable_media_height_shrink',
+              })
               emitWindowingDiag('stable_media_height_shrink_deferred', {
                 key,
                 prev: Math.round(prev),
@@ -715,7 +817,10 @@ export default function useForumWindowing({
           }
 
           if (Number.isFinite(prev) && prev > 0 && isScrollActiveNow() && stableMediaShell) {
-            pendingHeightsRef.current.set(key, nextHeight)
+            queuePendingMeasuredHeight(key, nextHeight, prev, index, {
+              notBefore: 0,
+              reason: 'active_scroll_media_height',
+            })
             emitWindowingDiag('media_height_deferred_during_scroll', {
               key,
               prev: Math.round(prev),
@@ -735,15 +840,12 @@ export default function useForumWindowing({
               if (isScrollActiveNow()) {
                 pendingAnchorDeltaRef.current += delta
                 scheduleAnchorFlush()
-              } else if (Math.abs(delta) <= anchorDeltaMaxPx) {
-                applyAnchoredScrollDelta(delta, 'height_above_window')
               } else {
-                emitWindowingDiag('anchor_large_delta_drop', {
-                  reason: 'large_height_delta_above_window',
-                  key,
-                  index,
-                  delta: Math.round(delta),
-                })
+                applyAnchoredScrollDelta(
+                  delta,
+                  'height_above_window',
+                  { maxAbs: getSafeAnchorMaxAbs(Math.abs(delta) + 80) },
+                )
               }
             }
           }
@@ -766,12 +868,13 @@ export default function useForumWindowing({
       }
     } catch {}
   }, [
-    anchorDeltaMaxPx,
     applyAnchoredScrollDelta,
     emitWindowingDiag,
     heightDeltaIgnorePx,
+    getSafeAnchorMaxAbs,
     isScrollActiveNow,
     layoutJitterPx,
+    queuePendingMeasuredHeight,
     scheduleAnchorFlush,
     scheduleRecalc,
     scrollSettleMs,

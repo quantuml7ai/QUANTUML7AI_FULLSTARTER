@@ -99,3 +99,15 @@ export function readForumWindowingOverscan(kind = 'post', velocity = 0) {
   const v = Math.min(1, Math.abs(Number(velocity || 0)) / 2.8)
   return Math.round(base * (1 + (v * boost)))
 }
+
+
+export function readForumWindowingItemGap(kind = 'post') {
+  switch (String(kind || 'post')) {
+    case 'none':
+      return 0
+    case 'topic':
+    case 'post':
+    default:
+      return 8
+  }
+}

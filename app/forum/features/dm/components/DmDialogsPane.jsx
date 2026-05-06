@@ -5,6 +5,7 @@ import DmDialogRow from './DmDialogRow'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import {
   readForumCardEstimate,
+  readForumWindowingItemGap,
   readForumWindowingMaxRender,
   readForumWindowingOverscan,
 } from '../../../shared/utils/forumWindowingPresets'
@@ -42,6 +43,7 @@ export default function DmDialogsPane({
     estimateItemHeight: () => readForumCardEstimate('dm_dialog'),
     maxRender: () => readForumWindowingMaxRender('dm_dialog'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_dialog', velocity),
+    itemGapPx: () => readForumWindowingItemGap('dm_dialog'),
     listId: 'forum:dm-dialogs',
   })
 

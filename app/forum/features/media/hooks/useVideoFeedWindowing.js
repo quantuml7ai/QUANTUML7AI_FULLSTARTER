@@ -2,6 +2,7 @@ import { useCallback, useMemo } from 'react'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
+import { readForumWindowingItemGap } from '../../../shared/utils/forumWindowingPresets'
 
 const VF_OVERSCAN_PX = 1480
 const VF_OVERSCAN_PX_MOBILE = 1260
@@ -15,10 +16,23 @@ const VF_AD_CARD_H_DESKTOP = 650
 const VF_RECOMMENDATION_CARD_H_MOBILE = 278
 const VF_RECOMMENDATION_CARD_H_TABLET = 304
 const VF_RECOMMENDATION_CARD_H_DESKTOP = 328
-const VF_ITEM_CHROME_EST = 240
+const VF_ITEM_CHROME_BASE_EST = 214
+const VF_TEXT_LINE_H_EST = 24
+const VF_TEXT_MAX_LINES_EST = 8
+const VF_PARENT_REPLY_EST = 76
 
 function defaultIsBrowser() {
   return typeof window !== 'undefined'
+}
+
+function pickPostText(post) {
+  return String(
+    post?.text ||
+    post?.message ||
+    post?.body ||
+    post?.caption ||
+    '',
+  ).trim()
 }
 
 export default function useVideoFeedWindowing({
@@ -103,6 +117,22 @@ export default function useVideoFeedWindowing({
     }
   }, [isBrowserFn])
 
+  const vfGetPostChromeEstimate = useCallback((post) => {
+    try {
+      const text = pickPostText(post)
+      const w = isBrowserFn() ? Number(window?.innerWidth || 0) : 768
+      const charsPerLine = w >= 1024 ? 74 : (w >= 640 ? 58 : 42)
+      const textLines = text
+        ? Math.min(VF_TEXT_MAX_LINES_EST, Math.max(1, Math.ceil(text.length / charsPerLine)))
+        : 1
+      const textHeight = textLines * VF_TEXT_LINE_H_EST
+      const parentHeight = post?.parentId ? VF_PARENT_REPLY_EST : 0
+      return VF_ITEM_CHROME_BASE_EST + textHeight + parentHeight
+    } catch {
+      return VF_ITEM_CHROME_BASE_EST + VF_TEXT_LINE_H_EST
+    }
+  }, [isBrowserFn])
+
   const vfRecommendationsEvery = useMemo(() => {
     const runtimeCfg = readForumRuntimeConfig()
     return Math.max(0, Number(runtimeCfg?.userRecommendations?.every || 0) || 0)
@@ -138,8 +168,8 @@ export default function useVideoFeedWindowing({
     const slot = item || vfSlots?.[index]
     if (slot?.type === 'recommendation_rail') return vfGetFixedRecommendationH()
     if (slot && slot.type !== 'item') return vfGetFixedAdH()
-    return vfGetFixedItemH() + VF_ITEM_CHROME_EST
-  }, [vfGetFixedAdH, vfGetFixedItemH, vfGetFixedRecommendationH, vfSlots])
+    return vfGetFixedItemH() + vfGetPostChromeEstimate(slot?.item)
+  }, [vfGetFixedAdH, vfGetFixedItemH, vfGetFixedRecommendationH, vfGetPostChromeEstimate, vfSlots])
 
   const { win: vfWin, measureRef: vfMeasureRef } = useForumWindowing({
     active: !!videoFeedOpen,
@@ -153,6 +183,7 @@ export default function useVideoFeedWindowing({
     estimateItemHeight: vfEstimateH,
     maxRender: () => vfGetMaxRender(),
     overscanPx: ({ velocity }) => vfGetOverscanPx(velocity),
+    itemGapPx: () => readForumWindowingItemGap('post'),
     getScrollEl: vfGetScrollEl,
     isBrowserFn,
     hardResetRef: videoFeedHardResetRef,
