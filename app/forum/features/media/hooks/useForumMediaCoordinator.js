@@ -1724,6 +1724,16 @@ const h = () => {
       volHandlers.set(el, h);
       el.addEventListener('volumechange', h, { passive: true });
     };
+    const unbindVolumeListener = (el) => {
+      try {
+        const isMedia = el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
+        if (!isMedia) return;
+        const h = volHandlers.get(el);
+        if (h) el.removeEventListener('volumechange', h);
+        volHandlers.delete(el);
+        if (el?.dataset) delete el.dataset.forumSoundBound;
+      } catch {}
+    };
 const onMutedEvent = (e) => {
   const source = String(e?.detail?.source || 'external');
   const isAuthoritativeMuteSource =
@@ -2168,9 +2178,14 @@ const onMediaLoadedCaptured = (e) => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
         try { cancelUnload(owner); } catch {}
+        try { clearExternalPlayKick(owner); } catch {}
         try { clearReadyReplay(owner); } catch {}
         try { pendingReadyGrace.delete(owner); } catch {}
         try { ratios.delete(owner); } catch {}
+        try { io?.unobserve?.(owner); } catch {}
+        try { nearIo?.unobserve?.(owner); } catch {}
+        try { observed.delete?.(owner); } catch {}
+        try { unbindVolumeListener(owner); } catch {}
         if (active === owner || active?.contains?.(owner) || owner.contains?.(active)) {
           active = null;
           activeSinceTs = 0;
@@ -2184,12 +2199,15 @@ const onMediaLoadedCaptured = (e) => {
           if (audio instanceof HTMLAudioElement) {
             try { clearReadyReplay(audio); } catch {}
             try { invalidatePlayRequest(audio); } catch {}
+            try { unbindVolumeListener(audio); } catch {}
           }
         }
         if (owner instanceof HTMLVideoElement || owner instanceof HTMLAudioElement) {
           try { clearReadyReplay(owner); } catch {}
           try { invalidatePlayRequest(owner); } catch {}
+          try { unbindVolumeListener(owner); } catch {}
           if (owner instanceof HTMLVideoElement) {
+            try { clearLoadPending(owner, 'removed_node_cleanup', Number(owner.readyState || 0) >= 2); } catch {}
             try { clearNativePauseRecovery(owner); } catch {}
             try { __dropActiveVideoEl(owner); } catch {}
             if (nativePrewarmEl === owner) {
@@ -2214,6 +2232,12 @@ const onMediaLoadedCaptured = (e) => {
         for (const [el] of ratios.entries()) {
           if (!(el instanceof Element) || !el.isConnected) {
             ratios.delete(el);
+            try { io?.unobserve?.(el); } catch {}
+            try { nearIo?.unobserve?.(el); } catch {}
+            try { observed.delete?.(el); } catch {}
+            try { clearExternalPlayKick(el); } catch {}
+            try { unbindVolumeListener(el); } catch {}
+            try { cancelUnload(el); } catch {}
           }
         }
       } catch {}
@@ -2222,6 +2246,12 @@ const onMediaLoadedCaptured = (e) => {
           if (!(el instanceof Element) || !el.isConnected) {
             try { cleanup?.(); } catch {}
             readyReplay.delete(el);
+            try { io?.unobserve?.(el); } catch {}
+            try { nearIo?.unobserve?.(el); } catch {}
+            try { observed.delete?.(el); } catch {}
+            try { clearExternalPlayKick(el); } catch {}
+            try { unbindVolumeListener(el); } catch {}
+            try { cancelUnload(el); } catch {}
           }
         }
       } catch {}
@@ -2666,7 +2696,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
     let io = null;
     let nearIo = null;
 
-    const observed = new WeakSet();
+    const observed = new WeakMap();
     const unloadTimers = new Map(); // el -> timeoutId
     const mediaDomOrder = new WeakMap();
     let mediaDomOrderSeq = 1;
@@ -2909,11 +2939,31 @@ const shouldRetainHtmlMedia = (el) => {
     };
     const getUnloadDelay = (el, reason = 'timeout') => {
       if (!isIframeLike(el)) {
+        const isPostNativeVideo = (() => {
+          try {
+            const media = getMediaStateNode(el);
+            return (
+              media instanceof HTMLVideoElement &&
+              isManagedForumVideoKind(media) &&
+              String(media.getAttribute?.('data-forum-video') || '') === 'post'
+            );
+          } catch {
+            return false;
+          }
+        })();
         if (reason === 'cleanup') return 0;
         if (reason === 'resident_cap' || reason === 'error_blocked') return 0;
+        if (isPostNativeVideo && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
+          if (isIOSUi) return 1500;
+          return isCoarseUi ? 1350 : 1900;
+        }
         if (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace') {
           if (isIOSUi) return 5600;
           return isCoarseUi ? 4600 : 5200;
+        }
+        if (isPostNativeVideo && reason === 'out_of_view') {
+          if (isIOSUi) return 1800;
+          return isCoarseUi ? 1550 : 2200;
         }
         if (reason === 'out_of_view') {
           if (isIOSUi) return 7000;
@@ -3052,6 +3102,23 @@ const shouldRetainHtmlMedia = (el) => {
           // Keeping suppression here blocks the reverse/forward runway prewarm and
           // causes late first frames plus retry load/play cycles on mobile.
           clearSuppressedPlayback(el);
+          try {
+            if (String(el.getAttribute?.('data-forum-video') || '') === 'post') {
+              // Do not let a paused/off-focus post video keep the single mobile
+              // load budget occupied. Safari often continues Range fetches after
+              // pause while preload stays auto; cool it immediately, then the
+              // active/prewarm pipeline can claim the budget cleanly.
+              clearLoadPending(el, 'soft_pause_cool_fetch', Number(el.readyState || 0) >= 2);
+              el.dataset.__nativePrimePending = '0';
+              if (nativePrewarmEl !== el) {
+                el.dataset.__nativePrewarm = '0';
+                el.dataset.__prewarm = '0';
+              }
+              el.dataset.__resident = '1';
+              el.dataset.__lastSoftPauseCoolTs = String(Date.now());
+              el.preload = 'metadata';
+            }
+          } catch {}
         } else {
           markSuppressedPlayback(el, 1400);
         }
@@ -3149,6 +3216,19 @@ const pauseForeignMedia = (keepEl = null) => {
           try {
             const owner = getOwnerNode(node);
             if (owner instanceof Element) clearSuppressedPlayback(owner);
+          } catch {}
+          try {
+            if (String(node.getAttribute?.('data-forum-video') || '') === 'post') {
+              clearLoadPending(node, 'foreign_pause_cool_fetch', Number(node.readyState || 0) >= 2);
+              node.dataset.__nativePrimePending = '0';
+              if (nativePrewarmEl !== node) {
+                node.dataset.__nativePrewarm = '0';
+                node.dataset.__prewarm = '0';
+              }
+              node.dataset.__resident = '1';
+              node.dataset.__lastForeignPauseCoolTs = String(Date.now());
+              node.preload = 'metadata';
+            }
           } catch {}
         } else {
           markSuppressedPlayback(node, 1200);
@@ -5100,7 +5180,7 @@ return;
       try {
         if (!(el instanceof Element)) return;
         if (observed.has(el)) return;
-        observed.add(el);
+        observed.set(el, true);
         getMediaDomOrder(el);
 
         // аудио/видео: следим за mute, чтобы запоминать выбор

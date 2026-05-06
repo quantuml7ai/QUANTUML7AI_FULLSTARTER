@@ -404,7 +404,6 @@ const keepWarmFetchOnSoftUnload =
   shouldSoftUnload &&
   (
     nativePrimeHoldActive ||
-    freshPostLoadPending ||
     activePostPipeline ||
     String(el.dataset?.__nativePrewarm || '') === '1'
   )
@@ -419,6 +418,10 @@ if (shouldSoftUnload) {
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = keepWarmFetchOnSoftUnload ? '1' : '0'
+    if (!keepWarmFetchOnSoftUnload) {
+      el.dataset.__loadPending = '0'
+      delete el.dataset.__loadPendingSince
+    }
     el.preload = keepWarmFetchOnSoftUnload ? 'auto' : 'metadata'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
