@@ -600,7 +600,7 @@ try {
     } catch {}
     try { delete el.dataset.__bootAttachedSrc } catch {}
     try { delete el.dataset.__bootMetadataPrimed } catch {}
-    try { el.preload = coordinatorOwnsPostLifecycle ? 'none' : 'metadata' } catch {}
+    try { el.preload = 'metadata' } catch {}
   }
 } catch {}
 }, [

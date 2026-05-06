@@ -235,7 +235,7 @@ export function __enforceActiveVideoCap(exceptEl) {
           victim.dataset.__active = '0'
           victim.dataset.__prewarm = '0'
           victim.dataset.__resident = '1'
-          victim.preload = victimIsPostFeedVideo ? 'none' : 'metadata'
+          victim.preload = 'metadata'
         } catch {}
       } else {
         __unloadVideoEl(victim)
@@ -399,6 +399,16 @@ const shouldSoftUnload =
   (!isPostFeedVideo && !canHardUnload) ||
   shouldKeepResidentPostVideo
 
+const keepWarmFetchOnSoftUnload =
+  isPostFeedVideo &&
+  shouldSoftUnload &&
+  (
+    nativePrimeHoldActive ||
+    freshPostLoadPending ||
+    activePostPipeline ||
+    String(el.dataset?.__nativePrewarm || '') === '1'
+  )
+
 if (shouldSoftUnload) {
   try {
     el.pause?.()
@@ -408,8 +418,8 @@ if (shouldSoftUnload) {
     if (!el.dataset.__src && el.getAttribute('src')) el.dataset.__src = el.getAttribute('src')
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
-    el.dataset.__prewarm = '0'
-    el.preload = isPostFeedVideo ? 'none' : 'metadata'
+    el.dataset.__prewarm = keepWarmFetchOnSoftUnload ? '1' : '0'
+    el.preload = keepWarmFetchOnSoftUnload ? 'auto' : 'metadata'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 

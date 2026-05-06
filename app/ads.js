@@ -21,11 +21,9 @@ const MEDIA_VIDEO_MUTED_KEY = 'forum:videoMuted';
 const MEDIA_MUTED_EVENT = 'forum:media-mute';
 const SITE_MEDIA_PLAY_EVENT = 'site-media-play';
 const SITE_AD_DEFAULT_MUTED = true;
-const SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE = 'none';
+const SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
-const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 12000;
-const SITE_AD_NATIVE_WARM_PENDING_STALE_MS = 9000;
-const SITE_AD_NATIVE_FAR_UNLOAD_MS = 4200;
+const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 6500;
 const YOUTUBE_NOCOOKIE_HOST = 'youtube-nocookie';
 
 function normalizeSiteMuted(value) {
@@ -218,7 +216,7 @@ function isSiteNativeVideoLoadingOrReady(videoEl) {
     if (readyState >= 2) return true;
     const pendingSince = Number(videoEl.dataset?.__siteAdLoadPendingSince || videoEl.dataset?.__siteAdLastAttachTs || 0);
     const pendingForMs = pendingSince > 0 ? Date.now() - pendingSince : 0;
-    if (readyState >= 1 && pendingForMs > 0 && pendingForMs < SITE_AD_NATIVE_WARM_PENDING_STALE_MS) return true;
+    if (readyState >= 1 && pendingForMs > 0 && pendingForMs < 4200) return true;
     const ns = Number(videoEl.networkState || 0);
     if (typeof HTMLMediaElement !== 'undefined') return ns === HTMLMediaElement.NETWORK_LOADING;
     return ns === 2;
@@ -476,7 +474,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   useEffect(() => {
     const el = rootRef.current;
     if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined') { setIsNear(true); setIsFocused(true); return undefined; }
-    const nearObs = new IntersectionObserver(([entry]) => setIsNear(!!entry?.isIntersecting), { rootMargin: '1250px 0px 1450px 0px', threshold: 0 });
+    const nearObs = new IntersectionObserver(([entry]) => setIsNear(!!entry?.isIntersecting), { rootMargin: '820px 0px 1650px 0px', threshold: 0 });
     const focusObs = new IntersectionObserver(([entry]) => setIsFocused((entry?.intersectionRatio || 0) >= 0.6), { threshold: [0, 0.25, 0.6, 0.75, 1] });
     nearObs.observe(el);
     focusObs.observe(el);
@@ -537,22 +535,6 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     }
     return undefined;
   }, [currentKind, currentSrc, isNear, isPageActive, isVideoSrcTemporarilyBlocked]);
-
-  useEffect(() => {
-    if (!isBrowser() || currentKind !== 'video' || isNear || shouldPlay) return undefined;
-    const v = videoRef.current;
-    if (!v) return undefined;
-    const timer = window.setTimeout(() => {
-      try {
-        if (shouldPlayRef.current) return;
-        const node = videoRef.current;
-        if (!node || node !== v) return;
-        attachedVideoSrcRef.current = '';
-        detachSiteNativeVideo(node, { hard: true, reason: 'far_offscreen_cooldown', resetPipeline: true });
-      } catch {}
-    }, SITE_AD_NATIVE_FAR_UNLOAD_MS);
-    return () => { try { window.clearTimeout(timer); } catch {} };
-  }, [currentKind, currentSrc, isNear, shouldPlay]);
 
   useEffect(() => {
     if (currentKind !== 'youtube' || !currentSrc || !isBrowser()) {
