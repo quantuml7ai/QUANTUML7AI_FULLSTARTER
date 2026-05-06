@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { registerForumWindowingTarget } from '../utils/forumWindowingRegistry'
 
 const DEFAULT_WINDOW_STICKY_MS = 780
@@ -134,8 +134,6 @@ export default function useForumWindowing({
   const scrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const scrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const pendingAnchorDeltaRef = useRef(0)
-  const pendingWindowAnchorRef = useRef(null)
-  const nodesRef = useRef(new Map())
   const pendingHeightsRef = useRef(new Map())
   const stableShrinkRef = useRef(new Map())
   const anchorFlushTimerRef = useRef(0)
@@ -307,117 +305,6 @@ export default function useForumWindowing({
     }
   }, [])
 
-
-  const readAnchorHost = useCallback(() => {
-    try {
-      const el = readScrollEl()
-      if (hasInnerScrollable(el)) {
-        const rect = el.getBoundingClientRect?.() || { top: 0, bottom: 0 }
-        return {
-          mode: 'inner',
-          el,
-          top: Number(rect.top || 0),
-          bottom: Number(rect.bottom || 0),
-          getTop: () => Number(el.scrollTop || 0),
-          setTop: (nextTop) => {
-            const maxTop = Math.max(
-              0,
-              Number(el.scrollHeight || 0) - Number(el.clientHeight || 0),
-            )
-            el.scrollTop = clamp(Number(nextTop || 0), 0, maxTop)
-          },
-        }
-      }
-    } catch {}
-
-    const winH = Number(window?.innerHeight || 0) || 0
-    return {
-      mode: 'window',
-      el: null,
-      top: 0,
-      bottom: winH,
-      getTop: () => Number(window?.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0),
-      setTop: (nextTop) => {
-        const doc = document.documentElement
-        const body = document.body
-        const maxTop = Math.max(
-          0,
-          Math.max(
-            Number(doc?.scrollHeight || 0),
-            Number(body?.scrollHeight || 0),
-          ) - winH,
-        )
-        window.__forumProgrammaticScrollTs = Date.now()
-        window.scrollTo(0, clamp(Number(nextTop || 0), 0, maxTop))
-      },
-    }
-  }, [hasInnerScrollable, readScrollEl])
-
-  const captureWindowAnchor = useCallback((reason = 'window_shift') => {
-    try {
-      const host = readAnchorHost()
-      let best = null
-
-      nodesRef.current.forEach((node, key) => {
-        try {
-          if (!key || !node?.isConnected) return
-          const rect = node.getBoundingClientRect?.()
-          if (!rect) return
-          if (Number(rect.bottom || 0) <= host.top + 1) return
-          if (Number(rect.top || 0) >= host.bottom - 1) return
-
-          const visibleTop = Math.max(Number(rect.top || 0), host.top)
-          const score = Math.abs(visibleTop - host.top)
-          if (!best || score < best.score) {
-            best = {
-              key,
-              mode: host.mode,
-              top: Number(rect.top || 0) - host.top,
-              scrollTop: host.getTop(),
-              score,
-              reason,
-              ts: Date.now(),
-            }
-          }
-        } catch {}
-      })
-
-      pendingWindowAnchorRef.current = best
-    } catch {
-      pendingWindowAnchorRef.current = null
-    }
-  }, [readAnchorHost])
-
-  const restoreWindowAnchor = useCallback(() => {
-    const anchor = pendingWindowAnchorRef.current
-    pendingWindowAnchorRef.current = null
-    if (!anchor?.key) return
-    if ((Date.now() - Number(anchor.ts || 0)) > 700) return
-
-    try {
-      const node = nodesRef.current.get(anchor.key)
-      if (!node?.isConnected) return
-
-      const host = readAnchorHost()
-      if (host.mode !== anchor.mode) return
-
-      const rect = node.getBoundingClientRect?.()
-      if (!rect) return
-
-      const nextTop = Number(rect.top || 0) - host.top
-      const delta = nextTop - Number(anchor.top || 0)
-      if (!Number.isFinite(delta) || Math.abs(delta) < 1) return
-
-      host.setTop(Number(host.getTop() || 0) + delta)
-
-      emitWindowingDiag('reverse_anchor_restore', {
-        reason: anchor.reason,
-        key: anchor.key,
-        delta: Math.round(delta),
-      })
-    } catch {}
-  }, [emitWindowingDiag, readAnchorHost])
-
   const scheduleRecalc = useCallback(() => {
     if (rafRef.current) return
     rafRef.current = requestAnimationFrame(() => {
@@ -571,10 +458,6 @@ export default function useForumWindowing({
             return prev
           }
 
-          if (direction < 0 && (prev.start !== next.start || prev.end !== next.end)) {
-            captureWindowAnchor('reverse_window_shift')
-          }
-
           winMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
           winRef.current = next
           return next
@@ -584,7 +467,6 @@ export default function useForumWindowing({
   }, [
     active,
     buildWindow,
-    captureWindowAnchor,
     getHeightAtIndex,
     layoutJitterPx,
     readViewportState,
@@ -772,7 +654,6 @@ export default function useForumWindowing({
     if (!key) return
     try {
       if (!node) {
-        nodesRef.current.delete(key)
         const ro = rosRef.current.get(key)
         if (ro) {
           try { ro.disconnect() } catch {}
@@ -782,8 +663,6 @@ export default function useForumWindowing({
         stableShrinkRef.current.delete(key)
         return
       }
-
-      nodesRef.current.set(key, node)
 
       const update = () => {
         try {
@@ -898,10 +777,6 @@ export default function useForumWindowing({
     scrollSettleMs,
   ])
 
-  useLayoutEffect(() => {
-    restoreWindowAnchor()
-  }, [restoreWindowAnchor, win.bottom, win.end, win.start, win.top])
-
   useEffect(() => {
     const activeKeys = new Set(itemKeys)
 
@@ -915,10 +790,6 @@ export default function useForumWindowing({
 
     stableShrinkRef.current.forEach((_, key) => {
       if (!activeKeys.has(key)) stableShrinkRef.current.delete(key)
-    })
-
-    nodesRef.current.forEach((_, key) => {
-      if (!activeKeys.has(key)) nodesRef.current.delete(key)
     })
 
     rosRef.current.forEach((ro, key) => {
@@ -1136,20 +1007,17 @@ export default function useForumWindowing({
     })
   }, [active, ensureItemRenderedByDomId, ensureItemRenderedByKey, listId])
 
-useEffect(() => {
-  const ros = rosRef.current
-  const nodes = nodesRef.current
-  const pendingHeights = pendingHeightsRef.current
-  const stableShrinks = stableShrinkRef.current
-  return () => {
-    try {
-      ros.forEach((ro) => {
-        try { ro.disconnect() } catch {}
-      })
-      ros.clear()
-    } catch {}
-    try { nodes.clear() } catch {}
-    try { pendingWindowAnchorRef.current = null } catch {}
+  useEffect(() => {
+    const ros = rosRef.current
+    const pendingHeights = pendingHeightsRef.current
+    const stableShrinks = stableShrinkRef.current
+    return () => {
+      try {
+        ros.forEach((ro) => {
+          try { ro.disconnect() } catch {}
+        })
+        ros.clear()
+      } catch {}
       try {
         if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
         anchorFlushTimerRef.current = 0
