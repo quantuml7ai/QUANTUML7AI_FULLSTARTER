@@ -23,7 +23,11 @@ const SITE_MEDIA_PLAY_EVENT = 'site-media-play';
 const SITE_AD_DEFAULT_MUTED = true;
 const SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';
 const SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY = 'auto';
-const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 6500;
+const SITE_AD_NATIVE_WARM_RELOAD_GAP_MS = 9000;
+const SITE_AD_NATIVE_WARM_PENDING_HOLD_MS = 10000;
+const SITE_AD_NATIVE_WARM_LOAD_BURST_WINDOW_MS = 22000;
+const SITE_AD_NATIVE_WARM_LOAD_BURST_LIMIT = 2;
+const SITE_AD_NATIVE_WARM_LOAD_BLOCK_MS = 14000;
 const YOUTUBE_NOCOOKIE_HOST = 'youtube-nocookie';
 
 function normalizeSiteMuted(value) {
@@ -135,6 +139,71 @@ function getSiteAdVideoNodeSrc(videoEl) {
   } catch { return ''; }
 }
 
+function isSiteNativeVideoNetworkLoading(videoEl) {
+  try {
+    if (!videoEl || typeof HTMLMediaElement === 'undefined') return false;
+    return !!getSiteAdVideoNodeSrc(videoEl) && Number(videoEl.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
+  } catch { return false; }
+}
+
+function markSiteNativeVideoLoadPending(videoEl, reason = 'warm_load') {
+  try {
+    if (!videoEl?.dataset) return;
+    const now = Date.now();
+    videoEl.dataset.__siteAdLoadPending = '1';
+    videoEl.dataset.__siteAdLoadPendingSince = String(Number(videoEl.dataset.__siteAdLoadPendingSince || 0) || now);
+    videoEl.dataset.__siteAdLoadPendingReason = reason;
+    videoEl.dataset.__siteAdLastWarmLoadTs = String(now);
+  } catch {}
+}
+
+function clearSiteNativeVideoLoadPending(videoEl, reason = 'ready', warmReady = false) {
+  try {
+    if (!videoEl?.dataset) return;
+    videoEl.dataset.__siteAdLoadPending = '0';
+    videoEl.dataset.__siteAdLoadPendingClearReason = reason;
+    delete videoEl.dataset.__siteAdLoadPendingSince;
+    if (warmReady) videoEl.dataset.__siteAdWarmReady = '1';
+  } catch {}
+}
+
+function canKickSiteNativeWarmLoad(videoEl, src, reason = 'near_warm') {
+  try {
+    if (!videoEl) return false;
+    const srcKey = String(src || getSiteAdVideoNodeSrc(videoEl) || '').trim();
+    if (!srcKey) return false;
+    const now = Date.now();
+    const readyState = Number(videoEl.readyState || 0);
+    if (readyState >= 2) { clearSiteNativeVideoLoadPending(videoEl, 'ready_before_warm_gate', true); return false; }
+    if (isSiteNativeVideoNetworkLoading(videoEl)) { markSiteNativeVideoLoadPending(videoEl, 'hold_existing_network_loading'); return false; }
+
+    const pendingSince = Number(videoEl.dataset?.__siteAdLoadPendingSince || 0);
+    const pendingForMs = pendingSince > 0 ? now - pendingSince : 0;
+    if (String(videoEl.dataset?.__siteAdLoadPending || '') === '1' && pendingForMs > 0 && pendingForMs < SITE_AD_NATIVE_WARM_PENDING_HOLD_MS) return false;
+
+    const blockedUntil = Number(videoEl.dataset?.__siteAdWarmLoadBlockedUntil || 0);
+    if (blockedUntil > now) return false;
+
+    const lastSrc = String(videoEl.dataset?.__siteAdWarmLoadSrc || '');
+    const lastTs = Number(videoEl.dataset?.__siteAdLastWarmLoadTs || 0);
+    if (lastSrc === srcKey && lastTs > 0 && (now - lastTs) < SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) return false;
+
+    const windowStartedAt = Number(videoEl.dataset?.__siteAdWarmLoadWindowStartedAt || 0);
+    const inWindow = windowStartedAt > 0 && (now - windowStartedAt) < SITE_AD_NATIVE_WARM_LOAD_BURST_WINDOW_MS;
+    const nextCount = inWindow ? Number(videoEl.dataset?.__siteAdWarmLoadWindowCount || 0) + 1 : 1;
+    if (nextCount > SITE_AD_NATIVE_WARM_LOAD_BURST_LIMIT) {
+      videoEl.dataset.__siteAdWarmLoadBlockedUntil = String(now + SITE_AD_NATIVE_WARM_LOAD_BLOCK_MS);
+      videoEl.dataset.__siteAdWarmLoadBlockReason = reason;
+      return false;
+    }
+
+    videoEl.dataset.__siteAdWarmLoadSrc = srcKey;
+    videoEl.dataset.__siteAdWarmLoadWindowStartedAt = String(inWindow ? windowStartedAt : now);
+    videoEl.dataset.__siteAdWarmLoadWindowCount = String(nextCount);
+    return true;
+  } catch { return false; }
+}
+
 function detachSiteNativeVideo(videoEl, opts = {}) {
   if (!videoEl) return;
   const hard = !!(opts === true || opts?.hard);
@@ -144,7 +213,8 @@ function detachSiteNativeVideo(videoEl, opts = {}) {
   if (!hard) {
     try {
       if (videoEl.dataset) {
-        videoEl.dataset.__siteAdLoadPending = '0';
+        if (isSiteNativeVideoNetworkLoading(videoEl)) markSiteNativeVideoLoadPending(videoEl, `soft_detach_${reason}`);
+        else clearSiteNativeVideoLoadPending(videoEl, `soft_detach_${reason}`, Number(videoEl.readyState || 0) >= 2);
         videoEl.dataset.__siteAdDetachedSoft = '1';
         videoEl.dataset.__siteAdDetachedReason = reason;
         videoEl.dataset.__siteAdDetachedSoftTs = String(Date.now());
@@ -184,6 +254,8 @@ function ensureSiteNativeVideoSrc(videoEl, src, muted) {
         videoEl.dataset.__siteAdDetachedHard = '0';
         delete videoEl.dataset.__siteAdDetachedReason;
       }
+      if (Number(videoEl.readyState || 0) >= 2) clearSiteNativeVideoLoadPending(videoEl, 'same_src_ready', true);
+      else if (isSiteNativeVideoNetworkLoading(videoEl)) markSiteNativeVideoLoadPending(videoEl, 'same_src_network_loading');
     } catch {}
     return true;
   }
@@ -194,14 +266,15 @@ function ensureSiteNativeVideoSrc(videoEl, src, muted) {
     if (videoEl.dataset) {
       const now = Date.now();
       videoEl.dataset.siteAdNativeSrc = nextSrc;
-      videoEl.dataset.__siteAdLoadPending = '1';
       videoEl.dataset.__siteAdLastAttachTs = String(now);
-      videoEl.dataset.__siteAdLastWarmLoadTs = String(now);
-      videoEl.dataset.__siteAdLoadPendingSince = String(now);
+      videoEl.dataset.__siteAdWarmLoadSrc = nextSrc;
       videoEl.dataset.__siteAdDetachedSoft = '0';
       videoEl.dataset.__siteAdDetachedHard = '0';
       delete videoEl.dataset.__siteAdDetachedReason;
+      delete videoEl.dataset.__siteAdWarmLoadBlockedUntil;
+      delete videoEl.dataset.__siteAdWarmLoadBlockReason;
     }
+    markSiteNativeVideoLoadPending(videoEl, 'attach_src');
   } catch {}
   try { videoEl.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY; videoEl.load?.(); } catch {}
   return true;
@@ -213,10 +286,12 @@ function isSiteNativeVideoLoadingOrReady(videoEl) {
     const hasSrc = !!getSiteAdVideoNodeSrc(videoEl);
     if (!hasSrc) return false;
     const readyState = Number(videoEl.readyState || 0);
-    if (readyState >= 2) return true;
+    if (readyState >= 2) { clearSiteNativeVideoLoadPending(videoEl, 'ready_state_2', true); return true; }
     const pendingSince = Number(videoEl.dataset?.__siteAdLoadPendingSince || videoEl.dataset?.__siteAdLastAttachTs || 0);
     const pendingForMs = pendingSince > 0 ? Date.now() - pendingSince : 0;
-    if (readyState >= 1 && pendingForMs > 0 && pendingForMs < 4200) return true;
+    if (isSiteNativeVideoNetworkLoading(videoEl)) { markSiteNativeVideoLoadPending(videoEl, 'loading_or_ready_network'); return true; }
+    if (String(videoEl.dataset?.__siteAdLoadPending || '') === '1' && pendingForMs > 0 && pendingForMs < SITE_AD_NATIVE_WARM_PENDING_HOLD_MS) return true;
+    if (readyState >= 1 && pendingForMs > 0 && pendingForMs < SITE_AD_NATIVE_WARM_PENDING_HOLD_MS) return true;
     const ns = Number(videoEl.networkState || 0);
     if (typeof HTMLMediaElement !== 'undefined') return ns === HTMLMediaElement.NETWORK_LOADING;
     return ns === 2;
@@ -527,10 +602,8 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         v.setAttribute('playsinline', '');
         v.setAttribute('webkit-playsinline', '');
         v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY;
-        const now = Date.now();
-        const lastLoadTs = Number(v.dataset?.__siteAdLastWarmLoadTs || 0);
         const loadingOrReady = isSiteNativeVideoLoadingOrReady(v);
-        if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.dataset.__siteAdLoadPendingSince = String(now); v.load?.(); }
+        if (!loadingOrReady && canKickSiteNativeWarmLoad(v, srcKey, 'near_warm')) { markSiteNativeVideoLoadPending(v, 'near_warm'); v.load?.(); }
       } catch {}
     }
     return undefined;
@@ -632,7 +705,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     onPlaying: () => {
       try {
         const v = videoRef.current;
-        if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; }
+        clearSiteNativeVideoLoadPending(v, 'playing', Number(v?.readyState || 0) >= 2);
         if (v?.dataset) delete v.dataset.__siteAdEndedHold;
         if (!shouldPlayRef.current) { try { v?.pause?.(); } catch {}; return; }
         const st = adNativePauseRecoveryRef.current || {};
@@ -657,10 +730,10 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       } catch {}
     },
     onLoadedData: () => {
-      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; clearSiteNativeVideoLoadPending(v, 'loadeddata', true); applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
     },
     onCanPlay: () => {
-      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; clearSiteNativeVideoLoadPending(v, 'canplay', true); applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
     },
     onEnded: () => {
       try {
@@ -668,7 +741,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         if (st.timer) clearTimeout(st.timer);
         adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
         const v = videoRef.current;
-        if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdWarmReady = '1'; delete v.dataset.__siteAdEndedHold; }
+        if (v?.dataset) { clearSiteNativeVideoLoadPending(v, 'ended', true); delete v.dataset.__siteAdEndedHold; }
         if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }
       } catch {}
     },
@@ -680,7 +753,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         const recentAttach = (now - Number(v?.dataset?.__siteAdLastAttachTs || 0)) < 6500;
         const loading = typeof HTMLMediaElement !== 'undefined' && Number(v?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
         const hasFrame = Number(v?.readyState || 0) >= 1;
-        if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdTransientErrorTs = String(now); } return; }
+        if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { clearSiteNativeVideoLoadPending(v, 'transient_error', hasFrame); v.dataset.__siteAdTransientErrorTs = String(now); } return; }
         markVideoSrcTemporarilyBlocked(currentSrc, isNear ? 12000 : 20000);
         attachedVideoSrcRef.current = '';
         detachSiteNativeVideo(videoRef.current, { hard: true, reason: 'error', resetPipeline: true });
