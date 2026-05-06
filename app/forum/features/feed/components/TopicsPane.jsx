@@ -53,6 +53,7 @@ export default function TopicsPane({
     getItemKey: (topic, index) => String(topic?.id || `topic:${index}`),
     getItemDomId: (topic) => (topic?.id ? `topic_${topic.id}` : ''),
     estimateItemHeight: () => readForumCardEstimate('topic'),
+    itemGapPx: 8,
     maxRender: () => readForumWindowingMaxRender('topic'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('topic', velocity),
     listId: 'forum:topics',

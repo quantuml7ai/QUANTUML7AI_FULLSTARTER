@@ -58,6 +58,7 @@ export default function DmMessagesPane({
     getItemKey: (message, index) => String(message?.id || `${message?.ts || 0}:${index}`),
     getItemDomId: (message) => (message?.id ? `dm_msg_${message.id}` : ''),
     estimateItemHeight: () => readForumCardEstimate('dm_message'),
+    itemGapPx: 8,
     maxRender: () => readForumWindowingMaxRender('dm_message'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_message', velocity),
     listId: 'forum:dm-thread',

@@ -82,6 +82,7 @@ export default function ThreadRepliesPane({
         ? readForumCardEstimate('post')
         : readForumCardEstimate('ad')
     ),
+    itemGapPx: 8,
     maxRender: () => readForumWindowingMaxRender('post'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
     listId: 'forum:thread-replies',

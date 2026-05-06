@@ -85,6 +85,7 @@ export default function InboxRepliesPane({
         ? readForumCardEstimate('post')
         : readForumCardEstimate('ad')
     ),
+    itemGapPx: 8,
     maxRender: () => readForumWindowingMaxRender('post'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
     listId: 'forum:inbox-replies',

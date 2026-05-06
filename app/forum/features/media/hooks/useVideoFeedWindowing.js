@@ -151,6 +151,7 @@ export default function useVideoFeedWindowing({
         : ''
     ),
     estimateItemHeight: vfEstimateH,
+    itemGapPx: 8,
     maxRender: () => vfGetMaxRender(),
     overscanPx: ({ velocity }) => vfGetOverscanPx(velocity),
     getScrollEl: vfGetScrollEl,
