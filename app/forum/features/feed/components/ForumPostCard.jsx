@@ -180,7 +180,7 @@ export default function ForumPostCard({
           posterUrl={p?.posterUrl}
           YT_RE={YT_RE}
         />
-<div className="postBodyFrame">
+      <div className="postBodyFrame">
         <PostBodyContent
           displayText={displayText}
           renderRich={richRenderer}
@@ -207,7 +207,7 @@ export default function ForumPostCard({
           onBanUser={onBanUser}
         />
         <div className="forumDividerRail forumDividerRail--gold" aria-hidden="true" />
-</div>
+       </div>
         <PostTranslateToggle
           hasCleanedText={hasCleanedText}
           isTranslated={isTranslated}

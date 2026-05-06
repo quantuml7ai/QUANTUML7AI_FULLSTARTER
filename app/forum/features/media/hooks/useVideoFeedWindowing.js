@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import { readForumRuntimeConfig } from '../../../shared/config/runtime'
-import { estimateForumPostSlotHeight } from '../../../shared/utils/forumWindowingPresets'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
 const VF_OVERSCAN_PX = 1480
@@ -41,8 +40,8 @@ export default function useVideoFeedWindowing({
       const dm = Number(window?.navigator?.deviceMemory || 0)
       const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
 
-      if (coarse || lowMem) return 7
-      return 9
+      if (coarse || lowMem) return 6
+      return 7
     } catch {
       return 5
     }
@@ -139,11 +138,7 @@ export default function useVideoFeedWindowing({
     const slot = item || vfSlots?.[index]
     if (slot?.type === 'recommendation_rail') return vfGetFixedRecommendationH()
     if (slot && slot.type !== 'item') return vfGetFixedAdH()
-
-    return Math.max(
-      vfGetFixedItemH() + VF_ITEM_CHROME_EST,
-      estimateForumPostSlotHeight(slot),
-    )
+    return vfGetFixedItemH() + VF_ITEM_CHROME_EST
   }, [vfGetFixedAdH, vfGetFixedItemH, vfGetFixedRecommendationH, vfSlots])
 
   const { win: vfWin, measureRef: vfMeasureRef } = useForumWindowing({

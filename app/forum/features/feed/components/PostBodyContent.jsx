@@ -37,12 +37,12 @@ export default function PostBodyContent({
       )}
 
       {hasText && (
-        <div className="postBodyFrame">
+
           <div
             className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"
             dangerouslySetInnerHTML={{ __html: renderRich(displayText) }}
           />
-        </div>
+
       )}
     </>
   )
