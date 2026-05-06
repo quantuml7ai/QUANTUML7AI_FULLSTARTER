@@ -464,14 +464,6 @@ let pendingLoadsCacheVal = 0;
 let nativePrewarmEl = null;
 let nativePrewarmTs = 0;
 const nativePauseRecovery = new WeakMap();
-const nativePrimeSrcState = new Map();
-const clearNativePauseRecovery = (media) => {
-  try {
-    const st = media ? nativePauseRecovery.get(media) : null;
-    if (st?.timer) clearTimeout(st.timer);
-    if (media) nativePauseRecovery.delete(media);
-  } catch {}
-};
 const POST_NATIVE_SRC_CAP = (() => {
       try {
         const ua = String(navigator?.userAgent || '');
@@ -482,8 +474,8 @@ const POST_NATIVE_SRC_CAP = (() => {
         // One active native video + one prepared neighbor is the stable mobile budget.
         // cap=1 was tearing down the prewarm node right after it attached src,
         // which caused repeat bytes=0-/tail Range cycles and black viewport entry.
-        if (lowMem) return 2;
         if (ios || coarse || /Android/i.test(ua)) return 2;
+        if (lowMem) return 2;
         return 3;
       } catch {
         return 2;
@@ -574,133 +566,6 @@ const readPendingLoads = (force = false) => {
         }
       } catch {}
     };
-    const pruneNativePrimeSrcState = (nowTs = Date.now()) => {
-      try {
-        const now = Number(nowTs || Date.now());
-        for (const [key, st] of nativePrimeSrcState) {
-          const touchedAt = Number(st?.touchedAt || 0);
-          const pendingUntil = Number(st?.pendingUntil || 0);
-          const blockedUntil = Number(st?.blockedUntil || 0);
-          if (
-            (!touchedAt || (now - touchedAt) > 150000) &&
-            pendingUntil <= now &&
-            blockedUntil <= now
-          ) {
-            nativePrimeSrcState.delete(key);
-          }
-        }
-
-        while (nativePrimeSrcState.size > 160) {
-          const firstKey = nativePrimeSrcState.keys().next().value;
-          if (!firstKey) break;
-          nativePrimeSrcState.delete(firstKey);
-        }
-      } catch {}
-    };
-
-    const canStartNativePrimeForSrc = (media, reason = 'native_prime', warmupOnlyPrime = false) => {
-      if (!(media instanceof HTMLVideoElement)) return false;
-      const srcKey = getMediaSrcKey(media);
-      if (!srcKey) return true;
-
-      const now = Date.now();
-      try {
-        const state = nativePrimeSrcState.get(srcKey) || {};
-        const blockedUntil = Number(state?.blockedUntil || 0);
-        if (blockedUntil > now) {
-          trace('native_prime_skip_src_blocked', media, {
-            reason,
-            blockedForMs: blockedUntil - now,
-          });
-          return false;
-        }
-
-        const pendingUntil = Number(state?.pendingUntil || 0);
-        if (pendingUntil > now) {
-          trace('native_prime_skip_src_pending', media, {
-            reason,
-            pendingForMs: pendingUntil - now,
-          });
-          return false;
-        }
-
-        const minGapMs = warmupOnlyPrime
-          ? (isIOSUi ? 4600 : (isCoarseUi ? 3400 : 2400))
-          : (isIOSUi ? 1800 : 1500);
-        const lastPrimeTs = Number(state?.lastPrimeTs || 0);
-        if (lastPrimeTs > 0 && (now - lastPrimeTs) < minGapMs) {
-          trace('native_prime_skip_src_gap', media, {
-            reason,
-            sinceMs: now - lastPrimeTs,
-            minGapMs,
-          });
-          return false;
-        }
-
-        const burstWindowMs = isIOSUi ? 24000 : 18000;
-        const burstLimit = warmupOnlyPrime ? 2 : 3;
-        const winStart = Number(state?.windowStart || 0);
-        let primeCount = Number(state?.count || 0);
-        const inWindow = winStart > 0 && (now - winStart) < burstWindowMs;
-        const nextWinStart = inWindow ? winStart : now;
-        if (!inWindow) primeCount = 0;
-        primeCount += 1;
-
-        if (primeCount > burstLimit) {
-          const until = now + (warmupOnlyPrime ? (isIOSUi ? 15000 : 11000) : (isIOSUi ? 9000 : 7000));
-          nativePrimeSrcState.set(srcKey, {
-            ...state,
-            blockedUntil: until,
-            pendingUntil: 0,
-            lastPrimeTs,
-            windowStart: nextWinStart,
-            count: primeCount,
-            touchedAt: now,
-          });
-          pruneNativePrimeSrcState(now);
-          trace('native_prime_block_src', media, {
-            reason,
-            primes: primeCount,
-            blockedForMs: until - now,
-          });
-          return false;
-        }
-
-        nativePrimeSrcState.set(srcKey, {
-          ...state,
-          blockedUntil: 0,
-          pendingUntil: now + (warmupOnlyPrime ? (isIOSUi ? 2600 : 2200) : 1600),
-          lastPrimeTs: now,
-          windowStart: nextWinStart,
-          count: primeCount,
-          touchedAt: now,
-        });
-        pruneNativePrimeSrcState(now);
-        return true;
-      } catch {
-        return true;
-      }
-    };
-
-    const finishNativePrimeForSrc = (media, state = 'done') => {
-      if (!(media instanceof HTMLVideoElement)) return;
-      const srcKey = getMediaSrcKey(media);
-      if (!srcKey) return;
-
-      try {
-        const now = Date.now();
-        const prev = nativePrimeSrcState.get(srcKey) || {};
-        nativePrimeSrcState.set(srcKey, {
-          ...prev,
-          pendingUntil: 0,
-          touchedAt: now,
-          readyTs: Number(media.readyState || 0) >= 2 ? now : Number(prev?.readyTs || 0),
-          lastState: String(state || 'done'),
-        });
-        pruneNativePrimeSrcState(now);
-      } catch {}
-    };
-
     const canKickLoad = (
       el,
       {
@@ -1724,16 +1589,6 @@ const h = () => {
       volHandlers.set(el, h);
       el.addEventListener('volumechange', h, { passive: true });
     };
-    const unbindVolumeListener = (el) => {
-      try {
-        const isMedia = el instanceof HTMLVideoElement || el instanceof HTMLAudioElement;
-        if (!isMedia) return;
-        const h = volHandlers.get(el);
-        if (h) el.removeEventListener('volumechange', h);
-        volHandlers.delete(el);
-        if (el?.dataset) delete el.dataset.forumSoundBound;
-      } catch {}
-    };
 const onMutedEvent = (e) => {
   const source = String(e?.detail?.source || 'external');
   const isAuthoritativeMuteSource =
@@ -2178,14 +2033,9 @@ const onMediaLoadedCaptured = (e) => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
         try { cancelUnload(owner); } catch {}
-        try { clearExternalPlayKick(owner); } catch {}
         try { clearReadyReplay(owner); } catch {}
         try { pendingReadyGrace.delete(owner); } catch {}
         try { ratios.delete(owner); } catch {}
-        try { io?.unobserve?.(owner); } catch {}
-        try { nearIo?.unobserve?.(owner); } catch {}
-        try { observed.delete?.(owner); } catch {}
-        try { unbindVolumeListener(owner); } catch {}
         if (active === owner || active?.contains?.(owner) || owner.contains?.(active)) {
           active = null;
           activeSinceTs = 0;
@@ -2199,21 +2049,13 @@ const onMediaLoadedCaptured = (e) => {
           if (audio instanceof HTMLAudioElement) {
             try { clearReadyReplay(audio); } catch {}
             try { invalidatePlayRequest(audio); } catch {}
-            try { unbindVolumeListener(audio); } catch {}
           }
         }
         if (owner instanceof HTMLVideoElement || owner instanceof HTMLAudioElement) {
           try { clearReadyReplay(owner); } catch {}
           try { invalidatePlayRequest(owner); } catch {}
-          try { unbindVolumeListener(owner); } catch {}
           if (owner instanceof HTMLVideoElement) {
-            try { clearLoadPending(owner, 'removed_node_cleanup', Number(owner.readyState || 0) >= 2); } catch {}
-            try { clearNativePauseRecovery(owner); } catch {}
             try { __dropActiveVideoEl(owner); } catch {}
-            if (nativePrewarmEl === owner) {
-              nativePrewarmEl = null;
-              nativePrewarmTs = 0;
-            }
           }
         }
       });
@@ -2232,12 +2074,6 @@ const onMediaLoadedCaptured = (e) => {
         for (const [el] of ratios.entries()) {
           if (!(el instanceof Element) || !el.isConnected) {
             ratios.delete(el);
-            try { io?.unobserve?.(el); } catch {}
-            try { nearIo?.unobserve?.(el); } catch {}
-            try { observed.delete?.(el); } catch {}
-            try { clearExternalPlayKick(el); } catch {}
-            try { unbindVolumeListener(el); } catch {}
-            try { cancelUnload(el); } catch {}
           }
         }
       } catch {}
@@ -2246,12 +2082,6 @@ const onMediaLoadedCaptured = (e) => {
           if (!(el instanceof Element) || !el.isConnected) {
             try { cleanup?.(); } catch {}
             readyReplay.delete(el);
-            try { io?.unobserve?.(el); } catch {}
-            try { nearIo?.unobserve?.(el); } catch {}
-            try { observed.delete?.(el); } catch {}
-            try { clearExternalPlayKick(el); } catch {}
-            try { unbindVolumeListener(el); } catch {}
-            try { cancelUnload(el); } catch {}
           }
         }
       } catch {}
@@ -2273,14 +2103,6 @@ const onMediaLoadedCaptured = (e) => {
           }
         }
       } catch {}
-      try {
-        if (nativePrewarmEl instanceof HTMLVideoElement && !nativePrewarmEl.isConnected) {
-          clearNativePauseRecovery(nativePrewarmEl);
-          nativePrewarmEl = null;
-          nativePrewarmTs = 0;
-        }
-      } catch {}
-      try { pruneNativePrimeSrcState(now); } catch {}
       try { pruneMediaSrcBlockMap(force); } catch {}
     };
     try {
@@ -2696,7 +2518,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
     let io = null;
     let nearIo = null;
 
-    const observed = new WeakMap();
+    const observed = new WeakSet();
     const unloadTimers = new Map(); // el -> timeoutId
     const mediaDomOrder = new WeakMap();
     let mediaDomOrderSeq = 1;
@@ -2939,31 +2761,11 @@ const shouldRetainHtmlMedia = (el) => {
     };
     const getUnloadDelay = (el, reason = 'timeout') => {
       if (!isIframeLike(el)) {
-        const isPostNativeVideo = (() => {
-          try {
-            const media = getMediaStateNode(el);
-            return (
-              media instanceof HTMLVideoElement &&
-              isManagedForumVideoKind(media) &&
-              String(media.getAttribute?.('data-forum-video') || '') === 'post'
-            );
-          } catch {
-            return false;
-          }
-        })();
         if (reason === 'cleanup') return 0;
         if (reason === 'resident_cap' || reason === 'error_blocked') return 0;
-        if (isPostNativeVideo && (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace')) {
-          if (isIOSUi) return 1500;
-          return isCoarseUi ? 1350 : 1900;
-        }
         if (reason === 'focus_switch' || reason === 'below_stop_ratio' || reason === 'candidate_replace') {
           if (isIOSUi) return 5600;
           return isCoarseUi ? 4600 : 5200;
-        }
-        if (isPostNativeVideo && reason === 'out_of_view') {
-          if (isIOSUi) return 1800;
-          return isCoarseUi ? 1550 : 2200;
         }
         if (reason === 'out_of_view') {
           if (isIOSUi) return 7000;
@@ -3093,35 +2895,7 @@ const shouldRetainHtmlMedia = (el) => {
       trace('soft_pause', el, { reason });
       if (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) {
         invalidatePlayRequest(el);
-        const managedNativeForumVideo =
-          el instanceof HTMLVideoElement &&
-          isManagedForumVideoKind(el) &&
-          String(el.getAttribute?.('data-forum-media') || '') === 'video';
-        if (managedNativeForumVideo) {
-          // Coordinator-driven pause is a lifecycle transition, not a user pause.
-          // Keeping suppression here blocks the reverse/forward runway prewarm and
-          // causes late first frames plus retry load/play cycles on mobile.
-          clearSuppressedPlayback(el);
-          try {
-            if (String(el.getAttribute?.('data-forum-video') || '') === 'post') {
-              // Do not let a paused/off-focus post video keep the single mobile
-              // load budget occupied. Safari often continues Range fetches after
-              // pause while preload stays auto; cool it immediately, then the
-              // active/prewarm pipeline can claim the budget cleanly.
-              clearLoadPending(el, 'soft_pause_cool_fetch', Number(el.readyState || 0) >= 2);
-              el.dataset.__nativePrimePending = '0';
-              if (nativePrewarmEl !== el) {
-                el.dataset.__nativePrewarm = '0';
-                el.dataset.__prewarm = '0';
-              }
-              el.dataset.__resident = '1';
-              el.dataset.__lastSoftPauseCoolTs = String(Date.now());
-              el.preload = 'metadata';
-            }
-          } catch {}
-        } else {
-          markSuppressedPlayback(el, 1400);
-        }
+        markSuppressedPlayback(el, 1400);
         withSystemPause(el, () => {
           try { if (!el.paused) el.pause(); } catch {}
         });
@@ -3207,36 +2981,11 @@ const pauseForeignMedia = (keepEl = null) => {
 
       if (node instanceof HTMLVideoElement || node instanceof HTMLAudioElement) {
         invalidatePlayRequest(node);
-        const managedNativeForumVideo =
-          node instanceof HTMLVideoElement &&
-          isManagedForumVideoKind(node) &&
-          String(node.getAttribute?.('data-forum-media') || '') === 'video';
-        if (managedNativeForumVideo) {
-          clearSuppressedPlayback(node);
-          try {
-            const owner = getOwnerNode(node);
-            if (owner instanceof Element) clearSuppressedPlayback(owner);
-          } catch {}
-          try {
-            if (String(node.getAttribute?.('data-forum-video') || '') === 'post') {
-              clearLoadPending(node, 'foreign_pause_cool_fetch', Number(node.readyState || 0) >= 2);
-              node.dataset.__nativePrimePending = '0';
-              if (nativePrewarmEl !== node) {
-                node.dataset.__nativePrewarm = '0';
-                node.dataset.__prewarm = '0';
-              }
-              node.dataset.__resident = '1';
-              node.dataset.__lastForeignPauseCoolTs = String(Date.now());
-              node.preload = 'metadata';
-            }
-          } catch {}
-        } else {
-          markSuppressedPlayback(node, 1200);
-          try {
-            const owner = getOwnerNode(node);
-            if (owner instanceof Element) markSuppressedPlayback(owner, 1200);
-          } catch {}
-        }
+        markSuppressedPlayback(node, 1200);
+        try {
+          const owner = getOwnerNode(node);
+          if (owner instanceof Element) markSuppressedPlayback(owner, 1200);
+        } catch {}
         withSystemPause(node, () => {
           try { if (!node.paused) node.pause(); } catch {}
         });
@@ -3674,9 +3423,7 @@ const getNativeEarlyPrimeGapLimit = () => {
             markCoordinatorPlayIntent(currentOwner, isIOSUi ? 2600 : 2200);
             cancelUnload(currentOwner);
             playMedia(currentOwner);
-          } catch {} finally {
-            try { nativePauseRecovery.delete(media); } catch {}
-          }
+          } catch {}
         }, delay);
 
         nativePauseRecovery.set(media, { ts: now, count: nextCount, timer });
@@ -3816,7 +3563,6 @@ const lastPrimeTs = Number(media.dataset?.__nativePrimeTs || 0);
 // viewport if WebKit rejected or stalled the first muted decode tick.
 if (lastPrimeTs > 0 && (now - lastPrimeTs) < (isIOSUi ? 1800 : 1800)) return false;
 if (String(media.dataset?.__nativePrimePending || '') === '1') return true;
-if (!canStartNativePrimeForSrc(media, reason, warmupOnlyPrime)) return false;
       const wantedMutedBeforePrime = desiredMuted();
       try {
         media.dataset.__nativePrimeTs = String(now);
@@ -3863,7 +3609,6 @@ let primeFinished = false;
 const finishPrime = (state = 'done') => {
   if (primeFinished) return;
   primeFinished = true;
-  try { finishNativePrimeForSrc(media, state); } catch {}
   try { media.dataset.__nativePrimePending = '0'; } catch {}
   try {
     const holdMs = warmupOnlyPrime ? NATIVE_EARLY_PRIME_HOLD_MS : 0;
@@ -3934,7 +3679,6 @@ if (p && typeof p.then === 'function') {
     const holdDelay = warmupOnlyPrime ? (isIOSUi ? 640 : 380) : (isIOSUi ? 180 : 110);
     setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), holdDelay);
   }).catch((err) => {
-    try { finishNativePrimeForSrc(media, 'reject'); } catch {}
     try { media.dataset.__nativePrimePending = '0'; } catch {}
     trace('native_prime_reject', media, {
       reason,
@@ -3947,7 +3691,6 @@ if (p && typeof p.then === 'function') {
 }
 return true;
       } catch (err) {
-        try { finishNativePrimeForSrc(media, 'throw'); } catch {}
         try { media.dataset.__nativePrimePending = '0'; } catch {}
         trace('native_prime_throw', media, { reason, message: String(err?.message || err || '') });
         return false;
@@ -3983,7 +3726,7 @@ return true;
           prevPipeline.loading &&
           !prevPipeline.ready &&
           prevStillInRunway &&
-          (!nextInFocusRunway || !nextClearlyBetter) &&
+          !nextInFocusRunway &&
           age < (isIOSUi ? 7200 : (isCoarseUi ? 6200 : 5200));
         if (holdLoadingPrev) {
           trace('native_prewarm_hold_loading_slot', prev, {
@@ -4086,9 +3829,23 @@ return true;
         centerDist: getOwnerCenterDist(media),
       });
 
-      if (!primeNativeFirstFrame(media, reason)) {
-        trace('native_prewarm_prime_deferred', media, {
+      const readyForFirstFrame =
+        Number(media.readyState || 0) >= 2 ||
+        String(media.dataset?.__warmReady || '') === '1';
+      if (readyForFirstFrame) {
+        if (!primeNativeFirstFrame(media, reason)) {
+          trace('native_prewarm_prime_deferred', media, {
+            reason,
+            readyState: Number(media.readyState || 0),
+            networkState: Number(media.networkState || 0),
+            gapPx: getOwnerViewportGapPx(media),
+            visiblePx: getOwnerVisiblePx(media),
+          });
+        }
+      } else {
+        trace('native_prewarm_wait_first_frame_ready', media, {
           reason,
+          kicked,
           readyState: Number(media.readyState || 0),
           networkState: Number(media.networkState || 0),
           gapPx: getOwnerViewportGapPx(media),
@@ -5180,7 +4937,7 @@ return;
       try {
         if (!(el instanceof Element)) return;
         if (observed.has(el)) return;
-        observed.set(el, true);
+        observed.add(el);
         getMediaDomOrder(el);
 
         // аудио/видео: следим за mute, чтобы запоминать выбор
@@ -5475,7 +5232,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
         try { cancelAnimationFrame(nativePrewarmScanRaf); } catch {}
         nativePrewarmScanRaf = 0;
       }
-      try { if (nativePrewarmEl instanceof HTMLVideoElement) clearNativePauseRecovery(nativePrewarmEl); } catch {}
       try { releaseNativePrewarmExcept(null, 'cleanup'); } catch {}
       try { sweepDetachedMediaState('cleanup', true); } catch {}
 
