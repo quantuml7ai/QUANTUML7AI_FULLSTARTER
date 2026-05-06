@@ -5,7 +5,6 @@ import { resolveProfileAccountId } from '../../profile/utils/profileCache'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import {
   readForumCardEstimate,
-  readForumWindowingItemGap,
   readForumWindowingMaxRender,
   readForumWindowingOverscan,
 } from '../../../shared/utils/forumWindowingPresets'
@@ -88,7 +87,6 @@ export default function InboxRepliesPane({
     ),
     maxRender: () => readForumWindowingMaxRender('post'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('post', velocity),
-    itemGapPx: () => readForumWindowingItemGap('post'),
     listId: 'forum:inbox-replies',
   })
 

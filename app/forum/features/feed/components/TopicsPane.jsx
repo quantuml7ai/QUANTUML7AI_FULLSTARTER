@@ -5,7 +5,6 @@ import { resolveProfileAccountId } from '../../profile/utils/profileCache'
 import useForumWindowing from '../../../shared/hooks/useForumWindowing'
 import {
   readForumCardEstimate,
-  readForumWindowingItemGap,
   readForumWindowingMaxRender,
   readForumWindowingOverscan,
 } from '../../../shared/utils/forumWindowingPresets'
@@ -56,7 +55,6 @@ export default function TopicsPane({
     estimateItemHeight: () => readForumCardEstimate('topic'),
     maxRender: () => readForumWindowingMaxRender('topic'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('topic', velocity),
-    itemGapPx: () => readForumWindowingItemGap('topic'),
     listId: 'forum:topics',
   })
 
