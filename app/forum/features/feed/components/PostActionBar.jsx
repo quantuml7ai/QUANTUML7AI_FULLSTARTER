@@ -2,6 +2,7 @@
 
 import React from 'react'
 import HydrateText from '../../../shared/components/HydrateText'
+import { formatCount } from '../../../shared/utils/counts'
 
 export default function PostActionBar({
   t,
@@ -54,7 +55,7 @@ export default function PostActionBar({
         }}
         suppressHydrationWarning
       >
-        🔎 <HydrateText value={views} />
+        🔎 <HydrateText value={formatCount(views)} />
       </button>
 
       <button
@@ -71,7 +72,7 @@ export default function PostActionBar({
         }}
         suppressHydrationWarning
       >
-        💬 <HydrateText value={replies} />
+        💬 <HydrateText value={formatCount(replies)} />
       </button>
 
       <button
@@ -89,7 +90,7 @@ export default function PostActionBar({
           onReact?.(p, 'like')
         }}
       >
-        💘 <HydrateText value={likes} />
+        💘 <HydrateText value={formatCount(likes)} />
       </button>
 
       <button
@@ -107,7 +108,7 @@ export default function PostActionBar({
           onReact?.(p, 'dislike')
         }}
       >
-        👎 <HydrateText value={dislikes} />
+        👎 <HydrateText value={formatCount(dislikes)} />
       </button>
 
       <button

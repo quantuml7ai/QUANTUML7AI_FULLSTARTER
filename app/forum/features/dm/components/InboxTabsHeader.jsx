@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
 
 export default function InboxTabsHeader({
   t,
@@ -13,6 +14,8 @@ export default function InboxTabsHeader({
   myPublishedCount,
   formatCount,
 }) {
+  const countFormatter = typeof formatCount === 'function' ? formatCount : formatCompactCount
+
   return (
     <div className="inboxHeader">
       <div className="inboxTitleLine">Quantum Messenger</div>
@@ -28,7 +31,7 @@ export default function InboxTabsHeader({
         >
           <span className="inboxTabLabel">{t('inbox_tab_replies_to_me')}</span>
           {mounted && unreadCount > 0 && (
-            <span className="inboxTabBadge" data-kind="replies">{formatCount(unreadCount)}</span>
+            <span className="inboxTabBadge" data-kind="replies">{countFormatter(unreadCount)}</span>
           )}
         </button>
         <button
@@ -39,7 +42,7 @@ export default function InboxTabsHeader({
         >
           <span className="inboxTabLabel">{t('inbox_tab_messages')}</span>
           {mounted && dmUnreadCount > 0 && (
-            <span className="inboxTabBadge" data-kind="messages">{formatCount(dmUnreadCount)}</span>
+            <span className="inboxTabBadge" data-kind="messages">{countFormatter(dmUnreadCount)}</span>
           )}
         </button>
         <button
@@ -53,7 +56,7 @@ export default function InboxTabsHeader({
         >
           <span className="inboxTabLabel">{t('inbox_tab_published')}</span>
           {mounted && myPublishedCount > 0 && (
-            <span className="inboxTabBadge" data-kind="published">{formatCount(myPublishedCount)}</span>
+            <span className="inboxTabBadge" data-kind="published">{countFormatter(myPublishedCount)}</span>
           )}
         </button>
       </div>

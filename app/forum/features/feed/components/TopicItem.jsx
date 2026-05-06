@@ -4,6 +4,7 @@ import React from 'react'
 import { useI18n } from '../../../../../components/i18n'
 import { cls } from '../../../shared/utils/classnames'
 import { human } from '../../../shared/utils/formatters'
+import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
 import HydrateText from '../../../shared/components/HydrateText'
 import ConfirmDeleteOverlay from '../../ui/components/ConfirmDeleteOverlay'
 import StarButton from '../../ui/components/StarButton'
@@ -36,6 +37,7 @@ const TopicItem = React.memo(function TopicItem({
   const { t: tt } = useI18n()
   const avatarRef = React.useRef(null)
   const { posts, likes, dislikes, views } = agg || {}
+  const countFormatter = typeof formatCount === 'function' ? formatCount : formatCompactCount
   const entryId = t?.id != null ? `topic_${t.id}` : ''
   const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()
   const rawUserId = String(t?.userId || t?.accountId || '').trim()
@@ -172,10 +174,10 @@ const TopicItem = React.memo(function TopicItem({
         </div>
 
         <div className="flex items-center gap-2 pt-1">
-          <span className="tag">👓 <HydrateText value={formatCount(views)} /></span>
-          <span className="tag">📣 <HydrateText value={formatCount(posts)} /></span>
-          <span className="tag">💕 <HydrateText value={formatCount(likes)} /></span>
-          <span className="tag">🤮 <HydrateText value={formatCount(dislikes)} /></span>
+          <span className="tag">👓 <HydrateText value={countFormatter(views)} /></span>
+          <span className="tag">📣 <HydrateText value={countFormatter(posts)} /></span>
+          <span className="tag">💕 <HydrateText value={countFormatter(likes)} /></span>
+          <span className="tag">🤮 <HydrateText value={countFormatter(dislikes)} /></span>
           {isAdmin && (
             <button
               className="tag"

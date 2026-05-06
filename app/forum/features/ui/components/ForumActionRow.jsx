@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
 
 import ForumActionNavIcon from './ForumActionNavIcon'
 import VideoFeedNavIcon from './VideoFeedNavIcon'
@@ -24,6 +25,8 @@ export default function ForumActionRow({
   canGlobalBack,
   onBackClick,
 }) {
+  const countFormatter = typeof formatCount === 'function' ? formatCount : formatCompactCount
+
   return (
     <div className="forumRowBar forumGlobalRow">
       <div className="slot-left">
@@ -37,10 +40,10 @@ export default function ForumActionRow({
         >
           <ForumActionNavIcon kind="inbox" active={!!inboxOpen} size={24} />
           {mounted && unreadCount > 0 && (
-            <span className="inboxBadgeReplies" suppressHydrationWarning>{formatCount(unreadCount)}</span>
+            <span className="inboxBadgeReplies" suppressHydrationWarning>{countFormatter(unreadCount)}</span>
           )}
           {mounted && dmUnreadCount > 0 && (
-            <span className="inboxBadgeDM" suppressHydrationWarning>{formatCount(dmUnreadCount)}</span>
+            <span className="inboxBadgeDM" suppressHydrationWarning>{countFormatter(dmUnreadCount)}</span>
           )}
         </button>
 
