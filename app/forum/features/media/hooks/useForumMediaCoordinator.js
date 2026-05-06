@@ -214,6 +214,8 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             ytMutePollsSize: ytMutePolls.size,
             detachedYtPolls,
             activeConnected: !!(active instanceof Element && active.isConnected),
+            nativePrimeSrcStateSize: nativePrimeSrcState.size,
+            srcKickStateSize: srcKickState.size,
           };
         } catch {
           return {};
@@ -452,14 +454,11 @@ const applyMutedPrefToAll = () => {
     })();
     const getLoadPendingStaleMs = () => {
       try {
-        // Keep a native Range fetch authoritative while the browser is still loading it.
-        // Short stale windows were freeing the budget on slow mobile networks and allowed
-        // a second .load() for the same URL, which restarted bytes=0-/tail probes.
-        if (isIOSUi) return 8200;
-        if (isCoarseUi) return 7200;
-        return 7800;
+        if (isIOSUi) return 3600;
+        if (isCoarseUi) return 4800;
+        return 6200;
       } catch {
-        return 7200;
+        return 5200;
       }
     };
 let pendingLoadsCacheTs = 0;
@@ -501,59 +500,22 @@ const readPendingLoads = (force = false) => {
         const stalePendingMs = getLoadPendingStaleMs();
         pendingLoadsCacheVal = nodes.reduce((acc, node) => {
           try {
-            const markedPending = String(node?.dataset?.__loadPending || '') === '1';
+            if (String(node?.dataset?.__loadPending || '') !== '1') return acc;
             const since = Number(node?.dataset?.__loadPendingSince || 0);
             const readyState = Number(node?.readyState || 0);
             const networkState = Number(node?.networkState || 0);
             const pendingForMs = since > 0 ? (now - since) : 0;
-            const hasAttachedSrc = !!String(node?.currentSrc || node?.getAttribute?.('src') || '').trim();
-            const isNetworkLoading =
-              typeof HTMLMediaElement !== 'undefined' &&
-              networkState === HTMLMediaElement.NETWORK_LOADING &&
-              hasAttachedSrc;
+            const isNetworkLoading = networkState === HTMLMediaElement.NETWORK_LOADING;
             const isNetworkIdleLike =
-              typeof HTMLMediaElement !== 'undefined' &&
-              (
-                networkState === HTMLMediaElement.NETWORK_EMPTY ||
-                networkState === HTMLMediaElement.NETWORK_IDLE ||
-                networkState === HTMLMediaElement.NETWORK_NO_SOURCE
-              );
-
-            // Adopt a native fetch even if the dataset flag was cleared by an earlier
-            // stale pass. The browser media pipeline is still holding a Range request;
-            // starting another candidate now creates the repeated 206/cancel pattern.
-            if (!markedPending && isNetworkLoading && readyState < 2) {
-              try {
-                node.dataset.__loadPending = '1';
-                node.dataset.__loadPendingSince = String(now);
-                node.dataset.__loadPendingReason = 'adopt_network_loading';
-                node.dataset.__loadPendingHeld = '1';
-              } catch {}
-              trace('load_pending_adopt_network_loading', node, { readyState, networkState });
-              return acc + 1;
-            }
-
-            if (!markedPending) return acc;
-
-            if (pendingForMs > stalePendingMs && isNetworkLoading && readyState < 2) {
-              try {
-                node.dataset.__loadPendingHeld = '1';
-                node.dataset.__loadPendingHoldReason = 'network_loading';
-              } catch {}
-              trace('load_pending_hold_network_loading', node, {
-                pendingForMs,
-                stalePendingMs,
-                readyState,
-                networkState,
-              });
-              return acc + 1;
-            }
-
+              networkState === HTMLMediaElement.NETWORK_EMPTY ||
+              networkState === HTMLMediaElement.NETWORK_IDLE ||
+              networkState === HTMLMediaElement.NETWORK_NO_SOURCE;
             const mayBeStuck =
               pendingForMs > stalePendingMs &&
               (
+                readyState < 2 ||
                 isNetworkIdleLike ||
-                (!isNetworkLoading && readyState < 2)
+                !isNetworkLoading
               );
             if (mayBeStuck) {
               try {
@@ -579,6 +541,119 @@ const readPendingLoads = (force = false) => {
         return 0;
       }
     };
+    const readElementViewportMetrics = (el) => {
+      try {
+        if (!(el instanceof Element)) {
+          return { visiblePx: 0, gapPx: Number.POSITIVE_INFINITY, top: 0, bottom: 0 };
+        }
+        const rect = el.getBoundingClientRect?.();
+        const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+        if (!rect || viewportH <= 0) {
+          return { visiblePx: 0, gapPx: Number.POSITIVE_INFINITY, top: 0, bottom: 0 };
+        }
+        const top = Number(rect.top || 0);
+        const bottom = Number(rect.bottom || 0);
+        const visiblePx = Math.max(0, Math.min(bottom, viewportH) - Math.max(top, 0));
+        const gapPx = bottom < 0 ? Math.abs(bottom) : (top > viewportH ? top - viewportH : 0);
+        return { visiblePx, gapPx, top, bottom };
+      } catch {
+        return { visiblePx: 0, gapPx: Number.POSITIVE_INFINITY, top: 0, bottom: 0 };
+      }
+    };
+
+    const reclaimPostNativePendingLoad = (requestingMedia = null, channel = 'generic') => {
+      try {
+        const requestMedia = getMediaStateNode(requestingMedia);
+        if (!(requestMedia instanceof HTMLMediaElement)) return false;
+        const cap = Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0));
+        const pendingNow = readPendingLoads(true);
+        if (pendingNow < cap) return false;
+
+        const now = Date.now();
+        const reclaimMargin = isIOSUi ? 760 : (isCoarseUi ? 680 : 520);
+        const minPendingMs = isIOSUi ? 850 : (isCoarseUi ? 760 : 620);
+        const requestSrc = String(
+          requestMedia.dataset?.__src ||
+          requestMedia.getAttribute?.('data-src') ||
+          requestMedia.currentSrc ||
+          requestMedia.getAttribute?.('src') ||
+          '',
+        );
+
+        const activeOwner = active instanceof Element ? active : null;
+        const candidates = Array.from(document.querySelectorAll(managedForumVideoSelector))
+          .filter((node) => {
+            try {
+              if (!(node instanceof HTMLVideoElement)) return false;
+              if (node === requestMedia) return false;
+              if (String(node.dataset?.__loadPending || '') !== '1') return false;
+              if (Number(node.readyState || 0) >= 2) return false;
+              if (!String(node.currentSrc || node.getAttribute?.('src') || '').trim()) return false;
+              if (node === nativePrewarmEl) return false;
+              if (!node.paused && !node.ended) return false;
+              if (activeOwner && (activeOwner === node || activeOwner.contains?.(node) || node.contains?.(activeOwner))) return false;
+              const nodeSrc = String(
+                node.dataset?.__src ||
+                node.getAttribute?.('data-src') ||
+                node.currentSrc ||
+                node.getAttribute?.('src') ||
+                '',
+              );
+              if (requestSrc && nodeSrc && requestSrc === nodeSrc) return false;
+              return true;
+            } catch {
+              return false;
+            }
+          })
+          .map((node) => {
+            const metrics = readElementViewportMetrics(node);
+            const since = Number(node.dataset?.__loadPendingSince || 0);
+            const pendingForMs = since > 0 ? now - since : 0;
+            const networkState = Number(node.networkState || 0);
+            const farEnough = metrics.visiblePx <= 0 && metrics.gapPx > reclaimMargin;
+            const oldEnough = pendingForMs > minPendingMs;
+            const score =
+              (farEnough ? 100000 : 0) +
+              Math.max(0, Number(metrics.gapPx || 0)) +
+              Math.max(0, pendingForMs * 0.18) +
+              (networkState === HTMLMediaElement.NETWORK_LOADING ? 80 : 0);
+            return { node, ...metrics, pendingForMs, networkState, farEnough, oldEnough, score };
+          })
+          .filter((item) => item.farEnough || item.oldEnough)
+          .sort((a, b) => b.score - a.score);
+
+        const victim = candidates[0];
+        if (!victim?.node) return false;
+
+        try {
+          victim.node.dataset.__loadPendingClearReason = 'budget_reclaim';
+          victim.node.dataset.__nativeBudgetReclaimTs = String(now);
+          victim.node.dataset.__nativeBudgetReclaimChannel = String(channel || 'generic');
+          victim.node.dataset.__resident = '0';
+          victim.node.dataset.__prewarm = '0';
+          victim.node.dataset.__nativePrewarm = '0';
+          victim.node.dataset.__nativePrimeHoldUntil = '0';
+        } catch {}
+        try { clearLoadPending(victim.node, 'budget_reclaim', false); } catch {}
+        try { scheduleHardUnload(victim.node, 0, 'resident_cap'); } catch {}
+        pendingLoadsCacheTs = 0;
+        pendingLoadsCacheVal = 0;
+
+        trace('load_budget_reclaim', victim.node, {
+          channel,
+          pendingBefore: pendingNow,
+          cap,
+          pendingForMs: Math.round(victim.pendingForMs),
+          gapPx: Math.round(victim.gapPx),
+          visiblePx: Math.round(victim.visiblePx),
+          networkState: victim.networkState,
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
     const getMediaSrcKey = (el) => {
       const media = getMediaStateNode(el);
       if (!(media instanceof HTMLMediaElement)) return '';
@@ -773,8 +848,12 @@ const readPendingLoads = (force = false) => {
         }
       })();
       if (!bypassPendingBudget && !isUserIntentChannel) {
-        const pendingLoads = readPendingLoads();
-        if (pendingLoads >= Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0))) {
+        const cap = Math.max(1, Number(MAX_CONCURRENT_LOAD_PENDING || 0));
+        let pendingLoads = readPendingLoads();
+        if (pendingLoads >= cap && reclaimPostNativePendingLoad(media, channel)) {
+          pendingLoads = readPendingLoads(true);
+        }
+        if (pendingLoads >= cap) {
           trace('load_kick_skip_budget', media, {
             channel,
             pendingLoads,
@@ -947,19 +1026,7 @@ const isHtmlMediaLoadingOrBuffered = (el) => {
     const pendingFresh = snap.loadPending && snap.pendingForMs < staleMs;
     const metadataFresh = snap.readyState >= 1 && snap.pendingForMs < Math.max(900, Math.round(staleMs * 0.55));
 
-    if (isLoading) {
-      try {
-        media.dataset.__loadPending = '1';
-        media.dataset.__loadPendingSince = String(Number(media.dataset?.__loadPendingSince || 0) || Date.now());
-        media.dataset.__loadPendingReason = media.dataset?.__loadPendingReason || 'buffer_network_loading';
-        if (snap.pendingForMs >= staleMs) {
-          media.dataset.__loadPendingHeld = '1';
-          media.dataset.__loadPendingHoldReason = 'buffer_network_loading';
-        }
-      } catch {}
-      return true;
-    }
-
+    if (isLoading && (pendingFresh || snap.pendingForMs <= 0)) return true;
     if (pendingFresh) return true;
     if (metadataFresh) return true;
 
@@ -1079,7 +1146,7 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
           visiblePx > 0 ||
           holdActive ||
           Number(gapPx || Number.POSITIVE_INFINITY) <= nearProtectPx;
-        const hardProtected = isKeep || playing || visiblePx > 0 || holdActive;
+        const hardProtected = isKeep || playing || visiblePx > 0;
         const priority =
           (isKeep ? -1000000 : 0) +
           (playing ? -900000 : 0) +
@@ -2304,6 +2371,7 @@ const onMediaLoadedCaptured = (e) => {
       } catch {}
       try { pruneNativePrimeSrcState(now); } catch {}
       try { pruneMediaSrcBlockMap(force); } catch {}
+      try { enforcePostNativeSrcCap(nativePrewarmEl, reason); } catch {}
     };
     try {
       window.sweepForumMediaLeaks = () => {
@@ -3431,6 +3499,8 @@ const pauseForeignMedia = (keepEl = null) => {
             emergencyHtmlMediaUnload &&
             reason !== 'cleanup' &&
             reason !== 'forceHardUnload' &&
+            reason !== 'resident_cap' &&
+            reason !== 'error_blocked' &&
             isConnectedPostVideoOwner(el)
           ) {
             const media = getMediaStateNode(el);
@@ -3665,33 +3735,18 @@ const getNativeEarlyPrimeGapLimit = () => {
         const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
         const holdUntil = Number(media?.dataset?.__nativePrimeHoldUntil || 0);
         const holdLeft = holdUntil > now ? holdUntil - now : 0;
-        const readyState = Number(media?.readyState || 0);
-        const hasAttachedSrc = !!String(media?.currentSrc || media?.getAttribute?.('src') || '').trim();
-        const networkLoading =
-          typeof HTMLMediaElement !== 'undefined' &&
-          Number(media?.networkState || 0) === HTMLMediaElement.NETWORK_LOADING;
-        const loadPending = String(media?.dataset?.__loadPending || '') === '1';
-        const inFlightWarmFetch = hasAttachedSrc && readyState < 2 && (networkLoading || loadPending);
         const nearOneCard =
           visiblePx > 0 ||
           gapPx <= Math.max(
             getNativePrimeGapLimit(),
             Math.round(viewportH * (isIOSUi ? 1.05 : (isCoarseUi ? 0.92 : 0.72))),
           );
-
-        if (inFlightWarmFetch) {
-          const runwayFetchDelay = nearOneCard
-            ? (isIOSUi ? 7600 : (isCoarseUi ? 6200 : 4200))
-            : (isIOSUi ? 4200 : (isCoarseUi ? 3600 : 2600));
-          return Math.max(runwayFetchDelay, Math.min(holdLeft, isIOSUi ? 8200 : (isCoarseUi ? 6800 : 4600)));
-        }
-
         const runwayDelay = nearOneCard
-          ? (isIOSUi ? 1600 : (isCoarseUi ? 1250 : 900))
-          : (isIOSUi ? 900 : (isCoarseUi ? 720 : 520));
-        return Math.max(runwayDelay, Math.min(holdLeft, isIOSUi ? 1900 : (isCoarseUi ? 1500 : 1050)));
+          ? (isIOSUi ? 900 : (isCoarseUi ? 760 : 520))
+          : (isIOSUi ? 360 : (isCoarseUi ? 300 : 240));
+        return Math.max(runwayDelay, Math.min(holdLeft, isIOSUi ? 1100 : (isCoarseUi ? 900 : 650)));
       } catch {
-        return isIOSUi ? 1600 : (isCoarseUi ? 1250 : 900);
+        return isIOSUi ? 900 : (isCoarseUi ? 760 : 560);
       }
     };
     const releaseNativePrewarmExcept = (keepEl = null, reason = 'native_prewarm_replace') => {
@@ -3701,32 +3756,15 @@ const getNativeEarlyPrimeGapLimit = () => {
         if (keepEl && prev === keepEl) return;
         if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
         nativePrewarmEl = null;
-        const prevPipeline = getNativePrewarmPipelineState(prev);
-        const keepFetchingPrev = !!(
-          prevPipeline?.hasSrc &&
-          prevPipeline?.loading &&
-          !prevPipeline?.ready &&
-          isNativePrewarmEligible(prev)
-        );
         try {
+          prev.dataset.__prewarm = '0';
+          prev.dataset.__resident = '0';
           prev.dataset.__nativePrewarm = '0';
-          if (keepFetchingPrev) {
-            prev.dataset.__prewarm = '1';
-            prev.dataset.__resident = '1';
-            prev.dataset.__nativePrewarmReleasedWhileLoading = String(Date.now());
-            prev.dataset.__nativePrewarmReleaseReason = reason;
-            if (prev instanceof HTMLVideoElement) prev.preload = 'auto';
-          } else {
-            prev.dataset.__prewarm = '0';
-            prev.dataset.__resident = '0';
-            if (prev instanceof HTMLVideoElement) prev.preload = 'metadata';
-          }
         } catch {}
 
         // Keep one strict warm owner, but do not tear down the previous source
-        // while its native Range request is still fetching a first frame. That
-        // was the main source of 206 -> cancel -> 206 loops during scroll
-        // direction corrections and quick handoffs between neighboring cards.
+        // inside the one-card mobile runway: it is the window where first frames
+        // are most often reused during small scroll corrections.
         scheduleHardUnload(prev, getNativeWarmOwnerLostDelay(prev), 'native_warm_owner_lost');
       } catch {}
     };
