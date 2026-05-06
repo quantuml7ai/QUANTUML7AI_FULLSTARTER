@@ -327,6 +327,22 @@ export default function useForumWindowing({
         const nextOverscanPx = resolveOverscanPx(velocity)
         const fromY = Math.max(0, st - nextOverscanPx)
         const toY = st + vh + nextOverscanPx
+        const viewportFromY = Math.max(0, st)
+        const viewportToY = st + vh
+
+        let visibleStart = 0
+        let visibleAcc = 0
+        while (visibleStart < total && (visibleAcc + getHeightAtIndex(visibleStart)) < viewportFromY) {
+          visibleAcc += getHeightAtIndex(visibleStart)
+          visibleStart += 1
+        }
+
+        let visibleEnd = visibleStart
+        let visibleAcc2 = visibleAcc
+        while (visibleEnd < total && visibleAcc2 < viewportToY) {
+          visibleAcc2 += getHeightAtIndex(visibleEnd)
+          visibleEnd += 1
+        }
 
         let start = 0
         let acc = 0
@@ -345,28 +361,45 @@ export default function useForumWindowing({
         const nextMaxRender = resolveMaxRender(velocity)
 
         if ((end - start) > nextMaxRender) {
-          const windowSize = clamp(nextMaxRender, 1, total)
+          const visibleCount = Math.max(1, visibleEnd - visibleStart)
+          const runwayItems = direction < 0 ? 2 : 1
+          const windowSize = clamp(
+            Math.max(nextMaxRender, visibleCount + runwayItems),
+            1,
+            total,
+          )
 
           if (direction < 0) {
-            // При скролле назад нельзя центрировать окно:
-            // иначе верхний/предыдущий media shell размонтируется прямо перед входом во viewport.
-            const reverseBias = Math.min(2, Math.max(1, Math.floor(windowSize * 0.18)))
-            start = Math.max(0, start - reverseBias)
+            // При обратном скролле hard-cap не должен отрезать карточки,
+            // которые реально находятся в viewport.
+            start = Math.max(0, Math.min(start, visibleStart))
             end = Math.min(total, start + windowSize)
+            if (end < visibleEnd) {
+              end = Math.min(total, visibleEnd)
+              start = Math.max(0, end - windowSize)
+            }
           } else if (direction > 0) {
-            // При скролле вперёд держим нижний край, чтобы не резать runway.
-            const forwardBias = Math.min(1, Math.max(0, Math.floor(windowSize * 0.12)))
-            end = Math.min(total, end + forwardBias)
+            // При прямом скролле сначала сохраняем viewport, потом режем
+            // только безопасный верхний хвост.
+            end = Math.min(total, Math.max(end, visibleEnd))
             start = Math.max(0, end - windowSize)
+            if (start > visibleStart) {
+              start = Math.max(0, visibleStart)
+              end = Math.min(total, start + windowSize)
+            }
           } else {
-            const mid = Math.floor((start + end) / 2)
+            const mid = Math.floor((visibleStart + visibleEnd) / 2)
             const half = Math.floor(windowSize / 2)
-            start = Math.max(0, mid - half)
+            start = clamp(mid - half, 0, Math.max(0, total - windowSize))
             end = Math.min(total, start + windowSize)
-          }
-
-          if ((end - start) < windowSize) {
-            start = Math.max(0, end - windowSize)
+            if (start > visibleStart) {
+              start = Math.max(0, visibleStart)
+              end = Math.min(total, start + windowSize)
+            }
+            if (end < visibleEnd) {
+              end = Math.min(total, visibleEnd)
+              start = Math.max(0, end - windowSize)
+            }
           }
         }
 
