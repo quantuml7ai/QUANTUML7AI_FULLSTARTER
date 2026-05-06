@@ -40,7 +40,6 @@ export default function DmDialogsPane({
         : ''
     ),
     estimateItemHeight: () => readForumCardEstimate('dm_dialog'),
-    itemGapPx: 8,
     maxRender: () => readForumWindowingMaxRender('dm_dialog'),
     overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_dialog', velocity),
     listId: 'forum:dm-dialogs',

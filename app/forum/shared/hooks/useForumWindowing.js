@@ -106,7 +106,6 @@ export default function useForumWindowing({
   getItemKey,
   getItemDomId,
   estimateItemHeight,
-  itemGapPx = 0,
   maxRender = DEFAULT_FALLBACK_MAX_RENDER,
   overscanPx = DEFAULT_FALLBACK_OVERSCAN_PX,
   getScrollEl,
@@ -223,16 +222,6 @@ export default function useForumWindowing({
     return Math.max(40, Math.round(raw || 40))
   }, [estimateItemHeight, itemList, totalItems])
 
-  const resolveItemGapPx = useCallback((index = 0) => {
-    const raw = resolveNumericConfig(itemGapPx, 0, {
-      index,
-      item: itemList[index],
-      items: itemList,
-      total: totalItems,
-    })
-    return Math.max(0, Math.round(raw || 0))
-  }, [itemGapPx, itemList, totalItems])
-
   const getHeightAtIndex = useCallback((index) => {
     const key = itemKeysRef.current[index]
     if (key) {
@@ -242,24 +231,15 @@ export default function useForumWindowing({
     return estimateHeightAtIndex(index)
   }, [estimateHeightAtIndex])
 
-  const getItemExtentAtIndex = useCallback((index, total = totalItems) => {
-    const height = getHeightAtIndex(index)
-    const gap = index < Math.max(0, Number(total || 0) - 1)
-      ? resolveItemGapPx(index)
-      : 0
-    return height + gap
-  }, [getHeightAtIndex, resolveItemGapPx, totalItems])
-
   const buildWindow = useCallback((start, end, total) => {
     let top = 0
-    for (let i = 0; i < start; i += 1) top += getItemExtentAtIndex(i, total)
-    if (start > 0) top = Math.max(0, top - resolveItemGapPx(start - 1))
+    for (let i = 0; i < start; i += 1) top += getHeightAtIndex(i)
 
     let bottom = 0
-    for (let i = end; i < total; i += 1) bottom += getItemExtentAtIndex(i, total)
+    for (let i = end; i < total; i += 1) bottom += getHeightAtIndex(i)
 
     return { start, end, top, bottom }
-  }, [getItemExtentAtIndex, resolveItemGapPx])
+  }, [getHeightAtIndex])
 
   const buildInitialWindow = useCallback((total) => {
     const initialEnd = Math.min(resolveMaxRender(0), Math.max(0, Number(total || 0)))
@@ -350,15 +330,15 @@ export default function useForumWindowing({
 
         let start = 0
         let acc = 0
-        while (start < total && (acc + getItemExtentAtIndex(start, total)) < fromY) {
-          acc += getItemExtentAtIndex(start, total)
+        while (start < total && (acc + getHeightAtIndex(start)) < fromY) {
+          acc += getHeightAtIndex(start)
           start += 1
         }
 
         let end = start
         let acc2 = acc
         while (end < total && acc2 < toY) {
-          acc2 += getItemExtentAtIndex(end, total)
+          acc2 += getHeightAtIndex(end)
           end += 1
         }
 
@@ -487,7 +467,7 @@ export default function useForumWindowing({
   }, [
     active,
     buildWindow,
-    getItemExtentAtIndex,
+    getHeightAtIndex,
     layoutJitterPx,
     readViewportState,
     resolveMaxRender,
