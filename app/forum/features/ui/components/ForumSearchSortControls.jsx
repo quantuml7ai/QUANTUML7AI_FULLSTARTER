@@ -70,12 +70,13 @@ export default function ForumSearchSortControls({
   videoFeedOpen,
   setVideoFeedUserSortLocked,
   setFeedSort,
+  feedSort,
+  topicSort,
+  postSort,
   sel,
   forcePostSort,
   setPostSort,
   setTopicSort,
-  starMode,
-  setStarMode,
   questEnabled,
   questBtnClass,
   openQuests,
@@ -98,15 +99,19 @@ export default function ForumSearchSortControls({
     })
   }
 
-  const toggleStarMode = (event) => {
-    event.preventDefault()
-    event.stopPropagation()
-    setStarMode((prev) => !prev)
-    onCommitSortChange?.({
-      kind: 'star_mode',
-      target: videoFeedOpen ? 'video' : (sel || forcePostSort ? 'post' : 'topic'),
-    })
-  }
+  const activeSortKey = String(
+    videoFeedOpen
+      ? (feedSort || 'new')
+      : (sel || forcePostSort ? (postSort || 'new') : (topicSort || 'top'))
+  )
+
+  const sortOptions = [
+    ['new', t('forum_sort_new')],
+    ['top', t('forum_sort_top')],
+    ['likes', t('forum_sort_likes')],
+    ['views', t('forum_sort_views')],
+    ['replies', t('forum_sort_replies')],
+  ]
 
   return (
     <div className="search">
@@ -255,33 +260,21 @@ export default function ForumSearchSortControls({
         />
         {sortOpen && (
           <div className="sortDrop" onMouseLeave={() => setSortOpen(false)}>
-            {[
-              ['new', t('forum_sort_new')],
-              ['top', t('forum_sort_top')],
-              ['likes', t('forum_sort_likes')],
-              ['views', t('forum_sort_views')],
-              ['replies', t('forum_sort_replies')],
-            ].map(([k, txt]) => (
-              <button
-                key={k}
-                className="item w-full text-left mb-1"
-                onClick={() => commitSelectedSort(k)}
-              >
-                {txt}
-              </button>
-            ))}
-            <button
-              type="button"
-              className={`starModeBtn ${starMode ? 'on' : ''}`}
-              onClick={toggleStarMode}
-              title={t('forum_star_mode_title')}
-              aria-pressed={starMode}
-              aria-label={t('forum_star_mode')}
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
-                <path className="starPath" d="M12 2.6l2.9 6.2 6.8.6-5.1 4.4 1.6 6.6L12 16.9 5.8 20.4l1.6-6.6-5.1-4.4 6.8-.6L12 2.6Z" />
-              </svg>
-            </button>
+            {sortOptions.map(([k, txt]) => {
+              const isActive = activeSortKey === k
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  className={cls('sortDropItem', isActive && 'sortDropItem--active')}
+                  aria-pressed={isActive}
+                  onClick={() => commitSelectedSort(k)}
+                >
+                  <span className="sortDropItemRail" aria-hidden="true" />
+                  <span className="sortDropItemText">{txt}</span>
+                </button>
+              )
+            })}
           </div>
         )}
     </div>

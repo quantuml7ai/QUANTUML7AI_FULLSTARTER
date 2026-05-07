@@ -21,6 +21,9 @@ export default function buildSearchSortControlsProps({
   videoFeedOpen,
   setVideoFeedUserSortLocked,
   setFeedSort,
+  feedSort,
+  topicSort,
+  postSort,
   sel,
   inboxOpen,
   inboxTab,
@@ -57,6 +60,9 @@ export default function buildSearchSortControlsProps({
     videoFeedOpen,
     setVideoFeedUserSortLocked,
     setFeedSort,
+    feedSort,
+    topicSort,
+    postSort,
     sel,
     forcePostSort:
       profileBranchMode === 'posts' ||

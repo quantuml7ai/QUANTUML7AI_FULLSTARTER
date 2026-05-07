@@ -1649,7 +1649,99 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   white-space:nowrap;
   max-width:100%;
 }
-.sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }
+.sortDrop{
+  position:absolute;
+  top:68px;
+  right:100px;
+  width:132px;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+  border:1px solid rgba(120,180,255,.20);
+  background:
+    radial-gradient(120% 130% at 50% 0%, rgba(80,167,255,.13), rgba(10,14,20,.98) 48%),
+    rgba(10,14,20,.98);
+  border-radius:16px;
+  padding:7px 8px;
+  z-index:3000;
+  box-shadow:
+    0 16px 34px rgba(0,0,0,.48),
+    0 0 24px rgba(80,167,255,.14),
+    inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter:blur(12px) saturate(145%);
+}
+.sortDropItem{
+  position:relative;
+  width:100%;
+  min-height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 10px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:rgba(234,244,255,.90);
+  font-size:.82rem;
+  font-weight:850;
+  line-height:1.1;
+  text-align:center;
+  cursor:pointer;
+  overflow:hidden;
+  isolation:isolate;
+  transition:background .16s ease, border-color .16s ease, box-shadow .16s ease, color .16s ease, transform .12s ease;
+}
+.sortDropItem + .sortDropItem::before{
+  content:"";
+  position:absolute;
+  top:-1px;
+  left:12px;
+  right:12px;
+  height:1px;
+  background:linear-gradient(90deg, rgba(80,167,255,0), rgba(120,205,255,.62), rgba(255,215,90,.42), rgba(120,205,255,.62), rgba(80,167,255,0));
+  box-shadow:0 0 10px rgba(120,205,255,.34);
+  opacity:.82;
+}
+.sortDropItemRail{
+  position:absolute;
+  inset:6px 6px;
+  border-left:1px solid rgba(120,205,255,.28);
+  border-right:1px solid rgba(255,215,90,.20);
+  border-radius:10px;
+  opacity:.32;
+  pointer-events:none;
+  z-index:-1;
+}
+.sortDropItemText{ position:relative; z-index:1; }
+.sortDropItem:hover,
+.sortDropItem:focus-visible{
+  color:#fff4bf;
+  background:linear-gradient(180deg, rgba(80,167,255,.12), rgba(255,215,90,.07));
+  border-color:rgba(140,210,255,.35);
+  box-shadow:inset 0 0 14px rgba(120,205,255,.08), 0 0 16px rgba(80,167,255,.12);
+}
+.sortDropItem:active{ transform:scale(.985); }
+.sortDropItem--active{
+  color:#ffe66d;
+  background:
+    radial-gradient(100% 180% at 50% 0%, rgba(255,230,109,.22), rgba(255,230,109,0) 58%),
+    linear-gradient(180deg, rgba(255,215,90,.15), rgba(80,167,255,.10));
+  border-color:rgba(255,215,90,.58);
+  box-shadow:
+    0 0 18px rgba(255,215,90,.20),
+    inset 0 0 16px rgba(255,215,90,.11),
+    inset 0 0 0 1px rgba(255,255,255,.06);
+  text-shadow:0 0 10px rgba(255,215,90,.48);
+}
+.sortDropItem--active .sortDropItemRail{
+  opacity:1;
+  border-left-color:rgba(255,235,145,.72);
+  border-right-color:rgba(255,235,145,.72);
+  box-shadow:
+    inset 8px 0 14px -12px rgba(255,235,145,.88),
+    inset -8px 0 14px -12px rgba(255,235,145,.88);
+}
 
 .starBtn{
   display:inline-flex;
