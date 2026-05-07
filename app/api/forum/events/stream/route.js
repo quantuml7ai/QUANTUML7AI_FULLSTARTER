@@ -9,6 +9,15 @@ export const revalidate = 0
 export const fetchCache = 'force-no-store'
 export const runtime = 'edge'
 
+// Если SSE не включён явно, route не должен держать долгий stream.
+// Основной форумный sync остаётся через /api/forum/snapshot.
+const isForumSseEnabled = () => (
+  String(
+    process.env.FORUM_SSE_ENABLED ||
+    process.env.NEXT_PUBLIC_FORUM_SSE_ENABLED ||
+    ''
+  ).trim() === '1'
+)
 // --- singleton-объект для защиты от двойных подписок в DEV/HMR и на инстансе ---
 const S = (globalThis.__forumSSE ||= {
   clients: new Set(),
@@ -19,6 +28,7 @@ const S = (globalThis.__forumSSE ||= {
 
 // один encoder на процесс
 const encoder = new TextEncoder()
+const STREAM_MAX_LIFETIME_MS = 55_000
 
 function safeEnqueue(controller, chunk) {
   try {
@@ -98,6 +108,15 @@ async function ensureSubscribed() {
 }
 
 export async function GET(req) {
+  if (!isForumSseEnabled()) {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'cache-control': 'no-store, max-age=0',
+      },
+    })
+  }
+
   // гарантируем подписку на канал
   await ensureSubscribed()
 
@@ -115,18 +134,30 @@ export async function GET(req) {
         const n = parseInt(r, 10)
         rev = Number.isFinite(n) ? n : 0
       } catch {}
-      write(controller, { type: 'connected', rev, ts: Date.now() })
+write(controller, { type: 'connected', rev, ts: Date.now() })
 
-      // heartbeat по протоколу SSE (комментарии), чтобы соединение не считалось «тихим»
-      const hb = setInterval(() => {
-        safeEnqueue(controller, `: ping ${Date.now()}\n\n`)
-      }, 15000)
+// heartbeat по протоколу SSE (комментарии), чтобы соединение не считалось «тихим»
+const hb = setInterval(() => {
+  safeEnqueue(controller, `: ping ${Date.now()}\n\n`)
+}, 15000)
 
-      const close = () => {
-        clearInterval(hb)
-        S.clients.delete(controller)
-        try { controller.close() } catch { /* no-op */ }
-      }
+let closed = false
+const close = () => {
+  if (closed) return
+  closed = true
+  clearInterval(hb)
+  clearTimeout(maxLife)
+  S.clients.delete(controller)
+  try { controller.close() } catch { /* no-op */ }
+}
+
+// Закрываем stream сами, чтобы Vercel не считал соединение timeout-ошибкой.
+const maxLife = setTimeout(() => {
+  try {
+    write(controller, { type: 'reconnect', rev, ts: Date.now() })
+  } catch {}
+  close()
+}, STREAM_MAX_LIFETIME_MS)
 
       // закрытие по аборту запроса/разрыву сети
       const { signal } = req

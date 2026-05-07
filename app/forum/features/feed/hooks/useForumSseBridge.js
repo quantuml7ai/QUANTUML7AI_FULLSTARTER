@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
-
+const isForumSseEnabled = () => (
+  String(process.env.NEXT_PUBLIC_FORUM_SSE_ENABLED || '').trim() === '1'
+)
 export default function useForumSseBridge({
   snapRef,
   sseHintRef,
@@ -10,16 +12,27 @@ export default function useForumSseBridge({
 }) {
   const sseSyncTimerRef = useRef(null)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+useEffect(() => {
+  if (typeof window === 'undefined') return
 
+  if (!isForumSseEnabled()) {
     if (window.__forumSSE) {
       try {
         window.__forumSSE.close()
       } catch {}
+      window.__forumSSE = null
     }
-    const es = new EventSource('/api/forum/events/stream', { withCredentials: false })
-    window.__forumSSE = es
+    return
+  }
+
+  if (window.__forumSSE) {
+    try {
+      window.__forumSSE.close()
+    } catch {}
+  }
+
+  const es = new EventSource('/api/forum/events/stream', { withCredentials: false })
+  window.__forumSSE = es
 
     es.onmessage = (e) => {
       if (!e?.data) return
