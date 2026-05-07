@@ -59,11 +59,6 @@ const MAX_OPS_PER_BATCH = 25
 const MAX_TITLE = 180
 const MAX_TEXT  = 4000
 const MAX_ICON  = 256
-
-const isForumViewRealtimeEnabled = () => (
-  String(process.env.FORUM_VIEW_REALTIME_ENABLED || '').trim() === '1'
-)
-
 const topicCidKey = (cid) => `forum:cid:topic:${String(cid || '').trim()}`
 function trimStr(v, max) {
   const s = String(v ?? '').trim()
@@ -421,28 +416,19 @@ try {
             }
             if (inc) changed = true
           }
-if (changed && isForumViewRealtimeEnabled()) {
-  const rev = await nextRev()
-  await pushChange({ rev, kind: 'views', topics: viewsMap, ts: Date.now() })
-
-  try {
-    if (Object.keys(snapshotTopicPatch).length) {
-      await patchSnapshotPartial({ rev, patch: { topics: snapshotTopicPatch } })
-    }
-  } catch {}
-
-  results.push({ op: 'view_topics', ids, views: viewsMap, rev, opId: op.opId })
-  await publishForumEvent({ type: 'view_topics', ids, views: viewsMap, rev })
-} else {
-  results.push({
-    op: 'view_topics',
-    ids,
-    views: viewsMap,
-    delta: changed ? 1 : 0,
-    realtime: false,
-    opId: op.opId,
-  })
-}
+          if (changed) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', topics: viewsMap, ts: Date.now() })
+            try {
+              if (Object.keys(snapshotTopicPatch).length) {
+                await patchSnapshotPartial({ rev, patch: { topics: snapshotTopicPatch } })
+              }
+            } catch {}
+            results.push({ op: 'view_topics', ids, views: viewsMap, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_topics', ids, views: viewsMap, rev })
+          } else {
+            results.push({ op: 'view_topics', ids, views: viewsMap, delta: 0, opId: op.opId })
+          }
 
         } else if (op.type === 'view_posts') {
           const ids = Array.from(new Set((Array.isArray(p.ids) ? p.ids : []).map(String).filter(Boolean)))
@@ -457,28 +443,19 @@ if (changed && isForumViewRealtimeEnabled()) {
             }
             if (inc) changed = true
           }
-if (changed && isForumViewRealtimeEnabled()) {
-  const rev = await nextRev()
-  await pushChange({ rev, kind: 'views', posts: viewsMap, ts: Date.now() })
-
-  try {
-    if (Object.keys(snapshotPostPatch).length) {
-      await patchSnapshotPartial({ rev, patch: { posts: snapshotPostPatch } })
-    }
-  } catch {}
-
-  results.push({ op: 'view_posts', ids, views: viewsMap, rev, opId: op.opId })
-  await publishForumEvent({ type: 'view_posts', ids, views: viewsMap, rev })
-} else {
-  results.push({
-    op: 'view_posts',
-    ids,
-    views: viewsMap,
-    delta: changed ? 1 : 0,
-    realtime: false,
-    opId: op.opId,
-  })
-}
+          if (changed) {
+            const rev = await nextRev()
+            await pushChange({ rev, kind: 'views', posts: viewsMap, ts: Date.now() })
+            try {
+              if (Object.keys(snapshotPostPatch).length) {
+                await patchSnapshotPartial({ rev, patch: { posts: snapshotPostPatch } })
+              }
+            } catch {}
+            results.push({ op: 'view_posts', ids, views: viewsMap, rev, opId: op.opId })
+            await publishForumEvent({ type: 'view_posts', ids, views: viewsMap, rev })
+          } else {
+            results.push({ op: 'view_posts', ids, views: viewsMap, delta: 0, opId: op.opId })
+          }
 
         } else if (op.type === 'set_reaction') {
           const { postId, state } = p
