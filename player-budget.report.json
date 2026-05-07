@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T16:20:50.403Z",
+  "generatedAt": "2026-05-07T07:53:14.144Z",
   "issues": [],
   "files": [
     {
@@ -53,9 +53,9 @@
     {
       "file": "app/forum/features/feed/components/PostMediaStack.jsx",
       "counts": {
-        "ownerId": 8,
-        "embedKind": 8,
-        "lifecycleState": 8,
+        "ownerId": 6,
+        "embedKind": 6,
+        "lifecycleState": 6,
         "coordinatorOwnsLifecycle": 0,
         "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
@@ -73,13 +73,13 @@
         "embedKind": 0,
         "lifecycleState": 0,
         "coordinatorOwnsLifecycle": 0,
-        "siteMediaPlay": 3,
+        "siteMediaPlay": 0,
         "legacyWarmSweep": 0,
         "legacyIframePrewarm": 0,
         "forumQcastMuted": 0,
         "restoreGuard": 0,
         "sameSrcGuard": 0,
-        "sharedMute": 9
+        "sharedMute": 0
       }
     },
     {

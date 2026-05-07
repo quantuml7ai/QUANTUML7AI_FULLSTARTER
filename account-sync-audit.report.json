@@ -1,16 +1,16 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-01T16:20:48.625Z",
+  "generatedAt": "2026-05-07T07:53:12.372Z",
   "summary": {
-    "scannedFiles": 371,
+    "scannedFiles": 373,
     "filesWithSyncKeys": 142,
     "keyFrequency": {
       "accountId": 410,
-      "userId": 385,
+      "userId": 389,
       "authorId": 106,
       "wallet": 20,
       "telegramId": 5,
-      "initData": 9,
+      "initData": 7,
       "linked": 4,
       "followers": 26,
       "following": 0,
@@ -769,407 +769,407 @@
         },
         {
           "key": "vip",
-          "line": 664,
+          "line": 638,
           "text": "--vip-emoji-size: 48px;      /* можно быстро настроить под себя */"
         },
         {
           "key": "vip",
-          "line": 665,
+          "line": 639,
           "text": "--vip-emoji-size-sm: 48px;   /* на мобильных */"
         },
         {
           "key": "vip",
-          "line": 667,
+          "line": 641,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 668,
+          "line": 642,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 669,
+          "line": 643,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 674,
+          "line": 648,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 679,
+          "line": 653,
           "text": ".vipComposerPreview{ position:relative; display:inline-block; margin-top:6px }"
         },
         {
           "key": "vip",
-          "line": 680,
+          "line": 654,
           "text": ".vipComposerPreview .vipRemove{"
         },
         {
           "key": "vip",
-          "line": 686,
+          "line": 660,
           "text": ".moziEmojiBig{ width: var(--mozi-emoji-size, var(--vip-emoji-size)); height: var(--mozi-emoji-size, var(--vip-emoji-size)); display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 1001,
+          "line": 975,
           "text": ".emojiBtn, .vipEmojiIcon, .lockBadge, .emojiPostBig{"
         },
         {
           "key": "vip",
-          "line": 1006,
+          "line": 980,
           "text": ".vipEmojiIcon { display:inline-block; width:100%; height:100%; }"
         },
         {
           "key": "vip",
-          "line": 1007,
+          "line": 981,
           "text": ".vipEmojiIcon img, .vipEmojiIcon { object-fit:cover; border-radius:8px }"
         },
         {
           "key": "vip",
-          "line": 1011,
+          "line": 985,
           "text": "--vip-emoji-size: 48px;      /* базовый размер */"
         },
         {
           "key": "vip",
-          "line": 1012,
+          "line": 986,
           "text": "--vip-emoji-size-sm: 40px;   /* на узких экранах */"
         },
         {
           "key": "vip",
-          "line": 1066,
+          "line": 1040,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 1067,
+          "line": 1041,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 1068,
+          "line": 1042,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 1074,
+          "line": 1048,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 2652,
+          "line": 2626,
           "text": ".iconBtn.vip { border-color: rgba(255,215,0,.55); color:#ffd700; box-shadow:0 0 14px rgba(255,215,0,.25) }"
         },
         {
           "key": "vip",
-          "line": 2653,
+          "line": 2627,
           "text": ".iconBtn.vipGray { opacity:.85 }"
         },
         {
           "key": "vip",
-          "line": 2654,
+          "line": 2628,
           "text": ".vipWrap { position:relative }"
         },
         {
           "key": "vip",
-          "line": 2662,
+          "line": 2636,
           "text": ".emojiGrid.vip { outline: 1px dashed rgba(255,215,0,.25); border-radius: 10px; padding: 6px; }"
         },
         {
           "key": "vip",
-          "line": 2663,
+          "line": 2637,
           "text": ".emojiBtn.vipAnim { will-change: transform; }"
         },
         {
           "key": "vip",
-          "line": 2664,
+          "line": 2638,
           "text": ".emojiBtn.vipAnim:hover { transform: translateY(-1px) scale(1.02); }"
         },
         {
           "key": "vip",
-          "line": 2684,
+          "line": 2658,
           "text": ".vipEmojiIcon { display:block; width:100%; height:100%; object-fit:cover; }"
         },
         {
           "key": "vip",
-          "line": 2686,
+          "line": 2660,
           "text": ".vipLock { position:absolute; right:-4px; top:-4px; font-size:12px; pointer-events:none; }"
         },
         {
           "key": "vip",
-          "line": 2687,
+          "line": 2661,
           "text": ".vipComposerPreview{ margin-top:6px; }"
         },
         {
           "key": "vip",
-          "line": 2688,
+          "line": 2662,
           "text": ":root{ --vip-emoji-size:48px; }"
         },
         {
           "key": "vip",
-          "line": 2689,
+          "line": 2663,
           "text": ".vipEmojiBig{ display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 2690,
+          "line": 2664,
           "text": ".vipComposerPreview{ margin-top:6px; }"
         },
         {
           "key": "vip",
-          "line": 2691,
+          "line": 2665,
           "text": ":root{ --vip-emoji-size:48px; --vip-emoji-size-sm:32px; }"
         },
         {
           "key": "vip",
-          "line": 2692,
+          "line": 2666,
           "text": ".vipEmojiBig{ display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 2694,
+          "line": 2668,
           "text": ".vipEmojiBig{ width:var(--vip-emoji-size-sm); height:var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 2725,
+          "line": 2699,
           "text": "--vip-badge-w, --vip-badge-h  (размер)"
         },
         {
           "key": "vip",
-          "line": 2726,
+          "line": 2700,
           "text": "--vip-badge-gap              (расстояние между бейджем и ником)"
         },
         {
           "key": "vip",
-          "line": 2727,
+          "line": 2701,
           "text": "--vip-badge-shift-x/y        (сдвиг бейджа)"
         },
         {
           "key": "vip",
-          "line": 2730,
+          "line": 2704,
           "text": "--vip-badge-w: clamp(42px, 9vw, 54px);"
         },
         {
           "key": "vip",
-          "line": 2731,
+          "line": 2705,
           "text": "--vip-badge-h: clamp(42px, 8.2vw, 58px);"
         },
         {
           "key": "vip",
-          "line": 2732,
+          "line": 2706,
           "text": "--vip-badge-gap: 2px;"
         },
         {
           "key": "vip",
-          "line": 2733,
+          "line": 2707,
           "text": "--vip-badge-shift-x: 0px;"
         },
         {
           "key": "vip",
-          "line": 2734,
+          "line": 2708,
           "text": "--vip-badge-shift-y: 0px;"
         },
         {
           "key": "vip",
-          "line": 2737,
+          "line": 2711,
           "text": ".nick-badge.vipNick{"
         },
         {
           "key": "vip",
-          "line": 2741,
+          "line": 2715,
           "text": "gap: var(--vip-badge-gap);"
         },
         {
           "key": "vip",
-          "line": 2745,
+          "line": 2719,
           "text": ".vipFlip{"
         },
         {
           "key": "vip",
-          "line": 2748,
+          "line": 2722,
           "text": "width: var(--vip-badge-w);"
         },
         {
           "key": "vip",
-          "line": 2749,
+          "line": 2723,
           "text": "height: var(--vip-badge-h);"
         },
         {
           "key": "vip",
-          "line": 2750,
+          "line": 2724,
           "text": "transform: translate(var(--vip-badge-shift-x), var(--vip-badge-shift-y));"
         },
         {
           "key": "vip",
-          "line": 2753,
+          "line": 2727,
           "text": ".vipFlipImg{"
         },
         {
           "key": "vip",
-          "line": 2765,
+          "line": 2739,
           "text": "@keyframes vipFlipA{"
         },
         {
           "key": "vip",
-          "line": 2769,
+          "line": 2743,
           "text": "@keyframes vipFlipB{"
         },
         {
           "key": "vip",
-          "line": 2773,
+          "line": 2747,
           "text": ".vipFlipImg.vip1{ animation: vipFlipA 25s infinite linear; }"
         },
         {
           "key": "vip",
-          "line": 2774,
+          "line": 2748,
           "text": ".vipFlipImg.vip2{ animation: vipFlipB 25s infinite linear; }"
         },
         {
           "key": "vip",
-          "line": 2777,
+          "line": 2751,
           "text": ".vipFlipImg.vip1, .vipFlipImg.vip2{ animation:none; }"
         },
         {
           "key": "vip",
-          "line": 2778,
+          "line": 2752,
           "text": ".vipFlipImg.vip2{ opacity:0; }"
         },
         {
           "key": "vip",
-          "line": 5555,
+          "line": 5529,
           "text": ".dmRow{ --vip-badge-w: 34px; --vip-badge-h: 36px; }"
         },
         {
           "key": "vip",
-          "line": 5556,
+          "line": 5530,
           "text": ".dmThreadHeader{ --vip-badge-w: 38px; --vip-badge-h: 40px; }"
         },
         {
           "key": "vip",
-          "line": 5956,
+          "line": 5930,
           "text": ".qcoinX2.vip{"
         },
         {
           "key": "vip",
-          "line": 6467,
+          "line": 6441,
           "text": "/* Золотой VIP-перелив для суммы награды — как у .qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6473,
+          "line": 6447,
           "text": "/* тот же градиент и скорость «shine», что у qcoinX2.vip */"
         },
         {
           "key": "vip",
-          "line": 6923,
+          "line": 6897,
           "text": "/* ===== animated search/sort/vip controls ===== */"
         },
         {
           "key": "vip",
-          "line": 6982,
+          "line": 6956,
           "text": ".forumVipControlBtn.is-vip-invite{"
         },
         {
           "key": "vip",
-          "line": 6988,
+          "line": 6962,
           "text": ".forumVipControlBtn.is-vip-invite::before{"
         },
         {
           "key": "vip",
-          "line": 6993,
+          "line": 6967,
           "text": "animation: vipInviteAura 3.2s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 6995,
+          "line": 6969,
           "text": ".forumVipControlBtn.is-vip-invite::after{"
         },
         {
           "key": "vip",
-          "line": 6997,
+          "line": 6971,
           "text": "animation: vipInviteSweep 2.8s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 6999,
+          "line": 6973,
           "text": ".forumVipControlBtn.is-vip-active{"
         },
         {
           "key": "vip",
-          "line": 7009,
+          "line": 6983,
           "text": ".forumVipControlBtn.is-vip-active::before{"
         },
         {
           "key": "vip",
-          "line": 7014,
+          "line": 6988,
           "text": "animation: vipActiveAura 2.6s ease-in-out infinite;"
         },
         {
           "key": "vip",
-          "line": 7016,
+          "line": 6990,
           "text": ".forumVipControlBtn.is-vip-active::after{"
         },
         {
           "key": "vip",
-          "line": 7018,
+          "line": 6992,
           "text": "animation: vipActiveSweep 2.15s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 7034,
+          "line": 7008,
           "text": ".forumVipControlBtn.is-vip-invite .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 7040,
+          "line": 7014,
           "text": "animation: vipInviteTextPulse 2.8s ease-in-out infinite, vipInviteTextShine 4.6s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 7042,
+          "line": 7016,
           "text": ".forumVipControlBtn.is-vip-active .forumVipControlText{"
         },
         {
           "key": "vip",
-          "line": 7049,
+          "line": 7023,
           "text": "animation: vipActiveTextGlow 1.9s ease-in-out infinite, vipInviteTextShine 4.2s linear infinite;"
         },
         {
           "key": "vip",
-          "line": 7051,
+          "line": 7025,
           "text": "@keyframes vipInviteAura{"
         },
         {
           "key": "vip",
-          "line": 7055,
+          "line": 7029,
           "text": "@keyframes vipInviteSweep{"
         },
         {
           "key": "vip",
-          "line": 7059,
+          "line": 7033,
           "text": "@keyframes vipActiveAura{"
         },
         {
           "key": "vip",
-          "line": 7063,
+          "line": 7037,
           "text": "@keyframes vipActiveSweep{"
         },
         {
           "key": "vip",
-          "line": 7067,
+          "line": 7041,
           "text": "@keyframes vipInviteTextPulse{"
         },
         {
           "key": "vip",
-          "line": 7071,
+          "line": 7045,
           "text": "@keyframes vipInviteTextShine{"
         },
         {
           "key": "vip",
-          "line": 7075,
+          "line": 7049,
           "text": "@keyframes vipActiveTextGlow{"
         }
       ],
@@ -2680,92 +2680,92 @@
         },
         {
           "key": "vip",
-          "line": 273,
+          "line": 326,
           "text": "--vip-emoji-size: 48px;      /* можно быстро настроить под себя */"
         },
         {
           "key": "vip",
-          "line": 274,
+          "line": 327,
           "text": "--vip-emoji-size-sm: 48px;   /* на мобильных */"
         },
         {
           "key": "vip",
-          "line": 276,
+          "line": 329,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 277,
+          "line": 330,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 278,
+          "line": 331,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 283,
+          "line": 336,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         },
         {
           "key": "vip",
-          "line": 288,
+          "line": 341,
           "text": ".vipComposerPreview{ position:relative; display:inline-block; margin-top:6px }"
         },
         {
           "key": "vip",
-          "line": 289,
+          "line": 342,
           "text": ".vipComposerPreview .vipRemove{"
         },
         {
           "key": "vip",
-          "line": 295,
+          "line": 348,
           "text": ".moziEmojiBig{ width: var(--mozi-emoji-size, var(--vip-emoji-size)); height: var(--mozi-emoji-size, var(--vip-emoji-size)); display:inline-block; vertical-align:middle; }"
         },
         {
           "key": "vip",
-          "line": 610,
+          "line": 663,
           "text": ".emojiBtn, .vipEmojiIcon, .lockBadge, .emojiPostBig{"
         },
         {
           "key": "vip",
-          "line": 615,
+          "line": 668,
           "text": ".vipEmojiIcon { display:inline-block; width:100%; height:100%; }"
         },
         {
           "key": "vip",
-          "line": 616,
+          "line": 669,
           "text": ".vipEmojiIcon img, .vipEmojiIcon { object-fit:cover; border-radius:8px }"
         },
         {
           "key": "vip",
-          "line": 620,
+          "line": 673,
           "text": "--vip-emoji-size: 48px;      /* базовый размер */"
         },
         {
           "key": "vip",
-          "line": 621,
+          "line": 674,
           "text": "--vip-emoji-size-sm: 40px;   /* на узких экранах */"
         },
         {
           "key": "vip",
-          "line": 675,
+          "line": 728,
           "text": ".vipEmojiBig{"
         },
         {
           "key": "vip",
-          "line": 676,
+          "line": 729,
           "text": "width: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 677,
+          "line": 730,
           "text": "height: var(--vip-emoji-size);"
         },
         {
           "key": "vip",
-          "line": 683,
+          "line": 736,
           "text": ".vipEmojiBig{ width: var(--vip-emoji-size-sm); height: var(--vip-emoji-size-sm); }"
         }
       ],
@@ -4140,92 +4140,92 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 40,
+          "line": 42,
           "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 40,
+          "line": 42,
           "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 40,
+          "line": 42,
           "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
         },
         {
           "key": "accountId",
-          "line": 41,
+          "line": 43,
           "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 41,
+          "line": 43,
           "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 44,
+          "line": 46,
           "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
         },
         {
           "key": "vip",
-          "line": 44,
+          "line": 46,
           "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
         },
         {
           "key": "nickname",
-          "line": 105,
+          "line": 107,
           "text": "{(t.nickname || t.icon) && ("
         },
         {
           "key": "userId",
-          "line": 117,
+          "line": 119,
           "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
         },
         {
           "key": "authorId",
-          "line": 117,
+          "line": 119,
           "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
         },
         {
           "key": "vip",
-          "line": 121,
+          "line": 123,
           "text": "className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}"
         },
         {
           "key": "authorId",
-          "line": 127,
+          "line": 129,
           "text": "title={authorId || ''}"
         },
         {
           "key": "authorId",
-          "line": 131,
+          "line": 133,
           "text": "<span className=\"nick-text\">{resolveNickForDisplay(authorId, t.nickname)}</span>"
         },
         {
           "key": "nickname",
-          "line": 131,
+          "line": 133,
           "text": "<span className=\"nick-text\">{resolveNickForDisplay(authorId, t.nickname)}</span>"
         },
         {
           "key": "authorId",
-          "line": 134,
+          "line": 136,
           "text": "{!!authorId && !isSelf && ("
         },
         {
           "key": "authorId",
-          "line": 137,
+          "line": 139,
           "text": "onClick={() => onToggleStar?.(authorId)}"
         },
         {
           "key": "accountId",
-          "line": 194,
+          "line": 196,
           "text": "{authId && authId === (t.userId || t.accountId) && ("
         },
         {
           "key": "userId",
-          "line": 194,
+          "line": 196,
           "text": "{authId && authId === (t.userId || t.accountId) && ("
         }
       ],
@@ -5272,42 +5272,42 @@
         },
         {
           "key": "vip",
-          "line": 1196,
+          "line": 1306,
           "text": "vipActive,"
         },
         {
           "key": "accountId",
-          "line": 1228,
+          "line": 1338,
           "text": "authAccountId: auth?.accountId,"
         },
         {
           "key": "vip",
-          "line": 1448,
+          "line": 1559,
           "text": "vipActive,"
         },
         {
           "key": "vip",
-          "line": 1627,
+          "line": 1743,
           "text": "vipActive,"
         },
         {
           "key": "vip",
-          "line": 1637,
+          "line": 1753,
           "text": "vipAvatars: VIP_AVATARS,"
         },
         {
           "key": "vip",
-          "line": 1652,
+          "line": 1768,
           "text": "vipBtnRef,"
         },
         {
           "key": "vip",
-          "line": 1653,
+          "line": 1769,
           "text": "vipOpen,"
         },
         {
           "key": "vip",
-          "line": 1820,
+          "line": 1936,
           "text": "vipEmoji: VIP_EMOJI,"
         }
       ],
@@ -6644,52 +6644,52 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 109,
+          "line": 110,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "userId",
-          "line": 109,
-          "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
-        },
-        {
-          "key": "authorId",
-          "line": 109,
+          "line": 110,
           "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
           "line": 110,
-          "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
+          "text": "const authorId = String(resolveProfileAccountId(p?.userId || p?.accountId) || '').trim()"
         },
         {
           "key": "authorId",
           "line": 111,
+          "text": "const isSelfAuthor = !!viewerId && !!authorId && String(viewerId) === authorId"
+        },
+        {
+          "key": "authorId",
+          "line": 112,
           "text": "const isStarredAuthor = !!authorId && !!starredAuthors?.has?.(authorId)"
         },
         {
           "key": "accountId",
-          "line": 134,
+          "line": 139,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "userId",
-          "line": 134,
+          "line": 139,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "nickname",
-          "line": 134,
+          "line": 139,
           "text": "parentAuthor={parent ? resolveNickForDisplay(parent.userId || parent.accountId, parent.nickname) : null}"
         },
         {
           "key": "accountId",
-          "line": 145,
+          "line": 150,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         },
         {
           "key": "userId",
-          "line": 145,
+          "line": 150,
           "text": "isBanned={bannedSet.has(p.accountId || p.userId)}"
         }
       ],
@@ -8087,6 +8087,41 @@
       "score": 5
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
+      "hits": [
+        {
+          "key": "userId",
+          "line": 45,
+          "text": "add(dialog?.userId)"
+        },
+        {
+          "key": "userId",
+          "line": 98,
+          "text": "const uid = String(dialog?.userId || '').trim()"
+        },
+        {
+          "key": "vip",
+          "line": 100,
+          "text": "const isVipAuthor = useVipFlag(uid, prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null)"
+        },
+        {
+          "key": "userId",
+          "line": 186,
+          "text": "<AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, '')} className=\"dmRowAvatarImg\" />"
+        },
+        {
+          "key": "vip",
+          "line": 190,
+          "text": "className={cls('nick-badge nick-animate dmRowNick', isVipAuthor && 'vipNick')}"
+        }
+      ],
+      "uniq": [
+        "userId",
+        "vip"
+      ],
+      "score": 5
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogsPane.jsx",
       "hits": [
         {
@@ -8348,36 +8383,6 @@
       "score": 4
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
-      "hits": [
-        {
-          "key": "userId",
-          "line": 63,
-          "text": "const uid = String(dialog?.userId || '').trim()"
-        },
-        {
-          "key": "vip",
-          "line": 65,
-          "text": "const isVipAuthor = useVipFlag(uid, prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null)"
-        },
-        {
-          "key": "userId",
-          "line": 151,
-          "text": "<AvatarEmoji userId={uid} pIcon={resolveIconForDisplay(uid, '')} className=\"dmRowAvatarImg\" />"
-        },
-        {
-          "key": "vip",
-          "line": 155,
-          "text": "className={cls('nick-badge nick-animate dmRowNick', isVipAuthor && 'vipNick')}"
-        }
-      ],
-      "uniq": [
-        "userId",
-        "vip"
-      ],
-      "score": 4
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmDeleteController.js",
       "hits": [
         {
@@ -8626,6 +8631,30 @@
       "score": 3
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmUnreadState.js",
+      "hits": [
+        {
+          "key": "userId",
+          "line": 23,
+          "text": "add(dialog?.userId)"
+        },
+        {
+          "key": "userId",
+          "line": 52,
+          "text": "const uid = String(dialog?.userId || '')"
+        },
+        {
+          "key": "userId",
+          "line": 73,
+          "text": "const uid = String(dialog?.userId || '')"
+        }
+      ],
+      "uniq": [
+        "userId"
+      ],
+      "score": 3
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\mediaParsing.js",
       "hits": [
         {
@@ -8844,17 +8873,17 @@
       "score": 2
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmUnreadState.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmSeenObservers.js",
       "hits": [
         {
           "key": "userId",
-          "line": 17,
-          "text": "const uid = String(dialog?.userId || '')"
+          "line": 52,
+          "text": "dialog?.userId,"
         },
         {
           "key": "userId",
-          "line": 38,
-          "text": "const uid = String(dialog?.userId || '')"
+          "line": 93,
+          "text": "add(dialog?.userId)"
         }
       ],
       "uniq": [
@@ -9020,12 +9049,12 @@
       "hits": [
         {
           "key": "followers",
-          "line": 39,
+          "line": 20,
           "text": "title={t?.('forum_followers')}"
         },
         {
           "key": "followers",
-          "line": 40,
+          "line": 21,
           "text": "aria-label={t?.('forum_followers')}"
         }
       ],
@@ -9088,25 +9117,6 @@
       ],
       "uniq": [
         "vip"
-      ],
-      "score": 2
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useTelegramVerticalSwipesGuard.js",
-      "hits": [
-        {
-          "key": "initData",
-          "line": 18,
-          "text": "const initData = typeof webApp?.initData === 'string' ? webApp.initData : ''"
-        },
-        {
-          "key": "initData",
-          "line": 19,
-          "text": "if (initData.includes('hash=')) return true"
-        }
-      ],
-      "uniq": [
-        "initData"
       ],
       "score": 2
     },
@@ -9279,7 +9289,7 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 10,
+          "line": 67,
           "text": "auth?.accountId ||"
         }
       ],

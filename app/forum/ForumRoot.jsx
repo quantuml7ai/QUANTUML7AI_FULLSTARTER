@@ -417,6 +417,8 @@ const inboxMessagesModeRef = useRef(false);
 const sortRefreshAlignTimersRef = useRef([]);
 const sortRefreshAlignRafsRef = useRef([]);
 const sortRefreshAlignPendingRef = useRef(false);
+const sortRefreshStartedAtRef = useRef(0);
+const videoFeedHardResetBridgeRef = useRef(null);
 useEffect(() => { headHiddenRef.current = headHidden }, [headHidden]);
 useEffect(() => { headPinnedRef.current = headPinned }, [headPinned]);
 useHtmlFlag('data-forum-active', '1');
@@ -444,6 +446,62 @@ const clearSortRefreshAlignHandles = useCallback(() => {
     sortRefreshAlignRafsRef.current = []
   } catch {}
 }, [])
+
+const forceFeedScrollTop = useCallback((reason = 'feed_refresh') => {
+  try {
+    const now = Date.now()
+    const scrollEl =
+      getScrollEl?.() ||
+      bodyRef.current ||
+      document.querySelector('[data-forum-scroll="1"]') ||
+      null
+
+    try {
+      window.__forumProgrammaticScrollTs = now
+      window.__forumProgrammaticScrollReason = String(reason || 'feed_refresh')
+    } catch {}
+
+    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+      scrollEl.scrollTop = 0
+      return true
+    }
+
+    try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }
+    return true
+  } catch {}
+  return false
+}, [bodyRef, getScrollEl])
+
+const alignSortRefreshNodeToTop = useCallback((node, reason = 'sort_align_node_top') => {
+  try {
+    if (!(node instanceof Element)) return false
+    const scrollEl =
+      getScrollEl?.() ||
+      bodyRef.current ||
+      document.querySelector('[data-forum-scroll="1"]') ||
+      null
+    const rect = node.getBoundingClientRect?.()
+    if (!rect) return false
+
+    const now = Date.now()
+    try {
+      window.__forumProgrammaticScrollTs = now
+      window.__forumProgrammaticScrollReason = String(reason || 'sort_align_node_top')
+    } catch {}
+
+    if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {
+      const hostRect = scrollEl.getBoundingClientRect?.() || { top: 0 }
+      const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))
+      scrollEl.scrollTop = Math.max(0, targetTop)
+      return true
+    }
+
+    const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top
+    try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }
+    return true
+  } catch {}
+  return false
+}, [bodyRef, getScrollEl])
   
 const questBtnClass = ''
 const setVideoFeedOpenRef = useRef(() => {})
@@ -691,8 +749,9 @@ const findSortRefreshBranchStartCard = useCallback(() => {
   return null
 }, [bodyRef, getScrollEl, inboxOpen, profileBranchMode, sel?.id])
 
-const runSortRefreshAlignment = useCallback(() => {
-  if (!canAutoAlignNow?.()) return false
+const runSortRefreshAlignment = useCallback((options = {}) => {
+  const force = !!options?.force
+  if (!force && !canAutoAlignNow?.()) return false
   try { headAutoOpenRef.current = false } catch {}
   try { setHeadPinned(false) } catch {}
   try { setHeadHidden(true) } catch {}
@@ -715,11 +774,13 @@ const runSortRefreshAlignment = useCallback(() => {
     }
     const target = findSortRefreshBranchStartCard()
     if (!(target instanceof Element)) return false
+    if (force) return alignSortRefreshNodeToTop(target)
     alignNodeToTop(target)
     return true
   } catch {}
   return false
 }, [
+  alignSortRefreshNodeToTop,
   alignNodeToTop,
   bodyRef,
   canAutoAlignNow,
@@ -735,9 +796,12 @@ const commitSortChangeRefresh = useCallback(() => {
   try { setHeadPinned(false) } catch {}
   try { setHeadHidden(true) } catch {}
   clearSortRefreshAlignHandles()
+  sortRefreshStartedAtRef.current = Date.now()
+  forceFeedScrollTop('sort_feed_refresh')
 
   if (videoFeedOpenRef.current) {
     try { setVisibleVideoCount(VIDEO_PAGE_SIZE) } catch {}
+    try { videoFeedHardResetBridgeRef.current?.current?.() } catch {}
   } else if (inboxOpen) {
     try { setVisibleRepliesCount(REPLIES_PAGE_SIZE) } catch {}
     try { setVisiblePublishedCount(PUBLISHED_PAGE_SIZE) } catch {}
@@ -758,6 +822,7 @@ const commitSortChangeRefresh = useCallback(() => {
   THREAD_PAGE_SIZE,
   PUBLISHED_PAGE_SIZE,
   clearSortRefreshAlignHandles,
+  forceFeedScrollTop,
   inboxOpen,
   setHeadHidden,
   setHeadPinned,
@@ -771,15 +836,56 @@ const commitSortChangeRefresh = useCallback(() => {
   sel?.id,
 ])
 
+const refreshHomeFeedSurface = useCallback(() => {
+  clearSortRefreshAlignHandles()
+  forceFeedScrollTop('home_feed_refresh')
+  try { setVisibleVideoCount(VIDEO_PAGE_SIZE) } catch {}
+  try { setVisibleTopicsCount(TOPIC_PAGE_SIZE) } catch {}
+  try { setVisibleRepliesCount(REPLIES_PAGE_SIZE) } catch {}
+  try { setVisibleThreadPostsCount(THREAD_PAGE_SIZE) } catch {}
+  try { setVisiblePublishedCount(PUBLISHED_PAGE_SIZE) } catch {}
+  try { setVisibleProfilePostsCount(THREAD_PAGE_SIZE) } catch {}
+  try { videoFeedHardResetBridgeRef.current?.current?.() } catch {}
+  setContentRefreshToken((prev) => prev + 1)
+}, [
+  VIDEO_PAGE_SIZE,
+  TOPIC_PAGE_SIZE,
+  REPLIES_PAGE_SIZE,
+  THREAD_PAGE_SIZE,
+  PUBLISHED_PAGE_SIZE,
+  clearSortRefreshAlignHandles,
+  forceFeedScrollTop,
+  setVisibleProfilePostsCount,
+  setVisiblePublishedCount,
+  setVisibleRepliesCount,
+  setVisibleThreadPostsCount,
+  setVisibleTopicsCount,
+  setVisibleVideoCount,
+])
+
 useEffect(() => {
   if (!sortRefreshAlignPendingRef.current) return undefined
 
   sortRefreshAlignPendingRef.current = false
   clearSortRefreshAlignHandles()
+  const sortRefreshStartedAt = Number(sortRefreshStartedAtRef.current || 0)
 
   const startUserScrollTs = (() => {
     try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
   })()
+
+  const isOwnSortProgrammaticScroll = (ts) => {
+    try {
+      const scrollTs = Number(ts || 0)
+      const programmaticTs = Number(window.__forumProgrammaticScrollTs || 0)
+      const reason = String(window.__forumProgrammaticScrollReason || '')
+      if (!scrollTs || !programmaticTs) return false
+      if (sortRefreshStartedAt && programmaticTs < sortRefreshStartedAt - 80) return false
+      if (!reason.startsWith('sort_')) return false
+      return Math.abs(scrollTs - programmaticTs) <= 260
+    } catch {}
+    return false
+  }
 
   let cancelled = false
   const scheduleAlign = (attempt = 0) => {
@@ -787,8 +893,12 @@ useEffect(() => {
     const currentUserScrollTs = (() => {
       try { return Number(window.__forumUserScrollTs || 0) } catch { return 0 }
     })()
-    if (attempt > 0 && currentUserScrollTs > startUserScrollTs) return
-    const aligned = !!runSortRefreshAlignment()
+    if (
+      attempt > 0 &&
+      currentUserScrollTs > startUserScrollTs &&
+      !isOwnSortProgrammaticScroll(currentUserScrollTs)
+    ) return
+    const aligned = !!runSortRefreshAlignment({ force: true })
     if (aligned) return
     if (attempt >= 12) return
     const delay = attempt <= 1 ? 72 : (attempt <= 6 ? 130 : 200)
@@ -1363,6 +1473,7 @@ const {
   vfWin,
   vfMeasureRef,
   videoFeedContextKey,
+  videoFeedHardResetRef,
   dmDeleteText,
   dmDeleteCheckboxLabel,
 } = useForumScreenFlowsRuntime({
@@ -1535,6 +1646,7 @@ const {
       headAutoOpenRef,
       setHeadPinned,
       setHeadHidden,
+      onHomeFeedRefresh: refreshHomeFeedSurface,
       setInboxOpen,
       setReplyTo,
       setThreadRoot,
@@ -1556,6 +1668,10 @@ const {
   },
   setVideoFeedOpenRef,
 })
+
+useEffect(() => {
+  videoFeedHardResetBridgeRef.current = videoFeedHardResetRef
+}, [videoFeedHardResetRef])
 
 const userRecommendationsRail = useUserRecommendationsRail({
   enabled: !!USER_RECOMMENDATIONS_RUNTIME?.enabled,

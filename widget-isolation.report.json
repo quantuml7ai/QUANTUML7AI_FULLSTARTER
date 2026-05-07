@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T16:20:50.459Z",
+  "generatedAt": "2026-05-07T07:53:14.203Z",
   "routeRows": [
     {
       "route": "/",
@@ -24,7 +24,7 @@
     {
       "route": "forum-thread-view",
       "widgetSignals": 0,
-      "iframeSignals": 2,
+      "iframeSignals": 0,
       "files": [
         "app/forum/ForumRoot.jsx",
         "app/forum/features/feed/components/ThreadRepliesPane.jsx",

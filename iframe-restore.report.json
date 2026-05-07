@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-01T16:20:46.452Z",
+  "generatedAt": "2026-05-07T07:53:10.163Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "counts": {
-        "dataSrc": 27,
+        "dataSrc": 31,
         "setSrc": 6,
         "removeSrc": 0,
-        "restore": 51,
-        "postMessagePause": 11,
+        "restore": 56,
+        "postMessagePause": 6,
         "ytPlayers": 12
       }
     },
@@ -26,7 +26,7 @@
     {
       "file": "app/forum/features/feed/components/PostMediaStack.jsx",
       "counts": {
-        "dataSrc": 2,
+        "dataSrc": 0,
         "setSrc": 5,
         "removeSrc": 0,
         "restore": 0,

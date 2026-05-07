@@ -6,10 +6,10 @@ import { buildSamplePassport, fileText } from '../../support/runtimeGovernance.j
 
 const SURFACE_CASES = [
   ['components/ForumBootSplash.jsx', ['forum-boot-splash', '/load/load.mp4', 'onDone']],
-  ['app/forum/features/feed/components/PostMediaStack.jsx', ['VideoMediaComponent', 'QCastPlayerComponent', 'data-forum-media="youtube"']],
+  ['app/forum/features/feed/components/PostMediaStack.jsx', ['VideoMediaComponent', 'QCastPlayerComponent', 'data-forum-embed-kind="youtube"']],
   ['app/forum/features/media/components/VideoMedia.jsx', ['data-forum-video', 'IntersectionObserver', 'mutedEventName']],
   ['app/forum/features/media/components/QCastPlayer.jsx', ['buildQCastControlBars', "mutedEventName = 'forum:media-mute'", 'data-forum-media="qcast"']],
-  ['app/forum/ForumAds.js', ['MEDIA_MUTED_EVENT', 'interleaveAds', 'AdsCoordinator']],
+  ['app/forum/ForumAds.js', ['AD_NATIVE_VIDEO_PRELOAD_IDLE', 'interleaveAds', 'AdsCoordinator']],
   ['components/AuthNavClient.jsx', ['auth:ok', 'open-auth', 'useWeb3Modal']],
   ['components/TopBar.js', ['AuthNavClient', 'LanguageSwitcher', 'nav-orbit']],
   ['components/ScrollTopPulse.js', ['requestAnimationFrame', 'passive: true', 'SCROLL_PX_PER_SEC']],

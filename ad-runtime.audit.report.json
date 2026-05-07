@@ -1,20 +1,20 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-01T16:20:50.357Z",
+  "generatedAt": "2026-05-07T07:53:14.099Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
       "runtime": {
-        "videoTag": 5,
+        "videoTag": 1,
         "iframeTag": 2,
-        "intersectionObserver": 6,
-        "mapUsage": 12,
+        "intersectionObserver": 2,
+        "mapUsage": 9,
         "fetchCalls": 5,
         "imageProbe": 1,
-        "ytPlayer": 5,
-        "intervals": 2,
+        "ytPlayer": 0,
+        "intervals": 1,
         "raf": 0,
-        "preloadAttr": 15
+        "preloadAttr": 1
       },
       "business": {
         "purchase": 0,
@@ -23,7 +23,31 @@
         "rotation": 0,
         "package": 0
       },
-      "runtimeScore": 53,
+      "runtimeScore": 22,
+      "businessScore": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
+      "runtime": {
+        "videoTag": 0,
+        "iframeTag": 0,
+        "intersectionObserver": 0,
+        "mapUsage": 2,
+        "fetchCalls": 0,
+        "imageProbe": 0,
+        "ytPlayer": 0,
+        "intervals": 1,
+        "raf": 0,
+        "preloadAttr": 0
+      },
+      "business": {
+        "purchase": 0,
+        "activation": 0,
+        "placement": 0,
+        "rotation": 0,
+        "package": 0
+      },
+      "runtimeScore": 3,
       "businessScore": 0
     },
     {
@@ -38,30 +62,6 @@
         "ytPlayer": 0,
         "intervals": 0,
         "raf": 1,
-        "preloadAttr": 0
-      },
-      "business": {
-        "purchase": 0,
-        "activation": 0,
-        "placement": 0,
-        "rotation": 0,
-        "package": 0
-      },
-      "runtimeScore": 1,
-      "businessScore": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
-      "runtime": {
-        "videoTag": 0,
-        "iframeTag": 0,
-        "intersectionObserver": 0,
-        "mapUsage": 1,
-        "fetchCalls": 0,
-        "imageProbe": 0,
-        "ytPlayer": 0,
-        "intervals": 0,
-        "raf": 0,
         "preloadAttr": 0
       },
       "business": {

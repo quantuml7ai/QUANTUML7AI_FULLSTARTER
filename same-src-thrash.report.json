@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T16:20:46.485Z",
+  "generatedAt": "2026-05-07T07:53:10.210Z",
   "report": [
     {
       "file": "app/forum/features/media/utils/mediaLifecycleRuntime.js",
@@ -23,9 +23,9 @@
         "restoreLoadBlockedUntil": 0,
         "restoreLoadWindowStart": 0,
         "lastWarmLoadKickTs": 2,
-        "loadPending": 43,
-        "currentSrc": 21,
-        "dataSrc": 27
+        "loadPending": 51,
+        "currentSrc": 24,
+        "dataSrc": 31
       },
       "guardScore": 0
     },

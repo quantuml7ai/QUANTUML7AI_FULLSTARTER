@@ -1,15 +1,15 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-01T16:20:13.689Z",
+  "generatedAt": "2026-05-07T07:52:38.080Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
       "counts": {
-        "for-loop": 15,
-        "while-loop": 1,
+        "for-loop": 16,
+        "while-loop": 2,
         "map-chain": 0,
         "filter-map": 0,
-        "layout-read": 23,
+        "layout-read": 26,
         "sync-json": 0,
         "local-storage": 2,
         "session-storage": 0,
@@ -18,25 +18,7 @@
         "interval": 2
       },
       "longLines": [],
-      "score": 112
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
-      "counts": {
-        "for-loop": 16,
-        "while-loop": 1,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 2,
-        "sync-json": 1,
-        "local-storage": 1,
-        "session-storage": 0,
-        "network-call": 5,
-        "raf": 0,
-        "interval": 2
-      },
-      "longLines": [],
-      "score": 55
+      "score": 126
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\lib\\adsCore.js",
@@ -111,6 +93,24 @@
       "score": 38
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
+      "counts": {
+        "for-loop": 11,
+        "while-loop": 1,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 1,
+        "local-storage": 1,
+        "session-storage": 0,
+        "network-call": 5,
+        "raf": 0,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 37
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\crypto-news\\route.js",
       "counts": {
         "for-loop": 10,
@@ -159,6 +159,24 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 5,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 34
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useForumWindowing.js",
+      "counts": {
+        "for-loop": 2,
+        "while-loop": 4,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 4,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 3,
         "interval": 0
       },
       "longLines": [],
@@ -277,24 +295,6 @@
       },
       "longLines": [],
       "score": 28
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useForumWindowing.js",
-      "counts": {
-        "for-loop": 2,
-        "while-loop": 2,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 3,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 3,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 25
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\components\\CryptoNewsLens.jsx",
@@ -469,6 +469,42 @@
       "score": 20
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 4,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 4,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 20
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmSeenObservers.js",
+      "counts": {
+        "for-loop": 3,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 3,
+        "sync-json": 1,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 1,
+        "raf": 1,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 19
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\ProfilePopover.jsx",
       "counts": {
         "for-loop": 0,
@@ -631,6 +667,85 @@
         }
       ],
       "score": 17
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads.js",
+      "counts": {
+        "for-loop": 1,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 1
+      },
+      "longLines": [
+        {
+          "i": 411,
+          "len": 190,
+          "text": "try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}"
+        },
+        {
+          "i": 417,
+          "len": 188,
+          "text": "try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}"
+        },
+        {
+          "i": 509,
+          "len": 212,
+          "text": "if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) { attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src', resetPipeline: true }); return undefined; }"
+        },
+        {
+          "i": 510,
+          "len": 205,
+          "text": "if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) { detachSiteNativeVideo(node, { hard: true, reason: 'src_change', resetPipeline: true }); attachedVideoSrcRef.current = ''; }"
+        },
+        {
+          "i": 533,
+          "len": 237,
+          "text": "if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.dataset.__siteAdLoadPendingSince = String(now); v.load?.(); }"
+        },
+        {
+          "i": 626,
+          "len": 188,
+          "text": "try { if (ytPlayerRef.current) { if (next) ytPlayerRef.current.mute?.(); else ytPlayerRef.current.unMute?.(); if (shouldPlayRef.current) ytPlayerRef.current.playVideo?.(); } } catch {}"
+        },
+        {
+          "i": 649,
+          "len": 196,
+          "text": "if (v.ended) { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; return; }"
+        },
+        {
+          "i": 655,
+          "len": 203,
+          "text": "const timer = setTimeout(() => { try { if (!shouldPlayRef.current || !v.paused) return; applyMutedToVideo(v, normalizeSiteMuted(mutedRef.current)); v.play?.().catch(() => {}); } catch {} }, 140);"
+        },
+        {
+          "i": 660,
+          "len": 400,
+          "text": "try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}"
+        },
+        {
+          "i": 663,
+          "len": 400,
+          "text": "try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}"
+        },
+        {
+          "i": 672,
+          "len": 221,
+          "text": "if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }"
+        },
+        {
+          "i": 683,
+          "len": 223,
+          "text": "if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdTransientErrorTs = String(now); } return; }"
+        }
+      ],
+      "score": 16
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\quotes\\route.js",
@@ -917,24 +1032,6 @@
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 4,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 12
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostMediaTextModel.js",
-      "counts": {
-        "for-loop": 6,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
         "sync-json": 0,
         "local-storage": 0,
         "session-storage": 0,
@@ -1661,6 +1758,24 @@
       "score": 10
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\usePostMediaTextModel.js",
+      "counts": {
+        "for-loop": 5,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 10
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\UserInfoPopover.jsx",
       "counts": {
         "for-loop": 0,
@@ -1839,17 +1954,17 @@
       },
       "longLines": [
         {
-          "i": 412,
+          "i": 410,
           "len": 251,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         },
         {
-          "i": 427,
+          "i": 425,
           "len": 246,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         },
         {
-          "i": 445,
+          "i": 443,
           "len": 253,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         }
@@ -1935,6 +2050,24 @@
       "score": 8
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
+      "counts": {
+        "for-loop": 4,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 8
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmThreadMessageRow.jsx",
       "counts": {
         "for-loop": 4,
@@ -1944,6 +2077,24 @@
         "layout-read": 0,
         "sync-json": 0,
         "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 8
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmStorageMaps.js",
+      "counts": {
+        "for-loop": 4,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 6,
+        "local-storage": 6,
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,
@@ -1983,24 +2134,6 @@
         "session-storage": 0,
         "network-call": 0,
         "raf": 1,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 8
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 4,
         "interval": 0
       },
       "longLines": [],
@@ -2133,24 +2266,6 @@
       "score": 6
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\components\\DmDialogRow.jsx",
-      "counts": {
-        "for-loop": 3,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 6
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmRepliesSeen.js",
       "counts": {
         "for-loop": 3,
@@ -2169,17 +2284,17 @@
       "score": 6
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmSeenObservers.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmUnreadState.js",
       "counts": {
-        "for-loop": 2,
+        "for-loop": 3,
         "while-loop": 0,
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 0,
         "sync-json": 1,
-        "local-storage": 0,
+        "local-storage": 1,
         "session-storage": 0,
-        "network-call": 1,
+        "network-call": 0,
         "raf": 0,
         "interval": 0
       },
@@ -2254,6 +2369,24 @@
         "network-call": 0,
         "raf": 0,
         "interval": 1
+      },
+      "longLines": [],
+      "score": 6
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ExternalVideoPlayer.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 1,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 1,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
       },
       "longLines": [],
       "score": 6
@@ -2347,32 +2480,32 @@
       },
       "longLines": [
         {
-          "i": 999,
+          "i": 973,
           "len": 190,
           "text": ".emojiBtn{ width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); font-size:22px; color:#fff; transition: transform .06s }"
         },
         {
-          "i": 1078,
+          "i": 1052,
           "len": 188,
           "text": ".avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }"
         },
         {
-          "i": 1519,
+          "i": 1493,
           "len": 196,
           "text": ".iconBtn{ width:40px; height:40px; border-radius:12px; border:1px solid rgba(255,255,255,.18); background:transparent; display:grid; place-items:center; transition:transform .08s, box-shadow .2s }"
         },
         {
-          "i": 1678,
+          "i": 1652,
           "len": 184,
           "text": ".sortDrop{ position:absolute; top:68px; right:100px; width:120px; border:1px solid rgba(255,255,255,.14); background:rgba(10,14,20,.98); border-radius:12px; padding:6px; z-index:3000 }"
         },
         {
-          "i": 1813,
+          "i": 1787,
           "len": 208,
           "text": ".qft_toast{ max-width:min(420px,90vw); padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(10,14,22,.94); color:#eaf4ff; box-shadow:0 10px 28px rgba(0,0,0,.45) }"
         },
         {
-          "i": 5523,
+          "i": 5497,
           "len": 183,
           "text": ".dmUnreadDot{ width:12px; height:12px; border-radius:999px; background:#35d07f; box-shadow:0 0 12px rgba(53,208,127,.7); flex:0 0 auto; animation: dmPulse 2.6s ease-in-out infinite; }"
         }
@@ -2519,24 +2652,6 @@
         "network-call": 0,
         "raf": 0,
         "interval": 2
-      },
-      "longLines": [],
-      "score": 4
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmUnreadState.js",
-      "counts": {
-        "for-loop": 2,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 1,
-        "local-storage": 1,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
       },
       "longLines": [],
       "score": 4
@@ -3533,24 +3648,6 @@
       "score": 2
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\hooks\\useDmStorageMaps.js",
-      "counts": {
-        "for-loop": 1,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 6,
-        "local-storage": 6,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 2
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\dm\\utils\\deletedMap.js",
       "counts": {
         "for-loop": 1,
@@ -3911,24 +4008,6 @@
       "score": 2
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\components\\FollowersCounterInline.jsx",
-      "counts": {
-        "for-loop": 1,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 2
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\utils\\starred.js",
       "counts": {
         "for-loop": 1,
@@ -3948,6 +4027,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useComposerUiLifecycle.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 1
+      },
+      "longLines": [],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
@@ -4037,24 +4134,6 @@
       "score": 2
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\hooks\\useTelegramVerticalSwipesGuard.js",
-      "counts": {
-        "for-loop": 1,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 2
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\shared\\utils\\counts.js",
       "counts": {
         "for-loop": 1,
@@ -4089,12 +4168,12 @@
       },
       "longLines": [
         {
-          "i": 608,
+          "i": 661,
           "len": 190,
           "text": ".emojiBtn{ width:38px; height:38px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.05); font-size:22px; color:#fff; transition: transform .06s }"
         },
         {
-          "i": 687,
+          "i": 740,
           "len": 188,
           "text": ".avaBig{ width:112px; height:112px; border-radius:16px; border:1px solid rgba(1, 204, 255, 0.31); display:grid; place-items:center; font-size:48px; background:rgba(119, 0, 255, 0.09) }"
         }
@@ -4445,24 +4524,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads\\GeoTargetingPicker.jsx",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\ads.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
@@ -6154,6 +6215,24 @@
       "score": 0
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\externalVideoBridge.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 1,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\formatMediaTime.js",
       "counts": {
         "for-loop": 0,
@@ -6227,6 +6306,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\mediaUrlPipeline.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\utils\\telegramMiniAppSwipeLock.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
@@ -6677,6 +6774,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\utils\\progress.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\components\\FollowersCounterInline.jsx",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,
@@ -7145,24 +7260,6 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdSlots.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumAdsRuntime.js",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

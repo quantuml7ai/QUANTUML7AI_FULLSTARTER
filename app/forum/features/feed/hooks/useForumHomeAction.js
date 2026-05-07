@@ -24,6 +24,7 @@ export default function useForumHomeAction({
   closeVideoFeed,
   questOpen,
   closeQuests,
+  onHomeFeedRefresh,
   clearProfileBranch,
   setInboxOpen,
   setReplyTo,
@@ -71,6 +72,7 @@ export default function useForumHomeAction({
     try { headAutoOpenRef.current = false } catch {}
     try { setHeadPinned(false) } catch {}
     try { setHeadHidden(true) } catch {}
+    try { onHomeFeedRefresh?.() } catch {}
     if (videoFeedOpen) { try { closeVideoFeed?.() } catch {} }
     if (questOpen) { try { closeQuests?.() } catch {} }
     try { clearProfileBranch?.() } catch {}
@@ -91,6 +93,7 @@ export default function useForumHomeAction({
     closeVideoFeed,
     clearProfileBranch,
     headAutoOpenRef,
+    onHomeFeedRefresh,
     questOpen,
     setHeadHidden,
     setHeadPinned,

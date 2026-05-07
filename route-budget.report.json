@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-01T16:20:50.458Z",
+  "generatedAt": "2026-05-07T07:53:14.202Z",
   "profiles": {
     "forum-feed-mobile": {
       "description": "Strict mobile forum feed profile with one-owner media discipline and single iframe allowance.",
@@ -757,7 +757,7 @@
         "forumShellGate": 0,
         "widgets": 0,
         "autoplay": 1,
-        "iframe": 2,
+        "iframe": 0,
         "video": 0
       }
     },

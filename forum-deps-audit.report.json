@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-01T16:20:15.414Z",
+  "generatedAt": "2026-05-07T07:52:39.875Z",
   "summary": {
-    "scannedFiles": 382,
-    "internalEdges": 524,
+    "scannedFiles": 384,
+    "internalEdges": 534,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 140,
+    "crossDomainEdgeCount": 144,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -108,6 +108,12 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/dm/components/InboxTabsHeader.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/feed/components/ForumPostCard.jsx",
       "fromDomain": "forum-ui",
       "to": "components/i18n.js",
@@ -117,6 +123,12 @@
       "from": "app/forum/features/feed/components/PostActionBar.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/PostActionBar.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
       "toDomain": "forum-shared"
     },
     {
@@ -183,6 +195,12 @@
       "from": "app/forum/features/feed/components/TopicItem.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/formatters.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/feed/components/TopicItem.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
       "toDomain": "forum-shared"
     },
     {
@@ -480,6 +498,12 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/ui/components/ComposerCore.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/classnames.js",
@@ -490,6 +514,12 @@
       "fromDomain": "forum-ui",
       "to": "components/i18n.js",
       "toDomain": "components"
+    },
+    {
+      "from": "app/forum/features/ui/components/ForumActionRow.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
     },
     {
       "from": "app/forum/features/ui/components/ForumSearchSortControls.jsx",
@@ -519,12 +549,6 @@
       "from": "app/forum/ForumHeaderPanel.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/classnames.js",
-      "toDomain": "forum-shared"
-    },
-    {
-      "from": "app/forum/ForumLayout.jsx",
-      "fromDomain": "forum-ui",
-      "to": "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js",
       "toDomain": "forum-shared"
     },
     {
@@ -1053,8 +1077,10 @@
     {
       "file": "app/forum/features/dm/components/InboxTabsHeader.jsx",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/shared/utils/counts.js"
+      ],
+      "importCount": 1,
       "external": [
         "react"
       ],
@@ -1321,9 +1347,10 @@
       "file": "app/forum/features/feed/components/PostActionBar.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/shared/components/HydrateText.jsx"
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/utils/counts.js"
       ],
-      "importCount": 1,
+      "importCount": 2,
       "external": [
         "react"
       ],
@@ -1386,8 +1413,11 @@
     {
       "file": "app/forum/features/feed/components/PostMediaStack.jsx",
       "domain": "forum-ui",
-      "imports": [],
-      "importCount": 0,
+      "imports": [
+        "app/forum/features/media/components/ExternalVideoPlayer.jsx",
+        "app/forum/features/media/utils/externalVideoBridge.js"
+      ],
+      "importCount": 2,
       "external": [
         "react",
         "next/image"
@@ -1477,6 +1507,7 @@
         "components/i18n.js",
         "app/forum/shared/utils/classnames.js",
         "app/forum/shared/utils/formatters.js",
+        "app/forum/shared/utils/counts.js",
         "app/forum/shared/components/HydrateText.jsx",
         "app/forum/features/ui/components/ConfirmDeleteOverlay.jsx",
         "app/forum/features/ui/components/StarButton.jsx",
@@ -1486,7 +1517,7 @@
         "app/forum/features/profile/utils/profileCache.js",
         "app/forum/features/feed/utils/cardMemo.js"
       ],
-      "importCount": 11,
+      "importCount": 12,
       "external": [
         "react"
       ],
@@ -1990,6 +2021,20 @@
       "externalCount": 2
     },
     {
+      "file": "app/forum/features/media/components/ExternalVideoPlayer.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/externalVideoBridge.js",
+        "app/forum/features/media/utils/telegramMiniAppSwipeLock.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/forum/features/media/components/LivePreview.jsx",
       "domain": "forum-ui",
       "imports": [],
@@ -2105,9 +2150,10 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/shared/utils/browser.js",
-        "app/forum/features/media/utils/mediaLifecycleRuntime.js"
+        "app/forum/features/media/utils/mediaLifecycleRuntime.js",
+        "app/forum/features/media/utils/externalVideoBridge.js"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -2230,6 +2276,14 @@
       "externalCount": 0
     },
     {
+      "file": "app/forum/features/media/utils/externalVideoBridge.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
       "file": "app/forum/features/media/utils/formatMediaTime.js",
       "domain": "forum-ui",
       "imports": [],
@@ -2306,6 +2360,14 @@
     },
     {
       "file": "app/forum/features/media/utils/qcastBars.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/media/utils/telegramMiniAppSwipeLock.js",
       "domain": "forum-ui",
       "imports": [],
       "importCount": 0,
@@ -2885,9 +2947,10 @@
       "file": "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
       "domain": "forum-ui",
       "imports": [
-        "app/forum/shared/components/HydrateText.jsx"
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/utils/counts.js"
       ],
-      "importCount": 1,
+      "importCount": 2,
       "external": [
         "react"
       ],
@@ -3067,10 +3130,11 @@
       "file": "app/forum/features/ui/components/ForumActionRow.jsx",
       "domain": "forum-ui",
       "imports": [
+        "app/forum/shared/utils/counts.js",
         "app/forum/features/ui/components/ForumActionNavIcon.jsx",
         "app/forum/features/ui/components/VideoFeedNavIcon.jsx"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "next/image"
       ],
@@ -3537,10 +3601,9 @@
         "app/forum/features/feed/components/TopicsSection.jsx",
         "app/forum/features/feed/components/ThreadSection.jsx",
         "app/forum/features/ui/components/ComposeDock.jsx",
-        "app/forum/features/ui/components/ForumOverlayStack.jsx",
-        "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js"
+        "app/forum/features/ui/components/ForumOverlayStack.jsx"
       ],
-      "importCount": 7,
+      "importCount": 6,
       "external": [
         "react"
       ],
@@ -3788,16 +3851,6 @@
     },
     {
       "file": "app/forum/shared/hooks/usePageLock.js",
-      "domain": "forum-shared",
-      "imports": [],
-      "importCount": 0,
-      "external": [
-        "react"
-      ],
-      "externalCount": 1
-    },
-    {
-      "file": "app/forum/shared/hooks/useTelegramVerticalSwipesGuard.js",
       "domain": "forum-shared",
       "imports": [],
       "importCount": 0,
