@@ -3635,6 +3635,29 @@ const getNativeEarlyPrimeGapLimit = () => {
       return state;
     };
 
+    const getNativePrewarmStaleMs = () => (
+      isIOSUi ? 1850 : (isCoarseUi ? 1700 : 1450)
+    );
+
+    const isStalePredictiveNativeWarmup = (el) => {
+      const media = getMediaStateNode(el);
+      if (!(media instanceof HTMLVideoElement)) return false;
+      try {
+        const pipeline = getNativePrewarmPipelineState(media);
+        if (!pipeline.loading || pipeline.ready) return false;
+        if (getOwnerVisiblePx(media) > 0) return false;
+
+        const pendingAge = Number(pipeline.pendingForMs || 0);
+        const ownerAge = media === nativePrewarmEl
+          ? Math.max(0, Date.now() - Number(nativePrewarmTs || 0))
+          : 0;
+        const age = Math.max(pendingAge, ownerAge);
+        return age > getNativePrewarmStaleMs();
+      } catch {
+        return false;
+      }
+    };
+
     const isNativePrewarmEligible = (el) => {
       try {
         const media = getMediaStateNode(el);
@@ -4027,12 +4050,19 @@ return true;
           nextVisible > Math.max(0, prevVisible + 36) ||
           nextGap + (isIOSUi ? 180 : 140) < prevGap ||
           getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
+        const prevLoadingFreshEnough =
+          !isStalePredictiveNativeWarmup(prev) &&
+          age < getNativePrewarmStaleMs();
+        const prevNotBehindNext =
+          prevVisible > 0 ||
+          prevGap <= nextGap + (isIOSUi ? 120 : 90);
         const holdLoadingPrev =
           prevPipeline.loading &&
           !prevPipeline.ready &&
           prevStillInRunway &&
-          (!nextInFocusRunway || !nextClearlyBetter) &&
-          age < (isIOSUi ? 7200 : (isCoarseUi ? 6200 : 5200));
+          prevLoadingFreshEnough &&
+          prevNotBehindNext &&
+          (!nextInFocusRunway || !nextClearlyBetter);
         if (holdLoadingPrev) {
           trace('native_prewarm_hold_loading_slot', prev, {
             reason,
@@ -5073,7 +5103,7 @@ return;
 
     let nativePrewarmScanRaf = 0;
     let nativePrewarmScanLastTs = 0;
-    const pickPredictiveNativePrewarmTarget = (dir = 1) => {
+    const pickPredictiveNativePrewarmTarget = (dir = 1, skipNode = null) => {
       try {
         const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
         if (viewportH <= 0) return null;
@@ -5082,6 +5112,7 @@ return;
         const rows = nodes
           .map((node) => {
             if (!(node instanceof HTMLVideoElement)) return null;
+            if (skipNode && node === skipNode) return null;
             if (!node.isConnected) return null;
             if (isUserPaused(node) || hasSuppressedPlayback(node) || isMediaSrcBlocked(node)) return null;
             const owner = getOwnerNode(node) || node;
@@ -5105,7 +5136,10 @@ return;
             const band = ahead ? 0 : (inViewport ? 1 : 2);
             const pipeline = getNativePrewarmPipelineState(node);
             if (pipeline.ready) return null;
-            const pendingBonus = pipeline.loading ? -180 : 0;
+            const staleWarmup = isStalePredictiveNativeWarmup(node);
+            const pendingBonus = pipeline.loading
+              ? (staleWarmup ? 520 : -120)
+              : 0;
             const distance = dir < 0
               ? Math.max(0, viewportH - bottom)
               : Math.max(0, top);
@@ -5116,7 +5150,7 @@ return;
               (visiblePx * 2.2) +
               pendingBonus +
               (getMediaDomOrder(owner) * 0.001);
-            return { node, score, gapPx, visiblePx, top, bottom, band };
+            return { node, score, gapPx, visiblePx, top, bottom, band, staleWarmup };
           })
           .filter(Boolean)
           .sort((a, b) => a.score - b.score);
@@ -5134,17 +5168,27 @@ return;
         nativePrewarmScanRaf = requestAnimationFrame(() => {
           nativePrewarmScanRaf = 0;
           const dir = updateCoordinatorScrollDirection();
-          const picked = pickPredictiveNativePrewarmTarget(dir);
-          if (!picked?.node) return;
-          const prepared = prewarmAhead(picked.node, reason);
-          traceCandidate('candidate_predictive_native_prewarm', picked.node, {
-            reason,
-            prepared,
-            dir,
-            gapPx: picked.gapPx,
-            visiblePx: picked.visiblePx,
-            band: picked.band,
-          });
+          let skipNode = null;
+          for (let attempt = 0; attempt < 2; attempt += 1) {
+            const picked = pickPredictiveNativePrewarmTarget(dir, skipNode);
+            if (!picked?.node) return;
+
+            const prepared = prewarmAhead(picked.node, reason);
+            const staleAfterPrepare = isStalePredictiveNativeWarmup(picked.node);
+            traceCandidate('candidate_predictive_native_prewarm', picked.node, {
+              reason,
+              prepared,
+              dir,
+              gapPx: picked.gapPx,
+              visiblePx: picked.visiblePx,
+              band: picked.band,
+              attempt,
+              staleWarmup: picked.staleWarmup || staleAfterPrepare,
+            });
+
+            if (prepared && !staleAfterPrepare) return;
+            skipNode = picked.node;
+          }
         });
       } catch {
         nativePrewarmScanRaf = 0;
@@ -5217,9 +5261,17 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(isIOSUi ? 560 : (isCoarseUi ? 440 : 280), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.2 : 0.9)))
+          Math.max(
+            isIOSUi ? 760 : (isCoarseUi ? 620 : 360),
+            Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.35 : 1.0)),
+            Math.round(getNativePrimeGapLimit() * 0.72),
+          )
         }px 0px ${
-          Math.max(isIOSUi ? 980 : (isCoarseUi ? 820 : 520), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.05 : 1.35)))
+          Math.max(
+            isIOSUi ? 1280 : (isCoarseUi ? 1040 : 560),
+            Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.4 : 1.55)),
+            getNativePrewarmGapLimit(),
+          )
         }px 0px`,
       },
     );
@@ -5261,14 +5313,21 @@ return;
           const shouldRestoreSurface =
             visiblePx > 0 ||
             gapPx <= Math.max(getNativeEarlyPrimeGapLimit(), isCoarseUi ? 560 : 460);
+          const shouldPredictivePrewarm =
+            shouldRestoreSurface ||
+            gapPx <= getNativePrewarmGapLimit();
           if (
-            shouldRestoreSurface &&
+            shouldPredictivePrewarm &&
             media instanceof HTMLVideoElement &&
             !isUserPaused(media) &&
             !hasSuppressedPlayback(media) &&
             !isMediaSrcBlocked(media)
           ) {
-            if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim() && __hasLazyVideoSourceWithoutSrc(media)) {
+            if (
+              shouldRestoreSurface &&
+              !String(media.getAttribute?.('src') || media.currentSrc || '').trim() &&
+              __hasLazyVideoSourceWithoutSrc(media)
+            ) {
               trace('observe_native_visible_restore', media, { visiblePx, gapPx });
               try { __restoreVideoEl(media); } catch {}
             }
