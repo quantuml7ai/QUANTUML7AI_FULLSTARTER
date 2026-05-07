@@ -3812,16 +3812,22 @@ const getNativeEarlyPrimeGapLimit = () => {
       const activeKind = (() => {
         try { return String(activeOwnerNow?.getAttribute?.('data-forum-media') || ''); } catch { return ''; }
       })();
-      const activeHasNativePostVideo = (() => {
+      const activeNativePostVideo = (() => {
         try {
-          return !!(
-            activeOwnerNow instanceof Element &&
-            activeOwnerNow.querySelector?.(managedForumVideoSelector)
-          );
+          if (!(activeOwnerNow instanceof Element)) return null;
+          if (
+            activeOwnerNow instanceof HTMLVideoElement &&
+            activeOwnerNow.matches?.(managedForumVideoSelector)
+          ) {
+            return activeOwnerNow;
+          }
+          const nested = activeOwnerNow.querySelector?.(managedForumVideoSelector);
+          return nested instanceof HTMLVideoElement ? nested : null;
         } catch {
-          return false;
+          return null;
         }
       })();
+      const activeHasNativePostVideo = activeNativePostVideo instanceof HTMLVideoElement;
       const allowHiddenWarmupPrime =
         warmupOnlyPrime &&
         (isIOSUi || isCoarseUi) &&
@@ -3883,7 +3889,7 @@ if (!canStartNativePrimeForSrc(media, reason, warmupOnlyPrime)) return false;
         media.preload = 'auto';
       } catch {}
 
-      try { markCoordinatorPlayIntent(media, warmupOnlyPrime ? (isIOSUi ? 1800 : 1400) : (isIOSUi ? 1800 : 1500)); } catch {}
+      try { markCoordinatorPlayIntent(media, warmupOnlyPrime ? (isIOSUi ? 3600 : 2400) : (isIOSUi ? 1800 : 1500)); } catch {}
 
       const rememberPrimeReady = (holdMs = 0) => {
         let ready = false;
@@ -3904,6 +3910,25 @@ if (!canStartNativePrimeForSrc(media, reason, warmupOnlyPrime)) return false;
           }
         } catch {}
         return ready;
+      };
+
+      const restoreActiveNativeAfterPrime = () => {
+        try {
+          if (!warmupOnlyPrime) return;
+          if (!(activeNativePostVideo instanceof HTMLVideoElement)) return;
+          if (!activeNativePostVideo.isConnected) return;
+          if (!activeNativePostVideo.paused) return;
+          if (isUserPaused(activeNativePostVideo) || hasSuppressedPlayback(activeNativePostVideo)) return;
+          const activeOwner = getOwnerNode(activeNativePostVideo) || activeNativePostVideo;
+          if (!isActiveNativeOwner(activeNativePostVideo, activeOwner)) return;
+          if (getOwnerVisiblePx(activeOwner) < Math.max(48, Math.round(getAutoplayMinVisiblePx(activeOwner) * 0.56))) return;
+          clearSuppressedPlayback(activeNativePostVideo);
+          clearSuppressedPlayback(activeOwner);
+          markCoordinatorPlayIntent(activeNativePostVideo, isIOSUi ? 1800 : 1400);
+          trace('native_prime_restore_active', activeNativePostVideo, { reason, state: 'restore_after_prime' });
+          const p2 = activeNativePostVideo.play?.();
+          if (p2 && typeof p2.catch === 'function') p2.catch(() => {});
+        } catch {}
       };
 
 let primeFinished = false;
@@ -3944,6 +3969,7 @@ const finishPrime = (state = 'done') => {
               media.removeAttribute('muted');
             } catch {}
           }
+          restoreActiveNativeAfterPrime();
           trace('native_prime_finish', media, { reason, state, readyState: Number(media.readyState || 0) });
         } catch {}
       };
@@ -3967,19 +3993,72 @@ const finishPrime = (state = 'done') => {
 const p = media.play?.();
 if (p && typeof p.then === 'function') {
   p.then(() => {
-    let frameCallbackArmed = false;
-    if (warmupOnlyPrime && typeof media.requestVideoFrameCallback === 'function') {
-      try {
-        frameCallbackArmed = true;
-        media.requestVideoFrameCallback(() => {
-          setTimeout(() => finishPrime('first_frame'), isIOSUi ? 48 : 32);
-        });
-      } catch {
-        frameCallbackArmed = false;
-      }
+    if (!warmupOnlyPrime) {
+      setTimeout(() => finishPrime('played'), isIOSUi ? 180 : 110);
+      return;
     }
-    const holdDelay = warmupOnlyPrime ? (isIOSUi ? 640 : 380) : (isIOSUi ? 180 : 110);
-    setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), holdDelay);
+
+    let settled = false;
+    let fallbackTimer = 0;
+    let activeStealTimer = 0;
+
+    const cleanupWarmupWaiters = () => {
+      try { media.removeEventListener('loadeddata', onReady); } catch {}
+      try { media.removeEventListener('canplay', onReady); } catch {}
+      try { media.removeEventListener('playing', onReady); } catch {}
+      try { media.removeEventListener('timeupdate', onReady); } catch {}
+      try { if (fallbackTimer) clearTimeout(fallbackTimer); } catch {}
+      try { if (activeStealTimer) clearTimeout(activeStealTimer); } catch {}
+    };
+
+    const finishWarmup = (state) => {
+      if (settled) return;
+      settled = true;
+      cleanupWarmupWaiters();
+      finishPrime(state);
+    };
+
+    const isFrameReady = () => {
+      try { return Number(media.readyState || 0) >= 2; } catch { return false; }
+    };
+
+    const onReady = () => {
+      if (isFrameReady()) setTimeout(() => finishWarmup('warmup_ready'), isIOSUi ? 44 : 28);
+    };
+
+    try { media.addEventListener('loadeddata', onReady); } catch {}
+    try { media.addEventListener('canplay', onReady); } catch {}
+    try { media.addEventListener('playing', onReady); } catch {}
+    try { media.addEventListener('timeupdate', onReady); } catch {}
+
+    if (typeof media.requestVideoFrameCallback === 'function') {
+      try {
+        media.requestVideoFrameCallback(() => {
+          setTimeout(() => finishWarmup('first_frame'), isIOSUi ? 44 : 28);
+        });
+      } catch {}
+    }
+
+    if (isFrameReady()) {
+      setTimeout(() => finishWarmup('warmup_ready_now'), isIOSUi ? 44 : 28);
+    }
+
+    activeStealTimer = setTimeout(() => {
+      try {
+        if (
+          activeNativePostVideo instanceof HTMLVideoElement &&
+          activeNativePostVideo.isConnected &&
+          activeNativePostVideo.paused &&
+          !isFrameReady()
+        ) {
+          finishWarmup('warmup_restore_active_early');
+        }
+      } catch {}
+    }, isIOSUi ? 220 : 180);
+
+    fallbackTimer = setTimeout(() => {
+      finishWarmup(isFrameReady() ? 'warmup_ready_timeout' : 'warmup_timeout');
+    }, isIOSUi ? 1320 : 860);
   }).catch((err) => {
     try { finishNativePrimeForSrc(media, warmupOnlyPrime ? 'warmup_reject' : 'reject'); } catch {}
     try { media.dataset.__nativePrimePending = '0'; } catch {}
