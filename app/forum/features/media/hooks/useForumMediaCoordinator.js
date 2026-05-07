@@ -485,7 +485,7 @@ const POST_NATIVE_SRC_CAP = (() => {
         // cap=1 was tearing down the prewarm node right after it attached src,
         // which caused repeat bytes=0-/tail Range cycles and black viewport entry.
         if (lowMem) return 2;
-        if (ios || coarse || /Android/i.test(ua)) return 2;
+        if (ios || coarse || /Android/i.test(ua)) return 3;
         return 3;
       } catch {
         return 2;
@@ -805,12 +805,16 @@ const readPendingLoads = (force = false) => {
       try {
         const now = Date.now();
         const prev = nativePrimeSrcState.get(srcKey) || {};
+        const warmupRejected = /warmup_(reject|throw)/i.test(String(state || ''));
         nativePrimeSrcState.set(srcKey, {
           ...prev,
           pendingUntil: 0,
+          blockedUntil: warmupRejected ? 0 : Number(prev?.blockedUntil || 0),
+          lastPrimeTs: warmupRejected ? 0 : Number(prev?.lastPrimeTs || 0),
           touchedAt: now,
           readyTs: Number(media.readyState || 0) >= 2 ? now : Number(prev?.readyTs || 0),
           lastState: String(state || 'done'),
+          count: warmupRejected ? Math.max(0, Number(prev?.count || 0) - 1) : Number(prev?.count || 0),
         });
         pruneNativePrimeSrcState(now);
       } catch {}
@@ -2250,6 +2254,7 @@ const onMediaLoadedCaptured = (e) => {
     if (isPostVideo && !wantsAutoplay) {
       clampPostNativeWarmBuffer(target, `loaded_${e?.type || 'ready'}`);
       enforcePostNativeSrcCap(target, 'loaded_warm_ready');
+      scheduleNativePrewarmScan('loaded_advance_native_predictive_scan');
     }
 
     if (
@@ -3566,25 +3571,25 @@ const pauseForeignMedia = (keepEl = null) => {
       // Prewarm must begin before the card is visible, but only one/two managed
       // native pipelines are allowed to keep src, so this wider runway does not
       // grow into a Range/decoder storm.
-      if (isIOSUi) return Math.max(900, Math.min(1580, Math.round(viewportH * 1.36)));
-      if (isCoarseUi) return Math.max(720, Math.min(1240, Math.round(viewportH * 1.08)));
-      return Math.max(320, Math.min(620, Math.round(viewportH * 0.58)));
+      if (isIOSUi) return Math.max(1100, Math.min(1900, Math.round(viewportH * 1.62)));
+      if (isCoarseUi) return Math.max(860, Math.min(1500, Math.round(viewportH * 1.24)));
+      return Math.max(360, Math.min(700, Math.round(viewportH * 0.64)));
     };
 
 const getNativePrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
   // Real decode/play priming is still close to the viewport, but must happen
   // before intersection so iPhone enters Viewport with a decoded first frame.
-  if (isIOSUi) return Math.max(640, Math.min(1120, Math.round(viewportH * 0.92)));
-  if (isCoarseUi) return Math.max(440, Math.min(780, Math.round(viewportH * 0.7)));
-  return Math.max(160, Math.min(340, Math.round(viewportH * 0.32)));
+  if (isIOSUi) return Math.max(760, Math.min(1320, Math.round(viewportH * 1.08)));
+  if (isCoarseUi) return Math.max(520, Math.min(920, Math.round(viewportH * 0.82)));
+  return Math.max(180, Math.min(380, Math.round(viewportH * 0.36)));
 };
 
 const getNativeEarlyPrimeGapLimit = () => {
   const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
-  if (isIOSUi) return Math.max(820, Math.min(1420, Math.round(viewportH * 1.18)));
-  if (isCoarseUi) return Math.max(560, Math.min(980, Math.round(viewportH * 0.86)));
-  return Math.max(getNativePrimeGapLimit(), Math.min(440, Math.round(viewportH * 0.42)));
+  if (isIOSUi) return Math.max(980, Math.min(1760, Math.round(viewportH * 1.46)));
+  if (isCoarseUi) return Math.max(680, Math.min(1180, Math.round(viewportH * 1.0)));
+  return Math.max(getNativePrimeGapLimit(), Math.min(520, Math.round(viewportH * 0.5)));
 };
 
     const isNativePostVideoCandidate = (el) => {
@@ -3976,10 +3981,11 @@ if (p && typeof p.then === 'function') {
     const holdDelay = warmupOnlyPrime ? (isIOSUi ? 640 : 380) : (isIOSUi ? 180 : 110);
     setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), holdDelay);
   }).catch((err) => {
-    try { finishNativePrimeForSrc(media, 'reject'); } catch {}
+    try { finishNativePrimeForSrc(media, warmupOnlyPrime ? 'warmup_reject' : 'reject'); } catch {}
     try { media.dataset.__nativePrimePending = '0'; } catch {}
     trace('native_prime_reject', media, {
       reason,
+      warmupOnlyPrime,
       name: String(err?.name || ''),
       message: String(err?.message || ''),
     });
@@ -3989,9 +3995,9 @@ if (p && typeof p.then === 'function') {
 }
 return true;
       } catch (err) {
-        try { finishNativePrimeForSrc(media, 'throw'); } catch {}
+        try { finishNativePrimeForSrc(media, warmupOnlyPrime ? 'warmup_throw' : 'throw'); } catch {}
         try { media.dataset.__nativePrimePending = '0'; } catch {}
-        trace('native_prime_throw', media, { reason, message: String(err?.message || err || '') });
+        trace('native_prime_throw', media, { reason, warmupOnlyPrime, message: String(err?.message || err || '') });
         return false;
       }
     };
@@ -4040,6 +4046,7 @@ return true;
           return true;
         }
         const canHoldPrev =
+          !prevPipeline.ready &&
           age < (isIOSUi ? 2400 : (isCoarseUi ? 1900 : 1600)) &&
           isNativePrewarmEligible(prev) &&
           !nextClearlyBetter;
@@ -5097,7 +5104,7 @@ return;
             const inViewport = visiblePx > 0;
             const band = ahead ? 0 : (inViewport ? 1 : 2);
             const pipeline = getNativePrewarmPipelineState(node);
-            const readyBonus = pipeline.ready ? -420 : 0;
+            if (pipeline.ready) return null;
             const pendingBonus = pipeline.loading ? -180 : 0;
             const distance = dir < 0
               ? Math.max(0, viewportH - bottom)
@@ -5107,7 +5114,6 @@ return;
               distance +
               (getOwnerCenterDist(node) * 0.18) -
               (visiblePx * 2.2) +
-              readyBonus +
               pendingBonus +
               (getMediaDomOrder(owner) * 0.001);
             return { node, score, gapPx, visiblePx, top, bottom, band };
