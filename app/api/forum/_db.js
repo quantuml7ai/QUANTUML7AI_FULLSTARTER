@@ -1,6 +1,8 @@
 // app/api/forum/_db.js
+import { Buffer } from 'node:buffer'
 import { Redis } from '@upstash/redis'
 import { now, toStr, parseIntSafe } from './_utils.js'
+import { resolveCanonicalAccountIds } from '../profile/_identity.js'
 
 /* =========================
    helpers
@@ -189,6 +191,13 @@ export const K = {
   // ===== SUBSCRIPTIONS (viewer -> authors) =====
   subsViewerSet:      (viewerId) => `forum:subs:viewer:${viewerId}`,
   subsFollowersCount: (authorId) => `forum:subs:followers_count:${authorId}`,
+  subsFollowersSet:   (authorId) => `forum:subs:followers:${authorId}`,
+  subsFollowingZSet:  (viewerId) => `forum:subs:following:z:${viewerId}`,
+  subsFollowersZSet:  (authorId) => `forum:subs:followers:z:${authorId}`,
+
+  // ===== USER SEARCH PREFIX INDEX =====
+  userSearchPrefix: (prefix) => `forum:user_search:prefix:${prefix}`,
+  userSearchTokens: (userId) => `forum:user_search:tokens:${userId}`,
 
   // ===== REPORTS / MEDIA LOCKS =====
   reportPostReasonSet: (postId, reason) => `forum:report:post:${postId}:${reason}:users`,
@@ -929,6 +938,7 @@ export async function setUserNick(userId, newNick) {
 
   // не меняется — сразу вернуть
   if (oldNick && nickKeyLower(oldNick) === nickKeyLower(nn)) {
+    try { await indexUserSearchNick(userId, oldNick, oldNick) } catch {}
     return oldNick
   }
 
@@ -943,6 +953,7 @@ export async function setUserNick(userId, newNick) {
       if (String(cur) === String(userId)) await redis.del(oldKey)
     } catch {}
   }
+  try { await indexUserSearchNick(userId, nn, oldNick) } catch {}
   return nn
 }
 export async function getUserAvatar(userId) {
@@ -1115,6 +1126,425 @@ export async function setUserProfile(userId, { nickname, icon, gender, birthYear
 ========================= */
 
 const normId = (x) => String(x ?? '').trim()
+const SUBS_PAGE_LIMIT_DEFAULT = 50
+const SUBS_PAGE_LIMIT_MAX = 100
+export const SUBS_SEARCH_MIN_CHARS = 2
+export const SUBS_SEARCH_MAX_CANDIDATES = 1000
+
+const unwrapRedisResult = (value) => {
+  if (value && typeof value === 'object' && 'result' in value) return value.result
+  return value
+}
+
+const normalizeLimit = (limit, def = SUBS_PAGE_LIMIT_DEFAULT) => {
+  const n = Number(limit || def)
+  if (!Number.isFinite(n)) return def
+  return Math.max(1, Math.min(SUBS_PAGE_LIMIT_MAX, Math.floor(n)))
+}
+
+const hashFraction = (input) => {
+  const s = String(input || '')
+  let h = 0
+  for (let i = 0; i < s.length; i += 1) {
+    h = ((h << 5) - h + s.charCodeAt(i)) | 0
+  }
+  return (Math.abs(h) % 1000) / 1000
+}
+
+export function subscriptionScore(viewerId, authorId, ts = Date.now()) {
+  return Number(ts || Date.now()) + hashFraction(`${viewerId}:${authorId}`)
+}
+
+export function encodeSubscriptionCursor(payload) {
+  if (!payload || typeof payload !== 'object') return null
+  try {
+    return Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')
+  } catch {
+    return null
+  }
+}
+
+export function decodeSubscriptionCursor(raw) {
+  const s = normId(raw)
+  if (!s || s === '0') return null
+  if (/^\d+$/.test(s)) return { kind: 'rank', offset: Math.max(0, Number(s) || 0) }
+  try {
+    const parsed = JSON.parse(Buffer.from(s, 'base64url').toString('utf8'))
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+export function normalizeZrangeWithScores(raw) {
+  const list = Array.isArray(raw) ? raw : []
+  const out = []
+  const push = (member, score) => {
+    const m = normId(member)
+    if (!m) return
+    const s = Number(score ?? 0)
+    out.push({ member: m, score: Number.isFinite(s) ? s : 0 })
+  }
+
+  if (!list.length) return out
+
+  if (Array.isArray(list[0])) {
+    for (const it of list) if (Array.isArray(it)) push(it[0], it[1])
+    return out
+  }
+
+  if (list[0] && typeof list[0] === 'object') {
+    for (const it of list) {
+      if (!it) continue
+      if (Array.isArray(it)) {
+        push(it[0], it[1])
+      } else if (typeof it === 'object' && ('member' in it || 'score' in it)) {
+        push(it.member, it.score)
+      } else {
+        push(it, 0)
+      }
+    }
+    return out
+  }
+
+  if (list.length % 2 === 0) {
+    for (let i = 0; i < list.length; i += 2) push(list[i], list[i + 1])
+    return out
+  }
+
+  for (const it of list) push(it, 0)
+  return out
+}
+
+const normalizeScanResult = (raw) => {
+  const list = Array.isArray(raw) ? raw : []
+  return {
+    cursor: String(list[0] ?? '0'),
+    values: Array.isArray(list[1]) ? list[1].map(normId).filter(Boolean) : [],
+  }
+}
+
+const readZSetPage = async (key, { limit, cursor } = {}) => {
+  const safeLimit = normalizeLimit(limit)
+  const parsed = decodeSubscriptionCursor(cursor)
+  const take = safeLimit + 1
+  let raw = []
+
+  if (parsed?.kind === 'rank') {
+    const start = Math.max(0, Number(parsed.offset || 0))
+    raw = await redis.zrange(key, start, start + take - 1, { rev: true, withScores: true })
+  } else {
+    const startScore = parsed?.kind === 'z' && Number.isFinite(Number(parsed.score))
+      ? `(${Number(parsed.score)}`
+      : '+inf'
+    raw = await redis.zrange(key, startScore, '-inf', {
+      byScore: true,
+      rev: true,
+      withScores: true,
+      offset: 0,
+      count: take,
+    })
+  }
+
+  const rows = normalizeZrangeWithScores(raw)
+  const page = rows.slice(0, safeLimit)
+  const hasMore = rows.length > safeLimit
+  const last = page[page.length - 1]
+  const nextCursor = hasMore && last
+    ? encodeSubscriptionCursor(
+        parsed?.kind === 'rank'
+          ? { kind: 'rank', offset: Number(parsed.offset || 0) + safeLimit }
+          : { kind: 'z', score: last.score, member: last.member },
+      )
+    : null
+
+  return {
+    ids: page.map((it) => it.member),
+    rows: page,
+    hasMore,
+    nextCursor,
+  }
+}
+
+const readSetPage = async (key, { limit, cursor } = {}) => {
+  const safeLimit = normalizeLimit(limit)
+  const parsed = decodeSubscriptionCursor(cursor)
+  let scanCursor = parsed?.kind === 'set' ? String(parsed.cursor || '0') : '0'
+  const ids = []
+  let scans = 0
+
+  do {
+    const raw = await redis.sscan(key, scanCursor, { count: Math.max(safeLimit + 1, 50) })
+    const page = normalizeScanResult(raw)
+    scanCursor = page.cursor
+    for (const id of page.values) {
+      if (!ids.includes(id)) ids.push(id)
+      if (ids.length > safeLimit) break
+    }
+    scans += 1
+  } while (ids.length <= safeLimit && scanCursor !== '0' && scans < 4)
+
+  const pageIds = ids.slice(0, safeLimit)
+  const hasMore = ids.length > safeLimit || scanCursor !== '0'
+  return {
+    ids: pageIds,
+    rows: pageIds.map((id) => ({ member: id, score: 0 })),
+    hasMore,
+    nextCursor: hasMore ? encodeSubscriptionCursor({ kind: 'set', cursor: scanCursor }) : null,
+  }
+}
+
+const safeZCard = async (key) => {
+  try { return Number(await redis.zcard(key) || 0) } catch { return 0 }
+}
+
+const safeSCard = async (key) => {
+  try { return Number(await redis.scard(key) || 0) } catch { return 0 }
+}
+
+export function normalizeUserSearchText(raw) {
+  const s = String(raw ?? '')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u0000-\u001f\u007f-\u009f]/g, ' ')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+  return Array.from(s).slice(0, 64).join('')
+}
+
+export function buildUserSearchPrefixes(nickname) {
+  const normalized = normalizeUserSearchText(nickname)
+  const chars = Array.from(normalized)
+  const out = new Set()
+  const max = Math.min(24, chars.length)
+  for (let len = SUBS_SEARCH_MIN_CHARS; len <= max; len += 1) {
+    out.add(chars.slice(0, len).join(''))
+  }
+  return Array.from(out).filter(Boolean)
+}
+
+export function isLikelyExactUserId(raw) {
+  const s = normId(raw)
+  if (!s) return false
+  return /^(?:web_|tg:|tguid:|0x)[a-z0-9:_-]{1,}$/i.test(s) || /^[a-z0-9_-]{6,}$/i.test(s) || /^\d{5,}$/.test(s)
+}
+
+export async function removeUserSearchIndex(userId) {
+  const uid = normId(userId)
+  if (!uid) return 0
+  const tokenKey = K.userSearchTokens(uid)
+  let tokens = []
+  try {
+    tokens = (await redis.smembers(tokenKey) || []).map(normId).filter(Boolean)
+  } catch {}
+  if (!tokens.length) {
+    try { await redis.del(tokenKey) } catch {}
+    return 0
+  }
+  const pipe = redis.multi()
+  tokens.forEach((token) => pipe.zrem(K.userSearchPrefix(token), uid))
+  pipe.del(tokenKey)
+  try {
+    await pipe.exec()
+    return tokens.length
+  } catch {
+    return 0
+  }
+}
+
+export async function indexUserSearchNick(userId, newNick, oldNick = null) {
+  const uid = normId(userId)
+  const nick = normNick(newNick)
+  if (!uid || !nick) {
+    if (uid) await removeUserSearchIndex(uid)
+    return 0
+  }
+
+  await removeUserSearchIndex(uid)
+
+  const tokens = buildUserSearchPrefixes(nick)
+  if (!tokens.length) return 0
+
+  const score = subscriptionScore(uid, normalizeUserSearchText(nick))
+  const pipe = redis.multi()
+  tokens.forEach((token) => {
+    pipe.zadd(K.userSearchPrefix(token), { score, member: uid })
+    pipe.sadd(K.userSearchTokens(uid), token)
+  })
+
+  if (oldNick && nickKeyLower(oldNick) !== nickKeyLower(nick)) {
+    for (const token of buildUserSearchPrefixes(oldNick)) {
+      if (!tokens.includes(token)) pipe.zrem(K.userSearchPrefix(token), uid)
+    }
+  }
+
+  try {
+    await pipe.exec()
+    return tokens.length
+  } catch {
+    return 0
+  }
+}
+
+export async function searchUsersByPrefixPage({ q, cursor = '', limit = SUBS_PAGE_LIMIT_DEFAULT } = {}) {
+  const query = normalizeUserSearchText(q)
+  const safeLimit = normalizeLimit(limit)
+  if (!query || Array.from(query).length < SUBS_SEARCH_MIN_CHARS) {
+    return { ids: [], query, nextCursor: null, hasMore: false }
+  }
+  const page = await readZSetPage(K.userSearchPrefix(query), { limit: safeLimit, cursor })
+  return {
+    ...page,
+    query,
+  }
+}
+
+async function resolveSubscriptionIdsPreservingOrder(ids) {
+  const pairs = await resolveSubscriptionPairsPreservingOrder(ids)
+  return pairs.map((pair) => pair.canonical).filter(Boolean)
+}
+
+async function resolveSubscriptionPairsPreservingOrder(ids) {
+  const rawList = Array.from(new Set((Array.isArray(ids) ? ids : []).map(normId).filter(Boolean)))
+  if (!rawList.length) return []
+  try {
+    const resolved = await resolveCanonicalAccountIds(rawList, redis)
+    const aliases = resolved?.aliases || {}
+    const canonicalPool = Array.isArray(resolved?.ids) ? resolved.ids.map(normId).filter(Boolean) : []
+    return rawList.map((id, idx) => ({
+      raw: id,
+      canonical: normId(aliases[id] || canonicalPool[idx] || id),
+    })).filter((pair) => pair.raw && pair.canonical)
+  } catch {
+    return rawList.map((id) => ({ raw: id, canonical: id }))
+  }
+}
+
+async function ensureFollowingPageIndexes(viewerId, authorIds) {
+  const viewer = normId(viewerId)
+  const authors = Array.from(new Set((Array.isArray(authorIds) ? authorIds : []).map(normId).filter(Boolean)))
+    .filter((id) => id && id !== viewer)
+    .slice(0, SUBS_PAGE_LIMIT_MAX)
+  if (!viewer || !authors.length) return 0
+
+  const pipe = redis.multi()
+  const nowTs = Date.now()
+  authors.forEach((authorId, idx) => {
+    const score = subscriptionScore(viewer, authorId, nowTs - idx)
+    pipe.zadd(K.subsFollowingZSet(viewer), { score, member: authorId })
+    pipe.sadd(K.subsFollowersSet(authorId), viewer)
+    pipe.zadd(K.subsFollowersZSet(authorId), { score, member: viewer })
+  })
+  try {
+    await pipe.exec()
+    return authors.length
+  } catch {
+    return 0
+  }
+}
+
+async function cleanupSubscriptionPageRelations(ownerId, mode, pairs) {
+  const owner = normId(ownerId)
+  const safeMode = mode === 'following' ? 'following' : 'followers'
+  const list = Array.isArray(pairs) ? pairs : []
+  if (!owner || !list.length) return 0
+
+  const seen = new Set()
+  const pipe = redis.multi()
+  let ops = 0
+  const nowTs = Date.now()
+
+  list.forEach((pair, idx) => {
+    const raw = normId(pair?.raw)
+    const canonical = normId(pair?.canonical)
+    if (!raw || !canonical) return
+
+    const selfRelation = canonical === owner || raw === owner
+    const duplicate = seen.has(canonical)
+    const shouldRemoveRaw = selfRelation || duplicate || raw !== canonical
+
+    if (safeMode === 'following') {
+      if (shouldRemoveRaw) {
+        pipe.srem(K.subsViewerSet(owner), raw)
+        pipe.zrem(K.subsFollowingZSet(owner), raw)
+        pipe.srem(K.subsFollowersSet(raw), owner)
+        pipe.zrem(K.subsFollowersZSet(raw), owner)
+        ops += 4
+      }
+      if (!selfRelation && !duplicate && raw !== canonical) {
+        const score = subscriptionScore(owner, canonical, nowTs - idx)
+        pipe.sadd(K.subsViewerSet(owner), canonical)
+        pipe.zadd(K.subsFollowingZSet(owner), { score, member: canonical })
+        pipe.sadd(K.subsFollowersSet(canonical), owner)
+        pipe.zadd(K.subsFollowersZSet(canonical), { score, member: owner })
+        ops += 4
+      }
+    } else {
+      if (shouldRemoveRaw) {
+        pipe.srem(K.subsFollowersSet(owner), raw)
+        pipe.zrem(K.subsFollowersZSet(owner), raw)
+        pipe.srem(K.subsViewerSet(raw), owner)
+        pipe.zrem(K.subsFollowingZSet(raw), owner)
+        ops += 4
+      }
+      if (!selfRelation && !duplicate && raw !== canonical) {
+        const score = subscriptionScore(canonical, owner, nowTs - idx)
+        pipe.sadd(K.subsFollowersSet(owner), canonical)
+        pipe.zadd(K.subsFollowersZSet(owner), { score, member: canonical })
+        pipe.sadd(K.subsViewerSet(canonical), owner)
+        pipe.zadd(K.subsFollowingZSet(canonical), { score, member: owner })
+        ops += 4
+      }
+    }
+
+    if (!selfRelation && !duplicate) seen.add(canonical)
+  })
+
+  if (!ops) return 0
+  try {
+    await pipe.exec()
+    return ops
+  } catch {
+    return 0
+  }
+}
+
+export async function getUsersPublicMini(ids) {
+  const list = (await resolveSubscriptionIdsPreservingOrder(ids)).slice(0, SUBS_PAGE_LIMIT_MAX)
+  if (!list.length) return []
+
+  const pipe = redis.multi()
+  list.forEach((uid) => {
+    pipe.get(K.userNick(uid))
+    pipe.get(K.userAvatar(uid))
+  })
+  const raw = await pipe.exec()
+  const flat = Array.isArray(raw) ? raw.map(unwrapRedisResult) : []
+
+  return list.map((uid, idx) => ({
+    userId: uid,
+    nickname: normId(flat[idx * 2]),
+    icon: normId(flat[idx * 2 + 1]),
+  }))
+}
+
+export async function getSubscriptionCounts(userId) {
+  const uid = normId(userId)
+  if (!uid) return { followers: 0, following: 0 }
+  const [followersZ, followingZ, followersSet, followingSet, legacyFollowersCount] = await Promise.all([
+    safeZCard(K.subsFollowersZSet(uid)),
+    safeZCard(K.subsFollowingZSet(uid)),
+    safeSCard(K.subsFollowersSet(uid)),
+    safeSCard(K.subsViewerSet(uid)),
+    getFollowersCount(uid),
+  ])
+
+  return {
+    followers: Math.max(followersZ, followersSet, legacyFollowersCount),
+    following: Math.max(followingZ, followingSet),
+  }
+}
 
 export async function listSubscriptions(viewerId) {
   const vid = normId(viewerId)
@@ -1127,6 +1557,90 @@ export async function getFollowersCount(authorId) {
   const aid = normId(authorId)
   if (!aid) return 0
   return await getInt(K.subsFollowersCount(aid), 0)
+}
+
+export async function listSubscriptionPeoplePage({
+  userId,
+  mode = 'followers',
+  limit = SUBS_PAGE_LIMIT_DEFAULT,
+  cursor = '',
+} = {}) {
+  const uid = normId(userId)
+  if (!uid) {
+    return { ids: [], users: [], totalCount: 0, nextCursor: null, hasMore: false }
+  }
+
+  const safeMode = mode === 'following' ? 'following' : 'followers'
+  const safeLimit = normalizeLimit(limit)
+  const counts = await getSubscriptionCounts(uid)
+  const zKey = safeMode === 'following' ? K.subsFollowingZSet(uid) : K.subsFollowersZSet(uid)
+  const setKey = safeMode === 'following' ? K.subsViewerSet(uid) : K.subsFollowersSet(uid)
+  const zTotal = await safeZCard(zKey)
+  const setTotal = await safeSCard(setKey)
+  const useZSet = zTotal > 0 && zTotal >= setTotal
+  const page = useZSet
+    ? await readZSetPage(zKey, { limit: safeLimit, cursor })
+    : await readSetPage(setKey, { limit: safeLimit, cursor })
+  const pairs = await resolveSubscriptionPairsPreservingOrder(page.ids)
+  const cleanupOps = await cleanupSubscriptionPageRelations(uid, safeMode, pairs)
+  const pageIds = []
+  for (const pair of pairs) {
+    const canonical = normId(pair?.canonical)
+    if (!canonical || canonical === uid || pageIds.includes(canonical)) continue
+    pageIds.push(canonical)
+  }
+  if (safeMode === 'following' && pageIds.length) {
+    await ensureFollowingPageIndexes(uid, pageIds)
+  }
+  const users = await getUsersPublicMini(pageIds)
+  const nextCounts = cleanupOps ? await getSubscriptionCounts(uid) : counts
+
+  return {
+    ids: pageIds,
+    users,
+    totalCount: safeMode === 'following' ? nextCounts.following : nextCounts.followers,
+    counts: nextCounts,
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore,
+    source: useZSet ? 'zset' : 'set',
+  }
+}
+
+export async function filterCandidatesBySubscriptionRelation({
+  ownerId,
+  mode = 'followers',
+  candidateIds = [],
+} = {}) {
+  const owner = normId(ownerId)
+  if (!owner) return []
+  const safeMode = mode === 'following' ? 'following' : 'followers'
+  const list = Array.from(new Set((Array.isArray(candidateIds) ? candidateIds : []).map(normId).filter(Boolean)))
+    .filter((id) => id !== owner)
+    .slice(0, SUBS_SEARCH_MAX_CANDIDATES)
+  if (!list.length) return []
+
+  const pipe = redis.multi()
+  for (const candidate of list) {
+    if (safeMode === 'followers') {
+      pipe.zscore(K.subsFollowersZSet(owner), candidate)
+      pipe.sismember(K.subsFollowersSet(owner), candidate)
+    } else {
+      pipe.zscore(K.subsFollowingZSet(owner), candidate)
+      pipe.sismember(K.subsViewerSet(owner), candidate)
+    }
+  }
+
+  const raw = await pipe.exec()
+  const flat = Array.isArray(raw) ? raw.map(unwrapRedisResult) : []
+  const out = []
+  for (let i = 0; i < list.length; i += 1) {
+    const score = flat[i * 2]
+    const member = flat[i * 2 + 1]
+    const inZSet = score !== null && score !== undefined
+    const inSet = member === 1 || member === true || member === '1'
+    if (inZSet || inSet) out.push(list[i])
+  }
+  return out
 }
 
 /**
@@ -1142,18 +1656,38 @@ export async function toggleSubscription(viewerId, authorId) {
 
   const setKey = K.subsViewerSet(vid)
   const cntKey = K.subsFollowersCount(aid)
+  const reverseSetKey = K.subsFollowersSet(aid)
+  const followingZKey = K.subsFollowingZSet(vid)
+  const followersZKey = K.subsFollowersZSet(aid)
 
   const isMember = await redis.sismember(setKey, aid)
 
   if (!isMember) {
     const added = await redis.sadd(setKey, aid) // 1 if new
-    if (added === 1) await redis.incr(cntKey)
+    if (added === 1) {
+      const score = subscriptionScore(vid, aid)
+      await redis
+        .multi()
+        .sadd(reverseSetKey, vid)
+        .zadd(followingZKey, { score, member: aid })
+        .zadd(followersZKey, { score, member: vid })
+        .incr(cntKey)
+        .exec()
+    }
     const followersCount = await getInt(cntKey, 0)
     return { ok:true, subscribed:true, followersCount }
   } else {
     const removed = await redis.srem(setKey, aid) // 1 if removed
     if (removed === 1) {
-      const v = await redis.decr(cntKey)
+      const raw = await redis
+        .multi()
+        .srem(reverseSetKey, vid)
+        .zrem(followingZKey, aid)
+        .zrem(followersZKey, vid)
+        .decr(cntKey)
+        .exec()
+      const flat = Array.isArray(raw) ? raw.map(unwrapRedisResult) : []
+      const v = flat[flat.length - 1]
       if ((Number(v) || 0) < 0) await redis.set(cntKey, 0)
     }
     const followersCount = await getInt(cntKey, 0)

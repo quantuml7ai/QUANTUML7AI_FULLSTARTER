@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-05-01T15:21:00.688Z
+Сгенерировано автоматически: 2026-05-07T16:38:13.434Z
 
 ## Общий Принцип
 
@@ -300,7 +300,7 @@
 
 - Зона: `app/forum/features/media`
 - Назначение: Видео, аудио, embeds, lifecycle плееров, preview и trim/upload runtime.
-- Точки входа: `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/media/components/LivePreview.jsx`, `app/forum/features/media/components/qcast/QCastIcons.jsx`, `app/forum/features/media/components/QCastPlayer.jsx`, `app/forum/features/media/components/VideoFeedPane.jsx`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoMedia.jsx`, `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/hooks/useForumComposerAttachments.js`
+- Точки входа: `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/media/components/ExternalVideoPlayer.jsx`, `app/forum/features/media/components/LivePreview.jsx`, `app/forum/features/media/components/qcast/QCastIcons.jsx`, `app/forum/features/media/components/QCastPlayer.jsx`, `app/forum/features/media/components/VideoFeedPane.jsx`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoMedia.jsx`, `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`
 - Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
 
 ### Forum feature: moderation
@@ -335,7 +335,7 @@
 
 - Зона: `app/forum/features/subscriptions`
 - Назначение: Подписки и social graph inside forum.
-- Точки входа: `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`, `app/forum/features/subscriptions/hooks/useStarredAuthorsState.js`, `app/forum/features/subscriptions/utils/starred.js`
+- Точки входа: `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/subscriptions/hooks/useStarredAuthorsState.js`, `app/forum/features/subscriptions/utils/starred.js`
 - Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
 
 ### Forum feature: ui

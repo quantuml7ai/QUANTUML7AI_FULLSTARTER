@@ -33,7 +33,9 @@ export default function ForumHeaderPanel({
   setProfileBump,
   viewerId,
   myFollowersCount,
+  myFollowingCount,
   myFollowersLoading,
+  onOpenSubscriptions,
   moderateImageFiles,
   toastI18n,
   reasonKey,
@@ -127,7 +129,9 @@ export default function ForumHeaderPanel({
               onSaved={() => setProfileBump((x) => x + 1)}
               viewerId={viewerId}
               myFollowersCount={myFollowersCount}
+              myFollowingCount={myFollowingCount}
               myFollowersLoading={myFollowersLoading}
+              onOpenSubscriptions={onOpenSubscriptions}
               moderateImageFiles={moderateImageFiles}
               toastI18n={toastI18n}
               reasonKey={reasonKey}

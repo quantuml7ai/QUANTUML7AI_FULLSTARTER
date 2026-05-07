@@ -24,20 +24,21 @@ export default function useForumProfileSocialRuntime({
   mergeProfileCacheFn,
   writeProfileAliasFn,
 }) {
-  const {
-    starredAuthors,
-    myFollowersCount,
-    myFollowersLoading,
-    toggleAuthorStar,
-    activeStarredAuthors,
-    starredFirst,
-  } = useStarredAuthorsState({
-    viewerId,
-    api,
-    requireAuthStrict,
-    starMode,
-    resolveProfileAccountIdFn,
-  })
+const {
+  starredAuthors,
+  myFollowersCount,
+  myFollowingCount,
+  myFollowersLoading,
+  toggleAuthorStar,
+  activeStarredAuthors,
+  starredFirst,
+} = useStarredAuthorsState({
+  viewerId,
+  api,
+  requireAuthStrict,
+  starMode,
+  resolveProfileAccountIdFn,
+})
 
   const [vipOpen, setVipOpen] = useState(false)
   const vipBtnRef = useRef(null)
@@ -88,6 +89,7 @@ export default function useForumProfileSocialRuntime({
   return {
     starredAuthors,
     myFollowersCount,
+    myFollowingCount,
     myFollowersLoading,
     toggleAuthorStar,
     activeStarredAuthors,

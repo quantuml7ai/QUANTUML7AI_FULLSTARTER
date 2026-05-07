@@ -1,7 +1,7 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T07:53:10.303Z",
-  "scannedFiles": 280,
+  "generatedAt": "2026-05-07T16:39:01.086Z",
+  "scannedFiles": 281,
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumFeedRuntime.js",
@@ -97,27 +97,27 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 469,
+          "line": 492,
           "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }"
         },
         {
           "key": "scrollWrite",
-          "line": 500,
+          "line": 523,
           "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
         },
         {
           "key": "scrollRead",
-          "line": 465,
+          "line": 488,
           "text": "scrollEl.scrollTop = 0"
         },
         {
           "key": "scrollRead",
-          "line": 494,
+          "line": 517,
           "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
         },
         {
           "key": "scrollRead",
-          "line": 499,
+          "line": 522,
           "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
         },
         {
@@ -127,32 +127,32 @@
         },
         {
           "key": "alignOps",
-          "line": 342,
+          "line": 365,
           "text": "alignInboxStartUnderTabs,"
         },
         {
           "key": "alignOps",
-          "line": 429,
+          "line": 452,
           "text": "alignNodeToTop,"
         },
         {
           "key": "alignOps",
-          "line": 432,
+          "line": 455,
           "text": "alignInboxStartUnderTabs,"
         },
         {
           "key": "alignOps",
-          "line": 609,
+          "line": 632,
           "text": "centerPostAfterDom,"
         },
         {
           "key": "alignOps",
-          "line": 669,
+          "line": 692,
           "text": "alignNodeToTop,"
         },
         {
           "key": "alignOps",
-          "line": 778,
+          "line": 801,
           "text": "alignNodeToTop(target)"
         }
       ]
@@ -1769,27 +1769,27 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 315,
+          "line": 317,
           "text": "const r = el.getBoundingClientRect();"
         },
         {
           "key": "rectReads",
-          "line": 645,
+          "line": 647,
           "text": "const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };"
         },
         {
           "key": "resizeObserver",
-          "line": 336,
+          "line": 338,
           "text": "const ro = new ResizeObserver(() => applySize());"
         },
         {
           "key": "raf",
-          "line": 195,
+          "line": 197,
           "text": "rafRef.current = requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 604,
+          "line": 606,
           "text": "const h = setTimeout(async () => {"
         }
       ]
@@ -1811,17 +1811,17 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 139,
+          "line": 144,
           "text": "else window.scrollTo({ top: 0, behavior: 'auto' })"
         },
         {
           "key": "scrollRead",
-          "line": 138,
+          "line": 143,
           "text": "if (sc && sc.scrollHeight > sc.clientHeight + 1) sc.scrollTop = 0"
         },
         {
           "key": "timers",
-          "line": 135,
+          "line": 140,
           "text": "setTimeout(() => {"
         }
       ]
@@ -2119,17 +2119,17 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 214,
+          "line": 219,
           "text": "const rect = anchorEl.getBoundingClientRect()"
         },
         {
           "key": "raf",
-          "line": 256,
+          "line": 261,
           "text": "rafRef.current = window.requestAnimationFrame(() => {"
         },
         {
           "key": "timers",
-          "line": 49,
+          "line": 54,
           "text": "timerRef.current = setTimeout(() => {"
         }
       ]
@@ -2833,6 +2833,33 @@
           "key": "rectReads",
           "line": 24,
           "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\components\\SubscriptionsPopover.jsx",
+      "score": 2,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 0,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 2
+      },
+      "hits": [
+        {
+          "key": "timers",
+          "line": 172,
+          "text": "const timer = window.setTimeout(() => setDebouncedQuery(activeQuery), 300)"
+        },
+        {
+          "key": "timers",
+          "line": 179,
+          "text": "window.setTimeout(() => {"
         }
       ]
     },

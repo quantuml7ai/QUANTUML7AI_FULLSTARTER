@@ -312,6 +312,35 @@ export const api = {
     }
   },
 
+  async subsPeople({ userId, mode = 'followers', q = '', limit = 50, cursor = '', signal } = {}) {
+    const empty = {
+      ok: false,
+      error: 'network',
+      users: [],
+      counts: { followers: 0, following: 0 },
+      totalCount: 0,
+      hasMore: false,
+      nextCursor: null,
+    }
+    try {
+      const params = new URLSearchParams()
+      params.set('userId', String(userId || ''))
+      params.set('mode', mode === 'following' ? 'following' : 'followers')
+      params.set('limit', String(limit || 50))
+      if (q) params.set('q', String(q || ''))
+      if (cursor) params.set('cursor', String(cursor || ''))
+      const r = await fetch('/api/forum/subs/people?' + params.toString(), {
+        method: 'GET',
+        cache: 'no-store',
+        signal,
+      })
+      return await r.json().catch(() => empty)
+    } catch (err) {
+      if (err?.name === 'AbortError') throw err
+      return empty
+    }
+  },
+
   // ===== VIP (batch) =====
   async vipBatch(ids) {
     try {

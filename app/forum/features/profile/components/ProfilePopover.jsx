@@ -25,7 +25,9 @@ export default function ProfilePopover({
 
   viewerId,
   myFollowersCount,
+  myFollowingCount,
   myFollowersLoading,
+  onOpenSubscriptions,
 
   // 👇 deps from Forum scope (moderation + toasts)
   moderateImageFiles,
@@ -914,8 +916,14 @@ if (mountedRef.current) setBusy(false);
             t={t}
             viewerId={viewerId}
             count={myFollowersCount}
+            followingCount={myFollowingCount}
             loading={myFollowersLoading}
             formatCountFn={formatCount}
+            onOpen={() => {
+              const uidForSubscriptions = String(viewerId || uid || '').trim()
+              if (!uidForSubscriptions) return
+              onOpenSubscriptions?.({ userId: uidForSubscriptions, initialMode: 'followers' })
+            }}
           />
         </div>
 

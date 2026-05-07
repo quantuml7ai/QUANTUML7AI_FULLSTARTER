@@ -9,6 +9,7 @@ import ReportPopover from '../../moderation/components/ReportPopover'
 import SharePopover from '../../../SharePopover'
 import UserInfoPopover from '../../profile/components/UserInfoPopover'
 import QuestClaimOverlay from '../../quests/components/QuestClaimOverlay'
+import SubscriptionsPopover from '../../subscriptions/components/SubscriptionsPopover'
 
 export default function ForumOverlayStack({
   dmDeletePopover,
@@ -48,6 +49,10 @@ export default function ForumOverlayStack({
   shareUI,
   closeSharePopover,
   toast,
+  subscriptionsUI,
+  closeSubscriptionsPopover,
+  openSubscriptionsPopover,
+  handleUserInfoToggle,
   userInfoAnchorRef,
   userInfoOpen,
   closeUserInfoPopover,
@@ -136,6 +141,15 @@ export default function ForumOverlayStack({
         t={t}
         toast={toast}
       />
+      <SubscriptionsPopover
+        open={!!subscriptionsUI?.open}
+        userId={subscriptionsUI?.userId}
+        initialMode={subscriptionsUI?.initialMode}
+        onClose={closeSubscriptionsPopover}
+        onOpenUserInfo={handleUserInfoToggle}
+        t={t}
+        formatCountFn={formatCount}
+      />
       <UserInfoPopover
         anchorRef={userInfoAnchorRef}
         open={userInfoOpen}
@@ -146,6 +160,7 @@ export default function ForumOverlayStack({
         formatCountFn={formatCount}
         onOpenUserPosts={onOpenUserPosts}
         onOpenUserTopics={onOpenUserTopics}
+        onOpenSubscriptions={openSubscriptionsPopover}
       />
       <QuestClaimOverlay
         claimFx={claimFx}

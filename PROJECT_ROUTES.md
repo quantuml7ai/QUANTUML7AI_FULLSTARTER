@@ -4,10 +4,10 @@
 > Любое изменение маршрутов, страниц, layout-файлов, loading/not-found/default файлов и API-route файлов обязано сопровождаться обновлением этого файла.
 > Рекомендуемый способ обновления: `node tools/generate-project-routes.js`.
 
-Сгенерировано автоматически: 2026-05-01T15:21:00.626Z
-Всего route-aware файлов: 96
+Сгенерировано автоматически: 2026-05-07T16:38:13.374Z
+Всего route-aware файлов: 99
 Пользовательских route-сущностей: 21
-API-route сущностей: 75
+API-route сущностей: 78
 
 ## Охват
 
@@ -151,10 +151,13 @@ API-route сущностей: 75
 - `/api/forum/subs/count` — API-эндпоинт `/api/forum/subs/count`; файл: `app/api/forum/subs/count/route.js`; тип: `api-route`.
 - `/api/forum/subs/list` — API-эндпоинт `/api/forum/subs/list`; файл: `app/api/forum/subs/list/route.js`; тип: `api-route`.
 - `/api/forum/subs/my-count` — API-эндпоинт `/api/forum/subs/my-count`; файл: `app/api/forum/subs/my-count/route.js`; тип: `api-route`.
+- `/api/forum/subs/people` — API-эндпоинт `/api/forum/subs/people`; файл: `app/api/forum/subs/people/route.js`; тип: `api-route`.
+- `/api/forum/subs/rebuild-followers` — API-эндпоинт `/api/forum/subs/rebuild-followers`; файл: `app/api/forum/subs/rebuild-followers/route.js`; тип: `api-route`.
 - `/api/forum/subs/toggle` — API-эндпоинт `/api/forum/subs/toggle`; файл: `app/api/forum/subs/toggle/route.js`; тип: `api-route`.
 - `/api/forum/upload` — API-эндпоинт `/api/forum/upload`; файл: `app/api/forum/upload/route.js`; тип: `api-route`.
 - `/api/forum/uploadAudio` — API-эндпоинт `/api/forum/uploadAudio`; файл: `app/api/forum/uploadAudio/route.js`; тип: `api-route`.
 - `/api/forum/uploadVideo` — API-эндпоинт `/api/forum/uploadVideo`; файл: `app/api/forum/uploadVideo/route.js`; тип: `api-route`.
+- `/api/forum/user-search/rebuild` — API-эндпоинт `/api/forum/user-search/rebuild`; файл: `app/api/forum/user-search/rebuild/route.js`; тип: `api-route`.
 - `/api/forum/vip/batch` — API-эндпоинт `/api/forum/vip/batch`; файл: `app/api/forum/vip/batch/route.js`; тип: `api-route`.
 - `/api/forum/wa-preview` — API-эндпоинт `/api/forum/wa-preview`; файл: `app/api/forum/wa-preview/route.js`; тип: `api-route`.
 

@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '../../forum/_utils.js'
 import {
   getFollowersCount,
+  getSubscriptionCounts,
   getUserAbout,
   getUserPostsTotal,
   getUserTopicsTotal,
@@ -48,26 +49,39 @@ export async function GET(req) {
       postsCanonical,
       topicsCanonical,
       likesCanonical,
+      countsCanonical,
       aboutLegacy,
       followersLegacy,
       postsLegacy,
       topicsLegacy,
       likesLegacy,
+      countsLegacy,
     ] = await Promise.all([
       getUserAbout(accountId),
       getFollowersCount(accountId),
       getUserPostsTotal(accountId),
       getUserTopicsTotal(accountId),
       getUserLikesTotal(accountId),
+      getSubscriptionCounts(accountId),
       legacyId ? getUserAbout(legacyId).catch(() => '') : Promise.resolve(''),
       legacyId ? getFollowersCount(legacyId).catch(() => 0) : Promise.resolve(0),
       legacyId ? getUserPostsTotal(legacyId).catch(() => 0) : Promise.resolve(0),
       legacyId ? getUserTopicsTotal(legacyId).catch(() => 0) : Promise.resolve(0),
       legacyId ? getUserLikesTotal(legacyId).catch(() => 0) : Promise.resolve(0),
+      legacyId ? getSubscriptionCounts(legacyId).catch(() => null) : Promise.resolve(null),
     ])
 
     const about = String(aboutCanonical || aboutLegacy || '')
-    const followers = Math.max(Number(followersCanonical || 0), Number(followersLegacy || 0))
+    const followers = Math.max(
+      Number(followersCanonical || 0),
+      Number(followersLegacy || 0),
+      Number(countsCanonical?.followers || 0),
+      Number(countsLegacy?.followers || 0),
+    )
+    const following = Math.max(
+      Number(countsCanonical?.following || 0),
+      Number(countsLegacy?.following || 0),
+    )
     const posts = Number(postsCanonical || 0) + Number(postsLegacy || 0)
     const topics = Number(topicsCanonical || 0) + Number(topicsLegacy || 0)
     const likes = Number(likesCanonical || 0) + Number(likesLegacy || 0)
@@ -78,6 +92,7 @@ export async function GET(req) {
       about: about || '',
       stats: {
         followers: Number(followers || 0),
+        following: Number(following || 0),
         posts: Number(posts || 0),
         topics: Number(topics || 0),
         likes: Number(likes || 0),

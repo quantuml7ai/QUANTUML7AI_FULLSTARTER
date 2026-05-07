@@ -10,6 +10,7 @@ export default function useStarredAuthorsState({
 }) {
   const [starredAuthors, setStarredAuthors] = useState(() => new Set())
   const [myFollowersCount, setMyFollowersCount] = useState(0)
+  const [myFollowingCount, setMyFollowingCount] = useState(0)
   const [myFollowersLoading, setMyFollowersLoading] = useState(false)
   const normalizedViewerId = useMemo(
     () => normalizeStarredAuthorId(viewerId, resolveProfileAccountIdFn),
@@ -22,6 +23,7 @@ export default function useStarredAuthorsState({
     if (!normalizedViewerId) {
       setStarredAuthors(new Set())
       setMyFollowersCount(0)
+      setMyFollowingCount(0)
       return () => { alive = false }
     }
 
@@ -39,6 +41,7 @@ export default function useStarredAuthorsState({
       const mc = await api.subsMyCount(normalizedViewerId)
       if (!alive) return
       setMyFollowersCount(Number(mc?.count || 0))
+      setMyFollowingCount(Number(mc?.followingCount ?? mc?.counts?.following ?? arr.length ?? 0))
       setMyFollowersLoading(false)
     })()
 
@@ -98,6 +101,7 @@ export default function useStarredAuthorsState({
     starredAuthors,
     setStarredAuthors,
     myFollowersCount,
+    myFollowingCount,
     myFollowersLoading,
     toggleAuthorStar,
     activeStarredAuthors,

@@ -5,6 +5,10 @@ import { createPortal } from 'react-dom'
 import { translateText } from '../../../shared/api/translate'
 import HydrateText from '../../../shared/components/HydrateText'
 import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
+import {
+  QuantumFamilyBadgeTitleSvg,
+  QuantumFamilyCounterPill,
+} from '../../subscriptions/components/FollowersCounterInline'
 import { resolveProfileAccountId, writeProfileAlias } from '../utils/profileCache'
 
 export default function UserInfoPopover({
@@ -17,6 +21,7 @@ export default function UserInfoPopover({
   formatCountFn,
   onOpenUserPosts,
   onOpenUserTopics,
+  onOpenSubscriptions,
 }) {
   const cacheRef = useRef(new Map())
   const aliasRef = useRef(new Map())
@@ -92,16 +97,23 @@ export default function UserInfoPopover({
         }
 
         const accountId = String(json.accountId || json.userId || rawKey).trim()
-        const payload = {
-          accountId,
-          about: json?.about || '',
-          stats: {
-            followers: Number(json?.stats?.followers || 0),
-            posts: Number(json?.stats?.posts || 0),
-            topics: Number(json?.stats?.topics || 0),
-            likes: Number(json?.stats?.likes || 0),
-          },
-        }
+const payload = {
+  accountId,
+  about: json?.about || '',
+  stats: {
+    followers: Number(json?.stats?.followers || 0),
+    following: Number(
+      json?.stats?.following ??
+      json?.stats?.followingCount ??
+      json?.followingCount ??
+      json?.counts?.following ??
+      0
+    ),
+    posts: Number(json?.stats?.posts || 0),
+    topics: Number(json?.stats?.topics || 0),
+    likes: Number(json?.stats?.likes || 0),
+  },
+}
 
         if (accountId) {
           cacheRef.current.set(accountId, payload)
@@ -336,6 +348,19 @@ export default function UserInfoPopover({
     [data?.accountId, onClose, onOpenUserPosts, onOpenUserTopics, rawUserId, registerAction],
   )
 
+  const openSubscriptions = useCallback(
+    (event) => {
+      event?.preventDefault?.()
+      event?.stopPropagation?.()
+      const uid = String(data?.accountId || rawUserId || '').trim()
+      if (!uid) return
+      registerAction()
+      onOpenSubscriptions?.({ userId: uid, initialMode: 'followers' })
+      onClose?.()
+    },
+    [data?.accountId, onClose, onOpenSubscriptions, rawUserId, registerAction],
+  )
+
   if (!open || !anchorRef?.current || !rawUserId) return null
 
   const stats = data?.stats || {}
@@ -432,8 +457,20 @@ export default function UserInfoPopover({
           </>
         ) : (
           <>
-            <div className="userInfoStat">
+            <button
+              type="button"
+              className="userInfoStat userInfoStat--action userInfoStat--stars"
+              onClick={openSubscriptions}
+              title={t?.('forum_subscriptions_open_followers') || t?.('forum_user_popover_stars')}
+            >
+              <QuantumFamilyBadgeTitleSvg className="userInfoQuantumTitleSvg" />
               <div className="userInfoStatLabel">
+                <QuantumFamilyCounterPill
+                  className="userInfoQuantumPill"
+                  followersCount={stats.followers}
+                  followingCount={stats.following}
+                  formatCountFn={formatCount}
+                />
                 <span className="userInfoStarBadge" aria-hidden="true">
                   <span className="subsRing" aria-hidden="true" />
                   <span className="subsStar" aria-hidden="true">
@@ -441,11 +478,15 @@ export default function UserInfoPopover({
                   </span>
                 </span>
                 <span className="srOnly">{t?.('forum_user_popover_stars')}</span>
+                <span className="userInfoStatArrow" aria-hidden="true">
+                  <span className="userInfoStatArrowTail" />
+                  <span className="userInfoStatArrowHead" />
+                </span>
               </div>
               <div className="userInfoStatValue">
                 <HydrateText value={formatCount(stats.followers)} />
               </div>
-            </div>
+            </button>
             <button
               type="button"
               className="userInfoStat userInfoStat--action"

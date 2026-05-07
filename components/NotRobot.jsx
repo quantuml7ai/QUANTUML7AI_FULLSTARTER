@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/components/i18n";
 
@@ -9,6 +10,9 @@ import { useI18n } from "@/components/i18n";
 // ===================== 
 const RB_CHECK_TIMEOUT_MS = 60 * 1000; // 60 сек на выбор правильной монеты
 const RB_DEFAULT_REDIRECT_URL = "https://www.google.com"; 
+
+// Верхний безопасный CSS z-index. NotRobot должен перекрывать любые внутренние overlay/popover форума.
+const RB_TOP_LAYER_Z_INDEX = 2147483647;
 
 const RB_COINS = [ 
   { id: 1, code: "BTC", imagePath: "/robot/1.png" },
@@ -258,7 +262,11 @@ export default function NotRobot({ onDone }) {
   const rbErrorText = rbErrorKey ? t(rbErrorKey) : "";
   const rbIsSuccess = rbStatus === "success";
 
-  return (
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  const rbOverlayNode = (
     <>
       <div className="rb-overlay">
         <div className="rb-backdrop" />
@@ -353,7 +361,7 @@ export default function NotRobot({ onDone }) {
         .rb-overlay {
           position: fixed;
           inset: 0;
-          z-index: 9999;
+          z-index: ${RB_TOP_LAYER_Z_INDEX};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -634,4 +642,5 @@ export default function NotRobot({ onDone }) {
       `}</style>
     </>
   );
+  return createPortal(rbOverlayNode, document.body);
 } 

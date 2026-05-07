@@ -4,9 +4,9 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-05-01T15:21:01.360Z
-Исходных файлов в анализе: 812
-Route-aware файлов: 96
+Сгенерировано автоматически: 2026-05-07T16:38:14.139Z
+Исходных файлов в анализе: 818
+Route-aware файлов: 99
 
 ## Что Считается Риском
 
@@ -63,10 +63,13 @@ Route-aware файлов: 96
 - `app/api/forum/subs/count/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/subs/list/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/subs/my-count/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
+- `app/api/forum/subs/people/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
+- `app/api/forum/subs/rebuild-followers/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/subs/toggle/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/upload/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/uploadAudio/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/uploadVideo/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
+- `app/api/forum/user-search/rebuild/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/vip/batch/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/wa-preview/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/market/summary/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
@@ -116,18 +119,19 @@ Route-aware файлов: 96
 
 ## Файлы С Самым Высоким Fan-In
 
-- `app/api/forum/_utils.js` — используют 33 локальных модулей
-- `app/api/forum/_db.js` — используют 32 локальных модулей
+- `app/api/forum/_utils.js` — используют 36 локальных модулей
+- `app/api/forum/_db.js` — используют 35 локальных модулей
 - `components/i18n.js` — используют 31 локальных модулей
 - `tools/runtime-governance.js` — используют 25 локальных модулей
+- `app/api/profile/_identity.js` — используют 18 локальных модулей
 - `app/forum/features/profile/utils/profileCache.js` — используют 18 локальных модулей
-- `app/forum/shared/utils/classnames.js` — используют 17 локальных модулей
-- `app/api/profile/_identity.js` — используют 15 локальных модулей
+- `app/forum/shared/utils/classnames.js` — используют 18 локальных модулей
+- `app/forum/shared/utils/counts.js` — используют 11 локальных модулей
 - `tests/support/runtimeGovernance.js` — используют 11 локальных модулей
+- `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 9 локальных модулей
+- `app/forum/shared/components/HydrateText.jsx` — используют 9 локальных модулей
 - `app/forum/shared/utils/forumWindowingRegistry.js` — используют 9 локальных модулей
 - `app/api/dm/_utils.js` — используют 8 локальных модулей
-- `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 8 локальных модулей
-- `app/forum/shared/components/HydrateText.jsx` — используют 8 локальных модулей
 - `app/forum/shared/hooks/useForumWindowing.js` — используют 8 локальных модулей
 - `lib/metadataCache.js` — используют 8 локальных модулей
 - `src/shared/runtime/budgets/routeProfiles.js` — используют 8 локальных модулей
@@ -135,28 +139,27 @@ Route-aware файлов: 96
 - `app/forum/shared/utils/browser.js` — используют 7 локальных модулей
 - `app/forum/shared/utils/forumWindowingPresets.js` — используют 7 локальных модулей
 - `app/ads.js` — используют 6 локальных модулей
+- `app/forum/features/profile/components/VipFlipBadge.jsx` — используют 6 локальных модулей
 - `app/forum/shared/hooks/useEvent.js` — используют 6 локальных модулей
 - `app/forum/shared/utils/formatters.js` — используют 6 локальных модулей
 - `app/forum/features/dm/utils/dmLoaders.js` — используют 5 локальных модулей
-- `app/forum/features/profile/components/VipFlipBadge.jsx` — используют 5 локальных модулей
-- `app/forum/shared/constants/media.js` — используют 5 локальных модулей
-- `app/forum/shared/utils/counts.js` — используют 5 локальных модулей
+- `app/forum/features/media/utils/mediaLifecycleRuntime.js` — используют 5 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
 - `app/forum/ForumRoot.jsx` — импортирует 65 локальных модулей
 - `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 12 локальных модулей
-- `app/forum/features/feed/components/TopicItem.jsx` — импортирует 11 локальных модулей
+- `app/forum/features/feed/components/TopicItem.jsx` — импортирует 12 локальных модулей
 - `app/layout.js` — импортирует 11 локальных модулей
 - `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
+- `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 9 локальных модулей
 - `app/forum/ForumHeaderPanel.jsx` — импортирует 9 локальных модулей
 - `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx` — импортирует 9 локальных модулей
 - `tests/unit/i18n/i18nDictionaries.test.js` — импортирует 9 локальных модулей
 - `tests/unit/runtime/runtimeGovernance.test.js` — импортирует 9 локальных модулей
-- `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 8 локальных модулей
 - `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — импортирует 8 локальных модулей
 - `components/i18n.js` — импортирует 8 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 7 локальных модулей
@@ -164,34 +167,35 @@ Route-aware файлов: 96
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
 - `app/forum/features/ui/utils/buildForumRootPropBundles.js` — импортирует 7 локальных модулей
-- `app/forum/ForumLayout.jsx` — импортирует 7 локальных модулей
 - `src/shared/runtime/mode/runtimeMode.js` — импортирует 7 локальных модулей
 - `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — импортирует 6 локальных модулей
 - `app/forum/features/profile/components/ProfilePopover.jsx` — импортирует 6 локальных модулей
+- `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx` — импортирует 6 локальных модулей
 - `app/forum/features/ui/hooks/useForumComposerSubmitRuntime.js` — импортирует 6 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 11; плотность: 11
-- `forum/root` — файлов: 14; исходящих связей: 89; плотность: 6.36
+- `forum/root` — файлов: 14; исходящих связей: 88; плотность: 6.29
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `app/ads` — файлов: 4; исходящих связей: 10; плотность: 2.5
+- `forum/subscriptions` — файлов: 4; исходящих связей: 9; плотность: 2.25
 - `api/profile` — файлов: 9; исходящих связей: 19; плотность: 2.11
 - `app/exchange` — файлов: 3; исходящих связей: 6; плотность: 2
 - `api/brain` — файлов: 1; исходящих связей: 2; плотность: 2
 - `api/market` — файлов: 1; исходящих связей: 2; плотность: 2
-- `forum/dm` — файлов: 31; исходящих связей: 59; плотность: 1.9
-- `api/forum` — файлов: 30; исходящих связей: 54; плотность: 1.8
+- `forum/dm` — файлов: 31; исходящих связей: 60; плотность: 1.94
+- `api/forum` — файлов: 33; исходящих связей: 63; плотность: 1.91
+- `forum/feed` — файлов: 59; исходящих связей: 108; плотность: 1.83
 - `api/dm` — файлов: 9; исходящих связей: 16; плотность: 1.78
-- `forum/feed` — файлов: 59; исходящих связей: 104; плотность: 1.76
-- `forum/profile` — файлов: 18; исходящих связей: 30; плотность: 1.67
+- `forum/profile` — файлов: 18; исходящих связей: 31; плотность: 1.72
 - `app/academy` — файлов: 3; исходящих связей: 5; плотность: 1.67
 - `api/pay` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `api/referral` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/about` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/game` — файлов: 2; исходящих связей: 3; плотность: 1.5
 - `app/subscribe` — файлов: 3; исходящих связей: 4; плотность: 1.33
-- `forum/ui` — файлов: 51; исходящих связей: 64; плотность: 1.25
+- `forum/ui` — файлов: 51; исходящих связей: 66; плотность: 1.29
 - `src/shared` — файлов: 32; исходящих связей: 34; плотность: 1.06
 - `api/telegram` — файлов: 4; исходящих связей: 4; плотность: 1
 - `api/qcoin` — файлов: 3; исходящих связей: 3; плотность: 1
@@ -201,7 +205,6 @@ Route-aware файлов: 96
 - `api/subscription` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/ads.js` — файлов: 1; исходящих связей: 1; плотность: 1
 - `app/components` — файлов: 1; исходящих связей: 1; плотность: 1
-- `app/contact` — файлов: 1; исходящих связей: 1; плотность: 1
 
 ## Серверные И Инфраструктурные Хотспоты
 
@@ -249,10 +252,13 @@ Route-aware файлов: 96
 - `app/api/forum/subs/count/route.js`
 - `app/api/forum/subs/list/route.js`
 - `app/api/forum/subs/my-count/route.js`
+- `app/api/forum/subs/people/route.js`
+- `app/api/forum/subs/rebuild-followers/route.js`
 - `app/api/forum/subs/toggle/route.js`
 - `app/api/forum/upload/route.js`
 - `app/api/forum/uploadAudio/route.js`
 - `app/api/forum/uploadVideo/route.js`
+- `app/api/forum/user-search/rebuild/route.js`
 - `app/api/forum/vip/batch/route.js`
 - `app/api/forum/wa-preview/route.js`
 - `app/api/market/summary/route.js`

@@ -203,6 +203,28 @@ export default function Forum(){
     toast,
   })
 
+  const [subscriptionsUI, setSubscriptionsUI] = useState({
+    open: false,
+    userId: '',
+    initialMode: 'followers',
+  })
+
+  const openSubscriptionsPopover = useCallback(({ userId, initialMode = 'followers' } = {}) => {
+    const raw = String(userId || '').trim()
+    const uid = String(resolveProfileAccountId(raw) || raw).trim()
+    if (!uid) return
+    setSubscriptionsUI({
+      open: true,
+      userId: uid,
+      initialMode: initialMode === 'following' ? 'following' : 'followers',
+    })
+  }, [])
+
+  const closeSubscriptionsPopover = useCallback(() => {
+    setSubscriptionsUI({ open: false, userId: '', initialMode: 'followers' })
+    closeUserInfoPopover?.()
+  }, [closeUserInfoPopover])
+
 const {
   starMode,
   setStarMode,
@@ -250,6 +272,7 @@ useForumGlobalPopovers(openOnlyRef)
 const {
   starredAuthors,
   myFollowersCount,
+  myFollowingCount,
   myFollowersLoading,
   toggleAuthorStar,
   activeStarredAuthors,
@@ -1747,7 +1770,9 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     setProfileBump,
     viewerId,
     myFollowersCount,
+    myFollowingCount,
     myFollowersLoading,
+    onOpenSubscriptions: openSubscriptionsPopover,
     moderateImageFiles,
     toastI18n,
     reasonKey,
@@ -1980,6 +2005,10 @@ const compensateScrollOnResize = useScrollResizeCompensation()
     shareUI,
     closeSharePopover,
     toast,
+    subscriptionsUI,
+    closeSubscriptionsPopover,
+    openSubscriptionsPopover,
+    handleUserInfoToggle,
     userInfoAnchorRef,
     userInfoOpen,
     closeUserInfoPopover,

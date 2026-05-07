@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T07:52:39.875Z",
+  "generatedAt": "2026-05-07T16:38:30.074Z",
   "summary": {
-    "scannedFiles": 384,
-    "internalEdges": 534,
+    "scannedFiles": 388,
+    "internalEdges": 551,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 144,
+    "crossDomainEdgeCount": 150,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -504,6 +504,24 @@
       "toDomain": "forum-shared"
     },
     {
+      "from": "app/forum/features/subscriptions/components/SubscriptionsPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/components/HydrateText.jsx",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/subscriptions/components/SubscriptionsPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/classnames.js",
+      "toDomain": "forum-shared"
+    },
+    {
+      "from": "app/forum/features/subscriptions/components/SubscriptionsPopover.jsx",
+      "fromDomain": "forum-ui",
+      "to": "app/forum/shared/utils/counts.js",
+      "toDomain": "forum-shared"
+    },
+    {
       "from": "app/forum/features/ui/components/ComposerCore.jsx",
       "fromDomain": "forum-ui",
       "to": "app/forum/shared/utils/classnames.js",
@@ -720,6 +738,18 @@
       "toDomain": "api-profile"
     },
     {
+      "from": "app/api/forum/subs/people/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
+      "from": "app/api/forum/subs/rebuild-followers/route.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
+    },
+    {
       "from": "app/api/forum/subs/toggle/route.js",
       "fromDomain": "api-forum",
       "to": "app/api/profile/_identity.js",
@@ -736,6 +766,12 @@
       "fromDomain": "api-forum",
       "to": "lib/subscriptions.js",
       "toDomain": "lib"
+    },
+    {
+      "from": "app/api/forum/_db.js",
+      "fromDomain": "api-forum",
+      "to": "app/api/profile/_identity.js",
+      "toDomain": "api-profile"
     },
     {
       "from": "app/api/dm/_utils.js",
@@ -2616,9 +2652,10 @@
         "app/forum/shared/api/translate.js",
         "app/forum/shared/components/HydrateText.jsx",
         "app/forum/shared/utils/counts.js",
+        "app/forum/features/subscriptions/components/FollowersCounterInline.jsx",
         "app/forum/features/profile/utils/profileCache.js"
       ],
-      "importCount": 4,
+      "importCount": 5,
       "external": [
         "react",
         "react-dom"
@@ -2957,6 +2994,24 @@
       "externalCount": 1
     },
     {
+      "file": "app/forum/features/subscriptions/components/SubscriptionsPopover.jsx",
+      "domain": "forum-ui",
+      "imports": [
+        "app/forum/shared/components/HydrateText.jsx",
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/shared/utils/counts.js",
+        "app/forum/services/forumApi.js",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "app/forum/features/profile/components/VipFlipBadge.jsx"
+      ],
+      "importCount": 6,
+      "external": [
+        "react",
+        "react-dom"
+      ],
+      "externalCount": 2
+    },
+    {
       "file": "app/forum/features/subscriptions/hooks/useStarredAuthorsState.js",
       "domain": "forum-ui",
       "imports": [
@@ -3173,9 +3228,10 @@
         "app/forum/features/moderation/components/ReportPopover.jsx",
         "app/forum/SharePopover.jsx",
         "app/forum/features/profile/components/UserInfoPopover.jsx",
-        "app/forum/features/quests/components/QuestClaimOverlay.jsx"
+        "app/forum/features/quests/components/QuestClaimOverlay.jsx",
+        "app/forum/features/subscriptions/components/SubscriptionsPopover.jsx"
       ],
-      "importCount": 8,
+      "importCount": 9,
       "external": [
         "react"
       ],
@@ -4319,6 +4375,32 @@
       "externalCount": 0
     },
     {
+      "file": "app/api/forum/subs/people/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/api/forum/subs/rebuild-followers/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js",
+        "app/api/profile/_identity.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "node:buffer"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/api/forum/subs/toggle/route.js",
       "domain": "api-forum",
       "imports": [
@@ -4370,6 +4452,19 @@
       "externalCount": 2
     },
     {
+      "file": "app/api/forum/user-search/rebuild/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_utils.js",
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 2,
+      "external": [
+        "node:buffer"
+      ],
+      "externalCount": 1
+    },
+    {
       "file": "app/api/forum/vip/batch/route.js",
       "domain": "api-forum",
       "imports": [
@@ -4403,13 +4498,15 @@
       "file": "app/api/forum/_db.js",
       "domain": "api-forum",
       "imports": [
-        "app/api/forum/_utils.js"
+        "app/api/forum/_utils.js",
+        "app/api/profile/_identity.js"
       ],
-      "importCount": 1,
+      "importCount": 2,
       "external": [
+        "node:buffer",
         "@upstash/redis"
       ],
-      "externalCount": 1
+      "externalCount": 2
     },
     {
       "file": "app/api/forum/_utils.js",
