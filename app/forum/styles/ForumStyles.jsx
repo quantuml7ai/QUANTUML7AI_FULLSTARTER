@@ -2547,7 +2547,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
       .subsFamilyOverlay{
         align-items:flex-start;
         padding:
-          max(12px, calc(env(safe-area-inset-top) + 12px))
+          max(120px, calc(env(safe-area-inset-top) + 12px))
           8px
           max(12px, calc(env(safe-area-inset-bottom) + 12px));
         overflow-y:auto;
@@ -2556,7 +2556,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
         width:500px;
         max-width:96vw;
         min-height:min(390px, calc(100dvh - 96px));
-        max-height:calc(100dvh - 96px);
+        max-height:calc(90dvh - 96px);
         padding:12px 10px;
         border-radius:18px;
       }
