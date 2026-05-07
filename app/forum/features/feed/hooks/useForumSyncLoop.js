@@ -22,7 +22,10 @@ export default function useForumSyncLoop({
   useEffect(() => {
     if (!isBrowserFn()) return
     let stop = false
-    const TICK_MS = 30_000
+    const TICK_MS = Math.max(
+      60_000,
+      Number(process.env.NEXT_PUBLIC_FORUM_SYNC_TICK_MS || 180_000),
+    )
     const FULL_EVERY_MS = 10 * 60 * 1000
     const readScrollIdleState = () => {
       try {
@@ -79,8 +82,28 @@ export default function useForumSyncLoop({
       }
     }
 
-    const runTick = async () => {
-      if (stop || syncInFlightRef.current) return
+    const pendingRunRef = { current: null }
+
+    const runTick = async (options = {}) => {
+      if (stop) return
+
+      if (syncInFlightRef.current) {
+        if (options?.forceApply || options?.full) {
+          const prev = pendingRunRef.current || {}
+          pendingRunRef.current = {
+            ...prev,
+            ...options,
+            forceApply: !!(prev.forceApply || options?.forceApply),
+            full: !!(prev.full || options?.full),
+            reason: options?.reason || prev.reason || 'queued_force',
+          }
+        }
+        return
+      }
+
+      const forceApply = !!options?.forceApply
+      const forceFull = !!options?.full
+
       syncInFlightRef.current = true
       try {
         await flushMutations()
@@ -88,13 +111,40 @@ export default function useForumSyncLoop({
 
         const now = Date.now()
         try {
-          if (typeof document !== 'undefined' && document.hidden) return
+          if (typeof document !== 'undefined' && document.hidden && !forceApply) return
         } catch {}
 
-        const needFull = !snapRef.current?.rev || (now - (lastFullSnapshotRef.current || 0) > FULL_EVERY_MS)
-        const canApplyFullNow = canApplyFullSnapshotNow()
-        const canApplyEventsNow = canApplyIncrementalNow()
-        if (needFull && snapRef.current?.rev && !canApplyFullNow) {
+        const sinceNow = Number(snapRef.current?.rev || 0)
+
+        // Дешёвый фоновый режим: сначала читаем только forum:rev.
+        // Если ревизия не изменилась — не тянем snapshot/changes вообще.
+        // Если изменилась, но пользователь глубоко читает ленту — копим pending rev
+        // и применим его при безопасном surface-refresh.
+        if (!forceApply && sinceNow > 0 && typeof api?.rev === 'function') {
+          const rr = await api.rev()
+          const liveRev = Number(rr?.rev || 0) || 0
+
+          if (!rr?.ok || liveRev <= sinceNow) {
+            return
+          }
+
+          sseHintRef.current = Math.max(Number(sseHintRef.current || 0), liveRev)
+
+          const canApplyEventsNow = canApplyIncrementalNow()
+          const canApplyFullNow = canApplyFullSnapshotNow()
+
+          if (!canApplyEventsNow && !canApplyFullNow) {
+            return
+          }
+        }
+
+        const needFull =
+          forceFull ||
+          !snapRef.current?.rev ||
+          (now - (lastFullSnapshotRef.current || 0) > FULL_EVERY_MS)
+        const canApplyFullNow = forceApply || canApplyFullSnapshotNow()
+        const canApplyEventsNow = forceApply || canApplyIncrementalNow()
+        if (needFull && snapRef.current?.rev && !canApplyFullNow && !forceFull) {
           // Defer heavy full snapshots while user is deep in feed.
           return
         }
@@ -200,18 +250,23 @@ export default function useForumSyncLoop({
               )
 
             if (useFullFallback) {
-              if (canApplyFullNow) {
+              const isGapFallback = !!r?.gap
+
+              if (canApplyFullNow || forceApply || isGapFallback) {
                 persistSnapRef.current((prev) => applyFullSnapshotRef.current(prev, r, tombstones))
                 lastFullSnapshotRef.current = now
+              } else {
+                const hinted = Number(sseHintRef.current || 0)
+                const revNow = Number(r?.rev || 0)
+                sseHintRef.current = Math.max(hinted, revNow, since)
               }
-            } else if (canApplyEventsNow) {
+            } else if (canApplyEventsNow || forceApply) {
               persistSnapRef.current((prev) => {
                 const next = applyEventsRef.current(prev, r.events || [], tombstones)
                 return { ...next, rev: r.rev ?? next.rev }
               })
             } else {
-              // Пока пользователь активно скроллит/читает глубоко, не перетряхиваем DOM событиями.
-              // Иначе получаются заметные подпрыгивания ленты в фоне.
+              // Пользователь глубоко читает/скроллит: не трогаем DOM, только копим ревизию.
               const hinted = Number(sseHintRef.current || 0)
               const revNow = Number(r?.rev || 0)
               sseHintRef.current = Math.max(hinted, revNow, since)
@@ -230,17 +285,53 @@ export default function useForumSyncLoop({
         console.error('sync tick error', e)
       } finally {
         syncInFlightRef.current = false
+        const pending = pendingRunRef.current
+        if (pending && !stop) {
+          pendingRunRef.current = null
+          setTimeout(() => {
+            try { runTick(pending) } catch {}
+          }, 0)
+        }
       }
     }
 
-    syncNowRef.current = runTick
-    runTick()
-    const id = setInterval(runTick, TICK_MS)
+    syncNowRef.current = (options = {}) => runTick(options)
+
+    runTick({ reason: 'bootstrap', forceApply: true })
+
+    const id = setInterval(() => {
+      runTick({ reason: 'interval' })
+    }, TICK_MS)
+
+    const requestVisibleSync = () => {
+      try {
+        if (document.hidden) return
+      } catch {}
+
+      setTimeout(() => {
+        try {
+          syncNowRef.current?.({
+            reason: 'visible',
+            forceApply: false,
+          })
+        } catch {}
+      }, 120)
+    }
+
+    try {
+      document.addEventListener('visibilitychange', requestVisibleSync)
+      window.addEventListener('focus', requestVisibleSync)
+    } catch {}
 
     return () => {
       stop = true
       syncNowRef.current = () => {}
       clearInterval(id)
+
+      try {
+        document.removeEventListener('visibilitychange', requestVisibleSync)
+        window.removeEventListener('focus', requestVisibleSync)
+      } catch {}
     }
   }, [
     isBrowserFn,

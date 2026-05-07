@@ -265,9 +265,10 @@ export default function useForumCreatePostAction({
       const sameHost = (typeof location !== 'undefined' ? location.host : '') || ''
       const URL_RE = /https?:\/\/[^\s<>"')]+/gi
       const ST_PREFIX = ['/vip-emoji/', '/emoji/', '/stickers/', '/assets/emoji/', '/mozi/', '/Quest/']
-      const ST_EXT = /\.(gif|png|webp|jpg|jpeg)$/i
-      const AUD_EXT = /\.(mp3|webm|ogg|wav|m4a)$/i
-      const VID_EXT = /\.(webm|mp4|mov|m4v|mkv)$/i
+      const ST_EXT = /\.(gif|png|webp|jpg|jpeg|avif)(?:$|[?#])/i
+      const IMG_EXT = /\.(gif|png|webp|jpg|jpeg|avif)(?:$|[?#])/i
+      const AUD_EXT = /\.(mp3|webm|ogg|wav|m4a)(?:$|[?#])/i
+      const VID_EXT = /\.(webm|mp4|mov|m4v|mkv)(?:$|[?#])/i
 
       const extractUrls = (s = '') => {
         const out = []
@@ -283,16 +284,16 @@ export default function useForumCreatePostAction({
         try {
           if (uStr.startsWith('/')) {
             if (ST_PREFIX.some((p) => uStr.startsWith(p)) && ST_EXT.test(uStr)) return true
-            if ((/\/uploads?\//i.test(uStr) || /\/media?\//i.test(uStr)) && (AUD_EXT.test(uStr) || VID_EXT.test(uStr))) return true
+            if ((/\/uploads?\//i.test(uStr) || /\/media?\//i.test(uStr)) && (IMG_EXT.test(uStr) || AUD_EXT.test(uStr) || VID_EXT.test(uStr))) return true
             if (uStr.startsWith('/_next/image')) return true
             return false
           }
           const u = new URL(uStr)
           if (sameHost && u.host === sameHost) {
             if (ST_PREFIX.some((p) => u.pathname.startsWith(p)) && ST_EXT.test(u.pathname)) return true
-            if ((/\/uploads?\//i.test(u.pathname) || /\/media?\//i.test(u.pathname)) && (AUD_EXT.test(u.pathname) || VID_EXT.test(u.pathname))) return true
+            if ((/\/uploads?\//i.test(u.pathname) || /\/media?\//i.test(u.pathname)) && (IMG_EXT.test(u.pathname) || AUD_EXT.test(u.pathname) || VID_EXT.test(u.pathname))) return true
           }
-          if (u.hostname.endsWith('vercel-storage.com') && (AUD_EXT.test(u.pathname) || VID_EXT.test(u.pathname))) return true
+          if (u.hostname.endsWith('vercel-storage.com') && (IMG_EXT.test(u.pathname) || AUD_EXT.test(u.pathname) || VID_EXT.test(u.pathname))) return true
           return false
         } catch {
           return true

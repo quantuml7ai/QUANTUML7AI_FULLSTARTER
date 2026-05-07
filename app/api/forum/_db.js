@@ -290,21 +290,36 @@ export async function patchSnapshotPartial({ rev, patch = {} }) {
     const topics = Array.isArray(payload.topics) ? payload.topics : []
     const posts  = Array.isArray(payload.posts)  ? payload.posts  : []
 
-    // patch: { topics: { [id]: {views?, postsCount?} }, posts: { [id]: {views?, likes?, dislikes?} } }
-    if (patch.topics && typeof patch.topics === 'object') {
-      for (const [id, v] of Object.entries(patch.topics)) {
-        const t = topics.find(x => String(x?.id) === String(id))
-        if (t && v && typeof v === 'object') Object.assign(t, v)
+    const upsertPatchItem = (list, id, v) => {
+      if (!id || !v || typeof v !== 'object') return
+      const item = list.find((x) => String(x?.id) === String(id))
+      if (item) {
+        Object.assign(item, v)
+        return
       }
+
+      // Не создаём новые карточки из частичных счетчиков вида { views } / { likes }.
+      // Новые темы/посты передаются сюда полным объектом из createTopic/createPost.
+      const looksLikeFullItem =
+        v.id != null ||
+        v.topicId != null ||
+        v.title != null ||
+        v.text != null ||
+        v.userId != null ||
+        v.nickname != null
+
+      if (!looksLikeFullItem) return
+      list.unshift({ ...v, id: String(v.id ?? id) })
+    }
+
+    // patch: { topics: { [id]: partialOrFullTopic }, posts: { [id]: partialOrFullPost } }
+    if (patch.topics && typeof patch.topics === 'object') {
+      for (const [id, v] of Object.entries(patch.topics)) upsertPatchItem(topics, id, v)
     }
 
     if (patch.posts && typeof patch.posts === 'object') {
-      for (const [id, v] of Object.entries(patch.posts)) {
-        const p = posts.find(x => String(x?.id) === String(id))
-        if (p && v && typeof v === 'object') Object.assign(p, v)
-      }
+      for (const [id, v] of Object.entries(patch.posts)) upsertPatchItem(posts, id, v)
     }
-
     const next = { rev: Number(rev) || snap.rev || 0, payload }
     await redis.set(K.snapshot, JSON.stringify(next))
     return true
@@ -340,6 +355,12 @@ export async function createTopic({ title, description, userId, nickname, icon, 
   try { await incrUserTopicsTotal(t.userId, 1) } catch {}
 
   await pushChange({ rev, kind: 'topic', id: topicId, data: t, ts: t.ts })
+  try {
+    await patchSnapshotPartial({
+      rev,
+      patch: { topics: { [topicId]: { ...t, postsCount: 0, views: 0 } } },
+    })
+  } catch {}
   return { topic: t, rev }
 }
 
@@ -371,6 +392,16 @@ export async function createPost({ topicId, parentId, text, userId, nickname, ic
   try { await incrUserPostsTotal(p.userId, 1) } catch {}
 
   await pushChange({ rev, kind: 'post', id: postId, data: p, ts: p.ts })
+  try {
+    const postsCount = await getInt(K.topicPostsCount(p.topicId), 0)
+    await patchSnapshotPartial({
+      rev,
+      patch: {
+        topics: { [p.topicId]: { postsCount } },
+        posts: { [postId]: { ...p, likes: 0, dislikes: 0, views: 0 } },
+      },
+    })
+  } catch {}
   return { post: p, rev }
 }
 
@@ -893,6 +924,21 @@ export async function snapshot(sinceRev = 0, limit = 10000) {
   const events = parsed
     .filter((e) => Number(e?.rev || 0) > Number(sinceRev || 0))
     .sort((a, b) => (a.rev || 0) - (b.rev || 0))
+
+  // Если forum:rev ушёл вперёд, но окно changes не отдало событий,
+  // нельзя возвращать пустой incremental и сбрасывать pending rev на клиенте.
+  // Отдаём full fallback; createTopic/createPost теперь точечно поддерживают K.snapshot свежим.
+  if (Number(currentRev) > Number(sinceRev || 0) && events.length === 0) {
+    const raw = await redis.get(K.snapshot)
+    if (raw) {
+      const snap = safeParse(raw)
+      if (snap && typeof snap.rev === 'number' && snap.payload) {
+        return { rev: snap.rev, ...snap.payload, full: true, gap: true }
+      }
+    }
+    const snap = await rebuildSnapshot()
+    return { rev: snap.rev, ...snap.payload, full: true, gap: true }
+  }
 
   return { rev: currentRev, events, full: false }
 }

@@ -458,6 +458,37 @@ const {
   isBrowserFn: isBrowser,
 })
 const [contentRefreshToken, setContentRefreshToken] = useState(0)
+const SURFACE_SNAPSHOT_SYNC_MIN_MS = Math.max(
+  60_000,
+  Number(process.env.NEXT_PUBLIC_FORUM_SURFACE_SYNC_MIN_MS || 180_000),
+)
+const lastSurfaceSnapshotSyncAtRef = useRef(0)
+const lastSurfaceSyncKeyRef = useRef('')
+
+const requestSurfaceSnapshotSync = useCallback((reason = 'surface_refresh') => {
+  try {
+    const now = Date.now()
+    const last = Number(lastSurfaceSnapshotSyncAtRef.current || 0)
+
+    if (last && now - last < SURFACE_SNAPSHOT_SYNC_MIN_MS) {
+      return false
+    }
+
+    lastSurfaceSnapshotSyncAtRef.current = now
+
+    setTimeout(() => {
+      try {
+        syncNowRef.current?.({
+          reason,
+          forceApply: true,
+        })
+      } catch {}
+    }, 180)
+
+    return true
+  } catch {}
+  return false
+}, [SURFACE_SNAPSHOT_SYNC_MIN_MS, syncNowRef])
 
 const clearSortRefreshAlignHandles = useCallback(() => {
   try {
@@ -698,6 +729,52 @@ useForumModeSync({
   canAutoAlignNow,
 })
 
+const surfaceSyncKey = useMemo(() => {
+  return [
+    sel?.id || 'home',
+    threadRoot?.id || '',
+    inboxOpen ? `inbox:${inboxTab || ''}:${dmWithUserId || ''}` : '',
+    questOpen ? `quest:${questSel?.id || questSel || ''}` : '',
+    profileBranchMode ? `profile:${profileBranchMode}:${normalizedProfileBranchUserId || ''}` : '',
+    topicFilterId || '',
+    topicSort || '',
+    postSort || '',
+    starMode ? 'star' : '',
+  ].join('|')
+}, [
+  sel?.id,
+  threadRoot?.id,
+  inboxOpen,
+  inboxTab,
+  dmWithUserId,
+  questOpen,
+  questSel,
+  profileBranchMode,
+  normalizedProfileBranchUserId,
+  topicFilterId,
+  topicSort,
+  postSort,
+  starMode,
+])
+
+useEffect(() => {
+  if (!surfaceSyncKey) return
+
+  if (!lastSurfaceSyncKeyRef.current) {
+    lastSurfaceSyncKeyRef.current = surfaceSyncKey
+    return
+  }
+
+  if (lastSurfaceSyncKeyRef.current === surfaceSyncKey) return
+
+  lastSurfaceSyncKeyRef.current = surfaceSyncKey
+
+  // Переход между ветками/режимами: поверхность всё равно меняется или выравнивается,
+  // поэтому здесь безопаснее применить накопленные snapshot-события.
+  // Внутри requestSurfaceSnapshotSync стоит throttle, поэтому прыжки туда-сюда не засыпают API.
+  requestSurfaceSnapshotSync('surface_key_change')
+}, [surfaceSyncKey, requestSurfaceSnapshotSync])
+
 const findSortRefreshBranchStartCard = useCallback(() => {
   try {
     const scrollEl =
@@ -838,6 +915,7 @@ const commitSortChangeRefresh = useCallback(() => {
 
   sortRefreshAlignPendingRef.current = true
   setContentRefreshToken((prev) => prev + 1)
+  requestSurfaceSnapshotSync('sort_change_refresh')
 }, [
   VIDEO_PAGE_SIZE,
   TOPIC_PAGE_SIZE,
@@ -856,6 +934,7 @@ const commitSortChangeRefresh = useCallback(() => {
   setVisibleTopicsCount,
   setVisibleVideoCount,
   profileBranchMode,
+  requestSurfaceSnapshotSync,
   sel?.id,
 ])
 
@@ -870,6 +949,7 @@ const refreshHomeFeedSurface = useCallback(() => {
   try { setVisibleProfilePostsCount(THREAD_PAGE_SIZE) } catch {}
   try { videoFeedHardResetBridgeRef.current?.current?.() } catch {}
   setContentRefreshToken((prev) => prev + 1)
+  requestSurfaceSnapshotSync('home_feed_refresh')
 }, [
   VIDEO_PAGE_SIZE,
   TOPIC_PAGE_SIZE,
@@ -878,6 +958,7 @@ const refreshHomeFeedSurface = useCallback(() => {
   PUBLISHED_PAGE_SIZE,
   clearSortRefreshAlignHandles,
   forceFeedScrollTop,
+  requestSurfaceSnapshotSync,
   setVisibleProfilePostsCount,
   setVisiblePublishedCount,
   setVisibleRepliesCount,
@@ -885,6 +966,7 @@ const refreshHomeFeedSurface = useCallback(() => {
   setVisibleTopicsCount,
   setVisibleVideoCount,
 ])
+
 
 useEffect(() => {
   if (!sortRefreshAlignPendingRef.current) return undefined

@@ -70,6 +70,20 @@ if (typeof window !== 'undefined') {
 // ==== API (клиент) ====
 export const api = {
 
+  // Дешевая проверка текущей ревизии форума: один Redis GET forum:rev на сервере.
+  async rev() {
+    try {
+      const r = await fetch('/api/forum/rev', { cache: 'no-store' })
+      const json = await r.json().catch(() => ({}))
+      return {
+        ok: !!json?.ok && r.ok,
+        rev: Number(json?.rev || 0) || 0,
+      }
+    } catch {
+      return { ok: false, rev: 0, error: 'network' }
+    }
+  },
+
   // Снимок базы: full или инкрементальный (since)
   async snapshot(q = {}) {
     try {
