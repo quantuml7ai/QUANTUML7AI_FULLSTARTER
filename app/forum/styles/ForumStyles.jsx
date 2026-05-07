@@ -5074,11 +5074,20 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
 /* сам блок QCoin растягивается на всю доступную ширину,
    но не переносится и не вылазит */
 .qRowRight > *{
-  flex:1 1 auto; min-width:0; width:100%;
-  display:inline-flex; align-items:center; justify-content:flex-end;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  flex:1 1 auto;
+  min-width:0;
+  width:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:flex-end;
+  white-space:nowrap;
+  overflow:visible;
+  text-overflow:clip;
   text-align:right;
-  font-size:clamp(12px, 2.8vw, 24px);     /* адаптивный размер шрифта */
+
+  /* было clamp(12px, 2.8vw, 24px) — сжимало с 857px */
+  font-size:clamp(18px, 4.8vw, 24px);
+
   max-width:100%;
 }
 
