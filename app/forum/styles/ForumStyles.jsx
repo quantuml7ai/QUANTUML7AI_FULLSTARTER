@@ -5086,7 +5086,7 @@ animation:qcastCtrlEQ 880ms ease-in-out infinite, qcastCtrlHue 2.4s linear infin
   text-align:right;
 
   /* было clamp(12px, 2.8vw, 24px) — сжимало с 857px */
-  font-size:clamp(18px, 4.8vw, 24px);
+  font-size:clamp(17px, 4.1vw, 22px);
 
   max-width:100%;
 }
