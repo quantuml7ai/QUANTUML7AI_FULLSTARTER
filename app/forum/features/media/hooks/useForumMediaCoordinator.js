@@ -3635,29 +3635,6 @@ const getNativeEarlyPrimeGapLimit = () => {
       return state;
     };
 
-    const getNativePrewarmStaleMs = () => (
-      isIOSUi ? 1850 : (isCoarseUi ? 1700 : 1450)
-    );
-
-    const isStalePredictiveNativeWarmup = (el) => {
-      const media = getMediaStateNode(el);
-      if (!(media instanceof HTMLVideoElement)) return false;
-      try {
-        const pipeline = getNativePrewarmPipelineState(media);
-        if (!pipeline.loading || pipeline.ready) return false;
-        if (getOwnerVisiblePx(media) > 0) return false;
-
-        const pendingAge = Number(pipeline.pendingForMs || 0);
-        const ownerAge = media === nativePrewarmEl
-          ? Math.max(0, Date.now() - Number(nativePrewarmTs || 0))
-          : 0;
-        const age = Math.max(pendingAge, ownerAge);
-        return age > getNativePrewarmStaleMs();
-      } catch {
-        return false;
-      }
-    };
-
     const isNativePrewarmEligible = (el) => {
       try {
         const media = getMediaStateNode(el);
@@ -3990,60 +3967,19 @@ const finishPrime = (state = 'done') => {
 const p = media.play?.();
 if (p && typeof p.then === 'function') {
   p.then(() => {
-    if (warmupOnlyPrime) {
-      let done = false;
-      let frameCallbackArmed = false;
-      let fallbackTimer = 0;
-      const readyNow = () => {
-        try { return Number(media.readyState || 0) >= 2; } catch {}
-        return false;
-      };
-      const cleanupReadyListeners = () => {
-        try { media.removeEventListener('loadeddata', onReady); } catch {}
-        try { media.removeEventListener('canplay', onReady); } catch {}
-        try { media.removeEventListener('playing', onReady); } catch {}
-        try { if (fallbackTimer) clearTimeout(fallbackTimer); } catch {}
-        fallbackTimer = 0;
-      };
-      const completeWarmup = (state = 'warmup_ready') => {
-        if (done) return;
-        done = true;
-        cleanupReadyListeners();
-        const delay = readyNow() ? (isIOSUi ? 56 : 32) : 0;
-        setTimeout(() => finishPrime(state), delay);
-      };
-      const onReady = () => {
-        if (readyNow()) completeWarmup('loaded_first_frame');
-      };
-
-      try { media.addEventListener('loadeddata', onReady, { once: true }); } catch {}
-      try { media.addEventListener('canplay', onReady, { once: true }); } catch {}
-      try { media.addEventListener('playing', onReady, { once: true }); } catch {}
-
-      if (typeof media.requestVideoFrameCallback === 'function') {
-        try {
-          frameCallbackArmed = true;
-          media.requestVideoFrameCallback(() => {
-            completeWarmup('first_frame');
-          });
-        } catch {
-          frameCallbackArmed = false;
-        }
+    let frameCallbackArmed = false;
+    if (warmupOnlyPrime && typeof media.requestVideoFrameCallback === 'function') {
+      try {
+        frameCallbackArmed = true;
+        media.requestVideoFrameCallback(() => {
+          setTimeout(() => finishPrime('first_frame'), isIOSUi ? 48 : 32);
+        });
+      } catch {
+        frameCallbackArmed = false;
       }
-
-      if (readyNow()) {
-        completeWarmup(frameCallbackArmed ? 'ready_after_play' : 'ready_no_rvfc');
-      } else {
-        const maxWarmupMs = isIOSUi ? 2400 : (isCoarseUi ? 1800 : 1100);
-        fallbackTimer = setTimeout(() => {
-          completeWarmup(readyNow() ? 'warmup_ready_timeout' : 'warmup_timeout');
-        }, maxWarmupMs);
-      }
-      return;
     }
-
-    const holdDelay = isIOSUi ? 180 : 110;
-    setTimeout(() => finishPrime('played'), holdDelay);
+    const holdDelay = warmupOnlyPrime ? (isIOSUi ? 640 : 380) : (isIOSUi ? 180 : 110);
+    setTimeout(() => finishPrime(frameCallbackArmed ? 'played_timeout' : 'played'), holdDelay);
   }).catch((err) => {
     try { finishNativePrimeForSrc(media, warmupOnlyPrime ? 'warmup_reject' : 'reject'); } catch {}
     try { media.dataset.__nativePrimePending = '0'; } catch {}
@@ -4055,7 +3991,7 @@ if (p && typeof p.then === 'function') {
     });
   });
 } else {
-  setTimeout(() => finishPrime('sync_play'), warmupOnlyPrime ? (isIOSUi ? 520 : 320) : 120);
+  setTimeout(() => finishPrime('sync_play'), 120);
 }
 return true;
       } catch (err) {
@@ -4091,19 +4027,12 @@ return true;
           nextVisible > Math.max(0, prevVisible + 36) ||
           nextGap + (isIOSUi ? 180 : 140) < prevGap ||
           getOwnerCenterDist(media) + (isIOSUi ? 120 : 90) < getOwnerCenterDist(prev);
-        const prevLoadingFreshEnough =
-          !isStalePredictiveNativeWarmup(prev) &&
-          age < getNativePrewarmStaleMs();
-        const prevNotBehindNext =
-          prevVisible > 0 ||
-          prevGap <= nextGap + (isIOSUi ? 120 : 90);
         const holdLoadingPrev =
           prevPipeline.loading &&
           !prevPipeline.ready &&
           prevStillInRunway &&
-          prevLoadingFreshEnough &&
-          prevNotBehindNext &&
-          (!nextInFocusRunway || !nextClearlyBetter);
+          (!nextInFocusRunway || !nextClearlyBetter) &&
+          age < (isIOSUi ? 7200 : (isCoarseUi ? 6200 : 5200));
         if (holdLoadingPrev) {
           trace('native_prewarm_hold_loading_slot', prev, {
             reason,
@@ -5144,7 +5073,7 @@ return;
 
     let nativePrewarmScanRaf = 0;
     let nativePrewarmScanLastTs = 0;
-    const pickPredictiveNativePrewarmTarget = (dir = 1, skipNode = null) => {
+    const pickPredictiveNativePrewarmTarget = (dir = 1) => {
       try {
         const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
         if (viewportH <= 0) return null;
@@ -5153,7 +5082,6 @@ return;
         const rows = nodes
           .map((node) => {
             if (!(node instanceof HTMLVideoElement)) return null;
-            if (skipNode && node === skipNode) return null;
             if (!node.isConnected) return null;
             if (isUserPaused(node) || hasSuppressedPlayback(node) || isMediaSrcBlocked(node)) return null;
             const owner = getOwnerNode(node) || node;
@@ -5177,10 +5105,7 @@ return;
             const band = ahead ? 0 : (inViewport ? 1 : 2);
             const pipeline = getNativePrewarmPipelineState(node);
             if (pipeline.ready) return null;
-            const staleWarmup = isStalePredictiveNativeWarmup(node);
-            const pendingBonus = pipeline.loading
-              ? (staleWarmup ? 520 : -120)
-              : 0;
+            const pendingBonus = pipeline.loading ? -180 : 0;
             const distance = dir < 0
               ? Math.max(0, viewportH - bottom)
               : Math.max(0, top);
@@ -5191,7 +5116,7 @@ return;
               (visiblePx * 2.2) +
               pendingBonus +
               (getMediaDomOrder(owner) * 0.001);
-            return { node, score, gapPx, visiblePx, top, bottom, band, staleWarmup };
+            return { node, score, gapPx, visiblePx, top, bottom, band };
           })
           .filter(Boolean)
           .sort((a, b) => a.score - b.score);
@@ -5209,27 +5134,17 @@ return;
         nativePrewarmScanRaf = requestAnimationFrame(() => {
           nativePrewarmScanRaf = 0;
           const dir = updateCoordinatorScrollDirection();
-          let skipNode = null;
-          for (let attempt = 0; attempt < 2; attempt += 1) {
-            const picked = pickPredictiveNativePrewarmTarget(dir, skipNode);
-            if (!picked?.node) return;
-
-            const prepared = prewarmAhead(picked.node, reason);
-            const staleAfterPrepare = isStalePredictiveNativeWarmup(picked.node);
-            traceCandidate('candidate_predictive_native_prewarm', picked.node, {
-              reason,
-              prepared,
-              dir,
-              gapPx: picked.gapPx,
-              visiblePx: picked.visiblePx,
-              band: picked.band,
-              attempt,
-              staleWarmup: picked.staleWarmup || staleAfterPrepare,
-            });
-
-            if (prepared && !staleAfterPrepare) return;
-            skipNode = picked.node;
-          }
+          const picked = pickPredictiveNativePrewarmTarget(dir);
+          if (!picked?.node) return;
+          const prepared = prewarmAhead(picked.node, reason);
+          traceCandidate('candidate_predictive_native_prewarm', picked.node, {
+            reason,
+            prepared,
+            dir,
+            gapPx: picked.gapPx,
+            visiblePx: picked.visiblePx,
+            band: picked.band,
+          });
         });
       } catch {
         nativePrewarmScanRaf = 0;
@@ -5302,17 +5217,9 @@ return;
       {
         threshold: 0.001,
         rootMargin: `${
-          Math.max(
-            isIOSUi ? 760 : (isCoarseUi ? 620 : 360),
-            Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.35 : 1.0)),
-            Math.round(getNativePrimeGapLimit() * 0.72),
-          )
+          Math.max(isIOSUi ? 560 : (isCoarseUi ? 440 : 280), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 1.2 : 0.9)))
         }px 0px ${
-          Math.max(
-            isIOSUi ? 1280 : (isCoarseUi ? 1040 : 560),
-            Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.4 : 1.55)),
-            getNativePrewarmGapLimit(),
-          )
+          Math.max(isIOSUi ? 980 : (isCoarseUi ? 820 : 520), Math.round(__MEDIA_VIS_MARGIN_PX * (isIOSUi ? 2.05 : 1.35)))
         }px 0px`,
       },
     );
@@ -5354,21 +5261,14 @@ return;
           const shouldRestoreSurface =
             visiblePx > 0 ||
             gapPx <= Math.max(getNativeEarlyPrimeGapLimit(), isCoarseUi ? 560 : 460);
-          const shouldPredictivePrewarm =
-            shouldRestoreSurface ||
-            gapPx <= getNativePrewarmGapLimit();
           if (
-            shouldPredictivePrewarm &&
+            shouldRestoreSurface &&
             media instanceof HTMLVideoElement &&
             !isUserPaused(media) &&
             !hasSuppressedPlayback(media) &&
             !isMediaSrcBlocked(media)
           ) {
-            if (
-              shouldRestoreSurface &&
-              !String(media.getAttribute?.('src') || media.currentSrc || '').trim() &&
-              __hasLazyVideoSourceWithoutSrc(media)
-            ) {
+            if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim() && __hasLazyVideoSourceWithoutSrc(media)) {
               trace('observe_native_visible_restore', media, { visiblePx, gapPx });
               try { __restoreVideoEl(media); } catch {}
             }

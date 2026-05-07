@@ -4,8 +4,8 @@ import { readForumRuntimeConfig } from '../../../shared/config/runtime'
 import interleaveRecommendationRails from '../../feed/utils/interleaveRecommendationRails'
 
 const VF_OVERSCAN_PX = 1480
-const VF_OVERSCAN_PX_MOBILE = 1980
-const VF_OVERSCAN_PX_TABLET = 1720
+const VF_OVERSCAN_PX_MOBILE = 1260
+const VF_OVERSCAN_PX_TABLET = 1360
 const VF_VIDEO_CARD_H_MOBILE = 650
 const VF_VIDEO_CARD_H_TABLET = 550
 const VF_VIDEO_CARD_H_DESKTOP = 550
@@ -40,8 +40,8 @@ export default function useVideoFeedWindowing({
       const dm = Number(window?.navigator?.deviceMemory || 0)
       const lowMem = Number.isFinite(dm) && dm > 0 && dm <= 4
 
-      if (coarse || lowMem) return 8
-      return 9
+      if (coarse || lowMem) return 6
+      return 7
     } catch {
       return 5
     }
