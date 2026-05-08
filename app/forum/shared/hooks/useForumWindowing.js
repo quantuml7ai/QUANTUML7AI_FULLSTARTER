@@ -328,6 +328,25 @@ export default function useForumWindowing({
     }
   }, [])
 
+  const isNodeAboveViewport = useCallback((node) => {
+    try {
+      if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+      const rect = node.getBoundingClientRect?.()
+      if (!rect) return false
+
+      const el = readScrollEl()
+      if (hasInnerScrollable(el)) {
+        const hostRect = el.getBoundingClientRect?.()
+        const hostTop = Number(hostRect?.top || 0)
+        return Number(rect.bottom || 0) <= hostTop + 1
+      }
+
+      return Number(rect.bottom || 0) <= 1
+    } catch {
+      return false
+    }
+  }, [hasInnerScrollable, readScrollEl])
+
   const scheduleRecalc = useCallback(() => {
     if (rafRef.current) return
     rafRef.current = requestAnimationFrame(() => {
@@ -756,6 +775,7 @@ export default function useForumWindowing({
           const measuredDelta = Number.isFinite(prev) && prev > 0
             ? Math.abs(prev - nextHeight)
             : 0
+          const renderedAboveViewport = isNodeAboveViewport(node)
 
           if (
             stableMediaShell &&
@@ -808,13 +828,18 @@ export default function useForumWindowing({
             isScrollActiveNow() &&
             shouldDeferMeasuredHeightDuringScroll
           ) {
+            const delta = nextHeight - prev
             pendingHeightsRef.current.set(key, nextHeight)
+            if (delta !== 0 && renderedAboveViewport) {
+              pendingAnchorDeltaRef.current += delta
+            }
             emitWindowingDiag('media_height_deferred_during_scroll', {
               key,
               prev: Math.round(prev),
               next: nextHeight,
               stableMediaShell,
               cardContainsStableMediaShell,
+              renderedAboveViewport,
             })
             scheduleAnchorFlush(scrollSettleMs)
             return
@@ -825,13 +850,17 @@ export default function useForumWindowing({
           if (Number.isFinite(prev) && prev > 0) {
             const delta = nextHeight - prev
             const isAboveWindow = index < Number(winRef.current?.start || 0)
+            const shouldAnchorVisualPosition = isAboveWindow || renderedAboveViewport
 
-            if (delta !== 0 && isAboveWindow) {
+            if (delta !== 0 && shouldAnchorVisualPosition) {
               if (isScrollActiveNow()) {
                 pendingAnchorDeltaRef.current += delta
                 scheduleAnchorFlush()
               } else {
-                applyAnchoredScrollDelta(delta, 'height_above_window')
+                applyAnchoredScrollDelta(
+                  delta,
+                  renderedAboveViewport ? 'height_rendered_above_viewport' : 'height_above_window',
+                )
               }
             }
           }
@@ -857,6 +886,7 @@ export default function useForumWindowing({
     applyAnchoredScrollDelta,
     emitWindowingDiag,
     heightDeltaIgnorePx,
+    isNodeAboveViewport,
     isScrollActiveNow,
     layoutJitterPx,
     scheduleAnchorFlush,
