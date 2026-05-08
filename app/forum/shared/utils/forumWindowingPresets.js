@@ -53,14 +53,14 @@ export function readForumWindowingMaxRender(kind = 'post') {
 
   switch (String(kind || 'post')) {
     case 'topic':
-      return constrained ? 18 : 22
+      return constrained ? 14 : 18
     case 'dm_dialog':
-      return constrained ? 18 : 22
+      return constrained ? 14 : 18
     case 'dm_message':
-      return constrained ? 16 : 18
+      return constrained ? 12 : 14
     case 'post':
     default:
-      return constrained ? 13 : 15
+      return constrained ? 9 : 11
   }
 }
 
