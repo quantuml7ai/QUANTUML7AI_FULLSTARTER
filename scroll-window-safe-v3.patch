@@ -1,0 +1,63 @@
+diff --git a/app/forum/shared/hooks/useForumWindowing.js b/app/forum/shared/hooks/useForumWindowing.js
+index 81c974f..6f99f2d 100644
+--- a/app/forum/shared/hooks/useForumWindowing.js
++++ b/app/forum/shared/hooks/useForumWindowing.js
+@@ -359,15 +359,16 @@ export default function useForumWindowing({
+         }
+ 
+         const nextMaxRender = resolveMaxRender(velocity)
++        const visibleCount = Math.max(1, visibleEnd - visibleStart)
++        const runwayItems = direction < 0 ? 2 : 1
++        const minViewportSafeWindowSize = clamp(
++          Math.max(nextMaxRender, visibleCount + runwayItems),
++          1,
++          total,
++        )
+ 
+         if ((end - start) > nextMaxRender) {
+-          const visibleCount = Math.max(1, visibleEnd - visibleStart)
+-          const runwayItems = direction < 0 ? 2 : 1
+-          const windowSize = clamp(
+-            Math.max(nextMaxRender, visibleCount + runwayItems),
+-            1,
+-            total,
+-          )
++          const windowSize = minViewportSafeWindowSize
+ 
+           if (direction < 0) {
+             // При обратном скролле hard-cap не должен отрезать карточки,
+@@ -446,7 +447,10 @@ export default function useForumWindowing({
+ 
+             const recentWindowChange = (now - Number(winMetaRef.current?.ts || 0)) < windowStickyMs
+             const stickyItems = velocity > 1.2 ? 2 : 1
+-            const stickyMaxRender = nextMaxRender + stickyItems
++            const stickyMaxRender = Math.max(
++              nextMaxRender + stickyItems,
++              minViewportSafeWindowSize,
++            )
+             const leadingTrim = Math.max(0, nextStart - prev.start)
+             const trailingTrim = Math.max(0, prev.end - nextEnd)
+             const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
+diff --git a/app/forum/shared/utils/forumWindowingPresets.js b/app/forum/shared/utils/forumWindowingPresets.js
+index 65bbc71..2ce8c04 100644
+--- a/app/forum/shared/utils/forumWindowingPresets.js
++++ b/app/forum/shared/utils/forumWindowingPresets.js
+@@ -53,14 +53,14 @@ export function readForumWindowingMaxRender(kind = 'post') {
+ 
+   switch (String(kind || 'post')) {
+     case 'topic':
+-      return constrained ? 14 : 18
++      return constrained ? 17 : 21
+     case 'dm_dialog':
+-      return constrained ? 14 : 18
++      return constrained ? 17 : 21
+     case 'dm_message':
+-      return constrained ? 12 : 14
++      return constrained ? 15 : 17
+     case 'post':
+     default:
+-      return constrained ? 9 : 11
++      return constrained ? 12 : 14
+   }
+ }
+ 
