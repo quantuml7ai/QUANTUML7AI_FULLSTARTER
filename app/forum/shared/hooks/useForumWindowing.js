@@ -8,7 +8,7 @@ const DEFAULT_LAYOUT_JITTER_PX = 32
 const DEFAULT_SCROLL_SETTLE_MS = 320
 const DEFAULT_HEIGHT_DELTA_IGNORE_PX = 2
 const DEFAULT_ANCHOR_DELTA_IGNORE_PX = 3
-const DEFAULT_ANCHOR_DELTA_MAX_PX = 64
+const DEFAULT_ANCHOR_DELTA_MAX_PX = 640
 const DEFAULT_ANCHOR_FLUSH_MS = 140
 const DEFAULT_ANCHOR_ACTIVE_RETRY_MS = 120
 const DEFAULT_REVEAL_HOLD_MS = 1800
@@ -46,6 +46,20 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n))
 }
 
+function readAnchorDeltaLimit(fallback = DEFAULT_ANCHOR_DELTA_MAX_PX) {
+  try {
+    const vh = Number(window?.innerHeight || 0)
+    if (vh > 0) {
+      return Math.max(
+        Number(fallback || DEFAULT_ANCHOR_DELTA_MAX_PX),
+        Math.min(900, Math.round(vh * 0.65)),
+      )
+    }
+  } catch {}
+
+  return Number(fallback || DEFAULT_ANCHOR_DELTA_MAX_PX)
+}
+
 function normalizeKey(raw, fallback = '') {
   const normalized = String(raw ?? fallback).trim()
   return normalized || String(fallback || '')
@@ -77,10 +91,19 @@ function readDefaultLayoutKey(isBrowserFn) {
   }
 }
 
-function hasStableMediaShell(node) {
+function isStableMediaShellNode(node) {
   try {
-    if (!(node instanceof Element)) return false
-    if (node.matches?.(STABLE_MEDIA_SHELL_SELECTOR)) return true
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    return !!node.matches?.(STABLE_MEDIA_SHELL_SELECTOR)
+  } catch {
+    return false
+  }
+}
+
+function containsStableMediaShell(node) {
+  try {
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    if (isStableMediaShellNode(node)) return true
     return !!node.querySelector?.(STABLE_MEDIA_SHELL_SELECTOR)
   } catch {
     return false
@@ -359,15 +382,16 @@ export default function useForumWindowing({
         }
 
         const nextMaxRender = resolveMaxRender(velocity)
+        const visibleCount = Math.max(1, visibleEnd - visibleStart)
+        const runwayItems = direction < 0 ? 2 : 1
+        const minViewportSafeWindowSize = clamp(
+          Math.max(nextMaxRender, visibleCount + runwayItems),
+          1,
+          total,
+        )
 
         if ((end - start) > nextMaxRender) {
-          const visibleCount = Math.max(1, visibleEnd - visibleStart)
-          const runwayItems = direction < 0 ? 2 : 1
-          const windowSize = clamp(
-            Math.max(nextMaxRender, visibleCount + runwayItems),
-            1,
-            total,
-          )
+          const windowSize = minViewportSafeWindowSize
 
           if (direction < 0) {
             // При обратном скролле hard-cap не должен отрезать карточки,
@@ -446,7 +470,10 @@ export default function useForumWindowing({
 
             const recentWindowChange = (now - Number(winMetaRef.current?.ts || 0)) < windowStickyMs
             const stickyItems = velocity > 1.2 ? 2 : 1
-            const stickyMaxRender = nextMaxRender + stickyItems
+            const stickyMaxRender = Math.max(
+              nextMaxRender + stickyItems,
+              minViewportSafeWindowSize,
+            )
             const leadingTrim = Math.max(0, nextStart - prev.start)
             const trailingTrim = Math.max(0, prev.end - nextEnd)
             const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
@@ -512,18 +539,24 @@ export default function useForumWindowing({
     const raw = Number(delta || 0)
     if (!Number.isFinite(raw) || Math.abs(raw) < anchorDeltaIgnorePx) return
 
-    if (Math.abs(raw) > anchorDeltaMaxPx) {
-      emitWindowingDiag('anchor_large_delta_drop', {
+    const anchorLimit = readAnchorDeltaLimit(anchorDeltaMaxPx)
+    const safeDelta = clamp(raw, -anchorLimit, anchorLimit)
+
+    if (Math.abs(raw) > anchorLimit) {
+      emitWindowingDiag('anchor_large_delta_clamped', {
         reason,
         delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
+        anchorLimit,
       })
-      return
     }
 
     if (isScrollActiveNow()) {
+      pendingAnchorDeltaRef.current += safeDelta
       emitWindowingDiag('anchor_adjust_deferred_active_scroll', {
         reason,
         delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
         applied: 0,
       })
       return
@@ -541,7 +574,7 @@ export default function useForumWindowing({
           0,
           Number(el.scrollHeight || 0) - Number(el.clientHeight || 0),
         )
-        const next = clamp(before + raw, 0, maxScroll || before + raw)
+        const next = clamp(before + safeDelta, 0, maxScroll || before + safeDelta)
 
         el.scrollTop = next
         applied = Number(el.scrollTop || 0) - before
@@ -556,7 +589,7 @@ export default function useForumWindowing({
             Number(body?.scrollHeight || 0),
           ) - Number(window.innerHeight || 0),
         )
-        const next = clamp(before + raw, 0, maxScroll || before + raw)
+        const next = clamp(before + safeDelta, 0, maxScroll || before + safeDelta)
 
         window.__forumProgrammaticScrollTs = now
         window.scrollTo(0, next)
@@ -567,6 +600,7 @@ export default function useForumWindowing({
     emitWindowingDiag('anchor_adjust_apply', {
       reason,
       delta: Math.round(raw),
+      appliedDelta: Math.round(safeDelta),
       applied: Math.round(applied),
     })
   }, [
@@ -580,23 +614,44 @@ export default function useForumWindowing({
 
   const applyPendingMeasuredHeights = useCallback((reason = 'flush') => {
     let applied = 0
+    let deferredAnchorDelta = 0
     try {
       pendingHeightsRef.current.forEach((height, key) => {
         const nextHeight = Math.round(Number(height || 0))
         if (!key || !Number.isFinite(nextHeight) || nextHeight <= 1) return
+
+        const prevHeight = Number(heightsRef.current.get(key) || 0)
         heightsRef.current.set(key, nextHeight)
         applied += 1
+
+        if (Number.isFinite(prevHeight) && prevHeight > 0) {
+          const index = keyToIndexRef.current.get(key)
+          const delta = nextHeight - prevHeight
+          if (
+            delta !== 0 &&
+            Number.isFinite(index) &&
+            index < Number(winRef.current?.start || 0)
+          ) {
+            deferredAnchorDelta += delta
+          }
+        }
       })
       pendingHeightsRef.current.clear()
+
+      if (Math.abs(deferredAnchorDelta) >= anchorDeltaIgnorePx) {
+        pendingAnchorDeltaRef.current += deferredAnchorDelta
+      }
+
       if (applied > 0) {
         emitWindowingDiag('media_height_deferred_apply', {
           reason,
           applied,
+          deferredAnchorDelta: Math.round(deferredAnchorDelta),
         })
       }
     } catch {}
     return applied
-  }, [emitWindowingDiag])
+  }, [anchorDeltaIgnorePx, emitWindowingDiag])
 
   const scheduleAnchorFlush = useCallback((delay = anchorFlushMs) => {
     try {
@@ -619,14 +674,7 @@ export default function useForumWindowing({
         pendingAnchorDeltaRef.current = 0
 
         if (Math.abs(pending) >= anchorDeltaIgnorePx) {
-          if (Math.abs(pending) <= anchorDeltaMaxPx) {
-            applyAnchoredScrollDelta(pending, 'deferred_height_above_window')
-          } else {
-            emitWindowingDiag('anchor_large_delta_drop', {
-              reason: 'large_deferred_height_delta_above_window',
-              pending: Math.round(pending),
-            })
-          }
+          applyAnchoredScrollDelta(pending, 'deferred_height_above_window')
         }
 
         scheduleRecalc()
@@ -637,11 +685,9 @@ export default function useForumWindowing({
   }, [
     anchorActiveRetryMs,
     anchorDeltaIgnorePx,
-    anchorDeltaMaxPx,
     anchorFlushMs,
     applyAnchoredScrollDelta,
     applyPendingMeasuredHeights,
-    emitWindowingDiag,
     isScrollActiveNow,
     scheduleRecalc,
   ])
@@ -707,10 +753,15 @@ export default function useForumWindowing({
 
           const nextHeight = Math.round(h)
           const prev = Number(heightsRef.current.get(key) || 0)
-          const stableMediaShell = hasStableMediaShell(node)
+          const stableMediaShell = isStableMediaShellNode(node)
+          const cardContainsStableMediaShell = !stableMediaShell && containsStableMediaShell(node)
+          const mediaSensitiveCard = stableMediaShell || cardContainsStableMediaShell
+          const measuredDelta = Number.isFinite(prev) && prev > 0
+            ? Math.abs(prev - nextHeight)
+            : 0
 
           if (
-            stableMediaShell &&
+            mediaSensitiveCard &&
             Number.isFinite(prev) &&
             prev > 0 &&
             nextHeight < prev &&
@@ -729,7 +780,7 @@ export default function useForumWindowing({
             const mayApplyShrink = !recentScroll && stableForMs >= Math.max(520, scrollSettleMs)
 
             if (!mayApplyShrink) {
-              pendingHeightsRef.current.set(key, prev)
+              pendingHeightsRef.current.set(key, nextHeight)
               emitWindowingDiag('stable_media_height_shrink_deferred', {
                 key,
                 prev: Math.round(prev),
@@ -747,12 +798,26 @@ export default function useForumWindowing({
             return
           }
 
-          if (Number.isFinite(prev) && prev > 0 && isScrollActiveNow() && stableMediaShell) {
+          const shouldDeferMeasuredHeightDuringScroll =
+            stableMediaShell ||
+            (
+              cardContainsStableMediaShell &&
+              measuredDelta >= Math.max(96, layoutJitterPx * 2)
+            )
+
+          if (
+            Number.isFinite(prev) &&
+            prev > 0 &&
+            isScrollActiveNow() &&
+            shouldDeferMeasuredHeightDuringScroll
+          ) {
             pendingHeightsRef.current.set(key, nextHeight)
             emitWindowingDiag('media_height_deferred_during_scroll', {
               key,
               prev: Math.round(prev),
               next: nextHeight,
+              stableMediaShell,
+              cardContainsStableMediaShell,
             })
             scheduleAnchorFlush(scrollSettleMs)
             return
@@ -768,15 +833,8 @@ export default function useForumWindowing({
               if (isScrollActiveNow()) {
                 pendingAnchorDeltaRef.current += delta
                 scheduleAnchorFlush()
-              } else if (Math.abs(delta) <= anchorDeltaMaxPx) {
-                applyAnchoredScrollDelta(delta, 'height_above_window')
               } else {
-                emitWindowingDiag('anchor_large_delta_drop', {
-                  reason: 'large_height_delta_above_window',
-                  key,
-                  index,
-                  delta: Math.round(delta),
-                })
+                applyAnchoredScrollDelta(delta, 'height_above_window')
               }
             }
           }
@@ -799,7 +857,6 @@ export default function useForumWindowing({
       }
     } catch {}
   }, [
-    anchorDeltaMaxPx,
     applyAnchoredScrollDelta,
     emitWindowingDiag,
     heightDeltaIgnorePx,

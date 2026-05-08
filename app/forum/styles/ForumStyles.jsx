@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 
 export const FORUM_STYLES = `
 
@@ -181,6 +181,19 @@ export const FORUM_STYLES = `
       display:block;
       border-radius: 10px;
     }
+
+
+/* Windowing stability: media shells must not become browser scroll anchors.
+   Virtual windowing already accounts for item heights; native scroll anchoring
+   on video/image/iframe shells can double-correct reverse scrolling. */
+.forum_root .mediaBox,
+.forum_root .ql7VideoSurface,
+.forum_root .ql7ExternalVideoSurface,
+.forum_root iframe[data-forum-media],
+.forum_root video[data-forum-video="post"]{
+  overflow-anchor: none;
+}
+
     .mediaBox{
       position:relative;
       width:100%;
