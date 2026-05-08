@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-05-07T16:38:13.843Z
-Исходных файлов в анализе: 818
-Локальных зависимостей: 760
+Сгенерировано автоматически: 2026-05-08T21:59:11.324Z
+Исходных файлов в анализе: 819
+Локальных зависимостей: 761
 
 ## Охват
 
@@ -28,7 +28,7 @@
 - `api/debug` — 1 файлов
 - `api/deep-translate` — 1 файлов
 - `api/dm` — 9 файлов
-- `api/forum` — 33 файлов
+- `api/forum` — 34 файлов
 - `api/market` — 1 файлов
 - `api/pay` — 2 файлов
 - `api/payments` — 3 файлов
@@ -93,7 +93,7 @@
 
 ## Топ Межзоновых Зависимостей
 
-- `api/forum` -> `api/forum` — 50 локальных импортов
+- `api/forum` -> `api/forum` — 51 локальных импортов
 - `forum/feed` -> `forum/feed` — 38 локальных импортов
 - `forum/ui` -> `forum/ui` — 31 локальных импортов
 - `src/shared` -> `src/shared` — 31 локальных импортов
@@ -198,7 +198,7 @@
 
 ### api/forum
 
-- `api/forum` — 50
+- `api/forum` — 51
 - `api/profile` — 11
 - `lib/subscriptions.js` — 2
 
@@ -534,8 +534,8 @@
 
 ## Файлы С Высоким Fan-In
 
+- `app/api/forum/_db.js` — fan-in 36; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`
 - `app/api/forum/_utils.js` — fan-in 36; основные потребители: `app/api/academy/exam/route.js`, `app/api/forum/_db.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/mediaLock/route.js`
-- `app/api/forum/_db.js` — fan-in 35; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`
 - `components/i18n.js` — fan-in 31; основные потребители: `app/about/page.js`, `app/academy/AcademyExamBlock.js`, `app/academy/page.js`, `app/ads/GeoTargetingPicker.jsx`, `app/ads/home.js`, `app/ads/page.jsx`, `app/components/CryptoNewsLens.jsx`, `app/contact/page.js`
 - `tools/runtime-governance.js` — fan-in 25; основные потребители: `tools/audit-adaptive-actions.js`, `tools/audit-adaptive-core.js`, `tools/audit-auth-cascade.js`, `tools/audit-console-noise.js`, `tools/audit-diagnostics-boundaries.js`, `tools/audit-feature-flag-safety.js`, `tools/audit-forensic-mode-bounds.js`, `tools/audit-iframe-restore.js`
 - `app/api/profile/_identity.js` — fan-in 18; основные потребители: `app/api/dm/_utils.js`, `app/api/forum/_db.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/subs/count/route.js`, `app/api/forum/subs/list/route.js`, `app/api/forum/subs/my-count/route.js`

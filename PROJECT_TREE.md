@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-05-07T16:38:14.385Z
-Файлов в реестре: 1760
+Сгенерировано автоматически: 2026-05-08T21:59:11.829Z
+Файлов в реестре: 1763
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -29,7 +29,7 @@
 - `adaptive-actions.report.json` — 1 файлов
 - `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 393 файлов
+- `app` — 394 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `auth-cascade.report.json` — 1 файлов
@@ -47,10 +47,11 @@
 - `feature-flag-safety.report.json` — 1 файлов
 - `forensic-bounds.report.json` — 1 файлов
 - `forum-deps-audit.report.json` — 1 файлов
+- `forum-diag.jsonl` — 1 файлов
 - `forum-media-churn.audit.report.json` — 1 файлов
 - `forum-media-har.report.json` — 1 файлов
+- `forum-scroll-media-anchor-v4.patch` — 1 файлов
 - `forum-scroll.audit.report.json` — 1 файлов
-- `forum-sortdrop-center-rails-active.patch` — 1 файлов
 - `forum-startup.audit.report.json` — 1 файлов
 - `heapsnapshot-analysis.report.json` — 1 файлов
 - `heavy-audit.report.json` — 1 файлов
@@ -81,7 +82,7 @@
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
 - `provider-baseline.report.json` — 1 файлов
-- `public` — 921 файлов
+- `public` — 922 файлов
 - `qcast-ownership.report.json` — 1 файлов
 - `README.md` — 1 файлов
 - `route-budget.report.json` — 1 файлов
@@ -219,6 +220,8 @@
           - route.js — API-route forum/recommendations/users для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/integration/api/forum/recommendations-users.route.test.js.
       - report/ — Каталог report.
         - route.js — API-route forum/report для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - rev/ — Каталог rev.
+        - route.js — API-route forum/rev для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
       - snapshot/ — Каталог snapshot.
         - route.js — API-route forum/snapshot для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js.
       - subs/ — Каталог subs.
@@ -961,6 +964,8 @@
     - ql7-forum-global.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - ai/ — Подкаталог статических ассетов public/ai.
     - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - anonymous/ — Подкаталог статических ассетов public/anonymous.
+    - anonymous.png — PNG-ассет из public/anonymous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
   - audio/ — Подкаталог статических ассетов public/audio.
     - bgaudio.gif — GIF-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
     - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
@@ -2095,10 +2100,11 @@
 - feature-flag-safety.report.json — JSON-файл feature flag safety.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forensic-bounds.report.json — JSON-файл forensic bounds.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-har.report.json — JSON-файл forum media har.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-scroll-media-anchor-v4.patch — .patch-файл forum scroll media anchor v4. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-- forum-sortdrop-center-rails-active.patch — .patch-файл forum sortdrop center rails active. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

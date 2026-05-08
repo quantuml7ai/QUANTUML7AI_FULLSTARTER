@@ -4,10 +4,10 @@
 > Любое изменение маршрутов, страниц, layout-файлов, loading/not-found/default файлов и API-route файлов обязано сопровождаться обновлением этого файла.
 > Рекомендуемый способ обновления: `node tools/generate-project-routes.js`.
 
-Сгенерировано автоматически: 2026-05-07T16:38:13.374Z
-Всего route-aware файлов: 99
+Сгенерировано автоматически: 2026-05-08T21:59:10.927Z
+Всего route-aware файлов: 100
 Пользовательских route-сущностей: 21
-API-route сущностей: 78
+API-route сущностей: 79
 
 ## Охват
 
@@ -147,6 +147,7 @@ API-route сущностей: 78
 - `/api/forum/post-meta` — API-эндпоинт `/api/forum/post-meta`; файл: `app/api/forum/post-meta/route.js`; тип: `api-route`.
 - `/api/forum/recommendations/users` — API-эндпоинт `/api/forum/recommendations/users`; файл: `app/api/forum/recommendations/users/route.js`; тип: `api-route`.
 - `/api/forum/report` — API-эндпоинт `/api/forum/report`; файл: `app/api/forum/report/route.js`; тип: `api-route`.
+- `/api/forum/rev` — API-эндпоинт `/api/forum/rev`; файл: `app/api/forum/rev/route.js`; тип: `api-route`.
 - `/api/forum/snapshot` — API-эндпоинт `/api/forum/snapshot`; файл: `app/api/forum/snapshot/route.js`; тип: `api-route`.
 - `/api/forum/subs/count` — API-эндпоинт `/api/forum/subs/count`; файл: `app/api/forum/subs/count/route.js`; тип: `api-route`.
 - `/api/forum/subs/list` — API-эндпоинт `/api/forum/subs/list`; файл: `app/api/forum/subs/list/route.js`; тип: `api-route`.

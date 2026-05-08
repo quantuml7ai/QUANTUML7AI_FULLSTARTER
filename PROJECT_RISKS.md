@@ -4,9 +4,9 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-05-07T16:38:14.139Z
-Исходных файлов в анализе: 818
-Route-aware файлов: 99
+Сгенерировано автоматически: 2026-05-08T21:59:11.594Z
+Исходных файлов в анализе: 819
+Route-aware файлов: 100
 
 ## Что Считается Риском
 
@@ -59,6 +59,7 @@ Route-aware файлов: 99
 - `app/api/forum/post-meta/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/recommendations/users/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/report/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
+- `app/api/forum/rev/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/snapshot/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/subs/count/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
 - `app/api/forum/subs/list/route.js` — Изменение влияет на серверный контракт и клиентов, завязанных на endpoint.
@@ -119,8 +120,8 @@ Route-aware файлов: 99
 
 ## Файлы С Самым Высоким Fan-In
 
+- `app/api/forum/_db.js` — используют 36 локальных модулей
 - `app/api/forum/_utils.js` — используют 36 локальных модулей
-- `app/api/forum/_db.js` — используют 35 локальных модулей
 - `components/i18n.js` — используют 31 локальных модулей
 - `tools/runtime-governance.js` — используют 25 локальных модулей
 - `app/api/profile/_identity.js` — используют 18 локальных модулей
@@ -185,7 +186,7 @@ Route-aware файлов: 99
 - `api/brain` — файлов: 1; исходящих связей: 2; плотность: 2
 - `api/market` — файлов: 1; исходящих связей: 2; плотность: 2
 - `forum/dm` — файлов: 31; исходящих связей: 60; плотность: 1.94
-- `api/forum` — файлов: 33; исходящих связей: 63; плотность: 1.91
+- `api/forum` — файлов: 34; исходящих связей: 64; плотность: 1.88
 - `forum/feed` — файлов: 59; исходящих связей: 108; плотность: 1.83
 - `api/dm` — файлов: 9; исходящих связей: 16; плотность: 1.78
 - `forum/profile` — файлов: 18; исходящих связей: 31; плотность: 1.72
@@ -248,6 +249,7 @@ Route-aware файлов: 99
 - `app/api/forum/post-meta/route.js`
 - `app/api/forum/recommendations/users/route.js`
 - `app/api/forum/report/route.js`
+- `app/api/forum/rev/route.js`
 - `app/api/forum/snapshot/route.js`
 - `app/api/forum/subs/count/route.js`
 - `app/api/forum/subs/list/route.js`

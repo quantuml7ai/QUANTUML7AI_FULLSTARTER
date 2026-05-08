@@ -831,20 +831,35 @@ React.useEffect(() => {
         try {
           el.pause?.()
         } catch {}
-        try {
-          el.dataset.__active = '0'
-          el.dataset.__prewarm = '0'
-          el.dataset.__resident = '0'
-          el.dataset.__playRequested = '0'
-          el.dataset.__loadPending = '0'
-          el.dataset.__warmReady = '0'
-          delete el.dataset.__loadPendingSince
-          el.preload = 'none'
-        } catch {}
+
+        const readDetachedCleanupDelay = () => {
+          try {
+            const ua = String(navigator?.userAgent || '')
+            const isIOS = /iP(hone|ad|od)/i.test(ua)
+            const isAndroid = /Android/i.test(ua)
+            const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+            if (isIOS || isAndroid || coarse) return 980
+          } catch {}
+          return 560
+        }
+
+        const markDetachedCold = () => {
+          try {
+            el.dataset.__active = '0'
+            el.dataset.__prewarm = '0'
+            el.dataset.__resident = '0'
+            el.dataset.__playRequested = '0'
+            el.dataset.__loadPending = '0'
+            el.dataset.__warmReady = '0'
+            delete el.dataset.__loadPendingSince
+            el.preload = 'none'
+          } catch {}
+        }
 
         const runDetachedUnload = () => {
           try {
             if (el.isConnected) return
+            markDetachedCold()
             try { el.dataset.__forceHardUnload = '1' } catch {}
             unloadVideoElFn(el)
           } catch {} finally {
@@ -858,10 +873,10 @@ React.useEffect(() => {
               ? window.requestAnimationFrame
               : (cb) => window.setTimeout(cb, 80)
             raf(() => {
-              try { window.setTimeout(runDetachedUnload, 0) } catch { runDetachedUnload() }
+              try { window.setTimeout(runDetachedUnload, readDetachedCleanupDelay()) } catch { runDetachedUnload() }
             })
           } else {
-            runDetachedUnload()
+            try { window.setTimeout(runDetachedUnload, readDetachedCleanupDelay()) } catch { runDetachedUnload() }
           }
         } catch {
           runDetachedUnload()

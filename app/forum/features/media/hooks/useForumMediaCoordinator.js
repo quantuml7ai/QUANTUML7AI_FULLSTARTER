@@ -612,18 +612,40 @@ const readPendingLoads = (force = false) => {
             const networkState = Number(node.networkState || 0);
             const farEnough = metrics.visiblePx <= 0 && metrics.gapPx > reclaimMargin;
             const oldEnough = pendingForMs > minPendingMs;
+            const oldEnoughNear = oldEnough && !farEnough;
             const score =
               (farEnough ? 100000 : 0) +
               Math.max(0, Number(metrics.gapPx || 0)) +
               Math.max(0, pendingForMs * 0.18) +
               (networkState === HTMLMediaElement.NETWORK_LOADING ? 80 : 0);
-            return { node, ...metrics, pendingForMs, networkState, farEnough, oldEnough, score };
+            return { node, ...metrics, pendingForMs, networkState, farEnough, oldEnough, oldEnoughNear, score };
           })
-          .filter((item) => item.farEnough || item.oldEnough)
+          .filter((item) => item.farEnough || item.oldEnoughNear)
           .sort((a, b) => b.score - a.score);
 
         const victim = candidates[0];
         if (!victim?.node) return false;
+
+        if (!victim.farEnough) {
+          softDemoteNativePostVideo(victim.node, 'pending_load_soft_demote_near', {
+            clearLoadPending: true,
+            keepResident: true,
+            keepPrewarm: false,
+            keepNativePrewarm: false,
+            pause: false,
+            traceEvent: 'pending_load_soft_demote_near',
+          });
+          trace('load_budget_reclaim_soft_near', victim.node, {
+            channel,
+            pendingBefore: pendingNow,
+            cap,
+            pendingForMs: Math.round(victim.pendingForMs),
+            gapPx: Math.round(victim.gapPx),
+            visiblePx: Math.round(victim.visiblePx),
+            networkState: victim.networkState,
+          });
+          return true;
+        }
 
         try {
           victim.node.dataset.__loadPendingClearReason = 'budget_reclaim';
@@ -635,7 +657,20 @@ const readPendingLoads = (force = false) => {
           victim.node.dataset.__nativePrimeHoldUntil = '0';
         } catch {}
         try { clearLoadPending(victim.node, 'budget_reclaim', false); } catch {}
-        try { scheduleHardUnload(victim.node, 0, 'resident_cap'); } catch {}
+        try {
+          const allowed = canHardDetachHtmlMedia(victim.node, 'resident_cap');
+          if (allowed.allowed) scheduleHardUnload(victim.node, 0, 'resident_cap');
+          else {
+            softDemoteNativePostVideo(victim.node, 'budget_reclaim_blocked_near', {
+              clearLoadPending: true,
+              keepResident: true,
+              keepPrewarm: false,
+              keepNativePrewarm: false,
+              pause: false,
+              traceEvent: 'budget_reclaim_blocked_near',
+            });
+          }
+        } catch {}
         pendingLoadsCacheTs = 0;
         pendingLoadsCacheVal = 0;
 
@@ -1125,6 +1160,7 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
         return isIOSUi ? 1120 : (isCoarseUi ? 920 : 560);
       }
     })();
+    const hardDetachMargin = getHardDetachMargin();
     const keepMedia = getMediaStateNode(keepEl);
     const activeOwner = active instanceof Element ? active : null;
     const scored = nodes
@@ -1146,6 +1182,9 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
         const holdUntil = Number(node.dataset?.__nativePrimeHoldUntil || 0);
         const holdActive = holdUntil > Date.now();
         const ready = Number(node.readyState || 0) >= 2 || String(node.dataset?.__warmReady || '') === '1';
+        const loadPending = String(node.dataset?.__loadPending || '') === '1';
+        const loadPendingSince = Number(node.dataset?.__loadPendingSince || 0);
+        const pendingForMs = loadPendingSince > 0 ? Date.now() - loadPendingSince : 0;
         const nearProtected =
           visiblePx > 0 ||
           holdActive ||
@@ -1159,19 +1198,37 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
           (ready ? -40000 : 0) +
           Math.max(0, Number(gapPx || 0)) -
           (visiblePx * 24);
-        return { node, owner, isKeep, playing, priority, visiblePx, gapPx, holdActive, nearProtected, hardProtected, ready };
+        return {
+          node,
+          owner,
+          isKeep,
+          playing,
+          priority,
+          visiblePx,
+          gapPx,
+          holdActive,
+          nearProtected,
+          hardProtected,
+          ready,
+          loadPending,
+          pendingForMs,
+        };
       })
       .sort((a, b) => b.priority - a.priority);
 
     let attached = nodes.length;
     for (const item of scored) {
       if (attached <= POST_NATIVE_SRC_CAP) break;
-      if (item.hardProtected || (item.nearProtected && attached <= POST_NATIVE_SRC_CAP)) {
+      if (item.hardProtected || item.nearProtected) {
         if (item.nearProtected) {
-          try {
-            item.node.preload = item.playing ? 'auto' : 'metadata';
-            item.node.dataset.__resident = '1';
-          } catch {}
+          softDemoteNativePostVideo(item.node, 'post_native_src_cap_soft_demote', {
+            clearLoadPending: false,
+            keepResident: true,
+            keepPrewarm: item.holdActive,
+            keepNativePrewarm: item.node === nativePrewarmEl,
+            pause: false,
+            traceEvent: 'post_native_src_cap_soft_demote',
+          });
           trace('post_native_src_cap_keep_near', item.node, {
             reason,
             attachedBefore: nodes.length,
@@ -1185,13 +1242,50 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
         }
         continue;
       }
+      if (
+        item.visiblePx > 0 ||
+        Number(item.gapPx || Number.POSITIVE_INFINITY) <= hardDetachMargin ||
+        item.node === nativePrewarmEl ||
+        (item.loadPending && item.pendingForMs < (isIOSUi ? 9000 : 7000))
+      ) {
+        softDemoteNativePostVideo(item.node, 'post_native_src_cap_soft_overflow', {
+          clearLoadPending: false,
+          keepResident: Number(item.gapPx || Number.POSITIVE_INFINITY) <= hardDetachMargin,
+          keepPrewarm: false,
+          keepNativePrewarm: false,
+          pause: false,
+          traceEvent: 'post_native_src_cap_soft_overflow',
+        });
+        trace('resident_cap_soft_overflow', item.node, {
+          reason,
+          attachedBefore: nodes.length,
+          cap: POST_NATIVE_SRC_CAP,
+          visiblePx: item.visiblePx,
+          gapPx: item.gapPx,
+          hardDetachMargin,
+          pendingForMs: item.pendingForMs,
+        });
+        continue;
+      }
       try {
         item.node.dataset.__nativeSrcCapReason = String(reason || 'post_native_src_cap');
         item.node.dataset.__nativePrimeHoldUntil = '0';
         item.node.dataset.__prewarm = '0';
         item.node.dataset.__resident = '0';
       } catch {}
-      scheduleHardUnload(item.node, 0, 'resident_cap');
+      if (canHardDetachHtmlMedia(item.node, 'resident_cap').allowed) {
+        scheduleHardUnload(item.node, 0, 'resident_cap');
+      } else {
+        softDemoteNativePostVideo(item.node, 'resident_cap_blocked_visible', {
+          clearLoadPending: false,
+          keepResident: true,
+          keepPrewarm: false,
+          keepNativePrewarm: false,
+          pause: false,
+          traceEvent: 'resident_cap_blocked_visible',
+        });
+        continue;
+      }
       attached -= 1;
       trace('post_native_src_cap_release', item.node, {
         reason,
@@ -1199,6 +1293,18 @@ const enforcePostNativeSrcCap = (keepEl = null, reason = 'post_native_src_cap') 
         cap: POST_NATIVE_SRC_CAP,
         visiblePx: item.visiblePx,
         gapPx: item.gapPx,
+        hardDetachMargin,
+        nearProtectPx,
+        holdActive: item.holdActive,
+        ready: item.ready,
+      });
+      trace('resident_cap_hard_unload_far', item.node, {
+        reason,
+        attachedBefore: nodes.length,
+        cap: POST_NATIVE_SRC_CAP,
+        visiblePx: item.visiblePx,
+        gapPx: item.gapPx,
+        hardDetachMargin,
         nearProtectPx,
         holdActive: item.holdActive,
         ready: item.ready,
@@ -2864,8 +2970,8 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
         if (isIOSUi) return 1;
         if (isCoarseUi) return 2;
         const dm = Number(navigator?.deviceMemory || 0);
-        if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 3;
-        return 4;
+        if (Number.isFinite(dm) && dm > 0 && dm <= 4) return 2;
+        return 2;
       } catch {
         return 2;
       }
@@ -2906,7 +3012,17 @@ const shouldRetainHtmlMedia = (el) => {
     const hardUnloadPending =
       String(mediaDataset?.__pendingHardUnload || ownerDataset?.__pendingHardUnload || '') === '1';
 
-    if (hardUnloadPending) return false;
+    if (hardUnloadPending) {
+      const managedConnectedPostVideo =
+        mediaEl instanceof HTMLVideoElement &&
+        mediaEl.isConnected &&
+        isManagedForumVideoKind(mediaEl);
+      const nearPendingSurface =
+        managedConnectedPostVideo &&
+        isNearViewportElement(owner || mediaEl, isIOSUi ? 1700 : (isCoarseUi ? 1500 : 980));
+      if (!nearPendingSurface) return false;
+      return true;
+    }
 
     if (String(mediaDataset?.__active || ownerDataset?.__active || '') === '1') return true;
 
@@ -3131,6 +3247,184 @@ const shouldRetainHtmlMedia = (el) => {
       } catch {}
     };
 
+    const getNearPostSurfaceLimit = () => {
+      if (isIOSUi) return 1700;
+      if (isCoarseUi) return 1500;
+      return 980;
+    };
+
+    const getHardDetachMargin = () => {
+      if (isIOSUi) return 2400;
+      if (isCoarseUi) return 2100;
+      return 1600;
+    };
+
+    const getRecentVisibleHoldMs = () => (isIOSUi || isCoarseUi ? 2200 : 1200);
+
+    const getMediaSurfaceState = (el) => {
+      const media = getMediaStateNode(el);
+      const owner = getOwnerNode(el) || (media instanceof Element ? media : (el instanceof Element ? el : null));
+      const now = Date.now();
+      const state = {
+        media,
+        owner,
+        connected: false,
+        managedPostVideo: false,
+        visiblePx: 0,
+        gapPx: Number.POSITIVE_INFINITY,
+        centerDist: Number.POSITIVE_INFINITY,
+        hasSrc: false,
+        readyState: 0,
+        networkState: 0,
+        playing: false,
+        active: false,
+        resident: false,
+        prewarm: false,
+        nativePrewarm: false,
+        nativePrimeHoldActive: false,
+        loadPending: false,
+        pendingForMs: 0,
+        recentlyVisible: false,
+        lastVisibleTs: 0,
+      };
+      try {
+        if (owner instanceof Element) {
+          const rect = owner.getBoundingClientRect?.();
+          const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;
+          if (rect && viewportH > 0) {
+            const top = Number(rect.top || 0);
+            const bottom = Number(rect.bottom || 0);
+            state.visiblePx = Math.max(0, Math.min(bottom, viewportH) - Math.max(top, 0));
+            state.gapPx = bottom < 0 ? Math.abs(bottom) : (top > viewportH ? top - viewportH : 0);
+            state.centerDist = Math.abs(((top + bottom) / 2) - (viewportH / 2));
+          }
+        }
+      } catch {}
+      try {
+        if (media instanceof HTMLVideoElement || media instanceof HTMLAudioElement) {
+          state.connected = !!media.isConnected;
+          state.managedPostVideo =
+            media instanceof HTMLVideoElement &&
+            isManagedForumVideoKind(media) &&
+            String(media.getAttribute?.('data-forum-media') || '') === 'video';
+          state.hasSrc = !!String(media.currentSrc || media.getAttribute?.('src') || '').trim();
+          state.readyState = Number(media.readyState || 0);
+          state.networkState = Number(media.networkState || 0);
+          state.playing = !media.paused && !media.ended;
+          state.active = String(media.dataset?.__active || owner?.dataset?.__active || '') === '1';
+          state.resident = String(media.dataset?.__resident || owner?.dataset?.__resident || '') === '1';
+          state.prewarm = String(media.dataset?.__prewarm || owner?.dataset?.__prewarm || '') === '1';
+          state.nativePrewarm = String(media.dataset?.__nativePrewarm || '') === '1' || media === nativePrewarmEl;
+          state.nativePrimeHoldActive = Number(media.dataset?.__nativePrimeHoldUntil || 0) > now;
+          state.loadPending = String(media.dataset?.__loadPending || '') === '1';
+          const since = Number(media.dataset?.__loadPendingSince || 0);
+          state.pendingForMs = since > 0 ? now - since : 0;
+          state.lastVisibleTs = Number(media.dataset?.__lastVisibleTs || owner?.dataset?.__lastVisibleTs || 0);
+          if (state.visiblePx > 0) {
+            state.lastVisibleTs = now;
+            try { media.dataset.__lastVisibleTs = String(now); } catch {}
+            try { if (owner instanceof Element) owner.dataset.__lastVisibleTs = String(now); } catch {}
+          }
+          state.recentlyVisible =
+            state.lastVisibleTs > 0 &&
+            (now - state.lastVisibleTs) <= getRecentVisibleHoldMs();
+        }
+      } catch {}
+      return state;
+    };
+
+    const canHardDetachHtmlMedia = (el, reason = 'timeout') => {
+      const state = getMediaSurfaceState(el);
+      const reasonKey = String(reason || 'timeout');
+      if (!(state.media instanceof HTMLMediaElement)) return { allowed: true, state, blockReason: 'not_html_media' };
+      if (!state.managedPostVideo) return { allowed: true, state, blockReason: 'not_managed_post_video' };
+      if (!state.connected) return { allowed: true, state, blockReason: 'detached' };
+      if (reasonKey === 'forceHardUnload' || reasonKey === 'error_blocked') {
+        return { allowed: true, state, blockReason: 'forced' };
+      }
+      const nearSurface = state.visiblePx > 0 || state.gapPx <= getNearPostSurfaceLimit();
+      const freshLoadPending =
+        state.loadPending &&
+        state.pendingForMs < (isIOSUi ? 9000 : 7000) &&
+        state.gapPx <= getHardDetachMargin();
+      const protectedSurface =
+        nearSurface ||
+        state.active ||
+        state.nativePrewarm ||
+        state.nativePrimeHoldActive ||
+        state.recentlyVisible ||
+        freshLoadPending;
+      return {
+        allowed: !protectedSurface,
+        state,
+        blockReason: protectedSurface ? 'near_or_warm_surface' : 'far_surface',
+      };
+    };
+
+    const softDemoteNativePostVideo = (el, reason = 'soft_demote', options = {}) => {
+      const media = getMediaStateNode(el);
+      if (!(media instanceof HTMLVideoElement) || !isManagedForumVideoKind(media)) return false;
+      const state = getMediaSurfaceState(media);
+      const keepResident =
+        options.keepResident != null
+          ? !!options.keepResident
+          : (state.visiblePx > 0 || state.gapPx <= getNearPostSurfaceLimit());
+      const keepPrewarm = !!options.keepPrewarm;
+      try { setPendingHardUnload(media, false); } catch {}
+      try {
+        delete media.dataset.__forceHardUnload;
+        delete media.dataset.__pendingHardUnload;
+        media.dataset.__resident = keepResident ? '1' : '0';
+        media.dataset.__prewarm = keepPrewarm ? '1' : '0';
+        media.dataset.__nativePrewarm = options.keepNativePrewarm ? '1' : '0';
+        media.dataset.__lastSoftDemoteReason = String(reason || 'soft_demote');
+        if (state.readyState >= 2) media.dataset.__warmReady = '1';
+        if (!media.dataset.__src && media.currentSrc) media.dataset.__src = media.currentSrc;
+        if (!media.dataset.__src && media.getAttribute('src')) media.dataset.__src = media.getAttribute('src');
+        if (media.dataset.__src && !media.getAttribute('data-src')) {
+          media.setAttribute('data-src', String(media.dataset.__src));
+        }
+        if (!state.playing) media.preload = keepPrewarm ? 'auto' : 'metadata';
+      } catch {}
+      if (options.clearLoadPending) {
+        try { clearLoadPending(media, String(reason || 'soft_demote'), state.readyState >= 2); } catch {}
+      }
+      if (options.pause && !state.active && state.playing) {
+        withSystemPause(media, () => {
+          try { media.pause?.(); } catch {}
+        });
+      }
+      trace(options.traceEvent || 'post_native_soft_demote', media, {
+        reason,
+        visiblePx: Math.round(state.visiblePx),
+        gapPx: Math.round(state.gapPx),
+        keepResident,
+        keepPrewarm,
+      });
+      return true;
+    };
+
+    const blockHardDetachWithSoftDemote = (el, reason = 'timeout', traceEvent = 'hard_unload_blocked_near_post_video') => {
+      const check = canHardDetachHtmlMedia(el, reason);
+      if (check.allowed) return false;
+      softDemoteNativePostVideo(check.state.media || el, reason, {
+        clearLoadPending: reason === 'resident_cap' || reason === 'native_warm_owner_lost',
+        keepResident: true,
+        keepPrewarm: check.state.nativePrewarm || check.state.nativePrimeHoldActive,
+        keepNativePrewarm: check.state.nativePrewarm,
+        pause: false,
+        traceEvent,
+      });
+      trace(traceEvent, check.state.media || el, {
+        reason,
+        blockReason: check.blockReason,
+        visiblePx: Math.round(check.state.visiblePx),
+        gapPx: Math.round(check.state.gapPx),
+        recent: check.state.recentlyVisible ? '1' : '0',
+      });
+      return true;
+    };
+
     const cancelUnload = (el) => {
       const id = unloadTimers.get(el);
       if (id) clearTimeout(id);
@@ -3204,6 +3498,7 @@ const shouldRetainHtmlMedia = (el) => {
         return;
       }
       if (kind === 'youtube') {
+        try { clearExternalPlayKick(el); } catch {}
         markSuppressedPlayback(el, 1400);
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
@@ -3212,6 +3507,7 @@ const shouldRetainHtmlMedia = (el) => {
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
+        try { clearExternalPlayKick(el); } catch {}
         markSuppressedPlayback(el, 1400);
       try { commandExternalVideo(el, 'pause'); } catch {}
       }
@@ -3324,6 +3620,40 @@ const pauseForeignMedia = (keepEl = null) => {
       const unloadReason = String(args?.[1] || 'unknown');
       if (!el) return;
       clearReadyReplay(el);
+      if (
+        unloadReason === 'native_warm_owner_lost' &&
+        (el instanceof HTMLVideoElement || getMediaStateNode(el) instanceof HTMLVideoElement)
+      ) {
+        const media = getMediaStateNode(el);
+        if (
+          media instanceof HTMLVideoElement &&
+          media.isConnected &&
+          isManagedForumVideoKind(media) &&
+          String(media.getAttribute?.('data-forum-media') || '') === 'video'
+        ) {
+          softDemoteNativePostVideo(media, unloadReason, {
+            clearLoadPending: false,
+            keepResident: true,
+            keepPrewarm: false,
+            keepNativePrewarm: false,
+            pause: false,
+            traceEvent: 'native_warm_owner_lost_soft_hold',
+          });
+          trace('hard_unload_blocked_native_warm_owner_lost', media, {
+            reason: unloadReason,
+            visiblePx: getOwnerVisiblePx(media),
+            gapPx: getOwnerViewportGapPx(media),
+          });
+          try { enforcePostNativeSrcCap(media, 'native_warm_owner_lost_soft_hold'); } catch {}
+          return;
+        }
+      }
+      if (
+        (el instanceof HTMLVideoElement || el instanceof HTMLAudioElement) &&
+        blockHardDetachWithSoftDemote(el, unloadReason, 'hard_unload_blocked_near_post_video')
+      ) {
+        return;
+      }
       const emergencyHtmlMediaUnload = isEmergencyHtmlMediaUnloadReason(unloadReason);
       const connectedPostVideoOwner = isConnectedPostVideoOwner(el);
       trace(
@@ -3366,6 +3696,30 @@ const pauseForeignMedia = (keepEl = null) => {
         unloadReason === 'resident_cap' ||
         unloadReason === 'error_blocked';
       const softIframeCooldown = !hardIframeReason;
+      if (
+        hardIframeReason &&
+        unloadReason !== 'error_blocked' &&
+        el instanceof Element &&
+        el.isConnected
+      ) {
+        const iframeVisiblePx = getOwnerVisiblePx(el);
+        const iframeNear = isNearViewportElement(el, isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100));
+        if (iframeVisiblePx > 48 || iframeNear) {
+          try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+          trace('iframe_resident_cap_blocked_visible', el, {
+            reason: unloadReason,
+            visiblePx: iframeVisiblePx,
+            near: iframeNear ? '1' : '0',
+          });
+          emitMediaDiag('iframe_resident_cap_blocked_visible', {
+            kind,
+            reason: unloadReason,
+            visiblePx: iframeVisiblePx,
+            ...getIframeSnapshot(),
+          });
+          return;
+        }
+      }
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
@@ -3465,7 +3819,12 @@ const pauseForeignMedia = (keepEl = null) => {
       if (!el) return;
       cancelUnload(el);
       const emergencyHtmlMediaUnload = isEmergencyHtmlMediaUnloadReason(reason);
-      setPendingHardUnload(el, emergencyHtmlMediaUnload);
+      const deferPendingHardFlag =
+        emergencyHtmlMediaUnload &&
+        !isIframeLike(el) &&
+        isConnectedPostVideoOwner(el);
+      if (!deferPendingHardFlag) setPendingHardUnload(el, emergencyHtmlMediaUnload);
+      else setPendingHardUnload(el, false);
       if (
         ms == null &&
         reason !== 'cleanup' &&
@@ -3481,6 +3840,13 @@ const pauseForeignMedia = (keepEl = null) => {
         unloadTimers.delete(el);
 
         try {
+          if (
+            !isIframeLike(el) &&
+            blockHardDetachWithSoftDemote(el, reason, 'hard_unload_blocked_near_post_video')
+          ) {
+            return;
+          }
+
           const visiblePx = getOwnerVisiblePx(el);
           const nearVisible = isNearViewportElement(
             el,
@@ -3547,6 +3913,7 @@ const pauseForeignMedia = (keepEl = null) => {
           trace('hard_unload_skip_retained', el, { reason });
           return;
         }
+        if (emergencyHtmlMediaUnload) setPendingHardUnload(el, true);
         hardUnloadMedia(el, reason);
       }, delay);
       unloadTimers.set(el, id);
@@ -3761,6 +4128,34 @@ const getNativeEarlyPrimeGapLimit = () => {
         if (keepEl && prev === keepEl) return;
         if (active && (active === prev || active.contains?.(prev) || prev.contains?.(active))) return;
         nativePrewarmEl = null;
+        const prevPipeline = getNativePrewarmPipelineState(prev);
+        const prevSurface = getMediaSurfaceState(prev);
+        const keepPreviousSurface =
+          prevSurface.visiblePx > 0 ||
+          prevSurface.gapPx <= getNearPostSurfaceLimit() ||
+          (
+            prevPipeline.loading &&
+            !prevPipeline.ready &&
+            prevPipeline.pendingForMs < (isIOSUi ? 7200 : (isCoarseUi ? 6200 : 5200))
+          );
+        if (keepPreviousSurface) {
+          softDemoteNativePostVideo(prev, 'native_prewarm_replace_soft_hold', {
+            clearLoadPending: false,
+            keepResident: true,
+            keepPrewarm: prevPipeline.loading && !prevPipeline.ready,
+            keepNativePrewarm: false,
+            pause: false,
+            traceEvent: 'native_prewarm_replace_soft_hold',
+          });
+          trace('native_prewarm_replace_soft_hold', prev, {
+            reason,
+            visiblePx: Math.round(prevSurface.visiblePx),
+            gapPx: Math.round(prevSurface.gapPx),
+            pendingForMs: Math.round(prevPipeline.pendingForMs),
+            loading: prevPipeline.loading ? '1' : '0',
+          });
+          return;
+        }
         try {
           prev.dataset.__prewarm = '0';
           prev.dataset.__resident = '0';
@@ -4238,6 +4633,65 @@ return true;
       }
     };
     const ensureYouTubeEmbedSrc = (src) => normalizeYouTubeEmbedSrc(src);
+    let externalPrewarmWindowTs = 0;
+    let externalPrewarmWindowCount = 0;
+    let externalPrewarmLastTs = 0;
+    const canSpendExternalPrewarmBudget = (el, reason = 'prewarm') => {
+      try {
+        const now = Date.now();
+        const reasonKey = String(reason || '').toLowerCase();
+        const budgetedReason = /prewarm|early|predictive|reject_not_ready|near/.test(reasonKey);
+        const hasSrc = !!String(el?.getAttribute?.('src') || '').trim();
+        if (hasSrc || !budgetedReason) return true;
+
+        const visiblePx = getOwnerVisiblePx(el);
+        const gapPx = getOwnerViewportGapPx(el);
+        const runwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
+        if (visiblePx <= 36 && gapPx > runwayPx) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            visiblePx,
+            gapPx,
+            runwayPx,
+            gate: 'far',
+          });
+          return false;
+        }
+
+        const minGapMs = isIOSUi ? 1400 : (isCoarseUi ? 1200 : 850);
+        if (externalPrewarmLastTs > 0 && (now - externalPrewarmLastTs) < minGapMs) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            sinceMs: now - externalPrewarmLastTs,
+            minGapMs,
+            gate: 'global_gap',
+          });
+          return false;
+        }
+
+        const windowMs = isIOSUi ? 2600 : (isCoarseUi ? 2200 : 1800);
+        const burstLimit = isIOSUi || isCoarseUi ? 1 : 2;
+        if (!externalPrewarmWindowTs || (now - externalPrewarmWindowTs) > windowMs) {
+          externalPrewarmWindowTs = now;
+          externalPrewarmWindowCount = 0;
+        }
+        if (externalPrewarmWindowCount >= burstLimit) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            windowMs,
+            burstLimit,
+            gate: 'burst',
+          });
+          return false;
+        }
+
+        externalPrewarmWindowCount += 1;
+        externalPrewarmLastTs = now;
+        return true;
+      } catch {
+        return true;
+      }
+    };
     const prepareExternalMedia = (el, reason = 'prewarm') => {
       if (!(el instanceof HTMLIFrameElement)) return false;
       const kind = String(el.getAttribute('data-forum-media') || '');
@@ -4263,6 +4717,7 @@ return true;
         curSrc = String(el.getAttribute('src') || '').trim();
         hadSrc = !!curSrc;
       } catch {}
+      if (!hadSrc && !canSpendExternalPrewarmBudget(el, reason)) return false;
       if (!hadSrc || curSrc !== nextSrc) {
         try {
           el.setAttribute('data-forum-iframe-loaded', '0');
@@ -4696,8 +5151,10 @@ return;
         if (!(el instanceof Element) || typeof runner !== 'function') return;
         clearExternalPlayKick(el);
         let count = 0;
-        const maxCount = isIOSUi ? 9 : (isCoarseUi ? 7 : 5);
-        const delayMs = isIOSUi ? 320 : (isCoarseUi ? 360 : 420);
+        const kind = getMediaKind(el);
+        const isYoutubeKick = kind === 'youtube';
+        const maxCount = isYoutubeKick ? (isIOSUi ? 3 : 2) : (isIOSUi ? 7 : (isCoarseUi ? 5 : 4));
+        const delayMs = isYoutubeKick ? (isIOSUi ? 560 : 680) : (isIOSUi ? 360 : (isCoarseUi ? 420 : 520));
         const tick = () => {
           if (!isExternalKickAllowed(el)) {
             clearExternalPlayKick(el);
@@ -4991,7 +5448,35 @@ return;
               reason: 'below_stop_ratio',
             });
             softPauseMedia(active);
-            scheduleHardUnload(active, null, 'below_stop_ratio');
+            const releaseSurface = getMediaSurfaceState(active);
+            const releaseVisibleHoldPx = isIOSUi || isCoarseUi ? 64 : 96;
+            const releaseGapHoldPx = isIOSUi || isCoarseUi ? 760 : 520;
+            if (
+              releaseSurface.managedPostVideo &&
+              (
+                releaseSurface.visiblePx >= releaseVisibleHoldPx ||
+                releaseSurface.gapPx <= releaseGapHoldPx
+              )
+            ) {
+              markSettling(active, isIOSUi ? 1800 : (isCoarseUi ? 1500 : 1200), 'below_stop_ratio_soft_hold_visible');
+              softDemoteNativePostVideo(active, 'below_stop_ratio_soft_hold_visible', {
+                clearLoadPending: false,
+                keepResident: true,
+                keepPrewarm: releaseSurface.nativePrewarm || releaseSurface.nativePrimeHoldActive,
+                keepNativePrewarm: releaseSurface.nativePrewarm,
+                pause: false,
+                traceEvent: 'below_stop_ratio_soft_only_visible',
+              });
+              traceCandidate('candidate_release_active_soft_hold_visible', active, {
+                ratio: ar,
+                score: activeScore,
+                visiblePx: releaseSurface.visiblePx,
+                gapPx: releaseSurface.gapPx,
+                reason: 'below_stop_ratio',
+              });
+            } else {
+              scheduleHardUnload(active, null, 'below_stop_ratio');
+            }
             active = null;
           }
 

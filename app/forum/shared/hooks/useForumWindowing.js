@@ -91,7 +91,7 @@ function readDefaultLayoutKey(isBrowserFn) {
   }
 }
 
-function isStableMediaShellNode(node) {
+function hasStableMediaShell(node) {
   try {
     if (typeof Element === 'undefined' || !(node instanceof Element)) return false
     return !!node.matches?.(STABLE_MEDIA_SHELL_SELECTOR)
@@ -103,8 +103,30 @@ function isStableMediaShellNode(node) {
 function containsStableMediaShell(node) {
   try {
     if (typeof Element === 'undefined' || !(node instanceof Element)) return false
-    if (isStableMediaShellNode(node)) return true
+    if (hasStableMediaShell(node)) return true
     return !!node.querySelector?.(STABLE_MEDIA_SHELL_SELECTOR)
+  } catch {
+    return false
+  }
+}
+
+function readMediaKeepaliveHoldMs() {
+  try {
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const mobile = Number(window?.innerWidth || 0) < 720
+    return coarse || mobile ? 2600 : 1800
+  } catch {
+    return 1800
+  }
+}
+
+function isNearViewportNode(node, marginPx = 1200) {
+  try {
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    const rect = node.getBoundingClientRect?.()
+    const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0
+    if (!rect || viewportH <= 0) return false
+    return Number(rect.bottom || 0) >= -marginPx && Number(rect.top || 0) <= viewportH + marginPx
   } catch {
     return false
   }
@@ -159,6 +181,7 @@ export default function useForumWindowing({
   const pendingAnchorDeltaRef = useRef(0)
   const pendingHeightsRef = useRef(new Map())
   const stableShrinkRef = useRef(new Map())
+  const mediaKeepaliveRef = useRef(new Map())
   const anchorFlushTimerRef = useRef(0)
   const winMetaRef = useRef({ ts: 0, start: 0, end: 0 })
   const winRef = useRef({ start: 0, end: 0, top: 0, bottom: 0 })
@@ -496,6 +519,37 @@ export default function useForumWindowing({
             }
           }
 
+          try {
+            const now = Date.now()
+            const maxIndexGap = Math.max(2, nextMaxRender)
+            let kept = 0
+            mediaKeepaliveRef.current.forEach((until, key) => {
+              if (Number(until || 0) <= now) {
+                mediaKeepaliveRef.current.delete(key)
+                return
+              }
+              const index = Number(keyToIndexRef.current.get(key))
+              if (!Number.isFinite(index) || index < 0 || index >= total) return
+              if (index < prev.start || index >= prev.end) return
+              if (index < nextStart && (nextStart - index) <= maxIndexGap) {
+                nextStart = index
+                kept += 1
+                return
+              }
+              if (index >= nextEnd && (index - nextEnd) <= maxIndexGap) {
+                nextEnd = Math.min(total, index + 1)
+                kept += 1
+              }
+            })
+            if (kept > 0) {
+              emitWindowingDiag('windowing_media_keepalive', {
+                kept,
+                start: nextStart,
+                end: nextEnd,
+              })
+            }
+          } catch {}
+
           const next = buildWindow(nextStart, nextEnd, total)
           const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
           const bottomDelta = Math.abs(Number(prev.bottom || 0) - Number(next.bottom || 0))
@@ -527,6 +581,7 @@ export default function useForumWindowing({
   }, [
     active,
     buildWindow,
+    emitWindowingDiag,
     getHeightAtIndex,
     layoutJitterPx,
     readViewportState,
@@ -543,6 +598,13 @@ export default function useForumWindowing({
     const safeDelta = clamp(raw, -anchorLimit, anchorLimit)
 
     if (Math.abs(raw) > anchorLimit) {
+      emitWindowingDiag('anchor_large_delta_drop', {
+        reason,
+        delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
+        anchorLimit,
+        mode: 'clamped',
+      })
       emitWindowingDiag('anchor_large_delta_clamped', {
         reason,
         delta: Math.round(raw),
@@ -753,9 +815,17 @@ export default function useForumWindowing({
 
           const nextHeight = Math.round(h)
           const prev = Number(heightsRef.current.get(key) || 0)
-          const stableMediaShell = isStableMediaShellNode(node)
+          const stableMediaShell = hasStableMediaShell(node)
           const cardContainsStableMediaShell = !stableMediaShell && containsStableMediaShell(node)
           const mediaSensitiveCard = stableMediaShell || cardContainsStableMediaShell
+          if (mediaSensitiveCard) {
+            const keepaliveMargin = Math.max(960, Math.round((window?.innerHeight || 0) * 1.35))
+            if (isNearViewportNode(node, keepaliveMargin)) {
+              const until = Date.now() + readMediaKeepaliveHoldMs()
+              const prevUntil = Number(mediaKeepaliveRef.current.get(key) || 0)
+              if (until > prevUntil) mediaKeepaliveRef.current.set(key, until)
+            }
+          }
           const measuredDelta = Number.isFinite(prev) && prev > 0
             ? Math.abs(prev - nextHeight)
             : 0
@@ -880,6 +950,10 @@ export default function useForumWindowing({
 
     stableShrinkRef.current.forEach((_, key) => {
       if (!activeKeys.has(key)) stableShrinkRef.current.delete(key)
+    })
+
+    mediaKeepaliveRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) mediaKeepaliveRef.current.delete(key)
     })
 
     rosRef.current.forEach((ro, key) => {
@@ -1101,6 +1175,7 @@ export default function useForumWindowing({
     const ros = rosRef.current
     const pendingHeights = pendingHeightsRef.current
     const stableShrinks = stableShrinkRef.current
+    const mediaKeepalive = mediaKeepaliveRef.current
     return () => {
       try {
         ros.forEach((ro) => {
@@ -1114,6 +1189,7 @@ export default function useForumWindowing({
         pendingAnchorDeltaRef.current = 0
         pendingHeights.clear()
         stableShrinks.clear()
+        mediaKeepalive.clear()
       } catch {}
     }
   }, [])

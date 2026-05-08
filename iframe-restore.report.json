@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-08T17:20:43.752Z",
+  "generatedAt": "2026-05-08T22:29:28.215Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "counts": {
-        "dataSrc": 31,
+        "dataSrc": 33,
         "setSrc": 6,
         "removeSrc": 0,
         "restore": 56,

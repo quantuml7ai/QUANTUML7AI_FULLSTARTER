@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-05-07T16:38:13.434Z
+Сгенерировано автоматически: 2026-05-08T21:59:10.983Z
 
 ## Общий Принцип
 
@@ -384,6 +384,13 @@
 - Зона: `public/ai`
 - Назначение: Статические ассеты namespace ai.
 - Точки входа: `public/ai/ai.gif`
+- Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
+
+### public/anonymous
+
+- Зона: `public/anonymous`
+- Назначение: Статические ассеты namespace anonymous.
+- Точки входа: `public/anonymous/anonymous.png`
 - Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
 
 ### public/audio

@@ -383,9 +383,23 @@ const readyPostPipeline = (() => {
   }
 })()
 
+const protectableForcedPostSurface =
+  isPostFeedVideo &&
+  hardUnloadRequested &&
+  !!el?.isConnected &&
+  (
+    nativePrimeHoldActive ||
+    nearViewport ||
+    shellVisible ||
+    postPrewarmRunway ||
+    freshPostLoadPending ||
+    activePostPipeline ||
+    readyPostPipeline
+  )
+
 const shouldKeepResidentPostVideo =
   isPostFeedVideo &&
-  !hardUnloadRequested &&
+  (!hardUnloadRequested || protectableForcedPostSurface) &&
   __SOFT_RESIDENT_POST_VIDEO &&
   !!el?.isConnected &&
   (
