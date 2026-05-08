@@ -359,15 +359,16 @@ export default function useForumWindowing({
         }
 
         const nextMaxRender = resolveMaxRender(velocity)
+        const visibleCount = Math.max(1, visibleEnd - visibleStart)
+        const runwayItems = direction < 0 ? 2 : 1
+        const minViewportSafeWindowSize = clamp(
+          Math.max(nextMaxRender, visibleCount + runwayItems),
+          1,
+          total,
+        )
 
         if ((end - start) > nextMaxRender) {
-          const visibleCount = Math.max(1, visibleEnd - visibleStart)
-          const runwayItems = direction < 0 ? 2 : 1
-          const windowSize = clamp(
-            Math.max(nextMaxRender, visibleCount + runwayItems),
-            1,
-            total,
-          )
+          const windowSize = minViewportSafeWindowSize
 
           if (direction < 0) {
             // При обратном скролле hard-cap не должен отрезать карточки,
@@ -446,7 +447,10 @@ export default function useForumWindowing({
 
             const recentWindowChange = (now - Number(winMetaRef.current?.ts || 0)) < windowStickyMs
             const stickyItems = velocity > 1.2 ? 2 : 1
-            const stickyMaxRender = nextMaxRender + stickyItems
+            const stickyMaxRender = Math.max(
+              nextMaxRender + stickyItems,
+              minViewportSafeWindowSize,
+            )
             const leadingTrim = Math.max(0, nextStart - prev.start)
             const trailingTrim = Math.max(0, prev.end - nextEnd)
             const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
