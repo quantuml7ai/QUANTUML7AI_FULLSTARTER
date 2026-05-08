@@ -205,8 +205,7 @@ export const FORUM_STYLES = `
   max-height: var(--mb-iframe-h);
   background:#000;
   position:relative;
-  overflow:hidden;
-  overflow-anchor:none;
+  overflow:hidden; 
 }
 
     .mediaBox[data-kind="audio"]{ --mb-h: var(--mb-audio-h); background:#000; }
@@ -310,7 +309,6 @@ export const FORUM_STYLES = `
   pointer-events:none !important;
   user-select:none;
   -webkit-user-select:none;
-  overflow-anchor:none;
 }
 
 .ql7ExternalProviderShield{
