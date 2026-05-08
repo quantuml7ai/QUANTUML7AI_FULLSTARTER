@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T16:38:28.304Z",
+  "generatedAt": "2026-05-08T16:16:44.576Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -103,12 +103,12 @@
         "sync-json": 15,
         "local-storage": 2,
         "session-storage": 0,
-        "network-call": 20,
+        "network-call": 21,
         "raf": 0,
         "interval": 0
       },
       "longLines": [],
-      "score": 40
+      "score": 42
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumAds.js",
@@ -4452,6 +4452,30 @@
       "score": 1
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumCreatePostAction.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 1,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 294,
+          "len": 183,
+          "text": "if ((/\\/uploads?\\//i.test(u.pathname) || /\\/media?\\//i.test(u.pathname)) && (IMG_EXT.test(u.pathname) || AUD_EXT.test(u.pathname) || VID_EXT.test(u.pathname))) return true"
+        }
+      ],
+      "score": 1
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ComposerAttachmentPreview.jsx",
       "counts": {
         "for-loop": 0,
@@ -4832,6 +4856,24 @@
         "filter-map": 0,
         "layout-read": 0,
         "sync-json": 1,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\api\\forum\\rev\\route.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 2,
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 0,
@@ -5859,24 +5901,6 @@
         "layout-read": 0,
         "sync-json": 0,
         "local-storage": 0,
-        "session-storage": 0,
-        "network-call": 0,
-        "raf": 0,
-        "interval": 0
-      },
-      "longLines": [],
-      "score": 0
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumCreatePostAction.js",
-      "counts": {
-        "for-loop": 0,
-        "while-loop": 0,
-        "map-chain": 0,
-        "filter-map": 0,
-        "layout-read": 0,
-        "sync-json": 0,
-        "local-storage": 1,
         "session-storage": 0,
         "network-call": 0,
         "raf": 0,

@@ -1,9 +1,9 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T16:38:30.074Z",
+  "generatedAt": "2026-05-08T16:16:46.461Z",
   "summary": {
-    "scannedFiles": 388,
-    "internalEdges": 551,
+    "scannedFiles": 389,
+    "internalEdges": 552,
     "cycleCount": 0,
     "crossDomainEdgeCount": 150,
     "forumRootImportCount": 1,
@@ -4329,6 +4329,16 @@
       "externalCount": 1
     },
     {
+      "file": "app/api/forum/rev/route.js",
+      "domain": "api-forum",
+      "imports": [
+        "app/api/forum/_db.js"
+      ],
+      "importCount": 1,
+      "external": [],
+      "externalCount": 0
+    },
+    {
       "file": "app/api/forum/snapshot/route.js",
       "domain": "api-forum",
       "imports": [
@@ -5193,9 +5203,10 @@
       "importCount": 1,
       "external": [
         "react",
+        "react-dom",
         "next/navigation"
       ],
-      "externalCount": 2
+      "externalCount": 3
     },
     {
       "file": "components/NotRobotHost.jsx",

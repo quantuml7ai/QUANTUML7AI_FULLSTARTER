@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T16:39:01.086Z",
+  "generatedAt": "2026-05-08T16:17:19.535Z",
   "scannedFiles": 281,
   "report": [
     {
@@ -82,7 +82,7 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
-      "score": 212,
+      "score": 213,
       "counts": {
         "scrollWrite": 4,
         "scrollRead": 5,
@@ -92,32 +92,32 @@
         "rectReads": 2,
         "resizeObserver": 0,
         "raf": 4,
-        "timers": 4
+        "timers": 5
       },
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 492,
+          "line": 523,
           "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }"
         },
         {
           "key": "scrollWrite",
-          "line": 523,
+          "line": 554,
           "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
         },
         {
           "key": "scrollRead",
-          "line": 488,
+          "line": 519,
           "text": "scrollEl.scrollTop = 0"
         },
         {
           "key": "scrollRead",
-          "line": 517,
+          "line": 548,
           "text": "const targetTop = (scrollEl.scrollTop || 0) + (rect.top - Number(hostRect.top || 0))"
         },
         {
           "key": "scrollRead",
-          "line": 522,
+          "line": 553,
           "text": "const y = (window.pageYOffset || document.documentElement.scrollTop || 0) + rect.top"
         },
         {
@@ -142,17 +142,17 @@
         },
         {
           "key": "alignOps",
-          "line": 632,
+          "line": 663,
           "text": "centerPostAfterDom,"
         },
         {
           "key": "alignOps",
-          "line": 692,
+          "line": 723,
           "text": "alignNodeToTop,"
         },
         {
           "key": "alignOps",
-          "line": 801,
+          "line": 878,
           "text": "alignNodeToTop(target)"
         }
       ]
@@ -1452,6 +1452,58 @@
       ]
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSyncLoop.js",
+      "score": 27,
+      "counts": {
+        "scrollWrite": 0,
+        "scrollRead": 8,
+        "alignOps": 0,
+        "restoreOps": 0,
+        "teleportOps": 0,
+        "rectReads": 0,
+        "resizeObserver": 0,
+        "raf": 0,
+        "timers": 3
+      },
+      "hits": [
+        {
+          "key": "scrollRead",
+          "line": 53,
+          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 55,
+          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 73,
+          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
+        },
+        {
+          "key": "scrollRead",
+          "line": 75,
+          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
+        },
+        {
+          "key": "timers",
+          "line": 291,
+          "text": "setTimeout(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 302,
+          "text": "const id = setInterval(() => {"
+        },
+        {
+          "key": "timers",
+          "line": 311,
+          "text": "setTimeout(() => {"
+        }
+      ]
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumDeepLinkFlow.js",
       "score": 25,
       "counts": {
@@ -1494,48 +1546,6 @@
       ]
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSyncLoop.js",
-      "score": 25,
-      "counts": {
-        "scrollWrite": 0,
-        "scrollRead": 8,
-        "alignOps": 0,
-        "restoreOps": 0,
-        "teleportOps": 0,
-        "rectReads": 0,
-        "resizeObserver": 0,
-        "raf": 0,
-        "timers": 1
-      },
-      "hits": [
-        {
-          "key": "scrollRead",
-          "line": 50,
-          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
-        },
-        {
-          "key": "scrollRead",
-          "line": 52,
-          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
-        },
-        {
-          "key": "scrollRead",
-          "line": 70,
-          "text": "const innerTop = Number(scrollEl?.scrollTop || 0)"
-        },
-        {
-          "key": "scrollRead",
-          "line": 72,
-          "text": "Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0)"
-        },
-        {
-          "key": "timers",
-          "line": 238,
-          "text": "const id = setInterval(runTick, TICK_MS)"
-        }
-      ]
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumCreatePostAction.js",
       "score": 22,
       "counts": {
@@ -1557,7 +1567,7 @@
         },
         {
           "key": "alignOps",
-          "line": 346,
+          "line": 347,
           "text": "try { centerPostAfterDom(tmpId, 'auto') } catch {}"
         }
       ]
@@ -2119,12 +2129,12 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 219,
+          "line": 226,
           "text": "const rect = anchorEl.getBoundingClientRect()"
         },
         {
           "key": "raf",
-          "line": 261,
+          "line": 268,
           "text": "rafRef.current = window.requestAnimationFrame(() => {"
         },
         {
@@ -2924,7 +2934,7 @@
       "hits": [
         {
           "key": "timers",
-          "line": 106,
+          "line": 119,
           "text": "sseSyncTimerRef.current = setTimeout(() => {"
         }
       ]

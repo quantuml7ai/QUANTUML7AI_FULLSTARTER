@@ -1,21 +1,21 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-07T16:39:03.194Z",
+  "generatedAt": "2026-05-08T16:17:21.774Z",
   "summary": {
-    "scannedFiles": 377,
+    "scannedFiles": 378,
     "filesWithSyncKeys": 148,
     "keyFrequency": {
       "accountId": 413,
-      "userId": 449,
+      "userId": 450,
       "authorId": 134,
       "wallet": 20,
       "telegramId": 5,
       "initData": 7,
       "linked": 4,
       "followers": 93,
-      "following": 67,
+      "following": 72,
       "bio": 1,
-      "nickname": 103,
+      "nickname": 104,
       "vip": 520
     }
   },
@@ -240,742 +240,752 @@
         },
         {
           "key": "userId",
-          "line": 319,
+          "line": 308,
+          "text": "v.userId != null ||"
+        },
+        {
+          "key": "nickname",
+          "line": 309,
+          "text": "v.nickname != null"
+        },
+        {
+          "key": "userId",
+          "line": 334,
           "text": "export async function createTopic({ title, description, userId, nickname, icon, ts }) {"
         },
         {
           "key": "nickname",
-          "line": 319,
+          "line": 334,
           "text": "export async function createTopic({ title, description, userId, nickname, icon, ts }) {"
         },
         {
           "key": "userId",
-          "line": 327,
+          "line": 342,
           "text": "userId:   toStr(userId),"
         },
         {
           "key": "nickname",
-          "line": 328,
+          "line": 343,
           "text": "nickname: toStr(nickname),"
-        },
-        {
-          "key": "userId",
-          "line": 340,
-          "text": "try { await incrUserTopicsTotal(t.userId, 1) } catch {}"
-        },
-        {
-          "key": "userId",
-          "line": 346,
-          "text": "export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {"
-        },
-        {
-          "key": "nickname",
-          "line": 346,
-          "text": "export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {"
         },
         {
           "key": "userId",
           "line": 355,
+          "text": "try { await incrUserTopicsTotal(t.userId, 1) } catch {}"
+        },
+        {
+          "key": "userId",
+          "line": 367,
+          "text": "export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {"
+        },
+        {
+          "key": "nickname",
+          "line": 367,
+          "text": "export async function createPost({ topicId, parentId, text, userId, nickname, icon, ts }) {"
+        },
+        {
+          "key": "userId",
+          "line": 376,
           "text": "userId:   toStr(userId),"
         },
         {
           "key": "nickname",
-          "line": 356,
+          "line": 377,
           "text": "nickname: toStr(nickname),"
         },
         {
           "key": "userId",
-          "line": 371,
+          "line": 392,
           "text": "try { await incrUserPostsTotal(p.userId, 1) } catch {}"
         },
         {
           "key": "userId",
-          "line": 396,
+          "line": 427,
           "text": "export async function reactPostUnique(postId, userId, kind) {"
         },
         {
           "key": "userId",
-          "line": 397,
+          "line": 428,
           "text": "if (!postId || !userId || !['like','dislike'].includes(kind)) {"
         },
         {
           "key": "userId",
-          "line": 404,
+          "line": 435,
           "text": "await redis.srem(disSet, userId)"
         },
         {
           "key": "userId",
-          "line": 405,
+          "line": 436,
           "text": "await redis.sadd(likeSet, userId)"
         },
         {
           "key": "userId",
-          "line": 407,
+          "line": 438,
           "text": "await redis.srem(likeSet, userId)"
         },
         {
           "key": "userId",
-          "line": 408,
+          "line": 439,
           "text": "await redis.sadd(disSet, userId)"
         },
         {
           "key": "userId",
-          "line": 427,
+          "line": 458,
           "text": "export async function incrementTopicViewsUnique(topicId, userId, ttlSec = VIEW_TTL_SEC) {"
         },
         {
           "key": "userId",
-          "line": 429,
+          "line": 460,
           "text": "const tid = str(topicId), uid = str(userId)"
         },
         {
           "key": "userId",
-          "line": 438,
+          "line": 469,
           "text": "export async function incrementPostViewsUnique(postId, userId, ttlSec = VIEW_TTL_SEC) {"
         },
         {
           "key": "userId",
-          "line": 440,
+          "line": 471,
           "text": "const pid = str(postId), uid = str(userId)"
         },
         {
           "key": "userId",
-          "line": 451,
+          "line": 482,
           "text": "export async function reactPostExclusiveDaily(postId, userId, kind) {"
         },
         {
           "key": "userId",
-          "line": 452,
+          "line": 483,
           "text": "const pid = str(postId), uid = str(userId)"
         },
         {
           "key": "userId",
-          "line": 498,
+          "line": 529,
           "text": "export async function isBannedUser(userId) {"
         },
         {
           "key": "userId",
-          "line": 499,
+          "line": 530,
           "text": "const id = String(userId || '').trim().toLowerCase()"
         },
         {
           "key": "userId",
-          "line": 521,
+          "line": 552,
           "text": "export async function isBanned(userId, ip) {"
         },
         {
           "key": "userId",
-          "line": 522,
+          "line": 553,
           "text": "return (await isBannedUser(userId)) || (await isBannedIp(ip))"
         },
         {
           "key": "accountId",
-          "line": 525,
+          "line": 556,
           "text": "export async function dbBanUser(accountId) {"
         },
         {
           "key": "accountId",
-          "line": 527,
+          "line": 558,
           "text": "const id = String(accountId || '').trim().toLowerCase()"
         },
         {
           "key": "accountId",
-          "line": 532,
+          "line": 563,
           "text": "export async function dbUnbanUser(accountId) {"
         },
         {
           "key": "accountId",
-          "line": 534,
+          "line": 565,
           "text": "const id = String(accountId || '').trim().toLowerCase()"
         },
         {
           "key": "userId",
-          "line": 673,
+          "line": 704,
           "text": "export async function getMediaLockUntil(userId) {"
         },
         {
           "key": "userId",
-          "line": 674,
+          "line": 705,
           "text": "const key = K.mediaLockKey(str(userId))"
         },
         {
           "key": "userId",
-          "line": 679,
+          "line": 710,
           "text": "export async function setMediaLockUntil(userId, untilMs) {"
         },
         {
           "key": "userId",
-          "line": 680,
+          "line": 711,
           "text": "const key = K.mediaLockKey(str(userId))"
         },
         {
           "key": "userId",
-          "line": 685,
+          "line": 716,
           "text": "export async function isMediaLocked(userId) {"
         },
         {
           "key": "userId",
-          "line": 686,
+          "line": 717,
           "text": "const untilMs = await getMediaLockUntil(userId)"
         },
         {
           "key": "userId",
-          "line": 689,
+          "line": 720,
           "text": "try { await redis.del(K.mediaLockKey(str(userId))) } catch {}"
         },
         {
           "key": "accountId",
-          "line": 789,
+          "line": 820,
           "text": "const authorId = str(post?.userId || post?.accountId)"
         },
         {
           "key": "userId",
-          "line": 789,
+          "line": 820,
           "text": "const authorId = str(post?.userId || post?.accountId)"
         },
         {
           "key": "authorId",
-          "line": 789,
+          "line": 820,
           "text": "const authorId = str(post?.userId || post?.accountId)"
         },
         {
           "key": "authorId",
-          "line": 790,
+          "line": 821,
           "text": "if (authorId && authorId === rid) {"
         },
         {
           "key": "authorId",
-          "line": 826,
+          "line": 857,
           "text": "if (authorId) {"
         },
         {
           "key": "authorId",
-          "line": 827,
+          "line": 858,
           "text": "await setMediaLockUntil(authorId, lockedUntil)"
         },
         {
           "key": "authorId",
-          "line": 833,
+          "line": 864,
           "text": "lockedUserId: authorId,"
         },
         {
           "key": "userId",
-          "line": 914,
+          "line": 960,
           "text": "export async function isNickAvailable(nick, userId) {"
         },
         {
           "key": "userId",
-          "line": 918,
+          "line": 964,
           "text": "return String(owner) === String(userId)"
         },
         {
           "key": "userId",
-          "line": 921,
+          "line": 967,
           "text": "export async function getUserNick(userId) {"
         },
         {
           "key": "userId",
-          "line": 922,
+          "line": 968,
           "text": "return await redis.get(K.userNick(userId))"
         },
         {
           "key": "userId",
-          "line": 929,
+          "line": 975,
           "text": "* - освобождаем старый индекс, если он принадлежал этому userId"
         },
         {
           "key": "userId",
-          "line": 931,
+          "line": 977,
           "text": "export async function setUserNick(userId, newNick) {"
         },
         {
           "key": "userId",
-          "line": 936,
+          "line": 982,
           "text": "const oldNick = await redis.get(K.userNick(userId))"
         },
         {
           "key": "userId",
-          "line": 941,
+          "line": 987,
           "text": "try { await indexUserSearchNick(userId, oldNick, oldNick) } catch {}"
         },
         {
           "key": "userId",
-          "line": 946,
+          "line": 992,
           "text": "const ok = await redis.set(newKey, String(userId), { nx: true })"
         },
         {
           "key": "userId",
-          "line": 949,
+          "line": 995,
           "text": "await redis.set(K.userNick(userId), nn)"
         },
         {
           "key": "userId",
-          "line": 953,
+          "line": 999,
           "text": "if (String(cur) === String(userId)) await redis.del(oldKey)"
         },
         {
           "key": "userId",
-          "line": 956,
+          "line": 1002,
           "text": "try { await indexUserSearchNick(userId, nn, oldNick) } catch {}"
         },
         {
           "key": "userId",
-          "line": 959,
+          "line": 1005,
           "text": "export async function getUserAvatar(userId) {"
         },
         {
           "key": "userId",
-          "line": 961,
+          "line": 1007,
           "text": "const v = await redis.get(K.userAvatar(userId))"
         },
         {
           "key": "vip",
-          "line": 973,
+          "line": 1019,
           "text": "if (/^https?:\\/\\//i.test(s0) || s0.startsWith('/uploads/') || s0.startsWith('/avatars/') || s0.startsWith('/vip/')) {"
         },
         {
           "key": "userId",
-          "line": 980,
+          "line": 1026,
           "text": "export async function setUserAvatar(userId, icon) {"
         },
         {
           "key": "userId",
-          "line": 985,
+          "line": 1031,
           "text": "await redis.del(K.userAvatar(userId))"
         },
         {
           "key": "userId",
-          "line": 988,
+          "line": 1034,
           "text": "await redis.set(K.userAvatar(userId), v)"
         },
         {
           "key": "userId",
-          "line": 1000,
+          "line": 1046,
           "text": "export async function getUserGender(userId) {"
         },
         {
           "key": "userId",
-          "line": 1002,
+          "line": 1048,
           "text": "const value = await redis.get(K.userGender(userId))"
         },
         {
           "key": "userId",
-          "line": 1009,
+          "line": 1055,
           "text": "export async function setUserGender(userId, gender) {"
         },
         {
           "key": "userId",
-          "line": 1013,
+          "line": 1059,
           "text": "await redis.del(K.userGender(userId))"
         },
         {
           "key": "userId",
-          "line": 1016,
+          "line": 1062,
           "text": "await redis.set(K.userGender(userId), value)"
         },
         {
           "key": "userId",
-          "line": 1037,
+          "line": 1083,
           "text": "export async function getUserBirthYear(userId) {"
         },
         {
           "key": "userId",
-          "line": 1039,
+          "line": 1085,
           "text": "return normUserBirthYear(await redis.get(K.userBirthYear(userId)))"
         },
         {
           "key": "userId",
-          "line": 1045,
+          "line": 1091,
           "text": "export async function setUserBirthYear(userId, birthYear) {"
         },
         {
           "key": "userId",
-          "line": 1049,
+          "line": 1095,
           "text": "await redis.del(K.userBirthYear(userId))"
         },
         {
           "key": "userId",
-          "line": 1052,
+          "line": 1098,
           "text": "await redis.set(K.userBirthYear(userId), String(value))"
         },
         {
           "key": "userId",
-          "line": 1065,
+          "line": 1111,
           "text": "export async function getUserAbout(userId) {"
         },
         {
           "key": "userId",
-          "line": 1067,
+          "line": 1113,
           "text": "const v = await redis.get(K.userAbout(userId))"
         },
         {
           "key": "userId",
-          "line": 1074,
+          "line": 1120,
           "text": "export async function setUserAbout(userId, about) {"
         },
         {
           "key": "userId",
-          "line": 1078,
+          "line": 1124,
           "text": "await redis.del(K.userAbout(userId))"
         },
         {
           "key": "userId",
-          "line": 1081,
+          "line": 1127,
           "text": "await redis.set(K.userAbout(userId), v)"
         },
         {
           "key": "userId",
-          "line": 1088,
+          "line": 1134,
           "text": "export async function getUserProfile(userId) {"
         },
         {
           "key": "userId",
-          "line": 1090,
+          "line": 1136,
           "text": "getUserNick(userId),"
         },
         {
           "key": "userId",
-          "line": 1091,
+          "line": 1137,
           "text": "getUserAvatar(userId),"
         },
         {
           "key": "userId",
-          "line": 1092,
+          "line": 1138,
           "text": "getUserGender(userId),"
         },
         {
           "key": "userId",
-          "line": 1093,
+          "line": 1139,
           "text": "getUserBirthYear(userId),"
         },
         {
           "key": "nickname",
-          "line": 1096,
+          "line": 1142,
           "text": "nickname: str(nick || ''),"
         },
         {
           "key": "userId",
-          "line": 1103,
+          "line": 1149,
           "text": "export async function setUserProfile(userId, { nickname, icon, gender, birthYear } = {}) {"
         },
         {
           "key": "nickname",
-          "line": 1103,
+          "line": 1149,
           "text": "export async function setUserProfile(userId, { nickname, icon, gender, birthYear } = {}) {"
         },
         {
           "key": "nickname",
-          "line": 1106,
+          "line": 1152,
           "text": "if (nickname != null && nickname !== '') {"
         },
         {
           "key": "userId",
-          "line": 1107,
+          "line": 1153,
           "text": "out.nickname = await setUserNick(userId, nickname)"
         },
         {
           "key": "nickname",
-          "line": 1107,
+          "line": 1153,
           "text": "out.nickname = await setUserNick(userId, nickname)"
         },
         {
           "key": "userId",
-          "line": 1111,
+          "line": 1157,
           "text": "out.icon = await setUserAvatar(userId, icon)"
         },
         {
           "key": "userId",
-          "line": 1115,
+          "line": 1161,
           "text": "out.gender = await setUserGender(userId, gender)"
         },
         {
           "key": "userId",
-          "line": 1119,
+          "line": 1165,
           "text": "out.birthYear = await setUserBirthYear(userId, birthYear)"
         },
         {
           "key": "authorId",
-          "line": 1154,
+          "line": 1200,
           "text": "export function subscriptionScore(viewerId, authorId, ts = Date.now()) {"
         },
         {
           "key": "authorId",
-          "line": 1155,
+          "line": 1201,
           "text": "return Number(ts || Date.now()) + hashFraction(`${viewerId}:${authorId}`)"
         },
         {
           "key": "nickname",
-          "line": 1316,
+          "line": 1362,
           "text": "export function buildUserSearchPrefixes(nickname) {"
         },
         {
           "key": "nickname",
-          "line": 1317,
+          "line": 1363,
           "text": "const normalized = normalizeUserSearchText(nickname)"
         },
         {
           "key": "userId",
-          "line": 1333,
+          "line": 1379,
           "text": "export async function removeUserSearchIndex(userId) {"
         },
         {
           "key": "userId",
-          "line": 1334,
+          "line": 1380,
           "text": "const uid = normId(userId)"
         },
         {
           "key": "userId",
-          "line": 1356,
+          "line": 1402,
           "text": "export async function indexUserSearchNick(userId, newNick, oldNick = null) {"
         },
         {
           "key": "userId",
-          "line": 1357,
+          "line": 1403,
           "text": "const uid = normId(userId)"
         },
         {
           "key": "authorId",
-          "line": 1424,
+          "line": 1470,
           "text": "async function ensureFollowingPageIndexes(viewerId, authorIds) {"
         },
         {
           "key": "authorId",
-          "line": 1426,
+          "line": 1472,
           "text": "const authors = Array.from(new Set((Array.isArray(authorIds) ? authorIds : []).map(normId).filter(Boolean)))"
         },
         {
           "key": "authorId",
-          "line": 1433,
+          "line": 1479,
           "text": "authors.forEach((authorId, idx) => {"
         },
         {
           "key": "authorId",
-          "line": 1434,
+          "line": 1480,
           "text": "const score = subscriptionScore(viewer, authorId, nowTs - idx)"
         },
         {
           "key": "authorId",
-          "line": 1435,
+          "line": 1481,
           "text": "pipe.zadd(K.subsFollowingZSet(viewer), { score, member: authorId })"
         },
         {
           "key": "authorId",
-          "line": 1436,
+          "line": 1482,
           "text": "pipe.sadd(K.subsFollowersSet(authorId), viewer)"
         },
         {
           "key": "authorId",
-          "line": 1437,
+          "line": 1483,
           "text": "pipe.zadd(K.subsFollowersZSet(authorId), { score, member: viewer })"
         },
         {
           "key": "followers",
-          "line": 1449,
+          "line": 1495,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 1449,
+          "line": 1495,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 1467,
+          "line": 1513,
           "text": "if (safeMode === 'following') {"
         },
         {
           "key": "userId",
-          "line": 1526,
+          "line": 1572,
           "text": "userId: uid,"
         },
         {
           "key": "nickname",
-          "line": 1527,
+          "line": 1573,
           "text": "nickname: normId(flat[idx * 2]),"
         },
         {
           "key": "userId",
-          "line": 1532,
+          "line": 1578,
           "text": "export async function getSubscriptionCounts(userId) {"
         },
         {
           "key": "userId",
-          "line": 1533,
+          "line": 1579,
           "text": "const uid = normId(userId)"
         },
         {
           "key": "followers",
-          "line": 1534,
+          "line": 1580,
           "text": "if (!uid) return { followers: 0, following: 0 }"
         },
         {
           "key": "following",
-          "line": 1534,
+          "line": 1580,
           "text": "if (!uid) return { followers: 0, following: 0 }"
         },
         {
           "key": "followers",
-          "line": 1535,
+          "line": 1581,
           "text": "const [followersZ, followingZ, followersSet, followingSet, legacyFollowersCount] = await Promise.all(["
         },
         {
           "key": "following",
-          "line": 1535,
+          "line": 1581,
           "text": "const [followersZ, followingZ, followersSet, followingSet, legacyFollowersCount] = await Promise.all(["
         },
         {
           "key": "followers",
-          "line": 1544,
+          "line": 1590,
           "text": "followers: Math.max(followersZ, followersSet, legacyFollowersCount),"
         },
         {
           "key": "following",
-          "line": 1545,
+          "line": 1591,
           "text": "following: Math.max(followingZ, followingSet),"
         },
         {
           "key": "authorId",
-          "line": 1556,
+          "line": 1602,
           "text": "export async function getFollowersCount(authorId) {"
         },
         {
           "key": "authorId",
-          "line": 1557,
+          "line": 1603,
           "text": "const aid = normId(authorId)"
         },
         {
           "key": "userId",
-          "line": 1563,
+          "line": 1609,
           "text": "userId,"
         },
         {
           "key": "followers",
-          "line": 1564,
+          "line": 1610,
           "text": "mode = 'followers',"
         },
         {
           "key": "userId",
-          "line": 1568,
+          "line": 1614,
           "text": "const uid = normId(userId)"
         },
         {
           "key": "followers",
-          "line": 1573,
+          "line": 1619,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 1573,
+          "line": 1619,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 1576,
+          "line": 1622,
           "text": "const zKey = safeMode === 'following' ? K.subsFollowingZSet(uid) : K.subsFollowersZSet(uid)"
         },
         {
           "key": "following",
-          "line": 1577,
+          "line": 1623,
           "text": "const setKey = safeMode === 'following' ? K.subsViewerSet(uid) : K.subsFollowersSet(uid)"
         },
         {
           "key": "following",
-          "line": 1592,
+          "line": 1638,
           "text": "if (safeMode === 'following' && pageIds.length) {"
         },
         {
           "key": "followers",
-          "line": 1601,
+          "line": 1647,
           "text": "totalCount: safeMode === 'following' ? nextCounts.following : nextCounts.followers,"
         },
         {
           "key": "following",
-          "line": 1601,
+          "line": 1647,
           "text": "totalCount: safeMode === 'following' ? nextCounts.following : nextCounts.followers,"
         },
         {
           "key": "followers",
-          "line": 1611,
+          "line": 1657,
           "text": "mode = 'followers',"
         },
         {
           "key": "followers",
-          "line": 1616,
+          "line": 1662,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 1616,
+          "line": 1662,
           "text": "const safeMode = mode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "followers",
-          "line": 1624,
+          "line": 1670,
           "text": "if (safeMode === 'followers') {"
         },
         {
           "key": "followers",
-          "line": 1648,
+          "line": 1694,
           "text": "* returns: { ok:true, subscribed:boolean, followersCount:number } OR { ok:false, error:string }"
         },
         {
           "key": "authorId",
-          "line": 1650,
+          "line": 1696,
           "text": "export async function toggleSubscription(viewerId, authorId) {"
         },
         {
           "key": "authorId",
-          "line": 1652,
+          "line": 1698,
           "text": "const aid = normId(authorId)"
         },
         {
           "key": "following",
-          "line": 1660,
+          "line": 1706,
           "text": "const followingZKey = K.subsFollowingZSet(vid)"
         },
         {
           "key": "followers",
-          "line": 1661,
+          "line": 1707,
           "text": "const followersZKey = K.subsFollowersZSet(aid)"
         },
         {
           "key": "following",
-          "line": 1672,
+          "line": 1718,
           "text": ".zadd(followingZKey, { score, member: aid })"
         },
         {
           "key": "followers",
-          "line": 1673,
+          "line": 1719,
           "text": ".zadd(followersZKey, { score, member: vid })"
         },
         {
           "key": "followers",
-          "line": 1677,
+          "line": 1723,
           "text": "const followersCount = await getInt(cntKey, 0)"
         },
         {
           "key": "followers",
-          "line": 1678,
+          "line": 1724,
           "text": "return { ok:true, subscribed:true, followersCount }"
         },
         {
           "key": "following",
-          "line": 1685,
+          "line": 1731,
           "text": ".zrem(followingZKey, aid)"
         },
         {
           "key": "followers",
-          "line": 1686,
+          "line": 1732,
           "text": ".zrem(followersZKey, vid)"
         },
         {
           "key": "followers",
-          "line": 1693,
+          "line": 1739,
           "text": "const followersCount = await getInt(cntKey, 0)"
         },
         {
           "key": "followers",
-          "line": 1694,
+          "line": 1740,
           "text": "return { ok:true, subscribed:false, followersCount }"
         }
       ],
@@ -988,7 +998,7 @@
         "nickname",
         "vip"
       ],
-      "score": 191
+      "score": 193
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\ForumStyles.jsx",
@@ -2663,217 +2673,217 @@
       "hits": [
         {
           "key": "userId",
-          "line": 84,
+          "line": 100,
           "text": "if (!p.userId) throw new Error('missing_userId')"
         },
         {
           "key": "userId",
-          "line": 118,
+          "line": 134,
           "text": "async function setPostReaction(postId, userId, state) {"
         },
         {
           "key": "userId",
-          "line": 120,
+          "line": 136,
           "text": "const uid = String(userId || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 138,
+          "line": 154,
           "text": "return { state: next, likes, dislikes, changed: false, likeDelta: 0, authorId: null }"
         },
         {
           "key": "authorId",
-          "line": 166,
+          "line": 182,
           "text": "let authorId = null"
         },
         {
           "key": "accountId",
-          "line": 169,
+          "line": 185,
           "text": "const rawAuthorId = String(postObj?.userId || postObj?.accountId || '').trim() || null"
         },
         {
           "key": "userId",
-          "line": 169,
+          "line": 185,
           "text": "const rawAuthorId = String(postObj?.userId || postObj?.accountId || '').trim() || null"
         },
         {
           "key": "authorId",
-          "line": 172,
+          "line": 188,
           "text": "authorId = String((await resolveCanonicalAccountId(rawAuthorId)) || rawAuthorId || '').trim() || null"
         },
         {
           "key": "authorId",
-          "line": 174,
+          "line": 190,
           "text": "authorId = rawAuthorId"
         },
         {
           "key": "authorId",
-          "line": 179,
+          "line": 195,
           "text": "return { state: next, likes, dislikes, changed: true, likeDelta, authorId }"
         },
         {
           "key": "userId",
-          "line": 246,
+          "line": 262,
           "text": "const userIdRaw = requireUserId(request, body)"
         },
         {
           "key": "userId",
-          "line": 247,
+          "line": 263,
           "text": "let userId = String(userIdRaw || '').trim()"
         },
         {
           "key": "userId",
-          "line": 249,
+          "line": 265,
           "text": "userId = String((await resolveCanonicalAccountId(userId)) || userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 252,
+          "line": 268,
           "text": "// 🚫 мгновенные баны (по userId и IP)"
         },
         {
           "key": "userId",
-          "line": 254,
+          "line": 270,
           "text": "if (await isBanned(userId, ip)) {"
         },
         {
           "key": "nickname",
-          "line": 272,
+          "line": 288,
           "text": "const nickname    = trimStr(p.nickname || '', 80)"
         },
         {
           "key": "userId",
-          "line": 289,
+          "line": 305,
           "text": "const autoKey = `forum:dedup:auto:topic:${sha1(`${userId.toLowerCase()}|${title}|${description}`)}`"
         },
         {
           "key": "userId",
-          "line": 297,
+          "line": 313,
           "text": "title, description, userId, nickname, icon, ts: Date.now(),"
         },
         {
           "key": "nickname",
-          "line": 297,
+          "line": 313,
           "text": "title, description, userId, nickname, icon, ts: Date.now(),"
         },
         {
           "key": "nickname",
-          "line": 328,
+          "line": 344,
           "text": "const nickname  = trimStr(p.nickname || '', 80)"
         },
         {
           "key": "userId",
-          "line": 339,
+          "line": 355,
           "text": "const autoKey = `forum:dedup:auto:post:${sha1(`${userId.toLowerCase()}|${topicId}|${text}`)}`"
         },
         {
           "key": "userId",
-          "line": 347,
+          "line": 363,
           "text": "topicId, parentId, text, userId, nickname, icon, ts: Date.now(),"
         },
         {
           "key": "nickname",
-          "line": 347,
+          "line": 363,
           "text": "topicId, parentId, text, userId, nickname, icon, ts: Date.now(),"
         },
         {
           "key": "userId",
-          "line": 364,
+          "line": 380,
           "text": "const { inc, views } = await incrementTopicViewsUnique(topicId, userId)"
         },
         {
           "key": "userId",
-          "line": 379,
+          "line": 395,
           "text": "const { inc, views } = await incrementPostViewsUnique(postId, userId)"
         },
         {
           "key": "userId",
-          "line": 401,
+          "line": 417,
           "text": "const { inc, views } = await incrementTopicViewsUnique(id, userId)"
         },
         {
           "key": "userId",
-          "line": 428,
+          "line": 453,
           "text": "const { inc, views } = await incrementPostViewsUnique(id, userId)"
         },
         {
           "key": "userId",
-          "line": 451,
+          "line": 485,
           "text": "const r = await setPostReaction(postId, userId, state ?? null)"
         },
         {
           "key": "authorId",
-          "line": 453,
+          "line": 487,
           "text": "if (r.likeDelta && r.authorId) {"
         },
         {
           "key": "authorId",
-          "line": 454,
+          "line": 488,
           "text": "try { await incrUserLikesTotal(r.authorId, r.likeDelta) } catch {}"
         },
         {
           "key": "userId",
-          "line": 474,
+          "line": 508,
           "text": "const r = await setPostReaction(postId, userId, kind)"
         },
         {
           "key": "authorId",
-          "line": 476,
+          "line": 510,
           "text": "if (r.likeDelta && r.authorId) {"
         },
         {
           "key": "authorId",
-          "line": 477,
+          "line": 511,
           "text": "try { await incrUserLikesTotal(r.authorId, r.likeDelta) } catch {}"
         },
         {
           "key": "userId",
-          "line": 565,
+          "line": 599,
           "text": "const targetRaw = String(p.userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 567,
+          "line": 601,
           "text": "if (!targetLc) throw new Error('missing_userId')"
         },
         {
           "key": "userId",
-          "line": 571,
+          "line": 605,
           "text": "await pushChange({ rev, kind: 'ban_user', id: targetLc, data: { userId: targetLc }, ts: Date.now() })"
         },
         {
           "key": "userId",
-          "line": 572,
+          "line": 606,
           "text": "results.push({ op: 'ban_user', userId: targetRaw, rev, opId: op.opId })"
         },
         {
           "key": "userId",
-          "line": 573,
+          "line": 607,
           "text": "await publishForumEvent({ type: 'ban_user', userId: targetLc, rev })"
         },
         {
           "key": "userId",
-          "line": 576,
+          "line": 610,
           "text": "const targetRaw = String(p.userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 578,
+          "line": 612,
           "text": "if (!targetLc) throw new Error('missing_userId')"
         },
         {
           "key": "userId",
-          "line": 582,
+          "line": 616,
           "text": "await pushChange({ rev, kind: 'unban_user', id: targetLc, data: { userId: targetLc }, ts: Date.now() })"
         },
         {
           "key": "userId",
-          "line": 583,
+          "line": 617,
           "text": "results.push({ op: 'unban_user', userId: targetRaw, rev, opId: op.opId })"
         },
         {
           "key": "userId",
-          "line": 584,
+          "line": 618,
           "text": "await publishForumEvent({ type: 'unban_user', userId: targetLc, rev })"
         }
       ],
@@ -3249,166 +3259,339 @@
       "score": 33
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\services\\forumApi.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\UserInfoPopover.jsx",
       "hits": [
         {
+          "key": "accountId",
+          "line": 67,
+          "text": "const accountId = aliasRef.current.get(rawKey) || (resolved && resolved !== rawKey ? resolved : null)"
+        },
+        {
+          "key": "accountId",
+          "line": 68,
+          "text": "if (accountId && cacheRef.current.has(accountId)) {"
+        },
+        {
+          "key": "accountId",
+          "line": 69,
+          "text": "return cacheRef.current.get(accountId)"
+        },
+        {
+          "key": "accountId",
+          "line": 99,
+          "text": "const accountId = String(json.accountId || json.userId || rawKey).trim()"
+        },
+        {
           "key": "userId",
+          "line": 99,
+          "text": "const accountId = String(json.accountId || json.userId || rawKey).trim()"
+        },
+        {
+          "key": "accountId",
+          "line": 101,
+          "text": "accountId,"
+        },
+        {
+          "key": "followers",
+          "line": 104,
+          "text": "followers: Number(json?.stats?.followers || 0),"
+        },
+        {
+          "key": "following",
+          "line": 105,
+          "text": "following: Number("
+        },
+        {
+          "key": "following",
           "line": 106,
-          "text": "async mutate(batch, userId) {"
+          "text": "json?.stats?.following ??"
         },
         {
-          "key": "userId",
+          "key": "following",
+          "line": 107,
+          "text": "json?.stats?.followingCount ??"
+        },
+        {
+          "key": "following",
+          "line": 108,
+          "text": "json?.followingCount ??"
+        },
+        {
+          "key": "following",
           "line": 109,
-          "text": "userId ??"
-        },
-        {
-          "key": "userId",
-          "line": 110,
-          "text": "batch?.userId ??"
+          "text": "json?.counts?.following ??"
         },
         {
           "key": "accountId",
-          "line": 111,
-          "text": "batch?.accountId ??"
-        },
-        {
-          "key": "userId",
-          "line": 125,
-          "text": "userId: String(actorId || ''),"
+          "line": 118,
+          "text": "if (accountId) {"
         },
         {
           "key": "accountId",
-          "line": 189,
-          "text": "async adminBanUser(accountId) {"
+          "line": 119,
+          "text": "cacheRef.current.set(accountId, payload)"
         },
         {
           "key": "accountId",
-          "line": 197,
-          "text": "body: JSON.stringify({ accountId }),"
+          "line": 120,
+          "text": "aliasRef.current.set(rawKey, accountId)"
         },
         {
           "key": "accountId",
-          "line": 207,
-          "text": "async adminUnbanUser(accountId) {"
+          "line": 121,
+          "text": "writeProfileAlias(rawKey, accountId)"
         },
         {
           "key": "accountId",
-          "line": 215,
-          "text": "body: JSON.stringify({ accountId }),"
+          "line": 338,
+          "text": "const userId = String(data?.accountId || rawUserId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 224,
-          "text": "async ownerDeleteTopic(id, userId) {"
+          "line": 338,
+          "text": "const userId = String(data?.accountId || rawUserId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 228,
-          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
+          "line": 339,
+          "text": "if (!userId) return"
         },
         {
           "key": "userId",
-          "line": 236,
-          "text": "async ownerDeletePost(id, userId) {"
+          "line": 342,
+          "text": "onOpenUserPosts?.({ userId })"
         },
         {
           "key": "userId",
-          "line": 240,
-          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
+          "line": 344,
+          "text": "onOpenUserTopics?.({ userId })"
         },
         {
-          "key": "userId",
-          "line": 248,
-          "text": "async ownerEditPost(id, text, userId) {"
-        },
-        {
-          "key": "userId",
-          "line": 252,
-          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
-        },
-        {
-          "key": "authorId",
-          "line": 275,
-          "text": "async subsToggle(viewerId, authorId) {"
-        },
-        {
-          "key": "authorId",
-          "line": 284,
-          "text": "body: JSON.stringify({ authorId: String(authorId || '') }),"
-        },
-        {
-          "key": "authorId",
-          "line": 305,
-          "text": "async subsCount(authorId) {"
-        },
-        {
-          "key": "authorId",
-          "line": 307,
-          "text": "const params = new URLSearchParams({ authorId: String(authorId || '') })"
-        },
-        {
-          "key": "userId",
-          "line": 315,
-          "text": "async subsPeople({ userId, mode = 'followers', q = '', limit = 50, cursor = '', signal } = {}) {"
-        },
-        {
-          "key": "followers",
-          "line": 315,
-          "text": "async subsPeople({ userId, mode = 'followers', q = '', limit = 50, cursor = '', signal } = {}) {"
-        },
-        {
-          "key": "followers",
-          "line": 320,
-          "text": "counts: { followers: 0, following: 0 },"
-        },
-        {
-          "key": "following",
-          "line": 320,
-          "text": "counts: { followers: 0, following: 0 },"
-        },
-        {
-          "key": "userId",
-          "line": 327,
-          "text": "params.set('userId', String(userId || ''))"
-        },
-        {
-          "key": "followers",
-          "line": 328,
-          "text": "params.set('mode', mode === 'following' ? 'following' : 'followers')"
-        },
-        {
-          "key": "following",
-          "line": 328,
-          "text": "params.set('mode', mode === 'following' ? 'following' : 'followers')"
-        },
-        {
-          "key": "vip",
-          "line": 345,
-          "text": "async vipBatch(ids) {"
-        },
-        {
-          "key": "vip",
+          "key": "accountId",
           "line": 348,
-          "text": "const r = await fetch('/api/forum/vip/batch', {"
+          "text": "[data?.accountId, onClose, onOpenUserPosts, onOpenUserTopics, rawUserId, registerAction],"
+        },
+        {
+          "key": "accountId",
+          "line": 355,
+          "text": "const uid = String(data?.accountId || rawUserId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 374,
-          "text": "async reportPost({ postId, reason, userId }) {"
+          "line": 358,
+          "text": "onOpenSubscriptions?.({ userId: uid, initialMode: 'followers' })"
         },
         {
-          "key": "userId",
-          "line": 380,
-          "text": "'x-forum-user-id': String(userId || ''),"
+          "key": "followers",
+          "line": 358,
+          "text": "onOpenSubscriptions?.({ userId: uid, initialMode: 'followers' })"
+        },
+        {
+          "key": "accountId",
+          "line": 361,
+          "text": "[data?.accountId, onClose, onOpenSubscriptions, rawUserId, registerAction],"
+        },
+        {
+          "key": "bio",
+          "line": 385,
+          "text": "<div className=\"text-sm font-semibold\">{t?.('forum_user_popover_bio')}</div>"
         },
         {
           "key": "userId",
           "line": 392,
+          "text": "window.dispatchEvent(new CustomEvent('inbox:open-dm', { detail: { userId: rawUserId } }))"
+        },
+        {
+          "key": "followers",
+          "line": 464,
+          "text": "title={t?.('forum_subscriptions_open_followers') || t?.('forum_user_popover_stars')}"
+        },
+        {
+          "key": "followers",
+          "line": 470,
+          "text": "followersCount={stats.followers}"
+        },
+        {
+          "key": "following",
+          "line": 471,
+          "text": "followingCount={stats.following}"
+        },
+        {
+          "key": "followers",
+          "line": 487,
+          "text": "<HydrateText value={formatCount(stats.followers)} />"
+        }
+      ],
+      "uniq": [
+        "accountId",
+        "userId",
+        "followers",
+        "following",
+        "bio"
+      ],
+      "score": 32
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\services\\forumApi.js",
+      "hits": [
+        {
+          "key": "userId",
+          "line": 120,
+          "text": "async mutate(batch, userId) {"
+        },
+        {
+          "key": "userId",
+          "line": 123,
+          "text": "userId ??"
+        },
+        {
+          "key": "userId",
+          "line": 124,
+          "text": "batch?.userId ??"
+        },
+        {
+          "key": "accountId",
+          "line": 125,
+          "text": "batch?.accountId ??"
+        },
+        {
+          "key": "userId",
+          "line": 139,
+          "text": "userId: String(actorId || ''),"
+        },
+        {
+          "key": "accountId",
+          "line": 203,
+          "text": "async adminBanUser(accountId) {"
+        },
+        {
+          "key": "accountId",
+          "line": 211,
+          "text": "body: JSON.stringify({ accountId }),"
+        },
+        {
+          "key": "accountId",
+          "line": 221,
+          "text": "async adminUnbanUser(accountId) {"
+        },
+        {
+          "key": "accountId",
+          "line": 229,
+          "text": "body: JSON.stringify({ accountId }),"
+        },
+        {
+          "key": "userId",
+          "line": 238,
+          "text": "async ownerDeleteTopic(id, userId) {"
+        },
+        {
+          "key": "userId",
+          "line": 242,
+          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
+        },
+        {
+          "key": "userId",
+          "line": 250,
+          "text": "async ownerDeletePost(id, userId) {"
+        },
+        {
+          "key": "userId",
+          "line": 254,
+          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
+        },
+        {
+          "key": "userId",
+          "line": 262,
+          "text": "async ownerEditPost(id, text, userId) {"
+        },
+        {
+          "key": "userId",
+          "line": 266,
+          "text": "headers: { 'Content-Type': 'application/json', 'x-forum-user-id': String(userId || '') },"
+        },
+        {
+          "key": "authorId",
+          "line": 289,
+          "text": "async subsToggle(viewerId, authorId) {"
+        },
+        {
+          "key": "authorId",
+          "line": 298,
+          "text": "body: JSON.stringify({ authorId: String(authorId || '') }),"
+        },
+        {
+          "key": "authorId",
+          "line": 319,
+          "text": "async subsCount(authorId) {"
+        },
+        {
+          "key": "authorId",
+          "line": 321,
+          "text": "const params = new URLSearchParams({ authorId: String(authorId || '') })"
+        },
+        {
+          "key": "userId",
+          "line": 329,
+          "text": "async subsPeople({ userId, mode = 'followers', q = '', limit = 50, cursor = '', signal } = {}) {"
+        },
+        {
+          "key": "followers",
+          "line": 329,
+          "text": "async subsPeople({ userId, mode = 'followers', q = '', limit = 50, cursor = '', signal } = {}) {"
+        },
+        {
+          "key": "followers",
+          "line": 334,
+          "text": "counts: { followers: 0, following: 0 },"
+        },
+        {
+          "key": "following",
+          "line": 334,
+          "text": "counts: { followers: 0, following: 0 },"
+        },
+        {
+          "key": "userId",
+          "line": 341,
+          "text": "params.set('userId', String(userId || ''))"
+        },
+        {
+          "key": "followers",
+          "line": 342,
+          "text": "params.set('mode', mode === 'following' ? 'following' : 'followers')"
+        },
+        {
+          "key": "following",
+          "line": 342,
+          "text": "params.set('mode', mode === 'following' ? 'following' : 'followers')"
+        },
+        {
+          "key": "vip",
+          "line": 359,
+          "text": "async vipBatch(ids) {"
+        },
+        {
+          "key": "vip",
+          "line": 362,
+          "text": "const r = await fetch('/api/forum/vip/batch', {"
+        },
+        {
+          "key": "userId",
+          "line": 388,
+          "text": "async reportPost({ postId, reason, userId }) {"
+        },
+        {
+          "key": "userId",
+          "line": 394,
+          "text": "'x-forum-user-id': String(userId || ''),"
+        },
+        {
+          "key": "userId",
+          "line": 406,
           "text": "async mediaLock({ userId }) {"
         },
         {
           "key": "userId",
-          "line": 396,
+          "line": 410,
           "text": "headers: { 'x-forum-user-id': String(userId || '') },"
         }
       ],
@@ -3880,279 +4063,131 @@
       "score": 28
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\components\\UserInfoPopover.jsx",
-      "hits": [
-        {
-          "key": "accountId",
-          "line": 67,
-          "text": "const accountId = aliasRef.current.get(rawKey) || (resolved && resolved !== rawKey ? resolved : null)"
-        },
-        {
-          "key": "accountId",
-          "line": 68,
-          "text": "if (accountId && cacheRef.current.has(accountId)) {"
-        },
-        {
-          "key": "accountId",
-          "line": 69,
-          "text": "return cacheRef.current.get(accountId)"
-        },
-        {
-          "key": "accountId",
-          "line": 99,
-          "text": "const accountId = String(json.accountId || json.userId || rawKey).trim()"
-        },
-        {
-          "key": "userId",
-          "line": 99,
-          "text": "const accountId = String(json.accountId || json.userId || rawKey).trim()"
-        },
-        {
-          "key": "accountId",
-          "line": 101,
-          "text": "accountId,"
-        },
-        {
-          "key": "followers",
-          "line": 104,
-          "text": "followers: Number(json?.stats?.followers || 0),"
-        },
-        {
-          "key": "accountId",
-          "line": 111,
-          "text": "if (accountId) {"
-        },
-        {
-          "key": "accountId",
-          "line": 112,
-          "text": "cacheRef.current.set(accountId, payload)"
-        },
-        {
-          "key": "accountId",
-          "line": 113,
-          "text": "aliasRef.current.set(rawKey, accountId)"
-        },
-        {
-          "key": "accountId",
-          "line": 114,
-          "text": "writeProfileAlias(rawKey, accountId)"
-        },
-        {
-          "key": "accountId",
-          "line": 331,
-          "text": "const userId = String(data?.accountId || rawUserId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 331,
-          "text": "const userId = String(data?.accountId || rawUserId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 332,
-          "text": "if (!userId) return"
-        },
-        {
-          "key": "userId",
-          "line": 335,
-          "text": "onOpenUserPosts?.({ userId })"
-        },
-        {
-          "key": "userId",
-          "line": 337,
-          "text": "onOpenUserTopics?.({ userId })"
-        },
-        {
-          "key": "accountId",
-          "line": 341,
-          "text": "[data?.accountId, onClose, onOpenUserPosts, onOpenUserTopics, rawUserId, registerAction],"
-        },
-        {
-          "key": "accountId",
-          "line": 348,
-          "text": "const uid = String(data?.accountId || rawUserId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 351,
-          "text": "onOpenSubscriptions?.({ userId: uid, initialMode: 'followers' })"
-        },
-        {
-          "key": "followers",
-          "line": 351,
-          "text": "onOpenSubscriptions?.({ userId: uid, initialMode: 'followers' })"
-        },
-        {
-          "key": "accountId",
-          "line": 354,
-          "text": "[data?.accountId, onClose, onOpenSubscriptions, rawUserId, registerAction],"
-        },
-        {
-          "key": "bio",
-          "line": 378,
-          "text": "<div className=\"text-sm font-semibold\">{t?.('forum_user_popover_bio')}</div>"
-        },
-        {
-          "key": "userId",
-          "line": 385,
-          "text": "window.dispatchEvent(new CustomEvent('inbox:open-dm', { detail: { userId: rawUserId } }))"
-        },
-        {
-          "key": "followers",
-          "line": 457,
-          "text": "title={t?.('forum_subscriptions_open_followers') || t?.('forum_user_popover_stars')}"
-        },
-        {
-          "key": "followers",
-          "line": 463,
-          "text": "followersCount={stats.followers}"
-        },
-        {
-          "key": "following",
-          "line": 464,
-          "text": "followingCount={stats.following}"
-        },
-        {
-          "key": "followers",
-          "line": 480,
-          "text": "<HydrateText value={formatCount(stats.followers)} />"
-        }
-      ],
-      "uniq": [
-        "accountId",
-        "userId",
-        "followers",
-        "bio",
-        "following"
-      ],
-      "score": 27
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSyncLoop.js",
       "hits": [
         {
           "key": "userId",
-          "line": 107,
+          "line": 157,
           "text": "const id = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 107,
+          "line": 157,
           "text": "const id = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim()"
         },
         {
           "key": "userId",
-          "line": 111,
+          "line": 161,
           "text": "const id = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 111,
+          "line": 161,
           "text": "const id = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim()"
         },
         {
           "key": "vip",
-          "line": 118,
+          "line": 168,
           "text": "const vm = await api.vipBatch(ids)"
         },
         {
           "key": "vip",
-          "line": 120,
+          "line": 170,
           "text": "const vipMap = vm.map"
         },
         {
           "key": "vip",
-          "line": 121,
+          "line": 171,
           "text": "r.vipMap = vipMap"
         },
         {
           "key": "userId",
-          "line": 124,
+          "line": 174,
           "text": "const aid = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 124,
+          "line": 174,
           "text": "const aid = String(t?.authorId || t?.userId || t?.ownerId || t?.uid || '').trim()"
         },
         {
           "key": "vip",
-          "line": 126,
+          "line": 176,
           "text": "const v = vipMap[aid]"
         },
         {
           "key": "vip",
-          "line": 130,
+          "line": 180,
           "text": "vipActive: !!v.active,"
         },
         {
           "key": "vip",
-          "line": 131,
+          "line": 181,
           "text": "vipUntil: Number(v.untilMs || 0),"
         },
         {
           "key": "userId",
-          "line": 138,
+          "line": 188,
           "text": "const aid = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim()"
         },
         {
           "key": "authorId",
-          "line": 138,
+          "line": 188,
           "text": "const aid = String(p?.authorId || p?.userId || p?.ownerId || p?.uid || '').trim()"
         },
         {
           "key": "vip",
-          "line": 140,
+          "line": 190,
           "text": "const v = vipMap[aid]"
         },
         {
           "key": "vip",
-          "line": 144,
+          "line": 194,
           "text": "vipActive: !!v.active,"
         },
         {
           "key": "vip",
-          "line": 145,
+          "line": 195,
           "text": "vipUntil: Number(v.untilMs || 0),"
         },
         {
           "key": "accountId",
-          "line": 156,
+          "line": 206,
           "text": "Object.entries(aliases).forEach(([rawId, accountId]) => {"
         },
         {
           "key": "accountId",
-          "line": 157,
+          "line": 207,
           "text": "writeProfileAlias(rawId, accountId)"
         },
         {
           "key": "accountId",
-          "line": 159,
+          "line": 209,
           "text": "Object.entries(pm.map).forEach(([accountId, profile]) => {"
         },
         {
           "key": "accountId",
-          "line": 160,
+          "line": 210,
           "text": "mergeProfileCache(accountId, {"
         },
         {
           "key": "nickname",
-          "line": 161,
+          "line": 211,
           "text": "nickname: profile?.nickname || '',"
         },
         {
           "key": "accountId",
-          "line": 167,
+          "line": 217,
           "text": "Object.entries(aliases).forEach(([rawId, accountId]) => {"
         },
         {
           "key": "accountId",
-          "line": 168,
+          "line": 218,
           "text": "const profile = pm.map?.[accountId]"
         },
         {
           "key": "nickname",
-          "line": 171,
+          "line": 221,
           "text": "nickname: profile?.nickname || '',"
         }
       ],
@@ -4764,42 +4799,42 @@
         },
         {
           "key": "vip",
-          "line": 1329,
+          "line": 1411,
           "text": "vipActive,"
         },
         {
           "key": "accountId",
-          "line": 1361,
+          "line": 1443,
           "text": "authAccountId: auth?.accountId,"
         },
         {
           "key": "vip",
-          "line": 1582,
+          "line": 1664,
           "text": "vipActive,"
         },
         {
           "key": "vip",
-          "line": 1769,
+          "line": 1851,
           "text": "vipActive,"
         },
         {
           "key": "vip",
-          "line": 1781,
+          "line": 1863,
           "text": "vipAvatars: VIP_AVATARS,"
         },
         {
           "key": "vip",
-          "line": 1796,
+          "line": 1878,
           "text": "vipBtnRef,"
         },
         {
           "key": "vip",
-          "line": 1797,
+          "line": 1879,
           "text": "vipOpen,"
         },
         {
           "key": "vip",
-          "line": 1964,
+          "line": 2046,
           "text": "vipEmoji: VIP_EMOJI,"
         }
       ],
@@ -4932,107 +4967,107 @@
       "hits": [
         {
           "key": "accountId",
-          "line": 31,
+          "line": 44,
           "text": "const bindProfileAliases = (accountId) => {"
         },
         {
           "key": "userId",
-          "line": 34,
+          "line": 47,
           "text": "evt.userId,"
         },
         {
           "key": "nickname",
-          "line": 53,
+          "line": 66,
           "text": "nickname: evt.nickname || evt.nick,"
         },
         {
           "key": "vip",
-          "line": 55,
+          "line": 68,
           "text": "vipIcon: evt.vipIcon,"
-        },
-        {
-          "key": "accountId",
-          "line": 60,
-          "text": "writeProfileAlias(rawId, accountId)"
-        },
-        {
-          "key": "accountId",
-          "line": 69,
-          "text": "if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && (evt.accountId || evt.userId)) {"
-        },
-        {
-          "key": "userId",
-          "line": 69,
-          "text": "if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && (evt.accountId || evt.userId)) {"
-        },
-        {
-          "key": "accountId",
-          "line": 70,
-          "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 70,
-          "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
-        },
-        {
-          "key": "accountId",
-          "line": 71,
-          "text": "if (accountId) {"
         },
         {
           "key": "accountId",
           "line": 73,
-          "text": "bindProfileAliases(accountId)"
+          "text": "writeProfileAlias(rawId, accountId)"
         },
         {
           "key": "accountId",
-          "line": 74,
-          "text": "mergeProfileCache(accountId, {"
-        },
-        {
-          "key": "nickname",
-          "line": 75,
-          "text": "nickname: evt.nickname || evt.nick,"
-        },
-        {
-          "key": "vip",
-          "line": 77,
-          "text": "vipIcon: evt.vipIcon,"
-        },
-        {
-          "key": "accountId",
-          "line": 86,
-          "text": "if (evt.type === 'profile.about.updated' && (evt.accountId || evt.userId)) {"
+          "line": 82,
+          "text": "if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && (evt.accountId || evt.userId)) {"
         },
         {
           "key": "userId",
-          "line": 86,
-          "text": "if (evt.type === 'profile.about.updated' && (evt.accountId || evt.userId)) {"
+          "line": 82,
+          "text": "if ((evt.type === 'profile.avatar' || evt.type === 'profile.updated') && (evt.accountId || evt.userId)) {"
         },
         {
           "key": "accountId",
-          "line": 87,
+          "line": 83,
           "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 87,
+          "line": 83,
           "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
         },
         {
           "key": "accountId",
-          "line": 88,
+          "line": 84,
           "text": "if (accountId) {"
         },
         {
           "key": "accountId",
-          "line": 90,
+          "line": 86,
           "text": "bindProfileAliases(accountId)"
         },
         {
           "key": "accountId",
-          "line": 91,
+          "line": 87,
+          "text": "mergeProfileCache(accountId, {"
+        },
+        {
+          "key": "nickname",
+          "line": 88,
+          "text": "nickname: evt.nickname || evt.nick,"
+        },
+        {
+          "key": "vip",
+          "line": 90,
+          "text": "vipIcon: evt.vipIcon,"
+        },
+        {
+          "key": "accountId",
+          "line": 99,
+          "text": "if (evt.type === 'profile.about.updated' && (evt.accountId || evt.userId)) {"
+        },
+        {
+          "key": "userId",
+          "line": 99,
+          "text": "if (evt.type === 'profile.about.updated' && (evt.accountId || evt.userId)) {"
+        },
+        {
+          "key": "accountId",
+          "line": 100,
+          "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
+        },
+        {
+          "key": "userId",
+          "line": 100,
+          "text": "const accountId = String(evt.accountId || evt.userId || '').trim()"
+        },
+        {
+          "key": "accountId",
+          "line": 101,
+          "text": "if (accountId) {"
+        },
+        {
+          "key": "accountId",
+          "line": 103,
+          "text": "bindProfileAliases(accountId)"
+        },
+        {
+          "key": "accountId",
+          "line": 104,
           "text": "mergeProfileCache(accountId, {"
         }
       ],
@@ -6731,27 +6766,27 @@
         },
         {
           "key": "vip",
-          "line": 306,
+          "line": 307,
           "text": "return fail(t('forum_links_admin_vip_only'))"
         },
         {
           "key": "nickname",
-          "line": 312,
+          "line": 313,
           "text": "const nickForSend = resolveNickForDisplay(uid, prof.nickname)"
         },
         {
           "key": "userId",
-          "line": 328,
+          "line": 329,
           "text": "userId: uid,"
         },
         {
           "key": "nickname",
-          "line": 329,
+          "line": 330,
           "text": "nickname: nickForSend,"
         },
         {
           "key": "nickname",
-          "line": 360,
+          "line": 361,
           "text": "nickname: p.nickname,"
         }
       ],
@@ -8295,47 +8330,47 @@
       "hits": [
         {
           "key": "vip",
-          "line": 42,
+          "line": 43,
           "text": "const [vipOpen, setVipOpen] = useState(false)"
         },
         {
           "key": "vip",
-          "line": 43,
+          "line": 44,
           "text": "const vipBtnRef = useRef(null)"
         },
         {
           "key": "vip",
-          "line": 44,
+          "line": 45,
           "text": "const { vipActive, setVipActive } = useVipSubscriptionState({"
         },
         {
           "key": "accountId",
-          "line": 45,
+          "line": 46,
           "text": "accountId: auth?.accountId,"
         },
         {
           "key": "accountId",
-          "line": 59,
+          "line": 60,
           "text": "const idShown = resolveProfileAccountIdFn(auth?.asherId || auth?.accountId || '')"
         },
         {
           "key": "nickname",
-          "line": 61,
+          "line": 62,
           "text": "const nickShown = resolveNickForDisplayFn(idShown, profile?.nickname)"
         },
         {
           "key": "vip",
-          "line": 95,
+          "line": 97,
           "text": "vipOpen,"
         },
         {
           "key": "vip",
-          "line": 97,
+          "line": 99,
           "text": "vipBtnRef,"
         },
         {
           "key": "vip",
-          "line": 98,
+          "line": 100,
           "text": "vipActive,"
         }
       ],

@@ -158,8 +158,14 @@ export default function ForumOverlayStack({
         t={t}
         renderRich={rich}
         formatCountFn={formatCount}
-        onOpenUserPosts={onOpenUserPosts}
-        onOpenUserTopics={onOpenUserTopics}
+        onOpenUserPosts={(payload) => {
+          closeSubscriptionsPopover?.()
+          onOpenUserPosts?.(payload)
+        }}
+        onOpenUserTopics={(payload) => {
+          closeSubscriptionsPopover?.()
+          onOpenUserTopics?.(payload)
+        }}
         onOpenSubscriptions={openSubscriptionsPopover}
       />
       <QuestClaimOverlay

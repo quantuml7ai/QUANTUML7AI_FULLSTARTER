@@ -960,51 +960,51 @@
     "samples": {
       "raf": [
         {
-          "line": 468,
+          "line": 499,
           "text": "sortRefreshAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))"
         },
         {
-          "line": 933,
+          "line": 1015,
           "text": "const rafA = requestAnimationFrame(() => {"
         },
         {
-          "line": 1049,
+          "line": 1131,
           "text": "editModeAlignRafsRef.current.forEach((rafId) => cancelAnimationFrame(rafId))"
         },
         {
-          "line": 1094,
+          "line": 1176,
           "text": "const rafA = requestAnimationFrame(() => {"
         }
       ],
       "scrollWrites": [
         {
-          "line": 488,
+          "line": 519,
           "text": "scrollEl.scrollTop = 0"
         },
         {
-          "line": 492,
+          "line": 523,
           "text": "try { window.scrollTo({ top: 0, behavior: 'auto' }) } catch { try { window.scrollTo(0, 0) } catch {} }"
         },
         {
-          "line": 518,
+          "line": 549,
           "text": "scrollEl.scrollTop = Math.max(0, targetTop)"
         },
         {
-          "line": 523,
+          "line": 554,
           "text": "try { window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }) } catch { try { window.scrollTo(0, Math.max(0, y)) } catch {} }"
         }
       ],
       "layoutReads": [
         {
-          "line": 487,
+          "line": 518,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
         },
         {
-          "line": 506,
+          "line": 537,
           "text": "const rect = node.getBoundingClientRect?.()"
         },
         {
-          "line": 515,
+          "line": 546,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) {"
         }
       ]
@@ -2738,21 +2738,21 @@
     "samples": {
       "raf": [
         {
-          "line": 261,
+          "line": 268,
           "text": "rafRef.current = window.requestAnimationFrame(() => {"
         },
         {
-          "line": 281,
+          "line": 288,
           "text": "cancelAnimationFrame(rafRef.current)"
         }
       ],
       "layoutReads": [
         {
-          "line": 219,
+          "line": 226,
           "text": "const rect = anchorEl.getBoundingClientRect()"
         },
         {
-          "line": 223,
+          "line": 230,
           "text": "const viewportH = window.innerHeight"
         }
       ]
