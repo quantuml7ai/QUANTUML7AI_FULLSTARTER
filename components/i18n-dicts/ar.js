@@ -5008,7 +5008,7 @@ const dict = {
   "forum_subscriptions_empty_following": "لا توجد اشتراكات بعد",
   "forum_subscriptions_empty_followers": "لا يوجد متابعون بعد",
   "forum_subscriptions_open_profile": "فتح الملف الشخصي",
-  "forum_subscriptions_unknown_user": "مستخدم",
+  "forum_subscriptions_unknown_user": "مجهول",
   "forum_subscriptions_count_following": "الاشتراكات",
   "forum_subscriptions_count_followers": "المتابعون",
   "forum_subscriptions_load_more": "تحميل المزيد",

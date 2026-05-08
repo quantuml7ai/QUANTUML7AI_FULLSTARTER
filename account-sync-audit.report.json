@@ -1,13 +1,13 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-08T16:17:21.774Z",
+  "generatedAt": "2026-05-08T17:20:46.173Z",
   "summary": {
     "scannedFiles": 378,
     "filesWithSyncKeys": 148,
     "keyFrequency": {
       "accountId": 413,
       "userId": 450,
-      "authorId": 134,
+      "authorId": 139,
       "wallet": 20,
       "telegramId": 5,
       "initData": 7,
@@ -15,8 +15,8 @@
       "followers": 93,
       "following": 72,
       "bio": 1,
-      "nickname": 104,
-      "vip": 520
+      "nickname": 107,
+      "vip": 522
     }
   },
   "top": [
@@ -1526,267 +1526,272 @@
         },
         {
           "key": "userId",
-          "line": 84,
+          "line": 85,
           "text": "const userId = String(user?.userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 85,
+          "line": 86,
           "text": "if (!userId || seen.has(userId)) continue"
         },
         {
           "key": "userId",
-          "line": 86,
+          "line": 87,
           "text": "seen.add(userId)"
         },
         {
           "key": "userId",
-          "line": 87,
+          "line": 88,
           "text": "out.push({ ...user, userId })"
         },
         {
           "key": "userId",
-          "line": 94,
+          "line": 100,
           "text": "userId,"
         },
         {
           "key": "followers",
-          "line": 95,
+          "line": 101,
           "text": "initialMode = 'followers',"
         },
         {
           "key": "followers",
-          "line": 102,
+          "line": 108,
           "text": "const safeInitialMode = initialMode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "following",
-          "line": 102,
+          "line": 108,
           "text": "const safeInitialMode = initialMode === 'following' ? 'following' : 'followers'"
         },
         {
           "key": "followers",
-          "line": 110,
+          "line": 116,
           "text": "const [searchByMode, setSearchByMode] = useState({ followers: '', following: '' })"
         },
         {
           "key": "following",
-          "line": 110,
+          "line": 116,
           "text": "const [searchByMode, setSearchByMode] = useState({ followers: '', following: '' })"
         },
         {
           "key": "vip",
-          "line": 121,
+          "line": 127,
           "text": "const [vipMap, setVipMap] = useState({})"
         },
         {
           "key": "following",
-          "line": 127,
+          "line": 133,
           "text": "followingTab: tFallback(t, 'forum_subscriptions_tab_following', 'Subscriptions'),"
         },
         {
           "key": "followers",
-          "line": 128,
+          "line": 134,
           "text": "followersTab: tFallback(t, 'forum_subscriptions_tab_followers', 'Followers'),"
         },
         {
           "key": "following",
-          "line": 129,
+          "line": 135,
           "text": "followingHint: tFallback(t, 'forum_subscriptions_following_hint', 'Accounts this profile follows'),"
         },
         {
           "key": "followers",
-          "line": 130,
+          "line": 136,
           "text": "followersHint: tFallback(t, 'forum_subscriptions_followers_hint', 'Accounts following this profile'),"
-        },
-        {
-          "key": "following",
-          "line": 130,
-          "text": "followersHint: tFallback(t, 'forum_subscriptions_followers_hint', 'Accounts following this profile'),"
-        },
-        {
-          "key": "following",
-          "line": 131,
-          "text": "followingCount: tFallback(t, 'forum_subscriptions_count_following', 'Subscriptions'),"
-        },
-        {
-          "key": "followers",
-          "line": 132,
-          "text": "followersCount: tFallback(t, 'forum_subscriptions_count_followers', 'Followers'),"
-        },
-        {
-          "key": "followers",
-          "line": 133,
-          "text": "followersTotal: tFallback(t, 'forum_subscriptions_total_followers_label', 'Total followers'),"
-        },
-        {
-          "key": "following",
-          "line": 134,
-          "text": "followingTotal: tFallback(t, 'forum_subscriptions_total_following_label', 'Total subscriptions'),"
-        },
-        {
-          "key": "followers",
-          "line": 135,
-          "text": "searchFollowers: tFallback(t, 'forum_subscriptions_search_followers_placeholder', 'Search followers'),"
         },
         {
           "key": "following",
           "line": 136,
+          "text": "followersHint: tFallback(t, 'forum_subscriptions_followers_hint', 'Accounts following this profile'),"
+        },
+        {
+          "key": "following",
+          "line": 137,
+          "text": "followingCount: tFallback(t, 'forum_subscriptions_count_following', 'Subscriptions'),"
+        },
+        {
+          "key": "followers",
+          "line": 138,
+          "text": "followersCount: tFallback(t, 'forum_subscriptions_count_followers', 'Followers'),"
+        },
+        {
+          "key": "followers",
+          "line": 139,
+          "text": "followersTotal: tFallback(t, 'forum_subscriptions_total_followers_label', 'Total followers'),"
+        },
+        {
+          "key": "following",
+          "line": 140,
+          "text": "followingTotal: tFallback(t, 'forum_subscriptions_total_following_label', 'Total subscriptions'),"
+        },
+        {
+          "key": "followers",
+          "line": 141,
+          "text": "searchFollowers: tFallback(t, 'forum_subscriptions_search_followers_placeholder', 'Search followers'),"
+        },
+        {
+          "key": "following",
+          "line": 142,
           "text": "searchFollowing: tFallback(t, 'forum_subscriptions_search_following_placeholder', 'Search subscriptions'),"
         },
         {
           "key": "followers",
-          "line": 143,
+          "line": 149,
           "text": "emptyFollowers: tFallback(t, 'forum_subscriptions_empty_followers', 'No followers yet'),"
         },
         {
           "key": "following",
-          "line": 144,
+          "line": 150,
           "text": "emptyFollowing: tFallback(t, 'forum_subscriptions_empty_following', 'No subscriptions yet'),"
         },
         {
           "key": "followers",
-          "line": 145,
+          "line": 151,
           "text": "noFollowers: tFallback(t, 'forum_subscriptions_search_no_results_followers', 'No followers found'),"
         },
         {
           "key": "following",
-          "line": 146,
+          "line": 152,
           "text": "noFollowing: tFallback(t, 'forum_subscriptions_search_no_results_following', 'No subscriptions found'),"
         },
         {
           "key": "followers",
-          "line": 151,
+          "line": 157,
           "text": "activeFollowers: tFallback(t, 'forum_subscriptions_active_mode_followers', 'Followers mode is open'),"
         },
         {
           "key": "following",
-          "line": 152,
+          "line": 158,
           "text": "activeFollowing: tFallback(t, 'forum_subscriptions_active_mode_following', 'Subscriptions mode is open'),"
         },
         {
           "key": "userId",
-          "line": 169,
+          "line": 175,
           "text": "}, [open, safeInitialMode, userId])"
         },
         {
           "key": "userId",
-          "line": 206,
+          "line": 212,
           "text": ".map((user) => String(user?.userId || '').trim())"
         },
         {
           "key": "vip",
-          "line": 208,
+          "line": 214,
           "text": "if (!ids.length || typeof apiClient?.vipBatch !== 'function') return"
         },
         {
           "key": "vip",
-          "line": 209,
+          "line": 215,
           "text": "apiClient.vipBatch(ids)"
         },
         {
           "key": "userId",
-          "line": 218,
+          "line": 224,
           "text": "const uid = String(userId || '').trim()"
         },
         {
           "key": "userId",
-          "line": 237,
+          "line": 243,
           "text": "userId: uid,"
         },
         {
           "key": "userId",
-          "line": 264,
+          "line": 270,
           "text": "}, [apiClient, debouncedQuery, loadVip, mode, open, userId])"
         },
         {
           "key": "userId",
-          "line": 267,
+          "line": 273,
           "text": "if (!open || !String(userId || '').trim()) return undefined"
         },
         {
           "key": "userId",
-          "line": 270,
+          "line": 276,
           "text": "}, [debouncedQuery, loadPage, mode, open, userId])"
         },
         {
           "key": "userId",
-          "line": 282,
+          "line": 288,
           "text": "if (!portalReady || !open || !String(userId || '').trim()) return null"
         },
         {
           "key": "followers",
-          "line": 285,
+          "line": 291,
           "text": "followers: Number(counts.followers || 0),"
         },
         {
           "key": "following",
-          "line": 286,
+          "line": 292,
           "text": "following: Number(counts.following || 0),"
         },
         {
           "key": "following",
-          "line": 288,
+          "line": 294,
           "text": "const searchPlaceholder = mode === 'following' ? copy.searchFollowing : copy.searchFollowers"
         },
         {
           "key": "following",
-          "line": 291,
+          "line": 297,
           "text": "? (mode === 'following' ? copy.noFollowing : copy.noFollowers)"
         },
         {
           "key": "following",
-          "line": 292,
+          "line": 298,
           "text": ": (mode === 'following' ? copy.emptyFollowing : copy.emptyFollowers)"
         },
         {
           "key": "followers",
-          "line": 331,
+          "line": 337,
           "text": "const label = tabMode === 'following' ? copy.followingTab : copy.followersTab"
         },
         {
           "key": "following",
-          "line": 331,
+          "line": 337,
           "text": "const label = tabMode === 'following' ? copy.followingTab : copy.followersTab"
         },
         {
           "key": "following",
-          "line": 332,
+          "line": 338,
           "text": "const aria = tabMode === 'following' ? copy.activeFollowing : copy.activeFollowers"
         },
         {
           "key": "userId",
-          "line": 411,
+          "line": 417,
           "text": "const rowUserId = String(row.userId || '').trim()"
         },
         {
           "key": "nickname",
-          "line": 412,
-          "text": "const nickname = String(row.nickname || '').trim() || copy.unknownUser"
-        },
-        {
-          "key": "vip",
-          "line": 413,
-          "text": "const isVip = !!vipMap[rowUserId]?.active"
+          "line": 418,
+          "text": "const rawNickname = String(row.nickname || '').trim()"
         },
         {
           "key": "nickname",
           "line": 419,
+          "text": "const nickname = rawNickname || copy.unknownUser"
+        },
+        {
+          "key": "vip",
+          "line": 422,
+          "text": "const isVip = !!vipMap[rowUserId]?.active"
+        },
+        {
+          "key": "nickname",
+          "line": 428,
           "text": "aria-label={`${copy.openProfile}: ${nickname}`}"
         },
         {
           "key": "userId",
-          "line": 423,
+          "line": 433,
           "text": "<AvatarEmoji userId={rowUserId} pIcon={row.icon} className=\"subsFamilyAvatar avaMini\" />"
         },
         {
           "key": "vip",
-          "line": 426,
+          "line": 448,
           "text": "<span className={cls('nick-badge nick-animate', isVip && 'vipNick')}>"
         },
         {
           "key": "nickname",
-          "line": 427,
+          "line": 449,
           "text": "<span className=\"nick-text\">{nickname}</span>"
         }
       ],
@@ -1797,7 +1802,7 @@
         "vip",
         "nickname"
       ],
-      "score": 57
+      "score": 58
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\styles\\modules\\profileStyles.js",
@@ -4594,6 +4599,134 @@
       "score": 23
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicItem.jsx",
+      "hits": [
+        {
+          "key": "accountId",
+          "line": 85,
+          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
+        },
+        {
+          "key": "userId",
+          "line": 85,
+          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
+        },
+        {
+          "key": "authorId",
+          "line": 85,
+          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
+        },
+        {
+          "key": "accountId",
+          "line": 86,
+          "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
+        },
+        {
+          "key": "userId",
+          "line": 86,
+          "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
+        },
+        {
+          "key": "authorId",
+          "line": 89,
+          "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
+        },
+        {
+          "key": "vip",
+          "line": 89,
+          "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
+        },
+        {
+          "key": "authorId",
+          "line": 90,
+          "text": "const cachedProfile = safeReadProfile(authorId)"
+        },
+        {
+          "key": "nickname",
+          "line": 91,
+          "text": "const rawNickname = String(cachedProfile?.nickname || t?.nickname || '').trim()"
+        },
+        {
+          "key": "vip",
+          "line": 92,
+          "text": "const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || t?.icon || ''"
+        },
+        {
+          "key": "authorId",
+          "line": 93,
+          "text": "const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)"
+        },
+        {
+          "key": "authorId",
+          "line": 96,
+          "text": ": resolveNickForDisplay(authorId, t.nickname)"
+        },
+        {
+          "key": "nickname",
+          "line": 96,
+          "text": ": resolveNickForDisplay(authorId, t.nickname)"
+        },
+        {
+          "key": "authorId",
+          "line": 97,
+          "text": "const shouldRenderAuthorRow = !!authorId || !!t.nickname || !!t.icon"
+        },
+        {
+          "key": "nickname",
+          "line": 97,
+          "text": "const shouldRenderAuthorRow = !!authorId || !!t.nickname || !!t.icon"
+        },
+        {
+          "key": "userId",
+          "line": 184,
+          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
+        },
+        {
+          "key": "authorId",
+          "line": 184,
+          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
+        },
+        {
+          "key": "vip",
+          "line": 189,
+          "text": "className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}"
+        },
+        {
+          "key": "authorId",
+          "line": 195,
+          "text": "title={authorId || ''}"
+        },
+        {
+          "key": "authorId",
+          "line": 202,
+          "text": "{!!authorId && !isSelf && ("
+        },
+        {
+          "key": "authorId",
+          "line": 205,
+          "text": "onClick={() => onToggleStar?.(authorId)}"
+        },
+        {
+          "key": "accountId",
+          "line": 262,
+          "text": "{authId && authId === (t.userId || t.accountId) && ("
+        },
+        {
+          "key": "userId",
+          "line": 262,
+          "text": "{authId && authId === (t.userId || t.accountId) && ("
+        }
+      ],
+      "uniq": [
+        "accountId",
+        "userId",
+        "authorId",
+        "vip",
+        "nickname"
+      ],
+      "score": 23
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\UserRecommendationCard.jsx",
       "hits": [
         {
@@ -5301,109 +5434,6 @@
         "following"
       ],
       "score": 19
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\TopicItem.jsx",
-      "hits": [
-        {
-          "key": "accountId",
-          "line": 42,
-          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 42,
-          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
-        },
-        {
-          "key": "authorId",
-          "line": 42,
-          "text": "const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()"
-        },
-        {
-          "key": "accountId",
-          "line": 43,
-          "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 43,
-          "text": "const rawUserId = String(t?.userId || t?.accountId || '').trim()"
-        },
-        {
-          "key": "authorId",
-          "line": 46,
-          "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
-        },
-        {
-          "key": "vip",
-          "line": 46,
-          "text": "const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)"
-        },
-        {
-          "key": "nickname",
-          "line": 107,
-          "text": "{(t.nickname || t.icon) && ("
-        },
-        {
-          "key": "userId",
-          "line": 119,
-          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
-        },
-        {
-          "key": "authorId",
-          "line": 119,
-          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />"
-        },
-        {
-          "key": "vip",
-          "line": 123,
-          "text": "className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}"
-        },
-        {
-          "key": "authorId",
-          "line": 129,
-          "text": "title={authorId || ''}"
-        },
-        {
-          "key": "authorId",
-          "line": 133,
-          "text": "<span className=\"nick-text\">{resolveNickForDisplay(authorId, t.nickname)}</span>"
-        },
-        {
-          "key": "nickname",
-          "line": 133,
-          "text": "<span className=\"nick-text\">{resolveNickForDisplay(authorId, t.nickname)}</span>"
-        },
-        {
-          "key": "authorId",
-          "line": 136,
-          "text": "{!!authorId && !isSelf && ("
-        },
-        {
-          "key": "authorId",
-          "line": 139,
-          "text": "onClick={() => onToggleStar?.(authorId)}"
-        },
-        {
-          "key": "accountId",
-          "line": 196,
-          "text": "{authId && authId === (t.userId || t.accountId) && ("
-        },
-        {
-          "key": "userId",
-          "line": 196,
-          "text": "{authId && authId === (t.userId || t.accountId) && ("
-        }
-      ],
-      "uniq": [
-        "accountId",
-        "userId",
-        "authorId",
-        "vip",
-        "nickname"
-      ],
-      "score": 18
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\profile\\hooks\\useVipFlag.js",
@@ -6723,6 +6753,78 @@
         "initData",
         "wallet",
         "accountId"
+      ],
+      "score": 12
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostHeaderMeta.jsx",
+      "hits": [
+        {
+          "key": "authorId",
+          "line": 61,
+          "text": "authorId,"
+        },
+        {
+          "key": "authorId",
+          "line": 74,
+          "text": "const cachedProfile = safeReadProfile(authorId)"
+        },
+        {
+          "key": "nickname",
+          "line": 75,
+          "text": "const rawNickname = String(cachedProfile?.nickname || p?.nickname || '').trim()"
+        },
+        {
+          "key": "vip",
+          "line": 76,
+          "text": "const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || p?.icon || ''"
+        },
+        {
+          "key": "authorId",
+          "line": 77,
+          "text": "const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)"
+        },
+        {
+          "key": "authorId",
+          "line": 80,
+          "text": ": resolveNickForDisplay(authorId, p?.nickname)"
+        },
+        {
+          "key": "nickname",
+          "line": 80,
+          "text": ": resolveNickForDisplay(authorId, p?.nickname)"
+        },
+        {
+          "key": "userId",
+          "line": 109,
+          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, p?.icon)} />"
+        },
+        {
+          "key": "authorId",
+          "line": 109,
+          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, p?.icon)} />"
+        },
+        {
+          "key": "vip",
+          "line": 115,
+          "text": "className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}"
+        },
+        {
+          "key": "authorId",
+          "line": 127,
+          "text": "{!!authorId && !isSelf && ("
+        },
+        {
+          "key": "authorId",
+          "line": 130,
+          "text": "onClick={() => onToggleStar?.(authorId)}"
+        }
+      ],
+      "uniq": [
+        "authorId",
+        "nickname",
+        "vip",
+        "userId"
       ],
       "score": 12
     },
@@ -8533,58 +8635,6 @@
       "uniq": [
         "authorId",
         "followers"
-      ],
-      "score": 8
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\components\\PostHeaderMeta.jsx",
-      "hits": [
-        {
-          "key": "authorId",
-          "line": 14,
-          "text": "authorId,"
-        },
-        {
-          "key": "userId",
-          "line": 41,
-          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, p?.icon)} />"
-        },
-        {
-          "key": "authorId",
-          "line": 41,
-          "text": "<AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, p?.icon)} />"
-        },
-        {
-          "key": "vip",
-          "line": 46,
-          "text": "className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}"
-        },
-        {
-          "key": "authorId",
-          "line": 55,
-          "text": "<span className=\"nick-text truncate\">{resolveNickForDisplay(authorId, p?.nickname)}</span>"
-        },
-        {
-          "key": "nickname",
-          "line": 55,
-          "text": "<span className=\"nick-text truncate\">{resolveNickForDisplay(authorId, p?.nickname)}</span>"
-        },
-        {
-          "key": "authorId",
-          "line": 58,
-          "text": "{!!authorId && !isSelf && ("
-        },
-        {
-          "key": "authorId",
-          "line": 61,
-          "text": "onClick={() => onToggleStar?.(authorId)}"
-        }
-      ],
-      "uniq": [
-        "authorId",
-        "userId",
-        "vip",
-        "nickname"
       ],
       "score": 8
     },

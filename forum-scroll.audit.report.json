@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-08T16:17:19.535Z",
+  "generatedAt": "2026-05-08T17:20:43.901Z",
   "scannedFiles": 281,
   "report": [
     {
@@ -2672,7 +2672,7 @@
       "hits": [
         {
           "key": "rectReads",
-          "line": 54,
+          "line": 105,
           "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
         }
       ]
@@ -2863,12 +2863,12 @@
       "hits": [
         {
           "key": "timers",
-          "line": 172,
+          "line": 178,
           "text": "const timer = window.setTimeout(() => setDebouncedQuery(activeQuery), 300)"
         },
         {
           "key": "timers",
-          "line": 179,
+          "line": 185,
           "text": "window.setTimeout(() => {"
         }
       ]

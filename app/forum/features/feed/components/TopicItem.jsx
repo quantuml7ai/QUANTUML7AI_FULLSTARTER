@@ -15,8 +15,51 @@ import {
   resolveProfileAccountId,
   resolveNickForDisplay,
   resolveIconForDisplay,
+  safeReadProfile,
 } from '../../profile/utils/profileCache'
 import { areTopicItemPropsEqual } from '../utils/cardMemo'
+
+const ANONYMOUS_AVATAR_URL = '/anonymous/anonymous.png'
+const DEFAULT_ICON_FALLBACKS = new Set(['', '/upload.jpg', 's:', '👤', 'рџ‘¤'])
+
+function hasProfileAvatar(icon) {
+  const value = String(icon || '').trim()
+  return !!value && !DEFAULT_ICON_FALLBACKS.has(value)
+}
+
+function fallbackShortId(id) {
+  const raw = String(id || '')
+  return raw ? `${raw.slice(0, 6)}...${raw.slice(-4)}` : ''
+}
+
+function fallbackShortIdAlt(id) {
+  const raw = String(id || '')
+  return raw ? `${raw.slice(0, 6)}…${raw.slice(-4)}` : ''
+}
+
+function stripTmaPrefix(id) {
+  return String(id || '').trim().replace(/^(?:tguid:|tg:|telegramid:|telegram:id:)/i, '')
+}
+
+function isGeneratedFallbackNick(nick, ...ids) {
+  const value = String(nick || '').trim()
+  if (!value) return true
+  const lower = value.toLowerCase()
+  if (/^0x[a-f0-9]{4}(?:\.{3}|…)[a-f0-9]{4}$/i.test(value)) return true
+  if (/^(?:tg:|tguid:|telegramid:|telegram:id:)?\d{5,}$/i.test(value)) return true
+  if (/^(?:tg:|tguid:|telegramid:|telegram:id:)?\d{3,}(?:\.{3}|…)\d{3,}$/i.test(value)) return true
+  return ids.some((id) => {
+    const raw = String(id || '').trim()
+    const cleaned = stripTmaPrefix(raw)
+    return [raw, cleaned].some((candidate) => {
+      const item = String(candidate || '').trim()
+      return item && (
+        fallbackShortId(item).toLowerCase() === lower ||
+        fallbackShortIdAlt(item).toLowerCase() === lower
+      )
+    })
+  })
+}
 
 const TopicItem = React.memo(function TopicItem({
   t,
@@ -44,6 +87,14 @@ const TopicItem = React.memo(function TopicItem({
   const isSelf = !!isSelfAuthor
   const isStarred = !!isStarredAuthor
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)
+  const cachedProfile = safeReadProfile(authorId)
+  const rawNickname = String(cachedProfile?.nickname || t?.nickname || '').trim()
+  const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || t?.icon || ''
+  const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)
+  const displayNickname = useAnonymousProfile
+    ? tt('forum_subscriptions_unknown_user')
+    : resolveNickForDisplay(authorId, t.nickname)
+  const shouldRenderAuthorRow = !!authorId || !!t.nickname || !!t.icon
 
   const [ownDelConfirm, setOwnDelConfirm] = React.useState(null)
   const requestOwnerDelete = (e) => {
@@ -104,7 +155,7 @@ const TopicItem = React.memo(function TopicItem({
     >
       <div className="postBodyFrame">
         <div className="flex flex-col gap-3">
-          {(t.nickname || t.icon) && (
+          {shouldRenderAuthorRow && (
             <div className="topicUserRow">
               <div
                 ref={avatarRef}
@@ -116,7 +167,22 @@ const TopicItem = React.memo(function TopicItem({
                   onUserInfoToggle?.(rawUserId, avatarRef.current)
                 }}
               >
-                <AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />
+                {useAnonymousProfile ? (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundImage: `url("${ANONYMOUS_AVATAR_URL}")`,
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: 'cover',
+                      borderRadius: 'inherit',
+                    }}
+                  />
+                ) : (
+                  <AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />
+                )}
               </div>
               <button
                 type="button"
@@ -130,7 +196,7 @@ const TopicItem = React.memo(function TopicItem({
                 style={{ flex: '0 1 auto', minWidth: 0 }}
                 translate="no"
               >
-                <span className="nick-text">{resolveNickForDisplay(authorId, t.nickname)}</span>
+                <span className="nick-text">{displayNickname}</span>
               </button>
 
               {!!authorId && !isSelf && (

@@ -11,6 +11,7 @@ import VipFlipBadge from '../../profile/components/VipFlipBadge'
 
 const MODES = ['followers', 'following']
 const DEFAULT_COUNTS = Object.freeze({ followers: 0, following: 0 })
+const ANONYMOUS_AVATAR_URL = '/anonymous/anonymous.png'
 
 function tFallback(t, key, fallback) {
   const value = t?.(key)
@@ -89,6 +90,11 @@ function dedupeUsers(list) {
   return out
 }
 
+function hasProfileAvatar(icon) {
+  const value = String(icon || '').trim()
+  return !!value && value !== '/upload.jpg' && value !== 's:'
+}
+
 export default function SubscriptionsPopover({
   open,
   userId,
@@ -147,7 +153,7 @@ export default function SubscriptionsPopover({
     minChars: tFallback(t, 'forum_subscriptions_search_min_chars', 'Enter at least 2 characters'),
     loadMore: tFallback(t, 'forum_subscriptions_load_more', 'Load more'),
     openProfile: tFallback(t, 'forum_subscriptions_open_profile', 'Open profile'),
-    unknownUser: tFallback(t, 'forum_subscriptions_unknown_user', 'User'),
+    unknownUser: tFallback(t, 'forum_subscriptions_unknown_user', 'Anonymous'),
     activeFollowers: tFallback(t, 'forum_subscriptions_active_mode_followers', 'Followers mode is open'),
     activeFollowing: tFallback(t, 'forum_subscriptions_active_mode_following', 'Subscriptions mode is open'),
   }), [t])
@@ -409,7 +415,10 @@ export default function SubscriptionsPopover({
             <div className="subsFamilyList">
               {users.map((row) => {
                 const rowUserId = String(row.userId || '').trim()
-                const nickname = String(row.nickname || '').trim() || copy.unknownUser
+                const rawNickname = String(row.nickname || '').trim()
+                const nickname = rawNickname || copy.unknownUser
+                const hasAvatar = hasProfileAvatar(row.icon)
+                const useAnonymousAvatar = !rawNickname && !hasAvatar
                 const isVip = !!vipMap[rowUserId]?.active
                 return (
                   <button
@@ -420,7 +429,20 @@ export default function SubscriptionsPopover({
                     onClick={(event) => openUserInfo(rowUserId, event.currentTarget)}
                   >
                     <span className="subsFamilyRowRail" aria-hidden="true" />
-                    <AvatarEmoji userId={rowUserId} pIcon={row.icon} className="subsFamilyAvatar avaMini" />
+                    {!useAnonymousAvatar ? (
+                      <AvatarEmoji userId={rowUserId} pIcon={row.icon} className="subsFamilyAvatar avaMini" />
+                    ) : (
+                      <span
+                        className="subsFamilyAvatar avaMini"
+                        aria-hidden="true"
+                        style={{
+                          backgroundImage: `url("${ANONYMOUS_AVATAR_URL}")`,
+                          backgroundPosition: 'center',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: 'cover',
+                        }}
+                      />
+                    )}
                     <span className="subsFamilyRowMain">
                       <span className="subsFamilyNickWrap">
                         <span className={cls('nick-badge nick-animate', isVip && 'vipNick')}>

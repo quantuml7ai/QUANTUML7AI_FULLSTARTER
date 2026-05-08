@@ -3026,13 +3026,13 @@
     "samples": {
       "io": [
         {
-          "line": 72,
+          "line": 123,
           "text": "const io = new IntersectionObserver("
         }
       ],
       "layoutReads": [
         {
-          "line": 54,
+          "line": 105,
           "text": "const b = e?.currentTarget?.getBoundingClientRect?.()"
         }
       ]

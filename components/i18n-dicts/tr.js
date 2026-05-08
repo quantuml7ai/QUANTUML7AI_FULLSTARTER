@@ -5008,7 +5008,7 @@ const dict = {
   "forum_subscriptions_empty_following": "Henüz abonelik yok",
   "forum_subscriptions_empty_followers": "Henüz takipçi yok",
   "forum_subscriptions_open_profile": "Profili aç",
-  "forum_subscriptions_unknown_user": "Kullanıcı",
+  "forum_subscriptions_unknown_user": "Anonim",
   "forum_subscriptions_count_following": "Abonelik",
   "forum_subscriptions_count_followers": "Takipçi",
   "forum_subscriptions_load_more": "Daha fazla yükle",

@@ -5008,7 +5008,7 @@ const dict = {
   "forum_subscriptions_empty_following": "暂无订阅",
   "forum_subscriptions_empty_followers": "暂无关注者",
   "forum_subscriptions_open_profile": "打开资料",
-  "forum_subscriptions_unknown_user": "用户",
+  "forum_subscriptions_unknown_user": "匿名",
   "forum_subscriptions_count_following": "订阅",
   "forum_subscriptions_count_followers": "关注者",
   "forum_subscriptions_load_more": "加载更多",

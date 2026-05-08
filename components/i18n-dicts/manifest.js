@@ -3,30 +3,30 @@ export const I18N_DEFAULT_LANG = "en"
 export const I18N_DICT_META = {
   "ru": {
     "keyCount": 4294,
-    "hash": "b4d494fc5862f26c74bcc6ea897b7bbc53ae4efd7df2c162c7be842f8f9355db"
+    "hash": "075c993d60cc1a0d76c1a17ad9d494c2f06c762c9204444455b5e623a8a0571f"
   },
   "en": {
     "keyCount": 4294,
-    "hash": "1d25a76c355337c4a90b39b98af1e01c7026d7334d8d688d92318b2ee599ce2d"
+    "hash": "e40c24556eeae69f9b743ce1dc15f8053163995041d6c0faac245c789a6f90cf"
   },
   "zh": {
     "keyCount": 4294,
-    "hash": "35e5cbd1f307e067228f1f43998db5c9634eba05f6fd1a29417e2187585cd28f"
+    "hash": "77f0f8b19000772a025fa66a8ab604e9b1ccb539503f0df404e6adb042d5a008"
   },
   "uk": {
     "keyCount": 4294,
-    "hash": "3941c3c28b5f8ff35fc339215c383c0bca816a6349c5a70f1245731272fd8924"
+    "hash": "505d94be38c9de7ac26b7cf935762d71691999bc0258a611926734bae5f7ed5b"
   },
   "ar": {
     "keyCount": 4294,
-    "hash": "1e71772f0719c1864c9494e64409ecc7b3fa43873b1939963cb9769193f36589"
+    "hash": "e2bf38e4fac1b2d42a38ff87dd3b4981394c3cadfb79ef6e7968807b04a5c018"
   },
   "tr": {
     "keyCount": 4294,
-    "hash": "ea494c008c8d93465d4a1619b838d8ea0777b93ebfb423781d3f4866d4158cd6"
+    "hash": "250a655db5a371f20467bed9b9492616914b3090ce107859d83aa7484fe4db9b"
   },
   "es": {
     "keyCount": 4294,
-    "hash": "ca50b99379b69ce86120c4399dd748aeac52e8d5880d8e582098ffff81916539"
+    "hash": "12c7192142af6abe02b7bf9843a19fd4277e0a7fa9b7736700c9f49f246d4ab6"
   }
 }

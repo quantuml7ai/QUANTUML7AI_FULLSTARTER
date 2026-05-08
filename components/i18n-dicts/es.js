@@ -5008,7 +5008,7 @@ const dict = {
   "forum_subscriptions_empty_following": "Aún no hay suscripciones",
   "forum_subscriptions_empty_followers": "Aún no hay seguidores",
   "forum_subscriptions_open_profile": "Abrir perfil",
-  "forum_subscriptions_unknown_user": "Usuario",
+  "forum_subscriptions_unknown_user": "Anónimo",
   "forum_subscriptions_count_following": "Suscripciones",
   "forum_subscriptions_count_followers": "Seguidores",
   "forum_subscriptions_load_more": "Cargar más",
