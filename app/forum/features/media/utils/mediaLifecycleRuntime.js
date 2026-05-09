@@ -307,6 +307,7 @@ export function __unloadVideoEl(el) {
     el.dataset.__warmReady = '0'
     el.dataset.__resident = '0'
     el.dataset.__prewarm = '0'
+    el.dataset.__hardDetached = '0'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
 const hardUnloadRequested = (() => {
@@ -433,6 +434,7 @@ if (shouldSoftUnload) {
     if (!el.dataset.__src && el.getAttribute('data-src')) el.dataset.__src = el.getAttribute('data-src')
     el.dataset.__resident = isPostFeedVideo ? '1' : '0'
     el.dataset.__prewarm = keepWarmFetchOnSoftUnload ? '1' : '0'
+    el.dataset.__hardDetached = '0'
     el.preload = keepWarmFetchOnSoftUnload ? 'auto' : 'metadata'
     el.dataset.__lastUnloadTs = String(nowTs)
   } catch {}
@@ -456,6 +458,7 @@ if (shouldSoftUnload) {
     el.preload = 'none'
   } catch {}
 try {
+  el.dataset.__hardDetached = '1'
   el.dataset.__lastHardUnloadTs = String(nowTs)
 } catch {}
   try {
@@ -474,6 +477,7 @@ export function __restoreVideoEl(el) {
   if (!src) return
   try {
     delete el.dataset.__forceHardUnload
+    delete el.dataset.__hardDetached
   } catch {}
 const canRestoreLoad = () => {
   try {

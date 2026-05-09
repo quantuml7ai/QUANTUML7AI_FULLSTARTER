@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-08T22:29:28.351Z",
+  "generatedAt": "2026-05-08T23:44:15.837Z",
   "scannedFiles": 281,
   "report": [
     {
@@ -559,12 +559,12 @@
       "hits": [
         {
           "key": "scrollWrite",
-          "line": 657,
+          "line": 672,
           "text": "window.scrollTo(0, next)"
         },
         {
           "key": "scrollWrite",
-          "line": 1128,
+          "line": 1143,
           "text": "else window.scrollTo(0, 0)"
         },
         {
@@ -584,27 +584,27 @@
         },
         {
           "key": "scrollRead",
-          "line": 634,
+          "line": 649,
           "text": "const before = Number(el.scrollTop || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 641,
+          "line": 656,
           "text": "el.scrollTop = next"
         },
         {
           "key": "scrollRead",
-          "line": 642,
+          "line": 657,
           "text": "applied = Number(el.scrollTop || 0) - before"
         },
         {
           "key": "scrollRead",
-          "line": 646,
+          "line": 661,
           "text": "const before = Number(window.scrollY || window.pageYOffset || 0)"
         },
         {
           "key": "scrollRead",
-          "line": 1127,
+          "line": 1142,
           "text": "if (hasInnerScrollable(el)) el.scrollTop = 0"
         },
         {
@@ -614,7 +614,7 @@
         },
         {
           "key": "rectReads",
-          "line": 813,
+          "line": 828,
           "text": "const h = node.getBoundingClientRect?.()?.height"
         }
       ]
@@ -703,12 +703,12 @@
       "hits": [
         {
           "key": "scrollRead",
-          "line": 2909,
+          "line": 2931,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) return Number(scrollEl.scrollTop || 0);"
         },
         {
           "key": "scrollRead",
-          "line": 2911,
+          "line": 2933,
           "text": "try { return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0); } catch {}"
         },
         {
@@ -723,42 +723,42 @@
         },
         {
           "key": "rectReads",
-          "line": 2539,
+          "line": 2561,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2932,
+          "line": 2954,
           "text": "const rect = el?.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2996,
+          "line": 3018,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3292,
+          "line": 3314,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3519,
+          "line": 3543,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3536,
+          "line": 3560,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "raf",
-          "line": 5279,
+          "line": 5344,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 5698,
+          "line": 5763,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         }
       ]
@@ -1675,7 +1675,7 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\components\\ExternalVideoPlayer.jsx",
-      "score": 16,
+      "score": 17,
       "counts": {
         "scrollWrite": 1,
         "scrollRead": 1,
@@ -1685,7 +1685,7 @@
         "rectReads": 0,
         "resizeObserver": 0,
         "raf": 0,
-        "timers": 5
+        "timers": 6
       },
       "hits": [
         {
@@ -1717,6 +1717,11 @@
           "key": "timers",
           "line": 366,
           "text": "try { timers = [window.setTimeout(refreshGuard, 250), window.setTimeout(refreshGuard, 1200)] } catch {}"
+        },
+        {
+          "key": "timers",
+          "line": 473,
+          "text": "window.setTimeout(release, normalizedKind === 'youtube' ? 180 : 320)"
         }
       ]
     },

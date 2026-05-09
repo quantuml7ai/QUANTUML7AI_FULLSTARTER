@@ -1,17 +1,17 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 1098,
+    "score": 1168,
     "counts": {
       "playCalls": 4,
       "pauseCalls": 17,
       "loadCalls": 2,
-      "srcSets": 6,
+      "srcSets": 8,
       "srcRemoves": 0,
       "currentSrcReads": 27,
       "pendingFlags": 120,
       "hardUnload": 23,
-      "iframeOps": 207,
+      "iframeOps": 235,
       "io": 4,
       "ro": 0,
       "raf": 7,
@@ -26,66 +26,66 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2574,
+          "line": 2596,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2655,
+          "line": 2677,
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 4324,
+          "line": 4369,
           "text": "const p2 = activeNativePostVideo.play?.();"
         },
         {
-          "line": 4388,
+          "line": 4433,
           "text": "const p = media.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 2106,
+          "line": 2110,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2116,
+          "line": 2120,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2126,
+          "line": 2130,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2304,
+          "line": 2308,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 1374,
+          "line": 1378,
           "text": "media.load?.();"
         },
         {
-          "line": 4994,
+          "line": 5053,
           "text": "})) a.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 3755,
+          "line": 2405,
+          "text": "try { if (iframe.getAttribute('src')) iframe.setAttribute('src', ''); } catch {}"
+        },
+        {
+          "line": 2432,
+          "text": "try { if (owner.getAttribute('src')) owner.setAttribute('src', ''); } catch {}"
+        },
+        {
+          "line": 3784,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3772,
+          "line": 3801,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
-        },
-        {
-          "line": 4725,
-          "text": "el.setAttribute('src', nextSrc);"
-        },
-        {
-          "line": 5022,
-          "text": "el.setAttribute('src', ds);"
         }
       ],
       "currentSrcReads": [
@@ -134,11 +134,11 @@
           "text": "if (allowed.allowed) scheduleHardUnload(victim.node, 0, 'resident_cap');"
         },
         {
-          "line": 1277,
+          "line": 1281,
           "text": "scheduleHardUnload(item.node, 0, 'resident_cap');"
         },
         {
-          "line": 1359,
+          "line": 1363,
           "text": "__restoreVideoEl(media);"
         }
       ],
@@ -162,37 +162,37 @@
       ],
       "io": [
         {
-          "line": 5256,
+          "line": 5321,
           "text": "if (!('IntersectionObserver' in window)) return;"
         },
         {
-          "line": 5258,
+          "line": 5323,
           "text": "io = new IntersectionObserver("
         },
         {
-          "line": 5557,
+          "line": 5622,
           "text": "// IntersectionObserver tick right after src/API bootstrap. If we only"
         },
         {
-          "line": 5718,
+          "line": 5783,
           "text": "nearIo = new IntersectionObserver("
         }
       ],
       "raf": [
         {
-          "line": 5279,
+          "line": 5344,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
-          "line": 5698,
+          "line": 5763,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 5995,
+          "line": 6060,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6064,
+          "line": 6129,
           "text": "if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(mutationSweepRaf);"
         }
       ],
@@ -210,7 +210,7 @@
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         },
         {
-          "line": 1153,
+          "line": 1157,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         }
       ]
@@ -384,47 +384,47 @@
           "text": "el.pause?.()"
         },
         {
-          "line": 428,
+          "line": 429,
           "text": "el.pause?.()"
         }
       ],
       "loadCalls": [
         {
-          "line": 465,
+          "line": 468,
           "text": "el.load?.()"
         },
         {
-          "line": 557,
+          "line": 561,
           "text": "el.load?.()"
         },
         {
-          "line": 617,
+          "line": 621,
           "text": "if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()"
         }
       ],
       "srcSets": [
         {
-          "line": 586,
+          "line": 590,
           "text": "el.setAttribute('src', src)"
         }
       ],
       "srcRemoves": [
         {
-          "line": 448,
+          "line": 450,
           "text": "el.removeAttribute('src')"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 379,
+          "line": 380,
           "text": "!!String(el.currentSrc || el.getAttribute?.('src') || '').trim()"
         },
         {
-          "line": 431,
+          "line": 432,
           "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
         },
         {
-          "line": 443,
+          "line": 445,
           "text": "if (!el.dataset.__src && el.currentSrc) el.dataset.__src = el.currentSrc"
         }
       ],
@@ -456,11 +456,11 @@
           "text": "export function __unloadVideoEl(el) {"
         },
         {
-          "line": 469,
+          "line": 472,
           "text": "export function __restoreVideoEl(el) {"
         },
         {
-          "line": 658,
+          "line": 662,
           "text": "restoreVideoEl={__restoreVideoEl}"
         }
       ],
@@ -759,7 +759,7 @@
       ],
       "ro": [
         {
-          "line": 923,
+          "line": 938,
           "text": "if (!rosRef.current.get(key) && typeof ResizeObserver !== 'undefined') {"
         }
       ],
@@ -769,29 +769,29 @@
           "text": "rafRef.current = requestAnimationFrame(() => {"
         },
         {
-          "line": 1053,
+          "line": 1068,
           "text": "try { cancelAnimationFrame(rafRef.current) } catch {}"
         },
         {
-          "line": 1090,
+          "line": 1105,
           "text": "try { cancelAnimationFrame(scheduled.rafA) } catch {}"
         },
         {
-          "line": 1094,
+          "line": 1109,
           "text": "try { cancelAnimationFrame(scheduled.rafB) } catch {}"
         }
       ],
       "scrollWrites": [
         {
-          "line": 641,
+          "line": 656,
           "text": "el.scrollTop = next"
         },
         {
-          "line": 657,
+          "line": 672,
           "text": "window.scrollTo(0, next)"
         },
         {
-          "line": 1127,
+          "line": 1142,
           "text": "if (hasInnerScrollable(el)) el.scrollTop = 0"
         }
       ],
@@ -1181,6 +1181,79 @@
         {
           "line": 93,
           "text": "const rect = el.getBoundingClientRect()"
+        }
+      ]
+    }
+  },
+  {
+    "file": "app/forum/features/media/components/ExternalVideoPlayer.jsx",
+    "score": 49,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 1,
+      "srcRemoves": 0,
+      "currentSrcReads": 3,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 15,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 3
+    },
+    "flags": [
+      "iframe remount risk"
+    ],
+    "samples": {
+      "srcSets": [
+        {
+          "line": 470,
+          "text": "if (currentSrc) doomed.setAttribute('src', '')"
+        }
+      ],
+      "currentSrcReads": [
+        {
+          "line": 464,
+          "text": "const currentSrc = doomed.getAttribute('src') || ''"
+        },
+        {
+          "line": 465,
+          "text": "const storedSrc = doomed.getAttribute('data-src') || currentSrc"
+        },
+        {
+          "line": 470,
+          "text": "if (currentSrc) doomed.setAttribute('src', '')"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 18,
+          "text": "// Telegram Mini App swipe guard for YouTube/TikTok iframe cards."
+        },
+        {
+          "line": 134,
+          "text": "const isExternalProvider = normalizedKind === 'youtube' || normalizedKind === 'tiktok'"
+        },
+        {
+          "line": 195,
+          "text": "try { frame.setAttribute('data-forum-iframe-active', '1') } catch {}"
+        },
+        {
+          "line": 202,
+          "text": "detail: { source: normalizedKind || 'iframe', element: frame, manual: !!manual },"
+        }
+      ],
+      "layoutReads": [
+        {
+          "line": 175,
+          "text": "top: Math.round(window.innerHeight * (0.48 + Math.random() * 0.22)),"
+        },
+        {
+          "line": 275,
+          "text": "if (canScrollY && node.scrollHeight > node.clientHeight + 1) return node"
         }
       ]
     }
@@ -1901,57 +1974,6 @@
         {
           "line": 47,
           "text": "window.scrollTo(0, document.body.scrollHeight || 0)"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/media/components/ExternalVideoPlayer.jsx",
-    "score": 28,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 0,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 11,
-      "io": 0,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 3
-    },
-    "flags": [],
-    "samples": {
-      "iframeOps": [
-        {
-          "line": 18,
-          "text": "// Telegram Mini App swipe guard for YouTube/TikTok iframe cards."
-        },
-        {
-          "line": 134,
-          "text": "const isExternalProvider = normalizedKind === 'youtube' || normalizedKind === 'tiktok'"
-        },
-        {
-          "line": 195,
-          "text": "try { frame.setAttribute('data-forum-iframe-active', '1') } catch {}"
-        },
-        {
-          "line": 202,
-          "text": "detail: { source: normalizedKind || 'iframe', element: frame, manual: !!manual },"
-        }
-      ],
-      "layoutReads": [
-        {
-          "line": 175,
-          "text": "top: Math.round(window.innerHeight * (0.48 + Math.random() * 0.22)),"
-        },
-        {
-          "line": 275,
-          "text": "if (canScrollY && node.scrollHeight > node.clientHeight + 1) return node"
         }
       ]
     }

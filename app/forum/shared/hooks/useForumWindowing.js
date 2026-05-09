@@ -114,9 +114,9 @@ function readMediaKeepaliveHoldMs() {
   try {
     const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
     const mobile = Number(window?.innerWidth || 0) < 720
-    return coarse || mobile ? 2600 : 1800
+    return coarse || mobile ? 4800 : 3600
   } catch {
-    return 1800
+    return 3600
   }
 }
 
@@ -521,7 +521,7 @@ export default function useForumWindowing({
 
           try {
             const now = Date.now()
-            const maxIndexGap = Math.max(2, nextMaxRender)
+            const maxIndexGap = Math.max(8, nextMaxRender * 2)
             let kept = 0
             mediaKeepaliveRef.current.forEach((until, key) => {
               if (Number(until || 0) <= now) {
@@ -530,7 +530,6 @@ export default function useForumWindowing({
               }
               const index = Number(keyToIndexRef.current.get(key))
               if (!Number.isFinite(index) || index < 0 || index >= total) return
-              if (index < prev.start || index >= prev.end) return
               if (index < nextStart && (nextStart - index) <= maxIndexGap) {
                 nextStart = index
                 kept += 1
@@ -549,6 +548,22 @@ export default function useForumWindowing({
               })
             }
           } catch {}
+
+          if (total > 0) {
+            if (nextStart > visibleStart) nextStart = visibleStart
+            if (nextEnd < visibleEnd) nextEnd = visibleEnd
+            if (nextEnd <= nextStart) {
+              const repairedStart = clamp(prev.start, 0, Math.max(0, total - 1))
+              nextStart = repairedStart
+              nextEnd = clamp(Math.max(prev.end, repairedStart + 1), repairedStart + 1, total)
+              emitWindowingDiag('windowing_window_repair', {
+                start: nextStart,
+                end: nextEnd,
+                visibleStart,
+                visibleEnd,
+              })
+            }
+          }
 
           const next = buildWindow(nextStart, nextEnd, total)
           const topDelta = Math.abs(Number(prev.top || 0) - Number(next.top || 0))
