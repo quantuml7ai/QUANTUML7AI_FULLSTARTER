@@ -12,6 +12,8 @@ export default function useForumAdsRuntime({ auth }) {
   const [adsRefreshTick, setAdsRefreshTick] = useState(0)
   const adConf = getForumAdConf()
   const linksLen = Array.isArray(adConf?.LINKS) ? adConf.LINKS.length : 0
+  const linksLenRef = useRef(linksLen)
+  linksLenRef.current = linksLen
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
@@ -19,12 +21,16 @@ export default function useForumAdsRuntime({ auth }) {
     let stopped = false
     let interval = 0
     const timers = []
-    const bump = () => {
-      if (!stopped) setAdsRefreshTick((value) => value + 1)
+    const bumpIfLinksChanged = (nextConf) => {
+      if (stopped) return
+      const nextLen = Array.isArray(nextConf?.LINKS) ? nextConf.LINKS.length : 0
+      if (nextLen === Number(linksLenRef.current || 0)) return
+      linksLenRef.current = nextLen
+      setAdsRefreshTick((value) => value + 1)
     }
     const refresh = () => {
-      getForumAdConf()
-      bump()
+      const nextConf = getForumAdConf()
+      bumpIfLinksChanged(nextConf)
     }
     const scheduleRefresh = (delay) => {
       timers.push(window.setTimeout(refresh, delay))
@@ -76,14 +82,6 @@ export default function useForumAdsRuntime({ auth }) {
     used: new Set(),
     bySlot: new Map(),
   })
-
-  useEffect(() => {
-    adSessionRef.current = {
-      bucket: null,
-      used: new Set(),
-      bySlot: new Map(),
-    }
-  }, [adsRefreshTick])
 
   const { debugAdsSlots, pickAdUrlForSlot } = useForumAdSlots({
     adConf,

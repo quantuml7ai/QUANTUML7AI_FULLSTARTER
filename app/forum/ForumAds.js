@@ -1,7 +1,7 @@
 // app/forum/ForumAds.js
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
@@ -1199,7 +1199,7 @@ export async function resolveAdMediaPayload(mediaHref, opts = {}) {
   }
 }
 
-export function useAdMediaPayload({ url, slotKind, nearId, conf: confProp } = {}) {
+export function useAdMediaPayload({ url, slotKind, nearId, conf: confProp, shouldDeferRotate } = {}) {
   const conf = useMemo(() => confProp || getForumAdConf(), [confProp]);
   const safeClick = useMemo(() => toSafeClickUrl(url), [url]);
   const clickHref = safeClick ? safeClick.toString() : '';
@@ -1251,12 +1251,15 @@ export function useAdMediaPayload({ url, slotKind, nearId, conf: confProp } = {}
       10_000,
       Number(conf?.ROTATE_MIN || 1) * 60_000
     );
-    const timer = setInterval(pickNext, rotateMs);
+    const timer = setInterval(() => {
+      if (typeof shouldDeferRotate === 'function' && shouldDeferRotate()) return;
+      pickNext();
+    }, rotateMs);
 
     return () => {
       clearInterval(timer);
     };
-  }, [clickHref, conf, mediaKey]);
+  }, [clickHref, conf, mediaKey, shouldDeferRotate]);
 
   useEffect(() => {
     if (!clickHref || !mediaHref) {
@@ -1327,12 +1330,43 @@ export function AdCard({
   const localRootRef = useRef(null);
   const localVideoRef = useRef(null);
   const localIframeRef = useRef(null);
+  const rotationHoldRef = useRef(!!(slotKind || nearId));
+  const shouldDeferForumAdRotation = useCallback(() => !!rotationHoldRef.current, []);
   const { safeClick, clickHref, host, mediaHref, media } = useAdMediaPayload({
     url,
     slotKind,
     nearId,
     conf,
+    shouldDeferRotate: shouldDeferForumAdRotation,
   });
+
+  useEffect(() => {
+    const forumSlot = !!(slotKind || nearId);
+    if (!forumSlot) {
+      rotationHoldRef.current = false;
+      return undefined;
+    }
+    const el = localRootRef.current;
+    if (!el || !isBrowser() || typeof IntersectionObserver === 'undefined') {
+      rotationHoldRef.current = true;
+      return undefined;
+    }
+    rotationHoldRef.current = true;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        rotationHoldRef.current = !!(entry?.isIntersecting || Number(entry?.intersectionRatio || 0) > 0);
+      },
+      {
+        rootMargin: '720px 0px 920px 0px',
+        threshold: [0, 0.01],
+      }
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+    };
+  }, [nearId, slotKind]);
 
   useEffect(() => {
     onMediaChange?.({ media, mediaHref, clickHref, slotKind, nearId });

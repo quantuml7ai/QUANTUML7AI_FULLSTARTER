@@ -216,6 +216,7 @@ export default function useForumMediaCoordinator({ emitDiag }) {
             activeConnected: !!(active instanceof Element && active.isConnected),
             nativePrimeSrcStateSize: nativePrimeSrcState.size,
             srcKickStateSize: srcKickState.size,
+            srcRestoreStateSize: srcRestoreState.size,
           };
         } catch {
           return {};
@@ -436,6 +437,7 @@ const applyMutedPrefToAll = () => {
       return getQCastAudio(el);
     };
     const srcKickState = new Map();
+    const srcRestoreState = new Map();
     const MAX_CONCURRENT_LOAD_PENDING = (() => {
       try {
         const ua = String(navigator?.userAgent || '');
@@ -1360,7 +1362,12 @@ const kickMediaLoad = (
 
   try {
     if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim()) {
-      __restoreVideoEl(media);
+      if (!restoreNativeSrcIfAllowed(media, channel, {
+        highPriority: /play|activate|visibility|native_priority/i.test(String(channel || '')),
+      })) {
+        trace('load_kick_restore_throttled', media, { channel });
+        return false;
+      }
     }
   } catch {}
 
@@ -1734,8 +1741,7 @@ try {
       !highPriorityReason &&
       (() => {
         try {
-          if (getOwnerVisiblePx(el) > 16) return true;
-          return getOwnerViewportGapPx(el) <= getNativeEarlyPrimeGapLimit();
+          return getOwnerVisiblePx(el) > Math.max(56, Math.round(getStartVisiblePx(el) * 0.24));
         } catch {
           return false;
         }
@@ -1756,8 +1762,15 @@ try {
     }
 
     if (!el.getAttribute('src')) {
+      if (!restoreNativeSrcIfAllowed(el, reason, {
+        highPriority: highPriorityReason || allowNearViewportRestore,
+        visiblePx: getOwnerVisiblePx(el),
+        gapPx: getOwnerViewportGapPx(el),
+      })) {
+        trace('candidate_restore_throttled', el, { reason });
+        return false;
+      }
       trace('candidate_restore', el, { reason });
-      __restoreVideoEl(el);
     }
   } else {
     try { el.preload = 'auto'; } catch {}
@@ -1849,7 +1862,15 @@ if (stalledPending && readyRetryCount < maxReadyRetryCount && (now - lastBoostTs
         stalledMs: now - pendingSince,
         mode: 'restore_only',
       });
-      try { __restoreVideoEl(el); } catch {}
+      try {
+        if (!restoreNativeSrcIfAllowed(el, `${reason}:pending_stall`, {
+          highPriority: wantsRealPlayback,
+          visiblePx: getOwnerVisiblePx(el),
+          gapPx: getOwnerViewportGapPx(el),
+        })) {
+          trace('candidate_pending_stall_restore_throttled', el, { reason });
+        }
+      } catch {}
       armReadyReplay(el);
       return false;
     }
@@ -3999,6 +4020,150 @@ const getNativeEarlyPrimeGapLimit = () => {
   return Math.max(getNativePrimeGapLimit(), Math.min(520, Math.round(viewportH * 0.5)));
 };
 
+    const pruneSrcRestoreState = (nowTs = Date.now()) => {
+      try {
+        const now = Number(nowTs || Date.now());
+        for (const [key, state] of srcRestoreState) {
+          const touchedAt = Number(state?.touchedAt || 0);
+          const blockedUntil = Number(state?.blockedUntil || 0);
+          if ((!touchedAt || (now - touchedAt) > 150000) && blockedUntil <= now) {
+            srcRestoreState.delete(key);
+          }
+        }
+        while (srcRestoreState.size > 220) {
+          const firstKey = srcRestoreState.keys().next().value;
+          if (!firstKey) break;
+          srcRestoreState.delete(firstKey);
+        }
+      } catch {}
+    };
+
+    function canRestoreNativeSrc(media, reason = 'restore', opts = {}) {
+      if (!(media instanceof HTMLVideoElement)) return true;
+      if (!isManagedForumVideoKind(media)) return true;
+      if (String(media.getAttribute?.('src') || media.currentSrc || '').trim()) return true;
+
+      const srcKey = getMediaSrcKey(media);
+      if (!srcKey) return true;
+
+      const now = Date.now();
+      const reasonText = String(reason || 'restore');
+      const forceRestore = !!opts.force;
+      const highPriority =
+        !!opts.highPriority ||
+        /activate|play|visible|visibility|focus|pageshow|manual|gesture/i.test(reasonText);
+      const visiblePx = Number.isFinite(Number(opts.visiblePx))
+        ? Number(opts.visiblePx)
+        : getOwnerVisiblePx(media);
+      const gapPx = Number.isFinite(Number(opts.gapPx))
+        ? Number(opts.gapPx)
+        : getOwnerViewportGapPx(media);
+      const nearVisible = visiblePx > 0 || gapPx <= getNativeEarlyPrimeGapLimit();
+
+      try {
+        const sameSrcBusy = Array.from(document.querySelectorAll(managedForumVideoSelector)).some((node) => {
+          if (!(node instanceof HTMLVideoElement) || node === media) return false;
+          const nodeSrc = String(
+            node.dataset?.__src ||
+            node.getAttribute?.('data-src') ||
+            node.currentSrc ||
+            node.getAttribute?.('src') ||
+            '',
+          ).trim();
+          if (!nodeSrc || nodeSrc !== srcKey) return false;
+          if (!String(node.currentSrc || node.getAttribute?.('src') || '').trim()) return false;
+          return (
+            String(node.dataset?.__loadPending || '') === '1' ||
+            Number(node.networkState || 0) === HTMLMediaElement.NETWORK_LOADING ||
+            Number(node.readyState || 0) >= 1
+          );
+        });
+        if (sameSrcBusy && !forceRestore && (!highPriority || !nearVisible)) {
+          trace('native_restore_skip_same_src_busy', media, { reason, visiblePx, gapPx });
+          return false;
+        }
+      } catch {}
+
+      try {
+        const state = srcRestoreState.get(srcKey) || {};
+        const blockedUntil = Number(state?.blockedUntil || 0);
+        if (blockedUntil > now && !highPriority && !forceRestore) {
+          trace('native_restore_skip_src_blocked', media, {
+            reason,
+            blockedForMs: blockedUntil - now,
+            visiblePx,
+            gapPx,
+          });
+          return false;
+        }
+
+        const minGapMs = highPriority
+          ? (isIOSUi ? 1100 : (isCoarseUi ? 900 : 760))
+          : (isIOSUi ? 4600 : (isCoarseUi ? 3600 : 2800));
+        const lastRestoreTs = Number(state?.lastRestoreTs || 0);
+        if (!forceRestore && lastRestoreTs > 0 && (now - lastRestoreTs) < minGapMs) {
+          trace('native_restore_skip_src_gap', media, {
+            reason,
+            sinceMs: now - lastRestoreTs,
+            minGapMs,
+            visiblePx,
+            gapPx,
+          });
+          return false;
+        }
+
+        const burstWindowMs = isIOSUi ? 26000 : 20000;
+        const burstLimit = highPriority ? (isIOSUi ? 4 : 5) : 2;
+        const winStart = Number(state?.windowStart || 0);
+        let restoreCount = Number(state?.count || 0);
+        const inWindow = winStart > 0 && (now - winStart) < burstWindowMs;
+        const nextWinStart = inWindow ? winStart : now;
+        if (!inWindow) restoreCount = 0;
+        restoreCount += 1;
+
+        if (!forceRestore && restoreCount > burstLimit) {
+          const until = now + (highPriority ? (isIOSUi ? 9000 : 7000) : (isIOSUi ? 18000 : 13000));
+          srcRestoreState.set(srcKey, {
+            blockedUntil: until,
+            lastRestoreTs,
+            windowStart: nextWinStart,
+            count: restoreCount,
+            touchedAt: now,
+          });
+          pruneSrcRestoreState(now);
+          trace('native_restore_block_src', media, {
+            reason,
+            restores: restoreCount,
+            blockedForMs: until - now,
+            visiblePx,
+            gapPx,
+          });
+          return false;
+        }
+
+        srcRestoreState.set(srcKey, {
+          blockedUntil: 0,
+          lastRestoreTs: now,
+          windowStart: nextWinStart,
+          count: restoreCount,
+          touchedAt: now,
+        });
+        pruneSrcRestoreState(now);
+      } catch {}
+
+      return true;
+    }
+
+    function restoreNativeSrcIfAllowed(media, reason = 'restore', opts = {}) {
+      if (!canRestoreNativeSrc(media, reason, opts)) return false;
+      try {
+        __restoreVideoEl(media);
+        return !!String(media?.getAttribute?.('src') || media?.currentSrc || '').trim();
+      } catch {
+        return false;
+      }
+    }
+
     const isNativePostVideoCandidate = (el) => {
       try {
         const media = getMediaStateNode(el);
@@ -4632,7 +4797,7 @@ return true;
         burstWindowMs: isIOSUi ? 18000 : 16000,
         burstLimit: isIOSUi ? 3 : 3,
         blockMs: isIOSUi ? 6200 : 5600,
-        bypassSrcLimiter: isAdMediaElement(media),
+        bypassSrcLimiter: false,
         bypassPendingBudget: false,
       });
 
@@ -4892,8 +5057,17 @@ if (el instanceof HTMLVideoElement) {
   let restoredNow = false;
 
   if (!hasSrc) {
+    const userIntentRestore = hasUserGestureIntent(el) || hasManualLease(el);
+    if (!restoreNativeSrcIfAllowed(el, 'play_restore', {
+      highPriority: true,
+      force: userIntentRestore,
+      visiblePx: getOwnerVisiblePx(el),
+      gapPx: getOwnerViewportGapPx(el),
+    })) {
+      trace('play_restore_throttled', el);
+      return;
+    }
     trace('play_restore', el);
-    __restoreVideoEl(el);
     restoredNow = true;
   }
 
@@ -5913,8 +6087,15 @@ return;
             !isMediaSrcBlocked(media)
           ) {
             if (!String(media.getAttribute?.('src') || media.currentSrc || '').trim() && __hasLazyVideoSourceWithoutSrc(media)) {
-              trace('observe_native_visible_restore', media, { visiblePx, gapPx });
-              try { __restoreVideoEl(media); } catch {}
+              if (restoreNativeSrcIfAllowed(media, 'observe_native_visible_restore', {
+                highPriority: visiblePx > 0,
+                visiblePx,
+                gapPx,
+              })) {
+                trace('observe_native_visible_restore', media, { visiblePx, gapPx });
+              } else {
+                trace('observe_native_visible_restore_throttled', media, { visiblePx, gapPx });
+              }
             }
             if (visiblePx > Math.max(40, Math.round(getStartVisiblePx(media) * 0.32))) {
               try { prepareNativePriorityPrewarm(media, 'observe_visible_native'); } catch {}
@@ -6022,8 +6203,17 @@ const onExternalMediaPlay = (e) => {
 
           const hasSrcNow = !!mediaEl.getAttribute('src') || !!mediaEl.currentSrc;
           if (!hasSrcNow && __hasLazyVideoSourceWithoutSrc(mediaEl)) {
-            trace('visibility_restore', mediaEl, { reason, mode: 'restore_src' });
-            __restoreVideoEl(mediaEl);
+            const visiblePx = getOwnerVisiblePx(mediaEl);
+            const gapPx = getOwnerViewportGapPx(mediaEl);
+            if (restoreNativeSrcIfAllowed(mediaEl, reason, {
+              highPriority: visiblePx > 0,
+              visiblePx,
+              gapPx,
+            })) {
+              trace('visibility_restore', mediaEl, { reason, mode: 'restore_src', visiblePx, gapPx });
+            } else {
+              trace('visibility_restore_throttled', mediaEl, { reason, mode: 'restore_src', visiblePx, gapPx });
+            }
             return;
           }
           const readyStateNow = Number(mediaEl.readyState || 0);

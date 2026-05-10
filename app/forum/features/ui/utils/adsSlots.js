@@ -25,7 +25,7 @@ export function pickAdUrlForSlot({
   if (sess.bucket !== bucket) {
     sess.bucket = bucket
     sess.used = new Set()
-    sess.bySlot = new Map()
+    if (!sess.bySlot) sess.bySlot = new Map()
   }
 
   if (sess.bySlot && sess.bySlot.has(stableSlotKey)) {
