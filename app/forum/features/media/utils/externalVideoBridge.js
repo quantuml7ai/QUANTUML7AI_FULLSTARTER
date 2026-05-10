@@ -57,7 +57,7 @@ export function buildYouTubeEmbedSrc(videoId, extraParams = '') {
   url.searchParams.set('loop', '1')
   url.searchParams.set('playlist', id)
   url.searchParams.set('mute', '1')
-  url.searchParams.set('autoplay', '0')
+  url.searchParams.set('autoplay', '1')
   if (origin) url.searchParams.set('origin', origin)
   return url.toString()
 }
@@ -107,7 +107,8 @@ export function buildTikTokPlayerSrc(videoId, extraParams = '') {
   url.searchParams.set('fullscreen_button', '0')
   url.searchParams.set('timestamp', '0')
   url.searchParams.set('loop', '1')
-  url.searchParams.set('autoplay', '0')
+  url.searchParams.set('autoplay', '1')
+  url.searchParams.set('mute', '1')
   url.searchParams.set('music_info', '0')
   url.searchParams.set('description', '0')
   url.searchParams.set('rel', '0')

@@ -4926,6 +4926,8 @@ return true;
       try {
         const u = new URL(src, window.location.href);
         if (!u.searchParams.has('loop')) u.searchParams.set('loop', '1');
+        if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
+        if (!u.searchParams.has('muted')) u.searchParams.set('muted', '1');
         return u.toString();
       } catch {
         return src;
