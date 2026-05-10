@@ -4869,6 +4869,18 @@ return true;
           gapPx: getOwnerViewportGapPx(media),
           visiblePx: getOwnerVisiblePx(media),
         });
+        if ((isIOSUi || isCoarseUi) && Number(media.readyState || 0) < 2) {
+          const primedWhileLoading = primeNativeFirstFrame(media, reason);
+          if (!primedWhileLoading) {
+            trace('native_prewarm_prime_deferred_loading', media, {
+              reason,
+              readyState: Number(media.readyState || 0),
+              networkState: Number(media.networkState || 0),
+              gapPx: getOwnerViewportGapPx(media),
+              visiblePx: getOwnerVisiblePx(media),
+            });
+          }
+        }
         armReadyReplay(media);
         return true;
       }
@@ -5028,6 +5040,26 @@ return true;
         curSrc = String(el.getAttribute('src') || '').trim();
         hadSrc = !!curSrc;
       } catch {}
+      if (kind === 'youtube' && passivePrepare && !hadSrc) {
+        const visiblePx = getOwnerVisiblePx(el);
+        const gapPx = getOwnerViewportGapPx(el);
+        const centerDist = getOwnerCenterDist(el);
+        const visibleGate = isIOSUi ? 260 : (isCoarseUi ? 240 : 220);
+        const centerGate = getPriorityCenterMaxDist(el) + (isIOSUi ? 140 : 100);
+        if (visiblePx < visibleGate || gapPx > 0 || centerDist > centerGate) {
+          trace('iframe_prewarm_skip_budget', el, {
+            kind,
+            reason,
+            gate: 'youtube_passive_no_attach',
+            visiblePx,
+            visibleGate,
+            gapPx,
+            centerDist,
+            centerGate,
+          });
+          return false;
+        }
+      }
       if (!hadSrc && !canSpendExternalPrewarmBudget(el, reason)) return false;
       if (!hadSrc || curSrc !== nextSrc) {
         try {
@@ -5367,7 +5399,7 @@ return;
           const kickYoutube = () => {
             try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
           };
-          kickYoutube();
+          if (!newlyAttached) kickYoutube();
           scheduleExternalPlayKick(el, kickYoutube, 'youtube_viewport_autoplay');
           enforceIframeResidentCap(el);
           emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
