@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-08T23:44:15.837Z",
+  "generatedAt": "2026-05-09T22:19:45.263Z",
   "scannedFiles": 281,
   "report": [
     {
@@ -703,12 +703,12 @@
       "hits": [
         {
           "key": "scrollRead",
-          "line": 2931,
+          "line": 2926,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) return Number(scrollEl.scrollTop || 0);"
         },
         {
           "key": "scrollRead",
-          "line": 2933,
+          "line": 2928,
           "text": "try { return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0); } catch {}"
         },
         {
@@ -723,42 +723,42 @@
         },
         {
           "key": "rectReads",
-          "line": 2561,
+          "line": 2556,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2954,
+          "line": 2949,
           "text": "const rect = el?.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3018,
+          "line": 3013,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3314,
+          "line": 3309,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3543,
+          "line": 3538,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3560,
+          "line": 3555,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "raf",
-          "line": 5344,
+          "line": 5339,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 5763,
+          "line": 5778,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         }
       ]

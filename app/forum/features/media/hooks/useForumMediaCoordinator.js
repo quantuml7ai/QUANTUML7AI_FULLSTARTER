@@ -2388,13 +2388,7 @@ const onMediaLoadedCaptured = (e) => {
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
       try {
         if (!(iframe instanceof HTMLIFrameElement)) return;
-        const player = ytPlayers.get(iframe);
-        if (player) {
-          try { stopYtMutePoll(player); } catch {}
-          try { player?.destroy?.(); } catch {}
-          ytMuteLast.delete(player);
-        }
-        ytPlayers.delete(iframe);
+        destroyTrackedYouTubePlayer(iframe);
         try {
           const src = iframe.getAttribute('data-src') || iframe.getAttribute('src') || '';
           if (src && !iframe.getAttribute('data-src')) iframe.setAttribute('data-src', src);
@@ -2505,6 +2499,7 @@ const onMediaLoadedCaptured = (e) => {
       try { pruneNativePrimeSrcState(now); } catch {}
       try { pruneMediaSrcBlockMap(force); } catch {}
       try { enforcePostNativeSrcCap(nativePrewarmEl, reason); } catch {}
+      try { enforceIframeResidentCap(active); } catch {}
     };
     try {
       window.sweepForumMediaLeaks = () => {
@@ -2836,7 +2831,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
       } catch {}
     }, reason === 'yt_api_load_timeout' ? 260 : 160);
   } catch {}
-};
+    };
     const initYouTubePlayer = async (iframe) => {
       if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
       const expectedSrc = ensureYouTubeEmbedSrc(iframe.getAttribute('data-src') || iframe.getAttribute('src') || '');
@@ -5401,14 +5396,20 @@ return;
             const stopCenterMaxDist = getStopCenterMaxDist(active);
             const activeKind = getMediaKind(active);
             const manualLeaseActive = hasManualLease(active);
+            const activeIsExternal =
+              activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe';
             const hardOutOfView = activeVisiblePx < 24;
             const keepByVisiblePx =
               (activeKind === 'qcast' && activeVisiblePx >= 120) ||
               ((activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe') && activeVisiblePx >= 220);
+            const keepExternalByRunway =
+              activeIsExternal &&
+              activeVisiblePx >= (isIOSUi ? 72 : (isCoarseUi ? 96 : 88)) &&
+              activeCenterDist <= stopCenterMaxDist + (isIOSUi ? 560 : (isCoarseUi ? 500 : 420));
             if (
               !hardOutOfView &&
-              activeCenterDist <= stopCenterMaxDist &&
-              (ar >= STOP_RATIO || keepByVisiblePx || (manualLeaseActive && activeVisiblePx >= 120))
+              (activeCenterDist <= stopCenterMaxDist || keepExternalByRunway) &&
+              (ar >= STOP_RATIO || keepByVisiblePx || keepExternalByRunway || (manualLeaseActive && activeVisiblePx >= 120))
             ) {
               // Если кандидат другой — переключаемся только когда он уверенно лучше.
               // (иначе будет флаттер между двумя элементами рядом)
@@ -5540,7 +5541,21 @@ return;
                 reason: 'below_stop_ratio',
               });
             } else {
-              scheduleHardUnload(active, null, 'below_stop_ratio');
+              if (
+                activeIsExternal &&
+                activeVisiblePx >= (isIOSUi ? 56 : (isCoarseUi ? 72 : 64))
+              ) {
+                markSettling(active, isIOSUi ? 1800 : (isCoarseUi ? 1500 : 1200), 'external_below_stop_soft_hold_visible');
+                traceCandidate('candidate_release_external_soft_hold_visible', active, {
+                  ratio: ar,
+                  score: activeScore,
+                  visiblePx: activeVisiblePx,
+                  centerDist: activeCenterDist,
+                  reason: 'below_stop_ratio',
+                });
+              } else {
+                scheduleHardUnload(active, null, 'below_stop_ratio');
+              }
             }
             active = null;
           }

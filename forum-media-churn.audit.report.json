@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 1168,
+    "score": 1172,
     "counts": {
       "playCalls": 4,
       "pauseCalls": 17,
@@ -11,7 +11,7 @@
       "currentSrcReads": 27,
       "pendingFlags": 120,
       "hardUnload": 23,
-      "iframeOps": 235,
+      "iframeOps": 237,
       "io": 4,
       "ro": 0,
       "raf": 7,
@@ -26,19 +26,19 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2596,
+          "line": 2591,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2677,
+          "line": 2672,
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 4369,
+          "line": 4364,
           "text": "const p2 = activeNativePostVideo.play?.();"
         },
         {
-          "line": 4433,
+          "line": 4428,
           "text": "const p = media.play?.();"
         }
       ],
@@ -66,25 +66,25 @@
           "text": "media.load?.();"
         },
         {
-          "line": 5053,
+          "line": 5048,
           "text": "})) a.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 2405,
+          "line": 2399,
           "text": "try { if (iframe.getAttribute('src')) iframe.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 2432,
+          "line": 2426,
           "text": "try { if (owner.getAttribute('src')) owner.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 3784,
+          "line": 3779,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         },
         {
-          "line": 3801,
+          "line": 3796,
           "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
         }
       ],
@@ -162,37 +162,37 @@
       ],
       "io": [
         {
-          "line": 5321,
+          "line": 5316,
           "text": "if (!('IntersectionObserver' in window)) return;"
         },
         {
-          "line": 5323,
+          "line": 5318,
           "text": "io = new IntersectionObserver("
         },
         {
-          "line": 5622,
+          "line": 5637,
           "text": "// IntersectionObserver tick right after src/API bootstrap. If we only"
         },
         {
-          "line": 5783,
+          "line": 5798,
           "text": "nearIo = new IntersectionObserver("
         }
       ],
       "raf": [
         {
-          "line": 5344,
+          "line": 5339,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
-          "line": 5763,
+          "line": 5778,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6060,
+          "line": 6075,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6129,
+          "line": 6144,
           "text": "if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(mutationSweepRaf);"
         }
       ],
