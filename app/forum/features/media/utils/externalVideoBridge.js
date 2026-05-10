@@ -153,7 +153,18 @@ export function emitExternalVideoState(frame, detail = {}) {
 function getYouTubeApiPlayer(frame) {
   try {
     const map = window.__forumYtPlayers
-    if (map && typeof map.get === 'function') return map.get(frame) || null
+    if (!frame?.isConnected) return null
+    if (map && typeof map.get === 'function') {
+      const player = map.get(frame) || null
+      if (!player) return null
+      try {
+        const iframe = player?.getIframe?.() || null
+        if (iframe && !iframe.isConnected) return null
+      } catch {
+        return null
+      }
+      return player
+    }
   } catch {}
   return null
 }
@@ -175,6 +186,7 @@ export function postTikTokCommand(frame, type, value) {
 
 export function commandExternalVideo(frame, action, options = {}) {
   if (!(frame instanceof HTMLIFrameElement)) return false
+  if (!frame.isConnected) return false
   const kind = safeString(frame.getAttribute('data-forum-media')).toLowerCase()
   const nextMuted = options.muted == null ? undefined : !!options.muted
 

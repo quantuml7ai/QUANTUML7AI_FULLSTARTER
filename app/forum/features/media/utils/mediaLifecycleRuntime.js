@@ -571,11 +571,17 @@ try {
       String(el.dataset?.__active || '') === '1' ||
       String(el.dataset?.__resident || '') === '1'
     )
+  const postRestorePreloadMode = String(el.dataset?.__restorePreloadMode || '').toLowerCase()
+  const postRestorePreload =
+    postRestorePreloadMode === 'auto' || postRestorePreloadMode === 'metadata'
+      ? postRestorePreloadMode
+      : 'none'
 
   // Feed native video is network-started only by the coordinator.
-  // Attach src under preload=none so the browser cannot begin a metadata Range
-  // request that is immediately aborted by the coordinator's explicit load().
-  el.preload = isPostFeedVideo ? 'none' : (shouldAutoPreload ? 'auto' : 'metadata')
+  // The coordinator may opt into metadata/auto before src attachment for first-frame
+  // prewarm. In that path it must not immediately call load(), otherwise Blob/CDN
+  // starts one Range from src and a second Range from load().
+  el.preload = isPostFeedVideo ? postRestorePreload : (shouldAutoPreload ? 'auto' : 'metadata')
 } catch {}
 try {
   if (isPostFeedVideo) {
@@ -590,6 +596,7 @@ try {
   el.setAttribute('src', src)
   el.dataset.__attachedSrc = String(src)
   el.dataset.__attachedSrcTs = String(Date.now())
+  delete el.dataset.__restorePreloadMode
 } catch {}
   try {
     const isPostFeedVideo = isManagedForumVideoKind(el)
