@@ -189,14 +189,23 @@ export function commandExternalVideo(frame, action, options = {}) {
   if (!frame.isConnected) return false
   const kind = safeString(frame.getAttribute('data-forum-media')).toLowerCase()
   const nextMuted = options.muted == null ? undefined : !!options.muted
+  const isPlayAction = action === 'play'
 
   try {
     const normalized = ensureExternalVideoSrc(kind, frame.getAttribute('data-src') || frame.getAttribute('src') || '')
     if (normalized) {
       if (frame.getAttribute('data-src') !== normalized) frame.setAttribute('data-src', normalized)
-      if (!frame.getAttribute('src')) frame.setAttribute('src', normalized)
+      if (isPlayAction && !frame.getAttribute('src')) frame.setAttribute('src', normalized)
     }
   } catch {}
+
+  if (!isPlayAction && !frame.getAttribute('src')) {
+    emitExternalVideoState(frame, {
+      paused: action === 'pause' ? true : undefined,
+      muted: action === 'mute' ? true : (action === 'unmute' ? false : undefined),
+    })
+    return false
+  }
 
   if (kind === 'youtube') {
     const player = getYouTubeApiPlayer(frame)

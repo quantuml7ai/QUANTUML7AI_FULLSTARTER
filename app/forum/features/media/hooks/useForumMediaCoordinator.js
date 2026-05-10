@@ -2430,6 +2430,7 @@ const onMediaLoadedCaptured = (e) => {
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
       try {
         if (!(iframe instanceof HTMLIFrameElement)) return;
+        try { clearExternalPlayKick(iframe); } catch {}
         destroyTrackedYouTubePlayer(iframe);
         try {
           const src = iframe.getAttribute('data-src') || iframe.getAttribute('src') || '';
@@ -2442,10 +2443,35 @@ const onMediaLoadedCaptured = (e) => {
         traceCandidate('candidate_external_ignored', iframe, { reason });
       } catch {}
     };
+    try {
+      window.__forumDestroyExternalFrame = (frame, reason = 'external_frame_cleanup') => {
+        try {
+          if (!(frame instanceof HTMLIFrameElement)) return false;
+          const kind = String(frame.getAttribute?.('data-forum-media') || '');
+          if (kind === 'youtube') {
+            detachYouTubePlayer(frame, reason);
+            return true;
+          }
+          if (kind === 'tiktok' || kind === 'iframe') {
+            try {
+              const src = frame.getAttribute('data-src') || frame.getAttribute('src') || '';
+              if (src && !frame.getAttribute('data-src')) frame.setAttribute('data-src', src);
+            } catch {}
+            try { frame.removeAttribute('data-forum-iframe-active'); } catch {}
+            try { frame.removeAttribute('data-forum-iframe-loaded'); } catch {}
+            try { frame.removeAttribute('data-forum-loaded-src'); } catch {}
+            try { if (frame.getAttribute('src')) frame.setAttribute('src', ''); } catch {}
+            return true;
+          }
+        } catch {}
+        return false;
+      };
+    } catch {}
     const cleanupObservedMediaNode = (node, reason = 'removed') => {
       if (!(node instanceof Element)) return;
       forEachMediaOwner(node, (owner) => {
         try { cancelUnload(owner); } catch {}
+        try { clearExternalPlayKick(owner); } catch {}
         try { clearReadyReplay(owner); } catch {}
         try { pendingReadyGrace.delete(owner); } catch {}
         try { ratios.delete(owner); } catch {}
@@ -2511,6 +2537,11 @@ const onMediaLoadedCaptured = (e) => {
             try { cleanup?.(); } catch {}
             readyReplay.delete(el);
           }
+        }
+      } catch {}
+      try {
+        for (const [el] of externalPlayKickTimers.entries()) {
+          if (!(el instanceof Element) || !el.isConnected) clearExternalPlayKick(el);
         }
       } catch {}
       try {
@@ -2797,6 +2828,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
     const ytPlayers = new Map();
     const ytMutePolls = new Map();
     const ytMuteLast = new Map();
+    const USE_YOUTUBE_IFRAME_API = false;
     try { window.__forumYtPlayers = ytPlayers; } catch {}
     const isAttachedYtPlayer = (player, iframeRef = null) => {
       try {
@@ -3581,7 +3613,9 @@ const shouldRetainHtmlMedia = (el) => {
       if (kind === 'youtube') {
         try { clearExternalPlayKick(el); } catch {}
         markSuppressedPlayback(el, 1400);
-        pauseTrackedYouTubePlayer(el, reason);
+        if (!pauseTrackedYouTubePlayer(el, reason)) {
+          try { commandExternalVideo(el, 'pause'); } catch {}
+        }
         try { emitExternalVideoState(el, { paused: true }); } catch {}
         try { el.removeAttribute('data-forum-iframe-active'); } catch {}
         try { enforceIframeResidentCap(active === el ? null : active); } catch {}
@@ -3683,7 +3717,9 @@ const pauseForeignMedia = (keepEl = null) => {
       }
 
       if (kind === 'youtube') {
-        pauseTrackedYouTubePlayer(node, 'pause_foreign');
+        if (!pauseTrackedYouTubePlayer(node, 'pause_foreign')) {
+          try { commandExternalVideo(node, 'pause'); } catch {}
+        }
         return;
       }
 
@@ -3819,7 +3855,9 @@ const pauseForeignMedia = (keepEl = null) => {
         return;
       }
       if (kind === 'youtube') {
-        pauseTrackedYouTubePlayer(el, unloadReason);
+        if (!pauseTrackedYouTubePlayer(el, unloadReason)) {
+          try { commandExternalVideo(el, 'pause'); } catch {}
+        }
         if (softIframeCooldown) {
           try { el.removeAttribute('data-forum-iframe-active'); } catch {}
           emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });
@@ -5295,7 +5333,7 @@ return;
           if (ds && el.getAttribute('data-src') !== ds) {
             try { el.setAttribute('data-src', ds); } catch {}
           }
-          let readyForYouTubeApi = false;
+          let newlyAttached = false;
           if (ds && (!cur || cur !== ds)) {
             try {
               el.setAttribute('data-forum-iframe-loaded', '0');
@@ -5304,22 +5342,27 @@ return;
             try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
             try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
             el.setAttribute('src', ds);
+            newlyAttached = true;
             try { enforceIframeResidentCap(el); } catch {}
-            readyForYouTubeApi = await waitExternalIframeLoad(el, ds, isIOSUi ? 2200 : 1800);
           } else if (ds) {
             try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
             try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
             try { enforceIframeResidentCap(el); } catch {}
-            readyForYouTubeApi = await waitExternalIframeLoad(el, ds, 700);
           }
-          if (ds && !readyForYouTubeApi && !isYouTubeIframeReadyForApi(el, ds)) {
-            scheduleYouTubeApiInitRetry(el, 'yt_api_load_timeout');
-            return;
+          if (newlyAttached && ds) {
+            waitExternalIframeLoad(el, ds, isIOSUi ? 2200 : 1800).then((ok) => {
+              try {
+                if (!ok || !isExternalKickAllowed(el)) return;
+                commandExternalVideo(el, 'play', { muted: desiredMuted() });
+              } catch {}
+            });
           }
           el.setAttribute('data-forum-last-active-ts', String(Date.now()));
         } catch {}
-        const player = await initYouTubePlayer(el);
-        if (!player) return;
+        if (USE_YOUTUBE_IFRAME_API) {
+          const player = await initYouTubePlayer(el);
+          if (!player) return;
+        }
         try {
           const kickYoutube = () => {
             try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
@@ -5441,8 +5484,8 @@ return;
         let count = 0;
         const kind = getMediaKind(el);
         const isYoutubeKick = kind === 'youtube';
-        const maxCount = isYoutubeKick ? (isIOSUi ? 3 : 2) : (isIOSUi ? 7 : (isCoarseUi ? 5 : 4));
-        const delayMs = isYoutubeKick ? (isIOSUi ? 560 : 680) : (isIOSUi ? 360 : (isCoarseUi ? 420 : 520));
+        const maxCount = isYoutubeKick ? (isIOSUi ? 7 : (isCoarseUi ? 6 : 5)) : (isIOSUi ? 7 : (isCoarseUi ? 5 : 4));
+        const delayMs = isYoutubeKick ? (isIOSUi ? 420 : (isCoarseUi ? 500 : 560)) : (isIOSUi ? 360 : (isCoarseUi ? 420 : 520));
         const tick = () => {
           if (!isExternalKickAllowed(el)) {
             clearExternalPlayKick(el);
@@ -6446,6 +6489,7 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
           delete window.__forumYtPlayers;
         }
       } catch {}
+      try { delete window.__forumDestroyExternalFrame; } catch {}
       // Полная очистка YouTube player'ов, чтобы не держать WebGL/GPU ресурсы
       try {
         ytPlayers.forEach((player, iframe) => {

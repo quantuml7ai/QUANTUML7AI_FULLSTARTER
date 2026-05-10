@@ -461,6 +461,7 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
           try {
             if (!(doomed instanceof HTMLIFrameElement)) return
             if (doomed.isConnected) return
+            try { window.__forumDestroyExternalFrame?.(doomed, 'external_component_unmount') } catch {}
             const currentSrc = doomed.getAttribute('src') || ''
             const storedSrc = doomed.getAttribute('data-src') || currentSrc
             if (storedSrc && !doomed.getAttribute('data-src')) doomed.setAttribute('data-src', storedSrc)
