@@ -307,6 +307,11 @@ function QuantumParticleField() {
     [43, 63, 5, 'cyan'], [51, 31, 2, 'violet'], [58, 82, 4, 'gold'], [65, 13, 1, 'cyan'], [72, 54, 3, 'violet'],
     [79, 76, 5, 'cyan'], [86, 27, 2, 'gold'], [92, 66, 4, 'cyan'], [18, 24, 5, 'violet'], [48, 91, 1, 'gold'],
     [69, 39, 2, 'cyan'], [11, 52, 3, 'gold'], [90, 47, 5, 'violet'], [31, 57, 4, 'cyan'], [60, 70, 0, 'gold'],
+    [5, 38, 0, 'cyan'], [9, 91, 0, 'violet'], [16, 8, 0, 'gold'], [25, 68, 0, 'gold'], [33, 33, 0, 'cyan'],
+    [39, 95, 0, 'violet'], [46, 12, 0, 'cyan'], [54, 48, 0, 'gold'], [62, 24, 0, 'violet'], [67, 90, 0, 'cyan'],
+    [74, 8, 0, 'gold'], [82, 84, 0, 'violet'], [88, 14, 0, 'cyan'], [95, 33, 0, 'gold'], [96, 91, 0, 'cyan'],
+    [12, 61, 0, 'gold'], [27, 13, 0, 'violet'], [41, 76, 0, 'cyan'], [57, 6, 0, 'gold'], [71, 70, 0, 'violet'],
+    [84, 53, 0, 'cyan'], [93, 74, 0, 'gold'],
   ]
 
   return (
@@ -322,6 +327,20 @@ function QuantumParticleField() {
         <path className="qw-field-flow qw-field-flow-a" d="M-40 652 C114 410, 255 716, 682 332" stroke="url(#qwFieldLine)" strokeWidth="1.2" fill="none" />
         <path className="qw-field-flow qw-field-flow-b" d="M48 -28 C150 206, 470 90, 584 805" stroke="url(#qwFieldLine)" strokeWidth="1" fill="none" />
         <path className="qw-field-flow qw-field-flow-c" d="M-24 314 C176 220, 338 512, 652 178" stroke="url(#qwFieldLine)" strokeWidth=".85" fill="none" />
+        <path className="qw-field-flow qw-field-flow-d" d="M-18 86 C106 194, 248 96, 372 252 S566 423, 642 294" stroke="url(#qwFieldLine)" strokeWidth=".78" fill="none" />
+        <path className="qw-field-flow qw-field-flow-e" d="M98 790 C158 650, 310 612, 388 470 S492 180, 652 98" stroke="url(#qwFieldLine)" strokeWidth=".72" fill="none" />
+        <path className="qw-field-circuit" d="M38 548h92l31-46h86l28 34h104l39-62h144" stroke="rgba(103,232,249,.2)" strokeWidth="1" fill="none" />
+        <path className="qw-field-circuit" d="M54 194h76l28 31h96l34-48h118l30 36h126" stroke="rgba(250,204,21,.18)" strokeWidth="1" fill="none" />
+        <g className="qw-field-constellation" opacity=".42">
+          <path d="M92 408 146 374 204 402 268 354 336 392 410 334 498 376" stroke="rgba(103,232,249,.34)" strokeWidth=".82" fill="none" />
+          <circle cx="92" cy="408" r="2.4" fill="#67e8f9" />
+          <circle cx="146" cy="374" r="1.8" fill="#facc15" />
+          <circle cx="204" cy="402" r="2.1" fill="#c084fc" />
+          <circle cx="268" cy="354" r="1.9" fill="#67e8f9" />
+          <circle cx="336" cy="392" r="2.2" fill="#facc15" />
+          <circle cx="410" cy="334" r="1.8" fill="#67e8f9" />
+          <circle cx="498" cy="376" r="2.6" fill="#c084fc" />
+        </g>
       </svg>
       {particles.map(([x, y, delay, tone], index) => (
         <span
@@ -710,20 +729,9 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
           animation: qwShellIn .34s cubic-bezier(.2,.9,.2,1) both;
         }
 
-        .qw-shell::before {
-          content: '';
-          position: absolute;
-          inset: -2px;
-          border-radius: inherit;
-          padding: 2px;
-          background: conic-gradient(from 210deg, rgba(103,232,249,.1), rgba(96,165,250,.72), rgba(192,132,252,.42), rgba(250,204,21,.78), rgba(45,212,191,.7), rgba(103,232,249,.1));
-          -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          pointer-events: none;
-          opacity: .92;
-          animation: qwBorderSpin 12s linear infinite;
-        }
+.qw-shell::before {
+  display: none !important;
+}
 
         .qw-shell::after {
           content: '';
@@ -1376,8 +1384,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
           from { opacity: 0; transform: translateY(18px) scale(.965); filter: blur(5px); }
           to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
-
-        @keyframes qwBorderSpin { to { transform: rotate(360deg); } }
+        
         @keyframes qwScan { 0%, 30% { transform: translateY(0); } 62%, 100% { transform: translateY(390%); } }
         @keyframes qwOverlayGrid { to { background-position: 72px 72px, -72px 72px; } }
         @keyframes qwParticles { to { background-position: 30px -18px, -42px 32px, 54px 20px, -38px -26px; opacity: .62; } }
@@ -1691,12 +1698,12 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
         }
         .qw-action-word-main { font-size: 18px; }
         .qw-action-word-sub { font-size: 10px; letter-spacing: .075em; animation-delay: .42s !important; }
-        .qw-action-comet,
-        .qw-meta-comet {
-          stroke-dasharray: 24 136 !important;
-          animation: qwActionComet 3.8s ease-in-out infinite !important;
-          opacity: .76;
-        }
+.qw-action-comet,
+.qw-meta-comet {
+  stroke-dasharray: 24 136 !important;
+  animation: qwActionComet 3.8s ease-in-out infinite !important;
+  opacity: .76;
+}
         .qw-action-star {
           opacity: .82;
           filter: drop-shadow(0 0 7px currentColor);
@@ -2117,6 +2124,126 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
           .qw-action-word-sub {
             font-size: 10px !important;
           }
+        }
+
+        /* Quantum Wallet v7: static reactor field. More visual detail, zero motion for shell particles/orbits/rings. */
+        .qw-overlay::before,
+        .qw-overlay::after,
+        .qw-backdrop-orbit,
+        .qw-shell-scan,
+        .qw-particle-field,
+        .qw-field-flow,
+        .qw-field-circuit,
+        .qw-field-constellation,
+        .qw-field-constellation *,
+        .qw-field-particle,
+        .qw-field-particle::before,
+        .qw-reactor-grid,
+        .qw-reactor-links,
+        .qw-reactor-core,
+        .qw-node,
+        .qw-orbit,
+        .qw-energy-beam,
+        .qw-coin-aura,
+        .qw-coin-ring,
+        .qw-coin-wrap::before,
+        .qw-coin-wrap::after {
+          animation: none !important;
+        }
+
+        .qw-shell-scan {
+          display: none !important;
+        }
+
+        .qw-field-lines {
+          opacity: .96 !important;
+          filter: drop-shadow(0 0 16px rgba(103,232,249,.18)) drop-shadow(0 0 24px rgba(250,204,21,.08)) !important;
+        }
+
+        .qw-field-flow,
+        .qw-field-circuit {
+          stroke-dasharray: none !important;
+          stroke-dashoffset: 0 !important;
+        }
+
+        .qw-field-flow-a { opacity: .74 !important; }
+        .qw-field-flow-b { opacity: .54 !important; }
+        .qw-field-flow-c { opacity: .42 !important; }
+        .qw-field-flow-d { opacity: .38 !important; }
+        .qw-field-flow-e { opacity: .34 !important; }
+
+        .qw-field-particle {
+          transform: translate(-50%, -50%) !important;
+          opacity: .72 !important;
+          box-shadow: 0 0 8px currentColor, 0 0 22px currentColor !important;
+        }
+
+        .qw-field-particle::before {
+          transform: scale(.82) !important;
+          opacity: .14 !important;
+        }
+
+        .qw-reactor-grid {
+          display: block !important;
+          opacity: .3 !important;
+          stroke-dasharray: 2 7 !important;
+          stroke-dashoffset: 0 !important;
+        }
+
+        .qw-reactor-links {
+          opacity: .58 !important;
+          stroke-dasharray: none !important;
+          stroke-dashoffset: 0 !important;
+        }
+
+        .qw-reactor-core {
+          opacity: .78 !important;
+          transform: none !important;
+          transform-origin: 128px 89px !important;
+        }
+
+        .qw-node {
+          opacity: .9 !important;
+          transform: none !important;
+          filter: drop-shadow(0 0 7px currentColor) !important;
+        }
+
+        .qw-orbit-a,
+        .qw-orbit-b,
+        .qw-orbit-c,
+        .qw-energy-beam {
+          stroke-dasharray: none !important;
+          stroke-dashoffset: 0 !important;
+        }
+
+        .qw-orbit-a { opacity: .66 !important; transform: rotate(0deg) !important; }
+        .qw-orbit-b { opacity: .52 !important; transform: rotate(-27deg) !important; }
+        .qw-orbit-c { opacity: .42 !important; transform: rotate(16deg) !important; }
+        .qw-energy-beam { opacity: .54 !important; }
+
+        .qw-coin-aura {
+          opacity: .72 !important;
+          transform: none !important;
+        }
+
+        .qw-coin-ring-a {
+          transform: rotateX(62deg) rotateZ(18deg) !important;
+          opacity: .58 !important;
+        }
+
+        .qw-coin-ring-b {
+          transform: rotateX(58deg) rotateZ(-28deg) !important;
+          opacity: .46 !important;
+        }
+
+        .qw-coin-wrap::before {
+          transform: rotate(18deg) !important;
+          opacity: .32 !important;
+        }
+
+        .qw-coin-wrap::after {
+          transform: translateX(0) rotate(18deg) !important;
+          opacity: .18 !important;
         }
 
       `}</style>
