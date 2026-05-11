@@ -582,7 +582,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
                       alt=""
                       width={256}
                       height={256}
-                      sizes="(max-width: 640px) 148px, 210px"
+                      sizes="(max-width: 640px) 250px, 250px"
                       onError={() => setCoinFailed(true)}
                     />
                   )}
@@ -590,7 +590,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
               </div>
 
               <div className="qw-balance" translate="no">
-                <div className="qw-balance-label">{tx('quantum_wallet_balance_label')}</div>
+                <div className="qw-balance-label">Balance</div>
                 <div className={`qw-balance-value ${qcoin.paused ? 'is-paused' : 'is-live'}`} suppressHydrationWarning>
                   {balanceText}
                 </div>
@@ -621,7 +621,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
                         )}
                       </span>
                       <span className="sr-only">{action.label}{action.sublabel ? ` ${action.sublabel}` : ''}</span>
-                      {disabled && <span className="qw-action-soon">{tx('quantum_wallet_coming_soon')}</span>}
+                      {disabled && <span className="qw-action-soon" aria-hidden="true">SOON</span>}
                     </button>
                   )
                 })}
@@ -868,7 +868,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
         .qw-title-back,
         .qw-title-main {
           font-family: ui-serif, Georgia, 'Times New Roman', serif;
-          font-size: 38px;
+          font-size: 45px;
           font-weight: 950;
           letter-spacing: .045em;
         }
@@ -1880,10 +1880,10 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
             width: min(78%, 300px) !important;
             min-height: clamp(136px, 36vw, 188px) !important;
           }
-          .qw-coin-wrap {
-            width: clamp(124px, 35vw, 166px) !important;
-            height: clamp(124px, 35vw, 166px) !important;
-          }
+.qw-coin-wrap {
+  width: clamp(150px, 34vw, 250px);
+  height: clamp(150px, 34vw, 250px);
+}
           .qw-balance-label { font-size: clamp(23px, 7vw, 32px) !important; }
           .qw-balance-value { font-size: clamp(20px, 6vw, 28px) !important; }
           .qw-actions { gap: clamp(5px, 1.6vw, 8px) !important; }
@@ -2371,7 +2371,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
 .qw-shell.qw-layer-home {
   --qw-home-topbar-space: clamp(48px, 7vw, 64px);
   --qw-home-bottom-gap: clamp(6px, 1vw, 10px);
-  --qw-balance-actions-gap: clamp(8px, 1.35vw, 14px);
+  --qw-balance-actions-gap: clamp(14px, 2vw, 22px);
 }
 
 .qw-shell.qw-layer-home .qw-content {
@@ -2427,7 +2427,7 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
   .qw-shell.qw-layer-home {
     --qw-home-topbar-space: 46px;
     --qw-home-bottom-gap: 6px;
-    --qw-balance-actions-gap: 8px;
+    --qw-balance-actions-gap: 13px;
   }
 
   .qw-shell.qw-layer-home .qw-content {
@@ -2444,11 +2444,113 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
 @media (max-width: 380px) {
   .qw-shell.qw-layer-home {
     --qw-home-bottom-gap: 5px;
-    --qw-balance-actions-gap: 7px;
+    --qw-balance-actions-gap: 11px;
   }
 
   .qw-shell.qw-layer-home .qw-stage {
     min-height: clamp(144px, 30dvh, 214px) !important;
+  }
+}
+
+
+/* Quantum Wallet v10: premium red SOON corner ribbon for disabled action modules.
+   Static only: no animations, no GPU-heavy effects, visible on all 4x2 button sizes. */
+.qw-action.is-disabled .qw-action-soon {
+  position: absolute !important;
+  z-index: 7 !important;
+  top: clamp(4px, .75vw, 7px) !important;
+  left: clamp(-25px, -3.8vw, -18px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: clamp(62px, 9vw, 84px) !important;
+  height: clamp(13px, 2vw, 18px) !important;
+  max-width: none !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  transform: rotate(-39deg) translateZ(0) !important;
+  transform-origin: center !important;
+  border-radius: 999px !important;
+  border-top: 1px solid rgba(255, 255, 255, .42) !important;
+  border-bottom: 1px solid rgba(80, 0, 0, .62) !important;
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.18) 0 2px, transparent 2px 5px),
+    linear-gradient(90deg, rgba(120, 0, 12, .98), rgba(239, 35, 60, .98) 45%, rgba(255, 91, 104, .96) 50%, rgba(155, 0, 20, .98)) !important;
+  color: rgba(255, 245, 245, .98) !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: clamp(7px, 1.05vw, 9px) !important;
+  font-weight: 1000 !important;
+  line-height: 1 !important;
+  letter-spacing: .16em !important;
+  text-transform: uppercase !important;
+  text-align: center !important;
+  text-overflow: clip !important;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, .09) inset,
+    0 2px 5px rgba(0, 0, 0, .45),
+    0 0 10px rgba(248, 40, 64, .32) !important;
+  text-shadow:
+    0 1px 0 rgba(90, 0, 12, .95),
+    0 0 7px rgba(255, 224, 224, .45) !important;
+  pointer-events: none !important;
+  opacity: .96 !important;
+}
+
+.qw-action.is-disabled .qw-action-soon::before,
+.qw-action.is-disabled .qw-action-soon::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 2px !important;
+  background: rgba(85, 0, 12, .92) !important;
+  transform: translateY(-50%) rotate(45deg) !important;
+  box-shadow: 0 0 6px rgba(0,0,0,.35) !important;
+}
+
+.qw-action.is-disabled .qw-action-soon::before {
+  left: -3px !important;
+}
+
+.qw-action.is-disabled .qw-action-soon::after {
+  right: -3px !important;
+}
+
+.qw-action.is-disabled .qw-action-mark-wrap,
+.qw-action.is-disabled .qw-action-icon {
+  z-index: 3 !important;
+}
+
+.qw-action.is-disabled.is-locked .qw-action-soon {
+  background:
+    repeating-linear-gradient(135deg, rgba(255,255,255,.14) 0 2px, transparent 2px 5px),
+    linear-gradient(90deg, rgba(85, 0, 14, .98), rgba(190, 18, 60, .98) 48%, rgba(248, 113, 113, .92) 52%, rgba(95, 0, 18, .98)) !important;
+  opacity: .9 !important;
+}
+
+@media (max-width: 640px) {
+  .qw-action.is-disabled .qw-action-soon {
+    top: 4px !important;
+    left: -22px !important;
+    width: 68px !important;
+    height: 14px !important;
+    font-size: 7px !important;
+    letter-spacing: .14em !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .qw-action.is-disabled .qw-action-soon {
+    display: flex !important;
+    top: 3px !important;
+    left: -23px !important;
+    width: 66px !important;
+    height: 13px !important;
+    font-size: 6.6px !important;
+    letter-spacing: .12em !important;
   }
 }
 
@@ -2462,6 +2564,158 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
     stroke-opacity: .72;
   }
 }
+
+
+/* Quantum Wallet v11: balance caption and lifted counter spacing.
+   Replaces the old QCoin asset label with a compact premium Balance title,
+   while the bottom-anchored actions stay in place and the counter rises above them. */
+.qw-shell.qw-layer-home .qw-balance {
+  gap: clamp(5px, .9vw, 8px) !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance-label {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(7px, 1.2vw, 12px) !important;
+  padding: 0 clamp(10px, 2vw, 18px) !important;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-size: clamp(12px, 2.15vw, 16px) !important;
+  line-height: 1 !important;
+  font-weight: 1000 !important;
+  letter-spacing: .24em !important;
+  text-transform: uppercase !important;
+  color: rgba(236, 254, 255, .96) !important;
+  text-shadow:
+    0 0 8px rgba(103, 232, 249, .72),
+    0 0 18px rgba(250, 204, 21, .26) !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance-label::before,
+.qw-shell.qw-layer-home .qw-balance-label::after {
+  content: '' !important;
+  width: clamp(18px, 4.2vw, 38px) !important;
+  height: 1px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent, rgba(103, 232, 249, .8), rgba(250, 204, 21, .62)) !important;
+  box-shadow: 0 0 10px rgba(103, 232, 249, .45) !important;
+  opacity: .82 !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance-label::after {
+  background: linear-gradient(90deg, rgba(250, 204, 21, .62), rgba(103, 232, 249, .8), transparent) !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance-value {
+  margin-bottom: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .qw-shell.qw-layer-home .qw-balance-label {
+    font-size: clamp(11px, 3.2vw, 14px) !important;
+    letter-spacing: .20em !important;
+  }
+}
+
+
+/* Quantum Wallet v12: mobile coin desktop-size parity + static coin.
+   Keeps the desktop coin tuning, makes mobile use the same large visual scale,
+   and freezes every coin-only motion layer to reduce popup GPU/CPU pressure. */
+.qw-shell.qw-layer-home .qw-coin-wrap {
+  width: clamp(150px, 34vw, 250px) !important;
+  height: clamp(150px, 34vw, 250px) !important;
+  animation: none !important;
+  transform: translateZ(0) !important;
+  will-change: auto !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin,
+.qw-shell.qw-layer-home .qw-coin-fallback {
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin-aura,
+.qw-shell.qw-layer-home .qw-coin-ring,
+.qw-shell.qw-layer-home .qw-coin-ring-a,
+.qw-shell.qw-layer-home .qw-coin-ring-b,
+.qw-shell.qw-layer-home .qw-coin-wrap::before,
+.qw-shell.qw-layer-home .qw-coin-wrap::after {
+  animation: none !important;
+  will-change: auto !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin-ring-a {
+  transform: rotateX(62deg) rotateZ(18deg) !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin-ring-b {
+  transform: rotateX(58deg) rotateZ(-28deg) !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin-wrap::before {
+  transform: rotate(18deg) !important;
+}
+
+.qw-shell.qw-layer-home .qw-coin-wrap::after {
+  transform: translateX(0) rotate(18deg) !important;
+}
+
+@media (max-width: 640px) {
+  .qw-shell.qw-layer-home .qw-stage {
+    width: min(88%, 360px) !important;
+    min-height: clamp(216px, 62vw, 274px) !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-coin-wrap {
+    width: clamp(190px, 56vw, 250px) !important;
+    height: clamp(190px, 56vw, 250px) !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-coin-aura {
+    width: clamp(198px, 58vw, 260px) !important;
+    height: clamp(198px, 58vw, 260px) !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-coin-ring {
+    width: clamp(206px, 60vw, 272px) !important;
+    height: clamp(206px, 60vw, 272px) !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-coin-ring-b {
+    width: clamp(232px, 66vw, 300px) !important;
+    height: clamp(142px, 40vw, 190px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .qw-shell.qw-layer-home .qw-stage {
+    min-height: clamp(204px, 60vw, 252px) !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-coin-wrap {
+    width: clamp(178px, 55vw, 232px) !important;
+    height: clamp(178px, 55vw, 232px) !important;
+  }
+}
+
+
+/* Quantum Wallet v13: freeze only the balance capsule floating.
+   The counter itself stays fixed in place; the white/gold sweep inside
+   .qw-balance-value::before remains alive. */
+.qw-shell.qw-layer-home .qw-balance-value {
+  animation: none !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance-value::before {
+  animation: qwBalanceSweep 3.6s ease-in-out infinite !important;
+}
+
+
       `}</style>
     </div>,
     document.body,
