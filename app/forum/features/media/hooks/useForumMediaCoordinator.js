@@ -1,4 +1,4 @@
-﻿import { useEffect } from 'react'
+import { useEffect } from 'react'
 
 import { isBrowser } from '../../../shared/utils/browser'
 import {
@@ -377,6 +377,11 @@ const applyMutedPrefToAll = () => {
           if (want) a.setAttribute('muted', '');
           else a.removeAttribute('muted');
         }
+        return;
+      }
+
+      if (kind === 'youtube') {
+        try { commandExternalVideo(el, want ? 'mute' : 'unmute'); } catch {}
         return;
       }
 
@@ -3653,9 +3658,11 @@ const shouldRetainHtmlMedia = (el) => {
         markSuppressedPlayback(el, 1400);
         const player = ytPlayers.get(el);
         try { player?.pauseVideo?.(); } catch {}
+        try { commandExternalVideo(el, 'pause'); } catch {}
         try { emitExternalVideoState(el, { paused: true }); } catch {}
         try { stopYtMutePoll(player); } catch {}
         try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { el.setAttribute('data-forum-yt-health-token', 'paused'); } catch {}
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
@@ -3753,9 +3760,15 @@ const pauseForeignMedia = (keepEl = null) => {
       }
 
       if (kind === 'youtube') {
+        try { clearExternalPlayKick(node); } catch {}
+        markSuppressedPlayback(node, 1200);
         const player = ytPlayers.get(node);
         try { player?.pauseVideo?.(); } catch {}
+        try { commandExternalVideo(node, 'pause'); } catch {}
+        try { emitExternalVideoState(node, { paused: true }); } catch {}
         try { stopYtMutePoll(player); } catch {}
+        try { node.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { node.setAttribute('data-forum-yt-health-token', 'paused'); } catch {}
         return;
       }
 
@@ -6205,20 +6218,35 @@ return;
     };
 const onExternalMediaPlay = (e) => {
   const source = String(e?.detail?.source || '');
+  const candidate = e?.detail?.element || null;
+  const manual = !!e?.detail?.manual;
 
   const isAdSource =
     source === 'ad' ||
     source === 'forum_ads' ||
     source === 'forum-ads' ||
     source === 'forum-ads-toggle' ||
-    source.startsWith('ad_');
+    source === 'site_ad' ||
+    source === 'site-ad' ||
+    source.startsWith('ad_') ||
+    source.startsWith('site_ad_') ||
+    source.startsWith('site-ad-');
 
-  if (isAdSource) return;
+  if (isAdSource) {
+    try {
+      if (active instanceof Element) {
+        softPauseMedia(active, `${source || 'ad'}_external_play`);
+        scheduleHardUnload(active, null, `${source || 'ad'}_external_play`);
+        active = null;
+        activeSinceTs = 0;
+      }
+      pauseForeignMedia(candidate);
+      traceCandidate('candidate_external_ad_play', candidate, { reason: source });
+    } catch {}
+    return;
+  }
 
   if (!['qcast', 'youtube', 'tiktok', 'iframe'].includes(source)) return;
-
-  const candidate = e?.detail?.element || null;
-  const manual = !!e?.detail?.manual;
 
   if ((isUserPaused(candidate) || hasSuppressedPlayback(candidate)) && !manual && !hasManualLease(candidate)) {
     traceCandidate('candidate_external_ignored', candidate, { reason: source });

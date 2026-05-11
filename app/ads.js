@@ -250,15 +250,60 @@ function buildInternalSlotKey(slotKeyProp, slotKindProp) {
   return `${base}__${page}__${globalInstanceCounter}`;
 }
 
+function detectExternalFrameKind(frame) {
+  if (!frame || !isBrowser()) return '';
+  try {
+    const attr = String(
+      frame.getAttribute?.('data-site-ad-media') ||
+      frame.getAttribute?.('data-forum-media') ||
+      frame.getAttribute?.('data-ad-media-kind') ||
+      ''
+    ).trim().toLowerCase();
+    if (attr === 'youtube' || attr === 'tiktok' || attr === 'iframe') return attr;
+  } catch {}
+  try {
+    const raw = String(frame.getAttribute?.('src') || frame.getAttribute?.('data-src') || '').trim();
+    if (!raw) return '';
+    const url = new URL(raw, window.location.href);
+    const host = String(url.hostname || '').toLowerCase();
+    if (/(^|\.)youtube(?:-nocookie)?\.com$|(^|\.)youtu\.be$/i.test(host)) return 'youtube';
+    if (/(^|\.)tiktok\.com$/i.test(host)) return 'tiktok';
+  } catch {}
+  return 'iframe';
+}
+
+function postYouTubeFrameCommand(frame, func, args = '') {
+  try {
+    frame.contentWindow?.postMessage?.(JSON.stringify({ event: 'command', func, args }), '*');
+  } catch {}
+}
+
 function commandExternalFrame(frame, command, muted) {
   if (!frame || !isBrowser()) return;
   const nextMuted = normalizeSiteMuted(muted);
-  const youtubeCommand = command === 'play' ? 'playVideo' : 'pauseVideo';
-  const tiktokCommand = command === 'play' ? 'play' : 'pause';
-  try { frame.contentWindow?.postMessage?.({ event: 'command', func: nextMuted ? 'mute' : 'unMute', args: '' }, '*'); } catch {}
-  try { frame.contentWindow?.postMessage?.({ event: 'command', func: youtubeCommand, args: '' }, '*'); } catch {}
-  try { frame.contentWindow?.postMessage?.({ method: tiktokCommand, value: command === 'play' ? 1 : 0, muted: nextMuted }, '*'); } catch {}
-  try { frame.contentWindow?.postMessage?.({ type: command, command: tiktokCommand, muted: nextMuted }, '*'); } catch {}
+  const kind = detectExternalFrameKind(frame);
+
+  if (kind === 'youtube') {
+    const youtubeCommand = command === 'play' ? 'playVideo' : 'pauseVideo';
+    postYouTubeFrameCommand(frame, nextMuted ? 'mute' : 'unMute');
+    postYouTubeFrameCommand(frame, youtubeCommand);
+    return;
+  }
+
+  if (kind === 'tiktok') {
+    const tiktokCommand = command === 'play' ? 'play' : 'pause';
+    try { frame.contentWindow?.postMessage?.({ method: tiktokCommand, value: command === 'play' ? 1 : 0, muted: nextMuted }, '*'); } catch {}
+    try { frame.contentWindow?.postMessage?.({ type: command, command: tiktokCommand, muted: nextMuted }, '*'); } catch {}
+    return;
+  }
+
+  try { frame.contentWindow?.postMessage?.({ method: command === 'play' ? 'play' : 'pause', muted: nextMuted }, '*'); } catch {}
+  try { frame.contentWindow?.postMessage?.(command === 'play' ? 'play' : 'pause', '*'); } catch {}
+}
+
+function isSiteAdPlaySource(source) {
+  const s = String(source || '').trim().toLowerCase();
+  return s === 'site_ad' || s.startsWith('site_ad_') || s === 'site-ad' || s.startsWith('site-ad-');
 }
 
 function emitSiteMediaPlay(source, element, id, muted, lastTsRef) {
@@ -291,6 +336,8 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   const adNativePauseRecoveryRef = useRef({ timer: 0, ts: 0, count: 0 });
   const adNativeFocusKickTsRef = useRef(0);
   const adPlayEventTsRef = useRef(0);
+  const foreignPauseUntilRef = useRef(0);
+  const foreignPauseReleaseTimerRef = useRef(0);
   const shouldPlayRef = useRef(false);
   const mutedRef = useRef(normalizeSiteMuted(readMutedPref()));
   const videoErrorUntilRef = useRef(new Map());
@@ -299,7 +346,9 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   const [isNear, setIsNear] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isPageActive, setIsPageActive] = useState(true);
-  const shouldPlay = isFocused && isPageActive;
+  const [foreignPauseRev, setForeignPauseRev] = useState(0);
+  const foreignPauseActive = foreignPauseRev >= 0 && isBrowser() && Number(foreignPauseUntilRef.current || 0) > Date.now();
+  const shouldPlay = isFocused && isPageActive && !foreignPauseActive;
   const currentMedia = mediaInfo?.media || { kind: 'skeleton', src: null };
   const currentKind = String(currentMedia?.kind || '');
   const currentSrc = String(currentMedia?.src || '');
@@ -342,6 +391,48 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
     emitSiteMediaPlay(source, el, playerIdRef.current, mutedRef.current, adPlayEventTsRef);
   }, []);
 
+  const markSiteAdPlaying = useCallback((nextPlaying, reason = 'state') => {
+    const next = nextPlaying ? '1' : '0';
+    const stamp = String(Date.now());
+    [rootRef.current, videoRef.current, iframeRef.current].forEach((node) => {
+      try {
+        if (!node?.dataset) return;
+        node.dataset.siteAdPlaying = next;
+        node.dataset.siteAdPlayingReason = String(reason || 'state');
+        node.dataset.siteAdPlayingTs = stamp;
+      } catch {}
+    });
+  }, []);
+
+  const pauseSiteAdForForeignPlay = useCallback((source = 'foreign_play') => {
+    const reason = `foreign_${String(source || 'media')}`;
+    foreignPauseUntilRef.current = Date.now() + 9000;
+    shouldPlayRef.current = false;
+    setForeignPauseRev((value) => value + 1);
+    try {
+      if (foreignPauseReleaseTimerRef.current) clearTimeout(foreignPauseReleaseTimerRef.current);
+      const releaseDelay = Math.max(250, Number(foreignPauseUntilRef.current || 0) - Date.now() + 25);
+      foreignPauseReleaseTimerRef.current = setTimeout(() => {
+        foreignPauseReleaseTimerRef.current = 0;
+        setForeignPauseRev((value) => value + 1);
+      }, releaseDelay);
+    } catch {}
+    markSiteAdPlaying(false, reason);
+
+    try {
+      const st = adNativePauseRecoveryRef.current || {};
+      if (st.timer) clearTimeout(st.timer);
+      adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+    } catch {}
+
+    try {
+      const v = videoRef.current;
+      if (v) detachSiteNativeVideo(v, { hard: false, reason });
+    } catch {}
+
+    try { ytPlayerRef.current?.pauseVideo?.(); } catch {}
+    try { commandExternalFrame(iframeRef.current, 'pause', mutedRef.current); } catch {}
+  }, [markSiteAdPlaying]);
 
   const repickAdUrl = useCallback(() => {
     const freshConf = getForumAdConf();
@@ -403,23 +494,25 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       v.setAttribute('playsinline', '');
       v.setAttribute('webkit-playsinline', '');
       v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY;
-      if (!v.paused && !v.ended) { emitAdPlayToCoordinator('site_ad_video'); return true; }
+      if (!v.paused && !v.ended) { markSiteAdPlaying(true, reason); emitAdPlayToCoordinator('site_ad_video'); return true; }
       if (v.ended) { try { v.currentTime = 0; } catch {}; try { delete v.dataset.__siteAdEndedHold; } catch {} }
       const playAttempt = v.play?.();
       if (playAttempt && typeof playAttempt.then === 'function') {
         playAttempt.then(() => {
           try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}
+          markSiteAdPlaying(true, reason);
           emitAdPlayToCoordinator('site_ad_video');
         }).catch(() => {
           try { if (!shouldPlayRef.current || normalizeSiteMuted(mutedRef.current) !== false) return; applyMutedToVideo(v, true); v.play?.().catch(() => {}); } catch {}
         });
       } else {
         try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}
+        markSiteAdPlaying(true, reason);
         emitAdPlayToCoordinator('site_ad_video');
       }
       return true;
     } catch { return false; }
-  }, [currentKind, currentSrc, emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked]);
+  }, [currentKind, currentSrc, emitAdPlayToCoordinator, isPageActive, isVideoSrcTemporarilyBlocked, markSiteAdPlaying]);
 
   useEffect(() => { shouldPlayRef.current = shouldPlay; }, [shouldPlay]);
   useEffect(() => { mutedRef.current = normalizeSiteMuted(muted); applyMutedToVideo(videoRef.current, mutedRef.current); }, [muted]);
@@ -449,13 +542,28 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
   }, []);
 
   useEffect(() => {
+    if (!isBrowser()) return undefined;
+    const onSiteMediaPlay = (event) => {
+      const detail = event?.detail || {};
+      if (detail?.id && detail.id === playerIdRef.current) return;
+      const source = String(detail?.source || '');
+      if (!source || isSiteAdPlaySource(source)) return;
+      pauseSiteAdForForeignPlay(source);
+    };
+    window.addEventListener(SITE_MEDIA_PLAY_EVENT, onSiteMediaPlay);
+    return () => window.removeEventListener(SITE_MEDIA_PLAY_EVENT, onSiteMediaPlay);
+  }, [pauseSiteAdForForeignPlay]);
+
+  useEffect(() => {
     const node = videoRef.current;
     return () => {
+      markSiteAdPlaying(false, 'unmount');
+      try { if (foreignPauseReleaseTimerRef.current) clearTimeout(foreignPauseReleaseTimerRef.current); foreignPauseReleaseTimerRef.current = 0; } catch {}
       try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: 0, count: 0 }; } catch {}
       attachedVideoSrcRef.current = '';
       detachSiteNativeVideo(node, { hard: true, reason: 'unmount', resetPipeline: true });
     };
-  }, []);
+  }, [markSiteAdPlaying]);
 
   useEffect(() => {
     if (!isBrowser()) return undefined;
@@ -504,20 +612,21 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
 
   useEffect(() => {
     const node = videoRef.current;
-    if (currentKind !== 'video') { attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'kind_change', resetPipeline: true }); return undefined; }
+    if (currentKind !== 'video') { markSiteAdPlaying(false, 'kind_change'); attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'kind_change', resetPipeline: true }); return undefined; }
     const nextSrc = String(currentSrc || '').trim();
-    if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) { attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src', resetPipeline: true }); return undefined; }
+    if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) { markSiteAdPlaying(false, 'blocked_or_empty_src'); attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src', resetPipeline: true }); return undefined; }
     if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) { detachSiteNativeVideo(node, { hard: true, reason: 'src_change', resetPipeline: true }); attachedVideoSrcRef.current = ''; }
     return undefined;
-  }, [currentKind, currentSrc, isVideoSrcTemporarilyBlocked]);
+  }, [currentKind, currentSrc, isVideoSrcTemporarilyBlocked, markSiteAdPlaying]);
 
   useEffect(() => {
     const v = videoRef.current;
-    if (currentKind !== 'video' || !isPageActive || !isNear) { if (v && !shouldPlayRef.current) detachSiteNativeVideo(v, { hard: false, reason: 'near_exit' }); return undefined; }
+    if (currentKind !== 'video' || !isPageActive || !isNear) { markSiteAdPlaying(false, 'near_exit'); if (v && !shouldPlayRef.current) detachSiteNativeVideo(v, { hard: false, reason: 'near_exit' }); return undefined; }
     if (!v) return undefined;
     const srcKey = String(currentSrc || '').trim();
     if (!srcKey || isVideoSrcTemporarilyBlocked(srcKey)) { detachSiteNativeVideo(v, { hard: true, reason: 'bad_src', resetPipeline: true }); return undefined; }
     if (!shouldPlayRef.current) {
+      markSiteAdPlaying(false, 'warm_only');
       const nextMuted = normalizeSiteMuted(mutedRef.current);
       const attached = ensureSiteNativeVideoSrc(v, srcKey, nextMuted);
       if (attached) attachedVideoSrcRef.current = srcKey;
@@ -534,10 +643,11 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       } catch {}
     }
     return undefined;
-  }, [currentKind, currentSrc, isNear, isPageActive, isVideoSrcTemporarilyBlocked]);
+  }, [currentKind, currentSrc, isNear, isPageActive, isVideoSrcTemporarilyBlocked, markSiteAdPlaying]);
 
   useEffect(() => {
     if (currentKind !== 'youtube' || !currentSrc || !isBrowser()) {
+      markSiteAdPlaying(false, 'youtube_inactive');
       const existing = ytPlayerRef.current;
       if (existing) { try { existing.destroy?.(); } catch {}; ytPlayerRef.current = null; }
       return undefined;
@@ -557,7 +667,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
             ytPlayerRef.current = ev.target;
             try {
               if (mutedRef.current === true) ev.target.mute?.(); else if (mutedRef.current === false) ev.target.unMute?.();
-              if (shouldPlayRef.current) { emitAdPlayToCoordinator('site_ad_youtube'); ev.target.playVideo?.(); } else ev.target.pauseVideo?.();
+              if (shouldPlayRef.current) { markSiteAdPlaying(true, 'youtube_ready'); emitAdPlayToCoordinator('site_ad_youtube'); ev.target.playVideo?.(); } else { markSiteAdPlaying(false, 'youtube_ready_paused'); ev.target.pauseVideo?.(); }
             } catch {}
           } },
         });
@@ -573,7 +683,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       }
     }
     return () => { cancelled = true; cleanupPlayer(); };
-  }, [currentKind, currentSrc, emitAdPlayToCoordinator]);
+  }, [currentKind, currentSrc, emitAdPlayToCoordinator, markSiteAdPlaying]);
 
   useEffect(() => {
     if (currentKind === 'video' && videoRef.current) {
@@ -583,21 +693,21 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       applyMutedToVideo(v, nextMuted);
       if (!srcKey || isVideoSrcTemporarilyBlocked(srcKey)) { try { v.pause?.(); } catch {}; return; }
       if (shouldPlay) playSiteNativeVideo('focus');
-      else { try { v.pause?.(); } catch {}; try { v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {} }
+      else { markSiteAdPlaying(false, 'video_focus_pause'); try { v.pause?.(); } catch {}; try { v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {} }
     }
     if (currentKind === 'youtube') {
       const p = ytPlayerRef.current;
       const nextMuted = normalizeSiteMuted(muted);
       try {
         if (p) {
-          if (shouldPlay) { if (nextMuted) p.mute?.(); else p.unMute?.(); emitAdPlayToCoordinator('site_ad_youtube'); p.playVideo?.(); }
-          else p.pauseVideo?.();
+          if (shouldPlay) { if (nextMuted) p.mute?.(); else p.unMute?.(); markSiteAdPlaying(true, 'youtube_focus'); emitAdPlayToCoordinator('site_ad_youtube'); p.playVideo?.(); }
+          else { markSiteAdPlaying(false, 'youtube_focus_pause'); p.pauseVideo?.(); }
         }
       } catch {}
       commandExternalFrame(iframeRef.current, shouldPlay ? 'play' : 'pause', nextMuted);
     }
-    if (currentKind === 'tiktok') { if (shouldPlay) emitAdPlayToCoordinator('site_ad_tiktok'); commandExternalFrame(iframeRef.current, shouldPlay ? 'play' : 'pause', muted); }
-  }, [currentKind, currentSrc, emitAdPlayToCoordinator, isVideoSrcTemporarilyBlocked, muted, playSiteNativeVideo, shouldPlay]);
+    if (currentKind === 'tiktok') { if (shouldPlay) { markSiteAdPlaying(true, 'tiktok_focus'); emitAdPlayToCoordinator('site_ad_tiktok'); } else markSiteAdPlaying(false, 'tiktok_focus_pause'); commandExternalFrame(iframeRef.current, shouldPlay ? 'play' : 'pause', muted); }
+  }, [currentKind, currentSrc, emitAdPlayToCoordinator, isVideoSrcTemporarilyBlocked, markSiteAdPlaying, muted, playSiteNativeVideo, shouldPlay]);
 
   useEffect(() => {
     if (currentKind !== 'video') return undefined;
@@ -634,10 +744,11 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         const v = videoRef.current;
         if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; }
         if (v?.dataset) delete v.dataset.__siteAdEndedHold;
-        if (!shouldPlayRef.current) { try { v?.pause?.(); } catch {}; return; }
+        if (!shouldPlayRef.current) { markSiteAdPlaying(false, 'video_playing_rejected'); try { v?.pause?.(); } catch {}; return; }
         const st = adNativePauseRecoveryRef.current || {};
         if (st.timer) clearTimeout(st.timer);
         adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
+        markSiteAdPlaying(true, 'video_playing');
         emitAdPlayToCoordinator('site_ad_video');
       } catch {}
     },
@@ -645,8 +756,8 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       try {
         const v = videoRef.current;
         const srcKey = String(currentSrc || '').trim();
-        if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) return;
-        if (v.ended) { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; return; }
+        if (!v || !shouldPlayRef.current || !srcKey || isVideoSrcTemporarilyBlocked(srcKey)) { markSiteAdPlaying(false, 'video_pause'); return; }
+        if (v.ended) { markSiteAdPlaying(false, 'video_ended_pause'); const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; return; }
         const prev = adNativePauseRecoveryRef.current || { timer: 0, ts: 0, count: 0 };
         const now = Date.now();
         const nextCount = prev.ts > 0 && (now - prev.ts) < 7000 ? Number(prev.count || 0) + 1 : 1;
@@ -657,10 +768,10 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
       } catch {}
     },
     onLoadedData: () => {
-      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else { markSiteAdPlaying(false, 'video_ready_idle'); if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } } catch {}
     },
     onCanPlay: () => {
-      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}
+      try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else { markSiteAdPlaying(false, 'video_ready_idle'); if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } } catch {}
     },
     onEnded: () => {
       try {
@@ -669,7 +780,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 };
         const v = videoRef.current;
         if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdWarmReady = '1'; delete v.dataset.__siteAdEndedHold; }
-        if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }
+        markSiteAdPlaying(false, 'video_ended'); if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }
       } catch {}
     },
     onError: () => {
@@ -683,6 +794,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
         if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdTransientErrorTs = String(now); } return; }
         markVideoSrcTemporarilyBlocked(currentSrc, isNear ? 12000 : 20000);
         attachedVideoSrcRef.current = '';
+        markSiteAdPlaying(false, 'video_error');
         detachSiteNativeVideo(videoRef.current, { hard: true, reason: 'error', resetPipeline: true });
       } catch {}
     },
