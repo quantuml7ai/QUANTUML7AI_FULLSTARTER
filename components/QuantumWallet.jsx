@@ -170,8 +170,7 @@ function QuantumTitle() {
         </linearGradient>
       </defs>
       <text className="qw-title-back" x="260" y="48" textAnchor="middle">Quantum Wallet</text>
-      <text className="qw-title-main" x="260" y="48" textAnchor="middle">Quantum Wallet</text>
-      <rect className="qw-title-sweep" x="-160" y="18" width="130" height="38" rx="18" fill="url(#qwTitleSweep)" />
+      <text className="qw-title-main" x="260" y="48" textAnchor="middle">Quantum Wallet</text> 
     </svg>
   )
 }
@@ -891,13 +890,9 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
           animation: qwTitleDraw 3.4s ease-in-out infinite alternate;
         }
 
-        .qw-title-sweep {
-          opacity: .38;
-          filter: blur(.3px);
-          transform: skewX(-18deg);
-          animation: qwTitleSweep 3.8s ease-in-out infinite;
-          mix-blend-mode: screen;
-        }
+.qw-title-sweep {
+  display: none !important;
+}
 
         .qw-stage {
           position: relative;
@@ -2365,6 +2360,95 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
 
   .qw-meta-word {
     font-size: 18px !important;
+  }
+}
+
+
+/* Quantum Wallet v9: bottom-anchored home composition.
+   Keeps the current top offset untouched, pushes actions to the shell bottom,
+   keeps the balance directly above actions, and lets the coin stage breathe
+   in the center between the title and the balance. */
+.qw-shell.qw-layer-home {
+  --qw-home-topbar-space: clamp(48px, 7vw, 64px);
+  --qw-home-bottom-gap: clamp(6px, 1vw, 10px);
+  --qw-balance-actions-gap: clamp(8px, 1.35vw, 14px);
+}
+
+.qw-shell.qw-layer-home .qw-content {
+  height: calc(100% - var(--qw-home-topbar-space)) !important;
+  max-height: none !important;
+  box-sizing: border-box !important;
+  padding-bottom: var(--qw-home-bottom-gap) !important;
+  overflow: hidden !important;
+}
+
+.qw-shell.qw-layer-home .qw-home {
+  height: 100% !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+  align-items: center !important;
+  justify-items: center !important;
+  justify-content: stretch !important;
+  row-gap: 0 !important;
+}
+
+.qw-shell.qw-layer-home .qw-title-svg {
+  grid-row: 1 !important;
+  align-self: start !important;
+  margin-top: clamp(-2px, .35vw, 2px) !important;
+  margin-bottom: clamp(4px, .8vw, 8px) !important;
+}
+
+.qw-shell.qw-layer-home .qw-stage {
+  grid-row: 2 !important;
+  align-self: center !important;
+  justify-self: center !important;
+  margin: 0 auto !important;
+  min-height: clamp(168px, 28dvh, 258px) !important;
+}
+
+.qw-shell.qw-layer-home .qw-balance {
+  grid-row: 3 !important;
+  align-self: end !important;
+  margin-top: 0 !important;
+  margin-bottom: var(--qw-balance-actions-gap) !important;
+}
+
+.qw-shell.qw-layer-home .qw-actions {
+  grid-row: 4 !important;
+  align-self: end !important;
+  justify-self: stretch !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+@media (max-width: 640px) {
+  .qw-shell.qw-layer-home {
+    --qw-home-topbar-space: 46px;
+    --qw-home-bottom-gap: 6px;
+    --qw-balance-actions-gap: 8px;
+  }
+
+  .qw-shell.qw-layer-home .qw-content {
+    height: calc(100% - var(--qw-home-topbar-space)) !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  .qw-shell.qw-layer-home .qw-stage {
+    min-height: clamp(158px, 32dvh, 236px) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .qw-shell.qw-layer-home {
+    --qw-home-bottom-gap: 5px;
+    --qw-balance-actions-gap: 7px;
+  }
+
+  .qw-shell.qw-layer-home .qw-stage {
+    min-height: clamp(144px, 30dvh, 214px) !important;
   }
 }
 
