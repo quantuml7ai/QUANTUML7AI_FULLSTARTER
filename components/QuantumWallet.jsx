@@ -2245,7 +2245,139 @@ export default function QuantumWallet({ onClose, userKey = '', vipActive = false
           transform: translateX(0) rotate(18deg) !important;
           opacity: .18 !important;
         }
+/* QW buttons v8: freeze decorative motion, make SVG labels bright and readable. */
+.qw-action::before {
+  animation: none !important;
+  transform: none !important;
+  opacity: .18 !important;
+}
 
+.qw-action::after {
+  animation: none !important;
+  transform: none !important;
+  opacity: .22 !important;
+}
+
+.qw-action-bg::after {
+  animation: none !important;
+  transform: none !important;
+  opacity: .24 !important;
+}
+
+.qw-action-comet,
+.qw-meta-comet {
+  animation: none !important;
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+  opacity: .2 !important;
+}
+
+.qw-action-star {
+  animation: none !important;
+  transform: none !important;
+  opacity: .5 !important;
+}
+
+.qw-action-mark,
+.qw-meta-mark {
+  filter:
+    drop-shadow(0 0 4px rgba(236,254,255,.32))
+    drop-shadow(0 1px 2px rgba(0,0,0,.92)) !important;
+}
+
+.qw-action-word,
+.qw-meta-word {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-weight: 1000 !important;
+  letter-spacing: .026em !important;
+  fill: rgba(248,253,255,.96) !important;
+  stroke: rgba(103,232,249,.56) !important;
+  stroke-width: .42px !important;
+  paint-order: stroke fill !important;
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+  opacity: 1 !important;
+  animation: qwActionTextSoftGlow 5.8s ease-in-out infinite !important;
+  filter:
+    drop-shadow(0 0 4px rgba(103,232,249,.36))
+    drop-shadow(0 1px 2px rgba(0,0,0,.9)) !important;
+}
+
+.qw-action.is-active .qw-action-word,
+.qw-action.is-active .qw-meta-word {
+  fill: rgba(255,255,246,.98) !important;
+  stroke: rgba(250,204,21,.64) !important;
+  animation-duration: 5.2s !important;
+  filter:
+    drop-shadow(0 0 5px rgba(250,204,21,.42))
+    drop-shadow(0 1px 2px rgba(0,0,0,.92)) !important;
+}
+
+.qw-action.is-disabled .qw-action-word,
+.qw-action.is-disabled .qw-meta-word {
+  fill: rgba(235,247,255,.9) !important;
+  stroke: rgba(125,211,252,.44) !important;
+  opacity: .96 !important;
+}
+
+.qw-action-word-main {
+  font-size: 28px !important;
+}
+
+.qw-action-word-sub {
+  font-size: 12px !important;
+  letter-spacing: .045em !important;
+  opacity: .92 !important;
+}
+
+.qw-meta-word {
+  font-size: 22px !important;
+  letter-spacing: .018em !important;
+}
+
+.qw-action-soon {
+  color: rgba(248,250,252,.76) !important;
+  text-shadow: 0 0 8px rgba(103,232,249,.18) !important;
+}
+
+@media (max-width: 640px) {
+  .qw-action-word-main {
+    font-size: 26px !important;
+  }
+
+  .qw-action-word-sub {
+    font-size: 11px !important;
+  }
+
+  .qw-meta-word {
+    font-size: 20px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .qw-action-word-main {
+    font-size: 23px !important;
+  }
+
+  .qw-action-word-sub {
+    font-size: 10px !important;
+  }
+
+  .qw-meta-word {
+    font-size: 18px !important;
+  }
+}
+
+@keyframes qwActionTextSoftGlow {
+  0%, 100% {
+    fill-opacity: .88;
+    stroke-opacity: .36;
+  }
+  48% {
+    fill-opacity: 1;
+    stroke-opacity: .72;
+  }
+}
       `}</style>
     </div>,
     document.body,
