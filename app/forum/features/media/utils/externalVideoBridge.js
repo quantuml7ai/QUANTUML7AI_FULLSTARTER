@@ -153,18 +153,7 @@ export function emitExternalVideoState(frame, detail = {}) {
 function getYouTubeApiPlayer(frame) {
   try {
     const map = window.__forumYtPlayers
-    if (!frame?.isConnected) return null
-    if (map && typeof map.get === 'function') {
-      const player = map.get(frame) || null
-      if (!player) return null
-      try {
-        const iframe = player?.getIframe?.() || null
-        if (iframe && !iframe.isConnected) return null
-      } catch {
-        return null
-      }
-      return player
-    }
+    if (map && typeof map.get === 'function') return map.get(frame) || null
   } catch {}
   return null
 }
@@ -186,26 +175,16 @@ export function postTikTokCommand(frame, type, value) {
 
 export function commandExternalVideo(frame, action, options = {}) {
   if (!(frame instanceof HTMLIFrameElement)) return false
-  if (!frame.isConnected) return false
   const kind = safeString(frame.getAttribute('data-forum-media')).toLowerCase()
   const nextMuted = options.muted == null ? undefined : !!options.muted
-  const isPlayAction = action === 'play'
 
   try {
     const normalized = ensureExternalVideoSrc(kind, frame.getAttribute('data-src') || frame.getAttribute('src') || '')
     if (normalized) {
       if (frame.getAttribute('data-src') !== normalized) frame.setAttribute('data-src', normalized)
-      if (isPlayAction && !frame.getAttribute('src')) frame.setAttribute('src', normalized)
+      if (!frame.getAttribute('src')) frame.setAttribute('src', normalized)
     }
   } catch {}
-
-  if (!isPlayAction && !frame.getAttribute('src')) {
-    emitExternalVideoState(frame, {
-      paused: action === 'pause' ? true : undefined,
-      muted: action === 'mute' ? true : (action === 'unmute' ? false : undefined),
-    })
-    return false
-  }
 
   if (kind === 'youtube') {
     const player = getYouTubeApiPlayer(frame)
