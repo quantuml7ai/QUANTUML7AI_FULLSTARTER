@@ -2641,68 +2641,8 @@ const onMediaLoadedCaptured = (e) => {
         return true;
       }
     };
-    const getHtmlMediaPlayAttemptState = (el) => {
-      const media = getMediaStateNode(el);
-      const state = {
-        pending: false,
-        pendingForMs: 0,
-        remainingMs: 0,
-        srcKey: '',
-      };
-      if (!(media instanceof HTMLMediaElement)) return state;
-      try {
-        const now = Date.now();
-        const until = Number(media.dataset?.__htmlPlayPendingUntil || 0);
-        if (!until || until <= now) return state;
-        const pendingSrc = String(media.dataset?.__htmlPlayPendingSrc || '').trim();
-        const srcKey = getMediaSrcKey(media);
-        if (pendingSrc && srcKey && pendingSrc !== srcKey) return state;
-        const startedAt = Number(media.dataset?.__htmlPlayPendingAt || 0);
-        state.pending = true;
-        state.pendingForMs = startedAt > 0 ? now - startedAt : 0;
-        state.remainingMs = until - now;
-        state.srcKey = srcKey || pendingSrc;
-      } catch {}
-      return state;
-    };
-    const markHtmlMediaPlayAttemptPending = (el, token) => {
-      const media = getMediaStateNode(el);
-      if (!(media instanceof HTMLMediaElement)) return;
-      try {
-        const now = Date.now();
-        const holdMs = isIOSUi ? 3400 : (isCoarseUi ? 2800 : 2100);
-        media.dataset.__htmlPlayPending = '1';
-        media.dataset.__htmlPlayPendingAt = String(now);
-        media.dataset.__htmlPlayPendingUntil = String(now + holdMs);
-        media.dataset.__htmlPlayPendingToken = String(token || '');
-        media.dataset.__htmlPlayPendingSrc = getMediaSrcKey(media);
-      } catch {}
-    };
-    const clearHtmlMediaPlayAttemptPending = (el, token, state = 'clear') => {
-      const media = getMediaStateNode(el);
-      if (!(media instanceof HTMLMediaElement)) return;
-      try {
-        const pendingToken = String(media.dataset?.__htmlPlayPendingToken || '');
-        if (pendingToken && token && pendingToken !== String(token)) return;
-        media.dataset.__htmlPlayPending = '0';
-        media.dataset.__htmlPlayPendingState = String(state || 'clear');
-        delete media.dataset.__htmlPlayPendingAt;
-        delete media.dataset.__htmlPlayPendingUntil;
-        delete media.dataset.__htmlPlayPendingToken;
-        delete media.dataset.__htmlPlayPendingSrc;
-      } catch {}
-    };
     const startHtmlMedia = (el, reason = 'play') => {
       if (!(el instanceof HTMLMediaElement)) return;
-      const pendingPlay = getHtmlMediaPlayAttemptState(el);
-      if (pendingPlay.pending) {
-        trace('play_request_hold_pending', el, {
-          reason,
-          pendingForMs: Math.round(pendingPlay.pendingForMs),
-          remainingMs: Math.round(pendingPlay.remainingMs),
-        });
-        return;
-      }
       const playToken = bumpPlayRequestToken(el);
       const canContinue = () => {
         try {
@@ -2712,7 +2652,6 @@ const onMediaLoadedCaptured = (e) => {
       };
       try {
         markCoordinatorPlayIntent(el, 1500);
-        markHtmlMediaPlayAttemptPending(el, playToken);
         try {
           el.dataset.__playRequested = '1';
           el.dataset.__prewarm = '1';
@@ -2726,7 +2665,6 @@ const onMediaLoadedCaptured = (e) => {
         if (p && typeof p.then === 'function') {
           p.then(() => {
             if (!canContinue()) {
-              clearHtmlMediaPlayAttemptPending(el, playToken, 'started_stale');
               try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_started_stale', el, { reason, muted: !!el.muted });
               withSystemPause(el, () => {
@@ -2735,7 +2673,6 @@ const onMediaLoadedCaptured = (e) => {
               return;
             }
             if (!isHtmlMediaPlaybackViewportAllowed(el)) {
-              clearHtmlMediaPlayAttemptPending(el, playToken, 'started_out_of_focus');
               try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_started_out_of_focus_guard', el, { reason, muted: !!el.muted });
               withSystemPause(el, () => {
@@ -2743,12 +2680,11 @@ const onMediaLoadedCaptured = (e) => {
               });
               return;
             }
-            clearHtmlMediaPlayAttemptPending(el, playToken, 'started');
-            trace('play_started', el, { reason, muted: !!el.muted });
-            try {
-              const confirmedReady =
-                Number(el?.readyState || 0) >= 2 &&
-                !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
+trace('play_started', el, { reason, muted: !!el.muted });
+try {
+  const confirmedReady =
+    Number(el?.readyState || 0) >= 2 &&
+    !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
 
   el.dataset.__playRequested = '0';
   el.dataset.__active = '1';
@@ -2769,7 +2705,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
 }
           }).catch((err) => {
             if (!canContinue()) {
-              clearHtmlMediaPlayAttemptPending(el, playToken, 'reject_stale');
               try { el.dataset.__playRequested = '0'; } catch {}
               trace('play_reject_stale', el, { reason });
               return;
@@ -2781,10 +2716,7 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
               message: String(err?.message || ''),
               muted: !!el.muted,
             });
-            if (el.muted) {
-              clearHtmlMediaPlayAttemptPending(el, playToken, 'reject_muted');
-              return;
-            }
+            if (el.muted) return;
             const qcastHost = (() => {
               try { return el.closest?.('[data-forum-media="qcast"]') || null; } catch { return null; }
             })();
@@ -2796,7 +2728,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
             if (qcastHost && qcastUserUnmuteHoldUntil > Date.now()) {
               // Пользователь явно держит qcast в unmute:
               // не переводим в muted-fallback, иначе визуально "звук включён", а по факту тишина.
-              clearHtmlMediaPlayAttemptPending(el, playToken, 'reject_qcast_hold');
               trace('play_reject_qcast_hold', el, { reason });
               return;
             }
@@ -2815,7 +2746,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
               if (retry && typeof retry.then === 'function') {
                 retry.then(() => {
                   if (!canContinue()) {
-                    clearHtmlMediaPlayAttemptPending(el, playToken, 'retry_stale');
                     try { el.dataset.__playRequested = '0'; } catch {}
                     trace('play_retry_stale', el, { reason });
                     withSystemPause(el, () => {
@@ -2824,7 +2754,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                     return;
                   }
                   if (!isHtmlMediaPlaybackViewportAllowed(el)) {
-                    clearHtmlMediaPlayAttemptPending(el, playToken, 'retry_out_of_focus');
                     try { el.dataset.__playRequested = '0'; } catch {}
                     trace('play_retry_out_of_focus_guard', el, { reason });
                     withSystemPause(el, () => {
@@ -2832,12 +2761,11 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                     });
                     return;
                   }
-                  clearHtmlMediaPlayAttemptPending(el, playToken, 'retry_started');
-                  trace('play_retry_muted_ok', el, { reason });
-                  try {
-                    const confirmedReady =
-                      Number(el?.readyState || 0) >= 2 &&
-                      !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
+trace('play_retry_muted_ok', el, { reason });
+try {
+  const confirmedReady =
+    Number(el?.readyState || 0) >= 2 &&
+    !!String(el?.getAttribute?.('src') || el?.currentSrc || '');
 
   el.dataset.__playRequested = '0';
   el.dataset.__active = '1';
@@ -2857,7 +2785,6 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
   try { enforcePostNativeSrcCap(el, 'play_retry_started'); } catch {}
 }
                 }).catch((retryErr) => {
-                  clearHtmlMediaPlayAttemptPending(el, playToken, 'retry_fail');
                   try { el.dataset.__playRequested = '0'; } catch {}
                   trace('play_retry_muted_fail', el, {
                     reason,
@@ -2865,13 +2792,9 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
                     message: String(retryErr?.message || ''),
                   });
                 });
-              } else {
-                clearHtmlMediaPlayAttemptPending(el, playToken, 'retry_no_promise');
               }
             } catch {}
           });
-        } else {
-          clearHtmlMediaPlayAttemptPending(el, playToken, 'no_promise');
         }
       } catch {}
     };
@@ -4946,18 +4869,6 @@ return true;
           gapPx: getOwnerViewportGapPx(media),
           visiblePx: getOwnerVisiblePx(media),
         });
-        if ((isIOSUi || isCoarseUi) && Number(media.readyState || 0) < 2) {
-          const primedWhileLoading = primeNativeFirstFrame(media, reason);
-          if (!primedWhileLoading) {
-            trace('native_prewarm_prime_deferred_loading', media, {
-              reason,
-              readyState: Number(media.readyState || 0),
-              networkState: Number(media.networkState || 0),
-              gapPx: getOwnerViewportGapPx(media),
-              visiblePx: getOwnerVisiblePx(media),
-            });
-          }
-        }
         armReadyReplay(media);
         return true;
       }
@@ -5003,8 +4914,6 @@ return true;
       try {
         const u = new URL(src, window.location.href);
         if (!u.searchParams.has('loop')) u.searchParams.set('loop', '1');
-        if (!u.searchParams.has('autoplay')) u.searchParams.set('autoplay', '1');
-        if (!u.searchParams.has('muted')) u.searchParams.set('muted', '1');
         return u.toString();
       } catch {
         return src;
@@ -5119,26 +5028,6 @@ return true;
         curSrc = String(el.getAttribute('src') || '').trim();
         hadSrc = !!curSrc;
       } catch {}
-      if (kind === 'youtube' && passivePrepare && !hadSrc) {
-        const visiblePx = getOwnerVisiblePx(el);
-        const gapPx = getOwnerViewportGapPx(el);
-        const centerDist = getOwnerCenterDist(el);
-        const visibleGate = isIOSUi ? 260 : (isCoarseUi ? 240 : 220);
-        const centerGate = getPriorityCenterMaxDist(el) + (isIOSUi ? 140 : 100);
-        if (visiblePx < visibleGate || gapPx > 0 || centerDist > centerGate) {
-          trace('iframe_prewarm_skip_budget', el, {
-            kind,
-            reason,
-            gate: 'youtube_passive_no_attach',
-            visiblePx,
-            visibleGate,
-            gapPx,
-            centerDist,
-            centerGate,
-          });
-          return false;
-        }
-      }
       if (!hadSrc && !canSpendExternalPrewarmBudget(el, reason)) return false;
       if (!hadSrc || curSrc !== nextSrc) {
         try {
@@ -5305,23 +5194,17 @@ if (el instanceof HTMLVideoElement) {
     if (shouldKickAfterRestore || shouldKickCold) {
       trace(shouldKickAfterRestore ? 'play_restore_load' : 'play_load', el);
 
-      const loadKicked = kickMediaLoad(el, {
+      if (!kickMediaLoad(el, {
         channel: shouldKickAfterRestore ? 'play_restore' : 'play_cold',
         minGapMs: isIOSUi ? 1100 : (isCoarseUi ? 950 : 900),
         burstWindowMs: isIOSUi ? 18000 : 14000,
         burstLimit: isIOSUi ? 4 : 5,
         blockMs: isIOSUi ? 8000 : 6500,
-        bypassSrcLimiter: userIntentKick,
-        bypassPendingBudget: userIntentKick,
-      });
-      if (!loadKicked) {
-        const attachedAfterSkip = !!String(el.currentSrc || el.getAttribute?.('src') || '').trim();
-        if (!isPostVideo || !attachedAfterSkip) return;
-        trace('play_load_skip_use_attached_src', el, {
-          reason: shouldKickAfterRestore ? 'play_restore' : 'play_cold',
-          userIntentKick,
-        });
-      }
+        // Focus/play is the user-visible path. It must not be blocked by a stale
+        // global source-key budget left from previous slots using the same MP4.
+        bypassSrcLimiter: true,
+        bypassPendingBudget: true,
+      })) return;
     }
   } catch {}
 }
@@ -5479,18 +5362,16 @@ return;
         if (USE_YOUTUBE_IFRAME_API) {
           const player = await initYouTubePlayer(el);
           if (!player) return;
-          try {
-            const kickYoutube = () => {
-              try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
-            };
-            if (!newlyAttached) kickYoutube();
-            scheduleExternalPlayKick(el, kickYoutube, 'youtube_viewport_autoplay');
-          } catch {}
-        } else {
-          try { emitExternalVideoState(el, { paused: false, muted: true }); } catch {}
         }
-        try { enforceIframeResidentCap(el); } catch {}
-        try { emitMediaDiag('iframe_play', { kind: 'youtube', urlAutoplay: true, ...getIframeSnapshot() }); } catch {}
+        try {
+          const kickYoutube = () => {
+            try { commandExternalVideo(el, 'play', { muted: desiredMuted() }); } catch {}
+          };
+          kickYoutube();
+          scheduleExternalPlayKick(el, kickYoutube, 'youtube_viewport_autoplay');
+          enforceIframeResidentCap(el);
+          emitMediaDiag('iframe_play', { kind: 'youtube', ...getIframeSnapshot() });
+        } catch {}
         return;
       }
 
