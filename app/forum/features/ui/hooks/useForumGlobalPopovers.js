@@ -4,9 +4,13 @@ import { useEffect } from 'react'
 
 export default function useForumGlobalPopovers(openOnlyRef) {
   useEffect(() => {
-    const openQcoin = () => openOnlyRef?.current?.('qcoin')
-    window.addEventListener('qcoin:open', openQcoin)
-    return () => window.removeEventListener('qcoin:open', openQcoin)
+    const closeForumPopoversForWallet = () => openOnlyRef?.current?.(null)
+    window.addEventListener('qcoin:open', closeForumPopoversForWallet)
+    window.addEventListener('quantum-wallet:open', closeForumPopoversForWallet)
+    return () => {
+      window.removeEventListener('qcoin:open', closeForumPopoversForWallet)
+      window.removeEventListener('quantum-wallet:open', closeForumPopoversForWallet)
+    }
   }, [openOnlyRef])
 
   useEffect(() => {

@@ -223,6 +223,21 @@ export default function BattleCoin() {
 
   const hasActiveOrder = !!(activeOrder && activeOrder.status === 'OPEN')
 
+  const handleOpenQuantumWallet = useCallback(() => {
+    try {
+      const accountId = readAccountId()
+      window.dispatchEvent(
+        new CustomEvent('quantum-wallet:open', {
+          detail: {
+            accountId,
+            userKey: accountId,
+            vipActive: isVip,
+          },
+        })
+      )
+    } catch {}
+  }, [isVip])
+
   // --- timer tick ---
   useEffect(() => {
     const id = setInterval(() => setNowTs(Date.now()), 1000)
@@ -593,20 +608,39 @@ const filteredOrders = useMemo(() => {
           </div>
         </div>
 
-        <div className="battlecoin-header-right">
+        <div className="battlecoin-header-right">         
           <div className="battlecoin-balance-block">
-            <div className="battlecoin-balance-label">{balanceLabel}</div>
-            <div className="battlecoin-balance-value">
-              <span className="battlecoin-balance-number">
-                {formatNumber(effectiveBalance, 4)}
-              </span>
-              <span className="battlecoin-balance-asset">QCOIN</span>
+           
+            <div className="battlecoin-balance-main">
+              <div className="battlecoin-balance-label">{balanceLabel}</div>
+              <div className="battlecoin-balance-value">
+                <span className="battlecoin-balance-number">
+                  {formatNumber(effectiveBalance, 4)}
+                </span>
+                <span className="battlecoin-balance-asset">QCOIN</span>
+              </div>
             </div>
+            <button
+              type="button"
+              className="battlecoin-wallet-open-btn"
+              onClick={handleOpenQuantumWallet}
+              aria-label={tf(t, 'quantum_wallet_open_aria', 'Open Quantum Wallet')}
+              title={tf(t, 'quantum_wallet_open_aria', 'Open Quantum Wallet')}
+            >
+              <Image
+                src="/click/quest.gif"
+                unoptimized
+                width={42}
+                height={42}
+                alt=""
+                draggable={false}
+                className="battlecoin-wallet-open-img"
+              />
+            </button>
+
           </div>
-
           <div className="battlecoin-header-divider" />
-
-<div className="battlecoin-vip-block">
+            <div className="battlecoin-vip-block"> 
   {isVip ? (
     <div className="battlecoin-vip-pill">
       <span className="vip-spark" />
@@ -624,8 +658,7 @@ const filteredOrders = useMemo(() => {
 </button>
 
   )}
-</div>
-
+</div> 
         </div>
       </header>
 
@@ -1441,9 +1474,13 @@ const filteredOrders = useMemo(() => {
         }
 
         .battlecoin-balance-block {
-          min-width: 165px;
-          padding: 10px 12px;
+          min-width: 245px;
+          padding: 8px 9px 8px 12px;
           border-radius: 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
           background: linear-gradient(
               135deg,
               rgba(40, 205, 255, 0.12),
@@ -1452,6 +1489,10 @@ const filteredOrders = useMemo(() => {
             rgba(6, 10, 32, 0.95);
           box-shadow: 0 0 0 1px rgba(138, 201, 255, 0.35),
             0 10px 28px rgba(0, 0, 0, 0.7);
+        }
+
+        .battlecoin-balance-main {
+          min-width: 0;
         }
 
         .battlecoin-balance-label {
@@ -1480,6 +1521,63 @@ const filteredOrders = useMemo(() => {
           letter-spacing: 0.1em;
           text-transform: uppercase;
           color: rgba(252, 206, 4, 0.9);
+        }
+
+        .battlecoin-wallet-open-btn {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 62px;
+          height: 62px;
+          flex: 0 0 62px;
+          border: 0;
+          padding: 0;
+          margin: 0;
+          border-radius: 18px;
+          background: radial-gradient(circle at 50% 42%, rgba(255, 223, 88, 0.2), transparent 58%);
+          cursor: pointer;
+          isolation: isolate;
+          transition: transform 0.18s ease, filter 0.18s ease;
+          filter: drop-shadow(0 0 10px rgba(255, 216, 73, 0.62))
+            drop-shadow(0 0 15px rgba(62, 214, 255, 0.22));
+        }
+
+        .battlecoin-wallet-open-btn::before {
+          content: '';
+          position: absolute;
+          inset: 5px;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(255, 231, 102, 0.35), rgba(255, 231, 102, 0) 66%);
+          box-shadow: 0 0 0 1px rgba(255, 227, 83, 0.24),
+            0 0 28px rgba(255, 210, 42, 0.32);
+          opacity: 0.92;
+          z-index: -1;
+          animation: battlecoin-wallet-pulse 2.4s ease-in-out infinite;
+        }
+
+        .battlecoin-wallet-open-btn:hover {
+          transform: translateY(-2px) scale(1.04);
+          filter: drop-shadow(0 0 14px rgba(255, 222, 72, 0.82))
+            drop-shadow(0 0 22px rgba(74, 216, 255, 0.3));
+        }
+
+        .battlecoin-wallet-open-btn:active {
+          transform: translateY(0) scale(0.98);
+        }
+
+        .battlecoin-wallet-open-btn:focus-visible {
+          outline: 2px solid rgba(255, 231, 94, 0.92);
+          outline-offset: 3px;
+        }
+
+        .battlecoin-wallet-open-img {
+          display: block;
+          width: 52px;
+          height: 52px;
+          object-fit: contain;
+          pointer-events: none;
+          user-select: none;
         }
 
         .battlecoin-header-divider {
@@ -2542,6 +2640,18 @@ const filteredOrders = useMemo(() => {
           }
           100% {
             transform: scale(1);
+          }
+        }
+
+        @keyframes battlecoin-wallet-pulse {
+          0%,
+          100% {
+            transform: scale(0.92);
+            opacity: 0.64;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 1;
           }
         }
         /* Золотая надпись с переливом и свечением для VIP */

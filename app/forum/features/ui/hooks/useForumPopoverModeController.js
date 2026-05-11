@@ -18,7 +18,9 @@ export default function useForumPopoverModeController({
     if (name === 'profile') controls.setProfileOpen?.(true)
     else if (name === 'vip') controls.setVipOpen?.(true)
     else if (name === 'admin') controls.setAdminOpen?.(true)
-    else if (name === 'qcoin') controls.setQcoinModalOpen?.(true)
+    else if (name === 'qcoin' || name === 'wallet') {
+      try { window.dispatchEvent(new Event('quantum-wallet:open')) } catch {}
+    }
     else if (name === 'sort') controls.setSortOpen?.(true)
     else if (name === 'search') controls.setDrop?.(true)
   }, [closeSharePopover, popoverControlsRef])

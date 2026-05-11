@@ -393,6 +393,7 @@ const forumEarlyDiagBootstrap = `(function () {
 // Рендерим тяжёлые/интерактивные вещи только на клиенте 
 const NotRobotHost = dynamic(() => import('../components/NotRobotHost'), { ssr: false })
 const InviteFriendHost = dynamic(() => import('../components/InviteFriendHost'), { ssr: false })
+const QuantumWalletHost = dynamic(() => import('../components/QuantumWalletHost'), { ssr: false })
 const QCoinDropFX = dynamic(() => import('../components/QCoinDropFX'), { ssr: false }) 
 const ScrollTopPulse = dynamic(() => import('../components/ScrollTopPulse'), { ssr: false })
 const BgAudio    = dynamic(() => import('../components/BgAudio'),    { ssr: false })
@@ -538,6 +539,7 @@ export default function RootLayout({ children }) {
 
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
            <InviteFriendHost />
+           <QuantumWalletHost />
            <ForumShellGate label="scroll_top_pulse" delayMs={2200} idleTimeoutMs={1800}>
              <ScrollTopPulse />
            </ForumShellGate>

@@ -2,11 +2,14 @@ import Image from 'next/image'
 
 export default function QuestLaunchIcon({
   t,
-  q,
-  questEnabled,
   questBtnClass,
-  openQuests,
 }) {
+  const openQuantumWallet = () => {
+    try {
+      window.dispatchEvent(new CustomEvent('quantum-wallet:open'))
+    } catch {}
+  }
+
   return (
     <Image
       src="/click/quest.gif"
@@ -15,18 +18,14 @@ export default function QuestLaunchIcon({
       height={52}
       alt=""
       role="button"
-      aria-label={t('quest_open')}
-      aria-disabled={!questEnabled}
-      tabIndex={questEnabled ? 0 : -1}
-      onClick={() => {
-        try { window.dispatchEvent(new Event('qcoin:open')) } catch {}
-        try { q?.open?.() } catch {}
-      }}
+      aria-label={t?.('quantum_wallet_open_aria') || t?.('quest_open') || 'Open Quantum Wallet'}
+      aria-disabled={false}
+      tabIndex={0}
+      onClick={openQuantumWallet}
       onKeyDown={(e) => {
-        if (!questEnabled) return
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          openQuests?.()
+          openQuantumWallet()
         }
       }}
       draggable={false}
@@ -34,10 +33,10 @@ export default function QuestLaunchIcon({
       style={{
         ['--quest-w']: '52px',
         ['--quest-h']: 'auto',
-        ['--quest-cursor']: questEnabled ? 'pointer' : 'default',
+        ['--quest-cursor']: 'pointer',
         ['--quest-y']: '-14px',
         width: 'var(--quest-w)',
-        height: 'var(--quest-h)',        
+        height: 'var(--quest-h)',
       }}
     />
   )

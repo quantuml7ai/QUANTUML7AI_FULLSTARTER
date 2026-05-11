@@ -3,22 +3,20 @@
 import React from 'react'
 import useQCoinLive from '../hooks/useQCoinLive'
 import { cls } from '../../../shared/utils/classnames'
+import { formatQCoinBalance } from '../utils/formatQCoinBalance'
 
 export default function QCoinInline({ t, userKey, vipActive, anchorRef }) {
   const q = useQCoinLive(userKey, !!vipActive)
   const clsVal = q.paused ? 'qcoinValue paused' : 'qcoinValue live'
+  const formattedBalance = formatQCoinBalance(q.balanceDisplay ?? q.balance ?? 0)
+  const walletTitle = t?.('quantum_wallet_open_aria') || t?.('forum_qcoin_open_hint') || 'Open Quantum Wallet'
 
-  const TOTAL_DIGITS = 11
-  const raw = Number(q.balanceDisplay ?? q.balance ?? 0)
-
-  let formattedBalance
-  if (!Number.isFinite(raw) || raw <= 0) {
-    formattedBalance = '0.' + '0'.repeat(TOTAL_DIGITS - 1)
-  } else {
-    const abs = Math.abs(raw)
-    const intDigits = Math.max(1, Math.floor(Math.log10(abs)) + 1)
-    const decimals = Math.max(0, TOTAL_DIGITS - intDigits)
-    formattedBalance = raw.toFixed(decimals)
+  const openQuantumWallet = () => {
+    try {
+      window.dispatchEvent(new CustomEvent('quantum-wallet:open', {
+        detail: { userKey, vipActive: !!vipActive },
+      }))
+    } catch {}
   }
 
   return (
@@ -52,16 +50,18 @@ export default function QCoinInline({ t, userKey, vipActive, anchorRef }) {
       <span
         ref={anchorRef}
         className={clsVal}
-        onClick={() => {
-          try {
-            window.dispatchEvent(new Event('qcoin:open'))
-          } catch {}
-          try {
-            q.open?.()
-          } catch {}
+        onClick={openQuantumWallet}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            openQuantumWallet()
+          }
         }}
+        role="button"
+        tabIndex={0}
         style={{ cursor: 'pointer' }}
-        title={t('forum_qcoin_open_hint')}
+        title={walletTitle}
+        aria-label={walletTitle}
         suppressHydrationWarning
       >
         {formattedBalance}

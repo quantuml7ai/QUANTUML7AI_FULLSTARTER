@@ -7,7 +7,6 @@ import AvatarEmoji from './features/profile/components/AvatarEmoji'
 import ProfilePopover from './features/profile/components/ProfilePopover'
 import AboutRail from './features/profile/components/AboutRail'
 import QCoinInline from './features/qcoin/components/QCoinInline'
-import QCoinWithdrawPopover from './features/qcoin/components/QCoinWithdrawPopover'
 import ForumSearchSortControls from './features/ui/components/ForumSearchSortControls'
 import ForumVipControl from './features/profile/components/ForumVipControl'
 
@@ -43,13 +42,6 @@ export default function ForumHeaderPanel({
   icons,
   vipAvatars,
   copyId,
-  qcoinModalOpen,
-  withdrawBtnRef,
-  setQcoinModalOpen,
-  openQuests,
-  questEnabled,
-  meUid,
-  openAuth,
   aboutSaved,
   aboutDraft,
   aboutEditing,
@@ -149,18 +141,6 @@ export default function ForumHeaderPanel({
               <span className="nick-text">{nickShown || t('forum_not_signed')}</span>
             </button>
           </div>
-
-          {qcoinModalOpen && (
-            <QCoinWithdrawPopover
-              anchorRef={withdrawBtnRef}
-              onClose={() => setQcoinModalOpen(false)}
-              onOpenQuests={openQuests}
-              t={t}
-              questEnabled={questEnabled}
-              isAuthed={!!meUid}
-              requireAuth={openAuth}
-            />
-          )}
 
           <div className="min-w-0">
             <div

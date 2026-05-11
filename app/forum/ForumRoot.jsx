@@ -1778,6 +1778,21 @@ useEffect(() => {
   videoFeedHardResetBridgeRef.current = videoFeedHardResetRef
 }, [videoFeedHardResetRef])
 
+useEffect(() => {
+  if (!isBrowser()) return undefined
+
+  const openQuestFromQuantumWallet = (event) => {
+    const entryId = event?.detail?.entryId || 'quantum_wallet_quest'
+    try {
+      openQuests?.(entryId)
+    } catch {}
+  }
+
+  window.addEventListener('quantum-wallet:quest-open', openQuestFromQuantumWallet)
+  return () => window.removeEventListener('quantum-wallet:quest-open', openQuestFromQuantumWallet)
+}, [openQuests])
+
+
 const userRecommendationsRail = useUserRecommendationsRail({
   enabled: !!USER_RECOMMENDATIONS_RUNTIME?.enabled,
   videoFeedOpen,
