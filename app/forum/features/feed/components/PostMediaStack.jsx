@@ -398,8 +398,8 @@ export default function PostMediaStack({
                 key={`tt:${mediaKeyBase}:${videoId}:${i}`}
                 className="videoCard mediaBox"
                 data-kind="iframe"
-                data-owner-id={ownerId}
-                data-forum-embed-kind="tiktok"
+                  data-owner-id={ownerId}
+                  data-forum-embed-kind="tiktok"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
                 style={{ margin: 0 }}
