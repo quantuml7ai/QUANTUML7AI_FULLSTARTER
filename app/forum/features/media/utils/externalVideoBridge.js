@@ -170,13 +170,6 @@ function getYouTubeApiPlayer(frame) {
   return null
 }
 
-function postYouTubeCommand(frame, func, args = []) {
-  try {
-    const payload = JSON.stringify({ event: 'command', func, args })
-    frame?.contentWindow?.postMessage?.(payload, '*')
-  } catch {}
-}
-
 export function postTikTokCommand(frame, type, value) {
   try {
     const payload = { type, 'x-tiktok-player': true }
@@ -216,36 +209,27 @@ export function commandExternalVideo(frame, action, options = {}) {
         if (nextMuted === false) player?.unMute?.()
         player?.playVideo?.()
       } catch {}
-      if (!player) {
-        if (nextMuted === true) postYouTubeCommand(frame, 'mute')
-        if (nextMuted === false) postYouTubeCommand(frame, 'unMute')
-        postYouTubeCommand(frame, 'playVideo')
-      }
       emitExternalVideoState(frame, { paused: false, muted: nextMuted })
       return true
     }
     if (action === 'pause') {
       try { player?.pauseVideo?.() } catch {}
-      if (!player) postYouTubeCommand(frame, 'pauseVideo')
       emitExternalVideoState(frame, { paused: true })
       return true
     }
     if (action === 'mute') {
       try { player?.mute?.() } catch {}
-      if (!player) postYouTubeCommand(frame, 'mute')
       emitExternalVideoState(frame, { muted: true })
       return true
     }
     if (action === 'unmute') {
       try { player?.unMute?.() } catch {}
-      if (!player) postYouTubeCommand(frame, 'unMute')
       emitExternalVideoState(frame, { muted: false })
       return true
     }
     if (action === 'seek') {
       const seconds = Number(options.seconds || 0)
       try { player?.seekTo?.(seconds, true) } catch {}
-      if (!player) postYouTubeCommand(frame, 'seekTo', [seconds, true])
       return true
     }
   }
