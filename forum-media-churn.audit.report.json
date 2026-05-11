@@ -1,17 +1,17 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 1172,
+    "score": 1388,
     "counts": {
       "playCalls": 4,
       "pauseCalls": 17,
       "loadCalls": 2,
-      "srcSets": 8,
+      "srcSets": 10,
       "srcRemoves": 0,
       "currentSrcReads": 27,
       "pendingFlags": 120,
-      "hardUnload": 23,
-      "iframeOps": 237,
+      "hardUnload": 24,
+      "iframeOps": 335,
       "io": 4,
       "ro": 0,
       "raf": 7,
@@ -26,101 +26,101 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2591,
+          "line": 2592,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2672,
+          "line": 2673,
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 4364,
+          "line": 4572,
           "text": "const p2 = activeNativePostVideo.play?.();"
         },
         {
-          "line": 4428,
+          "line": 4636,
           "text": "const p = media.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 2110,
+          "line": 2111,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2120,
+          "line": 2121,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2130,
+          "line": 2131,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2308,
+          "line": 2309,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 1378,
+          "line": 1379,
           "text": "media.load?.();"
         },
         {
-          "line": 5048,
+          "line": 5260,
           "text": "})) a.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 2399,
+          "line": 2400,
           "text": "try { if (iframe.getAttribute('src')) iframe.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 2426,
+          "line": 2427,
           "text": "try { if (owner.getAttribute('src')) owner.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 3779,
-          "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
+          "line": 2828,
+          "text": "if (iframe.getAttribute('src')) iframe.setAttribute('src', '');"
         },
         {
-          "line": 3796,
-          "text": "if (el.getAttribute('src')) { try { el.setAttribute('src', ''); } catch {} }"
+          "line": 2850,
+          "text": "iframe.setAttribute('src', fallbackSrc);"
         }
       ],
       "currentSrcReads": [
         {
-          "line": 61,
+          "line": 62,
           "text": "el?.currentSrc ||"
         },
         {
-          "line": 118,
+          "line": 119,
           "text": "mediaEl?.currentSrc ||"
         },
         {
-          "line": 232,
+          "line": 233,
           "text": "return !!String(el.getAttribute('src') || el.currentSrc || '');"
         },
         {
-          "line": 578,
+          "line": 579,
           "text": "requestMedia.currentSrc ||"
         }
       ],
       "pendingFlags": [
         {
-          "line": 74,
+          "line": 75,
           "text": "loadPending: String(el?.dataset?.__loadPending || ''),"
         },
         {
-          "line": 131,
+          "line": 132,
           "text": "prewarm: String(mediaEl?.dataset?.__prewarm || el?.dataset?.__prewarm || ''),"
         },
         {
-          "line": 132,
+          "line": 133,
           "text": "resident: String(mediaEl?.dataset?.__resident || el?.dataset?.__resident || ''),"
         },
         {
-          "line": 134,
+          "line": 135,
           "text": "loadPending: String(mediaEl?.dataset?.__loadPending || ''),"
         }
       ],
@@ -130,87 +130,87 @@
           "text": "__restoreVideoEl,"
         },
         {
-          "line": 662,
+          "line": 663,
           "text": "if (allowed.allowed) scheduleHardUnload(victim.node, 0, 'resident_cap');"
         },
         {
-          "line": 1281,
+          "line": 1282,
           "text": "scheduleHardUnload(item.node, 0, 'resident_cap');"
         },
         {
-          "line": 1363,
+          "line": 1364,
           "text": "__restoreVideoEl(media);"
         }
       ],
       "iframeOps": [
         {
-          "line": 198,
+          "line": 199,
           "text": "ytPlayers.forEach((player, iframe) => {"
         },
         {
-          "line": 199,
+          "line": 200,
           "text": "if (!(iframe instanceof HTMLIFrameElement) || !iframe.isConnected) detachedYtPlayers += 1;"
         },
         {
-          "line": 228,
+          "line": 229,
           "text": "const iframes = owners.filter((el) => el instanceof HTMLIFrameElement);"
         },
         {
-          "line": 237,
+          "line": 238,
           "text": "const iframesLoaded = iframes.filter((el) => {"
         }
       ],
       "io": [
         {
-          "line": 5316,
+          "line": 5556,
           "text": "if (!('IntersectionObserver' in window)) return;"
         },
         {
-          "line": 5318,
+          "line": 5558,
           "text": "io = new IntersectionObserver("
         },
         {
-          "line": 5637,
+          "line": 5877,
           "text": "// IntersectionObserver tick right after src/API bootstrap. If we only"
         },
         {
-          "line": 5798,
+          "line": 6038,
           "text": "nearIo = new IntersectionObserver("
         }
       ],
       "raf": [
         {
-          "line": 5339,
+          "line": 5579,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
-          "line": 5778,
+          "line": 6018,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6075,
+          "line": 6315,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6144,
+          "line": 6384,
           "text": "if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(mutationSweepRaf);"
         }
       ],
       "layoutReads": [
         {
-          "line": 109,
-          "text": "const rect = el.getBoundingClientRect?.();"
-        },
-        {
-          "line": 549,
+          "line": 110,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "line": 550,
+          "text": "const rect = el.getBoundingClientRect?.();"
+        },
+        {
+          "line": 551,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         },
         {
-          "line": 1157,
+          "line": 1158,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         }
       ]
@@ -1751,6 +1751,55 @@
     }
   },
   {
+    "file": "app/forum/features/media/utils/externalVideoBridge.js",
+    "score": 33,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 1,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 13,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [
+      "iframe remount risk"
+    ],
+    "samples": {
+      "srcSets": [
+        {
+          "line": 195,
+          "text": "if (!frame.getAttribute('src')) frame.setAttribute('src', normalized)"
+        }
+      ],
+      "iframeOps": [
+        {
+          "line": 5,
+          "text": "const YOUTUBE_HOST_RE = /(^|\\.)youtube(?:-nocookie)?\\.com$|(^|\\.)youtu\\.be$/i"
+        },
+        {
+          "line": 43,
+          "text": "const host = privacyEnhanced ? 'www.youtube-nocookie.com' : 'www.youtube.com'"
+        },
+        {
+          "line": 104,
+          "text": "const url = new URL(`https://www.tiktok.com/player/v1/${encodeURIComponent(id)}`)"
+        },
+        {
+          "line": 140,
+          "text": "if (source === 'youtube') return ensureYouTubeEmbedSrc(src)"
+        }
+      ]
+    }
+  },
+  {
     "file": "app/forum/features/ui/hooks/useScrollResizeCompensation.js",
     "score": 33,
     "counts": {
@@ -1874,55 +1923,6 @@
         {
           "line": 62,
           "text": "const rect = track.getBoundingClientRect?.();"
-        }
-      ]
-    }
-  },
-  {
-    "file": "app/forum/features/media/utils/externalVideoBridge.js",
-    "score": 29,
-    "counts": {
-      "playCalls": 0,
-      "pauseCalls": 0,
-      "loadCalls": 0,
-      "srcSets": 1,
-      "srcRemoves": 0,
-      "currentSrcReads": 0,
-      "pendingFlags": 0,
-      "hardUnload": 0,
-      "iframeOps": 11,
-      "io": 0,
-      "ro": 0,
-      "raf": 0,
-      "scrollWrites": 0,
-      "layoutReads": 0
-    },
-    "flags": [
-      "iframe remount risk"
-    ],
-    "samples": {
-      "srcSets": [
-        {
-          "line": 185,
-          "text": "if (!frame.getAttribute('src')) frame.setAttribute('src', normalized)"
-        }
-      ],
-      "iframeOps": [
-        {
-          "line": 5,
-          "text": "const YOUTUBE_HOST_RE = /(^|\\.)youtube(?:-nocookie)?\\.com$|(^|\\.)youtu\\.be$/i"
-        },
-        {
-          "line": 42,
-          "text": "const url = new URL(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`)"
-        },
-        {
-          "line": 98,
-          "text": "const url = new URL(`https://www.tiktok.com/player/v1/${encodeURIComponent(id)}`)"
-        },
-        {
-          "line": 134,
-          "text": "if (source === 'youtube') return ensureYouTubeEmbedSrc(src)"
         }
       ]
     }

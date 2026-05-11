@@ -532,7 +532,7 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
         data-stable-shell="1"
         data-provider-controls-disabled="1"
         data-src={src}
-        loading={normalizedKind === 'youtube' ? 'eager' : 'lazy'}
+        loading="lazy"
         frameBorder="0"
         allow={allow}
         allowFullScreen
@@ -541,13 +541,14 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
         className="ql7ExternalFrame"
 onLoad={() => {
   const frame = frameRef.current
+  const activeFrame = frame?.getAttribute?.('data-forum-iframe-active') === '1'
   try {
     if (frame) {
       frame.setAttribute('data-forum-iframe-loaded', '1')
       frame.setAttribute('data-forum-loaded-src', frame.getAttribute('src') || frame.getAttribute('data-src') || '')
     }
   } catch {}
-  emitExternalVideoState(frame, { ready: true, muted: mutedState, paused: pausedState })
+  emitExternalVideoState(frame, { ready: true, muted: mutedState, paused: activeFrame ? false : pausedState })
 }}
       />
       <div

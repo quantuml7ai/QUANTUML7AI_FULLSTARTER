@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-09T22:19:45.118Z",
+  "generatedAt": "2026-05-09T14:29:57.913Z",
   "report": [
     {
       "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
       "counts": {
-        "dataSrc": 39,
-        "setSrc": 8,
+        "dataSrc": 45,
+        "setSrc": 10,
         "removeSrc": 0,
         "restore": 56,
         "postMessagePause": 6,

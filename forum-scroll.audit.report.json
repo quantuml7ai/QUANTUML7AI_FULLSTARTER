@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T22:19:45.263Z",
+  "generatedAt": "2026-05-09T14:29:58.053Z",
   "scannedFiles": 281,
   "report": [
     {
@@ -688,7 +688,7 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
-      "score": 57,
+      "score": 59,
       "counts": {
         "scrollWrite": 0,
         "scrollRead": 4,
@@ -698,67 +698,67 @@
         "rectReads": 11,
         "resizeObserver": 0,
         "raf": 3,
-        "timers": 17
+        "timers": 19
       },
       "hits": [
         {
           "key": "scrollRead",
-          "line": 2926,
+          "line": 3042,
           "text": "if (scrollEl && scrollEl.scrollHeight > scrollEl.clientHeight + 1) return Number(scrollEl.scrollTop || 0);"
         },
         {
           "key": "scrollRead",
-          "line": 2928,
+          "line": 3044,
           "text": "try { return Number(window.pageYOffset || document.documentElement?.scrollTop || document.body?.scrollTop || 0); } catch {}"
         },
         {
           "key": "rectReads",
-          "line": 109,
+          "line": 110,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 549,
+          "line": 550,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2556,
+          "line": 2557,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 2949,
+          "line": 3065,
           "text": "const rect = el?.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3013,
+          "line": 3129,
           "text": "const rect = node.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3309,
+          "line": 3443,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3538,
+          "line": 3672,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "rectReads",
-          "line": 3555,
+          "line": 3689,
           "text": "const rect = owner.getBoundingClientRect?.();"
         },
         {
           "key": "raf",
-          "line": 5339,
+          "line": 5579,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
           "key": "raf",
-          "line": 5778,
+          "line": 6018,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         }
       ]

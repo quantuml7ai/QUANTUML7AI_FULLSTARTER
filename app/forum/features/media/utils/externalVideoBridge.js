@@ -36,10 +36,12 @@ export function getYouTubeVideoId(src) {
   }
 }
 
-export function buildYouTubeEmbedSrc(videoId, extraParams = '') {
+export function buildYouTubeEmbedSrc(videoId, extraParams = '', options = {}) {
   const id = safeString(videoId)
   if (!id) return ''
-  const url = new URL(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}`)
+  const privacyEnhanced = options?.privacyEnhanced !== false
+  const host = privacyEnhanced ? 'www.youtube-nocookie.com' : 'www.youtube.com'
+  const url = new URL(`https://${host}/embed/${encodeURIComponent(id)}`)
   const params = new URLSearchParams(safeString(extraParams))
   params.forEach((value, key) => {
     if (key) url.searchParams.set(key, value)
@@ -62,7 +64,7 @@ export function buildYouTubeEmbedSrc(videoId, extraParams = '') {
   return url.toString()
 }
 
-export function ensureYouTubeEmbedSrc(src) {
+export function ensureYouTubeEmbedSrc(src, options = {}) {
   const raw = safeString(src)
   if (!raw) return ''
   try {
@@ -72,11 +74,15 @@ export function ensureYouTubeEmbedSrc(src) {
     const id = getYouTubeVideoId(raw)
     if (!id) return raw
     const preserved = new URLSearchParams(url.search || '')
-    return buildYouTubeEmbedSrc(id, preserved.toString())
+    return buildYouTubeEmbedSrc(id, preserved.toString(), options)
   } catch {
     const id = getYouTubeVideoId(raw)
-    return id ? buildYouTubeEmbedSrc(id) : raw
+    return id ? buildYouTubeEmbedSrc(id, '', options) : raw
   }
+}
+
+export function ensureYouTubeStandardEmbedSrc(src) {
+  return ensureYouTubeEmbedSrc(src, { privacyEnhanced: false })
 }
 
 export function getTikTokVideoId(src) {
@@ -179,7 +185,11 @@ export function commandExternalVideo(frame, action, options = {}) {
   const nextMuted = options.muted == null ? undefined : !!options.muted
 
   try {
-    const normalized = ensureExternalVideoSrc(kind, frame.getAttribute('data-src') || frame.getAttribute('src') || '')
+    const rawSrc = frame.getAttribute('data-src') || frame.getAttribute('src') || ''
+    const normalized =
+      kind === 'youtube' && frame.getAttribute('data-forum-yt-host-fallback') === '1'
+        ? ensureYouTubeStandardEmbedSrc(rawSrc)
+        : ensureExternalVideoSrc(kind, rawSrc)
     if (normalized) {
       if (frame.getAttribute('data-src') !== normalized) frame.setAttribute('data-src', normalized)
       if (!frame.getAttribute('src')) frame.setAttribute('src', normalized)
@@ -199,7 +209,7 @@ export function commandExternalVideo(frame, action, options = {}) {
         if (nextMuted === false) postYouTubeCommand(frame, 'unMute')
         postYouTubeCommand(frame, 'playVideo')
       }
-      emitExternalVideoState(frame, { paused: false, muted: nextMuted })
+      emitExternalVideoState(frame, { ready: true, paused: false, muted: nextMuted })
       return true
     }
     if (action === 'pause') {
