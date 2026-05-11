@@ -317,6 +317,8 @@ export default function PostMediaStack({
                 data-forum-embed-kind="youtube"
                 data-lifecycle-state={lifecycleState}
                 data-stable-shell="1"
+                data-windowing-keepalive="media"
+                data-forum-windowing-stable="1"
                 style={{ margin: 0 }}
               >
                 <ExternalVideoPlayer
@@ -400,10 +402,12 @@ export default function PostMediaStack({
                 data-kind="iframe"
                   data-owner-id={ownerId}
                   data-forum-embed-kind="tiktok"
-                data-lifecycle-state={lifecycleState}
-                data-stable-shell="1"
-                style={{ margin: 0 }}
-              >
+                  data-lifecycle-state={lifecycleState}
+                  data-stable-shell="1"
+                  data-windowing-keepalive="media"
+                  data-forum-windowing-stable="1"
+                  style={{ margin: 0 }}
+                >
                 <ExternalVideoPlayer
                   kind="tiktok"
                   src={buildTikTokPlayerSrc(videoId)}

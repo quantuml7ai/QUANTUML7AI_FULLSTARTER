@@ -453,6 +453,29 @@ const onTouchMove = (event) => {
 React.useEffect(() => cleanupTimers, [cleanupTimers])
 
   React.useEffect(() => {
+    const frame = frameRef.current
+    return () => {
+      const doomed = frame
+      try {
+        const release = () => {
+          try {
+            if (!(doomed instanceof HTMLIFrameElement)) return
+            if (doomed.isConnected) return
+            const currentSrc = doomed.getAttribute('src') || ''
+            const storedSrc = doomed.getAttribute('data-src') || currentSrc
+            if (storedSrc && !doomed.getAttribute('data-src')) doomed.setAttribute('data-src', storedSrc)
+            doomed.removeAttribute('data-forum-iframe-active')
+            doomed.removeAttribute('data-forum-iframe-loaded')
+            doomed.removeAttribute('data-forum-loaded-src')
+            if (currentSrc) doomed.setAttribute('src', '')
+          } catch {}
+        }
+        window.setTimeout(release, normalizedKind === 'youtube' ? 180 : 320)
+      } catch {}
+    }
+  }, [normalizedKind])
+
+  React.useEffect(() => {
     const onState = (event) => {
       const detail = event?.detail || {}
       if (detail.frame !== frameRef.current) return
@@ -489,6 +512,9 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
       className={`ql7VideoSurface ql7ExternalVideoSurface ${className || ''}`.trim()}
       data-forum-external-video="1"
       data-forum-external-kind={normalizedKind}
+      data-windowing-keepalive="media"
+      data-forum-windowing-stable="1"
+      data-stable-shell="1"
       data-tma-touch-swipe-guard={telegramTouchSwipeGuardActive ? '1' : undefined}
       onPointerDown={handleSurfacePointerDown}
       onClick={handleSurfaceClick}
@@ -506,7 +532,7 @@ React.useEffect(() => cleanupTimers, [cleanupTimers])
         data-stable-shell="1"
         data-provider-controls-disabled="1"
         data-src={src}
-        loading="lazy"
+        loading={normalizedKind === 'youtube' ? 'eager' : 'lazy'}
         frameBorder="0"
         allow={allow}
         allowFullScreen

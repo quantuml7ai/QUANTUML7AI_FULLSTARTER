@@ -2430,13 +2430,15 @@ const onMediaLoadedCaptured = (e) => {
     const detachYouTubePlayer = (iframe, reason = 'detached') => {
       try {
         if (!(iframe instanceof HTMLIFrameElement)) return;
-        const player = ytPlayers.get(iframe);
-        if (player) {
-          try { stopYtMutePoll(player); } catch {}
-          try { player?.destroy?.(); } catch {}
-          ytMuteLast.delete(player);
-        }
-        ytPlayers.delete(iframe);
+        destroyTrackedYouTubePlayer(iframe);
+        try {
+          const src = iframe.getAttribute('data-src') || iframe.getAttribute('src') || '';
+          if (src && !iframe.getAttribute('data-src')) iframe.setAttribute('data-src', src);
+        } catch {}
+        try { iframe.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { iframe.removeAttribute('data-forum-iframe-loaded'); } catch {}
+        try { iframe.removeAttribute('data-forum-loaded-src'); } catch {}
+        try { if (iframe.getAttribute('src')) iframe.setAttribute('src', ''); } catch {}
         traceCandidate('candidate_external_ignored', iframe, { reason });
       } catch {}
     };
@@ -2454,6 +2456,16 @@ const onMediaLoadedCaptured = (e) => {
         const kind = String(owner.getAttribute?.('data-forum-media') || '');
         if (kind === 'youtube') {
           detachYouTubePlayer(owner, reason);
+        }
+        if ((kind === 'tiktok' || kind === 'iframe') && owner instanceof HTMLIFrameElement) {
+          try {
+            const src = owner.getAttribute('data-src') || owner.getAttribute('src') || '';
+            if (src && !owner.getAttribute('data-src')) owner.setAttribute('data-src', src);
+          } catch {}
+          try { owner.removeAttribute('data-forum-iframe-active'); } catch {}
+          try { owner.removeAttribute('data-forum-iframe-loaded'); } catch {}
+          try { owner.removeAttribute('data-forum-loaded-src'); } catch {}
+          try { if (owner.getAttribute('src')) owner.setAttribute('src', ''); } catch {}
         }
         if (kind === 'qcast') {
           const audio = getQCastAudio(owner);
@@ -2529,6 +2541,7 @@ const onMediaLoadedCaptured = (e) => {
       try { pruneNativePrimeSrcState(now); } catch {}
       try { pruneMediaSrcBlockMap(force); } catch {}
       try { enforcePostNativeSrcCap(nativePrewarmEl, reason); } catch {}
+      try { enforceIframeResidentCap(active); } catch {}
     };
     try {
       window.sweepForumMediaLeaks = () => {
@@ -2797,6 +2810,36 @@ if (String(el?.dataset?.__warmReady || '') === '1') {
       if (id) clearInterval(id);
       ytMutePolls.delete(player);
     };
+    function destroyTrackedYouTubePlayer(iframe, reason = 'yt_destroy') {
+      try {
+        if (!(iframe instanceof HTMLIFrameElement)) return false;
+        const player = ytPlayers.get(iframe);
+        if (!player) return false;
+        try { stopYtMutePoll(player); } catch {}
+        try { player?.destroy?.(); } catch {}
+        try { ytPlayers.delete(iframe); } catch {}
+        try { ytMuteLast.delete(player); } catch {}
+        try { iframe.removeAttribute('data-forum-yt-api-retry-ts'); } catch {}
+        trace('youtube_player_destroyed', iframe, { reason });
+        return true;
+      } catch {}
+      return false;
+    }
+    function pauseTrackedYouTubePlayer(iframe, reason = 'yt_pause') {
+      try {
+        if (!(iframe instanceof HTMLIFrameElement)) return false;
+        const player = ytPlayers.get(iframe);
+        if (!player) return false;
+        if (!isAttachedYtPlayer(player, iframe) || !iframe.isConnected) {
+          destroyTrackedYouTubePlayer(iframe, `${reason}_detached`);
+          return false;
+        }
+        try { player?.pauseVideo?.(); } catch {}
+        try { stopYtMutePoll(player); } catch {}
+        return true;
+      } catch {}
+      return false;
+    }
     const startYtMutePoll = (player) => {
       if (!player || ytMutePolls.has(player)) return;
       const id = setInterval(() => {
@@ -2860,7 +2903,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
       } catch {}
     }, reason === 'yt_api_load_timeout' ? 260 : 160);
   } catch {}
-};
+    };
     const initYouTubePlayer = async (iframe) => {
       if (!iframe || !(iframe instanceof HTMLIFrameElement)) return null;
       const expectedSrc = ensureYouTubeEmbedSrc(iframe.getAttribute('data-src') || iframe.getAttribute('src') || '');
@@ -2871,10 +2914,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
       if (ytPlayers.has(iframe)) {
         const existing = ytPlayers.get(iframe);
         if (isAttachedYtPlayer(existing, iframe)) return existing;
-        try { stopYtMutePoll(existing); } catch {}
-        try { existing?.destroy?.(); } catch {}
-        ytPlayers.delete(iframe);
-        ytMuteLast.delete(existing);
+        destroyTrackedYouTubePlayer(iframe, 'yt_init_replace_detached');
       }
       const YT = await ensureYouTubeAPI();
       if (!YT?.Player) return null;
@@ -2884,10 +2924,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
             events: {
               onReady: () => {
                 if (!isAttachedYtPlayer(player, iframe)) {
-                  try { stopYtMutePoll(player); } catch {}
-                  try { player?.destroy?.(); } catch {}
-                  ytPlayers.delete(iframe);
-                  ytMuteLast.delete(player);
+                  destroyTrackedYouTubePlayer(iframe, 'yt_ready_detached');
                   resolve(null);
                   return;
                 }
@@ -2901,9 +2938,7 @@ const scheduleYouTubeApiInitRetry = (iframe, reason = 'yt_api_wait') => {
               onStateChange: (evt) => {
                 try {
                   if (!isAttachedYtPlayer(player, iframe)) {
-                    stopYtMutePoll(player);
-                    ytPlayers.delete(iframe);
-                    ytMuteLast.delete(player);
+                    destroyTrackedYouTubePlayer(iframe, 'yt_state_detached');
                     return;
                   }
                   const state = evt?.data;
@@ -3544,16 +3579,20 @@ const shouldRetainHtmlMedia = (el) => {
         return;
       }
       if (kind === 'youtube') {
+        try { clearExternalPlayKick(el); } catch {}
         markSuppressedPlayback(el, 1400);
-        const player = ytPlayers.get(el);
-        try { player?.pauseVideo?.(); } catch {}
+        pauseTrackedYouTubePlayer(el, reason);
         try { emitExternalVideoState(el, { paused: true }); } catch {}
-        try { stopYtMutePoll(player); } catch {}
+        try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { enforceIframeResidentCap(active === el ? null : active); } catch {}
         return;
       }
       if (kind === 'tiktok' || kind === 'iframe') {
+        try { clearExternalPlayKick(el); } catch {}
         markSuppressedPlayback(el, 1400);
-      try { commandExternalVideo(el, 'pause'); } catch {}
+        try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+        try { commandExternalVideo(el, 'pause'); } catch {}
+        try { enforceIframeResidentCap(active === el ? null : active); } catch {}
       }
     };
     const getOwnerVisiblePx = (el) => {
@@ -3644,9 +3683,7 @@ const pauseForeignMedia = (keepEl = null) => {
       }
 
       if (kind === 'youtube') {
-        const player = ytPlayers.get(node);
-        try { player?.pauseVideo?.(); } catch {}
-        try { stopYtMutePoll(player); } catch {}
+        pauseTrackedYouTubePlayer(node, 'pause_foreign');
         return;
       }
 
@@ -3657,6 +3694,7 @@ const pauseForeignMedia = (keepEl = null) => {
         // это давало визуальное исчезновение iframe и дергания ленты.
       }
     });
+    try { enforceIframeResidentCap(keepEl); } catch {}
   } catch {}
 };
     const hardUnloadMedia = (...args) => {
@@ -3740,6 +3778,35 @@ const pauseForeignMedia = (keepEl = null) => {
         unloadReason === 'resident_cap' ||
         unloadReason === 'error_blocked';
       const softIframeCooldown = !hardIframeReason;
+      if (
+        hardIframeReason &&
+        unloadReason !== 'error_blocked' &&
+        el instanceof Element &&
+        el.isConnected
+      ) {
+        const iframeVisiblePx = getOwnerVisiblePx(el);
+        const isYoutubeFrame = kind === 'youtube';
+        const iframeActive =
+          el === active ||
+          String(el.getAttribute?.('data-forum-iframe-active') || '') === '1';
+        const iframeNear = !isYoutubeFrame && isNearViewportElement(el, isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100));
+        const visibleProtectPx = isYoutubeFrame ? 96 : 48;
+        if (iframeVisiblePx > visibleProtectPx || (iframeActive && iframeVisiblePx > 0) || iframeNear) {
+          try { el.removeAttribute('data-forum-iframe-active'); } catch {}
+          trace('iframe_resident_cap_blocked_visible', el, {
+            reason: unloadReason,
+            visiblePx: iframeVisiblePx,
+            near: iframeNear ? '1' : '0',
+          });
+          emitMediaDiag('iframe_resident_cap_blocked_visible', {
+            kind,
+            reason: unloadReason,
+            visiblePx: iframeVisiblePx,
+            ...getIframeSnapshot(),
+          });
+          return;
+        }
+      }
       if (kind === 'qcast') {
         const a = el.querySelector?.('audio');
         if (a instanceof HTMLAudioElement) {
@@ -3752,19 +3819,14 @@ const pauseForeignMedia = (keepEl = null) => {
         return;
       }
       if (kind === 'youtube') {
-        const player = ytPlayers.get(el);
-        try { player?.pauseVideo?.(); } catch {}
-        try { stopYtMutePoll(player); } catch {}
+        pauseTrackedYouTubePlayer(el, unloadReason);
         if (softIframeCooldown) {
           try { el.removeAttribute('data-forum-iframe-active'); } catch {}
           emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });
+          try { enforceIframeResidentCap(active === el ? null : active); } catch {}
           return;
         }
-        try {
-          try { player?.destroy?.(); } catch {}
-          try { ytPlayers.delete(el); } catch {}
-          try { ytMuteLast.delete(player); } catch {}
-        } catch {}
+        destroyTrackedYouTubePlayer(el, unloadReason);
         try {
           const ds = el.getAttribute('data-src') || el.getAttribute('src') || '';
           if (ds && !el.getAttribute('data-src')) {
@@ -3783,6 +3845,7 @@ const pauseForeignMedia = (keepEl = null) => {
         if (softIframeCooldown) {
           try { el.removeAttribute('data-forum-iframe-active'); } catch {}
           emitMediaDiag('iframe_soft_cooldown', { kind, reason: unloadReason, ...getIframeSnapshot() });
+          try { enforceIframeResidentCap(active === el ? null : active); } catch {}
           return;
         }
         const src = el.getAttribute('data-src') || el.getAttribute('src') || '';
@@ -3806,7 +3869,18 @@ const pauseForeignMedia = (keepEl = null) => {
           if (frame === keepEl) return false;
 
           try {
+            const kind = String(frame?.getAttribute?.('data-forum-media') || '');
             const visiblePx = getOwnerVisiblePx(frame);
+            const activeFrame =
+              frame === active ||
+              String(frame?.getAttribute?.('data-forum-iframe-active') || '') === '1';
+
+            if (activeFrame && visiblePx > 0) return false;
+
+            if (kind === 'youtube') {
+              return visiblePx <= 96;
+            }
+
             if (visiblePx > 48) return false;
 
             if (isNearViewportElement(frame, isIOSUi ? 1200 : (isCoarseUi ? 980 : 1100))) {
@@ -3826,6 +3900,11 @@ const pauseForeignMedia = (keepEl = null) => {
 
       victims.forEach((frame) => {
         cancelUnload(frame);
+        trace('iframe_destroy_far', frame, {
+          reason: 'resident_cap',
+          visiblePx: getOwnerVisiblePx(frame),
+          cap: IFRAME_RESIDENT_CAP,
+        });
         hardUnloadMedia(frame, 'resident_cap');
       });
       emitMediaDiag('iframe_resident_cap', {
@@ -4803,11 +4882,94 @@ return true;
       }
     };
     const ensureYouTubeEmbedSrc = (src) => normalizeYouTubeEmbedSrc(src);
+    let externalPrewarmWindowTs = 0;
+    let externalPrewarmWindowCount = 0;
+    let externalPrewarmLastTs = 0;
+    const canSpendExternalPrewarmBudget = (el, reason = 'prewarm') => {
+      try {
+        const now = Date.now();
+        const reasonKey = String(reason || '').toLowerCase();
+        const budgetedReason = /prewarm|early|predictive|reject_not_ready|near/.test(reasonKey);
+        const hasSrc = !!String(el?.getAttribute?.('src') || '').trim();
+        if (hasSrc || !budgetedReason) return true;
+
+        const visiblePx = getOwnerVisiblePx(el);
+        const gapPx = getOwnerViewportGapPx(el);
+        const runwayPx = isIOSUi ? 520 : (isCoarseUi ? 440 : 360);
+        if (visiblePx <= 36 && gapPx > runwayPx) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            visiblePx,
+            gapPx,
+            runwayPx,
+            gate: 'far',
+          });
+          return false;
+        }
+
+        try {
+          const loadedBefore = getLoadedIframes();
+          if (loadedBefore.length >= IFRAME_RESIDENT_CAP && visiblePx <= 72) {
+            enforceIframeResidentCap(null);
+            if (getLoadedIframes().length >= IFRAME_RESIDENT_CAP) {
+              trace('iframe_prewarm_skip_budget', el, {
+                reason,
+                visiblePx,
+                gapPx,
+                cap: IFRAME_RESIDENT_CAP,
+                loaded: loadedBefore.length,
+                gate: 'resident_cap_full',
+              });
+              return false;
+            }
+          }
+        } catch {}
+
+        const minGapMs = isIOSUi ? 1400 : (isCoarseUi ? 1200 : 850);
+        if (externalPrewarmLastTs > 0 && (now - externalPrewarmLastTs) < minGapMs) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            sinceMs: now - externalPrewarmLastTs,
+            minGapMs,
+            gate: 'global_gap',
+          });
+          return false;
+        }
+
+        const windowMs = isIOSUi ? 2600 : (isCoarseUi ? 2200 : 1800);
+        const burstLimit = isIOSUi || isCoarseUi ? 1 : 2;
+        if (!externalPrewarmWindowTs || (now - externalPrewarmWindowTs) > windowMs) {
+          externalPrewarmWindowTs = now;
+          externalPrewarmWindowCount = 0;
+        }
+        if (externalPrewarmWindowCount >= burstLimit) {
+          trace('iframe_prewarm_skip_budget', el, {
+            reason,
+            windowMs,
+            burstLimit,
+            gate: 'burst',
+          });
+          return false;
+        }
+
+        externalPrewarmWindowCount += 1;
+        externalPrewarmLastTs = now;
+        return true;
+      } catch {
+        return true;
+      }
+    };
     const prepareExternalMedia = (el, reason = 'prewarm') => {
       if (!(el instanceof HTMLIFrameElement)) return false;
       const kind = String(el.getAttribute('data-forum-media') || '');
       if (kind !== 'youtube' && kind !== 'tiktok' && kind !== 'iframe') return false;
       const now = Date.now();
+      const passivePrepare =
+        reason === 'prewarm' ||
+        reason === 'near_viewport' ||
+        reason === 'io_near_prewarm' ||
+        reason === 'early_prewarm' ||
+        /prewarm|predictive|near/i.test(String(reason || ''));
       const lastPrewarmTs = Number(el.getAttribute('data-forum-prewarm-ts') || 0);
       if (lastPrewarmTs > 0 && (now - lastPrewarmTs) < 700) {
         return !!String(el.getAttribute('src') || '').trim();
@@ -4828,6 +4990,7 @@ return true;
         curSrc = String(el.getAttribute('src') || '').trim();
         hadSrc = !!curSrc;
       } catch {}
+      if (!hadSrc && !canSpendExternalPrewarmBudget(el, reason)) return false;
       if (!hadSrc || curSrc !== nextSrc) {
         try {
           el.setAttribute('data-forum-iframe-loaded', '0');
@@ -5138,9 +5301,15 @@ return;
               el.setAttribute('data-forum-iframe-loaded', '0');
               el.removeAttribute('data-forum-loaded-src');
             } catch {}
+            try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
+            try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
             el.setAttribute('src', ds);
+            try { enforceIframeResidentCap(el); } catch {}
             readyForYouTubeApi = await waitExternalIframeLoad(el, ds, isIOSUi ? 2200 : 1800);
           } else if (ds) {
+            try { el.setAttribute('data-forum-iframe-active', '1'); } catch {}
+            try { el.setAttribute('data-forum-last-active-ts', String(Date.now())); } catch {}
+            try { enforceIframeResidentCap(el); } catch {}
             readyForYouTubeApi = await waitExternalIframeLoad(el, ds, 700);
           }
           if (ds && !readyForYouTubeApi && !isYouTubeIframeReadyForApi(el, ds)) {
@@ -5270,8 +5439,10 @@ return;
         if (!(el instanceof Element) || typeof runner !== 'function') return;
         clearExternalPlayKick(el);
         let count = 0;
-        const maxCount = isIOSUi ? 9 : (isCoarseUi ? 7 : 5);
-        const delayMs = isIOSUi ? 320 : (isCoarseUi ? 360 : 420);
+        const kind = getMediaKind(el);
+        const isYoutubeKick = kind === 'youtube';
+        const maxCount = isYoutubeKick ? (isIOSUi ? 3 : 2) : (isIOSUi ? 7 : (isCoarseUi ? 5 : 4));
+        const delayMs = isYoutubeKick ? (isIOSUi ? 560 : 680) : (isIOSUi ? 360 : (isCoarseUi ? 420 : 520));
         const tick = () => {
           if (!isExternalKickAllowed(el)) {
             clearExternalPlayKick(el);
@@ -5453,14 +5624,20 @@ return;
             const stopCenterMaxDist = getStopCenterMaxDist(active);
             const activeKind = getMediaKind(active);
             const manualLeaseActive = hasManualLease(active);
+            const activeIsExternal =
+              activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe';
             const hardOutOfView = activeVisiblePx < 24;
             const keepByVisiblePx =
               (activeKind === 'qcast' && activeVisiblePx >= 120) ||
               ((activeKind === 'youtube' || activeKind === 'tiktok' || activeKind === 'iframe') && activeVisiblePx >= 220);
+            const keepExternalByRunway =
+              activeIsExternal &&
+              activeVisiblePx >= (isIOSUi ? 72 : (isCoarseUi ? 96 : 88)) &&
+              activeCenterDist <= stopCenterMaxDist + (isIOSUi ? 560 : (isCoarseUi ? 500 : 420));
             if (
               !hardOutOfView &&
-              activeCenterDist <= stopCenterMaxDist &&
-              (ar >= STOP_RATIO || keepByVisiblePx || (manualLeaseActive && activeVisiblePx >= 120))
+              (activeCenterDist <= stopCenterMaxDist || keepExternalByRunway) &&
+              (ar >= STOP_RATIO || keepByVisiblePx || keepExternalByRunway || (manualLeaseActive && activeVisiblePx >= 120))
             ) {
               // Если кандидат другой — переключаемся только когда он уверенно лучше.
               // (иначе будет флаттер между двумя элементами рядом)
@@ -5592,7 +5769,21 @@ return;
                 reason: 'below_stop_ratio',
               });
             } else {
-              scheduleHardUnload(active, null, 'below_stop_ratio');
+              if (
+                activeIsExternal &&
+                activeVisiblePx >= (isIOSUi ? 56 : (isCoarseUi ? 72 : 64))
+              ) {
+                markSettling(active, isIOSUi ? 1800 : (isCoarseUi ? 1500 : 1200), 'external_below_stop_soft_hold_visible');
+                traceCandidate('candidate_release_external_soft_hold_visible', active, {
+                  ratio: ar,
+                  score: activeScore,
+                  visiblePx: activeVisiblePx,
+                  centerDist: activeCenterDist,
+                  reason: 'below_stop_ratio',
+                });
+              } else {
+                scheduleHardUnload(active, null, 'below_stop_ratio');
+              }
             }
             active = null;
           }
@@ -6255,7 +6446,6 @@ if (hasSrcNow && readyStateNow === 0 && networkEmpty && mediaEl.dataset?.__loadP
           delete window.__forumYtPlayers;
         }
       } catch {}
-      try { delete window.__forumDestroyExternalFrame; } catch {}
       // Полная очистка YouTube player'ов, чтобы не держать WebGL/GPU ресурсы
       try {
         ytPlayers.forEach((player, iframe) => {
