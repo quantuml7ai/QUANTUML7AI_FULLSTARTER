@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T14:29:59.986Z",
+  "generatedAt": "2026-05-13T12:50:13.733Z",
   "summary": [
     {
       "event": "auth:ok",
@@ -148,25 +148,25 @@
         {
           "event": "auth:ok",
           "kind": "add",
-          "line": 317,
+          "line": 332,
           "text": "window.addEventListener('auth:ok', onAuthOk)"
         },
         {
           "event": "auth:logout",
           "kind": "add",
-          "line": 318,
+          "line": 333,
           "text": "window.addEventListener('auth:logout', onLogout)"
         },
         {
           "event": "auth:ok",
           "kind": "remove",
-          "line": 322,
+          "line": 337,
           "text": "try { window.removeEventListener('auth:ok', onAuthOk) } catch {}"
         },
         {
           "event": "auth:logout",
           "kind": "remove",
-          "line": 323,
+          "line": 338,
           "text": "try { window.removeEventListener('auth:logout', onLogout) } catch {}"
         }
       ]

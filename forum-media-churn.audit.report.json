@@ -1,7 +1,7 @@
 [
   {
     "file": "app/forum/features/media/hooks/useForumMediaCoordinator.js",
-    "score": 1388,
+    "score": 1398,
     "counts": {
       "playCalls": 4,
       "pauseCalls": 17,
@@ -10,8 +10,8 @@
       "srcRemoves": 0,
       "currentSrcReads": 27,
       "pendingFlags": 120,
-      "hardUnload": 24,
-      "iframeOps": 335,
+      "hardUnload": 25,
+      "iframeOps": 337,
       "io": 4,
       "ro": 0,
       "raf": 7,
@@ -26,65 +26,65 @@
     "samples": {
       "playCalls": [
         {
-          "line": 2592,
+          "line": 2597,
           "text": "const p = el.play?.();"
         },
         {
-          "line": 2673,
+          "line": 2678,
           "text": "const retry = el.play?.();"
         },
         {
-          "line": 4572,
+          "line": 4585,
           "text": "const p2 = activeNativePostVideo.play?.();"
         },
         {
-          "line": 4636,
+          "line": 4649,
           "text": "const p = media.play?.();"
         }
       ],
       "pauseCalls": [
         {
-          "line": 2111,
+          "line": 2116,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2121,
+          "line": 2126,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2131,
+          "line": 2136,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         },
         {
-          "line": 2309,
+          "line": 2314,
           "text": "try { if (!target.paused) target.pause(); } catch {}"
         }
       ],
       "loadCalls": [
         {
-          "line": 1379,
+          "line": 1384,
           "text": "media.load?.();"
         },
         {
-          "line": 5260,
+          "line": 5273,
           "text": "})) a.load?.();"
         }
       ],
       "srcSets": [
         {
-          "line": 2400,
+          "line": 2405,
           "text": "try { if (iframe.getAttribute('src')) iframe.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 2427,
+          "line": 2432,
           "text": "try { if (owner.getAttribute('src')) owner.setAttribute('src', ''); } catch {}"
         },
         {
-          "line": 2828,
+          "line": 2833,
           "text": "if (iframe.getAttribute('src')) iframe.setAttribute('src', '');"
         },
         {
-          "line": 2850,
+          "line": 2855,
           "text": "iframe.setAttribute('src', fallbackSrc);"
         }
       ],
@@ -102,7 +102,7 @@
           "text": "return !!String(el.getAttribute('src') || el.currentSrc || '');"
         },
         {
-          "line": 579,
+          "line": 584,
           "text": "requestMedia.currentSrc ||"
         }
       ],
@@ -130,15 +130,15 @@
           "text": "__restoreVideoEl,"
         },
         {
-          "line": 663,
+          "line": 668,
           "text": "if (allowed.allowed) scheduleHardUnload(victim.node, 0, 'resident_cap');"
         },
         {
-          "line": 1282,
+          "line": 1287,
           "text": "scheduleHardUnload(item.node, 0, 'resident_cap');"
         },
         {
-          "line": 1364,
+          "line": 1369,
           "text": "__restoreVideoEl(media);"
         }
       ],
@@ -162,37 +162,37 @@
       ],
       "io": [
         {
-          "line": 5556,
+          "line": 5569,
           "text": "if (!('IntersectionObserver' in window)) return;"
         },
         {
-          "line": 5558,
+          "line": 5571,
           "text": "io = new IntersectionObserver("
         },
         {
-          "line": 5877,
+          "line": 5890,
           "text": "// IntersectionObserver tick right after src/API bootstrap. If we only"
         },
         {
-          "line": 6038,
+          "line": 6051,
           "text": "nearIo = new IntersectionObserver("
         }
       ],
       "raf": [
         {
-          "line": 5579,
+          "line": 5592,
           "text": "rafId = requestAnimationFrame(() => {"
         },
         {
-          "line": 6018,
+          "line": 6031,
           "text": "nativePrewarmScanRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6315,
+          "line": 6343,
           "text": "mutationSweepRaf = requestAnimationFrame(() => {"
         },
         {
-          "line": 6384,
+          "line": 6412,
           "text": "if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(mutationSweepRaf);"
         }
       ],
@@ -202,15 +202,15 @@
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
-          "line": 550,
+          "line": 555,
           "text": "const rect = el.getBoundingClientRect?.();"
         },
         {
-          "line": 551,
+          "line": 556,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         },
         {
-          "line": 1158,
+          "line": 1163,
           "text": "const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0;"
         }
       ]
@@ -6106,6 +6106,28 @@
   },
   {
     "file": "app/forum/features/qcoin/utils/account.js",
+    "score": 0,
+    "counts": {
+      "playCalls": 0,
+      "pauseCalls": 0,
+      "loadCalls": 0,
+      "srcSets": 0,
+      "srcRemoves": 0,
+      "currentSrcReads": 0,
+      "pendingFlags": 0,
+      "hardUnload": 0,
+      "iframeOps": 0,
+      "io": 0,
+      "ro": 0,
+      "raf": 0,
+      "scrollWrites": 0,
+      "layoutReads": 0
+    },
+    "flags": [],
+    "samples": {}
+  },
+  {
+    "file": "app/forum/features/qcoin/utils/formatQCoinBalance.js",
     "score": 0,
     "counts": {
       "playCalls": 0,

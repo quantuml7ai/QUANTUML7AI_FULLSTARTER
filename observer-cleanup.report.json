@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-09T14:30:00.653Z",
+  "generatedAt": "2026-05-13T12:50:14.404Z",
   "report": [
     {
       "file": "app/page.js",
@@ -33,8 +33,8 @@
       "file": "app/forum/ForumRoot.jsx",
       "observers": 0,
       "observerCleanup": 0,
-      "listeners": 0,
-      "listenerCleanup": 0
+      "listeners": 1,
+      "listenerCleanup": 1
     },
     {
       "file": "components/ForumBootSplash.jsx",
@@ -47,8 +47,8 @@
       "file": "app/forum/ForumRoot.jsx",
       "observers": 0,
       "observerCleanup": 0,
-      "listeners": 0,
-      "listenerCleanup": 0
+      "listeners": 1,
+      "listenerCleanup": 1
     },
     {
       "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",

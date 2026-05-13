@@ -1,30 +1,12 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T14:29:57.759Z",
+  "generatedAt": "2026-05-13T12:50:11.356Z",
   "report": [
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
-      "counts": {
-        "dynamicImport": 0,
-        "ssrFalseDynamic": 0,
-        "providerGateNull": 7,
-        "web3Modal": 2,
-        "wagmi": 2,
-        "analytics": 0,
-        "beforeInteractiveScript": 0,
-        "topBarMount": 0,
-        "forumBootSplash": 0
-      },
-      "startupMarks": [],
-      "riskFlags": [
-        "provider returns null during startup path"
-      ]
-    },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\layout.js",
       "counts": {
-        "dynamicImport": 5,
-        "ssrFalseDynamic": 5,
+        "dynamicImport": 6,
+        "ssrFalseDynamic": 6,
         "providerGateNull": 1,
         "web3Modal": 0,
         "wagmi": 0,
@@ -46,6 +28,24 @@
       "riskFlags": [
         "provider returns null during startup path",
         "global analytics mounts in root layout"
+      ]
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\AuthNavClient.jsx",
+      "counts": {
+        "dynamicImport": 0,
+        "ssrFalseDynamic": 0,
+        "providerGateNull": 7,
+        "web3Modal": 2,
+        "wagmi": 2,
+        "analytics": 0,
+        "beforeInteractiveScript": 0,
+        "topBarMount": 0,
+        "forumBootSplash": 0
+      },
+      "startupMarks": [],
+      "riskFlags": [
+        "provider returns null during startup path"
       ]
     },
     {

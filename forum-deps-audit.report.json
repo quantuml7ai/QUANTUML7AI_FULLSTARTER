@@ -1,11 +1,11 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T14:29:24.022Z",
+  "generatedAt": "2026-05-13T12:49:40.437Z",
   "summary": {
-    "scannedFiles": 389,
-    "internalEdges": 552,
+    "scannedFiles": 392,
+    "internalEdges": 555,
     "cycleCount": 0,
-    "crossDomainEdgeCount": 150,
+    "crossDomainEdgeCount": 152,
     "forumRootImportCount": 1,
     "forumRootExternalCount": 1
   },
@@ -910,6 +910,18 @@
       "fromDomain": "api-subscription",
       "to": "lib/subscriptions.js",
       "toDomain": "lib"
+    },
+    {
+      "from": "components/QuantumWallet.jsx",
+      "fromDomain": "components",
+      "to": "app/forum/features/qcoin/hooks/useQCoinLive.js",
+      "toDomain": "forum-ui"
+    },
+    {
+      "from": "components/QuantumWallet.jsx",
+      "fromDomain": "components",
+      "to": "app/forum/features/qcoin/utils/formatQCoinBalance.js",
+      "toDomain": "forum-ui"
     }
   ],
   "forumRoot": {
@@ -2808,9 +2820,10 @@
       "domain": "forum-ui",
       "imports": [
         "app/forum/features/qcoin/hooks/useQCoinLive.js",
-        "app/forum/shared/utils/classnames.js"
+        "app/forum/shared/utils/classnames.js",
+        "app/forum/features/qcoin/utils/formatQCoinBalance.js"
       ],
-      "importCount": 2,
+      "importCount": 3,
       "external": [
         "react"
       ],
@@ -2842,6 +2855,14 @@
     },
     {
       "file": "app/forum/features/qcoin/utils/account.js",
+      "domain": "forum-ui",
+      "imports": [],
+      "importCount": 0,
+      "external": [],
+      "externalCount": 0
+    },
+    {
+      "file": "app/forum/features/qcoin/utils/formatQCoinBalance.js",
       "domain": "forum-ui",
       "imports": [],
       "importCount": 0,
@@ -3637,11 +3658,10 @@
         "app/forum/features/profile/components/ProfilePopover.jsx",
         "app/forum/features/profile/components/AboutRail.jsx",
         "app/forum/features/qcoin/components/QCoinInline.jsx",
-        "app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx",
         "app/forum/features/ui/components/ForumSearchSortControls.jsx",
         "app/forum/features/profile/components/ForumVipControl.jsx"
       ],
-      "importCount": 9,
+      "importCount": 8,
       "external": [
         "react",
         "react-dom"
@@ -5239,6 +5259,34 @@
       "external": [
         "react",
         "next/navigation"
+      ],
+      "externalCount": 2
+    },
+    {
+      "file": "components/QuantumWallet.jsx",
+      "domain": "components",
+      "imports": [
+        "components/i18n.js",
+        "app/forum/features/qcoin/hooks/useQCoinLive.js",
+        "app/forum/features/qcoin/utils/formatQCoinBalance.js"
+      ],
+      "importCount": 3,
+      "external": [
+        "react",
+        "react-dom",
+        "next/image",
+        "next/navigation"
+      ],
+      "externalCount": 4
+    },
+    {
+      "file": "components/QuantumWalletHost.jsx",
+      "domain": "components",
+      "imports": [],
+      "importCount": 0,
+      "external": [
+        "react",
+        "next/dynamic"
       ],
       "externalCount": 2
     },

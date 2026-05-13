@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-05-08T21:59:10.983Z
+Сгенерировано автоматически: 2026-05-13T12:49:10.386Z
 
 ## Общий Принцип
 
@@ -321,7 +321,7 @@
 
 - Зона: `app/forum/features/qcoin`
 - Назначение: QCoin UI в форуме и клиентская логика баланса.
-- Точки входа: `app/forum/features/qcoin/components/QCoinInline.jsx`, `app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx`, `app/forum/features/qcoin/hooks/useQCoinLive.js`, `app/forum/features/qcoin/utils/account.js`, `app/forum/features/qcoin/utils/paymentWindow.js`
+- Точки входа: `app/forum/features/qcoin/components/QCoinInline.jsx`, `app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx`, `app/forum/features/qcoin/hooks/useQCoinLive.js`, `app/forum/features/qcoin/utils/account.js`, `app/forum/features/qcoin/utils/formatQCoinBalance.js`, `app/forum/features/qcoin/utils/paymentWindow.js`
 - Связанные зоны: `app/api/qcoin`, `app/forum/features/profile`, `app/forum/shared`
 
 ### Forum feature: quests

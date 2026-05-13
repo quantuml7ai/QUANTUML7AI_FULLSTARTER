@@ -1,14 +1,14 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T14:30:00.125Z",
+  "generatedAt": "2026-05-13T12:50:13.880Z",
   "summary": {
-    "scannedFiles": 378,
-    "filesWithSyncKeys": 148,
+    "scannedFiles": 379,
+    "filesWithSyncKeys": 149,
     "keyFrequency": {
       "accountId": 413,
       "userId": 450,
       "authorId": 139,
-      "wallet": 20,
+      "wallet": 33,
       "telegramId": 5,
       "initData": 7,
       "linked": 4,
@@ -16,7 +16,7 @@
       "following": 72,
       "bio": 1,
       "nickname": 107,
-      "vip": 522
+      "vip": 523
     }
   },
   "top": [
@@ -4068,6 +4068,150 @@
       "score": 28
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
+      "hits": [
+        {
+          "key": "vip",
+          "line": 107,
+          "text": "import { VIP_EMOJI, VIP_AVATARS } from './features/profile/constants/vipAssets'"
+        },
+        {
+          "key": "userId",
+          "line": 208,
+          "text": "userId: '',"
+        },
+        {
+          "key": "followers",
+          "line": 209,
+          "text": "initialMode: 'followers',"
+        },
+        {
+          "key": "userId",
+          "line": 212,
+          "text": "const openSubscriptionsPopover = useCallback(({ userId, initialMode = 'followers' } = {}) => {"
+        },
+        {
+          "key": "followers",
+          "line": 212,
+          "text": "const openSubscriptionsPopover = useCallback(({ userId, initialMode = 'followers' } = {}) => {"
+        },
+        {
+          "key": "userId",
+          "line": 213,
+          "text": "const raw = String(userId || '').trim()"
+        },
+        {
+          "key": "userId",
+          "line": 218,
+          "text": "userId: uid,"
+        },
+        {
+          "key": "followers",
+          "line": 219,
+          "text": "initialMode: initialMode === 'following' ? 'following' : 'followers',"
+        },
+        {
+          "key": "following",
+          "line": 219,
+          "text": "initialMode: initialMode === 'following' ? 'following' : 'followers',"
+        },
+        {
+          "key": "userId",
+          "line": 224,
+          "text": "setSubscriptionsUI({ open: false, userId: '', initialMode: 'followers' })"
+        },
+        {
+          "key": "followers",
+          "line": 224,
+          "text": "setSubscriptionsUI({ open: false, userId: '', initialMode: 'followers' })"
+        },
+        {
+          "key": "vip",
+          "line": 280,
+          "text": "vipOpen,"
+        },
+        {
+          "key": "vip",
+          "line": 282,
+          "text": "vipBtnRef,"
+        },
+        {
+          "key": "vip",
+          "line": 283,
+          "text": "vipActive,"
+        },
+        {
+          "key": "accountId",
+          "line": 424,
+          "text": "authAccountId: auth?.accountId,"
+        },
+        {
+          "key": "vip",
+          "line": 1411,
+          "text": "vipActive,"
+        },
+        {
+          "key": "accountId",
+          "line": 1443,
+          "text": "authAccountId: auth?.accountId,"
+        },
+        {
+          "key": "vip",
+          "line": 1664,
+          "text": "vipActive,"
+        },
+        {
+          "key": "wallet",
+          "line": 1785,
+          "text": "const entryId = event?.detail?.entryId || 'quantum_wallet_quest'"
+        },
+        {
+          "key": "wallet",
+          "line": 1791,
+          "text": "window.addEventListener('quantum-wallet:quest-open', openQuestFromQuantumWallet)"
+        },
+        {
+          "key": "wallet",
+          "line": 1792,
+          "text": "return () => window.removeEventListener('quantum-wallet:quest-open', openQuestFromQuantumWallet)"
+        },
+        {
+          "key": "vip",
+          "line": 1866,
+          "text": "vipActive,"
+        },
+        {
+          "key": "vip",
+          "line": 1878,
+          "text": "vipAvatars: VIP_AVATARS,"
+        },
+        {
+          "key": "vip",
+          "line": 1893,
+          "text": "vipBtnRef,"
+        },
+        {
+          "key": "vip",
+          "line": 1894,
+          "text": "vipOpen,"
+        },
+        {
+          "key": "vip",
+          "line": 2061,
+          "text": "vipEmoji: VIP_EMOJI,"
+        }
+      ],
+      "uniq": [
+        "vip",
+        "userId",
+        "followers",
+        "following",
+        "accountId",
+        "wallet"
+      ],
+      "score": 26
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\feed\\hooks\\useForumSyncLoop.js",
       "hits": [
         {
@@ -4849,134 +4993,6 @@
         "nickname",
         "userId",
         "followers"
-      ],
-      "score": 23
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\ForumRoot.jsx",
-      "hits": [
-        {
-          "key": "vip",
-          "line": 107,
-          "text": "import { VIP_EMOJI, VIP_AVATARS } from './features/profile/constants/vipAssets'"
-        },
-        {
-          "key": "userId",
-          "line": 208,
-          "text": "userId: '',"
-        },
-        {
-          "key": "followers",
-          "line": 209,
-          "text": "initialMode: 'followers',"
-        },
-        {
-          "key": "userId",
-          "line": 212,
-          "text": "const openSubscriptionsPopover = useCallback(({ userId, initialMode = 'followers' } = {}) => {"
-        },
-        {
-          "key": "followers",
-          "line": 212,
-          "text": "const openSubscriptionsPopover = useCallback(({ userId, initialMode = 'followers' } = {}) => {"
-        },
-        {
-          "key": "userId",
-          "line": 213,
-          "text": "const raw = String(userId || '').trim()"
-        },
-        {
-          "key": "userId",
-          "line": 218,
-          "text": "userId: uid,"
-        },
-        {
-          "key": "followers",
-          "line": 219,
-          "text": "initialMode: initialMode === 'following' ? 'following' : 'followers',"
-        },
-        {
-          "key": "following",
-          "line": 219,
-          "text": "initialMode: initialMode === 'following' ? 'following' : 'followers',"
-        },
-        {
-          "key": "userId",
-          "line": 224,
-          "text": "setSubscriptionsUI({ open: false, userId: '', initialMode: 'followers' })"
-        },
-        {
-          "key": "followers",
-          "line": 224,
-          "text": "setSubscriptionsUI({ open: false, userId: '', initialMode: 'followers' })"
-        },
-        {
-          "key": "vip",
-          "line": 280,
-          "text": "vipOpen,"
-        },
-        {
-          "key": "vip",
-          "line": 282,
-          "text": "vipBtnRef,"
-        },
-        {
-          "key": "vip",
-          "line": 283,
-          "text": "vipActive,"
-        },
-        {
-          "key": "accountId",
-          "line": 424,
-          "text": "authAccountId: auth?.accountId,"
-        },
-        {
-          "key": "vip",
-          "line": 1411,
-          "text": "vipActive,"
-        },
-        {
-          "key": "accountId",
-          "line": 1443,
-          "text": "authAccountId: auth?.accountId,"
-        },
-        {
-          "key": "vip",
-          "line": 1664,
-          "text": "vipActive,"
-        },
-        {
-          "key": "vip",
-          "line": 1851,
-          "text": "vipActive,"
-        },
-        {
-          "key": "vip",
-          "line": 1863,
-          "text": "vipAvatars: VIP_AVATARS,"
-        },
-        {
-          "key": "vip",
-          "line": 1878,
-          "text": "vipBtnRef,"
-        },
-        {
-          "key": "vip",
-          "line": 1879,
-          "text": "vipOpen,"
-        },
-        {
-          "key": "vip",
-          "line": 2046,
-          "text": "vipEmoji: VIP_EMOJI,"
-        }
-      ],
-      "uniq": [
-        "vip",
-        "userId",
-        "followers",
-        "following",
-        "accountId"
       ],
       "score": 23
     },
@@ -7573,6 +7589,71 @@
       "score": 11
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinInline.jsx",
+      "hits": [
+        {
+          "key": "vip",
+          "line": 8,
+          "text": "export default function QCoinInline({ t, userKey, vipActive, anchorRef }) {"
+        },
+        {
+          "key": "vip",
+          "line": 9,
+          "text": "const q = useQCoinLive(userKey, !!vipActive)"
+        },
+        {
+          "key": "wallet",
+          "line": 12,
+          "text": "const walletTitle = t?.('quantum_wallet_open_aria') || t?.('forum_qcoin_open_hint') || 'Open Quantum Wallet'"
+        },
+        {
+          "key": "wallet",
+          "line": 16,
+          "text": "window.dispatchEvent(new CustomEvent('quantum-wallet:open', {"
+        },
+        {
+          "key": "vip",
+          "line": 17,
+          "text": "detail: { userKey, vipActive: !!vipActive },"
+        },
+        {
+          "key": "vip",
+          "line": 27,
+          "text": "className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}"
+        },
+        {
+          "key": "vip",
+          "line": 31,
+          "text": "title={vipActive ? t('forum_qcoin_x2_active') : t('forum_qcoin_x2_get')}"
+        },
+        {
+          "key": "vip",
+          "line": 34,
+          "text": "window.dispatchEvent(new Event('vip:open'))"
+        },
+        {
+          "key": "vip",
+          "line": 40,
+          "text": "window.dispatchEvent(new Event('vip:open'))"
+        },
+        {
+          "key": "wallet",
+          "line": 63,
+          "text": "title={walletTitle}"
+        },
+        {
+          "key": "wallet",
+          "line": 64,
+          "text": "aria-label={walletTitle}"
+        }
+      ],
+      "uniq": [
+        "vip",
+        "wallet"
+      ],
+      "score": 11
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestHub.jsx",
       "hits": [
         {
@@ -7641,57 +7722,57 @@
       "hits": [
         {
           "key": "vip",
-          "line": 32,
+          "line": 31,
           "text": "vipActive,"
         },
         {
           "key": "vip",
-          "line": 44,
+          "line": 43,
           "text": "vipAvatars,"
         },
         {
           "key": "vip",
-          "line": 62,
+          "line": 54,
           "text": "vipBtnRef,"
         },
         {
           "key": "vip",
-          "line": 63,
+          "line": 55,
           "text": "vipOpen,"
         },
         {
           "key": "userId",
-          "line": 108,
+          "line": 100,
           "text": "<AvatarEmoji userId={idShown} pIcon={iconShown} />"
         },
         {
           "key": "vip",
-          "line": 128,
+          "line": 120,
           "text": "vipActive={vipActive}"
         },
         {
           "key": "vip",
-          "line": 140,
+          "line": 132,
           "text": "vipAvatars={vipAvatars}"
         },
         {
           "key": "vip",
-          "line": 170,
+          "line": 150,
           "text": "<QCoinInline t={t} userKey={idShown} vipActive={vipActive} />"
         },
         {
           "key": "vip",
-          "line": 191,
+          "line": 171,
           "text": "vipBtnRef={vipBtnRef}"
         },
         {
           "key": "vip",
-          "line": 192,
+          "line": 172,
           "text": "vipActive={vipActive}"
         },
         {
           "key": "vip",
-          "line": 194,
+          "line": 174,
           "text": "vipOpen={vipOpen}"
         }
       ],
@@ -9121,45 +9202,6 @@
       "score": 6
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\components\\QCoinInline.jsx",
-      "hits": [
-        {
-          "key": "vip",
-          "line": 7,
-          "text": "export default function QCoinInline({ t, userKey, vipActive, anchorRef }) {"
-        },
-        {
-          "key": "vip",
-          "line": 8,
-          "text": "const q = useQCoinLive(userKey, !!vipActive)"
-        },
-        {
-          "key": "vip",
-          "line": 29,
-          "text": "className={cls('qcoinX2', vipActive ? 'vip' : 'needVip', 'hoverPop')}"
-        },
-        {
-          "key": "vip",
-          "line": 33,
-          "text": "title={vipActive ? t('forum_qcoin_x2_active') : t('forum_qcoin_x2_get')}"
-        },
-        {
-          "key": "vip",
-          "line": 36,
-          "text": "window.dispatchEvent(new Event('vip:open'))"
-        },
-        {
-          "key": "vip",
-          "line": 42,
-          "text": "window.dispatchEvent(new Event('vip:open'))"
-        }
-      ],
-      "uniq": [
-        "vip"
-      ],
-      "score": 6
-    },
-    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\subscriptions\\utils\\starred.js",
       "hits": [
         {
@@ -9623,6 +9665,41 @@
         }
       ],
       "uniq": [
+        "vip"
+      ],
+      "score": 5
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumGlobalPopovers.js",
+      "hits": [
+        {
+          "key": "wallet",
+          "line": 9,
+          "text": "window.addEventListener('quantum-wallet:open', closeForumPopoversForWallet)"
+        },
+        {
+          "key": "wallet",
+          "line": 12,
+          "text": "window.removeEventListener('quantum-wallet:open', closeForumPopoversForWallet)"
+        },
+        {
+          "key": "vip",
+          "line": 17,
+          "text": "const openVip = () => openOnlyRef?.current?.('vip')"
+        },
+        {
+          "key": "vip",
+          "line": 18,
+          "text": "window.addEventListener('vip:open', openVip)"
+        },
+        {
+          "key": "vip",
+          "line": 19,
+          "text": "return () => window.removeEventListener('vip:open', openVip)"
+        }
+      ],
+      "uniq": [
+        "wallet",
         "vip"
       ],
       "score": 5
@@ -10109,26 +10186,27 @@
       "score": 3
     },
     {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumGlobalPopovers.js",
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumPopoverModeController.js",
       "hits": [
         {
           "key": "vip",
-          "line": 13,
-          "text": "const openVip = () => openOnlyRef?.current?.('vip')"
+          "line": 19,
+          "text": "else if (name === 'vip') controls.setVipOpen?.(true)"
         },
         {
-          "key": "vip",
-          "line": 14,
-          "text": "window.addEventListener('vip:open', openVip)"
+          "key": "wallet",
+          "line": 21,
+          "text": "else if (name === 'qcoin' || name === 'wallet') {"
         },
         {
-          "key": "vip",
-          "line": 15,
-          "text": "return () => window.removeEventListener('vip:open', openVip)"
+          "key": "wallet",
+          "line": 22,
+          "text": "try { window.dispatchEvent(new Event('quantum-wallet:open')) } catch {}"
         }
       ],
       "uniq": [
-        "vip"
+        "vip",
+        "wallet"
       ],
       "score": 3
     },
@@ -10376,6 +10454,25 @@
           "key": "wallet",
           "line": 15,
           "text": "ls.getItem('wallet') ||"
+        }
+      ],
+      "uniq": [
+        "wallet"
+      ],
+      "score": 2
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\quests\\components\\QuestLaunchIcon.jsx",
+      "hits": [
+        {
+          "key": "wallet",
+          "line": 9,
+          "text": "window.dispatchEvent(new CustomEvent('quantum-wallet:open'))"
+        },
+        {
+          "key": "wallet",
+          "line": 21,
+          "text": "aria-label={t?.('quantum_wallet_open_aria') || t?.('quest_open') || 'Open Quantum Wallet'}"
         }
       ],
       "uniq": [
@@ -10648,20 +10745,6 @@
       ],
       "uniq": [
         "accountId"
-      ],
-      "score": 1
-    },
-    {
-      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\ui\\hooks\\useForumPopoverModeController.js",
-      "hits": [
-        {
-          "key": "vip",
-          "line": 19,
-          "text": "else if (name === 'vip') controls.setVipOpen?.(true)"
-        }
-      ],
-      "uniq": [
-        "vip"
       ],
       "score": 1
     },

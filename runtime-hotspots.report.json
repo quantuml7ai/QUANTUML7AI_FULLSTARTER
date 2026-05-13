@@ -1,6 +1,6 @@
 {
   "root": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter",
-  "generatedAt": "2026-05-09T14:29:22.285Z",
+  "generatedAt": "2026-05-13T12:49:38.675Z",
   "report": [
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\media\\hooks\\useForumMediaCoordinator.js",
@@ -676,7 +676,7 @@
         "map-chain": 0,
         "filter-map": 0,
         "layout-read": 0,
-        "sync-json": 0,
+        "sync-json": 1,
         "local-storage": 0,
         "session-storage": 0,
         "network-call": 0,
@@ -685,64 +685,64 @@
       },
       "longLines": [
         {
-          "i": 411,
+          "i": 502,
           "len": 190,
           "text": "try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}"
         },
         {
-          "i": 417,
+          "i": 509,
           "len": 188,
           "text": "try { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; } catch {}"
         },
         {
-          "i": 509,
-          "len": 212,
-          "text": "if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) { attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src', resetPipeline: true }); return undefined; }"
+          "i": 615,
+          "len": 218,
+          "text": "if (currentKind !== 'video') { markSiteAdPlaying(false, 'kind_change'); attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'kind_change', resetPipeline: true }); return undefined; }"
         },
         {
-          "i": 510,
+          "i": 617,
+          "len": 262,
+          "text": "if (!nextSrc || isVideoSrcTemporarilyBlocked(nextSrc)) { markSiteAdPlaying(false, 'blocked_or_empty_src'); attachedVideoSrcRef.current = ''; detachSiteNativeVideo(node, { hard: true, reason: 'blocked_or_empty_src', resetPipeline: true }); return undefined; }"
+        },
+        {
+          "i": 618,
           "len": 205,
           "text": "if (attachedVideoSrcRef.current && attachedVideoSrcRef.current !== nextSrc) { detachSiteNativeVideo(node, { hard: true, reason: 'src_change', resetPipeline: true }); attachedVideoSrcRef.current = ''; }"
         },
         {
-          "i": 533,
+          "i": 624,
+          "len": 218,
+          "text": "if (currentKind !== 'video' || !isPageActive || !isNear) { markSiteAdPlaying(false, 'near_exit'); if (v && !shouldPlayRef.current) detachSiteNativeVideo(v, { hard: false, reason: 'near_exit' }); return undefined; }"
+        },
+        {
+          "i": 642,
           "len": 237,
           "text": "if (!loadingOrReady && (now - lastLoadTs) > SITE_AD_NATIVE_WARM_RELOAD_GAP_MS) { v.dataset.__siteAdLastWarmLoadTs = String(now); v.dataset.__siteAdLoadPending = '1'; v.dataset.__siteAdLoadPendingSince = String(now); v.load?.(); }"
         },
         {
-          "i": 626,
+          "i": 670,
+          "len": 240,
+          "text": "if (shouldPlayRef.current) { markSiteAdPlaying(true, 'youtube_ready'); emitAdPlayToCoordinator('site_ad_youtube'); ev.target.playVideo?.(); } else { markSiteAdPlaying(false, 'youtube_ready_paused'); ev.target.pauseVideo?.(); }"
+        },
+        {
+          "i": 709,
+          "len": 273,
+          "text": "if (currentKind === 'tiktok') { if (shouldPlay) { markSiteAdPlaying(true, 'tiktok_focus'); emitAdPlayToCoordinator('site_ad_tiktok'); } else markSiteAdPlaying(false, 'tiktok_focus_pause'); commandExternalFrame(iframeRef.current, shouldPlay ? 'play' : 'pause', muted); }"
+        },
+        {
+          "i": 736,
           "len": 188,
           "text": "try { if (ytPlayerRef.current) { if (next) ytPlayerRef.current.mute?.(); else ytPlayerRef.current.unMute?.(); if (shouldPlayRef.current) ytPlayerRef.current.playVideo?.(); } } catch {}"
         },
         {
-          "i": 649,
-          "len": 196,
-          "text": "if (v.ended) { const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; return; }"
+          "i": 760,
+          "len": 243,
+          "text": "if (v.ended) { markSiteAdPlaying(false, 'video_ended_pause'); const st = adNativePauseRecoveryRef.current || {}; if (st.timer) clearTimeout(st.timer); adNativePauseRecoveryRef.current = { timer: 0, ts: Date.now(), count: 0 }; return; }"
         },
         {
-          "i": 655,
+          "i": 766,
           "len": 203,
           "text": "const timer = setTimeout(() => { try { if (!shouldPlayRef.current || !v.paused) return; applyMutedToVideo(v, normalizeSiteMuted(mutedRef.current)); v.play?.().catch(() => {}); } catch {} }, 140);"
-        },
-        {
-          "i": 660,
-          "len": 400,
-          "text": "try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}"
-        },
-        {
-          "i": 663,
-          "len": 400,
-          "text": "try { const v = videoRef.current; if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; } if (v?.dataset) v.dataset.__siteAdWarmReady = '1'; applyMutedToVideo(v, mutedRef.current); clearVideoSrcBlock(currentSrc); if (shouldPlayRef.current && v?.paused) v.play?.().catch(() => {}); else if (v) v.preload = SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; } catch {}"
-        },
-        {
-          "i": 672,
-          "len": 221,
-          "text": "if (v) { v.preload = shouldPlayRef.current ? SITE_AD_NATIVE_VIDEO_PRELOAD_PLAY : SITE_AD_NATIVE_VIDEO_PRELOAD_IDLE; if (shouldPlayRef.current) { try { v.currentTime = 0; } catch {}; v.play?.().catch(() => {}); } }"
-        },
-        {
-          "i": 683,
-          "len": 223,
-          "text": "if (code <= 1 || recentAttach || loading || hasFrame) { if (v?.dataset) { v.dataset.__siteAdLoadPending = '0'; delete v.dataset.__siteAdLoadPendingSince; v.dataset.__siteAdTransientErrorTs = String(now); } return; }"
         }
       ],
       "score": 16
@@ -1972,17 +1972,17 @@
       },
       "longLines": [
         {
-          "i": 410,
+          "i": 411,
           "len": 251,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         },
         {
-          "i": 425,
+          "i": 426,
           "len": 246,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         },
         {
-          "i": 443,
+          "i": 444,
           "len": 253,
           "text": "'AI • Quantum Agents • Onchain Analytics • Crypto Exchange (core) • Q-Line Forum • Academy • QCoin Mining • Auto Execution • Risk Contour • Liquidity Routing • Web3 Metaverse • Games • API/SDK • Enterprise • All rights reserved • Quantum L7 AI ©',"
         }
@@ -3002,6 +3002,45 @@
         "interval": 0
       },
       "longLines": [],
+      "score": 4
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QuantumWallet.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [
+        {
+          "i": 1389,
+          "len": 185,
+          "text": "@keyframes qwTitleSweep { 0% { transform: translateX(0) skewX(-18deg); opacity: 0; } 20% { opacity: .38; } 80%,100% { transform: translateX(780px) skewX(-18deg); opacity: 0; } }"
+        },
+        {
+          "i": 1391,
+          "len": 190,
+          "text": "@keyframes qwCorePulse { 0%,100% { opacity: .54; transform: scale(.98); transform-origin: 128px 89px; } 50% { opacity: .92; transform: scale(1.035); transform-origin: 128px 89px; } }"
+        },
+        {
+          "i": 1540,
+          "len": 182,
+          "text": "background: conic-gradient(from 120deg, transparent, rgba(255,255,255,.55), transparent 22%, rgba(250,204,21,.35), transparent 54%, rgba(103,232,249,.38), transparent 76%);"
+        },
+        {
+          "i": 1633,
+          "len": 186,
+          "text": "background: conic-gradient(from 180deg, rgba(103,232,249,.08), rgba(103,232,249,.56), rgba(192,132,252,.34), rgba(250,204,21,.58), rgba(45,212,191,.52), rgba(103,232,249,.08));"
+        }
+      ],
       "score": 4
     },
     {
@@ -6756,6 +6795,24 @@
       "score": 0
     },
     {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\utils\\formatQCoinBalance.js",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\app\\forum\\features\\qcoin\\utils\\paymentWindow.js",
       "counts": {
         "for-loop": 0,
@@ -8413,6 +8470,24 @@
     },
     {
       "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QCoinDropFXGate.jsx",
+      "counts": {
+        "for-loop": 0,
+        "while-loop": 0,
+        "map-chain": 0,
+        "filter-map": 0,
+        "layout-read": 0,
+        "sync-json": 0,
+        "local-storage": 0,
+        "session-storage": 0,
+        "network-call": 0,
+        "raf": 0,
+        "interval": 0
+      },
+      "longLines": [],
+      "score": 0
+    },
+    {
+      "file": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\components\\QuantumWalletHost.jsx",
       "counts": {
         "for-loop": 0,
         "while-loop": 0,

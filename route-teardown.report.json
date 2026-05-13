@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-09T14:30:00.653Z",
+  "generatedAt": "2026-05-13T12:50:14.403Z",
   "report": [
     {
       "file": "app/page.js",
@@ -60,11 +60,11 @@
         "timerCleanup": 2,
         "observers": 0,
         "observerCleanup": 0,
-        "listeners": 0,
-        "listenerCleanup": 0,
+        "listeners": 1,
+        "listenerCleanup": 1,
         "destroyCalls": 0
       },
-      "teardownScore": 2
+      "teardownScore": 3
     },
     {
       "file": "components/ForumBootSplash.jsx",
@@ -86,11 +86,11 @@
         "timerCleanup": 2,
         "observers": 0,
         "observerCleanup": 0,
-        "listeners": 0,
-        "listenerCleanup": 0,
+        "listeners": 1,
+        "listenerCleanup": 1,
         "destroyCalls": 0
       },
-      "teardownScore": 2
+      "teardownScore": 3
     },
     {
       "file": "app/forum/features/feed/components/ThreadRepliesPane.jsx",

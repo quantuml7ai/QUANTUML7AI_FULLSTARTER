@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-05-08T21:59:11.594Z
-Исходных файлов в анализе: 819
+Сгенерировано автоматически: 2026-05-13T12:49:10.991Z
+Исходных файлов в анализе: 822
 Route-aware файлов: 100
 
 ## Что Считается Риском
@@ -122,7 +122,7 @@ Route-aware файлов: 100
 
 - `app/api/forum/_db.js` — используют 36 локальных модулей
 - `app/api/forum/_utils.js` — используют 36 локальных модулей
-- `components/i18n.js` — используют 31 локальных модулей
+- `components/i18n.js` — используют 32 локальных модулей
 - `tools/runtime-governance.js` — используют 25 локальных модулей
 - `app/api/profile/_identity.js` — используют 18 локальных модулей
 - `app/forum/features/profile/utils/profileCache.js` — используют 18 локальных модулей
@@ -152,16 +152,16 @@ Route-aware файлов: 100
 - `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 12 локальных модулей
 - `app/forum/features/feed/components/TopicItem.jsx` — импортирует 12 локальных модулей
-- `app/layout.js` — импортирует 11 локальных модулей
+- `app/layout.js` — импортирует 12 локальных модулей
 - `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 9 локальных модулей
-- `app/forum/ForumHeaderPanel.jsx` — импортирует 9 локальных модулей
 - `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx` — импортирует 9 локальных модулей
 - `tests/unit/i18n/i18nDictionaries.test.js` — импортирует 9 локальных модулей
 - `tests/unit/runtime/runtimeGovernance.test.js` — импортирует 9 локальных модулей
 - `app/forum/features/ui/hooks/useForumScreenFlowsRuntime.js` — импортирует 8 локальных модулей
+- `app/forum/ForumHeaderPanel.jsx` — импортирует 8 локальных модулей
 - `components/i18n.js` — импортирует 8 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 7 локальных модулей
@@ -176,8 +176,8 @@ Route-aware файлов: 100
 
 ## Зоны С Повышенной Плотностью Связей
 
-- `app/layout.js` — файлов: 1; исходящих связей: 11; плотность: 11
-- `forum/root` — файлов: 14; исходящих связей: 88; плотность: 6.29
+- `app/layout.js` — файлов: 1; исходящих связей: 12; плотность: 12
+- `forum/root` — файлов: 14; исходящих связей: 87; плотность: 6.21
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `app/ads` — файлов: 4; исходящих связей: 10; плотность: 2.5
 - `forum/subscriptions` — файлов: 4; исходящих связей: 9; плотность: 2.25

@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-05-08T21:59:11.829Z
-Файлов в реестре: 1763
+Сгенерировано автоматически: 2026-05-13T12:49:11.237Z
+Файлов в реестре: 1765
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -29,13 +29,13 @@
 - `adaptive-actions.report.json` — 1 файлов
 - `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 394 файлов
+- `app` — 395 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `auth-cascade.report.json` — 1 файлов
 - `baseline-after.stage0.json` — 1 файлов
 - `baseline-before.stage0.json` — 1 файлов
-- `components` — 34 файлов
+- `components` — 36 файлов
 - `config` — 1 файлов
 - `console-noise-classification.report.json` — 1 файлов
 - `decorative-media-budget.report.json` — 1 файлов
@@ -50,7 +50,6 @@
 - `forum-diag.jsonl` — 1 файлов
 - `forum-media-churn.audit.report.json` — 1 файлов
 - `forum-media-har.report.json` — 1 файлов
-- `forum-scroll-media-anchor-v4.patch` — 1 файлов
 - `forum-scroll.audit.report.json` — 1 файлов
 - `forum-startup.audit.report.json` — 1 файлов
 - `heapsnapshot-analysis.report.json` — 1 файлов
@@ -532,12 +531,13 @@
           - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
       - qcoin/ — Подсистема QCoin в форуме.
         - components/ — Каталог слоя компоненты внутри feature qcoin.
-          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
-          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: используется в forum/ForumHeaderPanel.jsx.
+          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
         - hooks/ — Каталог слоя хуки внутри feature qcoin.
-          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
         - utils/ — Каталог слоя утилиты внутри feature qcoin.
           - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
+          - formatQCoinBalance.js — Утилита format QCoin Balance домена QCoin. Связи: используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
           - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js.
       - quests/ — Подсистема квестов форума.
         - components/ — Каталог слоя компоненты внутри feature quests.
@@ -897,6 +897,8 @@
   - NotRobotHost.jsx — Общий React-компонент Not Robot Host, используемый вне одного домена. Связи: импортирует components/NotRobot.jsx; используется в app/layout.js.
   - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
   - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
+  - QuantumWallet.jsx — Общий React-компонент Quantum Wallet, используемый вне одного домена. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, components/i18n.js; используется в components/QuantumWalletHost.jsx.
+  - QuantumWalletHost.jsx — Общий React-компонент Quantum Wallet Host, используемый вне одного домена. Связи: импортирует components/QuantumWallet.jsx; используется в app/layout.js.
   - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
   - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/layout.js.
@@ -2103,7 +2105,6 @@
 - forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-media-har.report.json — JSON-файл forum media har.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-- forum-scroll-media-anchor-v4.patch — .patch-файл forum scroll media anchor v4. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

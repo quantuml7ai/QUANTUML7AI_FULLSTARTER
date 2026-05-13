@@ -477,12 +477,14 @@ export default function RootLayout({ children }) {
   return (
 <html
   lang="en"
+  translate="no"
   suppressHydrationWarning
-  className={forumTitleFont.variable}
+  className={`${forumTitleFont.variable} notranslate`}
 >
 
 
       <head>
+        <meta name="google" content="notranslate" />
         {/* ✅ compat.js – максимально рано */}
         <Script src="/compat.js" strategy="beforeInteractive" id="compat-bootstrap" />
         {forumEarlyDiagMasterEnabled ? (
