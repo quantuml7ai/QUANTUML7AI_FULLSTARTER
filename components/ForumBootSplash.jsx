@@ -38,7 +38,7 @@ const FORUM_SPLASH_TRY_SOUND_AUTOPLAY = 1
 const FORUM_SPLASH_ALLOW_MUTED_FALLBACK = 1
 
 // Initial volume if sound autoplay succeeds
-const FORUM_SPLASH_VOLUME = 0.5
+const FORUM_SPLASH_VOLUME = 0.3
 
 /* =========================================================
    LAYER / Z-INDEX
