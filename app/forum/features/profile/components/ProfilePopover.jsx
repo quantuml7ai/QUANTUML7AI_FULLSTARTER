@@ -1,0 +1,1460 @@
+'use client'
+
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import Image from 'next/image'
+import { useEvent } from '../../../shared/hooks/useEvent'
+import { cls } from '../../../shared/utils/classnames'
+import { formatCount } from '../../../shared/utils/counts'
+import { clearWalletAuthStorage, getStoredWalletSession } from '../../../../../lib/walletSessionClient'
+import FollowersCounterInline from '../../subscriptions/components/FollowersCounterInline'
+import { resolveForumUserId } from '../../qcoin/utils/account'
+import {
+  resolveProfileAccountId,
+  safeReadProfile,
+  writeProfileAlias,
+  mergeProfileCache,
+} from '../utils/profileCache'
+
+function QuantumTrashIcon() {
+  return (
+    <svg viewBox="0 0 64 64" focusable="false" aria-hidden="true" className="profileDeleteTrashSvg">
+      <defs>
+        <linearGradient id="ql7TrashBody" x1="12" x2="52" y1="14" y2="58" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ff8a8a" />
+          <stop offset="0.42" stopColor="#ff254d" />
+          <stop offset="1" stopColor="#9b001c" />
+        </linearGradient>
+        <linearGradient id="ql7TrashLid" x1="16" x2="48" y1="9" y2="25" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stopColor="#ffd2d2" />
+          <stop offset="0.34" stopColor="#ff4967" />
+          <stop offset="1" stopColor="#e00028" />
+        </linearGradient>
+        <filter id="ql7TrashGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feDropShadow dx="0" dy="0" stdDeviation="2.2" floodColor="#ff3158" floodOpacity="0.82" />
+          <feDropShadow dx="0" dy="8" stdDeviation="6" floodColor="#250006" floodOpacity="0.78" />
+        </filter>
+      </defs>
+      <g filter="url(#ql7TrashGlow)">
+        <path d="M22.4 14.8 24.7 9.6c.45-1.05 1.45-1.72 2.6-1.72h9.4c1.15 0 2.15.67 2.6 1.72l2.3 5.2" fill="none" stroke="url(#ql7TrashLid)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M14.5 18.4c0-2 1.62-3.62 3.62-3.62h27.76c2 0 3.62 1.62 3.62 3.62v2.1c0 1.18-.96 2.14-2.14 2.14H16.64a2.14 2.14 0 0 1-2.14-2.14v-2.1Z" fill="url(#ql7TrashLid)" />
+        <path d="M19.7 24.6h24.6l-2.1 25.25a5.55 5.55 0 0 1-5.52 5.08h-9.36a5.55 5.55 0 0 1-5.52-5.08L19.7 24.6Z" fill="url(#ql7TrashBody)" />
+        <path d="M25.55 29.2 27 49.25M32 29.1v20.4M38.45 29.2 37 49.25" fill="none" stroke="rgba(255,255,255,.78)" strokeWidth="2.65" strokeLinecap="round" />
+        <path d="M20.8 24.8h22.4M16.8 20.1h30.4" fill="none" stroke="rgba(255,255,255,.55)" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M21.4 32.3c6.2-4 15.3-4.25 21.2-.2" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="2" strokeLinecap="round" />
+      </g>
+    </svg>
+  )
+}
+
+function WarningTriangleIcon() {
+  return (
+    <svg viewBox="0 0 32 32" focusable="false" aria-hidden="true" className="profileDeleteWarnSvg">
+      <path d="M16 3.5 29 27H3L16 3.5Z" fill="rgba(255,49,88,.16)" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M16 11v7" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+      <circle cx="16" cy="23" r="1.55" fill="currentColor" />
+    </svg>
+  )
+}
+
+function ConfirmCheckIcon() {
+  return (
+    <svg viewBox="0 0 40 40" focusable="false" aria-hidden="true">
+      <path d="M10.2 20.9 17 27.7 30.4 12.5" fill="none" stroke="currentColor" strokeWidth="4.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function RejectCrossIcon() {
+  return (
+    <svg viewBox="0 0 40 40" focusable="false" aria-hidden="true">
+      <path d="M12 12 28 28M28 12 12 28" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function DeleteSpinnerIcon() {
+  return (
+    <svg viewBox="0 0 40 40" focusable="false" aria-hidden="true" className="profileDeleteSpin">
+      <circle cx="20" cy="20" r="13" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeDasharray="22 64" />
+    </svg>
+  )
+}
+export default function ProfilePopover({
+  anchorRef,
+  open,
+  onClose,
+  t,
+  auth,
+  vipActive,
+  onSaved,
+
+  viewerId,
+  myFollowersCount,
+  myFollowingCount,
+  myFollowersLoading,
+  onOpenSubscriptions,
+
+  // 👇 deps from Forum scope (moderation + toasts)
+  moderateImageFiles,
+  toastI18n,
+  reasonKey,
+  reasonFallbackEN,
+  icons = [],
+  vipAvatars = [],
+}) {
+  void reasonFallbackEN
+
+
+  // нормализуем UID через общий хелпер, чтобы TG и веб совпадали
+  const baseAuth = auth || {};
+  const base = baseAuth.asherId || baseAuth.accountId || '';
+  const resolved = resolveForumUserId(base);
+  const uid = resolveProfileAccountId(resolved);
+
+  const readLocal = React.useCallback(() => {
+    if (!uid || typeof window === 'undefined') return null;
+    return safeReadProfile(uid) || null;
+  }, [uid]);
+  const nowYear = new Date().getFullYear();
+  const maxBirthYear = nowYear - 14;
+  const minBirthYear = maxBirthYear - 99;
+  const birthYearOptions = React.useMemo(() =>
+    Array.from({ length: 100 }, (_, index) => maxBirthYear - index),
+  [maxBirthYear]);
+
+  const initialLocal = readLocal() || {};
+  const savedGenderRef = useRef(String(initialLocal.gender || ''));
+  const savedBirthYearRef = useRef(Number(initialLocal.birthYear || 0) || 0);
+  const [nick, setNick] = useState(initialLocal.nickname || '');
+  const [gender, setGender] = useState(String(initialLocal.gender || ''));
+  const [birthYear, setBirthYear] = useState(Number(initialLocal.birthYear || 0) || 0);
+  const [yearMenuOpen, setYearMenuOpen] = useState(false);
+  const yearMenuRef = useRef(null);
+  const genderLocked = !!String(savedGenderRef.current || '');
+  const birthYearLocked = Number(savedBirthYearRef.current || 0) > 0;
+  const [icon, setIcon] = useState(initialLocal.icon || icons[0] || '👦');
+ 
+  // ===== Upload Avatar (custom photo) =====
+  // ВАЖНО: превью и сохранение используют ОДИН И ТОТ ЖЕ canvas-рендер -> идеальное совпадение.
+  const fileRef = useRef(null);
+  const avaBoxRef = useRef(null);
+  const filePickerOpenTsRef = useRef(0);
+
+
+  const [uploadFile, setUploadFile] = useState(null);      // File выбранный пользователем
+  const [imgInfo, setImgInfo] = useState({ w: 0, h: 0 });  // натуральные размеры
+  // crop:
+  //  - x/y: относительный сдвиг (доля от стороны квадрата превью), чтобы одинаково смотрелось на desktop/mobile
+  //  - z: zoom (mult)
+  const [crop, setCrop] = useState({ x: 0, y: 0, z: 1 });  const [uploadBusy, setUploadBusy] = useState(false);
+  const [finalAvatarBlob, setFinalAvatarBlob] = useState(null);
+  const [finalAvatarUrl, setFinalAvatarUrl] = useState('');
+  const finalAvatarUrlRef = useRef('');
+  // ✅ мгновенное превью сразу после выбора файла (до canvas-crop)
+  const [rawAvatarUrl, setRawAvatarUrl] = useState('');
+  const rawAvatarUrlRef = useRef('');
+  const pickTokenRef = useRef(0); // защита от гонок при быстром выборе файлов
+
+  // ✅ защита от setState после unmount (save может продолжаться после onClose)
+  const mountedRef = useRef(false);
+  const lastFocusRef = useRef(null);
+  const [portalReady, setPortalReady] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+  const [deleteBusy, setDeleteBusy] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  useEffect(() => {
+    mountedRef.current = true;
+    setPortalReady(true);
+    return () => {
+      mountedRef.current = false;
+      setPortalReady(false);
+    };
+  }, []);
+  const dragRef = useRef({ on: false, moved: false, canDrag: false, x: 0, y: 0, sx: 0, sy: 0, sz: 1 });
+ 
+  const bmpRef = useRef(null); // ImageBitmap
+  const boxSizeRef = useRef(0);
+
+  // ===== Avatar preview (canvas) =====
+  // WHY: <img> + object-fit:cover обрезает картинку в квадрат сразу после выбора.
+  // Canvas-рендер рисует ПОЛНОЕ изображение и режет только при Save.
+  const previewCanvasRef = useRef(null);
+  const rafRef = useRef(0);
+  const drawPendingRef = useRef(false);
+  const dprRef = useRef(1);
+  const cropLiveRef = useRef({ x: 0, y: 0, z: 1 });
+  // x/y храним как долю от стороны квадрата (относительно),
+  // чтобы превью не плавало между desktop/mobile и точно совпадало с сохранением.
+  const relToPx = (rel, size) => (Number(rel) || 0) * (Number(size) || 0);
+  const pxToRel = (px, size) => {
+    const s = Number(size) || 0;
+    if (!s) return 0;
+    return (Number(px) || 0) / s;
+  };
+
+  const getDpr = () => {
+    try {
+      const v = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+      // clamp: 1..2 (retina, но без лишней нагрузки)
+      return Math.max(1, Math.min(2, Number(v) || 1));
+    } catch {     
+   return 1;
+    }
+  };
+
+  const ensurePreviewCanvasSize = useCallback(() => {
+    const canvas = previewCanvasRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!canvas || !size) return;
+
+    const dpr = getDpr();
+    dprRef.current = dpr;
+
+    const w = Math.max(1, Math.round(size * dpr));
+    const h = Math.max(1, Math.round(size * dpr));
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+
+    // css size — в CSS-пикселях
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+  }, []);
+
+  const drawAvatarPreview = useCallback(() => {
+    const canvas = previewCanvasRef.current;
+    const bmp = bmpRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!canvas || !bmp || !size) return;
+
+    ensurePreviewCanvasSize();
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = dprRef.current || 1;
+    // рисуем в CSS-пикселях, масштаб задаём transform-ом
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, size, size);
+
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+
+    const c = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+    const z = Math.max(1, Number(c.z || 1));
+    const scale = base * z;
+
+    const dw = iw * scale;
+    const dh = ih * scale;
+      const cx = size / 2 + relToPx(c.x, size);
+      const cy = size / 2 + relToPx(c.y, size);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+  }, [ensurePreviewCanvasSize]);
+
+  const requestPreviewDraw = useCallback(() => {
+    if (drawPendingRef.current) return;
+    drawPendingRef.current = true;
+    try {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    } catch {}
+    rafRef.current = requestAnimationFrame(() => {
+      drawPendingRef.current = false;
+      drawAvatarPreview();
+    });
+  }, [drawAvatarPreview]);
+  const clampCropRef = useRef((next) => next);
+  const ensurePreviewCanvasSizeRef = useRef(() => {});
+  const requestPreviewDrawRef = useRef(() => {});
+
+  // держим live-crop в ref (drag обновляет ref без лишних re-render)
+  useEffect(() => {
+    cropLiveRef.current = crop;
+    requestPreviewDraw();
+  }, [crop, requestPreviewDraw]);
+  const shouldKeepObjectUrl = React.useCallback((url) => {
+    if (!url || typeof window === 'undefined' || !uid) return false;
+    try {
+      const prof = safeReadProfile(uid);
+      return prof?.icon === url;
+    } catch {
+      return false;
+    }
+  }, [uid]);
+  const revokeObjectUrlIfSafe = React.useCallback((url) => {
+    if (!url || shouldKeepObjectUrl(url)) return false;
+    try {
+      URL.revokeObjectURL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [shouldKeepObjectUrl]);
+  const revokeObjectUrlIfSafeEvent = useEvent(revokeObjectUrlIfSafe)
+  const cleanupObjectUrlsIfStale = () => {
+    if (finalAvatarUrlRef.current && revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
+      finalAvatarUrlRef.current = '';
+    }
+    if (rawAvatarUrlRef.current && revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
+      rawAvatarUrlRef.current = '';
+    }
+  };
+  // финальная уборка (на размонтирование)
+  useEffect(() => {
+    return () => {
+      try { bmpRef.current?.close?.(); } catch {}
+      bmpRef.current = null;
+      if (finalAvatarUrlRef.current) {
+        if (revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
+          finalAvatarUrlRef.current = '';
+        }          
+       }
+      if (rawAvatarUrlRef.current) {
+        if (revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
+          rawAvatarUrlRef.current = '';
+        }
+      }   
+      };
+  }, [revokeObjectUrlIfSafeEvent]);
+  // когда поповер открывается — сбрасываем превью (чтобы не "тащилось" по страницам)
+  useEffect(() => {
+    if (!open) return;
+    // не трогаем icon/nick (они уже выставляются ниже)
+    // сбрасываем только upload-панель
+    setUploadFile(null);
+    setImgInfo({ w: 0, h: 0 });
+    setCrop({ x: 0, y: 0, z: 1 });
+    setUploadBusy(false);
+    setFinalAvatarBlob(null);
+    setFinalAvatarUrl('');
+    if (finalAvatarUrlRef.current) {
+      if (revokeObjectUrlIfSafeEvent(finalAvatarUrlRef.current)) {
+        finalAvatarUrlRef.current = '';
+      }
+    }  
+
+    setRawAvatarUrl('');
+    if (rawAvatarUrlRef.current) {
+      if (revokeObjectUrlIfSafeEvent(rawAvatarUrlRef.current)) {
+        rawAvatarUrlRef.current = '';
+      }
+    }      
+    try { bmpRef.current?.close?.(); } catch {}
+    bmpRef.current = null;
+  }, [open, revokeObjectUrlIfSafeEvent]);
+
+  useEffect(() => {
+    if (open) return;
+    setDeleteConfirmOpen(false);
+    setDeleteError('');
+    setDeleteBusy(false);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    lastFocusRef.current = document.activeElement;
+    return undefined;
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || typeof document === 'undefined') return;
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        if (deleteConfirmOpen) {
+          setDeleteConfirmOpen(false);
+          setDeleteError('');
+          return;
+        }
+        onClose?.();
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [open, onClose, deleteConfirmOpen]);
+
+  useEffect(() => {
+    if (open) return;
+    const prev = lastFocusRef.current || anchorRef?.current || null;
+    lastFocusRef.current = null;
+    if (prev && typeof prev.focus === 'function') {
+      try { prev.focus(); } catch {}
+    }
+  }, [open, anchorRef]);
+
+  // resize: держим превью-канвас = размеру квадрата (адаптив)
+  useEffect(() => {
+    if (!open) return;
+    const el = avaBoxRef.current;
+    if (!el) return;
+
+    const applySize = () => {
+      const r = el.getBoundingClientRect();
+      const sz = Math.max(1, Math.round(Math.min(r.width, r.height)));
+      boxSizeRef.current = sz;
+      // если квадрат по размеру поменялся (desktop<->mobile/ресайз),
+      // кроп мог оказаться вне границ -> клэмпим лайв сразу.
+      try {
+        const cur = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+        const clamped = clampCropRef.current(cur);
+        cropLiveRef.current = clamped;
+        // синхронизируем state только если не тащим прямо сейчас
+        if (!dragRef.current?.on) {
+          if (clamped.x !== cur.x || clamped.y !== cur.y || clamped.z !== cur.z) {
+            setCrop(clamped);
+          }
+        }
+      } catch {}      
+      try { ensurePreviewCanvasSizeRef.current(); } catch {}
+      try { requestPreviewDrawRef.current(); } catch {}
+    };
+
+    applySize();
+    const ro = new ResizeObserver(() => applySize());
+    ro.observe(el);
+    window.addEventListener('resize', applySize, { passive: true });
+    return () => {
+      try { ro.disconnect(); } catch {}
+      window.removeEventListener('resize', applySize);
+    };
+  }, [open]);
+
+  const clampCrop = React.useCallback((next) => {
+    const bmp = bmpRef.current;
+    const size = boxSizeRef.current || 0;
+    if (!bmp || !size) return next;
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+    const scale = base * Math.max(1, Number(next?.z || 1));
+    const drawW = iw * scale;
+    const drawH = ih * scale;
+    const maxX = Math.max(0, (drawW - size) / 2);
+    const maxY = Math.max(0, (drawH - size) / 2);
+    // x/y тут в относительных единицах (1.0 = ширинаквадрата)
+    const maxXRel = maxX / size;
+    const maxYRel = maxY / size;
+    const x = Math.min(maxXRel, Math.max(-maxXRel, Number(next?.x || 0)));
+    const y = Math.min(maxYRel, Math.max(-maxYRel, Number(next?.y || 0)));
+    return { x, y, z: Math.max(1, Number(next?.z || 1)) };
+  }, []);
+  useEffect(() => { clampCropRef.current = clampCrop; }, [clampCrop]);
+  useEffect(() => { ensurePreviewCanvasSizeRef.current = ensurePreviewCanvasSize; }, [ensurePreviewCanvasSize]);
+  useEffect(() => { requestPreviewDrawRef.current = requestPreviewDraw; }, [requestPreviewDraw]);
+  const openFilePicker = useCallback((event = null) => {
+    try {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+    } catch {}
+
+    const input = fileRef.current;
+    if (!input) return;
+
+    // Guard against pointerup + synthetic click opening the native picker twice.
+    const now = Date.now();
+    if (now - Number(filePickerOpenTsRef.current || 0) < 350) return;
+    filePickerOpenTsRef.current = now;
+
+    try { input.value = ''; } catch {}
+    input.click?.();
+  }, []);
+
+  const onPickFile = (e) => {
+    const f = e?.target?.files?.[0];
+    if (!f) return;
+    // 1) мгновенно показываем выбранное изображение (без "PROCESSING")
+    const token = ++pickTokenRef.current;  
+    try {
+      if (finalAvatarUrlRef.current) {
+        if (revokeObjectUrlIfSafe(finalAvatarUrlRef.current)) {
+          finalAvatarUrlRef.current = '';
+        }
+      }      
+      if (rawAvatarUrlRef.current) {
+        if (revokeObjectUrlIfSafe(rawAvatarUrlRef.current)) {
+          rawAvatarUrlRef.current = '';
+        }
+      }
+      const url = URL.createObjectURL(f);
+      rawAvatarUrlRef.current = url;
+      setRawAvatarUrl(url);
+      setFinalAvatarUrl('');
+      finalAvatarUrlRef.current = ''; } catch {}
+
+    // 2) базовые стейты
+    setUploadFile(f);
+    setFinalAvatarBlob(null);    
+    setCrop({ x: 0, y: 0, z: 1 });
+    setImgInfo({ w: 0, h: 0 });
+    // 3) декод в bitmap + натуральные размеры (асинхронно)
+    (async () => {
+      try {
+        try { bmpRef.current?.close?.(); } catch {}
+        let bmp = null;
+        if (typeof createImageBitmap === 'function') {
+          try { bmp = await createImageBitmap(f); } catch {}
+        }
+        if (!bmp) {
+          const localUrl = URL.createObjectURL(f);
+          bmp = await new Promise((resolve, reject) => {
+            const img = new window.Image();
+            img.decoding = 'async';
+            img.onload = () => {
+              try {
+                img.close = () => { try { URL.revokeObjectURL(localUrl); } catch {} };
+              } catch {}
+              resolve(img);
+            };
+            img.onerror = () => {
+              try { URL.revokeObjectURL(localUrl); } catch {}
+              reject(new Error('avatar_decode_failed'));
+            };
+            img.src = localUrl;
+          });
+        }
+        if (pickTokenRef.current !== token) {
+          try { bmp?.close?.(); } catch {}
+          return;
+        }
+        bmpRef.current = bmp;
+        setImgInfo({ w: bmp?.width || 0, h: bmp?.height || 0 });
+        try { requestPreviewDraw(); } catch {}
+      } catch {
+        // если bitmap не создался — оставляем raw превью
+      }
+    })();
+
+    try { e.target.value = ''; } catch {}
+  };
+
+  const onPointerDown = (e) => {
+
+    e.preventDefault();
+    e.stopPropagation();
+    const p = dragRef.current;
+    p.on = true;
+    p.moved = false;
+    p.canDrag = !!uploadFile && !!bmpRef.current;    
+    p.x = e.clientX;
+    p.y = e.clientY;
+    // фиксируем размер квадрата на момент начала drag,
+    // чтобы расчёт dx/dy был стабильным даже если layout чуть "дышит".
+    p.sz = boxSizeRef.current || 1;    
+    // стартуем от актуального live-crop (а не от стейта, чтобы всё совпадало с canvas)
+    const c0 = cropLiveRef.current || crop;
+    p.sx = Number(c0?.x || 0);
+    p.sy = Number(c0?.y || 0);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
+  };
+  const onPointerMove = (e) => {
+    const p = dragRef.current;
+    if (!p.on) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const dx = e.clientX - p.x;
+    const dy = e.clientY - p.y;
+    if (!p.moved && (dx * dx + dy * dy > 9)) {
+      p.moved = true;
+    }
+    if (!p.moved || !p.canDrag) return;    
+    // PERF: не setState на каждом пикселе — обновляем ref и перерисовываем в rAF
+    const sz = p.sz || boxSizeRef.current || 1;
+    const dxRel = dx / sz;
+    const dyRel = dy / sz;    
+    const next = clampCrop({
+      ...(cropLiveRef.current || crop),
+      x: p.sx + dxRel,
+      y: p.sy + dyRel,
+    });
+    cropLiveRef.current = next;
+    requestPreviewDraw();
+  };
+  const onPointerUp = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const p = dragRef.current;
+    if (!p.on) return;
+    p.on = false;
+    p.canDrag = false;   
+    try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch {}
+    if (!p.moved) {
+      openFilePicker(e);
+      return;
+    }
+
+    // commit: один setState на release
+    const committed = clampCrop(cropLiveRef.current || crop);
+    cropLiveRef.current = committed;
+    setCrop(committed);
+    requestPreviewDraw();  
+  };
+
+  // делаем квадратный PNG из превью (клиентский кроп)
+const makeCroppedPngBlob = React.useCallback(async ({ size = 512 } = {}) => {
+    const bmp = bmpRef.current;
+    if (!bmp) return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const iw = bmp.width || 1;
+    const ih = bmp.height || 1;
+    const base = Math.max(size / iw, size / ih);
+
+    // IMPORTANT: берём live-crop (drag может ещё не успеть прожечь setState)
+    const c = cropLiveRef.current || { x: 0, y: 0, z: 1 };
+    const z = Math.max(1, Number(c?.z || 1));
+    const scale = base * z;
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const cx = size / 2 + relToPx(c?.x, size);
+    const cy = size / 2 + relToPx(c?.y, size);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(bmp, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+
+    return new Promise((resolve) => {
+      canvas.toBlob((b) => resolve(b), 'image/png', 0.92);
+    });
+ }, []);
+
+
+  // грузим на сервер и ставим icon=url (но НЕ сохраняем профиль — это сделает основной Save)
+  const useUploadedPhoto = async () => {
+    if (!uid || !finalAvatarBlob || uploadBusy) return;
+    setUploadBusy(true);
+    try {
+ 
+      const fd = new FormData();
+      fd.append('uid', uid);
+      fd.append('file', finalAvatarBlob, 'avatar.png');
+
+      const r = await fetch('/api/profile/upload-avatar', { method: 'POST', body: fd });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.ok || !j?.url) return;
+
+      // важно: icon становится url, но сохранение только по главной кнопке Save
+      setIcon(j.url);
+    } finally {
+      setUploadBusy(false);
+    }
+  };
+
+  // валидация ника
+  const [nickFree, setNickFree] = useState(null)   // null|true|false
+  const [nickBusy, setNickBusy] = useState(false)  // идет проверка
+  const [busy, setBusy] = useState(false)          // сохранение
+  useEffect(() => {
+  if (!open || !uid) return;
+  const l = readLocal() || {};
+  setNick(l.nickname || '');
+  setGender(String(l.gender || ''));
+  setBirthYear(Number(l.birthYear || 0) || 0);
+  savedGenderRef.current = String(l.gender || '');
+  savedBirthYearRef.current = Number(l.birthYear || 0) || 0;
+  setYearMenuOpen(false);
+  setIcon(l.icon || icons[0] || '👦');
+}, [open, uid, readLocal, icons]);
+
+useEffect(() => {
+  if (!open || !yearMenuOpen) return undefined;
+
+  const handlePointerDown = (event) => {
+    const root = yearMenuRef.current;
+    if (!root || root.contains(event.target)) return;
+    setYearMenuOpen(false);
+  };
+
+  document.addEventListener('pointerdown', handlePointerDown);
+  return () => {
+    document.removeEventListener('pointerdown', handlePointerDown);
+  };
+}, [open, yearMenuOpen]);
+
+// дебаунс-проверка ника в базе
+useEffect(() => {
+  if (!open || !uid) {
+    setNickFree(null);
+    setNickBusy(false);
+    return;
+  }
+
+  const val = String(nick || '').trim();
+  if (!val) {
+    setNickFree(null);
+    setNickBusy(false);
+    return;
+  }
+
+  setNickBusy(true);
+  const h = setTimeout(async () => {
+    try {
+      const url = `/api/profile/check-nick?nick=${encodeURIComponent(val)}&uid=${encodeURIComponent(uid)}`;
+      const r = await fetch(url, { method: 'GET', cache: 'no-store' });
+      const j = await r.json().catch(() => null);
+
+      // j?.ok === false или странный ответ — считаем «не знаем», но НЕ кидаем ошибок
+      if (!j || j.error) {
+        setNickFree(null);
+      } else {
+        setNickFree(!!j.free);
+      }
+    } catch {
+      // любая сеть/бэк — просто "не знаем"
+      setNickFree(null);
+    } finally {
+      setNickBusy(false);
+    }
+  }, 300);
+
+  return () => clearTimeout(h);
+}, [open, nick, uid]);
+
+
+if (!open || !uid || !portalReady || typeof document === 'undefined') return null;
+
+// ===== позиционирование попапа (LTR/RTL) =====
+const isRtl =
+  typeof document !== 'undefined' &&
+  (document.documentElement?.dir === 'rtl' ||
+    getComputedStyle(document.documentElement).direction === 'rtl');
+
+const el = anchorRef?.current || null;
+
+// ищем ближайшего “контейнерного” родителя, относительно которого будет absolute-позиционирование
+const parent =
+  el?.offsetParent ||
+  el?.parentElement ||
+  el?.closest?.('section') ||
+  document.body;
+
+const parentRect = parent?.getBoundingClientRect?.() || { top: 0, left: 0, right: 0 };
+const rect = el?.getBoundingClientRect?.() || parentRect;
+
+// top/left/right — теперь ВНУТРИ parent (а не в координатах окна)
+const top = Math.round((rect.bottom - parentRect.top) + 8);
+
+// LTR — обычный left
+const left = isRtl ? undefined : Math.round(rect.left - parentRect.left);
+
+// RTL — прижимаем по правому краю parent
+const right = isRtl ? Math.round(parentRect.right - rect.right) : undefined;
+void isRtl;
+void el;
+void parent;
+void parentRect;
+void rect;
+void top;
+void left;
+void right;
+const genderOptions = [
+  { value: 'male', label: t('forum_profile_gender_male') },
+  { value: 'female', label: t('forum_profile_gender_female') },
+];
+const selectedBirthYearLabel = birthYear
+  ? String(birthYear)
+  : t('forum_profile_birth_year_placeholder');
+
+  const readTelegramMiniAppDeleteAuth = () => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const webApp = window.Telegram?.WebApp;
+      const initData = String(webApp?.initData || '').trim();
+      if (!initData || !initData.includes('hash=')) return {};
+      const unsafeUser = webApp?.initDataUnsafe?.user || {};
+      const telegramUserId = String(unsafeUser?.id || unsafeUser?.user_id || '').trim();
+      const telegramAlias = telegramUserId ? `telegram:${telegramUserId}` : '';
+      return {
+        telegramInitData: initData,
+        telegramUserId,
+        telegramId: telegramUserId,
+        telegramAlias,
+        authProvider: 'telegram-mini-app',
+      };
+    } catch {
+      return {};
+    }
+  };
+
+  const clearDeletedAccountClientState = (accountId) => {
+    if (typeof window === 'undefined') return;
+    const ids = new Set([accountId, uid, base, baseAuth?.accountId, baseAuth?.asherId].map((item) => String(item || '').trim()).filter(Boolean));
+    try { clearWalletAuthStorage(); } catch {}
+    try {
+      const stores = [window.localStorage, window.sessionStorage].filter(Boolean);
+      for (const store of stores) {
+        const keys = [];
+        for (let i = 0; i < store.length; i += 1) {
+          const key = store.key(i);
+          if (!key) continue;
+          if (key.startsWith('profile:') || key.startsWith('dm:dialogs:') || key.startsWith('dm:thread:') || key.startsWith('ql7_notification_counts')) {
+            keys.push(key);
+          }
+        }
+        keys.forEach((key) => { try { store.removeItem(key); } catch {} });
+      }
+      ids.forEach((id) => {
+        try { window.localStorage.removeItem(`profile:${id}`); } catch {}
+        try { window.sessionStorage.removeItem(`profile:${id}`); } catch {}
+      });
+    } catch {}
+    try { window.dispatchEvent(new CustomEvent('profile:deleted', { detail: { accountId } })); } catch {}
+    try { window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason: 'account_deleted', accountId } })); } catch {}
+  };
+
+  const deleteAccount = async () => {
+    if (!uid || deleteBusy) return;
+    setDeleteBusy(true);
+    setDeleteError('');
+    try {
+      const walletSession = getStoredWalletSession();
+      const r = await fetch('/api/profile/delete-account', {
+        method: 'POST',
+        cache: 'no-store',
+        headers: {
+          'content-type': 'application/json',
+          'x-forum-user-id': String(base || uid || '').trim(),
+        },
+        body: JSON.stringify({
+          confirm: 'DELETE_ACCOUNT',
+          accountId: uid,
+          asherId: uid,
+          userId: String(base || uid || '').trim(),
+          rawUserId: String(base || '').trim(),
+          sourceAccountId: String(baseAuth?.accountId || '').trim(),
+          sourceAsherId: String(baseAuth?.asherId || '').trim(),
+          sourceForumUserId: (() => {
+            try { return String(localStorage.getItem('forum_user_id') || '').trim() } catch { return '' }
+          })(),
+          walletSessionToken: String(walletSession?.token || '').trim(),
+          walletAddress: String(walletSession?.walletAddress || '').trim(),
+          walletAccountId: String(walletSession?.accountId || '').trim(),
+          ...readTelegramMiniAppDeleteAuth(),
+        }),
+      });
+      const j = await r.json().catch(() => null);
+      if (!r.ok || !j?.ok) {
+        throw new Error(j?.error || `delete_account_${r.status}`);
+      }
+      clearDeletedAccountClientState(j.accountId || uid);
+      setDeleteConfirmOpen(false);
+      onClose?.();
+      try { window.location.assign('/'); } catch { try { window.location.reload(); } catch {} }
+    } catch (err) {
+      setDeleteError(String(err?.message || '') || t('forum_delete_account_error'));
+    } finally {
+      if (mountedRef.current) setDeleteBusy(false);
+    }
+  };
+
+  const save = async () => {
+  const n = String(nick || '').trim();
+  if (!n || nickFree === false || busy || !uid) return;
+  const nextGender = genderLocked
+    ? String(savedGenderRef.current || '')
+    : (gender === 'male' || gender === 'female' ? gender : '');
+  const nextBirthYear = birthYearLocked
+    ? (Number(savedBirthYearRef.current || 0) || 0)
+    : (
+        Number(birthYear || 0) >= minBirthYear &&
+        Number(birthYear || 0) <= maxBirthYear
+          ? Number(birthYear || 0)
+          : 0
+      );
+  setYearMenuOpen(false);
+
+  // ===== OPTIMISTIC UI (сразу обновляем всё в интерфейсе пользователя) =====
+  const prevLocal = readLocal() || {};
+  const prevNick = prevLocal.nickname || '';
+  const prevGender = String(prevLocal.gender || '');
+  const prevBirthYear = Number(prevLocal.birthYear || 0) || 0;
+  const prevIcon = prevLocal.icon || icons[0] || '👦';
+
+  // если выбран файл — показываем везде то, что уже есть в превью
+  const optimisticIcon = uploadFile ? (finalAvatarUrl || rawAvatarUrl || icon) : icon;
+
+  mergeProfileCache(uid, {
+    nickname: n,
+    icon: optimisticIcon,
+    gender: nextGender,
+    birthYear: nextBirthYear,
+    updatedAt: Date.now(),
+  });
+  onSaved?.({ nickname: n, icon: optimisticIcon, gender: nextGender, birthYear: nextBirthYear });
+
+  // закрываем поповер мгновенно (дальше всё догружается в фоне)
+  onClose?.();
+
+  // ===== серверная часть (в фоне): загрузка аватара + сохранение =====
+  if (mountedRef.current) setBusy(true);
+  try {
+    let iconToSend = icon;
+
+    // Если выбрано пользовательское фото — модерируем и грузим в /api/forum/upload.
+    if (uploadFile) {
+      if (mountedRef.current) setUploadBusy(true);
+      try {
+        // На мобильных заранее работаем с уже-cropped PNG:
+        // меньше риск moderation timeout/oom и стабильнее upload.
+        const avatarCropSize = (() => {
+          try {
+            const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches;
+            return coarse ? 384 : 512;
+          } catch {
+            return 512;
+          }
+        })();
+        let blob = finalAvatarBlob;
+        if (!blob) blob = await makeCroppedPngBlob({ size: avatarCropSize });
+        const preparedAvatarFile = blob
+          ? new File([blob], `avatar-${uid}-${Date.now()}.png`, { type: 'image/png' })
+          : uploadFile;
+
+        // 0) MODERATION: точно так же, как в attach (paperclip)
+        try {
+          const mod = await moderateImageFiles([preparedAvatarFile]);
+          if (mod?.decision === 'block') {
+            toastI18n('warn', 'forum_image_blocked');
+            toastI18n('info', reasonKey(mod?.reason));
+            // rollback optimistic
+            mergeProfileCache(uid, {
+              nickname: prevNick,
+              icon: prevIcon,
+              gender: prevGender,
+              birthYear: prevBirthYear,
+              updatedAt: Date.now(),
+            });
+            onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
+            cleanupObjectUrlsIfStale();      
+            return;
+          }
+          if (mod?.decision === 'review') {
+            try { console.warn('[moderation] avatar review -> allow (balanced)', mod?.reason, mod?.raw); } catch {}
+          }
+        } catch (err) {
+          console.error('[moderation] avatar check failed', err);
+          toastI18n('err', 'forum_moderation_error');
+          toastI18n('info', 'forum_moderation_try_again');
+          // rollback optimistic
+          mergeProfileCache(uid, {
+            nickname: prevNick,
+            icon: prevIcon,
+            gender: prevGender,
+            birthYear: prevBirthYear,
+            updatedAt: Date.now(),
+          });
+          onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
+           cleanupObjectUrlsIfStale();     
+          return;
+        }
+ 
+        const fd = new FormData();
+        if (blob && preparedAvatarFile) {
+          fd.append('files', preparedAvatarFile);
+        } else {
+          // крайний случай: отправляем исходный файл (без кропа), чтобы не стопорить UX
+          fd.append('files', uploadFile);
+        }
+
+        const up = await fetch('/api/forum/upload', {
+          method: 'POST',
+          body: fd,
+          cache: 'no-store',
+          headers: { 'x-forum-user-id': String(uid || '') },
+        });
+        const uj = await up.json().catch(() => ({}));
+        if (!up.ok || !uj?.urls?.[0]) {
+          console.warn('avatar upload failed', uj);
+          // rollback optimistic
+          mergeProfileCache(uid, {
+            nickname: prevNick,
+            icon: prevIcon,
+            gender: prevGender,
+            birthYear: prevBirthYear,
+            updatedAt: Date.now(),
+          });
+          onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
+          cleanupObjectUrlsIfStale();     
+          return;
+        }
+
+        iconToSend = uj.urls[0];
+
+        // ✅ reconcile: подменяем blob-превью на реальный URL (чтобы пережило перезагрузку)
+        mergeProfileCache(uid, {
+          icon: iconToSend,
+          gender: nextGender,
+          birthYear: nextBirthYear,
+          updatedAt: Date.now(),
+        });
+        onSaved?.({ nickname: n, icon: iconToSend, gender: nextGender, birthYear: nextBirthYear });
+        cleanupObjectUrlsIfStale();     
+      } finally {
+        if (mountedRef.current) setUploadBusy(false);
+      }
+    } else {
+      iconToSend = icon;
+    }
+
+
+    const r = await fetch('/api/profile/save-nick', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-forum-user-id': String(base || uid || '').trim(),
+      },
+      body: JSON.stringify({
+        nick: n,
+        icon: iconToSend,
+        gender: nextGender,
+        birthYear: nextBirthYear,
+        // canonical ids
+        accountId: uid,
+        asherId: uid,
+        // raw ids for cross-client alias fan-out
+        userId: String(base || uid || '').trim(),
+        rawUserId: String(base || '').trim(),
+        sourceAccountId: String(baseAuth?.accountId || '').trim(),
+        sourceAsherId: String(baseAuth?.asherId || '').trim(),
+        sourceForumUserId: (() => {
+          try { return String(localStorage.getItem('forum_user_id') || '').trim() } catch { return '' }
+        })(),
+      }),
+    });
+
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j?.ok) {
+      if (j?.error === 'nick_taken' && mountedRef.current) setNickFree(false);
+      // rollback optimistic
+      mergeProfileCache(uid, {
+        nickname: prevNick,
+        icon: prevIcon,
+        gender: prevGender,
+        birthYear: prevBirthYear,
+        updatedAt: Date.now(),
+      });
+      onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
+      cleanupObjectUrlsIfStale();    
+      return;
+    }
+
+    const savedNick = j.nick || n;
+    const savedIcon = j.icon || iconToSend || optimisticIcon;
+    const savedGender = String(j.gender || nextGender || '');
+    const savedBirthYear = Number(j.birthYear || nextBirthYear || 0) || 0;
+    const savedAccountId = String(j.accountId || uid || '').trim();
+    savedGenderRef.current = savedGender;
+    savedBirthYearRef.current = savedBirthYear;
+    setGender(savedGender);
+    setBirthYear(savedBirthYear);
+
+    writeProfileAlias(uid, savedAccountId);
+    mergeProfileCache(savedAccountId, {
+      nickname: savedNick,
+      icon: savedIcon,
+      gender: savedGender,
+      birthYear: savedBirthYear,
+      updatedAt: Date.now(),
+    });
+  // финальный reconcile на ответ бэка
+    onSaved?.({ nickname: savedNick, icon: savedIcon, gender: savedGender, birthYear: savedBirthYear });
+    cleanupObjectUrlsIfStale();
+  } finally {
+if (mountedRef.current) setBusy(false);
+  }
+};
+
+  return createPortal(
+    <div
+      className="profileOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t('forum_account_settings')}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose?.();
+      }}
+    >
+    <div
+      className="profilePop"
+      translate="no"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
+  
+      {deleteConfirmOpen && (
+        <div
+          className="profileDeleteShade"
+          role="presentation"
+          onClick={() => {
+            if (deleteBusy) return;
+            setDeleteConfirmOpen(false);
+            setDeleteError('');
+          }}
+        >
+          <div
+            className="profileDeleteConfirm"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="profile-delete-title"
+            aria-describedby="profile-delete-warning"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="profileDeleteConfirmTitleRow">
+              <WarningTriangleIcon />
+              <div id="profile-delete-title" className="profileDeleteConfirmTitle">
+                {t('forum_delete_account_title')}
+              </div>
+              <WarningTriangleIcon />
+            </div>
+            <div className="profileDeleteRail" aria-hidden="true" />
+            <p id="profile-delete-warning" className="profileDeleteWarningText">
+              {t('forum_delete_account_warning')}
+            </p>
+            {deleteError && (
+              <div className="profileDeleteError" role="status">
+                {t('forum_delete_account_error')}
+              </div>
+            )}
+            <div className="profileDeleteConfirmActions">
+              <button
+                type="button"
+                className="profileDeleteApprove"
+                disabled={deleteBusy}
+                aria-label={t('forum_delete_account_confirm')}
+                title={t('forum_delete_account_confirm')}
+                onClick={deleteAccount}
+              >
+                {deleteBusy ? <DeleteSpinnerIcon /> : <ConfirmCheckIcon />}
+              </button>
+              <button
+                type="button"
+                className="profileDeleteReject"
+                disabled={deleteBusy}
+                aria-label={t('forum_delete_account_cancel')}
+                title={t('forum_delete_account_cancel')}
+                onClick={() => {
+                  setDeleteConfirmOpen(false);
+                  setDeleteError('');
+                }}
+              >
+                <RejectCrossIcon />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="text-lg font-bold mb-2">{t('forum_account_settings')}</div>
+
+      {/* Под заголовком: слева бейдж со звездой, справа квадратный Upload Avatar (одна линия) */}
+      <div className="profileTopRow">
+        <div className="profileBadgeLeft">
+          <FollowersCounterInline
+            t={t}
+            viewerId={viewerId}
+            count={myFollowersCount}
+            followingCount={myFollowingCount}
+            loading={myFollowersLoading}
+            formatCountFn={formatCount}
+            onOpen={() => {
+              const uidForSubscriptions = String(viewerId || uid || '').trim()
+              if (!uidForSubscriptions) return
+              onOpenSubscriptions?.({ userId: uidForSubscriptions, initialMode: 'followers' })
+            }}
+          />
+        </div>
+
+        <button
+          type="button"
+          ref={avaBoxRef}
+          className="avaUploadSquare" 
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!dragRef.current?.moved) openFilePicker(e);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openFilePicker(e);
+            }
+          }}       
+          title="Upload avatar"
+          aria-label="Upload avatar"
+        >
+          {/* PREVIEW:
+              - до декода показываем исходник (без квадратного object-fit crop)
+              - после декода рисуем на canvas (полное изображение + drag/zoom),
+                а кроп в PNG делаем ТОЛЬКО при Save.
+          */}
+          {rawAvatarUrl && !uploadFile && (
+            // eslint-disable-next-line @next/next/no-img-element -- blob/object URL preview from local file picker must render as raw img src.
+            <img
+              src={rawAvatarUrl}
+              alt=""
+              className="avaUploadSquareImgFallback"
+            />
+          )}
+
+          {rawAvatarUrl && uploadFile && !(imgInfo.w && imgInfo.h) && (
+            // eslint-disable-next-line @next/next/no-img-element -- blob/object URL preview from local file picker must render as raw img src.
+            <img
+              src={rawAvatarUrl}
+              alt=""
+              className="avaUploadSquareImgFallback"
+            />
+          )}
+
+          {uploadFile && (imgInfo.w && imgInfo.h) && (
+            <canvas
+              ref={previewCanvasRef}
+              className="avaUploadSquareCanvas" 
+            />
+          )}
+          {!uploadFile && (
+            <div className="avaUploadSquareTxt">
+              {t('forum_avatar_upload_top')}
+              <br/>
+              
+            </div>
+          )}
+          {uploadFile && !finalAvatarUrl && !rawAvatarUrl && (
+            <div className="avaUploadSquareTxt">{t('forum_processing')}</div>
+          )}          
+          {uploadBusy && (
+            <div className="avaUploadSquareBusy">{t('saving')}</div>
+          )}
+        </button>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="avaFileInput"
+          onChange={onPickFile}
+        />
+      </div>
+
+      {/* Zoom: следующей строкой, на всю ширину, адаптив */}
+      <div className="avaZoomWideRow">
+        <span className="avaZoomLbl">{t('forum_zoom')}</span>
+        <input
+          type="range"
+          className="cyberRange"
+          min="1"
+          max="3"
+          step="0.01"
+          value={crop.z}
+          disabled={!uploadFile}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            setCrop((c) => {
+              const next = clampCrop({ ...c, z: v });
+              cropLiveRef.current = next;
+              try { requestPreviewDraw(); } catch {}
+              return next;
+            });
+          }}
+        />
+      </div>
+      <div className="grid gap-2">
+        <label className="block">
+          <div className="topicDesc text-[#eaf4ff]/75 text-sm
+      !whitespace-normal break-words
+      [overflow-wrap:anywhere]
+      max-w-full mt-1">{t('forum_profile_nickname')}</div>
+          <input
+            className={['input',
+              nickFree===true ? 'ok' : '',
+              nickFree===false ? 'bad' : ''
+            ].join(' ')}
+            maxLength={24}
+            value={nick}
+            onChange={e => setNick(e.target.value)}
+            placeholder={t('forum_profile_nickname_ph')}
+          />
+        <div className="meta mt-1">
+            {nickBusy && t('checking')}
+            {!nickBusy && nickFree===true  && t('nick_free')}
+            {!nickBusy && nickFree===false && t('nick_taken')}
+          </div>
+        </label>
+        <div className="profileIdentityRow">
+          <div className={cls('profileIdentityField', genderLocked && 'isLocked')}>
+            <div className="profileIdentityLabel">{t('forum_profile_gender')}</div>
+            <div className="profileGenderOptions" role="group" aria-label={t('forum_profile_gender')}>
+              {genderOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={cls(
+                    'profileSelectChip',
+                    gender === option.value && 'isSelected',
+                    genderLocked && 'isLocked',
+                  )}
+                  disabled={genderLocked || busy}
+                  onClick={() => setGender(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={cls('profileIdentityField', birthYearLocked && 'isLocked')} ref={yearMenuRef}>
+            <div className="profileIdentityLabel">{t('forum_profile_birth_year')}</div>
+            <button
+              type="button"
+              className={cls(
+                'profileSelectTrigger',
+                birthYear && 'isSelected',
+                birthYearLocked && 'isLocked',
+              )}
+              disabled={birthYearLocked || busy}
+              onClick={() => setYearMenuOpen((value) => !value)}
+            >
+              <span>{selectedBirthYearLabel}</span>
+              <svg viewBox="0 0 20 20" focusable="false" aria-hidden="true">
+                <path
+                  d="m5 7 5 6 5-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {!birthYearLocked && yearMenuOpen && (
+              <div className="profileYearMenu" role="listbox" aria-label={t('forum_profile_birth_year')}>
+                {birthYearOptions.map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={cls('profileYearOption', birthYear === option && 'isSelected')}
+                    onClick={() => {
+                      setBirthYear(option);
+                      setYearMenuOpen(false);
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div>
+      <div className="forumDividerRail forumDividerRail--gold" style={{ margin: '20px 4px' }} aria-hidden="true" />
+           
+          <div className="profileAvatarHead">
+            <div className="meta">{t('forum_profile_avatar')}</div>
+            <div className="meta" style={{ opacity: .7 }}>
+              {uploadFile ? `${imgInfo.w || 0}×${imgInfo.h || 0}` : t('')}
+            </div>
+          </div>
+
+<div className="profileList">
+  {/* VIP блок (верхняя строка) */}
+  <div className="p-1">
+    <div className="emojiTitle">{t('') /* "VIP+ аватары" */}</div>
+
+    <div className="iconWrap">
+      {vipAvatars.slice(0,130).map(src => (
+        <button
+          key={src}
+          className={cls('avaMini', icon===src && 'tag', 'hoverPop')}
+          onClick={()=>{
+
+  if (!vipActive){
+    try { toastI18n?.('warn', 'forum_vip_required') } catch {}
+    try { document.activeElement?.blur?.() } catch {}
+    return;
+  }
+  
+            setIcon(src) }}
+          title={vipActive ? '' : t('forum_vip_only')}
+          style={{ position:'relative', width:40, height:40, padding:0 }}
+        >
+          <Image src={src} alt="" width={40} height={40} unoptimized style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:10 }}/>
+         {!vipActive && <span className="lockBadge" aria-hidden>🔒</span>}
+        </button>       
+      ))}
+    </div>
+  </div>
+
+  {/* разделитель между VIP и обычными */}
+  <div className="forumDividerRail forumDividerRail--gold" style={{ margin: '20px 4px' }} aria-hidden="true" />
+
+  {/* обычные эмодзи-аватары ниже (как было) */}
+  <div className="iconWrap p-1">
+    {icons.map(ic => (
+      <button
+        key={ic}
+        className={cls('avaMini', icon === ic && 'tag', vipActive && 'vip')}
+        onClick={() => setIcon(ic)}
+        title={ic}
+        style={{ width: 40, height: 40, fontSize: 22 }}
+      >
+        {ic}
+      </button>
+    ))}
+  </div>
+</div>
+
+        </div>
+        <div className="profileFooterBar">
+          <button
+            type="button"
+            className="profileDeleteLauncher"
+            aria-label={t('forum_delete_account_button')}
+            title={t('forum_delete_account_button')}
+            disabled={busy || deleteBusy}
+            onClick={() => {
+              setDeleteError('');
+              setDeleteConfirmOpen(true);
+            }}
+          >
+            <QuantumTrashIcon />
+            <span>{t('forum_delete_account_button')}</span>
+          </button>
+          <div className="profileFooterActions">
+            <button className="btn btnGhost" onClick={onClose}>{t('forum_cancel')}</button>
+            <button
+              className="btn"
+              disabled={busy || nickBusy || !String(nick||'').trim() || nickFree===false}
+              onClick={save}
+            >
+              {busy ? t('saving') : t('forum_save')}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>,
+    document.body,
+  )
+}
+
+
+/* =========================================================
+   UI: посты/темы
+========================================================= */
+

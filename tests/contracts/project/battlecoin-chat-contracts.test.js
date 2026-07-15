@@ -1,0 +1,204 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { describe, expect, test } from 'vitest'
+
+const root = process.cwd()
+const read = (file) => readFileSync(resolve(root, file), 'utf8')
+
+describe('Battle Chat isolated contour contracts', () => {
+  test('has isolated API routes and Mongo-primary adapter', () => {
+    expect(existsSync(resolve(root, 'app/api/battlecoin/chat/messages/route.js'))).toBe(true)
+    expect(existsSync(resolve(root, 'app/api/battlecoin/chat/reaction/route.js'))).toBe(true)
+    expect(existsSync(resolve(root, 'app/api/battlecoin/chat/events/route.js'))).toBe(true)
+    expect(existsSync(resolve(root, 'lib/mongo/battlecoin-chat-primary.cjs'))).toBe(true)
+    expect(existsSync(resolve(root, 'docs/exchange/BATTLE_CHAT_CONTOUR_CONTRACT.md'))).toBe(true)
+  })
+
+  test('keeps durable chat state out of BattleCoin state polling route', () => {
+    const stateRoute = read('app/api/battlecoin/state/route.js')
+    expect(stateRoute).not.toContain('battlecoin_chat_messages')
+    expect(stateRoute).not.toContain('battlecoin_chat_likes')
+    expect(stateRoute).not.toContain('/api/battlecoin/chat')
+  })
+
+  test('BattleCoin state route probes active symbol price before returning open order metrics', () => {
+    const stateRoute = read('app/api/battlecoin/state/route.js')
+    expect(stateRoute).toContain('async function fetchSpotPrice')
+    expect(stateRoute).toContain('fetchBattlecoinMarketList(activeSymbol)')
+    expect(stateRoute).toContain('const spotPrice = await fetchSpotPrice(active)')
+    expect(stateRoute).toContain('enrichOrderWithMarket(order, priceMap)')
+    expect(stateRoute).toContain('closePrice: enriched.markPrice || enriched.entryPrice')
+  })
+
+  test('declares Redis as event accelerator only, not durable chat storage', () => {
+    const events = read('lib/battlecoin/battle-chat-events.cjs')
+    const primary = read('lib/mongo/battlecoin-chat-primary.cjs')
+    expect(events).toContain('pubsub-accelerator-only')
+    expect(primary).toContain("storagePrimary: 'mongo'")
+    expect(primary).toContain('battlecoin_chat_messages')
+    expect(primary).not.toContain('redis.set')
+    expect(primary).not.toContain('redis.get')
+  })
+
+  test('client chat module does not import forum runtime or snapshots', () => {
+    const files = [
+      'app/exchange/battle-chat/BattleChat.jsx',
+      'app/exchange/battle-chat/useBattleChat.js',
+      'app/exchange/battle-chat/battleChatClient.js',
+      'app/exchange/battle-chat/BattleChatMessageRow.jsx',
+    ]
+    for (const file of files) {
+      const text = read(file)
+      expect(text).not.toMatch(/app\/forum|features\/feed|snapshot|forum-server/)
+    }
+  })
+
+  test('send and reaction mutations require verified auth on server and client gate', () => {
+    const messagesRoute = read('app/api/battlecoin/chat/messages/route.js')
+    const reactionRoute = read('app/api/battlecoin/chat/reaction/route.js')
+    const hook = read('app/exchange/battle-chat/useBattleChat.js')
+    expect(messagesRoute).toContain('requireBattleChatActor')
+    expect(reactionRoute).toContain('requireBattleChatActor')
+    expect(hook).toContain('runAuthorizedClientAction')
+    expect(messagesRoute).not.toMatch(/body\?\.accountId\\s*\\|\\|\\s*body\?\.wallet/)
+  })
+
+
+  test('BattleCoin embeds BattleChat without changing wallet launch component', () => {
+    const battleCoin = read('app/exchange/BattleCoin.jsx')
+    expect(battleCoin).toContain("import BattleChat from './battle-chat/BattleChat'")
+    expect(battleCoin).toContain('<BattleChat />')
+    expect(battleCoin).toContain('QuantumWalletLaunchButton')
+    expect(battleCoin).toContain('grid-template-areas')
+  })
+
+  test('Battle Chat UI keeps premium composer and message contract', () => {
+    const chat = read('app/exchange/battle-chat/BattleChat.jsx')
+    const composer = read('app/exchange/battle-chat/BattleChatComposer.jsx')
+    const row = read('app/exchange/battle-chat/BattleChatMessageRow.jsx')
+    const css = read('app/exchange/battle-chat/BattleChat.module.css')
+
+    expect(chat).toContain('BattleChatBrand')
+    expect(chat).toContain('Battle</text>')
+    expect(chat).toContain('Chat</text>')
+    expect(chat).toContain('toastState')
+    expect(chat).toContain('className={styles.localToast}')
+    expect(chat).toContain('onToast={showLocalToast}')
+    expect(chat).toContain('locale={locale}')
+    expect(composer).toContain('className={styles.sendButton}')
+    expect(composer).toContain('className={styles.sendIcon}')
+    expect(composer).toContain('function clampGraphemes')
+    expect(composer).toContain('setText(clampGraphemes')
+    expect(composer).toContain("tr(t, 'battlecoin_chat_quick_emoji'")
+    expect(composer).toContain('type="button"')
+    expect(composer).toContain("event.key === 'Enter' && !event.shiftKey")
+    expect(row).toContain('className={styles.avatarWrap}')
+    expect(row).toContain('width={68}')
+    expect(row).toContain('isAuthorVip')
+    expect(row).toContain('styles.avatarVipFlip')
+    expect(row).toContain('src="/isvip/1.png"')
+    expect(row).toContain('src="/isvip/2.png"')
+    expect(row).toContain('translateBattleChatText')
+    expect(row).toContain("fetch('/api/deep-translate'")
+    expect(row).toContain("tr(t, 'crypto_news_translate'")
+    expect(row).toContain("tr(t, 'crypto_news_translate_loading'")
+    expect(row).toContain("tr(t, 'crypto_news_show_original'")
+    expect(row).toContain('styles.messageActions')
+    expect(row).toContain('styles.messageActionsTranslated')
+    expect(row).toContain('styles.translateButton')
+    expect(row).toContain('nickFontSizePx')
+    expect(row).toContain('className={styles.avatarTime}')
+    expect(row).not.toContain('className={styles.messageTimeBadge}')
+    expect(row).toContain('styles.nickBadge')
+    expect(row).toContain('styles.nickBadgeCopied')
+    expect(row).toContain("tr(t, 'battlecoin_chat_copy_nickname'")
+    expect(row).toContain("tr(t, 'battlecoin_chat_nickname_copied'")
+    expect(row).toContain('onToast?.(nicknameCopiedLabel)')
+    expect(row).toContain('className={[styles.likeButton')
+    expect(css).toContain('.localToast')
+    expect(css).toContain('animation: battle-chat-live')
+    expect(css).toContain('.messageRow + .messageRow')
+    expect(css).toContain('.quickEmojiDock::after')
+    expect(css).toContain('battle-chat-emoji-coinflip')
+    expect(css).toContain('battle-chat-heart-mini')
+    expect(css).toContain('battle-chat-rocket-trail')
+    expect(css).toContain('battle-chat-diamond-prism-left')
+    expect(css).toContain('.avatarVipFlip')
+    expect(css).toContain('@keyframes battle-chat-vip-flip-one')
+    expect(css).toContain('.translateButton')
+    expect(css).toContain('.messageActionsTranslated')
+    expect(css).toContain('min-width: 118px')
+    expect(css).toContain('text-overflow: clip')
+    expect(css).toContain('justify-content: center')
+    expect(css).not.toContain('battlecoin_chat_subtitle')
+    expect(css).toContain('.sendButton:disabled')
+  })
+
+  test('Battle Chat seven-language i18n avoids English fallback for nickname and controls', () => {
+    const source = read('components/i18n.source.js')
+    const dicts = ['en', 'ru', 'uk', 'es', 'zh', 'ar', 'tr'].map((lang) => read(`components/i18n-dicts/${lang}.js`))
+    for (const text of [source, ...dicts]) {
+      expect(text).toContain('battlecoin_chat_copy_nickname')
+      expect(text).toContain('battlecoin_chat_nickname_copied')
+      expect(text).toContain('battlecoin_chat_quick_emoji')
+      expect(text).toContain('battlecoin_chat_jump_latest')
+      expect(text).not.toContain('battlecoin_chat_subtitle')
+      expect(text).not.toContain('Write a short market message')
+      expect(text).not.toContain('Live market talk for BattleCoin')
+    }
+  })
+
+  test('BattleCoin premium style layer keeps wallet button and responsive badge guards', () => {
+    const battleCoin = read('app/exchange/BattleCoin.jsx')
+
+    expect(battleCoin).toContain('MetaMarket-aligned BattleCoin surface')
+    expect(battleCoin).toContain('--bc-cyan')
+    expect(battleCoin).toContain('grid-template-columns: clamp(96px, 13vw, 148px) minmax(0, 1fr)')
+    expect(battleCoin).toContain('white-space: nowrap')
+    expect(battleCoin).toContain('grid-template-columns: repeat(auto-fit, minmax(62px, 1fr))')
+    expect(battleCoin).toContain('<QuantumWalletLaunchButton')
+    expect(battleCoin).toContain('handleOpenQuantumWallet')
+    expect(battleCoin).toContain('max-height: none')
+    expect(battleCoin).toContain('display: flex')
+    expect(battleCoin).toContain('--battle-history-desktop-height: 790px')
+    expect(battleCoin).toContain('--battle-history-stacked-height: 360px')
+    expect(battleCoin).toContain('height: var(--battle-history-desktop-height)')
+    expect(battleCoin).toContain('max-height: var(--battle-history-desktop-height)')
+    expect(battleCoin).toContain('max-height: var(--battle-history-stacked-height)')
+    expect(battleCoin).toContain('scrollbar-gutter: stable both-edges')
+    expect(battleCoin).toContain('position: sticky')
+    expect(battleCoin).toContain('border-right: 1px solid rgba(96, 236, 255, 0.12)')
+    expect(battleCoin).toContain('.battlecoin-panel > .battlecoin-loading-overlay')
+    expect(battleCoin).toContain('z-index: 50')
+    expect(battleCoin).toContain('const [openingSide, setOpeningSide]')
+    expect(battleCoin).toContain('setOpeningSide(side)')
+    expect(battleCoin).toContain('aria-busy={openingSide ===')
+    expect(battleCoin).toContain('className="ls-spinner"')
+    expect(battleCoin).toContain('.ls-btn.is-opening')
+    expect(battleCoin).toContain('@keyframes battlecoin-order-spin')
+  })
+
+  test('Battle Chat message API hydrates live VIP author hints without forum imports', () => {
+    const identity = read('lib/battlecoin/battle-chat-public-identity.cjs')
+    const primary = read('lib/mongo/battlecoin-chat-primary.cjs')
+
+    expect(identity).toContain('function profileVipActive')
+    expect(identity).toContain('vipActive')
+    expect(identity).toContain('vipUntil')
+    expect(primary).toContain("require('./subscriptions-primary.cjs')")
+    expect(primary).toContain('function vipStateForAccount')
+    expect(primary).toContain('subscriptionsPrimary.getVip')
+    expect(primary).toContain('function hydrateAuthorSnapshot')
+    expect(primary).toContain('snapshotAuthor(accountId, profile, vipState)')
+    expect(primary).toContain('vipStates.set(id, vipState)')
+    expect(primary).toContain('vipActive: liveAuthor.vipActive')
+    expect(primary).toContain('vipUntil: liveAuthor.vipUntil')
+  })
+
+  test('account deletion contour includes Battle Chat collections', () => {
+    const deletion = read('lib/mongo/account-deletion-primary.cjs')
+    expect(deletion).toContain('battlecoin_chat_messages')
+    expect(deletion).toContain('battlecoin_chat_likes')
+    expect(deletion).toContain('battlecoin_chat_sender_state')
+  })
+})

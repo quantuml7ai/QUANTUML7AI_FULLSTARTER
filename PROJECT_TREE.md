@@ -1,0 +1,5337 @@
+# PROJECT_TREE.md
+
+> Обязательное правило сопровождения:
+> Любое изменение структуры проекта обязательно должно сопровождаться обновлением этого файла.
+> Это включает: добавление файлов, удаление файлов, переименование, перенос между папками и изменение назначения файла.
+> Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
+> Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
+
+Сгенерировано автоматически: 2026-07-15T18:24:14.171Z
+Файлов в реестре: 4025
+
+## Исключенные каталоги
+- `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
+- `.next/` — генерируемые артефакты Next.js сборки.
+- `node_modules/` — внешние зависимости менеджера пакетов, не авторский код репозитория.
+- `scripts/` — локальные migration/audit/smoke/image утилиты; не production runtime и не часть коммитимого дерева после V15.
+- `.ql7-backups/`, `.ql7-local-archive/`, `.ql7-tmp/`, `account-deletion-reports/`, `migration-reports/`, `mongo-migration-reports/` — локальные backup/report/evidence артефакты.
+
+## Охват
+
+Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.
+Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.
+
+- `.env.local` — 1 файлов
+- `.env.local.example` — 1 файлов
+- `.env.production.local` — 1 файлов
+- `.eslintrc.json` — 1 файлов
+- `.gitignore` — 1 файлов
+- `.npmrc` — 1 файлов
+- `.vscode` — 1 файлов
+- `account-sync-audit.report.json` — 1 файлов
+- `ad-runtime.audit.report.json` — 1 файлов
+- `adaptive-actions.report.json` — 1 файлов
+- `adaptive-core.report.json` — 1 файлов
+- `AGENTS.md` — 1 файлов
+- `app` — 465 файлов
+- `audit` — 170 файлов
+- `auth-bus.audit.report.json` — 1 файлов
+- `auth-cascade.report.json` — 1 файлов
+- `baseline-after.stage0.json` — 1 файлов
+- `baseline-before.stage0.json` — 1 файлов
+- `components` — 48 файлов
+- `config` — 1 файлов
+- `console-noise-classification.report.json` — 1 файлов
+- `decorative-media-budget.report.json` — 1 файлов
+- `deep-audit.report.json` — 1 файлов
+- `diagnostics-boundaries.report.json` — 1 файлов
+- `diff.stage0.json` — 1 файлов
+- `docs` — 17 файлов
+- `effects-leak.report.json` — 1 файлов
+- `feature-flag-safety.report.json` — 1 файлов
+- `forensic-bounds.report.json` — 1 файлов
+- `forum-deps-audit.report.json` — 1 файлов
+- `forum-diag.jsonl` — 1 файлов
+- `forum-media-churn.audit.report.json` — 1 файлов
+- `forum-media-har.report.json` — 1 файлов
+- `forum-scroll.audit.report.json` — 1 файлов
+- `forum-startup.audit.report.json` — 1 файлов
+- `GEO_DETECT_WORLD_FEED_PREMIUM_IMPLEMENTATION_AUDIT_RU.md` — 1 файлов
+- `geo.md` — 1 файлов
+- `heapsnapshot-analysis.report.json` — 1 файлов
+- `heavy-audit.report.json` — 1 файлов
+- `iframe-restore.report.json` — 1 файлов
+- `jsconfig.json` — 1 файлов
+- `layout-stability.report.json` — 1 файлов
+- `lib` — 62 файлов
+- `media-audit.report.json` — 1 файлов
+- `media-budget.audit.report.json` — 1 файлов
+- `media-heap.verify.report.json` — 1 файлов
+- `media-ownership.audit.report.json` — 1 файлов
+- `middleware.js` — 1 файлов
+- `mobile` — 1491 файлов
+- `mobile-matrix.report.json` — 1 файлов
+- `mode-contract.validation.report.json` — 1 файлов
+- `native-post-video.audit.report.json` — 1 файлов
+- `next-env.d.ts` — 1 файлов
+- `next.config.mjs` — 1 файлов
+- `observer-cleanup.report.json` — 1 файлов
+- `package.json` — 1 файлов
+- `player-budget.report.json` — 1 файлов
+- `pnpm-lock.yaml` — 1 файлов
+- `pnpm-workspace.yaml` — 1 файлов
+- `preload-waste.report.json` — 1 файлов
+- `pressure-ladder.report.json` — 1 файлов
+- `prod-lite-discipline.report.json` — 1 файлов
+- `PROJECT_DEPENDENCIES.md` — 1 файлов
+- `PROJECT_OWNERSHIP.md` — 1 файлов
+- `PROJECT_RISKS.md` — 1 файлов
+- `PROJECT_ROUTES.md` — 1 файлов
+- `PROJECT_TREE.md` — 1 файлов
+- `provider-baseline.report.json` — 1 файлов
+- `public` — 1501 файлов
+- `qcast-ownership.report.json` — 1 файлов
+- `QL7_DATA_ROUTES_STORAGE_README_RU.md` — 1 файлов
+- `QL7_DATABASE_ARCHITECTURE_RU.md` — 1 файлов
+- `QL7_FORUM_PREMIUM_GEO_SERVER_SURFACES_TZ_DRAFT_V3_RU.md` — 1 файлов
+- `QL7_REDIS_MONGO_PREMIUM_CLOSEOUT_AUDIT_RU.md` — 1 файлов
+- `README.md` — 1 файлов
+- `route-budget.report.json` — 1 файлов
+- `route-priority-policies.report.json` — 1 файлов
+- `route-teardown.report.json` — 1 файлов
+- `runtime-hotspots.report.json` — 1 файлов
+- `runtime-mode-resolution.report.json` — 1 файлов
+- `runtime-passport.snapshot.json` — 1 файлов
+- `runtime-passports.report.json` — 1 файлов
+- `same-src-thrash.report.json` — 1 файлов
+- `scenario.adaptive-pressure.report.json` — 1 файлов
+- `scenario.auth-cascade.report.json` — 1 файлов
+- `scenario.console-noise.report.json` — 1 файлов
+- `scenario.decorative-media.report.json` — 1 файлов
+- `scenario.exchange-route.report.json` — 1 файлов
+- `scenario.forensic-mode.report.json` — 1 файлов
+- `scenario.forum-background-restore.report.json` — 1 файлов
+- `scenario.forum-desktop.report.json` — 1 файлов
+- `scenario.forum-long-scroll.report.json` — 1 файлов
+- `scenario.forum-mobile.report.json` — 1 файлов
+- `scenario.forum-route-return.report.json` — 1 файлов
+- `scenario.forum-wallet-untouched.report.json` — 1 файлов
+- `scenario.preload-waste.report.json` — 1 файлов
+- `scenario.provider-baseline.report.json` — 1 файлов
+- `scenario.qcast-mixed.report.json` — 1 файлов
+- `scenario.route-teardown.report.json` — 1 файлов
+- `scenario.startup-shell.report.json` — 1 файлов
+- `src` — 32 файлов
+- `startup-budget.report.json` — 1 файлов
+- `tests` — 66 файлов
+- `timer-cleanup.report.json` — 1 файлов
+- `tools` — 74 файлов
+- `tsconfig.json` — 1 файлов
+- `tsconfig.tsbuildinfo` — 1 файлов
+- `vitest.config.mjs` — 1 файлов
+- `widget-isolation.report.json` — 1 файлов
+
+## Дерево проекта
+
+- .vscode/ — Каталог .vscode.
+  - settings.json — JSON-файл settings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- app/ — Основной каталог Next.js App Router: страницы, layout и API.
+  - about/ — Страница/ресурсы раздела About.
+    - layout.js — Next.js layout для сегмента /about. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /about. Связи: импортирует app/ads.js, components/i18n.js.
+  - academy/ — Страницы и блоки академии.
+    - AcademyExamBlock.js — JS-файл Academy Exam Block сегмента academy. Связи: импортирует components/i18n.js; используется в app/academy/page.js.
+    - layout.js — Next.js layout для сегмента /academy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /academy. Связи: импортирует app/academy/AcademyExamBlock.js, app/ads.js, components/i18n.js.
+  - ads/ — Страницы и модули рекламного раздела.
+    - GeoTargetingPicker.jsx — JSX-файл Geo Targeting Picker сегмента ads. Связи: импортирует components/i18n.js, lib/geo/countries.js, lib/geo/regions.js; используется в app/ads/home.js.
+    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, forum/features/media/services/uploadR2MediaFile.js, forum/shared/constants/media.js; используется в app/ads/page.jsx.
+    - layout.js — Next.js layout для сегмента /ads. Связи: импортирует lib/metadataCache.js.
+    - page.jsx — JSX-файл page сегмента ads. Связи: импортирует app/ads/home.js, components/i18n.js.
+  - api/ — Серверные API-маршруты и их внутренние хелперы.
+    - _diag/ — Служебная диагностика API.
+      - route.js — API-route _diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - academy/ — Каталог academy.
+      - exam/ — Каталог exam.
+        - route.js — API-route academy/exam для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/identity/ql7IdentityContract.cjs, lib/mongo/academy-primary.cjs.
+    - ads/ — Каталог ads.
+      - route.js — API-route ads для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+    - aiquota/ — Каталог aiquota.
+      - usage/ — Каталог usage.
+        - route.js — API-route aiquota/usage для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - app-shell/ — Каталог app-shell.
+      - config/ — Каталог config.
+        - route.js — API-route app-shell/config для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - battlecoin/ — Каталог battlecoin.
+      - chat/ — Каталог chat.
+        - events/ — Каталог events.
+          - route.js — API-route battlecoin/chat/events для серверной логики Next.js. Связи: импортирует lib/battlecoin/battle-chat-events.cjs.
+        - messages/ — Каталог messages.
+          - route.js — API-route battlecoin/chat/messages для серверной логики Next.js. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs.
+        - reaction/ — Каталог reaction.
+          - route.js — API-route battlecoin/chat/reaction для серверной логики Next.js. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs.
+      - order/ — Каталог order.
+        - route.js — API-route battlecoin/order для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+      - state/ — Каталог state.
+        - route.js — API-route battlecoin/state для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+    - brain/ — Каталог brain.
+      - analyze/ — Каталог analyze.
+        - route.js — API-route brain/analyze для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - coins/ — Каталог coins.
+      - route.js — API-route coins для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - contact/ — Каталог contact.
+      - route.js — API-route contact для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - crypto-news/ — Каталог crypto-news.
+      - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - debug/ — Каталог debug.
+      - ads/ — Каталог ads.
+        - grant/ — Каталог grant.
+          - route.js — API-route debug/ads/grant для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+      - env/ — Каталог env.
+        - route.js — API-route debug/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-diag/ — Каталог forum-diag.
+        - route.js — API-route debug/forum-diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - invoices/ — Каталог invoices.
+        - route.js — API-route debug/invoices для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - redis/ — Каталог redis.
+        - info/ — Каталог info.
+          - route.js — API-route debug/redis/info для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - route.js — API-route debug/redis для серверной логики Next.js. Связи: импортирует lib/redis.js.
+      - vip/ — Каталог vip.
+        - grant/ — Каталог grant.
+          - route.js — API-route debug/vip/grant для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/subscriptions.js.
+        - migrate/ — Каталог migrate.
+          - route.js — API-route debug/vip/migrate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - route.js — API-route debug/vip для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - deep-translate/ — Каталог deep-translate.
+      - route.js — API-route deep-translate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - dm/ — Серверный контур личных сообщений.
+      - block/ — Каталог block.
+        - route.js — API-route dm/block для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - delete/ — Каталог delete.
+        - route.js — API-route dm/delete для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - dialogs/ — Каталог dialogs.
+        - route.js — API-route dm/dialogs для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - seen/ — Каталог seen.
+        - route.js — API-route dm/seen для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - send/ — Каталог send.
+        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - thread/ — Каталог thread.
+        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - unblock/ — Каталог unblock.
+        - route.js — API-route dm/unblock для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - _db.js — Внутренний db для API-сегмента dm. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs; используется в app/api/dm/block/route.js, app/api/dm/delete/route.js, app/api/dm/seen/route.js.
+      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - forum/ — Серверный контур форума: снапшоты, мутации, модерация, upload.
+      - admin/ — Каталог admin.
+        - banUser/ — Каталог banUser.
+          - route.js — API-route forum/admin/banUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deletePost/ — Каталог deletePost.
+          - route.js — API-route forum/admin/deletePost для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deleteTopic/ — Каталог deleteTopic.
+          - route.js — API-route forum/admin/deleteTopic для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - unbanUser/ — Каталог unbanUser.
+          - route.js — API-route forum/admin/unbanUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - verify/ — Каталог verify.
+          - route.js — API-route forum/admin/verify для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - blobUploadUrl/ — Каталог blobUploadUrl.
+        - route.js — API-route forum/blobUploadUrl для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, lib/storage/mediaKeys.js.
+      - events/ — Каталог events.
+        - stream/ — Каталог stream.
+          - route.js — API-route forum/events/stream для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js.
+      - feed/ — Каталог feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - inbox/ — Каталог inbox.
+        - replies/ — Каталог replies.
+          - page/ — Каталог page.
+            - route.js — API-route forum/inbox/replies/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - media-feed/ — Каталог media-feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/media-feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - mediaLock/ — Каталог mediaLock.
+        - route.js — API-route forum/mediaLock для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - moderate/ — Каталог moderate.
+        - route.js — API-route forum/moderate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - mutate/ — Каталог mutate.
+        - route.js — API-route forum/mutate для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - own/ — Каталог own.
+        - route.js — API-route forum/own для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/forum-primary.cjs.
+      - post-by-id/ — Каталог post-by-id.
+        - route.js — API-route forum/post-by-id для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-chain/ — Каталог post-chain.
+        - route.js — API-route forum/post-chain для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-locate/ — Каталог post-locate.
+        - route.js — API-route forum/post-locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-meta/ — Каталог post-meta.
+        - route.js — API-route forum/post-meta для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - recommendations/ — Каталог recommendations.
+        - users/ — Каталог users.
+          - route.js — API-route forum/recommendations/users для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/integration/api/forum/recommendations-users.route.test.js.
+      - report/ — Каталог report.
+        - route.js — API-route forum/report для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - rev/ — Каталог rev.
+        - route.js — API-route forum/rev для серверной логики Next.js. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - search/ — Каталог search.
+        - page/ — Каталог page.
+          - route.js — API-route forum/search/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - snapshot/ — Каталог snapshot.
+        - route.js — API-route forum/snapshot для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - subs/ — Каталог subs.
+        - count/ — Каталог count.
+          - route.js — API-route forum/subs/count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - list/ — Каталог list.
+          - route.js — API-route forum/subs/list для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - my-count/ — Каталог my-count.
+          - route.js — API-route forum/subs/my-count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - people/ — Каталог people.
+          - route.js — API-route forum/subs/people для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/forum/subs-people.route.test.js.
+        - rebuild-followers/ — Каталог rebuild-followers.
+          - route.js — API-route forum/subs/rebuild-followers для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - toggle/ — Каталог toggle.
+          - route.js — API-route forum/subs/toggle для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - thread/ — Каталог thread.
+        - locate/ — Каталог locate.
+          - route.js — API-route forum/thread/locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+        - page/ — Каталог page.
+          - route.js — API-route forum/thread/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - topics/ — Каталог topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - upload/ — Каталог upload.
+        - route.js — API-route forum/upload для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, lib/storage/mediaKeys.js, lib/storage/r2.js.
+      - uploadAudio/ — Каталог uploadAudio.
+        - route.js — API-route forum/uploadAudio для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, lib/storage/mediaKeys.js.
+      - uploadVideo/ — Каталог uploadVideo.
+        - route.js — API-route forum/uploadVideo для серверной логики Next.js. Связи: импортирует lib/storage/mediaKeys.js, lib/storage/r2.js.
+      - user-posts/ — Каталог user-posts.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-posts/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - user-search/ — Каталог user-search.
+        - rebuild/ — Каталог rebuild.
+          - route.js — API-route forum/user-search/rebuild для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/profile-primary.cjs.
+      - user-topics/ — Каталог user-topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - vip/ — Каталог vip.
+        - batch/ — Каталог batch.
+          - route.js — API-route forum/vip/batch для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+      - wa-preview/ — Каталог wa-preview.
+        - route.js — API-route forum/wa-preview для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - _bus.js — Внутренний bus для API-сегмента forum. Связи: используется в app/api/forum/events/stream/route.js, app/api/forum/mutate/route.js.
+      - _db.js — Внутренний db для API-сегмента forum. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/forum-primary.cjs; используется в app/api/forum/admin/banUser/route.js, app/api/forum/admin/deletePost/route.js, app/api/forum/admin/deleteTopic/route.js.
+      - _utils.js — Внутренний utils для API-сегмента forum. Связи: используется в app/api/academy/exam/route.js, app/api/forum/_db.js, app/api/forum/admin/banUser/route.js.
+    - geo/ — Каталог geo.
+      - session-touch/ — Каталог session-touch.
+        - route.js — API-route geo/session-touch для серверной логики Next.js. Связи: импортирует lib/forum/public-sanitize.cjs, lib/geo/request-geo.cjs, lib/identity/geo-identity.cjs.
+    - market/ — Каталог market.
+      - summary/ — Каталог summary.
+        - route.js — API-route market/summary для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - metamarket/ — Каталог metamarket.
+      - buy/ — Каталог buy.
+        - route.js — API-route metamarket/buy для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - collection/ — Каталог collection.
+        - route.js — API-route metamarket/collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - gift/ — Каталог gift.
+        - route.js — API-route metamarket/gift для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - my-collection/ — Каталог my-collection.
+        - route.js — API-route metamarket/my-collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - owners/ — Каталог owners.
+        - route.js — API-route metamarket/owners для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - quote/ — Каталог quote.
+        - route.js — API-route metamarket/quote для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - sell/ — Каталог sell.
+        - route.js — API-route metamarket/sell для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - state/ — Каталог state.
+        - route.js — API-route metamarket/state для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - token-history/ — Каталог token-history.
+        - route.js — API-route metamarket/token-history для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - _catalog.js — Внутренний catalog для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js; используется в app/api/metamarket/_db.js, app/api/metamarket/_transactions.js, app/api/metamarket/collection/route.js.
+      - _db.js — Внутренний db для API-сегмента metamarket. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_ledger.js, app/api/metamarket/_locks.js, app/api/metamarket/_transactions.js.
+      - _format.js — Внутренний format для API-сегмента metamarket. Связи: используется в app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_identity.js.
+      - _identity.js — Внутренний identity для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, app/api/profile/_identity.js; используется в app/api/metamarket/_transactions.js, app/api/metamarket/buy/route.js, app/api/metamarket/collection/route.js.
+      - _ledger.js — Внутренний ledger для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js; используется в app/api/metamarket/_transactions.js.
+      - _locks.js — Внутренний locks для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_transactions.js.
+      - _transactions.js — Внутренний transactions для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/buy/route.js, app/api/metamarket/gift/route.js, app/api/metamarket/quote/route.js.
+    - metastudio/ — Каталог metastudio.
+      - register/ — Каталог register.
+        - route.js — API-route metastudio/register для серверной логики Next.js. Связи: импортирует lib/mongo/metastudio-primary.cjs.
+    - pay/ — Каталог pay.
+      - create/ — Каталог create.
+        - route.js — API-route pay/create для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/mongo/payments-primary.cjs, lib/mongo/profile-primary.cjs.
+      - webhook/ — Каталог webhook.
+        - route.js — API-route pay/webhook для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/mongo/payments-primary.cjs, lib/subscriptions.js.
+    - payments/ — Каталог payments.
+      - demo/ — Каталог demo.
+        - complete/ — Каталог complete.
+          - route.js — API-route payments/demo/complete для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - now/ — Каталог now.
+        - create/ — Каталог create.
+          - route.js — API-route payments/now/create для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route payments/now/webhook для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - profile/ — Серверные маршруты профиля, ника и аватара.
+      - batch/ — Каталог batch.
+        - route.js — API-route profile/batch для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - check-nick/ — Каталог check-nick.
+        - route.js — API-route profile/check-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - delete-account/ — Каталог delete-account.
+        - route.js — API-route profile/delete-account для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/account-deletion-primary.cjs.
+      - get-about/ — Каталог get-about.
+        - route.js — API-route profile/get-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - get-profile/ — Каталог get-profile.
+        - route.js — API-route profile/get-profile для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - save-nick/ — Каталог save-nick.
+        - route.js — API-route profile/save-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - set-about/ — Каталог set-about.
+        - route.js — API-route profile/set-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - upload-avatar/ — Каталог upload-avatar.
+        - route.js — API-route profile/upload-avatar для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - user-popover/ — Каталог user-popover.
+        - route.js — API-route profile/user-popover для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/profile/user-popover.route.test.js.
+      - _identity.js — Внутренний identity для API-сегмента profile. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs; используется в app/api/dm/_utils.js, app/api/forum/_db.js, app/api/forum/blobUploadUrl/route.js.
+    - push/ — Каталог push.
+      - config/ — Каталог config.
+        - route.js — API-route push/config для серверной логики Next.js. Связи: импортирует lib/webPush.js.
+      - events/ — Каталог events.
+        - route.js — API-route push/events для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - native/ — Каталог native.
+        - link/ — Каталог link.
+          - route.js — API-route push/native/link для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - register/ — Каталог register.
+          - route.js — API-route push/native/register для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+        - status/ — Каталог status.
+          - route.js — API-route push/native/status для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - unlink/ — Каталог unlink.
+          - route.js — API-route push/native/unlink для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+      - subscribe/ — Каталог subscribe.
+        - route.js — API-route push/subscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - sync/ — Каталог sync.
+        - route.js — API-route push/sync для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - unsubscribe/ — Каталог unsubscribe.
+        - route.js — API-route push/unsubscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+    - qcoin/ — Серверные маршруты QCoin.
+      - drop/ — Каталог drop.
+        - route.js — API-route qcoin/drop для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - get/ — Каталог get.
+        - route.js — API-route qcoin/get для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - heartbeat/ — Каталог heartbeat.
+        - route.js — API-route qcoin/heartbeat для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - topup/ — Каталог topup.
+        - cancel/ — Каталог cancel.
+          - route.js — API-route qcoin/topup/cancel для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - create/ — Каталог create.
+          - route.js — API-route qcoin/topup/create для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route qcoin/topup/webhook для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+    - quest/ — Серверные маршруты квестов.
+      - env/ — Каталог env.
+        - route.js — API-route quest/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - progress/ — Каталог progress.
+        - route.js — API-route quest/progress для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs, lib/mongo/quest-primary.cjs.
+      - status/ — Каталог status.
+        - route.js — API-route quest/status для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/quest-primary.cjs.
+    - quotes/ — Каталог quotes.
+      - route.js — API-route quotes для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - referral/ — Каталог referral.
+      - hit/ — Каталог hit.
+        - route.js — API-route referral/hit для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/ql7IdentityContract.cjs.
+      - link/ — Каталог link.
+        - route.js — API-route referral/link для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/ql7IdentityContract.cjs.
+    - subscription/ — Каталог subscription.
+      - status/ — Каталог status.
+        - route.js — API-route subscription/status для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - telegram/ — Каталог telegram.
+      - link/ — Каталог link.
+        - confirm/ — Каталог confirm.
+          - route.js — API-route telegram/link/confirm для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js.
+        - resolve/ — Каталог resolve.
+          - route.js — API-route telegram/link/resolve для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
+        - start/ — Каталог start.
+          - route.js — API-route telegram/link/start для серверной логики Next.js. Связи: импортирует lib/redis.js.
+        - status/ — Каталог status.
+          - route.js — API-route telegram/link/status для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js, lib/subscriptions.js.
+    - tma/ — Каталог tma.
+      - auto/ — Каталог auto.
+        - route.js — API-route tma/auto для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
+    - wallet-session/ — Каталог wallet-session.
+      - route.js — API-route wallet-session для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - components/ — Локальные компоненты верхнего уровня внутри app.
+    - CryptoNewsLens.jsx — JSX-файл Crypto News Lens сегмента components. Связи: импортирует components/i18n.js; используется в app/page.js.
+  - contact/ — Страница контактов.
+    - layout.js — Next.js layout для сегмента /contact. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /contact. Связи: импортирует components/i18n.js.
+  - exchange/ — Страницы/виджеты exchange-раздела.
+    - battle-chat/ — Каталог battle-chat.
+      - BattleChat.jsx — JSX-файл Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx; используется в app/exchange/BattleCoin.jsx.
+      - BattleChat.module.css — CSS-файл Battle Chat.module сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatClient.js — JS-файл battle Chat Client сегмента exchange/battle-chat. Связи: импортирует lib/walletSessionClient.js; используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/useBattleChat.js.
+      - BattleChatComposer.jsx — JSX-файл Battle Chat Composer сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatClient.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - battleChatFormatters.js — JS-файл battle Chat Formatters сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatIdentity.js — JS-файл battle Chat Identity сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - BattleChatMessageRow.jsx — JSX-файл Battle Chat Message Row сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatFormatters.js, app/exchange/battle-chat/battleChatIdentity.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - useBattleChat.js — JS-файл use Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/battleChatClient.js, lib/authActionGateClient.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+    - BattleCoin.jsx — JSX-файл Battle Coin сегмента exchange. Связи: импортирует app/exchange/battle-chat/BattleChat.jsx, components/QuantumWalletLaunchIcon.jsx, components/i18n.js; используется в app/exchange/page.js.
+    - layout.js — Next.js layout для сегмента /exchange. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /exchange. Связи: импортирует app/ads.js, app/exchange/BattleCoin.jsx, components/i18n.js.
+  - forum/ — Домен форума и мессенджера.
+    - events/ — Клиентские event-хелперы форума.
+      - bus.js — JS-файл bus домена форума. Связи: используется в forum/features/feed/utils/postEvents.js.
+    - features/ — Feature-oriented слой форума.
+      - diagnostics/ — Подсистема диагностики и perf-наблюдения.
+        - hooks/ — Каталог слоя хуки внутри feature diagnostics.
+          - useForumDiagnostics.js — Хук use Forum Diagnostics домена диагностики. Связи: импортирует forum/features/diagnostics/utils/emitPolicy.js; используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature diagnostics.
+          - emitPolicy.js — Утилита emit Policy домена диагностики. Связи: используется в forum/features/diagnostics/hooks/useForumDiagnostics.js.
+      - dm/ — Подсистема Quantum Messenger / DM.
+        - components/ — Каталог слоя компоненты внутри feature dm.
+          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
+          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
+          - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadLoadMore.jsx — UI-компонент Dm Thread Load More домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
+          - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: импортирует forum/shared/utils/counts.js; используется в forum/features/dm/components/InboxPane.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature dm.
+          - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmDeleteCopy.js — Хук use Dm Delete Copy домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmLoadLifecycle.js — Хук use Dm Load Lifecycle домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmLocalCache.js — Хук use Dm Local Cache домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmOpenEvents.js — Хук use Dm Open Events домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmRepliesSeen.js — Хук use Dm Replies Seen домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmSeenObservers.js — Хук use Dm Seen Observers домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmStorageMaps.js — Хук use Dm Storage Maps домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/deletedMap.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmThreadAutoScroll.js — Хук use Dm Thread Auto Scroll домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmUnreadState.js — Хук use Dm Unread State домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmVipBatchProbe.js — Хук use Dm Vip Batch Probe домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useForumDmRuntime.js — Хук use Forum Dm Runtime домена DM/мессенджера. Связи: импортирует forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLoadLifecycle.js, forum/features/dm/hooks/useDmLocalCache.js; используется в forum/ForumRoot.jsx.
+          - useInboxRepliesModel.js — Хук use Inbox Replies Model домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useOpenInboxGlobalAction.js — Хук use Open Inbox Global Action домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/openInboxGlobal.js, lib/authActionGateClient.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature dm.
+          - sendDmComposerMessage.js — Сервис send Dm Composer Message домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+        - utils/ — Каталог слоя утилиты внутри feature dm.
+          - alignInboxStartUnderTabs.js — Утилита align Inbox Start Under Tabs домена DM/мессенджера. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - deletedMap.js — Утилита deleted Map домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useDmStorageMaps.js.
+          - dmLoaders.js — Утилита dm Loaders домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLocalCache.js, forum/features/dm/hooks/useForumDmRuntime.js.
+          - dmLoaders.js.dm-delete-cross-device-v1.20260611-014845.bak — Утилита dm Loaders.js.dm delete cross device v1.20260611 014845 домена DM/мессенджера. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - mediaParsing.js — Утилита media Parsing домена DM/мессенджера. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+          - openInboxGlobal.js — Утилита open Inbox Global домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useOpenInboxGlobalAction.js.
+      - feed/ — Подсистема ленты, тем, постов и композера.
+        - components/ — Каталог слоя компоненты внутри feature feed.
+          - CreateTopicCard.jsx — UI-компонент Create Topic Card домена ленты/тем/постов. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumPostCard.jsx — UI-компонент Forum Post Card домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/PostActionBar.jsx, forum/features/feed/components/PostBodyContent.jsx, forum/features/feed/components/PostFxLayer.jsx; используется в forum/features/feed/components/PostCardBridge.jsx.
+          - LoadMoreSentinel.jsx — UI-компонент Load More Sentinel домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+          - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/feed/utils/cardMemo.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/ForumRoot.jsx.
+          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: импортирует forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/utils/externalVideoBridge.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
+          - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumRoot.jsx.
+          - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
+          - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+        - constants/ — Каталог слоя константы внутри feature feed.
+          - deeplink.js — Константа deeplink домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js.
+        - docs/ — Каталог слоя документация внутри feature feed.
+          - phase-03-feed.md — Документ phase 03 feed домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature feed.
+          - useForumCreatePostAction.js — Хук use Forum Create Post Action домена ленты/тем/постов. Связи: импортирует forum/features/dm/services/sendDmComposerMessage.js, forum/features/media/services/resolveComposerMediaPayload.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumCreateTopicAction.js — Хук use Forum Create Topic Action домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumDataRuntime.js — Хук use Forum Data Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumMutationQueue.js, forum/features/feed/hooks/useForumSseBridge.js, forum/features/feed/hooks/useForumSyncLoop.js; используется в forum/ForumRoot.jsx.
+          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useForumFeedRuntime.js — Хук use Forum Feed Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useThreadOpenNavigation.js, forum/features/feed/hooks/useThreadPostsModel.js; используется в forum/ForumRoot.jsx.
+          - useForumHomeAction.js — Хук use Forum Home Action домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumMutationActions.js — Хук use Forum Mutation Actions домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useForumMutationQueue.js — Хук use Forum Mutation Queue домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumNavigationActions.js — Хук use Forum Navigation Actions домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/alignInboxStartUnderTabs.js, forum/features/feed/utils/navOrchestrator.js, forum/features/feed/utils/navState.js; используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumNavigationRuntime.js — Хук use Forum Navigation Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumHomeAction.js, forum/features/feed/hooks/useForumNavigationActions.js, forum/features/feed/hooks/useNavStateSnapshot.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumSseBridge.js — Хук use Forum Sse Bridge домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumSyncLoop.js — Хук use Forum Sync Loop домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumViewTracking.js — Хук use Forum View Tracking домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useNavStateSnapshot.js — Хук use Nav State Snapshot домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
+          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/dm/hooks/useForumDmRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useUserRecommendationsRail.js — Хук use User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/ForumRoot.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+        - services/ — Каталог слоя сервисы внутри feature feed.
+          - rateLimiter.js — Сервис rate Limiter домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature feed.
+          - cardMemo.js — Утилита card Memo домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostCardBridge.jsx, forum/features/feed/components/TopicItem.jsx, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - interleaveRecommendationRails.js — Утилита interleave Recommendation Rails домена ленты/тем/постов. Связи: используется в forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/features/feed/utils/interleaveRecommendationRails.test.js.
+          - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/ForumRoot.jsx.
+          - navState.js — Утилита nav State домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+          - postEvents.js — Утилита post Events домена ленты/тем/постов. Связи: импортирует forum/events/bus.js; используется в forum/ForumRoot.jsx.
+          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - postMerge.js — Утилита post Merge домена ленты/тем/постов. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js, forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumSyncLoop.js.
+          - signatures.js — Утилита signatures домена ленты/тем/постов. Связи: используется в forum/features/feed/utils/snapshotTransforms.js.
+          - snapshotTransforms.js — Утилита snapshot Transforms домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/signatures.js; используется в forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumMutationQueue.js, tests/unit/forum/snapshotTransforms.test.js.
+      - geo/ — Каталог geo.
+        - GeoSessionTouchClient.jsx — Модуль Geo Session Touch Client домена geo. Связи: используется в forum/ForumRoot.jsx.
+      - media/ — Подсистема медиа, плееров и preview.
+        - components/ — Каталог слоя компоненты внутри feature media.
+          - qcast/ — Каталог qcast внутри feature media.
+            - QCastIcons.jsx — UI-компонент QCast Icons домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - ComposerAttachmentPreview.jsx — UI-компонент Composer Attachment Preview домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ExternalVideoPlayer.jsx — UI-компонент External Video Player домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/feed/components/PostMediaStack.jsx.
+          - LivePreview.jsx — UI-компонент Live Preview домена медиа. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+          - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/features/media/utils/frontCameraMirror.js, forum/shared/hooks/useHtmlFlag.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature media.
+          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: импортирует forum/features/media/services/uploadR2MediaFile.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/telegramMiniAppSwipeLock.js; используется в forum/ForumRoot.jsx.
+          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js, forum/services/forumApi.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
+          - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature media.
+          - resolveComposerMediaPayload.js — Сервис resolve Composer Media Payload домена медиа. Связи: импортирует forum/features/media/services/uploadR2MediaFile.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+          - uploadR2MediaFile.js — Сервис upload R2 Media File домена медиа. Связи: используется в app/ads/home.js, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/services/resolveComposerMediaPayload.js.
+        - utils/ — Каталог слоя утилиты внутри feature media.
+          - externalVideoBridge.js — Утилита external Video Bridge домена медиа. Связи: используется в forum/features/feed/components/PostMediaStack.jsx, forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/hooks/useForumMediaCoordinator.js.
+          - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
+          - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
+          - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
+          - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - telegramMiniAppSwipeLock.js — Утилита telegram Mini App Swipe Lock домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js.
+          - urlParsing.js — Утилита url Parsing домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - videoControls.js — Утилита video Controls домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - videoCopy.js — Утилита video Copy домена медиа. Связи: импортирует forum/shared/utils/forumLocale.js; используется в forum/ForumRoot.jsx.
+          - videoFeedActions.js — Утилита video Feed Actions домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedActions.js.
+          - videoFeedBuilder.js — Утилита video Feed Builder домена медиа. Связи: импортирует forum/features/media/utils/videoFeedPosts.js, forum/features/media/utils/videoFeedRandom.js; используется в forum/features/media/hooks/useVideoFeedState.js, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - videoFeedPosts.js — Утилита video Feed Posts домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedRandom.js — Утилита video Feed Random домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedSalt.js — Утилита video Feed Salt домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedState.js.
+          - videoFeedScroll.js — Утилита video Feed Scroll домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+      - moderation/ — Подсистема жалоб, модерации и admin UI.
+        - components/ — Каталог слоя компоненты внутри feature moderation.
+          - AdminPopover.jsx — UI-компонент Admin Popover домена модерации. Связи: импортирует forum/services/forumApi.js.
+          - ReportPopover.jsx — UI-компонент Report Popover домена модерации. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature moderation.
+          - useAdminActions.js — Хук use Admin Actions домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useAdminFlag.js — Хук use Admin Flag домена модерации. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useForumModerationRuntime.js — Хук use Forum Moderation Runtime домена модерации. Связи: импортирует forum/features/moderation/hooks/useAdminActions.js, forum/features/moderation/hooks/useAdminFlag.js, forum/features/moderation/hooks/useForumModerationUi.js; используется в forum/ForumRoot.jsx.
+          - useForumModerationUi.js — Хук use Forum Moderation Ui домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useMediaModeration.js — Хук use Media Moderation домена модерации. Связи: импортирует forum/features/moderation/utils/http.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useReportController.js — Хук use Report Controller домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature moderation.
+          - http.js — Утилита http домена модерации. Связи: используется в forum/features/moderation/hooks/useMediaModeration.js.
+      - profile/ — Подсистема профиля, about, VIP и popover.
+        - components/ — Каталог слоя компоненты внутри feature profile.
+          - AboutRail.jsx — UI-компонент About Rail домена профиля/VIP. Связи: импортирует forum/features/profile/utils/aboutText.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - ForumVipControl.jsx — UI-компонент Forum Vip Control домена профиля/VIP. Связи: импортирует forum/features/profile/components/VipPopover.jsx, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx — UI-компонент Profile Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/account.js, forum/features/subscriptions/components/FollowersCounterInline.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx.avatar-click-v3.20260611-004401.bak — UI-компонент Profile Popover.jsx.avatar click v3.20260611 004401 домена профиля/VIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - UserInfoPopover.jsx — UI-компонент User Info Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/subscriptions/components/FollowersCounterInline.jsx, forum/shared/api/translate.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VipFlipBadge.jsx — UI-компонент Vip Flip Badge домена профиля/VIP. Связи: импортирует forum/shared/utils/classnames.js, components/i18n.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - VipPopover.jsx — UI-компонент Vip Popover домена профиля/VIP. Связи: используется в forum/features/profile/components/ForumVipControl.jsx.
+        - constants/ — Каталог слоя константы внутри feature profile.
+          - vipAssets.js — Константа vip Assets домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature profile.
+          - useAboutEditor.js — Хук use About Editor домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useForumProfileSocialRuntime.js — Хук use Forum Profile Social Runtime домена профиля/VIP. Связи: импортирует forum/features/profile/hooks/useAboutEditor.js, forum/features/profile/hooks/useVipPayAction.js, forum/features/profile/hooks/useVipSubscriptionState.js; используется в forum/ForumRoot.jsx.
+          - useForumProfileSync.js — Хук use Forum Profile Sync домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useEvent.js, forum/shared/storage/localStorage.js; используется в forum/ForumRoot.jsx.
+          - useVipFlag.js — Хук use Vip Flag домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/profile/utils/vip.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/ForumPostCard.jsx.
+          - useVipPayAction.js — Хук use Vip Pay Action домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/paymentWindow.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useVipSubscriptionState.js — Хук use Vip Subscription State домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature profile.
+          - aboutText.js — Утилита about Text домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/AboutRail.jsx.
+          - avatar.js — Утилита avatar домена профиля/VIP. Связи: используется в forum/features/profile/components/AvatarEmoji.jsx.
+          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
+      - qcoin/ — Подсистема QCoin в форуме.
+        - components/ — Каталог слоя компоненты внутри feature qcoin.
+          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature qcoin.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature qcoin.
+          - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
+          - formatQCoinBalance.js — Утилита format QCoin Balance домена QCoin. Связи: используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+          - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js, components/QuantumWallet.jsx.
+      - quests/ — Подсистема квестов форума.
+        - components/ — Каталог слоя компоненты внутри feature quests.
+          - QuestClaimOverlay.jsx — UI-компонент Quest Claim Overlay домена квестов. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - QuestHub.jsx — UI-компонент Quest Hub домена квестов. Связи: импортирует forum/features/quests/utils/progress.js, forum/shared/utils/classnames.js; используется в forum/features/quests/components/QuestPane.jsx.
+          - QuestPane.jsx — UI-компонент Quest Pane домена квестов. Связи: импортирует forum/features/quests/components/QuestHub.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature quests.
+          - useForumQuestConfig.js — Хук use Forum Quest Config домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestProgress.js — Хук use Forum Quest Progress домена квестов. Связи: импортирует forum/features/quests/hooks/useQuestStorageState.js, forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestRuntime.js — Хук use Forum Quest Runtime домена квестов. Связи: импортирует forum/features/quests/hooks/useForumQuestConfig.js, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestClaimAction.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useQuestClaimAction.js — Хук use Quest Claim Action домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useQuestStorageState.js — Хук use Quest Storage State домена квестов. Связи: импортирует forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestProgress.js.
+          - useQuestViewActions.js — Хук use Quest View Actions домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature quests.
+          - progress.js — Утилита progress домена квестов. Связи: используется в forum/features/quests/components/QuestHub.jsx, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestStorageState.js.
+      - subscriptions/ — Подсистема подписок/соцграфа.
+        - components/ — Каталог слоя компоненты внутри feature subscriptions.
+          - FollowersCounterInline.jsx — UI-компонент Followers Counter Inline домена подписок. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/profile/components/UserInfoPopover.jsx.
+          - SubscriptionsPopover.jsx — UI-компонент Subscriptions Popover домена подписок. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/services/forumApi.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature subscriptions.
+          - useStarredAuthorsState.js — Хук use Starred Authors State домена подписок. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature subscriptions.
+          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/feed/hooks/useTopicDiscoveryModel.js, forum/features/subscriptions/hooks/useStarredAuthorsState.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+      - ui/ — Общие UI-узлы и проп-бандлы форума.
+        - components/ — Каталог слоя компоненты внутри feature ui.
+          - ComposeDock.jsx — UI-компонент Compose Dock домена форумного UI. Связи: импортирует forum/features/ui/components/ComposerCore.jsx, forum/features/ui/components/ComposerFabButton.jsx, forum/features/ui/components/ComposerStatusMeta.jsx; используется в forum/ForumLayout.jsx.
+          - ComposerActionRail.jsx — UI-компонент Composer Action Rail домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerCore.jsx — UI-компонент Composer Core домена форумного UI. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/ui/components/ComposerActionRail.jsx; используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerEmojiPanel.jsx — UI-компонент Composer Emoji Panel домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerEmojiPreview.jsx — UI-компонент Composer Emoji Preview домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerFabButton.jsx — UI-компонент Composer Fab Button домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerFileInput.jsx — UI-компонент Composer File Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerMediaProgressBar.jsx — UI-компонент Composer Media Progress Bar домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerStatusMeta.jsx — UI-компонент Composer Status Meta домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerTextInput.jsx — UI-компонент Composer Text Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ConfirmDeleteOverlay.jsx — UI-компонент Confirm Delete Overlay домена форумного UI. Связи: импортирует components/i18n.js; используется в forum/features/feed/components/PostOwnerMenu.jsx, forum/features/feed/components/TopicItem.jsx.
+          - DmDeletePopover.jsx — UI-компонент Dm Delete Popover домена форумного UI. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - ForumActionNavIcon.jsx — UI-компонент Forum Action Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+          - ForumActionRow.jsx — UI-компонент Forum Action Row домена форумного UI. Связи: импортирует forum/features/ui/components/ForumActionNavIcon.jsx, forum/features/ui/components/VideoFeedNavIcon.jsx, forum/shared/utils/counts.js; используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumAdSlot.jsx — UI-компонент Forum Ad Slot домена форумного UI. Связи: импортирует forum/ForumAds.js; используется в forum/ForumRoot.jsx.
+          - ForumControlNavIcon.jsx — UI-компонент Forum Control Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumSearchSortControls.jsx.
+          - ForumOverlayStack.jsx — UI-компонент Forum Overlay Stack домена форумного UI. Связи: импортирует forum/SharePopover.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoOverlay.jsx; используется в forum/ForumLayout.jsx.
+          - ForumSearchSortControls.jsx — UI-компонент Forum Search Sort Controls домена форумного UI. Связи: импортирует forum/features/media/utils/mediaLinks.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - HeadChevronIcon.jsx — UI-компонент Head Chevron Icon домена форумного UI. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - MainForumActionCluster.jsx — UI-компонент Main Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/TopicsSection.jsx.
+          - StarButton.jsx — UI-компонент Star Button домена форумного UI. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - ThreadForumActionCluster.jsx — UI-компонент Thread Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - VideoFeedNavIcon.jsx — UI-компонент Video Feed Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+        - constants/ — Каталог слоя константы внутри feature ui.
+          - emojiCatalog.js — Константа emoji Catalog домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - inviteButton.js — Константа invite Button домена форумного UI. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature ui.
+          - useComposerActionHandlers.js — Хук use Composer Action Handlers домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerEmojiState.js — Хук use Composer Emoji State домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerScrollMemory.js — Хук use Composer Scroll Memory домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useComposerUiLifecycle.js — Хук use Composer Ui Lifecycle домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useForumAdSlots.js — Хук use Forum Ad Slots домена форумного UI. Связи: импортирует forum/features/ui/utils/adsSlots.js; используется в forum/features/ui/hooks/useForumAdsRuntime.js.
+          - useForumAdsRuntime.js — Хук use Forum Ads Runtime домена форумного UI. Связи: импортирует forum/ForumAds.js, forum/features/ui/hooks/useForumAdSlots.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumComposerRuntime.js — Хук use Forum Composer Runtime домена форумного UI. Связи: импортирует forum/features/media/hooks/useMediaPipelineController.js, forum/features/media/hooks/useVoiceRecorder.js, forum/features/ui/hooks/useComposerScrollMemory.js; используется в forum/ForumRoot.jsx.
+          - useForumComposerSubmitRuntime.js — Хук use Forum Composer Submit Runtime домена форумного UI. Связи: импортирует forum/features/feed/hooks/useForumCreatePostAction.js, forum/features/feed/hooks/useForumCreateTopicAction.js, forum/features/feed/hooks/useForumViewTracking.js; используется в forum/ForumRoot.jsx.
+          - useForumEditMode.js — Хук use Forum Edit Mode домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumGlobalPopovers.js — Хук use Forum Global Popovers домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumHeadCollapse.js — Хук use Forum Head Collapse домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumPopoverModeController.js — Хук use Forum Popover Mode Controller домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumScreenFlowsRuntime.js — Хук use Forum Screen Flows Runtime домена форумного UI. Связи: импортирует forum/features/dm/hooks/useDmDeleteCopy.js, forum/features/dm/hooks/useDmOpenEvents.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js; используется в forum/ForumRoot.jsx.
+          - useForumSessionShell.js — Хук use Forum Session Shell домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumViewState.js — Хук use Forum View State домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useScrollResizeCompensation.js — Хук use Scroll Resize Compensation домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature ui.
+          - propBundles/ — Каталог propBundles внутри feature ui.
+            - buildActionClusterProps.js — Утилита build Action Cluster Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildComposerCoreProps.js — Утилита build Composer Core Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildForumHeaderPanelProps.js — Утилита build Forum Header Panel Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildInboxPaneProps.js — Утилита build Inbox Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildSearchSortControlsProps.js — Утилита build Search Sort Controls Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildThreadRepliesPaneProps.js — Утилита build Thread Replies Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildTopicsSwitchProps.js — Утилита build Topics Switch Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+          - adsSlots.js — Утилита ads Slots домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumAdSlots.js.
+          - buildForumLayoutProps.js — Утилита build Forum Layout Props домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - buildForumRootPropBundles.js — Утилита build Forum Root Prop Bundles домена форумного UI. Связи: импортирует forum/features/ui/utils/propBundles/buildActionClusterProps.js, forum/features/ui/utils/propBundles/buildComposerCoreProps.js, forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js; используется в forum/ForumRoot.jsx.
+    - p/ — Каталог p.
+      - [postId]/ — Каталог [postId].
+        - route.js — JS-файл route домена форума. Связи: импортирует app/api/forum/_db.js, lib/mongo/forum-primary.cjs.
+    - services/ — Каталог services.
+      - forumApi.js — JS-файл forum Api домена форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedActions.js, forum/features/moderation/components/AdminPopover.jsx.
+    - shared/ — Shared-слой форума: общие хуки, utils, storage, config.
+      - api/ — Каталог shared-слоя форума: api.
+        - http.js — Shared API-хелпер http форума. Связи: используется в forum/shared/api/translate.js.
+        - translate.js — Shared API-хелпер translate форума. Связи: импортирует forum/shared/api/http.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/hooks/usePostTranslation.js, forum/features/profile/components/UserInfoPopover.jsx.
+      - components/ — Каталог shared-слоя форума: components.
+        - HydrateText.jsx — Shared UI-компонент Hydrate Text форума. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostActionBar.jsx.
+      - config/ — Каталог shared-слоя форума: config.
+        - runtime.js — Shared конфиг runtime форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/shared/config/runtime.test.js.
+      - constants/ — Каталог shared-слоя форума: constants.
+        - media.js — Shared константа media форума. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx, forum/features/media/components/VideoLimitOverlay.jsx.
+      - docs/ — Каталог shared-слоя форума: docs.
+        - phase-01-shared-foundation.md — Shared документ phase 01 shared foundation форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - hooks/ — Каталог shared-слоя форума: hooks.
+        - useEvent.js — Shared хук use Event форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - useForumNavBridge.js — Shared хук use Forum Nav Bridge форума. Связи: импортирует forum/shared/hooks/useEvent.js; используется в forum/ForumRoot.jsx.
+        - useForumToast.js — Shared хук use Forum Toast форума. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumRoot.jsx.
+        - useForumWindowing.js — Shared хук use Forum Windowing форума. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+      - storage/ — Каталог shared-слоя форума: storage.
+        - localStorage.js — Shared storage-обертка local Storage форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/profile/hooks/useForumProfileSync.js.
+      - telemetry/ — Каталог shared-слоя форума: telemetry.
+        - diag.js — Shared телеметрия diag форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - utils/ — Каталог shared-слоя форума: utils.
+        - browser.js — Shared утилита browser форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/moderation/hooks/useAdminFlag.js.
+        - classnames.js — Shared утилита classnames форума. Связи: используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - counts.js — Shared утилита counts форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/InboxTabsHeader.jsx, forum/features/feed/components/PostActionBar.jsx.
+        - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
+        - forumWindowingPresets.js — Shared утилита forum Windowing Presets форума. Связи: используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js.
+        - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
+        - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx, app/game/page.js.
+        - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
+        - time.js — Shared утилита time форума. Связи: используется в forum/ForumRoot.jsx.
+    - styles/ — Стили форума и их сборка.
+      - modules/ — Модульные фрагменты стилевого слоя форума.
+        - composerStyles.js — Модуль стилевой сборки форума: composer Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - dmStyles.js — Модуль стилевой сборки форума: dm Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - foundationStyles.js — Модуль стилевой сборки форума: foundation Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fxStyles.js — Модуль стилевой сборки форума: fx Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - layoutStyles.js — Модуль стилевой сборки форума: layout Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - profileStyles.js — Модуль стилевой сборки форума: profile Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - qcoinStyles.js — Модуль стилевой сборки форума: qcoin Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - questStyles.js — Модуль стилевой сборки форума: quest Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ForumFxStyles.jsx — Файл стилевого слоя форума: Forum Fx Styles. Связи: используется в forum/ForumLayout.jsx.
+      - ForumStyles.jsx — Файл стилевого слоя форума: Forum Styles. Связи: используется в forum/ForumLayout.jsx.
+    - error.js — JS-файл error домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - Forum.jsx — Тонкий entry-point экрана форума. Связи: импортирует forum/ForumRoot.jsx; используется в forum/page.js.
+    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx, components/i18n.js; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
+    - ForumHeaderPanel.jsx — Компоновщик шапки форума с контролами, профилем, QCoin и VIP. Связи: импортирует forum/features/profile/components/AboutRail.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/ForumVipControl.jsx; используется в forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx.
+    - ForumLayout.jsx — Layout-обвязка форума. Связи: импортирует forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx, forum/features/ui/components/ComposeDock.jsx; используется в forum/ForumRoot.jsx.
+    - ForumProviders.jsx — Провайдеры и контекстная сборка форума. Связи: используется в forum/ForumRoot.jsx.
+    - ForumRoot.jsx — Корневой composition-root форума и мессенджера. Связи: импортирует forum/ForumAds.js, forum/ForumLayout.jsx, forum/ForumProviders.jsx; используется в forum/Forum.jsx.
+    - layout.js — JS-файл layout домена форума. Связи: импортирует lib/metadataCache.js.
+    - loading.js — JS-файл loading домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/ForumBootSplash.jsx, components/i18n.js.
+    - SharePopover.jsx — JSX-файл Share Popover домена форума. Связи: импортирует lib/forumShareManager.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+  - game/ — Страницы/компоненты игрового раздела.
+    - layout.js — Next.js layout для сегмента /game. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /game. Связи: импортирует app/ads.js, forum/shared/utils/openAuth.js, components/i18n.js.
+  - privacy/ — Страница privacy/policy.
+    - layout.js — Next.js layout для сегмента /privacy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /privacy. Связи: импортирует components/i18n.js.
+  - subscribe/ — Страницы подписки/лендинга.
+    - layout.js — Next.js layout для сегмента /subscribe. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /subscribe. Связи: импортирует app/subscribe/subscribe.client.jsx.
+    - subscribe.client.jsx — JSX-файл subscribe.client сегмента subscribe. Связи: импортирует app/ads.js, components/i18n.js; используется в app/subscribe/page.js.
+  - tma/ — Telegram Mini App связанные страницы.
+    - auto/ — Авто-страницы TMA.
+      - layout.js — Next.js layout для сегмента /tma/auto. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - page.jsx — JSX-файл page сегмента tma/auto. Связи: импортирует components/i18n.js.
+  - ads.js — JS-файл ads сегмента app. Связи: импортирует forum/ForumAds.js; используется в app/about/page.js, app/academy/page.js, app/exchange/page.js.
+  - globals.css — CSS-файл globals сегмента app. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/AndroidAppPrompt.jsx, components/AndroidNotificationBadgeSync.jsx.
+  - page.js — Next.js страница маршрута /. Связи: импортирует app/ads.js, app/components/CryptoNewsLens.jsx, components/i18n.js.
+  - providers.jsx — JSX-файл providers сегмента app. Связи: импортирует components/WalletRuntimeBridge.jsx; используется в app/layout.js.
+  - robots.js — JS-файл robots сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в tests/contracts/project/seo-indexing-contracts.test.js.
+  - sitemap.js — JS-файл sitemap сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в tests/contracts/project/seo-indexing-contracts.test.js.
+- audit/ — JSON-артефакты аудитов и миграционных фаз.
+  - forum-final-created-files-check.json — JSON-артефакт аудита forum final created files check. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-final-ownership-map.json — JSON-артефакт аудита forum final ownership map. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-final-residual-monolith.json — JSON-артефакт аудита forum final residual monolith. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-functional-parity.report.json — JSON-артефакт аудита forum functional parity.report. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-00-architecture.json — JSON-артефакт аудита forum phase 00 architecture. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-01-shared.json — JSON-артефакт аудита forum phase 01 shared. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-02-ui-primitives.json — JSON-артефакт аудита forum phase 02 ui primitives. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-03-feed.json — JSON-артефакт аудита forum phase 03 feed. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-04-media.json — JSON-артефакт аудита forum phase 04 media. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-05-dm.json — JSON-артефакт аудита forum phase 05 dm. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-06-profile-social-qcoin.json — JSON-артефакт аудита forum phase 06 profile social qcoin. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-07-quests-moderation-diagnostics.json — JSON-артефакт аудита forum phase 07 quests moderation diagnostics. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-08-styles.json — JSON-артефакт аудита forum phase 08 styles. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-09-final.json — JSON-артефакт аудита forum phase 09 final. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10-root-pass-02.json — JSON-артефакт аудита forum phase 10 root pass 02. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10-style-runtime-parity-fix.json — JSON-артефакт аудита forum phase 10 style runtime parity fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10b-global-css-gating.json — JSON-артефакт аудита forum phase 10b global css gating. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10c-head-style-injection.json — JSON-артефакт аудита forum phase 10c head style injection. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10d-header-controls-parity.json — JSON-артефакт аудита forum phase 10d header controls parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10d-style-parity-integration.json — JSON-артефакт аудита forum phase 10d style parity integration. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10e-header-single-block-parity.json — JSON-артефакт аудита forum phase 10e header single block parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10f-encoding-and-inbox-parity.json — JSON-артефакт аудита forum phase 10f encoding and inbox parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10g-quests-dm-encoding-inbox-recheck.json — JSON-артефакт аудита forum phase 10g quests dm encoding inbox recheck. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10h-quest-claim-instant-overlay.json — JSON-артефакт аудита forum phase 10h quest claim instant overlay. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10i-diagnostics-route-restore.json — JSON-артефакт аудита forum phase 10i diagnostics route restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10j-composer-emoji-encoding-restore.json — JSON-артефакт аудита forum phase 10j composer emoji encoding restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-10k-composer-emoji-parity-complete.json — JSON-артефакт аудита forum phase 10k composer emoji parity complete. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-11-report-controller.json — JSON-артефакт аудита forum phase 11 report controller. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-12-diagnostics-hook.json — JSON-артефакт аудита forum phase 12 diagnostics hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-12-final-parity.json — JSON-артефакт аудита forum phase 12 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-13-final-closeout.json — JSON-артефакт аудита forum phase 13 final closeout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-13-media-moderation-hook.json — JSON-артефакт аудита forum phase 13 media moderation hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-14-hotspot-cleanup.json — JSON-артефакт аудита forum phase 14 hotspot cleanup. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-14-media-preprocess-utils.json — JSON-артефакт аудита forum phase 14 media preprocess utils. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-15-profile-sync-hooks.json — JSON-артефакт аудита forum phase 15 profile sync hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-15-root-lifecycle-extraction.json — JSON-артефакт аудита forum phase 15 root lifecycle extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-16-shared-helpers.json — JSON-артефакт аудита forum phase 16 shared helpers. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-16-videofeed-nav-action-extraction.json — JSON-артефакт аудита forum phase 16 videofeed nav action extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-17-auth-flow-helper.json — JSON-артефакт аудита forum phase 17 auth flow helper. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-18-vip-hook-badge.json — JSON-артефакт аудита forum phase 18 vip hook badge. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-19-shared-toast-hook.json — JSON-артефакт аудита forum phase 19 shared toast hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-20-root-residual-cleanup.json — JSON-артефакт аудита forum phase 20 root residual cleanup. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-21-root-dead-auth-helper.json — JSON-артефакт аудита forum phase 21 root dead auth helper. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-22-avatar-component.json — JSON-артефакт аудита forum phase 22 avatar component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-23-dm-leaf-components.json — JSON-артефакт аудита forum phase 23 dm leaf components. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-24-shared-formatters-hydrate.json — JSON-артефакт аудита forum phase 24 shared formatters hydrate. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-25-feed-topic-item-component.json — JSON-артефакт аудита forum phase 25 feed topic item component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-26-post-action-bar-component.json — JSON-артефакт аудита forum phase 26 post action bar component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-27-post-media-stack-component.json — JSON-артефакт аудита forum phase 27 post media stack component. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-28-post-body-translate-components.json — JSON-артефакт аудита forum phase 28 post body translate components. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-29-post-translation-hook.json — JSON-артефакт аудита forum phase 29 post translation hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-30-post-media-text-model-hook.json — JSON-артефакт аудита forum phase 30 post media text model hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-31-post-owner-menu-actions.json — JSON-артефакт аудита forum phase 31 post owner menu actions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-32-post-fx-hook-layer.json — JSON-артефакт аудита forum phase 32 post fx hook layer. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-33-post-header-meta-parent-nav.json — JSON-артефакт аудита forum phase 33 post header meta parent nav. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-34-post-card-plus-feed-media-leaf-extraction.json — JSON-артефакт аудита forum phase 34 post card plus feed media leaf extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-35-popover-leaf-extraction.json — JSON-артефакт аудита forum phase 35 popover leaf extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-36-qcoin-subscriptions-inline-extraction.json — JSON-артефакт аудита forum phase 36 qcoin subscriptions inline extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-37-qcoin-withdraw-userinfo-extraction.json — JSON-артефакт аудита forum phase 37 qcoin withdraw userinfo extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-38-about-dmvoice-extraction.json — JSON-артефакт аудита forum phase 38 about dmvoice extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-39-video-media-adapter-extraction.json — JSON-артефакт аудита forum phase 39 video media adapter extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-40-media-time-util-extraction.json — JSON-артефакт аудита forum phase 40 media time util extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-41-qcast-ui-primitives-extraction.json — JSON-артефакт аудита forum phase 41 qcast ui primitives extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-42-qcast-component-extraction.json — JSON-артефакт аудита forum phase 42 qcast component extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-43-video-controls-handler-extraction.json — JSON-артефакт аудита forum phase 43 video controls handler extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-44-media-links-cluster-extraction.json — JSON-артефакт аудита forum phase 44 media links cluster extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-45-core-helper-clusters-extraction.json — JSON-артефакт аудита forum phase 45 core helper clusters extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-46-overlay-shared-popover-events.json — JSON-артефакт аудита forum phase 46 overlay shared popover events. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-47-feed-media-hooks-utils-extraction.json — JSON-артефакт аудита forum phase 47 feed media hooks utils extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-48-post-focus-deeplink-media-pipeline.json — JSON-артефакт аудита forum phase 48 post focus deeplink media pipeline. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-49-video-trim-and-nav-scroll-extraction.json — JSON-артефакт аудита forum phase 49 video trim and nav scroll extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-50-media-runtime-overlay-hooks.json — JSON-артефакт аудита forum phase 50 media runtime overlay hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-51-videofeed-nav-ads-utils.json — JSON-артефакт аудита forum phase 51 videofeed nav ads utils. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-52-nav-quest-extraction.json — JSON-артефакт аудита forum phase 52 nav quest extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-53-dm-videofeed-actions-extraction.json — JSON-артефакт аудита forum phase 53 dm videofeed actions extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-54-validation-and-postcard-bridge.json — JSON-артефакт аудита forum phase 54 validation and postcard bridge. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-55-style-split.json — JSON-артефакт аудита forum phase 55 style split. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-56-root-cleanup-style-hooks.json — JSON-артефакт аудита forum phase 56 root cleanup style hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-57-windowing-dm-media-hooks.json — JSON-артефакт аудита forum phase 57 windowing dm media hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-58-profile-admin-dm-quest-storage-hooks.json — JSON-артефакт аудита forum phase 58 profile admin dm quest storage hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-59-dm-orchestration-hooks.json — JSON-артефакт аудита forum phase 59 dm orchestration hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-60-feed-sync-engine-hooks.json — JSON-артефакт аудита forum phase 60 feed sync engine hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-61-feed-mutation-queue-hook.json — JSON-артефакт аудита forum phase 61 feed mutation queue hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-62-feed-view-and-actions-hooks.json — JSON-артефакт аудита forum phase 62 feed view and actions hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-63-composer-and-head-collapse-hooks.json — JSON-артефакт аудита forum phase 63 composer and head collapse hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-64-deeplink-create-topic-hooks.json — JSON-артефакт аудита forum phase 64 deeplink create topic hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-65-create-post-hook.json — JSON-артефакт аудита forum phase 65 create post hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-66-post-action-services-split.json — JSON-артефакт аудита forum phase 66 post action services split. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-67-navigation-actions-hook.json — JSON-артефакт аудита forum phase 67 navigation actions hook. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-68-quest-home-actions-hooks.json — JSON-артефакт аудита forum phase 68 quest home actions hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-69-quest-domain-hooks.json — JSON-артефакт аудита forum phase 69 quest domain hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-70-quest-claim-overlay-modularization.json — JSON-артефакт аудита forum phase 70 quest claim overlay modularization. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-71-action-row-quest-launch-extraction.json — JSON-артефакт аудита forum phase 71 action row quest launch extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-72-vip-pay-hook-extraction.json — JSON-артефакт аудита forum phase 72 vip pay hook extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-73-vip-control-component-extraction.json — JSON-артефакт аудита forum phase 73 vip control component extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-74-search-sort-controls-extraction.json — JSON-артефакт аудита forum phase 74 search sort controls extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-75-header-panel-composition-extraction.json — JSON-артефакт аудита forum phase 75 header panel composition extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-76-final-parity.json — JSON-артефакт аудита forum phase 76 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-76-video-trim-controller-extraction.json — JSON-артефакт аудита forum phase 76 video trim controller extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-77-final-parity.json — JSON-артефакт аудита forum phase 77 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-77-video-capture-controller-extraction.json — JSON-артефакт аудита forum phase 77 video capture controller extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-78-composer-attachment-preview-extraction.json — JSON-артефакт аудита forum phase 78 composer attachment preview extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-78-final-parity.json — JSON-артефакт аудита forum phase 78 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-80-final-parity.json — JSON-артефакт аудита forum phase 80 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-80-five-extractions.json — JSON-артефакт аудита forum phase 80 five extractions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-81-final-parity.json — JSON-артефакт аудита forum phase 81 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-81-ten-extractions.json — JSON-артефакт аудита forum phase 81 ten extractions. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-82-final-parity.json — JSON-артефакт аудита forum phase 82 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-83-final-parity.json — JSON-артефакт аудита forum phase 83 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-83-six-hooks-extraction.json — JSON-артефакт аудита forum phase 83 six hooks extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-84-final-parity.json — JSON-артефакт аудита forum phase 84 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-84-thread-open-nav-extraction.json — JSON-артефакт аудита forum phase 84 thread open nav extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-85-final-parity.json — JSON-артефакт аудита forum phase 85 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-85-three-blocks-extraction.json — JSON-артефакт аудита forum phase 85 three blocks extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-86-feed-model-hooks.json — JSON-артефакт аудита forum phase 86 feed model hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-86-final-parity.json — JSON-артефакт аудита forum phase 86 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-87-feed-dm-model-extraction.json — JSON-артефакт аудита forum phase 87 feed dm model extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-87-final-parity.json — JSON-артефакт аудита forum phase 87 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-88-final-parity.json — JSON-артефакт аудита forum phase 88 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-88-media-coordinator-and-asset-catalog.json — JSON-артефакт аудита forum phase 88 media coordinator and asset catalog. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-89-composer-admin-subs-moderation-hooks.json — JSON-артефакт аудита forum phase 89 composer admin subs moderation hooks. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-89-final-parity.json — JSON-артефакт аудита forum phase 89 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-90-final-parity.json — JSON-артефакт аудита forum phase 90 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-90-shell-cleanup-and-noise-reduction.json — JSON-артефакт аудита forum phase 90 shell cleanup and noise reduction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-91-dm-runtime-extraction.json — JSON-артефакт аудита forum phase 91 dm runtime extraction. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-91-final-parity.json — JSON-артефакт аудита forum phase 91 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-92-final-parity.json — JSON-артефакт аудита forum phase 92 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-92-runtime-feed-media-quests.json — JSON-артефакт аудита forum phase 92 runtime feed media quests. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-93-all-five-finalization.json — JSON-артефакт аудита forum phase 93 all five finalization. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-93-final-parity.json — JSON-артефакт аудита forum phase 93 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-94-big-five-pass-parity.json — JSON-артефакт аудита forum phase 94 big five pass parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-94-five-clusters-runtime-layout.json — JSON-артефакт аудита forum phase 94 five clusters runtime layout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-95-final-parity.json — JSON-артефакт аудита forum phase 95 final parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-96-hotfix-parity.json — JSON-артефакт аудита forum phase 96 hotfix parity. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-96-ideal-closeout.json — JSON-артефакт аудита forum phase 96 ideal closeout. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-97-style-parity-hotfix.json — JSON-артефакт аудита forum phase 97 style parity hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-98-style-isolation-restore.json — JSON-артефакт аудита forum phase 98 style isolation restore. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-99-forum-global-css-isolation.json — JSON-артефакт аудита forum phase 99 forum global css isolation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-100-forum-hard-isolation.json — JSON-артефакт аудита forum phase 100 forum hard isolation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-101-avatar-live-sync-and-emoji-fallback.json — JSON-артефакт аудита forum phase 101 avatar live sync and emoji fallback. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-102-avatar-propagation-hotfix.json — JSON-артефакт аудита forum phase 102 avatar propagation hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-103-avatar-propagation-flicker-fix.json — JSON-артефакт аудита forum phase 103 avatar propagation flicker fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-104-dm-loading-and-profile-alias-hardening.json — JSON-артефакт аудита forum phase 104 dm loading and profile alias hardening. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-105-composer-preview-and-dm-optimism.json — JSON-артефакт аудита forum phase 105 composer preview and dm optimism. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-106-composer-vip-preview-and-dm-delete-overlay-optimism.json — JSON-артефакт аудита forum phase 106 composer vip preview and dm delete overlay optimism. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-107-dm-delete-for-all-fix-and-loading-center.json — JSON-артефакт аудита forum phase 107 dm delete for all fix and loading center. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-108-dm-delete-for-all-server-parity-hotfix.json — JSON-артефакт аудита forum phase 108 dm delete for all server parity hotfix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-109-dm-delete-for-all-race-fix.json — JSON-артефакт аудита forum phase 109 dm delete for all race fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-110-dm-delete-default-for-all-message.json — JSON-артефакт аудита forum phase 110 dm delete default for all message. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-111-dm-delete-server-best-effort-fallback.json — JSON-артефакт аудита forum phase 111 dm delete server best effort fallback. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-112-dm-delete-server-parity-and-thread-refresh.json — JSON-артефакт аудита forum phase 112 dm delete server parity and thread refresh. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-113-dm-dialog-delete-and-composer-progress.json — JSON-артефакт аудита forum phase 113 dm dialog delete and composer progress. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114-dm-dialog-delete-and-composer-progress-smooth.json — JSON-артефакт аудита forum phase 114 dm dialog delete and composer progress smooth. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114b-video-progress-reference-fix.json — JSON-артефакт аудита forum phase 114b video progress reference fix. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-114c-progress-revert.json — JSON-артефакт аудита forum phase 114c progress revert. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-115-dm-optimistic-video-rails-qcoin-overlay.json — JSON-артефакт аудита forum phase 115 dm optimistic video rails qcoin overlay. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-116-rails-controls-qcoin-progress.json — JSON-артефакт аудита forum phase 116 rails controls qcoin progress. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-117-about-pencil-and-post-media-fullbleed.json — JSON-артефакт аудита forum phase 117 about pencil and post media fullbleed. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-118-reactions-views-premium.json — JSON-артефакт аудита forum phase 118 reactions views premium. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-119-share-parity-check.json — JSON-артефакт аудита forum phase 119 share parity check. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-120-user-popover-user-branches.json — JSON-артефакт аудита forum phase 120 user popover user branches. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-121-branch-scroll-alignment-and-thread-title-spacing.json — JSON-артефакт аудита forum phase 121 branch scroll alignment and thread title spacing. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-122-functional-parity.report.json — JSON-артефакт аудита forum phase 122 functional parity.report. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-122-view-sync-report-flow.json — JSON-артефакт аудита forum phase 122 view sync report flow. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-123-mobile-qcoin-rail.json — JSON-артефакт аудита forum phase 123 mobile qcoin rail. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-124-mobile-qcoin-center-pencil.json — JSON-артефакт аудита forum phase 124 mobile qcoin center pencil. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-125-vip-button-animation.json — JSON-артефакт аудита forum phase 125 vip button animation. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - forum-phase-126-video-warm-lifecycle.json — JSON-артефакт аудита forum phase 126 video warm lifecycle. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - project-docs-audit.json — JSON-артефакт аудита project docs audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+  - project-tree-audit.json — JSON-артефакт аудита project tree audit. Связи: генерируется audit-скриптами из tools/ и служит для проверки регрессий.
+- components/ — Общие React-компоненты всего проекта.
+  - i18n-dicts/ — Каталог i18n-dicts.
+    - ar.js — Общий React-компонент ar, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - en.js — Общий React-компонент en, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - es.js — Общий React-компонент es, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - manifest.js — Общий React-компонент manifest, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/siteIndex.js, tests/contracts/project/seo-indexing-contracts.test.js.
+    - ru.js — Общий React-компонент ru, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - tr.js — Общий React-компонент tr, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - uk.js — Общий React-компонент uk, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+    - zh.js — Общий React-компонент zh, используемый вне одного домена. Связи: используется в components/i18n.js, tests/contracts/metamarket/metamarket-contracts.test.js, tests/unit/i18n/i18nDictionaries.test.js.
+  - metamarket/ — Каталог metamarket.
+    - metaMarketFormat.js — Общий React-компонент meta Market Format, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+    - metaMarketI18n.js — Общий React-компонент meta Market I18n, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - AndroidAppPrompt.jsx — Общий React-компонент Android App Prompt, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
+  - AndroidChromiumVideoCanvas.jsx — Общий React-компонент Android Chromium Video Canvas, используемый вне одного домена. Связи: используется в forum/ForumAds.js, forum/features/media/components/VideoMedia.jsx, components/ForumBootSplash.jsx.
+  - AndroidNotificationBadgeSync.jsx — Общий React-компонент Android Notification Badge Sync, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/notificationCenter.js; используется в app/layout.js.
+  - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/walletSessionClient.js; используется в components/TopBar.js.
+  - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: используется в app/layout.js.
+  - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/page.js.
+  - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
+  - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
+  - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
+  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - i18n.source.js — Общий React-компонент i18n.source, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - InviteFriendHost.jsx — Общий React-компонент Invite Friend Host, используемый вне одного домена. Связи: импортирует components/InviteFriendProvider.jsx; используется в app/layout.js.
+  - InviteFriendPopup.jsx — Общий React-компонент Invite Friend Popup, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/InviteFriendProvider.jsx.
+  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx; используется в components/InviteFriendHost.jsx.
+  - LanguageSwitcher.js — Общий React-компонент Language Switcher, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
+  - MetaMarket.jsx — Общий React-компонент Meta Market, используемый вне одного домена. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, components/MetaMarketCatalog.js; используется в components/MetaMarketHost.jsx.
+  - MetaMarketCatalog.js — Общий React-компонент Meta Market Catalog, используемый вне одного домена. Связи: используется в app/api/metamarket/_catalog.js, components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+  - MetaMarketHost.jsx — Общий React-компонент Meta Market Host, используемый вне одного домена. Связи: импортирует components/MetaMarket.jsx; используется в app/layout.js.
+  - MetaMarketIcons.jsx — Общий React-компонент Meta Market Icons, используемый вне одного домена. Связи: используется в forum/features/profile/components/UserInfoPopover.jsx, forum/features/ui/components/ForumSearchSortControls.jsx, components/MetaMarket.jsx.
+  - MetaMarketTitle.jsx — Общий React-компонент Meta Market Title, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/NotRobotHost.jsx.
+  - NotRobotHost.jsx — Общий React-компонент Not Robot Host, используемый вне одного домена. Связи: импортирует components/NotRobot.jsx; используется в app/layout.js.
+  - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
+  - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
+  - QuantumWallet.jsx — Общий React-компонент Quantum Wallet, используемый вне одного домена. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/features/qcoin/utils/paymentWindow.js; используется в components/QuantumWalletHost.jsx.
+  - QuantumWalletHost.jsx — Общий React-компонент Quantum Wallet Host, используемый вне одного домена. Связи: импортирует components/QuantumWallet.jsx, lib/authActionGateClient.js; используется в app/layout.js.
+  - QuantumWalletLaunchIcon.jsx — Общий React-компонент Quantum Wallet Launch Icon, используемый вне одного домена. Связи: используется в app/exchange/BattleCoin.jsx, forum/features/ui/components/ForumSearchSortControls.jsx.
+  - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
+  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/layout.js.
+  - UnlimitModal.client.jsx — Общий React-компонент Unlimit Modal.client, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletEVM.js — Общий React-компонент Wallet EVM, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletRuntimeBridge.jsx — Общий React-компонент Wallet Runtime Bridge, используемый вне одного домена. Связи: импортирует lib/walletSessionClient.js; используется в app/providers.jsx.
+  - WalletsHub.js — Общий React-компонент Wallets Hub, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletSOL.js — Общий React-компонент Wallet SOL, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTON.js — Общий React-компонент Wallet TON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTRON.js — Общий React-компонент Wallet TRON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - Web3Provider.js — Общий React-компонент Web3 Provider, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- config/ — Каталог config.
+  - runtime-governance.json — JSON-файл runtime governance. Связи: используется в src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js, src/shared/runtime/identity/runtimeTypes.js.
+- docs/ — Каталог docs.
+  - exchange/ — Каталог exchange.
+    - BATTLE_CHAT_CONTOUR_CONTRACT.md — Markdown-документ BATTLE CHAT CONTOUR CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - forum/ — Каталог forum.
+    - QL7_FORUM_GEO_CURSOR_COUNTER_CONTRACT.md — Markdown-документ QL7 FORUM GEO CURSOR COUNTER CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mongo/ — Каталог mongo.
+    - ads-metamarket-synthetic-write-proof-v55.md — Markdown-документ ads metamarket synthetic write proof v55. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-canary-v53.md — Markdown-документ qcoin ledger canary v53. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-v52.md — Markdown-документ qcoin ledger v52. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_PREMIUM_CLOSEOUT_V65.md — Markdown-документ QL7 MONGO PREMIUM CLOSEOUT V65. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_TZ_FINAL_CLOSEOUT_V60.md — Markdown-документ QL7 MONGO TZ FINAL CLOSEOUT V60. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-codex-rules.md — Markdown-документ mobile codex rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-monorepo-workflow.md — Markdown-документ mobile monorepo workflow. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-payment-compliance.md — Markdown-документ mobile payment compliance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-release.md — Markdown-документ mobile release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-shell-v3.md — Markdown-документ mobile shell v3. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-store-review.md — Markdown-документ mobile store review. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-test-matrix.md — Markdown-документ mobile test matrix. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - seo-indexing-governance.md — Markdown-документ seo indexing governance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - stage0-engineering-report.md — Markdown-документ stage0 engineering report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - verification-pipeline.md — Markdown-документ verification pipeline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- lib/ — Общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.
+  - auth/ — Каталог auth.
+    - battlecoin-chat-auth.cjs — Общая библиотека/утилита battlecoin chat auth инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/tma.js; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js.
+  - battlecoin/ — Каталог battlecoin.
+    - battle-chat-events.cjs — Общая библиотека/утилита battle chat events инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs; используется в app/api/battlecoin/chat/events/route.js, app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js.
+    - battle-chat-public-identity.cjs — Общая библиотека/утилита battle chat public identity инфраструктурного слоя. Связи: используется в lib/mongo/battlecoin-chat-primary.cjs.
+    - battle-chat-validation.cjs — Общая библиотека/утилита battle chat validation инфраструктурного слоя. Связи: используется в lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs, tests/unit/battlecoin/battle-chat-validation.test.js.
+  - forum/ — Каталог forum.
+    - forum-index-maintenance.cjs — Общая библиотека/утилита forum index maintenance инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в app/api/forum/mutate/route.js, lib/forum/forum-projection-rebuild.cjs.
+    - forum-projection-rebuild.cjs — Общая библиотека/утилита forum projection rebuild инфраструктурного слоя. Связи: импортирует lib/forum/forum-index-maintenance.cjs, lib/mongo/client.cjs, lib/mongo/forum-indexes-primary.cjs.
+    - forum-server-complete-reader.cjs — Общая библиотека/утилита forum server complete reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/inbox/replies/page/route.js, app/api/forum/post-by-id/route.js, app/api/forum/post-chain/route.js.
+    - forum-server-page-reader.cjs — Общая библиотека/утилита forum server page reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/feed/page/route.js, app/api/forum/media-feed/page/route.js, tests/unit/forum/serverPageReaderGeo.test.js.
+    - public-sanitize.cjs — Общая библиотека/утилита public sanitize инфраструктурного слоя. Связи: используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - ql7-forum-architecture.cjs — Общая библиотека/утилита ql7 forum architecture инфраструктурного слоя. Связи: используется в lib/forum/forum-index-maintenance.cjs, lib/geo/geo-rings.cjs, lib/geo/request-geo.cjs.
+    - signed-cursor.cjs — Общая библиотека/утилита signed cursor инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+  - geo/ — Каталог geo.
+    - city-labels.cjs — Общая библиотека/утилита city labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - countries.js — Общая библиотека/утилита countries инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - country-labels.cjs — Общая библиотека/утилита country labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - geo-rings.cjs — Общая библиотека/утилита geo rings инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/request-geo.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - regions.js — Общая библиотека/утилита regions инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - request-geo.cjs — Общая библиотека/утилита request geo инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/city-labels.cjs, lib/geo/country-labels.cjs; используется в app/api/forum/mutate/route.js, app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs.
+  - identity/ — Каталог identity.
+    - geo-identity.cjs — Общая библиотека/утилита geo identity инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs; используется в app/api/geo/session-touch/route.js.
+    - ql7IdentityContract.cjs — Общая библиотека/утилита ql7 Identity Contract инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs; используется в app/api/academy/exam/route.js, app/api/profile/_identity.js, app/api/referral/hit/route.js.
+  - mongo/ — Каталог mongo.
+    - academy-primary.cjs — Общая библиотека/утилита academy primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/academy/exam/route.js.
+    - account-deletion-primary.cjs — Общая библиотека/утилита account deletion primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/forum-primary.cjs; используется в app/api/profile/delete-account/route.js.
+    - ads-primary.cjs — Общая библиотека/утилита ads primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/adsCore.js, tests/unit/mongo/ads-primary.test.js.
+    - battlecoin-chat-primary.cjs — Общая библиотека/утилита battlecoin chat primary инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-public-identity.cjs, lib/battlecoin/battle-chat-validation.cjs, lib/mongo/client.cjs; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, tests/unit/mongo/battlecoin-chat-primary.test.js.
+    - battlecoin-primary.cjs — Общая библиотека/утилита battlecoin primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/qcoin-primary.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js.
+    - client.cjs — Общая библиотека/утилита client инфраструктурного слоя. Связи: импортирует lib/mongo/permanent-policy.cjs; используется в app/api/forum/recommendations/users/route.js, app/api/profile/user-popover/route.js, lib/forum/forum-index-maintenance.cjs.
+    - dm-primary.cjs — Общая библиотека/утилита dm primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/dm-read-domain-codec.cjs; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - dm-read-domain-codec.cjs — Общая библиотека/утилита dm read domain codec инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/mongo/dm-primary.cjs.
+    - forum-indexes-primary.cjs — Общая библиотека/утилита forum indexes primary инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в lib/forum/forum-projection-rebuild.cjs, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - forum-primary.cjs — Общая библиотека/утилита forum primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/forum/_db.js, app/api/forum/mutate/route.js, app/api/forum/own/route.js.
+    - metamarket-primary.cjs — Общая библиотека/утилита metamarket primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/qcoin-primary.cjs; используется в app/api/metamarket/_db.js, tests/unit/mongo/metamarket-primary.test.js.
+    - metastudio-primary.cjs — Общая библиотека/утилита metastudio primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/metastudio/register/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - payments-primary.cjs — Общая библиотека/утилита payments primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/pay/create/route.js, app/api/pay/webhook/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - permanent-policy.cjs — Общая библиотека/утилита permanent policy инфраструктурного слоя. Связи: используется в lib/mongo/client.cjs.
+    - profile-geo-primary.cjs — Общая библиотека/утилита profile geo primary инфраструктурного слоя. Связи: импортирует lib/geo/request-geo.cjs, lib/mongo/client.cjs; используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - profile-primary.cjs — Общая библиотека/утилита profile primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/debug/vip/grant/route.js, app/api/forum/_db.js, app/api/forum/recommendations/users/route.js.
+    - qcoin-primary.cjs — Общая библиотека/утилита qcoin primary инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/client.cjs, lib/mongo/profile-primary.cjs; используется в app/api/academy/exam/route.js, app/api/qcoin/drop/route.js, app/api/qcoin/get/route.js.
+    - quest-primary.cjs — Общая библиотека/утилита quest primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/quest/progress/route.js, app/api/quest/status/route.js, tests/unit/mongo/quest-primary.test.js.
+    - referral-primary.cjs — Общая библиотека/утилита referral primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/referral/hit/route.js, app/api/referral/link/route.js, tests/unit/mongo/referral-primary.test.js.
+    - subscriptions-primary.cjs — Общая библиотека/утилита subscriptions primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/subscriptions.js, tests/unit/mongo/subscriptions-primary.test.js.
+  - security/ — Каталог security.
+    - ql7-server-secret.cjs — Общая библиотека/утилита ql7 server secret инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/forum/signed-cursor.cjs.
+  - seo/ — Каталог seo.
+    - siteIndex.js — Общая библиотека/утилита site Index инфраструктурного слоя. Связи: импортирует components/i18n-dicts/manifest.js; используется в app/robots.js, app/sitemap.js, lib/seo/structuredData.js.
+    - siteOrigin.js — Общая библиотека/утилита site Origin инфраструктурного слоя. Связи: используется в app/robots.js, app/sitemap.js, lib/metadataCache.js.
+    - structuredData.js — Общая библиотека/утилита structured Data инфраструктурного слоя. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в app/layout.js, tests/contracts/project/seo-indexing-contracts.test.js.
+  - storage/ — Каталог storage.
+    - mediaKeys.js — Общая библиотека/утилита media Keys инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
+    - r2.js — Общая библиотека/утилита r2 инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
+  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: импортирует lib/mongo/ads-primary.cjs, lib/mongo/profile-primary.cjs, lib/storage/mediaKeys.js; используется в app/api/ads/route.js, app/api/debug/ads/grant/route.js, app/api/pay/create/route.js.
+  - authActionGateClient.js — Общая библиотека/утилита auth Action Gate Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/useBattleChat.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js, components/QuantumWalletHost.jsx.
+  - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js, app/exchange/page.js.
+  - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js.
+  - fcm.js — Общая библиотека/утилита fcm инфраструктурного слоя. Связи: используется в lib/nativePush.js.
+  - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/SharePopover.jsx.
+  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx.
+  - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js; используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
+  - nativePush.js — Общая библиотека/утилита native Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/fcm.js, lib/notificationCenter.js; используется в app/api/push/native/link/route.js, app/api/push/native/register/route.js, app/api/push/native/status/route.js.
+  - notificationCenter.js — Общая библиотека/утилита notification Center инфраструктурного слоя. Связи: используется в components/AndroidNotificationBadgeSync.jsx, lib/nativePush.js, lib/webPush.js.
+  - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/debug/redis/route.js, app/api/telegram/link/confirm/route.js, app/api/telegram/link/start/route.js.
+  - safeWin.js — Общая библиотека/утилита safe Win инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/mongo/subscriptions-primary.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/debug/vip/grant/route.js.
+  - tma.js — Общая библиотека/утилита tma инфраструктурного слоя. Связи: используется в lib/auth/battlecoin-chat-auth.cjs.
+  - walletSessionClient.js — Общая библиотека/утилита wallet Session Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/battleChatClient.js, forum/features/profile/components/ProfilePopover.jsx, app/game/page.js.
+  - webPush.js — Общая библиотека/утилита web Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/nativePush.js, lib/notificationCenter.js; используется в app/api/dm/send/route.js, app/api/forum/mutate/route.js, app/api/metamarket/gift/route.js.
+- mobile/ — Каталог mobile.
+  - android/ — Каталог android.
+    - .android-user-home/ — Каталог .android-user-home.
+      - debug.keystore — .keystore-файл debug. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - debug.keystore.lock — .lock-файл debug.keystore. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .gradle/ — Каталог .gradle.
+      - 9.3.0/ — Каталог 9.3.0.
+        - checksums/ — Каталог checksums.
+          - checksums.lock — .lock-файл checksums. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - executionHistory/ — Каталог executionHistory.
+          - executionHistory.lock — .lock-файл execution History. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fileChanges/ — Каталог fileChanges.
+          - last-build.bin — Бинарный ассет last build. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fileHashes/ — Каталог fileHashes.
+          - fileHashes.lock — .lock-файл file Hashes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - gc.properties — .properties-файл gc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - buildOutputCleanup/ — Каталог buildOutputCleanup.
+        - buildOutputCleanup.lock — .lock-файл build Output Cleanup. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - cache.properties — .properties-файл cache. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - vcs-1/ — Каталог vcs-1.
+        - gc.properties — .properties-файл gc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .idea/ — Каталог .idea.
+      - caches/ — Каталог caches.
+        - deviceStreaming.xml — .xml-файл device Streaming. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - codeStyles/ — Каталог codeStyles.
+        - codeStyleConfig.xml — .xml-файл code Style Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - Project.xml — .xml-файл Project. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - .name — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - AndroidProjectSystem.xml — .xml-файл Android Project System. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - compiler.xml — .xml-файл compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - deploymentTargetSelector.xml — .xml-файл deployment Target Selector. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - gradle.xml — .xml-файл gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - markdown.xml — .xml-файл markdown. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - migrations.xml — .xml-файл migrations. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - misc.xml — .xml-файл misc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - runConfigurations.xml — .xml-файл run Configurations. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - vcs.xml — .xml-файл vcs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - workspace.xml — .xml-файл workspace. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .kotlin/ — Каталог .kotlin.
+      - errors/ — Каталог errors.
+        - errors-1780850479186.log — .log-файл errors 1780850479186. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780850684302.log — .log-файл errors 1780850684302. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780923517886.log — .log-файл errors 1780923517886. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780925985526.log — .log-файл errors 1780925985526. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780953427680.log — .log-файл errors 1780953427680. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780965095540.log — .log-файл errors 1780965095540. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780976457177.log — .log-файл errors 1780976457177. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780987357246.log — .log-файл errors 1780987357246. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780992835687.log — .log-файл errors 1780992835687. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780992940389.log — .log-файл errors 1780992940389. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780993195874.log — .log-файл errors 1780993195874. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780999320586.log — .log-файл errors 1780999320586. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1780999320596.log — .log-файл errors 1780999320596. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1781001371273.log — .log-файл errors 1781001371273. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - errors-1781001371332.log — .log-файл errors 1781001371332. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .signing/ — Каталог .signing.
+      - quantuml7ai-release.jks — .jks-файл quantuml7ai release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - app/ — Каталог app.
+      - build/ — Каталог build.
+        - generated/ — Каталог generated.
+          - source/ — Каталог source.
+            - buildConfig/ — Каталог buildConfig.
+              - debug/ — Каталог debug.
+                - com/ — Каталог com.
+                  - quantuml7ai/ — Каталог quantuml7ai.
+                    - app/ — Каталог app.
+                      - BuildConfig.java — .java-файл Build Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release/ — Каталог release.
+                - com/ — Каталог com.
+                  - quantuml7ai/ — Каталог quantuml7ai.
+                    - app/ — Каталог app.
+                      - BuildConfig.java — .java-файл Build Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - intermediates/ — Каталог intermediates.
+          - aapt_proguard_file/ — Каталог aapt_proguard_file.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - aapt_rules.txt — .txt-файл aapt rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - annotation_processor_list/ — Каталог annotation_processor_list.
+            - debug/ — Каталог debug.
+              - javaPreCompileDebug/ — Каталог javaPreCompileDebug.
+                - annotationProcessors.json — JSON-файл annotation Processors. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - javaPreCompileRelease/ — Каталог javaPreCompileRelease.
+                - annotationProcessors.json — JSON-файл annotation Processors. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - apk_ide_redirect_file/ — Каталог apk_ide_redirect_file.
+            - debug/ — Каталог debug.
+              - createDebugApkListingFileRedirect/ — Каталог createDebugApkListingFileRedirect.
+                - redirect.txt — .txt-файл redirect. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - createReleaseApkListingFileRedirect/ — Каталог createReleaseApkListingFileRedirect.
+                - redirect.txt — .txt-файл redirect. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - app_metadata/ — Каталог app_metadata.
+            - debug/ — Каталог debug.
+              - writeDebugAppMetadata/ — Каталог writeDebugAppMetadata.
+                - app-metadata.properties — .properties-файл app metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - writeReleaseAppMetadata/ — Каталог writeReleaseAppMetadata.
+                - app-metadata.properties — .properties-файл app metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - binary_art_profile/ — Каталог binary_art_profile.
+            - release/ — Каталог release.
+              - compileReleaseArtProfile/ — Каталог compileReleaseArtProfile.
+                - baseline.prof — .prof-файл baseline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - binary_art_profile_metadata/ — Каталог binary_art_profile_metadata.
+            - release/ — Каталог release.
+              - compileReleaseArtProfile/ — Каталог compileReleaseArtProfile.
+                - baseline.profm — .profm-файл baseline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bundle_dependency_report/ — Каталог bundle_dependency_report.
+            - release/ — Каталог release.
+              - configureReleaseDependencies/ — Каталог configureReleaseDependencies.
+                - dependencies.pb — .pb-файл dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bundle_ide_model/ — Каталог bundle_ide_model.
+            - release/ — Каталог release.
+              - produceReleaseBundleIdeListingFile/ — Каталог produceReleaseBundleIdeListingFile.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bundle_ide_redirect_file/ — Каталог bundle_ide_redirect_file.
+            - release/ — Каталог release.
+              - createReleaseBundleListingFileRedirect/ — Каталог createReleaseBundleListingFileRedirect.
+                - redirect.txt — .txt-файл redirect. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bundle_manifest/ — Каталог bundle_manifest.
+            - release/ — Каталог release.
+              - processApplicationManifestReleaseForBundle/ — Каталог processApplicationManifestReleaseForBundle.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - combined_art_profile/ — Каталог combined_art_profile.
+            - release/ — Каталог release.
+              - compileReleaseArtProfile/ — Каталог compileReleaseArtProfile.
+                - baseline-prof.txt — .txt-файл baseline prof. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - compatible_screen_manifest/ — Каталог compatible_screen_manifest.
+            - debug/ — Каталог debug.
+              - createDebugCompatibleScreenManifests/ — Каталог createDebugCompatibleScreenManifests.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - createReleaseCompatibleScreenManifests/ — Каталог createReleaseCompatibleScreenManifests.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - compile_and_runtime_not_namespaced_r_class_jar/ — Каталог compile_and_runtime_not_namespaced_r_class_jar.
+            - debug/ — Каталог debug.
+              - processDebugResources/ — Каталог processDebugResources.
+                - R.jar — .jar-файл R. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - R.jar — .jar-файл R. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - compile_app_classes_jar/ — Каталог compile_app_classes_jar.
+            - release/ — Каталог release.
+              - bundleReleaseClassesToCompileJar/ — Каталог bundleReleaseClassesToCompileJar.
+                - classes.jar — .jar-файл classes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - default_proguard_files/ — Каталог default_proguard_files.
+            - global/ — Каталог global.
+              - proguard-android-optimize.txt-8.7.3 — .3-файл proguard android optimize.txt 8.7. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - proguard-android.txt-8.7.3 — .3-файл proguard android.txt 8.7. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - proguard-defaults.txt-8.7.3 — .3-файл proguard defaults.txt 8.7. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - desugar_graph/ — Каталог desugar_graph.
+            - debug/ — Каталог debug.
+              - dexBuilderDebug/ — Каталог dexBuilderDebug.
+                - out/ — Каталог out.
+                  - currentProject/ — Каталог currentProject.
+                    - dirs_bucket_0/ — Каталог dirs_bucket_0.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - dirs_bucket_1/ — Каталог dirs_bucket_1.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - dirs_bucket_2/ — Каталог dirs_bucket_2.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - dirs_bucket_3/ — Каталог dirs_bucket_3.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - dirs_bucket_4/ — Каталог dirs_bucket_4.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - dirs_bucket_5/ — Каталог dirs_bucket_5.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_0/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_0.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_1/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_1.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_2/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_2.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_3/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_3.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_4/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_4.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_5/ — Каталог jar_2cd4f5475c636fa60ef433aea4870f8555f634f6789b3ef630ebe6ee6f03220b_bucket_5.
+                      - graph.bin — Бинарный ассет graph. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dex/ — Каталог dex.
+            - debug/ — Каталог debug.
+              - mergeExtDexDebug/ — Каталог mergeExtDexDebug.
+                - classes.dex — .dex-файл classes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mergeProjectDexDebug/ — Каталог mergeProjectDexDebug.
+                - 0/ — Каталог 0.
+                  - classes.dex — .dex-файл classes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 3/ — Каталог 3.
+                  - classes.dex — .dex-файл classes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - minifyReleaseWithR8/ — Каталог minifyReleaseWithR8.
+                - classes.dex — .dex-файл classes. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dex_archive_input_jar_hashes/ — Каталог dex_archive_input_jar_hashes.
+            - debug/ — Каталог debug.
+              - dexBuilderDebug/ — Каталог dexBuilderDebug.
+                - out — Служебный-файл out. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dex_metadata_directory/ — Каталог dex_metadata_directory.
+            - release/ — Каталог release.
+              - compileReleaseArtProfile/ — Каталог compileReleaseArtProfile.
+                - 0/ — Каталог 0.
+                  - .dm — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1/ — Каталог 1.
+                  - .dm — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - dex-metadata-map.properties — .properties-файл dex metadata map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dex_number_of_buckets_file/ — Каталог dex_number_of_buckets_file.
+            - debug/ — Каталог debug.
+              - dexBuilderDebug/ — Каталог dexBuilderDebug.
+                - out — Служебный-файл out. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - feature_set_metadata/ — Каталог feature_set_metadata.
+            - release/ — Каталог release.
+              - generateReleaseFeatureMetadata/ — Каталог generateReleaseFeatureMetadata.
+                - feature-metadata.json — JSON-файл feature metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - incremental/ — Каталог incremental.
+            - debug/ — Каталог debug.
+              - mergeDebugResources/ — Каталог mergeDebugResources.
+                - merged.dir/ — Каталог merged.dir.
+                  - values/ — Каталог values.
+                    - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-af/ — Каталог values-af.
+                    - values-af.xml — .xml-файл values af. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-am/ — Каталог values-am.
+                    - values-am.xml — .xml-файл values am. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ar/ — Каталог values-ar.
+                    - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-as/ — Каталог values-as.
+                    - values-as.xml — .xml-файл values as. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-az/ — Каталог values-az.
+                    - values-az.xml — .xml-файл values az. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-b+sr+Latn/ — Каталог values-b+sr+Latn.
+                    - values-b+sr+Latn.xml — .xml-файл values b+sr+Latn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-be/ — Каталог values-be.
+                    - values-be.xml — .xml-файл values be. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bg/ — Каталог values-bg.
+                    - values-bg.xml — .xml-файл values bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bn/ — Каталог values-bn.
+                    - values-bn.xml — .xml-файл values bn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bs/ — Каталог values-bs.
+                    - values-bs.xml — .xml-файл values bs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ca/ — Каталог values-ca.
+                    - values-ca.xml — .xml-файл values ca. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-cs/ — Каталог values-cs.
+                    - values-cs.xml — .xml-файл values cs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-da/ — Каталог values-da.
+                    - values-da.xml — .xml-файл values da. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-de/ — Каталог values-de.
+                    - values-de.xml — .xml-файл values de. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-el/ — Каталог values-el.
+                    - values-el.xml — .xml-файл values el. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rAU/ — Каталог values-en-rAU.
+                    - values-en-rAU.xml — .xml-файл values en r AU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rCA/ — Каталог values-en-rCA.
+                    - values-en-rCA.xml — .xml-файл values en r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rGB/ — Каталог values-en-rGB.
+                    - values-en-rGB.xml — .xml-файл values en r GB. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rIN/ — Каталог values-en-rIN.
+                    - values-en-rIN.xml — .xml-файл values en r IN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rXC/ — Каталог values-en-rXC.
+                    - values-en-rXC.xml — .xml-файл values en r XC. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es/ — Каталог values-es.
+                    - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es-rUS/ — Каталог values-es-rUS.
+                    - values-es-rUS.xml — .xml-файл values es r US. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-et/ — Каталог values-et.
+                    - values-et.xml — .xml-файл values et. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-eu/ — Каталог values-eu.
+                    - values-eu.xml — .xml-файл values eu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fa/ — Каталог values-fa.
+                    - values-fa.xml — .xml-файл values fa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fi/ — Каталог values-fi.
+                    - values-fi.xml — .xml-файл values fi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fr/ — Каталог values-fr.
+                    - values-fr.xml — .xml-файл values fr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fr-rCA/ — Каталог values-fr-rCA.
+                    - values-fr-rCA.xml — .xml-файл values fr r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-gl/ — Каталог values-gl.
+                    - values-gl.xml — .xml-файл values gl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-gu/ — Каталог values-gu.
+                    - values-gu.xml — .xml-файл values gu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hi/ — Каталог values-hi.
+                    - values-hi.xml — .xml-файл values hi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hr/ — Каталог values-hr.
+                    - values-hr.xml — .xml-файл values hr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hu/ — Каталог values-hu.
+                    - values-hu.xml — .xml-файл values hu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hy/ — Каталог values-hy.
+                    - values-hy.xml — .xml-файл values hy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-in/ — Каталог values-in.
+                    - values-in.xml — .xml-файл values in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-is/ — Каталог values-is.
+                    - values-is.xml — .xml-файл values is. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-it/ — Каталог values-it.
+                    - values-it.xml — .xml-файл values it. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-iw/ — Каталог values-iw.
+                    - values-iw.xml — .xml-файл values iw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ja/ — Каталог values-ja.
+                    - values-ja.xml — .xml-файл values ja. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ka/ — Каталог values-ka.
+                    - values-ka.xml — .xml-файл values ka. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-kk/ — Каталог values-kk.
+                    - values-kk.xml — .xml-файл values kk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-km/ — Каталог values-km.
+                    - values-km.xml — .xml-файл values km. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-kn/ — Каталог values-kn.
+                    - values-kn.xml — .xml-файл values kn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ko/ — Каталог values-ko.
+                    - values-ko.xml — .xml-файл values ko. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ky/ — Каталог values-ky.
+                    - values-ky.xml — .xml-файл values ky. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lo/ — Каталог values-lo.
+                    - values-lo.xml — .xml-файл values lo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lt/ — Каталог values-lt.
+                    - values-lt.xml — .xml-файл values lt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lv/ — Каталог values-lv.
+                    - values-lv.xml — .xml-файл values lv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mk/ — Каталог values-mk.
+                    - values-mk.xml — .xml-файл values mk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ml/ — Каталог values-ml.
+                    - values-ml.xml — .xml-файл values ml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mn/ — Каталог values-mn.
+                    - values-mn.xml — .xml-файл values mn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mr/ — Каталог values-mr.
+                    - values-mr.xml — .xml-файл values mr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ms/ — Каталог values-ms.
+                    - values-ms.xml — .xml-файл values ms. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-my/ — Каталог values-my.
+                    - values-my.xml — .xml-файл values my. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-nb/ — Каталог values-nb.
+                    - values-nb.xml — .xml-файл values nb. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ne/ — Каталог values-ne.
+                    - values-ne.xml — .xml-файл values ne. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-nl/ — Каталог values-nl.
+                    - values-nl.xml — .xml-файл values nl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-or/ — Каталог values-or.
+                    - values-or.xml — .xml-файл values or. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pa/ — Каталог values-pa.
+                    - values-pa.xml — .xml-файл values pa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pl/ — Каталог values-pl.
+                    - values-pl.xml — .xml-файл values pl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt/ — Каталог values-pt.
+                    - values-pt.xml — .xml-файл values pt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt-rBR/ — Каталог values-pt-rBR.
+                    - values-pt-rBR.xml — .xml-файл values pt r BR. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt-rPT/ — Каталог values-pt-rPT.
+                    - values-pt-rPT.xml — .xml-файл values pt r PT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ro/ — Каталог values-ro.
+                    - values-ro.xml — .xml-файл values ro. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ru/ — Каталог values-ru.
+                    - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-si/ — Каталог values-si.
+                    - values-si.xml — .xml-файл values si. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sk/ — Каталог values-sk.
+                    - values-sk.xml — .xml-файл values sk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sl/ — Каталог values-sl.
+                    - values-sl.xml — .xml-файл values sl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sq/ — Каталог values-sq.
+                    - values-sq.xml — .xml-файл values sq. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sr/ — Каталог values-sr.
+                    - values-sr.xml — .xml-файл values sr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sv/ — Каталог values-sv.
+                    - values-sv.xml — .xml-файл values sv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sw/ — Каталог values-sw.
+                    - values-sw.xml — .xml-файл values sw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ta/ — Каталог values-ta.
+                    - values-ta.xml — .xml-файл values ta. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-te/ — Каталог values-te.
+                    - values-te.xml — .xml-файл values te. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-th/ — Каталог values-th.
+                    - values-th.xml — .xml-файл values th. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tl/ — Каталог values-tl.
+                    - values-tl.xml — .xml-файл values tl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tr/ — Каталог values-tr.
+                    - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uk/ — Каталог values-uk.
+                    - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ur/ — Каталог values-ur.
+                    - values-ur.xml — .xml-файл values ur. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uz/ — Каталог values-uz.
+                    - values-uz.xml — .xml-файл values uz. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-v21/ — Каталог values-v21.
+                    - values-v21.xml — .xml-файл values v21. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-vi/ — Каталог values-vi.
+                    - values-vi.xml — .xml-файл values vi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rCN/ — Каталог values-zh-rCN.
+                    - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rHK/ — Каталог values-zh-rHK.
+                    - values-zh-rHK.xml — .xml-файл values zh r HK. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rTW/ — Каталог values-zh-rTW.
+                    - values-zh-rTW.xml — .xml-файл values zh r TW. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zu/ — Каталог values-zu.
+                    - values-zu.xml — .xml-файл values zu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - compile-file-map.properties — .properties-файл compile file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - packageDebugResources/ — Каталог packageDebugResources.
+                - merged.dir/ — Каталог merged.dir.
+                  - values/ — Каталог values.
+                    - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ar/ — Каталог values-ar.
+                    - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es/ — Каталог values-es.
+                    - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ru/ — Каталог values-ru.
+                    - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tr/ — Каталог values-tr.
+                    - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uk/ — Каталог values-uk.
+                    - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rCN/ — Каталог values-zh-rCN.
+                    - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - compile-file-map.properties — .properties-файл compile file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - debug-mergeJavaRes/ — Каталог debug-mergeJavaRes.
+              - zip-cache/ — Каталог zip-cache.
+                - +_tsPOjaRZ8_nBhkEBu_7raDQ9Y= — Служебный-файл + ts POja RZ8 n Bhk EBu 7ra DQ9 Y=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - +6rm6ZtXdW1qUqVyMNQqmu7917M= — Служебный-файл +6rm6 Zt Xd W1q Uq Vy MNQqmu7917 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - +cqcZd6gUcC0gyLlgEyTqcnzs3w= — Служебный-файл +cqc Zd6g Uc C0gy Llg Ey Tqcnzs3w=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 0Rjw65NSNC_WOg_3Vn1vsSbO6EY= — Служебный-файл 0 Rjw65 NSNC WOg 3 Vn1vs Sb O6 EY=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1aObQoAnzaKBsHuBscwE_bSVSxQ= — Служебный-файл 1a Ob Qo Anza KBs Hu Bscw E b SVSx Q=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1cfPfTM11yavwWkvLXjfaL72P6U= — Служебный-файл 1cf Pf TM11yavw Wkv LXjfa L72 P6 U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1EMoNhMiMp61tYmjpAkWCwCHmFs= — Служебный-файл 1 EMo Nh Mi Mp61t Ymjp Ak WCw CHm Fs=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1myo+NJC7_R_Qj5lQNaesvWs5Sg= — Служебный-файл 1myo+NJC7 R Qj5l QNaesv Ws5 Sg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1wGWAkyZT_zYT_iLUZ47WbSbcBI= — Служебный-файл 1w GWAky ZT z YT i LUZ47 Wb Sbc BI=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2glCIkizp9+jri8oi9uxJMayqDk= — Служебный-файл 2gl CIkizp9+jri8oi9ux JMayq Dk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2IwLHlWH_XkpFM6RYBCSoHdXpdA= — Служебный-файл 2 Iw LHl WH Xkp FM6 RYBCSo Hd Xpd A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2S1U1KJRd94kcT_tLwmEkisrfr0= — Служебный-файл 2 S1 U1 KJRd94kc T t Lwm Ekisrfr0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 4nZxar2b4nB2+yghks45geisoRg= — Служебный-файл 4n Zxar2b4n B2+yghks45geiso Rg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 4otvyYJgrIozbIUav57wBpwrdiI= — Служебный-файл 4otvy YJgr Iozb IUav57w Bpwrdi I=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 5NSra9htVhTaHzTzdV5MBWEmZhg= — Служебный-файл 5 NSra9ht Vh Ta Hz Tzd V5 MBWEm Zhg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 5t7hw5DpY99IlO4uBIVGjVwVRpM= — Служебный-файл 5t7hw5 Dp Y99 Il O4u BIVGj Vw VRp M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 6pqpvgdO_+ninzehwUKsiaRlH2M= — Служебный-файл 6pqpvgd O +ninzehw UKsia Rl H2 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 7oIDytngwTfeCOBFPCFYfKpgrLw= — Служебный-файл 7o IDytngw Tfe COBFPCFYf Kpgr Lw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 8xPh7RZqWIP62lppAa8UfETLsYw= — Служебный-файл 8x Ph7 RZq WIP62lpp Aa8 Uf ETLs Yw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - AodD65YeAjfVI6jWRHwX8eYu2cU= — Служебный-файл Aod D65 Ye Ajf VI6j WRHw X8e Yu2c U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - b6gZhDBK63MYdOB7Ja8MdKaOBcY= — Служебный-файл b6g Zh DBK63 MYd OB7 Ja8 Md Ka OBc Y=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - bEzOAF5OAudwaHDzFB5i++WQlUQ= — Служебный-файл b Ez OAF5 OAudwa HDz FB5i++WQl UQ=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - bFqBKUaV3lOV1GzfOjPNP+tFPkA= — Служебный-файл b Fq BKUa V3l OV1 Gzf Oj PNP+t FPk A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - CesQV7iwrTocpDU2h0Pen9d6Cxc= — Служебный-файл Ces QV7iwr Tocp DU2h0 Pen9d6 Cxc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - CFiZG5Z_vO6qN+9y0XqQFeejpGE= — Служебный-файл CFi ZG5 Z v O6q N+9y0 Xq QFeejp GE=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ChM25kYFoWEO_quKfAyQxsFkyv4= — Служебный-файл Ch M25k YFo WEO qu Kf Ay Qxs Fkyv4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ctXKlriszXnBP8tOhD684KYrwNc= — Служебный-файл ct XKlrisz Xn BP8t Oh D684 KYrw Nc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - DfDn2HOLeY0WCcHYmkvh6AdB8zw= — Служебный-файл Df Dn2 HOLe Y0 WCc HYmkvh6 Ad B8zw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - DOVTqVg20plBiWNFBTNHLUhjb4M= — Служебный-файл DOVTq Vg20pl Bi WNFBTNHLUhjb4 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - eaQXeNgIW6KcQLNToUyo8PaTl+U= — Служебный-файл ea QXe Ng IW6 Kc QLNTo Uyo8 Pa Tl+U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Eg+4eH+pv+wz7leMJgbpbKPwjMA= — Служебный-файл Eg+4e H+pv+wz7le MJgbpb KPwj MA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fLB82HqnAsM5vo6mFKTrLI5JVZA= — Служебный-файл f LB82 Hqn As M5vo6m FKTr LI5 JVZA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - FuNtUTHOx0TWM1CTRoxPdVvYxvE= — Служебный-файл Fu Nt UTHOx0 TWM1 CTRox Pd Vv Yxv E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Gryw2wW7P1+yY38Cmi9KxsvyRYw= — Служебный-файл Gryw2w W7 P1+y Y38 Cmi9 Kxsvy RYw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Gumli75qstNZlzbWcieNUKmgsJI= — Служебный-файл Gumli75qst NZlzb Wcie NUKmgs JI=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - hxpFAR5jOeCGcu5A0OvZHx2rQn4= — Служебный-файл hxp FAR5j Oe CGcu5 A0 Ov ZHx2r Qn4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - I3mAnB8SOBWMY+HyhgSsc6kHH2o= — Служебный-файл I3m An B8 SOBWMY+Hyhg Ssc6k HH2o=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - IM2KmKFEyl__iK90tpKOSr7rbMc= — Служебный-файл IM2 Km KFEyl i K90tp KOSr7rb Mc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - iXMB1DeE5Qm6nkoHYOpDRG0Y83E= — Служебный-файл i XMB1 De E5 Qm6nko HYOp DRG0 Y83 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - J4Y5IV7e+8juXYN08KEY66AsM1U= — Служебный-файл J4 Y5 IV7e+8ju XYN08 KEY66 As M1 U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - K8qDLwVEmCkrqLfE+l7Qw9rsSNM= — Служебный-файл K8q DLw VEm Ckrq Lf E+l7 Qw9rs SNM=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - kbvmdJ707EbTfWlh5W8HfjKG55E= — Служебный-файл kbvmd J707 Eb Tf Wlh5 W8 Hfj KG55 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - kInT2L0lpng9N0s59OI3oD87Xs0= — Служебный-файл k In T2 L0lpng9 N0s59 OI3o D87 Xs0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Lf__riM67hyUl3jZArMEpfmOZrQ= — Служебный-файл Lf ri M67hy Ul3j ZAr MEpfm OZr Q=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - lk7dXTq9pVMrgT2ZCYG8UAVSzl0= — Служебный-файл lk7d XTq9p VMrg T2 ZCYG8 UAVSzl0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - LXikiysFhpLGdtCF6DIMct6nYak= — Служебный-файл LXikiys Fhp LGdt CF6 DIMct6n Yak=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - MEvxGaC3N0HLKoH2+uqlvkuIYN4= — Служебный-файл MEvx Ga C3 N0 HLKo H2+uqlvku IYN4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - MT6Q7tKx5e2y9RzGINWOpmPMvGw= — Служебный-файл MT6 Q7t Kx5e2y9 Rz GINWOpm PMv Gw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - N0Bhg0sENBvjJLJdCBIFztPn_gk= — Служебный-файл N0 Bhg0s ENBvj JLJd CBIFzt Pn gk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - O1UyaWelejYjltYqmF_KeSdan0g= — Служебный-файл O1 Uya Welej Yjlt Yqm F Ke Sdan0g=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - o9jMp92qn49A_jzLanJZEFs86jk= — Служебный-файл o9j Mp92qn49 A jz Lan JZEFs86jk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - OLwHe4wPB7hKwF92JNNV2O9KlaA= — Служебный-файл OLw He4w PB7h Kw F92 JNNV2 O9 Kla A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - p2n_SrA2A2FjSZ28LjrjtlbEqcg= — Служебный-файл p2n Sr A2 A2 Fj SZ28 Ljrjtlb Eqcg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - PqmZ9VbZK5T6qRuYLVahVONw3zg= — Служебный-файл Pqm Z9 Vb ZK5 T6q Ru YLVah VONw3zg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Pv533SIqhEhs7DroZyDmPQbUe5k= — Служебный-файл Pv533 SIqh Ehs7 Dro Zy Dm PQb Ue5k=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - QBdwmSxLbAzcsefVOVbiSoFUE7w= — Служебный-файл QBdwm Sx Lb Azcsef VOVbi So FUE7w=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - qFzXCXUFkjoswmgQGukp_oeJ6NU= — Служебный-файл q Fz XCXUFkjoswmg QGukp oe J6 NU=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - RH_2oyuHQFV4LYF6Mw17Ewud_Ac= — Служебный-файл RH 2oyu HQFV4 LYF6 Mw17 Ewud Ac=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - rYpPeOC3Ly5rZxx1__WDegDtBKk= — Служебный-файл r Yp Pe OC3 Ly5r Zxx1 WDeg Dt BKk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Se6RswEZEEkPhdP9UwxMghccCyI= — Служебный-файл Se6 Rsw EZEEk Phd P9 Uwx Mghcc Cy I=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - sHt2302kc7tCVSBE1GIxs6MXO5E= — Служебный-файл s Ht2302kc7t CVSBE1 GIxs6 MXO5 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - slJ_m_+h+t5bH_NId5IeBI3G8SA= — Служебный-файл sl J m +h+t5b H NId5 Ie BI3 G8 SA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - tvv9oErsgnYYp8gjo3gyck7YADU= — Служебный-файл tvv9o Ersgn YYp8gjo3gyck7 YADU=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Ul+4xxen62vtxOvoxc9Dx_y6yts= — Служебный-файл Ul+4xxen62vtx Ovoxc9 Dx y6yts=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - uLJv_it+22D0vv6mq9gsMCGb0ao= — Служебный-файл u LJv it+22 D0vv6mq9gs MCGb0ao=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - v6ffCoKl8pWZHZQGU6osC5_8zT8= — Служебный-файл v6ff Co Kl8p WZHZQGU6os C5 8z T8=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vLedCYhTdfRV5oK_iFqPJoQ+dxE= — Служебный-файл v Led CYh Tdf RV5o K i Fq PJo Q+dx E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vPkSMzSFjvRVZnHknXmf_vWVReE= — Служебный-файл v Pk SMz SFjv RVZn Hkn Xmf v WVRe E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vV3AipQPpkro1SmpdwiJt3YIfBA= — Служебный-файл v V3 Aip QPpkro1 Smpdwi Jt3 YIf BA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - wGMQ65UjS_RhL+X6DJqmRXaKcy0= — Служебный-файл w GMQ65 Uj S Rh L+X6 DJqm RXa Kcy0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - wJ30Lm8pW0ry4ZkG+1CbigOTgVY= — Служебный-файл w J30 Lm8p W0ry4 Zk G+1 Cbig OTg VY=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Wz9rd3IUd4DxaKOrJybsNuPje+M= — Служебный-файл Wz9rd3 IUd4 Dxa KOr Jybs Nu Pje+M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - x0nD03yoEozxUrq7vV6up_IexdM= — Служебный-файл x0n D03yo Eozx Urq7v V6up Iexd M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - yIkeGWv5jIruPBezJliEqqmGnOc= — Служебный-файл y Ike GWv5j Iru PBez Jli Eqqm Gn Oc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - YS9LTuIuG5ZLh0+XWRUqD5OhhiM= — Служебный-файл YS9 LTu Iu G5 ZLh0+XWRUq D5 Ohhi M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - z1syfflQtkYcMkpyglI5ucbZtmE= — Служебный-файл z1syffl Qtk Yc Mkpygl I5ucb Ztm E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Z3CmcUUkVM4s5XCan2CoqMpGwGw= — Служебный-файл Z3 Cmc UUk VM4s5 XCan2 Coq Mp Gw Gw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ZriK5mCwB6ihM6HndKoa77faXas= — Служебный-файл Zri K5m Cw B6ih M6 Hnd Koa77fa Xas=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - merge-state — Служебный-файл merge state. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintAnalyzeRelease/ — Каталог lintAnalyzeRelease.
+              - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintAnalyzeReleaseUnitTest/ — Каталог lintAnalyzeReleaseUnitTest.
+              - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintVitalAnalyzeRelease/ — Каталог lintVitalAnalyzeRelease.
+              - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeDebugAssets/ — Каталог mergeDebugAssets.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeDebugJniLibFolders/ — Каталог mergeDebugJniLibFolders.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeDebugShaders/ — Каталог mergeDebugShaders.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeReleaseAssets/ — Каталог mergeReleaseAssets.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeReleaseJniLibFolders/ — Каталог mergeReleaseJniLibFolders.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mergeReleaseShaders/ — Каталог mergeReleaseShaders.
+              - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - packageDebug/ — Каталог packageDebug.
+              - tmp/ — Каталог tmp.
+                - debug/ — Каталог debug.
+                  - zip-cache/ — Каталог zip-cache.
+                    - androidResources — Служебный-файл android Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - javaResources0 — Служебный-файл java Resources0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - dex-renamer-state.txt — .txt-файл dex renamer state. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - packageRelease/ — Каталог packageRelease.
+              - tmp/ — Каталог tmp.
+                - release/ — Каталог release.
+                  - zip-cache/ — Каталог zip-cache.
+                    - androidResources — Служебный-файл android Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - javaResources0 — Служебный-файл java Resources0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - dex-renamer-state.txt — .txt-файл dex renamer state. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - processDebugResources/ — Каталог processDebugResources.
+              - resources-list-for-linked-resources-binary-format-debug.ap_.txt — .txt-файл resources list for linked resources binary format debug.ap. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mergeReleaseResources/ — Каталог mergeReleaseResources.
+                - merged.dir/ — Каталог merged.dir.
+                  - values/ — Каталог values.
+                    - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-af/ — Каталог values-af.
+                    - values-af.xml — .xml-файл values af. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-am/ — Каталог values-am.
+                    - values-am.xml — .xml-файл values am. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ar/ — Каталог values-ar.
+                    - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-as/ — Каталог values-as.
+                    - values-as.xml — .xml-файл values as. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-az/ — Каталог values-az.
+                    - values-az.xml — .xml-файл values az. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-b+sr+Latn/ — Каталог values-b+sr+Latn.
+                    - values-b+sr+Latn.xml — .xml-файл values b+sr+Latn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-be/ — Каталог values-be.
+                    - values-be.xml — .xml-файл values be. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bg/ — Каталог values-bg.
+                    - values-bg.xml — .xml-файл values bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bn/ — Каталог values-bn.
+                    - values-bn.xml — .xml-файл values bn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-bs/ — Каталог values-bs.
+                    - values-bs.xml — .xml-файл values bs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ca/ — Каталог values-ca.
+                    - values-ca.xml — .xml-файл values ca. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-cs/ — Каталог values-cs.
+                    - values-cs.xml — .xml-файл values cs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-da/ — Каталог values-da.
+                    - values-da.xml — .xml-файл values da. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-de/ — Каталог values-de.
+                    - values-de.xml — .xml-файл values de. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-el/ — Каталог values-el.
+                    - values-el.xml — .xml-файл values el. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rAU/ — Каталог values-en-rAU.
+                    - values-en-rAU.xml — .xml-файл values en r AU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rCA/ — Каталог values-en-rCA.
+                    - values-en-rCA.xml — .xml-файл values en r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rGB/ — Каталог values-en-rGB.
+                    - values-en-rGB.xml — .xml-файл values en r GB. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rIN/ — Каталог values-en-rIN.
+                    - values-en-rIN.xml — .xml-файл values en r IN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-en-rXC/ — Каталог values-en-rXC.
+                    - values-en-rXC.xml — .xml-файл values en r XC. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es/ — Каталог values-es.
+                    - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es-rUS/ — Каталог values-es-rUS.
+                    - values-es-rUS.xml — .xml-файл values es r US. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-et/ — Каталог values-et.
+                    - values-et.xml — .xml-файл values et. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-eu/ — Каталог values-eu.
+                    - values-eu.xml — .xml-файл values eu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fa/ — Каталог values-fa.
+                    - values-fa.xml — .xml-файл values fa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fi/ — Каталог values-fi.
+                    - values-fi.xml — .xml-файл values fi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fr/ — Каталог values-fr.
+                    - values-fr.xml — .xml-файл values fr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-fr-rCA/ — Каталог values-fr-rCA.
+                    - values-fr-rCA.xml — .xml-файл values fr r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-gl/ — Каталог values-gl.
+                    - values-gl.xml — .xml-файл values gl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-gu/ — Каталог values-gu.
+                    - values-gu.xml — .xml-файл values gu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hi/ — Каталог values-hi.
+                    - values-hi.xml — .xml-файл values hi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hr/ — Каталог values-hr.
+                    - values-hr.xml — .xml-файл values hr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hu/ — Каталог values-hu.
+                    - values-hu.xml — .xml-файл values hu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-hy/ — Каталог values-hy.
+                    - values-hy.xml — .xml-файл values hy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-in/ — Каталог values-in.
+                    - values-in.xml — .xml-файл values in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-is/ — Каталог values-is.
+                    - values-is.xml — .xml-файл values is. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-it/ — Каталог values-it.
+                    - values-it.xml — .xml-файл values it. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-iw/ — Каталог values-iw.
+                    - values-iw.xml — .xml-файл values iw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ja/ — Каталог values-ja.
+                    - values-ja.xml — .xml-файл values ja. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ka/ — Каталог values-ka.
+                    - values-ka.xml — .xml-файл values ka. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-kk/ — Каталог values-kk.
+                    - values-kk.xml — .xml-файл values kk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-km/ — Каталог values-km.
+                    - values-km.xml — .xml-файл values km. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-kn/ — Каталог values-kn.
+                    - values-kn.xml — .xml-файл values kn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ko/ — Каталог values-ko.
+                    - values-ko.xml — .xml-файл values ko. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ky/ — Каталог values-ky.
+                    - values-ky.xml — .xml-файл values ky. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lo/ — Каталог values-lo.
+                    - values-lo.xml — .xml-файл values lo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lt/ — Каталог values-lt.
+                    - values-lt.xml — .xml-файл values lt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-lv/ — Каталог values-lv.
+                    - values-lv.xml — .xml-файл values lv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mk/ — Каталог values-mk.
+                    - values-mk.xml — .xml-файл values mk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ml/ — Каталог values-ml.
+                    - values-ml.xml — .xml-файл values ml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mn/ — Каталог values-mn.
+                    - values-mn.xml — .xml-файл values mn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-mr/ — Каталог values-mr.
+                    - values-mr.xml — .xml-файл values mr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ms/ — Каталог values-ms.
+                    - values-ms.xml — .xml-файл values ms. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-my/ — Каталог values-my.
+                    - values-my.xml — .xml-файл values my. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-nb/ — Каталог values-nb.
+                    - values-nb.xml — .xml-файл values nb. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ne/ — Каталог values-ne.
+                    - values-ne.xml — .xml-файл values ne. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-nl/ — Каталог values-nl.
+                    - values-nl.xml — .xml-файл values nl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-or/ — Каталог values-or.
+                    - values-or.xml — .xml-файл values or. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pa/ — Каталог values-pa.
+                    - values-pa.xml — .xml-файл values pa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pl/ — Каталог values-pl.
+                    - values-pl.xml — .xml-файл values pl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt/ — Каталог values-pt.
+                    - values-pt.xml — .xml-файл values pt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt-rBR/ — Каталог values-pt-rBR.
+                    - values-pt-rBR.xml — .xml-файл values pt r BR. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-pt-rPT/ — Каталог values-pt-rPT.
+                    - values-pt-rPT.xml — .xml-файл values pt r PT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ro/ — Каталог values-ro.
+                    - values-ro.xml — .xml-файл values ro. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ru/ — Каталог values-ru.
+                    - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-si/ — Каталог values-si.
+                    - values-si.xml — .xml-файл values si. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sk/ — Каталог values-sk.
+                    - values-sk.xml — .xml-файл values sk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sl/ — Каталог values-sl.
+                    - values-sl.xml — .xml-файл values sl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sq/ — Каталог values-sq.
+                    - values-sq.xml — .xml-файл values sq. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sr/ — Каталог values-sr.
+                    - values-sr.xml — .xml-файл values sr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sv/ — Каталог values-sv.
+                    - values-sv.xml — .xml-файл values sv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-sw/ — Каталог values-sw.
+                    - values-sw.xml — .xml-файл values sw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ta/ — Каталог values-ta.
+                    - values-ta.xml — .xml-файл values ta. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-te/ — Каталог values-te.
+                    - values-te.xml — .xml-файл values te. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-th/ — Каталог values-th.
+                    - values-th.xml — .xml-файл values th. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tl/ — Каталог values-tl.
+                    - values-tl.xml — .xml-файл values tl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tr/ — Каталог values-tr.
+                    - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uk/ — Каталог values-uk.
+                    - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ur/ — Каталог values-ur.
+                    - values-ur.xml — .xml-файл values ur. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uz/ — Каталог values-uz.
+                    - values-uz.xml — .xml-файл values uz. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-v21/ — Каталог values-v21.
+                    - values-v21.xml — .xml-файл values v21. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-vi/ — Каталог values-vi.
+                    - values-vi.xml — .xml-файл values vi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rCN/ — Каталог values-zh-rCN.
+                    - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rHK/ — Каталог values-zh-rHK.
+                    - values-zh-rHK.xml — .xml-файл values zh r HK. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rTW/ — Каталог values-zh-rTW.
+                    - values-zh-rTW.xml — .xml-файл values zh r TW. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zu/ — Каталог values-zu.
+                    - values-zu.xml — .xml-файл values zu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - compile-file-map.properties — .properties-файл compile file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - packageReleaseResources/ — Каталог packageReleaseResources.
+                - merged.dir/ — Каталог merged.dir.
+                  - values/ — Каталог values.
+                    - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ar/ — Каталог values-ar.
+                    - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-es/ — Каталог values-es.
+                    - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-ru/ — Каталог values-ru.
+                    - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-tr/ — Каталог values-tr.
+                    - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-uk/ — Каталог values-uk.
+                    - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - values-zh-rCN/ — Каталог values-zh-rCN.
+                    - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - compile-file-map.properties — .properties-файл compile file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - merger.xml — .xml-файл merger. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release-mergeJavaRes/ — Каталог release-mergeJavaRes.
+              - zip-cache/ — Каталог zip-cache.
+                - +_tsPOjaRZ8_nBhkEBu_7raDQ9Y= — Служебный-файл + ts POja RZ8 n Bhk EBu 7ra DQ9 Y=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - +6rm6ZtXdW1qUqVyMNQqmu7917M= — Служебный-файл +6rm6 Zt Xd W1q Uq Vy MNQqmu7917 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - +cqcZd6gUcC0gyLlgEyTqcnzs3w= — Служебный-файл +cqc Zd6g Uc C0gy Llg Ey Tqcnzs3w=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 0Rjw65NSNC_WOg_3Vn1vsSbO6EY= — Служебный-файл 0 Rjw65 NSNC WOg 3 Vn1vs Sb O6 EY=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1aObQoAnzaKBsHuBscwE_bSVSxQ= — Служебный-файл 1a Ob Qo Anza KBs Hu Bscw E b SVSx Q=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1cfPfTM11yavwWkvLXjfaL72P6U= — Служебный-файл 1cf Pf TM11yavw Wkv LXjfa L72 P6 U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1EMoNhMiMp61tYmjpAkWCwCHmFs= — Служебный-файл 1 EMo Nh Mi Mp61t Ymjp Ak WCw CHm Fs=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1myo+NJC7_R_Qj5lQNaesvWs5Sg= — Служебный-файл 1myo+NJC7 R Qj5l QNaesv Ws5 Sg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1wGWAkyZT_zYT_iLUZ47WbSbcBI= — Служебный-файл 1w GWAky ZT z YT i LUZ47 Wb Sbc BI=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2glCIkizp9+jri8oi9uxJMayqDk= — Служебный-файл 2gl CIkizp9+jri8oi9ux JMayq Dk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2IwLHlWH_XkpFM6RYBCSoHdXpdA= — Служебный-файл 2 Iw LHl WH Xkp FM6 RYBCSo Hd Xpd A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 2S1U1KJRd94kcT_tLwmEkisrfr0= — Служебный-файл 2 S1 U1 KJRd94kc T t Lwm Ekisrfr0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 4nZxar2b4nB2+yghks45geisoRg= — Служебный-файл 4n Zxar2b4n B2+yghks45geiso Rg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 4otvyYJgrIozbIUav57wBpwrdiI= — Служебный-файл 4otvy YJgr Iozb IUav57w Bpwrdi I=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 5NSra9htVhTaHzTzdV5MBWEmZhg= — Служебный-файл 5 NSra9ht Vh Ta Hz Tzd V5 MBWEm Zhg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 5t7hw5DpY99IlO4uBIVGjVwVRpM= — Служебный-файл 5t7hw5 Dp Y99 Il O4u BIVGj Vw VRp M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 6pqpvgdO_+ninzehwUKsiaRlH2M= — Служебный-файл 6pqpvgd O +ninzehw UKsia Rl H2 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 7oIDytngwTfeCOBFPCFYfKpgrLw= — Служебный-файл 7o IDytngw Tfe COBFPCFYf Kpgr Lw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 8xPh7RZqWIP62lppAa8UfETLsYw= — Служебный-файл 8x Ph7 RZq WIP62lpp Aa8 Uf ETLs Yw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - AodD65YeAjfVI6jWRHwX8eYu2cU= — Служебный-файл Aod D65 Ye Ajf VI6j WRHw X8e Yu2c U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - b6gZhDBK63MYdOB7Ja8MdKaOBcY= — Служебный-файл b6g Zh DBK63 MYd OB7 Ja8 Md Ka OBc Y=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - bEzOAF5OAudwaHDzFB5i++WQlUQ= — Служебный-файл b Ez OAF5 OAudwa HDz FB5i++WQl UQ=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - bFqBKUaV3lOV1GzfOjPNP+tFPkA= — Служебный-файл b Fq BKUa V3l OV1 Gzf Oj PNP+t FPk A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - CesQV7iwrTocpDU2h0Pen9d6Cxc= — Служебный-файл Ces QV7iwr Tocp DU2h0 Pen9d6 Cxc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - CFiZG5Z_vO6qN+9y0XqQFeejpGE= — Служебный-файл CFi ZG5 Z v O6q N+9y0 Xq QFeejp GE=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ChM25kYFoWEO_quKfAyQxsFkyv4= — Служебный-файл Ch M25k YFo WEO qu Kf Ay Qxs Fkyv4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ctXKlriszXnBP8tOhD684KYrwNc= — Служебный-файл ct XKlrisz Xn BP8t Oh D684 KYrw Nc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - DfDn2HOLeY0WCcHYmkvh6AdB8zw= — Служебный-файл Df Dn2 HOLe Y0 WCc HYmkvh6 Ad B8zw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - DOVTqVg20plBiWNFBTNHLUhjb4M= — Служебный-файл DOVTq Vg20pl Bi WNFBTNHLUhjb4 M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - eaQXeNgIW6KcQLNToUyo8PaTl+U= — Служебный-файл ea QXe Ng IW6 Kc QLNTo Uyo8 Pa Tl+U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Eg+4eH+pv+wz7leMJgbpbKPwjMA= — Служебный-файл Eg+4e H+pv+wz7le MJgbpb KPwj MA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fLB82HqnAsM5vo6mFKTrLI5JVZA= — Служебный-файл f LB82 Hqn As M5vo6m FKTr LI5 JVZA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - FuNtUTHOx0TWM1CTRoxPdVvYxvE= — Служебный-файл Fu Nt UTHOx0 TWM1 CTRox Pd Vv Yxv E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Gryw2wW7P1+yY38Cmi9KxsvyRYw= — Служебный-файл Gryw2w W7 P1+y Y38 Cmi9 Kxsvy RYw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Gumli75qstNZlzbWcieNUKmgsJI= — Служебный-файл Gumli75qst NZlzb Wcie NUKmgs JI=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - hxpFAR5jOeCGcu5A0OvZHx2rQn4= — Служебный-файл hxp FAR5j Oe CGcu5 A0 Ov ZHx2r Qn4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - I3mAnB8SOBWMY+HyhgSsc6kHH2o= — Служебный-файл I3m An B8 SOBWMY+Hyhg Ssc6k HH2o=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - IM2KmKFEyl__iK90tpKOSr7rbMc= — Служебный-файл IM2 Km KFEyl i K90tp KOSr7rb Mc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - iXMB1DeE5Qm6nkoHYOpDRG0Y83E= — Служебный-файл i XMB1 De E5 Qm6nko HYOp DRG0 Y83 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - J4Y5IV7e+8juXYN08KEY66AsM1U= — Служебный-файл J4 Y5 IV7e+8ju XYN08 KEY66 As M1 U=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - K8qDLwVEmCkrqLfE+l7Qw9rsSNM= — Служебный-файл K8q DLw VEm Ckrq Lf E+l7 Qw9rs SNM=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - kbvmdJ707EbTfWlh5W8HfjKG55E= — Служебный-файл kbvmd J707 Eb Tf Wlh5 W8 Hfj KG55 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - kInT2L0lpng9N0s59OI3oD87Xs0= — Служебный-файл k In T2 L0lpng9 N0s59 OI3o D87 Xs0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Lf__riM67hyUl3jZArMEpfmOZrQ= — Служебный-файл Lf ri M67hy Ul3j ZAr MEpfm OZr Q=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - lk7dXTq9pVMrgT2ZCYG8UAVSzl0= — Служебный-файл lk7d XTq9p VMrg T2 ZCYG8 UAVSzl0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - LXikiysFhpLGdtCF6DIMct6nYak= — Служебный-файл LXikiys Fhp LGdt CF6 DIMct6n Yak=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - MEvxGaC3N0HLKoH2+uqlvkuIYN4= — Служебный-файл MEvx Ga C3 N0 HLKo H2+uqlvku IYN4=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - MT6Q7tKx5e2y9RzGINWOpmPMvGw= — Служебный-файл MT6 Q7t Kx5e2y9 Rz GINWOpm PMv Gw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - N0Bhg0sENBvjJLJdCBIFztPn_gk= — Служебный-файл N0 Bhg0s ENBvj JLJd CBIFzt Pn gk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - O1UyaWelejYjltYqmF_KeSdan0g= — Служебный-файл O1 Uya Welej Yjlt Yqm F Ke Sdan0g=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - o9jMp92qn49A_jzLanJZEFs86jk= — Служебный-файл o9j Mp92qn49 A jz Lan JZEFs86jk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - OLwHe4wPB7hKwF92JNNV2O9KlaA= — Служебный-файл OLw He4w PB7h Kw F92 JNNV2 O9 Kla A=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - p2n_SrA2A2FjSZ28LjrjtlbEqcg= — Служебный-файл p2n Sr A2 A2 Fj SZ28 Ljrjtlb Eqcg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - PqmZ9VbZK5T6qRuYLVahVONw3zg= — Служебный-файл Pqm Z9 Vb ZK5 T6q Ru YLVah VONw3zg=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Pv533SIqhEhs7DroZyDmPQbUe5k= — Служебный-файл Pv533 SIqh Ehs7 Dro Zy Dm PQb Ue5k=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - QBdwmSxLbAzcsefVOVbiSoFUE7w= — Служебный-файл QBdwm Sx Lb Azcsef VOVbi So FUE7w=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - qFzXCXUFkjoswmgQGukp_oeJ6NU= — Служебный-файл q Fz XCXUFkjoswmg QGukp oe J6 NU=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - RH_2oyuHQFV4LYF6Mw17Ewud_Ac= — Служебный-файл RH 2oyu HQFV4 LYF6 Mw17 Ewud Ac=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - rYpPeOC3Ly5rZxx1__WDegDtBKk= — Служебный-файл r Yp Pe OC3 Ly5r Zxx1 WDeg Dt BKk=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Se6RswEZEEkPhdP9UwxMghccCyI= — Служебный-файл Se6 Rsw EZEEk Phd P9 Uwx Mghcc Cy I=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - sHt2302kc7tCVSBE1GIxs6MXO5E= — Служебный-файл s Ht2302kc7t CVSBE1 GIxs6 MXO5 E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - slJ_m_+h+t5bH_NId5IeBI3G8SA= — Служебный-файл sl J m +h+t5b H NId5 Ie BI3 G8 SA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - tvv9oErsgnYYp8gjo3gyck7YADU= — Служебный-файл tvv9o Ersgn YYp8gjo3gyck7 YADU=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Ul+4xxen62vtxOvoxc9Dx_y6yts= — Служебный-файл Ul+4xxen62vtx Ovoxc9 Dx y6yts=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - uLJv_it+22D0vv6mq9gsMCGb0ao= — Служебный-файл u LJv it+22 D0vv6mq9gs MCGb0ao=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - v6ffCoKl8pWZHZQGU6osC5_8zT8= — Служебный-файл v6ff Co Kl8p WZHZQGU6os C5 8z T8=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vLedCYhTdfRV5oK_iFqPJoQ+dxE= — Служебный-файл v Led CYh Tdf RV5o K i Fq PJo Q+dx E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vPkSMzSFjvRVZnHknXmf_vWVReE= — Служебный-файл v Pk SMz SFjv RVZn Hkn Xmf v WVRe E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - vV3AipQPpkro1SmpdwiJt3YIfBA= — Служебный-файл v V3 Aip QPpkro1 Smpdwi Jt3 YIf BA=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - wGMQ65UjS_RhL+X6DJqmRXaKcy0= — Служебный-файл w GMQ65 Uj S Rh L+X6 DJqm RXa Kcy0=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - wJ30Lm8pW0ry4ZkG+1CbigOTgVY= — Служебный-файл w J30 Lm8p W0ry4 Zk G+1 Cbig OTg VY=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Wz9rd3IUd4DxaKOrJybsNuPje+M= — Служебный-файл Wz9rd3 IUd4 Dxa KOr Jybs Nu Pje+M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - x0nD03yoEozxUrq7vV6up_IexdM= — Служебный-файл x0n D03yo Eozx Urq7v V6up Iexd M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - yIkeGWv5jIruPBezJliEqqmGnOc= — Служебный-файл y Ike GWv5j Iru PBez Jli Eqqm Gn Oc=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - YS9LTuIuG5ZLh0+XWRUqD5OhhiM= — Служебный-файл YS9 LTu Iu G5 ZLh0+XWRUq D5 Ohhi M=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - z1syfflQtkYcMkpyglI5ucbZtmE= — Служебный-файл z1syffl Qtk Yc Mkpygl I5ucb Ztm E=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - Z3CmcUUkVM4s5XCan2CoqMpGwGw= — Служебный-файл Z3 Cmc UUk VM4s5 XCan2 Coq Mp Gw Gw=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ZriK5mCwB6ihM6HndKoa77faXas= — Служебный-файл Zri K5m Cw B6ih M6 Hnd Koa77fa Xas=. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - merge-state — Служебный-файл merge state. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - intermediary_bundle/ — Каталог intermediary_bundle.
+            - release/ — Каталог release.
+              - packageReleaseBundle/ — Каталог packageReleaseBundle.
+                - intermediary-bundle.aab — .aab-файл intermediary bundle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - shrinkBundleReleaseResources/ — Каталог shrinkBundleReleaseResources.
+                - intermediary-bundle.aab — .aab-файл intermediary bundle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - java_res/ — Каталог java_res.
+            - debug/ — Каталог debug.
+              - processDebugJavaRes/ — Каталог processDebugJavaRes.
+                - out/ — Каталог out.
+                  - META-INF/ — Каталог META-INF.
+                    - app_debug.kotlin_module — .kotlin_module-файл app debug. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseJavaRes/ — Каталог processReleaseJavaRes.
+                - out/ — Каталог out.
+                  - META-INF/ — Каталог META-INF.
+                    - app_release.kotlin_module — .kotlin_module-файл app release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - kotlin-tooling-metadata.json — JSON-файл kotlin tooling metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - javac/ — Каталог javac.
+            - debug/ — Каталог debug.
+              - compileDebugJavaWithJavac/ — Каталог compileDebugJavaWithJavac.
+                - classes/ — Каталог classes.
+                  - com/ — Каталог com.
+                    - quantuml7ai/ — Каталог quantuml7ai.
+                      - app/ — Каталог app.
+                        - BuildConfig.class — .class-файл Build Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - compileReleaseJavaWithJavac/ — Каталог compileReleaseJavaWithJavac.
+                - classes/ — Каталог classes.
+                  - com/ — Каталог com.
+                    - quantuml7ai/ — Каталог quantuml7ai.
+                      - app/ — Каталог app.
+                        - BuildConfig.class — .class-файл Build Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - linked_resources_binary_format/ — Каталог linked_resources_binary_format.
+            - debug/ — Каталог debug.
+              - processDebugResources/ — Каталог processDebugResources.
+                - linked-resources-binary-format-debug.ap_ — .ap_-файл linked resources binary format debug. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - linked-resources-binary-format-release.ap_ — .ap_-файл linked resources binary format release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - linked_resources_for_bundle_proto_format/ — Каталог linked_resources_for_bundle_proto_format.
+            - release/ — Каталог release.
+              - bundleReleaseResources/ — Каталог bundleReleaseResources.
+                - linked-resources-proto-format.ap_ — .ap_-файл linked resources proto format. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - linked_resources_proto_format/ — Каталог linked_resources_proto_format.
+            - release/ — Каталог release.
+              - convertLinkedResourcesToProtoRelease/ — Каталог convertLinkedResourcesToProtoRelease.
+                - linked-resources-proto-format-release.ap_ — .ap_-файл linked resources proto format release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_intermediate_text_report/ — Каталог lint_intermediate_text_report.
+            - release/ — Каталог release.
+              - lintReportRelease/ — Каталог lintReportRelease.
+                - lint-results-release.txt — .txt-файл lint results release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_partial_results/ — Каталог lint_partial_results.
+            - release/ — Каталог release.
+              - lintAnalyzeRelease/ — Каталог lintAnalyzeRelease.
+                - out/ — Каталог out.
+                  - lint-definite.xml — .xml-файл lint definite. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - lint-partial.xml — .xml-файл lint partial. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - lint-provisional.xml — .xml-файл lint provisional. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - lint-resources.xml — .xml-файл lint resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_report_lint_model/ — Каталог lint_report_lint_model.
+            - release/ — Каталог release.
+              - generateReleaseLintReportModel/ — Каталог generateReleaseLintReportModel.
+                - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_return_value/ — Каталог lint_return_value.
+            - release/ — Каталог release.
+              - lintReportRelease/ — Каталог lintReportRelease.
+                - return-value-release.txt — .txt-файл return value release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_vital_intermediate_text_report/ — Каталог lint_vital_intermediate_text_report.
+            - release/ — Каталог release.
+              - lintVitalReportRelease/ — Каталог lintVitalReportRelease.
+                - lint-results-release.txt — .txt-файл lint results release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_vital_partial_results/ — Каталог lint_vital_partial_results.
+            - release/ — Каталог release.
+              - lintVitalAnalyzeRelease/ — Каталог lintVitalAnalyzeRelease.
+                - out/ — Каталог out.
+                  - lint-resources.xml — .xml-файл lint resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_vital_report_lint_model/ — Каталог lint_vital_report_lint_model.
+            - release/ — Каталог release.
+              - generateReleaseLintVitalReportModel/ — Каталог generateReleaseLintVitalReportModel.
+                - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint_vital_return_value/ — Каталог lint_vital_return_value.
+            - release/ — Каталог release.
+              - lintVitalReportRelease/ — Каталог lintVitalReportRelease.
+                - return-value-release.txt — .txt-файл return value release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint-cache/ — Каталог lint-cache.
+            - lintAnalyzeRelease/ — Каталог lintAnalyzeRelease.
+              - maven.google/ — Каталог maven.google.
+                - androidx/ — Каталог androidx.
+                  - activity/ — Каталог activity.
+                    - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - core/ — Каталог core.
+                    - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - com/ — Каталог com.
+                  - google/ — Каталог google.
+                    - androidbrowserhelper/ — Каталог androidbrowserhelper.
+                      - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - master-index.xml — .xml-файл master index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - sdk_index/ — Каталог sdk_index.
+                - snapshot.gz — .gz-файл snapshot. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - api-versions-49-35rev2.bin — Бинарный ассет api versions 49 35rev2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - lint-cache-version.txt — .txt-файл lint cache version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - typos-en.txt-2.bin — Бинарный ассет typos en.txt 2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - typos-es.txt-2.bin — Бинарный ассет typos es.txt 2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - typos-tr.txt-2.bin — Бинарный ассет typos tr.txt 2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintAnalyzeReleaseUnitTest/ — Каталог lintAnalyzeReleaseUnitTest.
+              - api-versions-49-35rev2.bin — Бинарный ассет api versions 49 35rev2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - lint-cache-version.txt — .txt-файл lint cache version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintReportRelease/ — Каталог lintReportRelease.
+              - lint-cache-version.txt — .txt-файл lint cache version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintVitalAnalyzeRelease/ — Каталог lintVitalAnalyzeRelease.
+              - maven.google/ — Каталог maven.google.
+                - androidx/ — Каталог androidx.
+                  - activity/ — Каталог activity.
+                    - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - core/ — Каталог core.
+                    - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - fragment/ — Каталог fragment.
+                    - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - com/ — Каталог com.
+                  - google/ — Каталог google.
+                    - androidbrowserhelper/ — Каталог androidbrowserhelper.
+                      - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - firebase/ — Каталог firebase.
+                      - group-index.xml — .xml-файл group index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - master-index.xml — .xml-файл master index. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - sdk_index/ — Каталог sdk_index.
+                - snapshot.gz — .gz-файл snapshot. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - lint-cache-version.txt — .txt-файл lint cache version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - lintVitalReportRelease/ — Каталог lintVitalReportRelease.
+              - lint-cache-version.txt — .txt-файл lint cache version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - local_only_symbol_list/ — Каталог local_only_symbol_list.
+            - debug/ — Каталог debug.
+              - parseDebugLocalResources/ — Каталог parseDebugLocalResources.
+                - R-def.txt — .txt-файл R def. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - parseReleaseLocalResources/ — Каталог parseReleaseLocalResources.
+                - R-def.txt — .txt-файл R def. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - manifest_merge_blame_file/ — Каталог manifest_merge_blame_file.
+            - debug/ — Каталог debug.
+              - processDebugMainManifest/ — Каталог processDebugMainManifest.
+                - manifest-merger-blame-debug-report.txt — .txt-файл manifest merger blame debug report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseMainManifest/ — Каталог processReleaseMainManifest.
+                - manifest-merger-blame-release-report.txt — .txt-файл manifest merger blame release report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_art_profile/ — Каталог merged_art_profile.
+            - release/ — Каталог release.
+              - mergeReleaseArtProfile/ — Каталог mergeReleaseArtProfile.
+                - baseline-prof.txt — .txt-файл baseline prof. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_java_res/ — Каталог merged_java_res.
+            - debug/ — Каталог debug.
+              - mergeDebugJavaResource/ — Каталог mergeDebugJavaResource.
+                - base.jar — .jar-файл base. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mergeReleaseJavaResource/ — Каталог mergeReleaseJavaResource.
+                - base.jar — .jar-файл base. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - minifyReleaseWithR8/ — Каталог minifyReleaseWithR8.
+                - base.jar — .jar-файл base. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_manifest/ — Каталог merged_manifest.
+            - debug/ — Каталог debug.
+              - processDebugMainManifest/ — Каталог processDebugMainManifest.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseMainManifest/ — Каталог processReleaseMainManifest.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_manifests/ — Каталог merged_manifests.
+            - debug/ — Каталог debug.
+              - processDebugManifest/ — Каталог processDebugManifest.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseManifest/ — Каталог processReleaseManifest.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_native_libs/ — Каталог merged_native_libs.
+            - debug/ — Каталог debug.
+              - mergeDebugNativeLibs/ — Каталог mergeDebugNativeLibs.
+                - out/ — Каталог out.
+                  - lib/ — Каталог lib.
+                    - arm64-v8a/ — Каталог arm64-v8a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - armeabi-v7a/ — Каталог armeabi-v7a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86/ — Каталог x86.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86_64/ — Каталог x86_64.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mergeReleaseNativeLibs/ — Каталог mergeReleaseNativeLibs.
+                - out/ — Каталог out.
+                  - lib/ — Каталог lib.
+                    - arm64-v8a/ — Каталог arm64-v8a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - armeabi-v7a/ — Каталог armeabi-v7a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86/ — Каталог x86.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86_64/ — Каталог x86_64.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_res/ — Каталог merged_res.
+            - debug/ — Каталог debug.
+              - mergeDebugResources/ — Каталог mergeDebugResources.
+                - drawable_ic_launcher_foreground_image.png.flat — .flat-файл drawable ic launcher foreground image.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_notification.xml.flat — .flat-файл drawable ic notification.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26_ic_launcher_round.xml.flat — .flat-файл mipmap anydpi v26 ic launcher round.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26_ic_launcher.xml.flat — .flat-файл mipmap anydpi v26 ic launcher.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi_ic_launcher_round.png.flat — .flat-файл mipmap hdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi_ic_launcher.png.flat — .flat-файл mipmap hdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi_ic_launcher_round.png.flat — .flat-файл mipmap mdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi_ic_launcher.png.flat — .flat-файл mipmap mdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi_ic_launcher.png.flat — .flat-файл mipmap xhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xxhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi_ic_launcher.png.flat — .flat-файл mipmap xxhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xxxhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi_ic_launcher.png.flat — .flat-файл mipmap xxxhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values_values.arsc.flat — .flat-файл values values.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-af_values-af.arsc.flat — .flat-файл values af values af.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-am_values-am.arsc.flat — .flat-файл values am values am.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ar_values-ar.arsc.flat — .flat-файл values ar values ar.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-as_values-as.arsc.flat — .flat-файл values as values as.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-az_values-az.arsc.flat — .flat-файл values az values az.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-b+sr+Latn_values-b+sr+Latn.arsc.flat — .flat-файл values b+sr+Latn values b+sr+Latn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-be_values-be.arsc.flat — .flat-файл values be values be.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bg_values-bg.arsc.flat — .flat-файл values bg values bg.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bn_values-bn.arsc.flat — .flat-файл values bn values bn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bs_values-bs.arsc.flat — .flat-файл values bs values bs.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ca_values-ca.arsc.flat — .flat-файл values ca values ca.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-cs_values-cs.arsc.flat — .flat-файл values cs values cs.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-da_values-da.arsc.flat — .flat-файл values da values da.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-de_values-de.arsc.flat — .flat-файл values de values de.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-el_values-el.arsc.flat — .flat-файл values el values el.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rAU_values-en-rAU.arsc.flat — .flat-файл values en r AU values en r AU.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rCA_values-en-rCA.arsc.flat — .flat-файл values en r CA values en r CA.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rGB_values-en-rGB.arsc.flat — .flat-файл values en r GB values en r GB.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rIN_values-en-rIN.arsc.flat — .flat-файл values en r IN values en r IN.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rXC_values-en-rXC.arsc.flat — .flat-файл values en r XC values en r XC.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es_values-es.arsc.flat — .flat-файл values es values es.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es-rUS_values-es-rUS.arsc.flat — .flat-файл values es r US values es r US.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-et_values-et.arsc.flat — .flat-файл values et values et.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-eu_values-eu.arsc.flat — .flat-файл values eu values eu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fa_values-fa.arsc.flat — .flat-файл values fa values fa.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fi_values-fi.arsc.flat — .flat-файл values fi values fi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fr_values-fr.arsc.flat — .flat-файл values fr values fr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fr-rCA_values-fr-rCA.arsc.flat — .flat-файл values fr r CA values fr r CA.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-gl_values-gl.arsc.flat — .flat-файл values gl values gl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-gu_values-gu.arsc.flat — .flat-файл values gu values gu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hi_values-hi.arsc.flat — .flat-файл values hi values hi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hr_values-hr.arsc.flat — .flat-файл values hr values hr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hu_values-hu.arsc.flat — .flat-файл values hu values hu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hy_values-hy.arsc.flat — .flat-файл values hy values hy.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-in_values-in.arsc.flat — .flat-файл values in values in.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-is_values-is.arsc.flat — .flat-файл values is values is.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-it_values-it.arsc.flat — .flat-файл values it values it.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-iw_values-iw.arsc.flat — .flat-файл values iw values iw.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ja_values-ja.arsc.flat — .flat-файл values ja values ja.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ka_values-ka.arsc.flat — .flat-файл values ka values ka.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-kk_values-kk.arsc.flat — .flat-файл values kk values kk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-km_values-km.arsc.flat — .flat-файл values km values km.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-kn_values-kn.arsc.flat — .flat-файл values kn values kn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ko_values-ko.arsc.flat — .flat-файл values ko values ko.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ky_values-ky.arsc.flat — .flat-файл values ky values ky.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lo_values-lo.arsc.flat — .flat-файл values lo values lo.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lt_values-lt.arsc.flat — .flat-файл values lt values lt.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lv_values-lv.arsc.flat — .flat-файл values lv values lv.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mk_values-mk.arsc.flat — .flat-файл values mk values mk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ml_values-ml.arsc.flat — .flat-файл values ml values ml.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mn_values-mn.arsc.flat — .flat-файл values mn values mn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mr_values-mr.arsc.flat — .flat-файл values mr values mr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ms_values-ms.arsc.flat — .flat-файл values ms values ms.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-my_values-my.arsc.flat — .flat-файл values my values my.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-nb_values-nb.arsc.flat — .flat-файл values nb values nb.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ne_values-ne.arsc.flat — .flat-файл values ne values ne.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-nl_values-nl.arsc.flat — .flat-файл values nl values nl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-or_values-or.arsc.flat — .flat-файл values or values or.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pa_values-pa.arsc.flat — .flat-файл values pa values pa.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pl_values-pl.arsc.flat — .flat-файл values pl values pl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt_values-pt.arsc.flat — .flat-файл values pt values pt.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt-rBR_values-pt-rBR.arsc.flat — .flat-файл values pt r BR values pt r BR.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt-rPT_values-pt-rPT.arsc.flat — .flat-файл values pt r PT values pt r PT.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ro_values-ro.arsc.flat — .flat-файл values ro values ro.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ru_values-ru.arsc.flat — .flat-файл values ru values ru.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-si_values-si.arsc.flat — .flat-файл values si values si.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sk_values-sk.arsc.flat — .flat-файл values sk values sk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sl_values-sl.arsc.flat — .flat-файл values sl values sl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sq_values-sq.arsc.flat — .flat-файл values sq values sq.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sr_values-sr.arsc.flat — .flat-файл values sr values sr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sv_values-sv.arsc.flat — .flat-файл values sv values sv.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sw_values-sw.arsc.flat — .flat-файл values sw values sw.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ta_values-ta.arsc.flat — .flat-файл values ta values ta.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-te_values-te.arsc.flat — .flat-файл values te values te.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-th_values-th.arsc.flat — .flat-файл values th values th.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tl_values-tl.arsc.flat — .flat-файл values tl values tl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tr_values-tr.arsc.flat — .flat-файл values tr values tr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uk_values-uk.arsc.flat — .flat-файл values uk values uk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ur_values-ur.arsc.flat — .flat-файл values ur values ur.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uz_values-uz.arsc.flat — .flat-файл values uz values uz.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-v21_values-v21.arsc.flat — .flat-файл values v21 values v21.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-vi_values-vi.arsc.flat — .flat-файл values vi values vi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rCN_values-zh-rCN.arsc.flat — .flat-файл values zh r CN values zh r CN.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rHK_values-zh-rHK.arsc.flat — .flat-файл values zh r HK values zh r HK.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rTW_values-zh-rTW.arsc.flat — .flat-файл values zh r TW values zh r TW.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zu_values-zu.arsc.flat — .flat-файл values zu values zu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_data_extraction_rules.xml.flat — .flat-файл xml data extraction rules.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_file_paths.xml.flat — .flat-файл xml file paths.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_network_security_config.xml.flat — .flat-файл xml network security config.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mergeReleaseResources/ — Каталог mergeReleaseResources.
+                - anim-v21_fragment_fast_out_extra_slow_in.xml.flat — .flat-файл anim v21 fragment fast out extra slow in.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_close_enter.xml.flat — .flat-файл animator fragment close enter.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_close_exit.xml.flat — .flat-файл animator fragment close exit.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_fade_enter.xml.flat — .flat-файл animator fragment fade enter.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_fade_exit.xml.flat — .flat-файл animator fragment fade exit.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_open_enter.xml.flat — .flat-файл animator fragment open enter.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - animator_fragment_open_exit.xml.flat — .flat-файл animator fragment open exit.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - color_common_google_signin_btn_text_dark.xml.flat — .flat-файл color common google signin btn text dark.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - color_common_google_signin_btn_text_light.xml.flat — .flat-файл color common google signin btn text light.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - color_common_google_signin_btn_tint.xml.flat — .flat-файл color common google signin btn tint.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_dark_focused.xml.flat — .flat-файл drawable common google signin btn icon dark focused.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_dark_normal.xml.flat — .flat-файл drawable common google signin btn icon dark normal.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_dark.xml.flat — .flat-файл drawable common google signin btn icon dark.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_disabled.xml.flat — .flat-файл drawable common google signin btn icon disabled.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_light_focused.xml.flat — .flat-файл drawable common google signin btn icon light focused.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_light_normal.xml.flat — .flat-файл drawable common google signin btn icon light normal.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_icon_light.xml.flat — .flat-файл drawable common google signin btn icon light.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_dark_focused.xml.flat — .flat-файл drawable common google signin btn text dark focused.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_dark_normal.xml.flat — .flat-файл drawable common google signin btn text dark normal.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_dark.xml.flat — .flat-файл drawable common google signin btn text dark.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_disabled.xml.flat — .flat-файл drawable common google signin btn text disabled.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_light_focused.xml.flat — .flat-файл drawable common google signin btn text light focused.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_light_normal.xml.flat — .flat-файл drawable common google signin btn text light normal.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_common_google_signin_btn_text_light.xml.flat — .flat-файл drawable common google signin btn text light.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_answer_low.xml.flat — .flat-файл drawable ic call answer low.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_answer_video_low.xml.flat — .flat-файл drawable ic call answer video low.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_answer_video.xml.flat — .flat-файл drawable ic call answer video.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_answer.xml.flat — .flat-файл drawable ic call answer.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_decline_low.xml.flat — .flat-файл drawable ic call decline low.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_call_decline.xml.flat — .flat-файл drawable ic call decline.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_launcher_foreground_image.png.flat — .flat-файл drawable ic launcher foreground image.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_ic_notification.xml.flat — .flat-файл drawable ic notification.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_notification_bg_low.xml.flat — .flat-файл drawable notification bg low.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_notification_bg.xml.flat — .flat-файл drawable notification bg.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_notification_icon_background.xml.flat — .flat-файл drawable notification icon background.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable_notification_tile_bg.xml.flat — .flat-файл drawable notification tile bg.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_common_full_open_on_phone.png.flat — .flat-файл drawable hdpi v4 common full open on phone.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_common_google_signin_btn_icon_dark_normal_background.9.png.flat — .flat-файл drawable hdpi v4 common google signin btn icon dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_common_google_signin_btn_icon_light_normal_background.9.png.flat — .flat-файл drawable hdpi v4 common google signin btn icon light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_common_google_signin_btn_text_dark_normal_background.9.png.flat — .flat-файл drawable hdpi v4 common google signin btn text dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_common_google_signin_btn_text_light_normal_background.9.png.flat — .flat-файл drawable hdpi v4 common google signin btn text light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_googleg_disabled_color_18.png.flat — .flat-файл drawable hdpi v4 googleg disabled color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_googleg_standard_color_18.png.flat — .flat-файл drawable hdpi v4 googleg standard color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_ic_site_settings.png.flat — .flat-файл drawable hdpi v4 ic site settings.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notification_bg_low_normal.9.png.flat — .flat-файл drawable hdpi v4 notification bg low normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notification_bg_low_pressed.9.png.flat — .flat-файл drawable hdpi v4 notification bg low pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notification_bg_normal_pressed.9.png.flat — .flat-файл drawable hdpi v4 notification bg normal pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notification_bg_normal.9.png.flat — .flat-файл drawable hdpi v4 notification bg normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notification_oversize_large_icon_bg.png.flat — .flat-файл drawable hdpi v4 notification oversize large icon bg.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-hdpi-v4_notify_panel_notification_icon_bg.png.flat — .flat-файл drawable hdpi v4 notify panel notification icon bg.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_common_google_signin_btn_icon_dark_normal_background.9.png.flat — .flat-файл drawable mdpi v4 common google signin btn icon dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_common_google_signin_btn_icon_light_normal_background.9.png.flat — .flat-файл drawable mdpi v4 common google signin btn icon light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_common_google_signin_btn_text_dark_normal_background.9.png.flat — .flat-файл drawable mdpi v4 common google signin btn text dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_common_google_signin_btn_text_light_normal_background.9.png.flat — .flat-файл drawable mdpi v4 common google signin btn text light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_googleg_disabled_color_18.png.flat — .flat-файл drawable mdpi v4 googleg disabled color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_googleg_standard_color_18.png.flat — .flat-файл drawable mdpi v4 googleg standard color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_ic_site_settings.png.flat — .flat-файл drawable mdpi v4 ic site settings.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_notification_bg_low_normal.9.png.flat — .flat-файл drawable mdpi v4 notification bg low normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_notification_bg_low_pressed.9.png.flat — .flat-файл drawable mdpi v4 notification bg low pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_notification_bg_normal_pressed.9.png.flat — .flat-файл drawable mdpi v4 notification bg normal pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_notification_bg_normal.9.png.flat — .flat-файл drawable mdpi v4 notification bg normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-mdpi-v4_notify_panel_notification_icon_bg.png.flat — .flat-файл drawable mdpi v4 notify panel notification icon bg.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-v21_notification_action_background.xml.flat — .flat-файл drawable v21 notification action background.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_common_full_open_on_phone.png.flat — .flat-файл drawable xhdpi v4 common full open on phone.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_common_google_signin_btn_icon_dark_normal_background.9.png.flat — .flat-файл drawable xhdpi v4 common google signin btn icon dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_common_google_signin_btn_icon_light_normal_background.9.png.flat — .flat-файл drawable xhdpi v4 common google signin btn icon light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_common_google_signin_btn_text_dark_normal_background.9.png.flat — .flat-файл drawable xhdpi v4 common google signin btn text dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_common_google_signin_btn_text_light_normal_background.9.png.flat — .flat-файл drawable xhdpi v4 common google signin btn text light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_googleg_disabled_color_18.png.flat — .flat-файл drawable xhdpi v4 googleg disabled color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_googleg_standard_color_18.png.flat — .flat-файл drawable xhdpi v4 googleg standard color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_ic_site_settings.png.flat — .flat-файл drawable xhdpi v4 ic site settings.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_notification_bg_low_normal.9.png.flat — .flat-файл drawable xhdpi v4 notification bg low normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_notification_bg_low_pressed.9.png.flat — .flat-файл drawable xhdpi v4 notification bg low pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_notification_bg_normal_pressed.9.png.flat — .flat-файл drawable xhdpi v4 notification bg normal pressed.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_notification_bg_normal.9.png.flat — .flat-файл drawable xhdpi v4 notification bg normal.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xhdpi-v4_notify_panel_notification_icon_bg.png.flat — .flat-файл drawable xhdpi v4 notify panel notification icon bg.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_common_google_signin_btn_icon_dark_normal_background.9.png.flat — .flat-файл drawable xxhdpi v4 common google signin btn icon dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_common_google_signin_btn_icon_light_normal_background.9.png.flat — .flat-файл drawable xxhdpi v4 common google signin btn icon light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_common_google_signin_btn_text_dark_normal_background.9.png.flat — .flat-файл drawable xxhdpi v4 common google signin btn text dark normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_common_google_signin_btn_text_light_normal_background.9.png.flat — .flat-файл drawable xxhdpi v4 common google signin btn text light normal background.9.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_googleg_disabled_color_18.png.flat — .flat-файл drawable xxhdpi v4 googleg disabled color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_googleg_standard_color_18.png.flat — .flat-файл drawable xxhdpi v4 googleg standard color 18.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - drawable-xxhdpi-v4_ic_site_settings.png.flat — .flat-файл drawable xxhdpi v4 ic site settings.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_browser_actions_context_menu_page.xml.flat — .flat-файл layout browser actions context menu page.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_browser_actions_context_menu_row.xml.flat — .flat-файл layout browser actions context menu row.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_custom_dialog.xml.flat — .flat-файл layout custom dialog.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_ime_base_split_test_activity.xml.flat — .flat-файл layout ime base split test activity.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_ime_secondary_split_test_activity.xml.flat — .flat-файл layout ime secondary split test activity.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_notification_template_part_chronometer.xml.flat — .flat-файл layout notification template part chronometer.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout_notification_template_part_time.xml.flat — .flat-файл layout notification template part time.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout-v21_notification_action_tombstone.xml.flat — .flat-файл layout v21 notification action tombstone.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout-v21_notification_action.xml.flat — .flat-файл layout v21 notification action.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout-v21_notification_template_custom_big.xml.flat — .flat-файл layout v21 notification template custom big.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - layout-v21_notification_template_icon_group.xml.flat — .flat-файл layout v21 notification template icon group.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26_ic_launcher_round.xml.flat — .flat-файл mipmap anydpi v26 ic launcher round.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26_ic_launcher.xml.flat — .flat-файл mipmap anydpi v26 ic launcher.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi_ic_launcher_round.png.flat — .flat-файл mipmap hdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi_ic_launcher.png.flat — .flat-файл mipmap hdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi_ic_launcher_round.png.flat — .flat-файл mipmap mdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi_ic_launcher.png.flat — .flat-файл mipmap mdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi_ic_launcher.png.flat — .flat-файл mipmap xhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xxhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi_ic_launcher.png.flat — .flat-файл mipmap xxhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi_ic_launcher_round.png.flat — .flat-файл mipmap xxxhdpi ic launcher round.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi_ic_launcher.png.flat — .flat-файл mipmap xxxhdpi ic launcher.png. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - raw_firebase_common_keep.xml.flat — .flat-файл raw firebase common keep.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values_values.arsc.flat — .flat-файл values values.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-af_values-af.arsc.flat — .flat-файл values af values af.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-am_values-am.arsc.flat — .flat-файл values am values am.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ar_values-ar.arsc.flat — .flat-файл values ar values ar.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-as_values-as.arsc.flat — .flat-файл values as values as.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-az_values-az.arsc.flat — .flat-файл values az values az.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-b+sr+Latn_values-b+sr+Latn.arsc.flat — .flat-файл values b+sr+Latn values b+sr+Latn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-be_values-be.arsc.flat — .flat-файл values be values be.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bg_values-bg.arsc.flat — .flat-файл values bg values bg.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bn_values-bn.arsc.flat — .flat-файл values bn values bn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-bs_values-bs.arsc.flat — .flat-файл values bs values bs.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ca_values-ca.arsc.flat — .flat-файл values ca values ca.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-cs_values-cs.arsc.flat — .flat-файл values cs values cs.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-da_values-da.arsc.flat — .flat-файл values da values da.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-de_values-de.arsc.flat — .flat-файл values de values de.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-el_values-el.arsc.flat — .flat-файл values el values el.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rAU_values-en-rAU.arsc.flat — .flat-файл values en r AU values en r AU.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rCA_values-en-rCA.arsc.flat — .flat-файл values en r CA values en r CA.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rGB_values-en-rGB.arsc.flat — .flat-файл values en r GB values en r GB.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rIN_values-en-rIN.arsc.flat — .flat-файл values en r IN values en r IN.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-en-rXC_values-en-rXC.arsc.flat — .flat-файл values en r XC values en r XC.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es_values-es.arsc.flat — .flat-файл values es values es.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es-rUS_values-es-rUS.arsc.flat — .flat-файл values es r US values es r US.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-et_values-et.arsc.flat — .flat-файл values et values et.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-eu_values-eu.arsc.flat — .flat-файл values eu values eu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fa_values-fa.arsc.flat — .flat-файл values fa values fa.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fi_values-fi.arsc.flat — .flat-файл values fi values fi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fr_values-fr.arsc.flat — .flat-файл values fr values fr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-fr-rCA_values-fr-rCA.arsc.flat — .flat-файл values fr r CA values fr r CA.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-gl_values-gl.arsc.flat — .flat-файл values gl values gl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-gu_values-gu.arsc.flat — .flat-файл values gu values gu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hi_values-hi.arsc.flat — .flat-файл values hi values hi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hr_values-hr.arsc.flat — .flat-файл values hr values hr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hu_values-hu.arsc.flat — .flat-файл values hu values hu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-hy_values-hy.arsc.flat — .flat-файл values hy values hy.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-in_values-in.arsc.flat — .flat-файл values in values in.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-is_values-is.arsc.flat — .flat-файл values is values is.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-it_values-it.arsc.flat — .flat-файл values it values it.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-iw_values-iw.arsc.flat — .flat-файл values iw values iw.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ja_values-ja.arsc.flat — .flat-файл values ja values ja.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ka_values-ka.arsc.flat — .flat-файл values ka values ka.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-kk_values-kk.arsc.flat — .flat-файл values kk values kk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-km_values-km.arsc.flat — .flat-файл values km values km.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-kn_values-kn.arsc.flat — .flat-файл values kn values kn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ko_values-ko.arsc.flat — .flat-файл values ko values ko.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ky_values-ky.arsc.flat — .flat-файл values ky values ky.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lo_values-lo.arsc.flat — .flat-файл values lo values lo.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lt_values-lt.arsc.flat — .flat-файл values lt values lt.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-lv_values-lv.arsc.flat — .flat-файл values lv values lv.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mk_values-mk.arsc.flat — .flat-файл values mk values mk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ml_values-ml.arsc.flat — .flat-файл values ml values ml.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mn_values-mn.arsc.flat — .flat-файл values mn values mn.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-mr_values-mr.arsc.flat — .flat-файл values mr values mr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ms_values-ms.arsc.flat — .flat-файл values ms values ms.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-my_values-my.arsc.flat — .flat-файл values my values my.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-nb_values-nb.arsc.flat — .flat-файл values nb values nb.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ne_values-ne.arsc.flat — .flat-файл values ne values ne.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-nl_values-nl.arsc.flat — .flat-файл values nl values nl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-or_values-or.arsc.flat — .flat-файл values or values or.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pa_values-pa.arsc.flat — .flat-файл values pa values pa.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pl_values-pl.arsc.flat — .flat-файл values pl values pl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt_values-pt.arsc.flat — .flat-файл values pt values pt.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt-rBR_values-pt-rBR.arsc.flat — .flat-файл values pt r BR values pt r BR.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-pt-rPT_values-pt-rPT.arsc.flat — .flat-файл values pt r PT values pt r PT.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ro_values-ro.arsc.flat — .flat-файл values ro values ro.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ru_values-ru.arsc.flat — .flat-файл values ru values ru.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-si_values-si.arsc.flat — .flat-файл values si values si.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sk_values-sk.arsc.flat — .flat-файл values sk values sk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sl_values-sl.arsc.flat — .flat-файл values sl values sl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sq_values-sq.arsc.flat — .flat-файл values sq values sq.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sr_values-sr.arsc.flat — .flat-файл values sr values sr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sv_values-sv.arsc.flat — .flat-файл values sv values sv.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-sw_values-sw.arsc.flat — .flat-файл values sw values sw.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ta_values-ta.arsc.flat — .flat-файл values ta values ta.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-te_values-te.arsc.flat — .flat-файл values te values te.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-th_values-th.arsc.flat — .flat-файл values th values th.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tl_values-tl.arsc.flat — .flat-файл values tl values tl.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tr_values-tr.arsc.flat — .flat-файл values tr values tr.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uk_values-uk.arsc.flat — .flat-файл values uk values uk.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ur_values-ur.arsc.flat — .flat-файл values ur values ur.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uz_values-uz.arsc.flat — .flat-файл values uz values uz.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-v21_values-v21.arsc.flat — .flat-файл values v21 values v21.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-vi_values-vi.arsc.flat — .flat-файл values vi values vi.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rCN_values-zh-rCN.arsc.flat — .flat-файл values zh r CN values zh r CN.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rHK_values-zh-rHK.arsc.flat — .flat-файл values zh r HK values zh r HK.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rTW_values-zh-rTW.arsc.flat — .flat-файл values zh r TW values zh r TW.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zu_values-zu.arsc.flat — .flat-файл values zu values zu.arsc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_data_extraction_rules.xml.flat — .flat-файл xml data extraction rules.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_file_paths.xml.flat — .flat-файл xml file paths.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_image_share_filepaths.xml.flat — .flat-файл xml image share filepaths.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml_network_security_config.xml.flat — .flat-файл xml network security config.xml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged_res_blame_folder/ — Каталог merged_res_blame_folder.
+            - debug/ — Каталог debug.
+              - mergeDebugResources/ — Каталог mergeDebugResources.
+                - out/ — Каталог out.
+                  - multi-v2/ — Каталог multi-v2.
+                    - mergeDebugResources.json — JSON-файл merge Debug Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-af.json — JSON-файл values af. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-am.json — JSON-файл values am. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ar.json — JSON-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-as.json — JSON-файл values as. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-az.json — JSON-файл values az. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-b+sr+Latn.json — JSON-файл values b+sr+Latn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-be.json — JSON-файл values be. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bg.json — JSON-файл values bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bn.json — JSON-файл values bn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bs.json — JSON-файл values bs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ca.json — JSON-файл values ca. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-cs.json — JSON-файл values cs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-da.json — JSON-файл values da. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-de.json — JSON-файл values de. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-el.json — JSON-файл values el. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rAU.json — JSON-файл values en r AU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rCA.json — JSON-файл values en r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rGB.json — JSON-файл values en r GB. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rIN.json — JSON-файл values en r IN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rXC.json — JSON-файл values en r XC. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-es-rUS.json — JSON-файл values es r US. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-es.json — JSON-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-et.json — JSON-файл values et. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-eu.json — JSON-файл values eu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fa.json — JSON-файл values fa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fi.json — JSON-файл values fi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fr-rCA.json — JSON-файл values fr r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fr.json — JSON-файл values fr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-gl.json — JSON-файл values gl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-gu.json — JSON-файл values gu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hi.json — JSON-файл values hi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hr.json — JSON-файл values hr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hu.json — JSON-файл values hu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hy.json — JSON-файл values hy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-in.json — JSON-файл values in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-is.json — JSON-файл values is. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-it.json — JSON-файл values it. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-iw.json — JSON-файл values iw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ja.json — JSON-файл values ja. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ka.json — JSON-файл values ka. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-kk.json — JSON-файл values kk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-km.json — JSON-файл values km. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-kn.json — JSON-файл values kn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ko.json — JSON-файл values ko. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ky.json — JSON-файл values ky. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lo.json — JSON-файл values lo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lt.json — JSON-файл values lt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lv.json — JSON-файл values lv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mk.json — JSON-файл values mk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ml.json — JSON-файл values ml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mn.json — JSON-файл values mn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mr.json — JSON-файл values mr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ms.json — JSON-файл values ms. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-my.json — JSON-файл values my. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-nb.json — JSON-файл values nb. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ne.json — JSON-файл values ne. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-nl.json — JSON-файл values nl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-or.json — JSON-файл values or. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pa.json — JSON-файл values pa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pl.json — JSON-файл values pl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt-rBR.json — JSON-файл values pt r BR. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt-rPT.json — JSON-файл values pt r PT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt.json — JSON-файл values pt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ro.json — JSON-файл values ro. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ru.json — JSON-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-si.json — JSON-файл values si. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sk.json — JSON-файл values sk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sl.json — JSON-файл values sl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sq.json — JSON-файл values sq. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sr.json — JSON-файл values sr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sv.json — JSON-файл values sv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sw.json — JSON-файл values sw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ta.json — JSON-файл values ta. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-te.json — JSON-файл values te. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-th.json — JSON-файл values th. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-tl.json — JSON-файл values tl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-tr.json — JSON-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-uk.json — JSON-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ur.json — JSON-файл values ur. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-uz.json — JSON-файл values uz. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-v21.json — JSON-файл values v21. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-vi.json — JSON-файл values vi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rCN.json — JSON-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rHK.json — JSON-файл values zh r HK. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rTW.json — JSON-файл values zh r TW. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zu.json — JSON-файл values zu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values.json — JSON-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - single/ — Каталог single.
+                    - mergeDebugResources.json — JSON-файл merge Debug Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mergeReleaseResources/ — Каталог mergeReleaseResources.
+                - out/ — Каталог out.
+                  - multi-v2/ — Каталог multi-v2.
+                    - mergeReleaseResources.json — JSON-файл merge Release Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-af.json — JSON-файл values af. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-am.json — JSON-файл values am. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ar.json — JSON-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-as.json — JSON-файл values as. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-az.json — JSON-файл values az. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-b+sr+Latn.json — JSON-файл values b+sr+Latn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-be.json — JSON-файл values be. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bg.json — JSON-файл values bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bn.json — JSON-файл values bn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-bs.json — JSON-файл values bs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ca.json — JSON-файл values ca. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-cs.json — JSON-файл values cs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-da.json — JSON-файл values da. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-de.json — JSON-файл values de. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-el.json — JSON-файл values el. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rAU.json — JSON-файл values en r AU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rCA.json — JSON-файл values en r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rGB.json — JSON-файл values en r GB. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rIN.json — JSON-файл values en r IN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-en-rXC.json — JSON-файл values en r XC. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-es-rUS.json — JSON-файл values es r US. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-es.json — JSON-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-et.json — JSON-файл values et. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-eu.json — JSON-файл values eu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fa.json — JSON-файл values fa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fi.json — JSON-файл values fi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fr-rCA.json — JSON-файл values fr r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-fr.json — JSON-файл values fr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-gl.json — JSON-файл values gl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-gu.json — JSON-файл values gu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hi.json — JSON-файл values hi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hr.json — JSON-файл values hr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hu.json — JSON-файл values hu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-hy.json — JSON-файл values hy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-in.json — JSON-файл values in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-is.json — JSON-файл values is. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-it.json — JSON-файл values it. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-iw.json — JSON-файл values iw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ja.json — JSON-файл values ja. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ka.json — JSON-файл values ka. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-kk.json — JSON-файл values kk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-km.json — JSON-файл values km. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-kn.json — JSON-файл values kn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ko.json — JSON-файл values ko. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ky.json — JSON-файл values ky. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lo.json — JSON-файл values lo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lt.json — JSON-файл values lt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-lv.json — JSON-файл values lv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mk.json — JSON-файл values mk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ml.json — JSON-файл values ml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mn.json — JSON-файл values mn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-mr.json — JSON-файл values mr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ms.json — JSON-файл values ms. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-my.json — JSON-файл values my. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-nb.json — JSON-файл values nb. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ne.json — JSON-файл values ne. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-nl.json — JSON-файл values nl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-or.json — JSON-файл values or. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pa.json — JSON-файл values pa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pl.json — JSON-файл values pl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt-rBR.json — JSON-файл values pt r BR. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt-rPT.json — JSON-файл values pt r PT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-pt.json — JSON-файл values pt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ro.json — JSON-файл values ro. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ru.json — JSON-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-si.json — JSON-файл values si. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sk.json — JSON-файл values sk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sl.json — JSON-файл values sl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sq.json — JSON-файл values sq. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sr.json — JSON-файл values sr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sv.json — JSON-файл values sv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-sw.json — JSON-файл values sw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ta.json — JSON-файл values ta. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-te.json — JSON-файл values te. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-th.json — JSON-файл values th. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-tl.json — JSON-файл values tl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-tr.json — JSON-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-uk.json — JSON-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-ur.json — JSON-файл values ur. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-uz.json — JSON-файл values uz. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-v21.json — JSON-файл values v21. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-vi.json — JSON-файл values vi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rCN.json — JSON-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rHK.json — JSON-файл values zh r HK. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zh-rTW.json — JSON-файл values zh r TW. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values-zu.json — JSON-файл values zu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - values.json — JSON-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - single/ — Каталог single.
+                    - mergeReleaseResources.json — JSON-файл merge Release Resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - merged-not-compiled-resources/ — Каталог merged-not-compiled-resources.
+            - release/ — Каталог release.
+              - anim-v21/ — Каталог anim-v21.
+                - fragment_fast_out_extra_slow_in.xml — .xml-файл fragment fast out extra slow in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - animator/ — Каталог animator.
+                - fragment_close_enter.xml — .xml-файл fragment close enter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fragment_close_exit.xml — .xml-файл fragment close exit. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fragment_fade_enter.xml — .xml-файл fragment fade enter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fragment_fade_exit.xml — .xml-файл fragment fade exit. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fragment_open_enter.xml — .xml-файл fragment open enter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - fragment_open_exit.xml — .xml-файл fragment open exit. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - color/ — Каталог color.
+                - common_google_signin_btn_text_dark.xml — .xml-файл common google signin btn text dark. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light.xml — .xml-файл common google signin btn text light. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_tint.xml — .xml-файл common google signin btn tint. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable/ — Каталог drawable.
+                - common_google_signin_btn_icon_dark_focused.xml — .xml-файл common google signin btn icon dark focused. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_dark_normal.xml — .xml-файл common google signin btn icon dark normal. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_dark.xml — .xml-файл common google signin btn icon dark. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_disabled.xml — .xml-файл common google signin btn icon disabled. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_focused.xml — .xml-файл common google signin btn icon light focused. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_normal.xml — .xml-файл common google signin btn icon light normal. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light.xml — .xml-файл common google signin btn icon light. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_focused.xml — .xml-файл common google signin btn text dark focused. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_normal.xml — .xml-файл common google signin btn text dark normal. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark.xml — .xml-файл common google signin btn text dark. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_disabled.xml — .xml-файл common google signin btn text disabled. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_focused.xml — .xml-файл common google signin btn text light focused. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_normal.xml — .xml-файл common google signin btn text light normal. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light.xml — .xml-файл common google signin btn text light. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_answer_low.xml — .xml-файл ic call answer low. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_answer_video_low.xml — .xml-файл ic call answer video low. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_answer_video.xml — .xml-файл ic call answer video. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_answer.xml — .xml-файл ic call answer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_decline_low.xml — .xml-файл ic call decline low. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_call_decline.xml — .xml-файл ic call decline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low.xml — .xml-файл notification bg low. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg.xml — .xml-файл notification bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_icon_background.xml — .xml-файл notification icon background. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_tile_bg.xml — .xml-файл notification tile bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable-hdpi-v4/ — Каталог drawable-hdpi-v4.
+                - common_full_open_on_phone.png — PNG-ассет common full open on phone. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_dark_normal_background.9.png — PNG-ассет common google signin btn icon dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_normal_background.9.png — PNG-ассет common google signin btn icon light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_normal_background.9.png — PNG-ассет common google signin btn text dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_normal_background.9.png — PNG-ассет common google signin btn text light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_disabled_color_18.png — PNG-ассет googleg disabled color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_standard_color_18.png — PNG-ассет googleg standard color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_site_settings.png — PNG-ассет ic site settings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_normal.9.png — PNG-ассет notification bg low normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_pressed.9.png — PNG-ассет notification bg low pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal_pressed.9.png — PNG-ассет notification bg normal pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal.9.png — PNG-ассет notification bg normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_oversize_large_icon_bg.png — PNG-ассет notification oversize large icon bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notify_panel_notification_icon_bg.png — PNG-ассет notify panel notification icon bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable-mdpi-v4/ — Каталог drawable-mdpi-v4.
+                - common_google_signin_btn_icon_dark_normal_background.9.png — PNG-ассет common google signin btn icon dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_normal_background.9.png — PNG-ассет common google signin btn icon light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_normal_background.9.png — PNG-ассет common google signin btn text dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_normal_background.9.png — PNG-ассет common google signin btn text light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_disabled_color_18.png — PNG-ассет googleg disabled color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_standard_color_18.png — PNG-ассет googleg standard color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_site_settings.png — PNG-ассет ic site settings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_normal.9.png — PNG-ассет notification bg low normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_pressed.9.png — PNG-ассет notification bg low pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal_pressed.9.png — PNG-ассет notification bg normal pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal.9.png — PNG-ассет notification bg normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notify_panel_notification_icon_bg.png — PNG-ассет notify panel notification icon bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable-v21/ — Каталог drawable-v21.
+                - notification_action_background.xml — .xml-файл notification action background. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable-xhdpi-v4/ — Каталог drawable-xhdpi-v4.
+                - common_full_open_on_phone.png — PNG-ассет common full open on phone. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_dark_normal_background.9.png — PNG-ассет common google signin btn icon dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_normal_background.9.png — PNG-ассет common google signin btn icon light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_normal_background.9.png — PNG-ассет common google signin btn text dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_normal_background.9.png — PNG-ассет common google signin btn text light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_disabled_color_18.png — PNG-ассет googleg disabled color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_standard_color_18.png — PNG-ассет googleg standard color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_site_settings.png — PNG-ассет ic site settings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_normal.9.png — PNG-ассет notification bg low normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_low_pressed.9.png — PNG-ассет notification bg low pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal_pressed.9.png — PNG-ассет notification bg normal pressed.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_bg_normal.9.png — PNG-ассет notification bg normal.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notify_panel_notification_icon_bg.png — PNG-ассет notify panel notification icon bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - drawable-xxhdpi-v4/ — Каталог drawable-xxhdpi-v4.
+                - common_google_signin_btn_icon_dark_normal_background.9.png — PNG-ассет common google signin btn icon dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_icon_light_normal_background.9.png — PNG-ассет common google signin btn icon light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_dark_normal_background.9.png — PNG-ассет common google signin btn text dark normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - common_google_signin_btn_text_light_normal_background.9.png — PNG-ассет common google signin btn text light normal background.9. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_disabled_color_18.png — PNG-ассет googleg disabled color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - googleg_standard_color_18.png — PNG-ассет googleg standard color 18. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_site_settings.png — PNG-ассет ic site settings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - layout/ — Каталог layout.
+                - browser_actions_context_menu_page.xml — .xml-файл browser actions context menu page. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - browser_actions_context_menu_row.xml — .xml-файл browser actions context menu row. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - custom_dialog.xml — .xml-файл custom dialog. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ime_base_split_test_activity.xml — .xml-файл ime base split test activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ime_secondary_split_test_activity.xml — .xml-файл ime secondary split test activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_template_part_chronometer.xml — .xml-файл notification template part chronometer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_template_part_time.xml — .xml-файл notification template part time. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - layout-v21/ — Каталог layout-v21.
+                - notification_action_tombstone.xml — .xml-файл notification action tombstone. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_action.xml — .xml-файл notification action. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_template_custom_big.xml — .xml-файл notification template custom big. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - notification_template_icon_group.xml — .xml-файл notification template icon group. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+                - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-hdpi-v4/ — Каталог mipmap-hdpi-v4.
+                - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-mdpi-v4/ — Каталог mipmap-mdpi-v4.
+                - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-xhdpi-v4/ — Каталог mipmap-xhdpi-v4.
+                - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-xxhdpi-v4/ — Каталог mipmap-xxhdpi-v4.
+                - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mipmap-xxxhdpi-v4/ — Каталог mipmap-xxxhdpi-v4.
+                - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - raw/ — Каталог raw.
+                - firebase_common_keep.xml — .xml-файл firebase common keep. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values/ — Каталог values.
+                - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-af/ — Каталог values-af.
+                - values-af.xml — .xml-файл values af. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-am/ — Каталог values-am.
+                - values-am.xml — .xml-файл values am. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ar/ — Каталог values-ar.
+                - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-as/ — Каталог values-as.
+                - values-as.xml — .xml-файл values as. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-az/ — Каталог values-az.
+                - values-az.xml — .xml-файл values az. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-b+sr+Latn/ — Каталог values-b+sr+Latn.
+                - values-b+sr+Latn.xml — .xml-файл values b+sr+Latn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-be/ — Каталог values-be.
+                - values-be.xml — .xml-файл values be. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-bg/ — Каталог values-bg.
+                - values-bg.xml — .xml-файл values bg. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-bn/ — Каталог values-bn.
+                - values-bn.xml — .xml-файл values bn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-bs/ — Каталог values-bs.
+                - values-bs.xml — .xml-файл values bs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ca/ — Каталог values-ca.
+                - values-ca.xml — .xml-файл values ca. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-cs/ — Каталог values-cs.
+                - values-cs.xml — .xml-файл values cs. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-da/ — Каталог values-da.
+                - values-da.xml — .xml-файл values da. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-de/ — Каталог values-de.
+                - values-de.xml — .xml-файл values de. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-el/ — Каталог values-el.
+                - values-el.xml — .xml-файл values el. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-en-rAU/ — Каталог values-en-rAU.
+                - values-en-rAU.xml — .xml-файл values en r AU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-en-rCA/ — Каталог values-en-rCA.
+                - values-en-rCA.xml — .xml-файл values en r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-en-rGB/ — Каталог values-en-rGB.
+                - values-en-rGB.xml — .xml-файл values en r GB. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-en-rIN/ — Каталог values-en-rIN.
+                - values-en-rIN.xml — .xml-файл values en r IN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-en-rXC/ — Каталог values-en-rXC.
+                - values-en-rXC.xml — .xml-файл values en r XC. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-es/ — Каталог values-es.
+                - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-es-rUS/ — Каталог values-es-rUS.
+                - values-es-rUS.xml — .xml-файл values es r US. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-et/ — Каталог values-et.
+                - values-et.xml — .xml-файл values et. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-eu/ — Каталог values-eu.
+                - values-eu.xml — .xml-файл values eu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-fa/ — Каталог values-fa.
+                - values-fa.xml — .xml-файл values fa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-fi/ — Каталог values-fi.
+                - values-fi.xml — .xml-файл values fi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-fr/ — Каталог values-fr.
+                - values-fr.xml — .xml-файл values fr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-fr-rCA/ — Каталог values-fr-rCA.
+                - values-fr-rCA.xml — .xml-файл values fr r CA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-gl/ — Каталог values-gl.
+                - values-gl.xml — .xml-файл values gl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-gu/ — Каталог values-gu.
+                - values-gu.xml — .xml-файл values gu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-hi/ — Каталог values-hi.
+                - values-hi.xml — .xml-файл values hi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-hr/ — Каталог values-hr.
+                - values-hr.xml — .xml-файл values hr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-hu/ — Каталог values-hu.
+                - values-hu.xml — .xml-файл values hu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-hy/ — Каталог values-hy.
+                - values-hy.xml — .xml-файл values hy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-in/ — Каталог values-in.
+                - values-in.xml — .xml-файл values in. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-is/ — Каталог values-is.
+                - values-is.xml — .xml-файл values is. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-it/ — Каталог values-it.
+                - values-it.xml — .xml-файл values it. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-iw/ — Каталог values-iw.
+                - values-iw.xml — .xml-файл values iw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ja/ — Каталог values-ja.
+                - values-ja.xml — .xml-файл values ja. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ka/ — Каталог values-ka.
+                - values-ka.xml — .xml-файл values ka. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-kk/ — Каталог values-kk.
+                - values-kk.xml — .xml-файл values kk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-km/ — Каталог values-km.
+                - values-km.xml — .xml-файл values km. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-kn/ — Каталог values-kn.
+                - values-kn.xml — .xml-файл values kn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ko/ — Каталог values-ko.
+                - values-ko.xml — .xml-файл values ko. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ky/ — Каталог values-ky.
+                - values-ky.xml — .xml-файл values ky. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-lo/ — Каталог values-lo.
+                - values-lo.xml — .xml-файл values lo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-lt/ — Каталог values-lt.
+                - values-lt.xml — .xml-файл values lt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-lv/ — Каталог values-lv.
+                - values-lv.xml — .xml-файл values lv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-mk/ — Каталог values-mk.
+                - values-mk.xml — .xml-файл values mk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ml/ — Каталог values-ml.
+                - values-ml.xml — .xml-файл values ml. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-mn/ — Каталог values-mn.
+                - values-mn.xml — .xml-файл values mn. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-mr/ — Каталог values-mr.
+                - values-mr.xml — .xml-файл values mr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ms/ — Каталог values-ms.
+                - values-ms.xml — .xml-файл values ms. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-my/ — Каталог values-my.
+                - values-my.xml — .xml-файл values my. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-nb/ — Каталог values-nb.
+                - values-nb.xml — .xml-файл values nb. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ne/ — Каталог values-ne.
+                - values-ne.xml — .xml-файл values ne. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-nl/ — Каталог values-nl.
+                - values-nl.xml — .xml-файл values nl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-or/ — Каталог values-or.
+                - values-or.xml — .xml-файл values or. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-pa/ — Каталог values-pa.
+                - values-pa.xml — .xml-файл values pa. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-pl/ — Каталог values-pl.
+                - values-pl.xml — .xml-файл values pl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-pt/ — Каталог values-pt.
+                - values-pt.xml — .xml-файл values pt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-pt-rBR/ — Каталог values-pt-rBR.
+                - values-pt-rBR.xml — .xml-файл values pt r BR. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-pt-rPT/ — Каталог values-pt-rPT.
+                - values-pt-rPT.xml — .xml-файл values pt r PT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ro/ — Каталог values-ro.
+                - values-ro.xml — .xml-файл values ro. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ru/ — Каталог values-ru.
+                - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-si/ — Каталог values-si.
+                - values-si.xml — .xml-файл values si. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sk/ — Каталог values-sk.
+                - values-sk.xml — .xml-файл values sk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sl/ — Каталог values-sl.
+                - values-sl.xml — .xml-файл values sl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sq/ — Каталог values-sq.
+                - values-sq.xml — .xml-файл values sq. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sr/ — Каталог values-sr.
+                - values-sr.xml — .xml-файл values sr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sv/ — Каталог values-sv.
+                - values-sv.xml — .xml-файл values sv. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-sw/ — Каталог values-sw.
+                - values-sw.xml — .xml-файл values sw. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ta/ — Каталог values-ta.
+                - values-ta.xml — .xml-файл values ta. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-te/ — Каталог values-te.
+                - values-te.xml — .xml-файл values te. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-th/ — Каталог values-th.
+                - values-th.xml — .xml-файл values th. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-tl/ — Каталог values-tl.
+                - values-tl.xml — .xml-файл values tl. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-tr/ — Каталог values-tr.
+                - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-uk/ — Каталог values-uk.
+                - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-ur/ — Каталог values-ur.
+                - values-ur.xml — .xml-файл values ur. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-uz/ — Каталог values-uz.
+                - values-uz.xml — .xml-файл values uz. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-v21/ — Каталог values-v21.
+                - values-v21.xml — .xml-файл values v21. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-vi/ — Каталог values-vi.
+                - values-vi.xml — .xml-файл values vi. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-zh-rCN/ — Каталог values-zh-rCN.
+                - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-zh-rHK/ — Каталог values-zh-rHK.
+                - values-zh-rHK.xml — .xml-файл values zh r HK. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-zh-rTW/ — Каталог values-zh-rTW.
+                - values-zh-rTW.xml — .xml-файл values zh r TW. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - values-zu/ — Каталог values-zu.
+                - values-zu.xml — .xml-файл values zu. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - xml/ — Каталог xml.
+                - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - image_share_filepaths.xml — .xml-файл image share filepaths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - metadata_library_dependencies_report/ — Каталог metadata_library_dependencies_report.
+            - release/ — Каталог release.
+              - collectReleaseDependencies/ — Каталог collectReleaseDependencies.
+                - dependencies.pb — .pb-файл dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - module_bundle/ — Каталог module_bundle.
+            - release/ — Каталог release.
+              - buildReleasePreBundle/ — Каталог buildReleasePreBundle.
+                - base.zip — .zip-файл base. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - navigation_json/ — Каталог navigation_json.
+            - debug/ — Каталог debug.
+              - extractDeepLinksDebug/ — Каталог extractDeepLinksDebug.
+                - navigation.json — JSON-файл navigation. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - extractDeepLinksRelease/ — Каталог extractDeepLinksRelease.
+                - navigation.json — JSON-файл navigation. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - nested_resources_validation_report/ — Каталог nested_resources_validation_report.
+            - debug/ — Каталог debug.
+              - generateDebugResources/ — Каталог generateDebugResources.
+                - nestedResourcesValidationReport.txt — .txt-файл nested Resources Validation Report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - generateReleaseResources/ — Каталог generateReleaseResources.
+                - nestedResourcesValidationReport.txt — .txt-файл nested Resources Validation Report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - optimized_processed_res/ — Каталог optimized_processed_res.
+            - release/ — Каталог release.
+              - optimizeReleaseResources/ — Каталог optimizeReleaseResources.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - resources-release-optimize.ap_ — .ap_-файл resources release optimize. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - packaged_manifests/ — Каталог packaged_manifests.
+            - debug/ — Каталог debug.
+              - processDebugManifestForPackage/ — Каталог processDebugManifestForPackage.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseManifestForPackage/ — Каталог processReleaseManifestForPackage.
+                - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - packaged_res/ — Каталог packaged_res.
+            - debug/ — Каталог debug.
+              - packageDebugResources/ — Каталог packageDebugResources.
+                - drawable/ — Каталог drawable.
+                  - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+                  - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi-v4/ — Каталог mipmap-hdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi-v4/ — Каталог mipmap-mdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi-v4/ — Каталог mipmap-xhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi-v4/ — Каталог mipmap-xxhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi-v4/ — Каталог mipmap-xxxhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values/ — Каталог values.
+                  - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ar/ — Каталог values-ar.
+                  - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es/ — Каталог values-es.
+                  - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ru/ — Каталог values-ru.
+                  - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tr/ — Каталог values-tr.
+                  - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uk/ — Каталог values-uk.
+                  - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rCN/ — Каталог values-zh-rCN.
+                  - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml/ — Каталог xml.
+                  - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - packageReleaseResources/ — Каталог packageReleaseResources.
+                - drawable/ — Каталог drawable.
+                  - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+                  - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-hdpi-v4/ — Каталог mipmap-hdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-mdpi-v4/ — Каталог mipmap-mdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xhdpi-v4/ — Каталог mipmap-xhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxhdpi-v4/ — Каталог mipmap-xxhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - mipmap-xxxhdpi-v4/ — Каталог mipmap-xxxhdpi-v4.
+                  - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values/ — Каталог values.
+                  - values.xml — .xml-файл values. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ar/ — Каталог values-ar.
+                  - values-ar.xml — .xml-файл values ar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-es/ — Каталог values-es.
+                  - values-es.xml — .xml-файл values es. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-ru/ — Каталог values-ru.
+                  - values-ru.xml — .xml-файл values ru. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-tr/ — Каталог values-tr.
+                  - values-tr.xml — .xml-файл values tr. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-uk/ — Каталог values-uk.
+                  - values-uk.xml — .xml-файл values uk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - values-zh-rCN/ — Каталог values-zh-rCN.
+                  - values-zh-rCN.xml — .xml-файл values zh r CN. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - xml/ — Каталог xml.
+                  - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - project_dex_archive/ — Каталог project_dex_archive.
+            - debug/ — Каталог debug.
+              - dexBuilderDebug/ — Каталог dexBuilderDebug.
+                - out/ — Каталог out.
+                  - com/ — Каталог com.
+                    - quantuml7ai/ — Каталог quantuml7ai.
+                      - app/ — Каталог app.
+                        - AndroidShellDefaults.dex — .dex-файл Android Shell Defaults. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - AppShellConfig.dex — .dex-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - AppShellConfigRepository.dex — .dex-файл App Shell Config Repository. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - AppShellConfigRepository$Companion.dex — .dex-файл App Shell Config Repository$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - AuthReturnActivity.dex — .dex-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - BuildConfig.dex — .dex-файл Build Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity.dex — .dex-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity$authPopupWebViewClient$1.dex — .dex-файл Main Activity$auth Popup Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity$configureBack$1.dex — .dex-файл Main Activity$configure Back$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity$createAuthPopupWebView$1$2.dex — .dex-файл Main Activity$create Auth Popup Web View$1$2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity$quantumWebChromeClient$1.dex — .dex-файл Main Activity$quantum Web Chrome Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - MainActivity$quantumWebViewClient$1.dex — .dex-файл Main Activity$quantum Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - NativeBridge.dex — .dex-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - NativeBridge$Companion.dex — .dex-файл Native Bridge$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - NativePushRegistrar.dex — .dex-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - QuantumFirebaseMessagingService.dex — .dex-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - QuantumLauncherActivity.dex — .dex-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - QuantumLauncherActivity$Companion.dex — .dex-файл Quantum Launcher Activity$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - QuantumNotificationService.dex — .dex-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - QuantumNotificationService$Companion.dex — .dex-файл Quantum Notification Service$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - UrlPolicy.dex — .dex-файл Url Policy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                        - UrlPolicy$Companion.dex — .dex-файл Url Policy$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_0.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_1.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_2.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_3.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 3. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_4.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 4. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84_5.jar — .jar-файл 108e144074ded973bc1d7d238063739681cba1fb16a3395ad275c64d722d7a84 5. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - r8_art_profile/ — Каталог r8_art_profile.
+            - release/ — Каталог release.
+              - expandReleaseArtProfileWildcards/ — Каталог expandReleaseArtProfileWildcards.
+                - baseline-prof.txt — .txt-файл baseline prof. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - minifyReleaseWithR8/ — Каталог minifyReleaseWithR8.
+                - baseline-prof.txt — .txt-файл baseline prof. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - r8_metadata/ — Каталог r8_metadata.
+            - release/ — Каталог release.
+              - minifyReleaseWithR8/ — Каталог minifyReleaseWithR8.
+                - out.jar — .jar-файл out. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - runtime_symbol_list/ — Каталог runtime_symbol_list.
+            - debug/ — Каталог debug.
+              - processDebugResources/ — Каталог processDebugResources.
+                - R.txt — .txt-файл R. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - R.txt — .txt-файл R. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sdk_dependency_data/ — Каталог sdk_dependency_data.
+            - release/ — Каталог release.
+              - sdkReleaseDependencyData/ — Каталог sdkReleaseDependencyData.
+                - sdkDependencyData.pb — .pb-файл sdk Dependency Data. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shrunk_resources_binary_format/ — Каталог shrunk_resources_binary_format.
+            - release/ — Каталог release.
+              - convertShrunkResourcesToBinaryRelease/ — Каталог convertShrunkResourcesToBinaryRelease.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - shrunk-resources-binary-format-release.ap_ — .ap_-файл shrunk resources binary format release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shrunk_resources_proto_format/ — Каталог shrunk_resources_proto_format.
+            - release/ — Каталог release.
+              - shrinkReleaseRes/ — Каталог shrinkReleaseRes.
+                - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - shrunk-resources-proto-format-release.ap_ — .ap_-файл shrunk resources proto format release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - signing_config_versions/ — Каталог signing_config_versions.
+            - debug/ — Каталог debug.
+              - writeDebugSigningConfigVersions/ — Каталог writeDebugSigningConfigVersions.
+                - signing-config-versions.json — JSON-файл signing config versions. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - writeReleaseSigningConfigVersions/ — Каталог writeReleaseSigningConfigVersions.
+                - signing-config-versions.json — JSON-файл signing config versions. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - source_set_path_map/ — Каталог source_set_path_map.
+            - debug/ — Каталог debug.
+              - mapDebugSourceSetPaths/ — Каталог mapDebugSourceSetPaths.
+                - file-map.txt — .txt-файл file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - mapReleaseSourceSetPaths/ — Каталог mapReleaseSourceSetPaths.
+                - file-map.txt — .txt-файл file map. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - stable_resource_ids_file/ — Каталог stable_resource_ids_file.
+            - debug/ — Каталог debug.
+              - processDebugResources/ — Каталог processDebugResources.
+                - stableIds.txt — .txt-файл stable Ids. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - stableIds.txt — .txt-файл stable Ids. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - stripped_native_libs/ — Каталог stripped_native_libs.
+            - debug/ — Каталог debug.
+              - stripDebugDebugSymbols/ — Каталог stripDebugDebugSymbols.
+                - out/ — Каталог out.
+                  - lib/ — Каталог lib.
+                    - arm64-v8a/ — Каталог arm64-v8a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - armeabi-v7a/ — Каталог armeabi-v7a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86/ — Каталог x86.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86_64/ — Каталог x86_64.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - stripReleaseDebugSymbols/ — Каталог stripReleaseDebugSymbols.
+                - out/ — Каталог out.
+                  - lib/ — Каталог lib.
+                    - arm64-v8a/ — Каталог arm64-v8a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - armeabi-v7a/ — Каталог armeabi-v7a.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86/ — Каталог x86.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - x86_64/ — Каталог x86_64.
+                      - libdatastore_shared_counter.so — .so-файл libdatastore shared counter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - symbol_list_with_package_name/ — Каталог symbol_list_with_package_name.
+            - debug/ — Каталог debug.
+              - processDebugResources/ — Каталог processDebugResources.
+                - package-aware-r.txt — .txt-файл package aware r. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - processReleaseResources/ — Каталог processReleaseResources.
+                - package-aware-r.txt — .txt-файл package aware r. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - unit_test_lint_model/ — Каталог unit_test_lint_model.
+            - release/ — Каталог release.
+              - generateReleaseUnitTestLintModel/ — Каталог generateReleaseUnitTestLintModel.
+                - module.xml — .xml-файл module. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-dependencies.xml — .xml-файл release artifact dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release-artifact-libraries.xml — .xml-файл release artifact libraries. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - release.xml — .xml-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - unit_test_lint_partial_results/ — Каталог unit_test_lint_partial_results.
+            - release/ — Каталог release.
+              - lintAnalyzeReleaseUnitTest/ — Каталог lintAnalyzeReleaseUnitTest.
+                - out/ — Каталог out.
+                  - lint-partial.xml — .xml-файл lint partial. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - version_control_info_file/ — Каталог version_control_info_file.
+            - release/ — Каталог release.
+              - extractReleaseVersionControlInfo/ — Каталог extractReleaseVersionControlInfo.
+                - version-control-info.textproto — .textproto-файл version control info. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - kotlinToolingMetadata/ — Каталог kotlinToolingMetadata.
+          - kotlin-tooling-metadata.json — JSON-файл kotlin tooling metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - outputs/ — Каталог outputs.
+          - apk/ — Каталог apk.
+            - debug/ — Каталог debug.
+              - app-debug.apk — .apk-файл app debug. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - baselineProfiles/ — Каталог baselineProfiles.
+                - 0/ — Каталог 0.
+                  - app-release.dm — .dm-файл app release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                - 1/ — Каталог 1.
+                  - app-release.dm — .dm-файл app release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - output-metadata.json — JSON-файл output metadata. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - Quantum L7 AI release 1.0.7.apk — .apk-файл Quantum L7 AI release 1.0.7. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bundle/ — Каталог bundle.
+            - release/ — Каталог release.
+              - Quantum L7 AI release 1.0.7.aab — .aab-файл Quantum L7 AI release 1.0.7. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - logs/ — Каталог logs.
+            - manifest-merger-debug-report.txt — .txt-файл manifest merger debug report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - manifest-merger-release-report.txt — .txt-файл manifest merger release report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - mapping/ — Каталог mapping.
+            - release/ — Каталог release.
+              - configuration.txt — .txt-файл configuration. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - mapping.txt — .txt-файл mapping. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - resources.txt — .txt-файл resources. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - seeds.txt — .txt-файл seeds. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - usage.txt — .txt-файл usage. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sdk-dependencies/ — Каталог sdk-dependencies.
+            - release/ — Каталог release.
+              - sdkDependencies.txt — .txt-файл sdk Dependencies. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - reports/ — Каталог reports.
+          - lint-results-release.html — .html-файл lint results release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint-results-release.txt — .txt-файл lint results release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lint-results-release.xml — .xml-файл lint results release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - tmp/ — Каталог tmp.
+          - compileDebugJavaWithJavac/ — Каталог compileDebugJavaWithJavac.
+            - previous-compilation-data.bin — Бинарный ассет previous compilation data. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - compileReleaseJavaWithJavac/ — Каталог compileReleaseJavaWithJavac.
+            - previous-compilation-data.bin — Бинарный ассет previous compilation data. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - kotlin-classes/ — Каталог kotlin-classes.
+            - debug/ — Каталог debug.
+              - com/ — Каталог com.
+                - quantuml7ai/ — Каталог quantuml7ai.
+                  - app/ — Каталог app.
+                    - AndroidShellDefaults.class — .class-файл Android Shell Defaults. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfig.class — .class-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfigRepository.class — .class-файл App Shell Config Repository. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfigRepository$Companion.class — .class-файл App Shell Config Repository$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AuthReturnActivity.class — .class-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity.class — .class-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$authPopupWebViewClient$1.class — .class-файл Main Activity$auth Popup Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$configureBack$1.class — .class-файл Main Activity$configure Back$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$createAuthPopupWebView$1$2.class — .class-файл Main Activity$create Auth Popup Web View$1$2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$quantumWebChromeClient$1.class — .class-файл Main Activity$quantum Web Chrome Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$quantumWebViewClient$1.class — .class-файл Main Activity$quantum Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativeBridge.class — .class-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativeBridge$Companion.class — .class-файл Native Bridge$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativePushRegistrar.class — .class-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumFirebaseMessagingService.class — .class-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumLauncherActivity.class — .class-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumLauncherActivity$Companion.class — .class-файл Quantum Launcher Activity$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumNotificationService.class — .class-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumNotificationService$Companion.class — .class-файл Quantum Notification Service$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - UrlPolicy.class — .class-файл Url Policy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - UrlPolicy$Companion.class — .class-файл Url Policy$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - META-INF/ — Каталог META-INF.
+                - app_debug.kotlin_module — .kotlin_module-файл app debug. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - release/ — Каталог release.
+              - com/ — Каталог com.
+                - quantuml7ai/ — Каталог quantuml7ai.
+                  - app/ — Каталог app.
+                    - AndroidShellDefaults.class — .class-файл Android Shell Defaults. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfig.class — .class-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfigRepository.class — .class-файл App Shell Config Repository. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AppShellConfigRepository$Companion.class — .class-файл App Shell Config Repository$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - AuthReturnActivity.class — .class-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity.class — .class-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$authPopupWebViewClient$1.class — .class-файл Main Activity$auth Popup Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$configureBack$1.class — .class-файл Main Activity$configure Back$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$createAuthPopupWebView$1$2.class — .class-файл Main Activity$create Auth Popup Web View$1$2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$quantumWebChromeClient$1.class — .class-файл Main Activity$quantum Web Chrome Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - MainActivity$quantumWebViewClient$1.class — .class-файл Main Activity$quantum Web View Client$1. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativeBridge.class — .class-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativeBridge$Companion.class — .class-файл Native Bridge$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - NativePushRegistrar.class — .class-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumFirebaseMessagingService.class — .class-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumLauncherActivity.class — .class-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumLauncherActivity$Companion.class — .class-файл Quantum Launcher Activity$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumNotificationService.class — .class-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - QuantumNotificationService$Companion.class — .class-файл Quantum Notification Service$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - UrlPolicy.class — .class-файл Url Policy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                    - UrlPolicy$Companion.class — .class-файл Url Policy$Companion. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - META-INF/ — Каталог META-INF.
+                - app_release.kotlin_module — .kotlin_module-файл app release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260607_8525471440893221788.compiler.options — .options-файл 20260607 8525471440893221788.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260607_15804928368838672018.compiler.options — .options-файл 20260607 15804928368838672018.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260608_71235444989837286.compiler.options — .options-файл 20260608 71235444989837286.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260608_700000044098245577.compiler.options — .options-файл 20260608 700000044098245577.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_915062753365240782.compiler.options — .options-файл 20260609 915062753365240782.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_4612313102743502746.compiler.options — .options-файл 20260609 4612313102743502746.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_6008225419470604399.compiler.options — .options-файл 20260609 6008225419470604399.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_9037217782894484162.compiler.options — .options-файл 20260609 9037217782894484162.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_9821843574678434528.compiler.options — .options-файл 20260609 9821843574678434528.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_10635406114514610661.compiler.options — .options-файл 20260609 10635406114514610661.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_10907901825379490306.compiler.options — .options-файл 20260609 10907901825379490306.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_13912595214240812513.compiler.options — .options-файл 20260609 13912595214240812513.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_14047610869379358671.compiler.options — .options-файл 20260609 14047610869379358671.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_14444401228867582094.compiler.options — .options-файл 20260609 14444401228867582094.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - 20260609_15320540946408908723.compiler.options — .options-файл 20260609 15320540946408908723.compiler. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - src/ — Каталог src.
+        - main/ — Каталог main.
+          - java/ — Каталог java.
+            - com/ — Каталог com.
+              - quantuml7ai/ — Каталог quantuml7ai.
+                - app/ — Каталог app.
+                  - AppShellConfig.kt — .kt-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - AuthReturnActivity.kt — .kt-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - MainActivity.kt — .kt-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativeBridge.kt — .kt-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativePushRegistrar.kt — .kt-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumFirebaseMessagingService.kt — .kt-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumLauncherActivity.kt — .kt-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumNotificationService.kt — .kt-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - res/ — Каталог res.
+            - drawable/ — Каталог drawable.
+              - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+              - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-hdpi/ — Каталог mipmap-hdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-mdpi/ — Каталог mipmap-mdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xhdpi/ — Каталог mipmap-xhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxhdpi/ — Каталог mipmap-xxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxxhdpi/ — Каталог mipmap-xxxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values/ — Каталог values.
+              - colors.xml — .xml-файл colors. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - styles.xml — .xml-файл styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ar/ — Каталог values-ar.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-es/ — Каталог values-es.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ru/ — Каталог values-ru.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-tr/ — Каталог values-tr.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-uk/ — Каталог values-uk.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-zh-rCN/ — Каталог values-zh-rCN.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - xml/ — Каталог xml.
+              - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - proguard-rules.pro — .pro-файл proguard rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - build/ — Каталог build.
+      - reports/ — Каталог reports.
+        - problems/ — Каталог problems.
+          - problems-report.html — .html-файл problems report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle/ — Каталог gradle.
+      - wrapper/ — Каталог wrapper.
+        - gradle-wrapper.jar — .jar-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - gradle-wrapper.properties — .properties-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - tools/ — Каталог tools.
+      - android-doctor.ps1 — .ps1-файл android doctor. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-debug-apk.ps1 — .ps1-файл build debug apk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-release.ps1 — .ps1-файл build release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - install-ldplayer.ps1 — .ps1-файл install ldplayer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - print-signing-fingerprints.ps1 — .ps1-файл print signing fingerprints. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_ACCEPTANCE_CHECKLIST.md — Markdown-документ ANDROID ACCEPTANCE CHECKLIST. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_APP_LINKS.md — Markdown-документ ANDROID APP LINKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_MEDIA_PERMISSIONS.md — Markdown-документ ANDROID MEDIA PERMISSIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NATIVE_BRIDGE.md — Markdown-документ ANDROID NATIVE BRIDGE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NOTIFICATIONS.md — Markdown-документ ANDROID NOTIFICATIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_OBSERVABILITY.md — Markdown-документ ANDROID OBSERVABILITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE_DECISIONS.md — Markdown-документ ANDROID RELEASE DECISIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE.md — Markdown-документ ANDROID RELEASE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_REMOTE_CONFIG.md — Markdown-документ ANDROID REMOTE CONFIG. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_SECURITY.md — Markdown-документ ANDROID SECURITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_STORE_METADATA.md — Markdown-документ ANDROID STORE METADATA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_TEST_MATRIX.md — Markdown-документ ANDROID TEST MATRIX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_WALLET_PAYMENT.md — Markdown-документ ANDROID WALLET PAYMENT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - GRADLE_WRAPPER.md — Markdown-документ GRADLE WRAPPER. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle.properties — .properties-файл gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew — Служебный-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew.bat — .bat-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - keystore.properties — .properties-файл keystore. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - keystore.properties.example — .example-файл keystore.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - LDPLAYER_TESTING.md — Markdown-документ LDPLAYER TESTING. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - local.properties — .properties-файл local. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - local.properties.example — .example-файл local.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - settings.gradle.kts — .kts-файл settings.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ios/ — Каталог ios.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- public/ — Статические ассеты, доступные по публичным URL.
+  - .well-known/ — Подкаталог статических ассетов public/.well-known.
+    - assetlinks.json — JSON-файл из public/.well-known; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - README.md — Корневая документация проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - academy/ — Подкаталог статических ассетов public/academy.
+    - ai_block_15.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_block_16.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_meta_block_17.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - chain_block_03.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dao_meta_block_08.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - data_ai_block_14.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01 1.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_02.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dev_data_block_13.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - gamefi_socialfi_block_11.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_ai_reg_block_19.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_09.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_21.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_22.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_23.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_24.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_25.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_26.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_27.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_28.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_29.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_gamefi_block_10.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_mix_block_18.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - nft_reg_ai_block_07.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - rwa_gamefi_mix_block_20.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sec_trade_block_05.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - socialfi_dev_block_12.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - trade_nft_block_06.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web3_sec_block_04.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ads/ — Подкаталог статических ассетов public/ads.
+    - hero-preview.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-forum-global.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ai/ — Подкаталог статических ассетов public/ai.
+    - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - android/ — Подкаталог статических ассетов public/android.
+    - Quantum L7 AI release 1.0.7.apk — .apk-файл из public/android; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - anonymous/ — Подкаталог статических ассетов public/anonymous.
+    - anonymous.png — PNG-ассет из public/anonymous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - audio/ — Подкаталог статических ассетов public/audio.
+    - bgaudio.gif — GIF-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - Q-Cast.png — PNG-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - branding/ — Подкаталог статических ассетов public/branding.
+    - about-analytics.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-architecture.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-feed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - explain_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - qc_room.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-logo-512.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-hero.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-start.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed_poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - click/ — Подкаталог статических ассетов public/click.
+    - authorization.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - policy.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quest.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - support.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - coins/ — Подкаталог статических ассетов public/coins.
+    - battlecoin/ — Подкаталог статических ассетов public/battlecoin.
+      - logo.png — PNG-ассет из public/coins/battlecoin; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 0GUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1INCHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1MBABYDOGEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2ZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000CATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000CHEEMSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 1000SATSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - A2ZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AAOIBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AAVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ACXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ADAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ADXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AEURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AEVOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AGLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AIGENSYNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AIXBTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALCXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALGOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALICEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALPINEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ALTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AMDBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ANIMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ANKRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - APEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - API3USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - APTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARDRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARKMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARMBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARPAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASTERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ASTRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATOMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUCTIONUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUDIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVAXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVGOBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AVNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AWEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AXLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - AXSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BABABUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BABYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANANAS31USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BANKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BARDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BCHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BEAMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BERAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BFUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BICOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIGTIMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BLURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNSOLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BOMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BONKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BREVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BROCCOLI714USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - BTTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - C98USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CAKEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CATIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CBRSBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CELOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CELRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CETUSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CFGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CFXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CGPTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHESSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHIPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CHZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CITYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CKBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COINBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COOKIEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COTIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - COWUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CRCLBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CRVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CTKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CTSIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CVCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CVXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - CYBERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DASHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DATAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DCRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DEGOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DENTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DEXEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DGBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DODOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOGEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOGSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DRAMBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DUSKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DYDXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - DYMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EDENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EDUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EGLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EIGENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENSOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ENSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EPICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ERAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ESPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETHFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ETHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EULUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EURIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EURUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - EWYBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FARMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FDUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FETUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FIDAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FISUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLOKIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLOWUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FLUXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FOGOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FORMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FORTHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FRAXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FTTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - FXSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GALAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GASUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GENIUSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GHSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GIGGLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GLMRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GLWBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GNSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GOOGLBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GPSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GRAMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GRTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - GUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HAEDALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HBARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HEIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HEMIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HFTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HIGHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HIVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HMSTRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOLOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOODBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOOKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HUMAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - HYPERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IBMBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ICPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ICXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IDEXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ILVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IMXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - INITUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - INJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - INTCBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOTXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - IQUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JASMYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JOEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JTOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JUPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - JUVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAITOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KATUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KAVAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KERNELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KGSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KITEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KMNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KNCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - KSMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAYERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LAZIOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LDOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LINEAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LINKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LISTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LITEBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LPTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LQTYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LRCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LSKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUMIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUNAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - LUNCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MAGICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MANTAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MANTRAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MASKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MAVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MBLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MBOXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MDTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MEGAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MEMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - METABUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - METISUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - METUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MINAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MIRAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MITOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MLNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MMTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MORPHOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MOVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MOVRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MRVLBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MSFTBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MSTRBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MTLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MUBARAKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - MUBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NBISBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEARUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEIROUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEWTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NEXOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NFPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NIGHTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NKNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NMRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NOKBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NOMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NOTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NTRNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NVDABUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - NXPCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OGNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONDOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ONTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ORCAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ORDIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OSMOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - OXTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PARTIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PAXGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PENDLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PENGUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PEOPLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PEPEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PHAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PHBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PIVXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PIXELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PLTRBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PLUMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PNUTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POLYXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PONDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PORTALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PORTOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - POWRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PROMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PROVEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PSGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PUMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PUNDIXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PYRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - PYTHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QCOMBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QKCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QQQBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QTUMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - QUICKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RADUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RAREUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RAYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RDNTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RENDERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REQUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RESOLVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - REZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RIFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RKLBBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RLCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RLUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ROBOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RONINUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ROSEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RPLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RSRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RUNEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - RVNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAGAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAHARAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SANDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SANTOSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SAPIENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCRTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SEIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SENTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SFPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SHELLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SHIBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SIGNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SKHYBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SKLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SKYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SLPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SNDKBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SNXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOLVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOMIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOPHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SOXLBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPCXBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPELLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SPYBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SSVUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STEEMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STORJUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STRAXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STRKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - STXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUPERUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SUSHIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SXPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SXTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYNUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYRUPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - SYSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TAOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TFUELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - THETAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - THEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TIAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TKOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TNSRUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TONUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TOWNSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TREEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRUMPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRUUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TRXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TSLABUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TSMBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TSTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TURBOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TURTLEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TUTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - TWTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UMAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UNIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USD1USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USDSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - USUALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UTKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - UUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VANAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VANRYUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VELODROMEUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VETUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VICUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VIRTUALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VOXELUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - VTHOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WALUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WANUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WAXPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WBETHUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WBTCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WCTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WDCBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WIFUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WINUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WLDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WLFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WOOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - WUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XAIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XAUTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XECUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XLMUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XNOUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XPLUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XRPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XTZUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XUSDUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XVGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - XVSUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YBUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YFIUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - YGGUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZAMAUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZBTUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZECUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZENUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZILUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZKCUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZKPUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZKUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZROUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ZRXUSDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 币安人生USDT.png — PNG-ассет из public/coins; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - friends/ — Подкаталог статических ассетов public/friends.
+    - fb.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ig.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - invitation.gif — GIF-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tg.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - viber.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - wa.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - x.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - fucher/ — Подкаталог статических ассетов public/fucher.
+    - fucher.png — PNG-ассет из public/fucher; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - game/ — Подкаталог статических ассетов public/game.
+    - 1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - apk.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game.gif — GIF-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif2.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif3.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif4.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif5.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif6.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif7.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif8.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif9.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif10.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ios.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - windows.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icons/ — Подкаталог статических ассетов public/icons.
+    - instagram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tiktok.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - twitter.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - youtube.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - isvip/ — Подкаталог статических ассетов public/isvip.
+    - 1.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - leng/ — Подкаталог статических ассетов public/leng.
+    - ar.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - en.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - es.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ru.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tr.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - uk.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - zh.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - load/ — Подкаталог статических ассетов public/load.
+    - load.mp4 — MP4-ассет из public/load; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - metab/ — Подкаталог статических ассетов public/metab.
+    - about1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - academy1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ads1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - home1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - subscription1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - metamarket/ — Подкаталог статических ассетов public/metamarket.
+    - cyber_animals/ — Подкаталог статических ассетов public/cyber_animals.
+      - Aetherion.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AetherScavenger.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaMind.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaPulse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaSentinel.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AuroraVix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlastHorn.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlazeClaw.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlockSnail.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ByteJaw.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataCrane.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataGrizzly.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataHart.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Donaflex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - EchoByte.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FrostByte.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GravitonPrime.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Heliot.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IronTusker.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Kynex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LumaGiraffe.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MagnoRam.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NanoSpecter.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NanoTitan.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeonGrace.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neraxis.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeuroBlade.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeuroVenom.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NoctSynapse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseRunner.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseShade.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseStripe.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QCat.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QDog.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QOwl.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumSloth.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumSteed.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RedCore.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rynex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SharKiller.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solara.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarDune.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarOx.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SubNet.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tharion.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ThermoSynapse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Venomatrix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoltBound.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoltPossum.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zyntrix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - heroes/ — Подкаталог статических ассетов public/heroes.
+      - Abyssal.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AegisPrime.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AetherArchitect.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aqualis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Architect.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Arkanis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aureon.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AurionCelestis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BronzeSentinel.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CelestialEnvoy.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronoParasite.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ColeDust.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CorvinShade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dawnfire.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DrakeSolen.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DreamEngine.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elias.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FireTiron.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Frostbane.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gearholt.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GlassWarden.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - HelionVex.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hiveblade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - HollowBotanist.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IceBlaster.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnisMartialis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IndustrialТor.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ironclad.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IronLegionary.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ka’Roth.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - KaelDraven.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Kaelthorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Krythar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - KuroSynth.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LuminDiver.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LyraAetheris.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LyraFrost.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MedievalKnight.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MiraHolt.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeonVanguard.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nerathis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nexara.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NoctisVeil.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NyraSolstice.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NyxArkhon.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Obsidian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrinVale.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrionJack.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrionVexar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Orvian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ravenna.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RaxionBladeclaw.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Renaissance.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RexVorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RhaegorVorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RiftLibrarian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RiftNomad.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RonanKade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ScapePredator.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SeleneArdent.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SeraphionLux.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SpectralVoid.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stormlord.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sylvarion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Syterix.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thalvion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TireGekoid.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdant.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voidstrider.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xir’Tal.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xylaren.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZenithFlux.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zenrath.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerathion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZerathOmnivar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZyraMoonfang.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_keys/ — Подкаталог статических ассетов public/meta_keys.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - On.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantum.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Si.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Vi.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_resources/ — Подкаталог статических ассетов public/meta_resources.
+      - Aetheris.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aethora.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aethyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Antimatter.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Asteryon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurivon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bioryn.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Biovex.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Capacitor.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chronyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corelith.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crynthar.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovast.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovolt.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystara.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cubeyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dreamyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualith.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Forgeon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Forman.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fusiora.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Galmyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacirion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gold Nugget.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravionis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Helionis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnisCore.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferyte.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IvoryShard.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumetall.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumivra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Magnetron.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mechyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mystarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neuralite.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neuroxis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Noctyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivara.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oraclyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PlasmaFuel.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Plasmoryn.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Platinyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyronis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantPrime.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Radiyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Runyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Runyxis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solvra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solyros.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellaris.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terranyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Toxarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Umbyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Varyon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdanix.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Viridrax.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ViridraxBloom.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voidarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_space/ — Подкаталог статических ассетов public/meta_space.
+      - Abyssarion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AstralRelic.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurionis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Azurion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cataclyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Celestara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Comyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corevian.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Coronae.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CosmicStringX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryflame.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonix.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonys.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovex.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalMoon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalNebula.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualith.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dyseron.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Eclipsera.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndros.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Emberis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Emberith.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flareon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fractyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacira.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacirion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GlacirionPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glaciron.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - hardonix.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ignara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnarionPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jovara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminex.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LunaCore.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MagnetarX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Molthera.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebulaX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Novyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oceara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyronyx.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyrragon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyrrion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Satyros.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SingularityX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaris.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaryx.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SupernovaX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TerraPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Therionis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoidSphereX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Volcaris.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voltanys.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xylarion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - miscellaneous/ — Подкаталог статических ассетов public/miscellaneous.
+      - Ammoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Antivirus.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurabloom.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurajack.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Biotree.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blasteron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bouquora.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chronoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cosmaview.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystalis.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cubryon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbear.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbite.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberboots.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbow.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbunny.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybercatapult.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybercorn.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberflag.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberheart.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberhelm.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberion.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberknees.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberknife.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberlip.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberphones.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberpick.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberskates.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkheart.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DictaphoneX.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Digitron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dumblox.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flamoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Floranyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Frogaris.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fuelara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gemnyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Globarys.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hexaura.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrocaps.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Imperhat.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Infernogem.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jestmask.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Keyl7.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lionflint.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Liquidra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumicandle.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumisphere.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Metachups.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mycoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mystara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neocap.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonlight.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neosneak.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nitrocandy.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Obscyra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Orbistaff.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oxycandy.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Paracyber.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Portalis.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Q‑7X9.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantcup.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rollerion.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rosanyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rugbyon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RunestoneX.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Shoptron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solarcompass.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Spectra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Statum.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steampen.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamscope.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stoneaxe.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tennix.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thermoview.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Vinylon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Wrenchon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - real_estate/ — Подкаталог статических ассетов public/real_estate.
+      - AbyssalForge.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aerionis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Alquira.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aqualis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquanex.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquaryn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Arboris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AsteroidResort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurivon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AxisDawn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BioSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Brassora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Celestara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronaSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronosHall.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cosmyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crownora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalCasino.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalRanch.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crythara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryvona.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Domyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - EchoVault.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ecosyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndor.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyzoria.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fluxora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fortyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FractalHaven.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FrozenPort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fumora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GalacticMall.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GalacticReal.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gearion.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Halcyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydryon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Isyrel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - JungleEstate.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Koralyth.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumivara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lunaris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LuxoraCore.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marivon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marsyn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Miralis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mirathis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mistora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mycovar.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebulaHotel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebularFoundry.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonix.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nerithis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nestara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neythra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Noctyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OriginTower.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oxivra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ozyrel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Phorion.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumBank.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Redora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RustcoreDistrict.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Selunaris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skythrone.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skyvora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarMirage.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarVeil.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sweetara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sylvara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TechnoSpace.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thalora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thryvon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - uxyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Velora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VerdantSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoidPort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xelythar.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zenora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerathis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zeylara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zeythra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - technique/ — Подкаталог статических ассетов public/technique.
+      - Abyssor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aerolyth.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aeroryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aetheron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aracnix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Armoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Asteryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AsterynPrime.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Autoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bathoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Battalon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bitrider.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blastoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blastoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chargon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Classoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corelyth.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryptoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crysalon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crysalor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryseron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystarion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberis.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybervanix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cylorix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dravion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dravon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Drillgon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dumpyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Excaryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flygon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Galvion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GirodunePro.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glidron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Graviton.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravyon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hauloryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hoverion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hoveron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrionix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ignaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Irydon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jetron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - JetronFly.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lavorix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminar.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lunaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Magnoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marsyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mecharis.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Metronyx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Motoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nautyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NautyraSix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nebryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebryonPS.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Portyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Railtron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ravager.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Redmaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rovaryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sailtron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skyron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Starion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stealthoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamaryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamdrill.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stormaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Subryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tankryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terradyne.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terramax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terronix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Titanor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tourion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tugoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Velaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Veyronix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voltrax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Wartrax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xerion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xythera.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - models/ — Подкаталог статических ассетов public/models.
+    - nsfwjs/ — Подкаталог статических ассетов public/nsfwjs.
+      - group1-shard1of1 — Служебный-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - model.json — JSON-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoind/ — Подкаталог статических ассетов public/qcoind.
+    - mini.mp4 — MP4-ассет из public/qcoind; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Quest/ — Подкаталог статических ассетов public/Quest.
+    - q1/ — Подкаталог статических ассетов public/q1.
+      - 1.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 2.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 3.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 4.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 5.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.mp4 — MP4-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.png — PNG-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q2.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q3.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q4.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q5.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q6.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q7.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q8.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q9.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q10.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - robot/ — Подкаталог статических ассетов public/robot.
+    - 1.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 3.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 4.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 5.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 6.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 7.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 8.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 9.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 10.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 11.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 12.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 13.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 14.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 15.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 16.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 17.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 18.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 19.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 20.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 21.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 22.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 23.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - robot.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - snow/ — Подкаталог статических ассетов public/snow.
+    - fx. 1png — . 1png-файл из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - fx.png — PNG-ассет из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - uploads/ — Подкаталог статических ассетов public/uploads.
+    - avatars/ — Подкаталог статических ассетов public/avatars.
+      - ava_0x8F49b54543_2b1a5851f8d04c349227.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_3ac73e94e23e43ce9d4a.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_3e772da4fa014c89ba1b.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_5f42899137284397a273.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_7e472c3b350f4899a482.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_48cb9ee3b4734e8f8df6.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_216f5cd128a64d0c9a46.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_421e9e5bfd0147369293.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_79140efcff7342219e38.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_2831984313e34dc3b970.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_b01aa1c556fa404aa600.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d4d3abb7e9124da7abb9.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d27f9cfff21441779b10.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_d384cdd74a6749ce9902.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_e59cee92e73e4e069e65.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_e72e70e7d5134bc79d86.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_f6fb87c689a44a4d8281.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ava_0x8F49b54543_f08a385401e048f79b52.png — PNG-ассет из public/uploads/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - vendor/ — Подкаталог статических ассетов public/vendor.
+    - ffmpeg/ — Подкаталог статических ассетов public/ffmpeg.
+      - 814.ffmpeg.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg-core.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg-core.wasm — .wasm-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - manifest.json — JSON-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - vip/ — Подкаталог статических ассетов public/vip.
+    - avatars/ — Подкаталог статических ассетов public/avatars.
+      - a1.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a2.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a3.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a4.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a5.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a6.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a7.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a8.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a9.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a10.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a11.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a12.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a13.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a14.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a15.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a16.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a17.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a18.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a19.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a20.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a21.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a22.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a23.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a24.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a25.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a26.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a27.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a28.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a29.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a30.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a31.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a32.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a33.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a34.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a35.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a36.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a37.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a38.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a39.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a40.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a41.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a42.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a43.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a44.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a45.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a46.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a47.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a48.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a49.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a50.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a51.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a52.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a53.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a54.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a55.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a56.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a57.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a58.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a59.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a60.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a61.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a62.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a63.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a64.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a65.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a66.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a67.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a68.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a69.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a70.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a71.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a72.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a73.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a74.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a75.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a76.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a77.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a78.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a79.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a80.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a81.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a82.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a83.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a84.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a85.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a86.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a87.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a88.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a89.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a90.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a91.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a92.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a93.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a94.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a95.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a96.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a97.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a98.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a99.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a100.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a101.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a102.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a103.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a104.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a105.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a106.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a107.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a108.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a109.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a110.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a111.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a112.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a113.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a114.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a115.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a116.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a117.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a118.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a119.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a120.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a121.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a122.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a123.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a124.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a125.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a126.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a127.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a128.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a129.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a130.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - emoji/ — Подкаталог статических ассетов public/emoji.
+      - e1.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e2.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e3.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e4.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e5.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e6.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e7.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e8.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e9.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e10.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e11.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e12.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e13.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e14.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e15.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e16.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e17.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e18.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e19.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e20.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e21.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e22.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e23.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e24.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e25.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e26.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e27.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e28.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e29.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e30.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e31.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e32.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e33.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e34.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e35.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e36.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e37.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e38.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e39.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e40.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e41.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e42.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e43.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e44.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e45.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e46.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e47.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e48.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e49.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e50.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e51.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e53.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e54.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e55.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e56.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e57.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e58.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e59.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e60.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e61.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e62.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e63.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e64.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e65.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e66.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e67.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e68.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e69.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e70.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e71.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e72.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e73.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e74.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e75.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e76.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e77.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e78.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e79.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e80.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e81.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e82.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e83.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e84.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e85.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e86.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e87.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e88.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e89.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e90.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e91.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e92.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e93.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e94.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e95.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e96.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e97.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e98.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e99.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e100.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e101.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e102.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e103.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e104.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e105.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e106.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e107.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e108.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e109.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e110.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e111.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e112.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e113.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e114.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e115.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e116.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e117.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e118.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e119.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e120.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e121.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e122.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e123.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e124.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e125.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e126.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e127.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e128.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e129.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e130.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e131.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e132.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e133.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e134.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e135.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e136.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e137.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e138.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e139.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e140.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e141.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e142.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e143.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e144.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e145.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e146.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e147.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e148.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e149.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e150.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - workers/ — Подкаталог статических ассетов public/workers.
+    - 814.ffmpeg.js — JS-файл из public/workers; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum-trim-worker.js — JS-файл из public/workers; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - apple-touch-icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - avatar.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - compat.js — JS-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Exchange.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-16.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-48.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-64.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new.ico — ICO-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - google60edac59d881ff88.html — .html-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-192.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoin-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ql7-notification-sw.js — JS-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - tonconnect-manifest.json — JSON-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - upload.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+- src/ — Каталог src.
+  - shared/ — Каталог shared.
+    - runtime/ — Каталог runtime.
+      - adaptive/ — Каталог adaptive.
+        - deviceProfileResolver.js — JS-файл device Profile Resolver. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - effectDegradation.js — JS-файл effect Degradation. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - productionAdaptiveCore.js — JS-файл production Adaptive Core. Связи: импортирует src/shared/runtime/adaptive/deviceProfileResolver.js, src/shared/runtime/adaptive/effectDegradation.js, src/shared/runtime/adaptive/runtimePriority.js.
+        - runtimePriority.js — JS-файл runtime Priority. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+      - budgets/ — Каталог budgets.
+        - budgetEngine.js — JS-файл budget Engine. Связи: импортирует src/shared/runtime/budgets/budgetViolations.js, src/shared/runtime/budgets/ownerArbitration.js, src/shared/runtime/budgets/promotionJournal.js; используется в tests/contracts/forum/ads-shared-budget.contract.test.js, tests/contracts/forum/iframe-singleton-mobile.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - budgetViolations.js — JS-файл budget Violations. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - ownerArbitration.js — JS-файл owner Arbitration. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - promotionJournal.js — JS-файл promotion Journal. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - routeCapabilities.js — JS-файл route Capabilities. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js; используется в tests/contracts/root/runtime-startup-budget.contract.test.js, tests/contracts/route/widget-locality.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - routeProfileResolver.js — JS-файл route Profile Resolver. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/forum/player-budget-profiles.contract.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - routeProfiles.js — JS-файл route Profiles. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/decorative/autoplay-budget.contract.test.js, tests/contracts/forum/ads-shared-budget.contract.test.js.
+      - diff/ — Каталог diff.
+        - diffEngine.js — JS-файл diff Engine. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+        - diffReportFormatter.js — JS-файл diff Report Formatter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forensics/ — Каталог forensics.
+        - forensicMode.js — JS-файл forensic Mode. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - identity/ — Каталог identity.
+        - runtimeDebugStore.js — JS-файл runtime Debug Store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - runtimeInspector.js — JS-файл runtime Inspector. Связи: импортирует src/shared/runtime/passports/runtimePassport.js.
+        - runtimeRegistry.js — JS-файл runtime Registry. Связи: импортирует src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/identity/runtimeTypes.js; используется в tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeStates.js — JS-файл runtime States. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js; используется в src/shared/runtime/identity/runtimeRegistry.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeTypes.js — JS-файл runtime Types. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/identity/runtimeRegistry.js, src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/passports/runtimePassport.js.
+      - mode/ — Каталог mode.
+        - runtimeFlags.js — JS-файл runtime Flags. Связи: импортирует src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeResolver.js.
+        - runtimeMode.js — JS-файл runtime Mode. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeDebug.js; используется в src/shared/runtime/modes/runtimeModes.js, src/shared/runtime/passports/runtimePassport.js.
+        - runtimeModeClient.js — JS-файл runtime Mode Client. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeDebug.js — JS-файл runtime Mode Debug. Связи: используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/modes/runtimeModeGuards.js.
+        - runtimeModeResolver.js — JS-файл runtime Mode Resolver. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModeServer.js — JS-файл runtime Mode Server. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeTypes.js — JS-файл runtime Mode Types. Связи: используется в src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeGuards.js.
+      - modes/ — Каталог modes.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModes.js — JS-файл runtime Modes. Связи: импортирует src/shared/runtime/mode/runtimeMode.js.
+      - passports/ — Каталог passports.
+        - runtimePassport.js — JS-файл runtime Passport. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js, src/shared/runtime/mode/runtimeMode.js; используется в src/shared/runtime/identity/runtimeInspector.js, tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimePassportPanel.jsx — JSX-файл runtime Passport Panel. Связи: используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx.
+        - runtimePassportSerializer.js — JS-файл runtime Passport Serializer. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+- tests/ — Каталог tests.
+  - component/ — Каталог component.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - components/ — Каталог components.
+            - UserRecommendationCard.test.jsx — JSX-файл User Recommendation Card.test. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, tests/fixtures/forum/recommendations.js.
+            - UserRecommendationsRail.test.jsx — JSX-файл User Recommendations Rail.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - runtime/ — Каталог runtime.
+      - runtimeComponentSurfaces.test.jsx — JSX-файл runtime Component Surfaces.test. Связи: импортирует src/shared/runtime/passports/runtimePassportPanel.jsx, tests/support/runtimeGovernance.js.
+  - contracts/ — Каталог contracts.
+    - decorative/ — Каталог decorative.
+      - autoplay-budget.contract.test.js — JS-файл autoplay budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - forum/ — Каталог forum.
+      - ads-shared-budget.contract.test.js — JS-файл ads shared budget.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - iframe-singleton-mobile.contract.test.js — JS-файл iframe singleton mobile.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - media-budget-owner.contract.test.js — JS-файл media budget owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - native-video-cold-offscreen.contract.test.js — JS-файл native video cold offscreen.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+      - player-budget-profiles.contract.test.js — JS-файл player budget profiles.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, tests/support/runtimeGovernance.js.
+      - qcast-shared-mute-owner.contract.test.js — JS-файл qcast shared mute owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - same-src-thrash-guard.contract.test.js — JS-файл same src thrash guard.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - metamarket/ — Каталог metamarket.
+      - metamarket-contracts.test.js — JS-файл metamarket contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - mobile/ — Каталог mobile.
+      - android-shell-contracts.test.js — JS-файл android shell contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - project/ — Каталог project.
+      - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - battlecoin-chat-contracts.test.js — JS-файл battlecoin chat contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - runtime-governance-contracts.test.js — JS-файл runtime governance contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - seo-indexing-contracts.test.js — JS-файл seo indexing contracts.test. Связи: импортирует app/robots.js, app/sitemap.js, components/i18n-dicts/manifest.js.
+    - root/ — Каталог root.
+      - auth-bus-budget.contract.test.js — JS-файл auth bus budget.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-mode.contract.test.js — JS-файл runtime mode.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-startup-budget.contract.test.js — JS-файл runtime startup budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+      - wallet-intent-only.contract.test.js — JS-файл wallet intent only.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - route/ — Каталог route.
+      - widget-locality.contract.test.js — JS-файл widget locality.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+  - fixtures/ — Каталог fixtures.
+    - forum/ — Каталог forum.
+      - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+  - integration/ — Каталог integration.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - recommendations-users.route.test.js — JS-файл recommendations users.route.test. Связи: импортирует app/api/forum/recommendations/users/route.js.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - hooks/ — Каталог hooks.
+            - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+      - media/ — Каталог media.
+        - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.integration.test.js — JS-файл runtime Governance.integration.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeCapabilities.js, src/shared/runtime/budgets/routeProfiles.js.
+  - mocks/ — Каталог mocks.
+    - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - smoke/ — Каталог smoke.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - media/ — Каталог media.
+          - components/ — Каталог components.
+            - VideoFeedPane.test.jsx — JSX-файл Video Feed Pane.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.smoke.test.js — JS-файл runtime Governance.smoke.test. Связи: импортирует tests/support/runtimeGovernance.js.
+  - support/ — Каталог support.
+    - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/metamarket/metamarket-contracts.test.js, tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js.
+    - runtimeGovernance.js — JS-файл runtime Governance. Связи: импортирует tests/support/projectSurface.js; используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx, tests/contracts/forum/media-budget-owner.contract.test.js, tests/contracts/forum/player-budget-profiles.contract.test.js.
+    - setup-dom.js — JS-файл setup dom. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - unit/ — Каталог unit.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - subs-people.route.test.js — JS-файл subs people.route.test. Связи: импортирует app/api/forum/subs/people/route.js, forum/features/subscriptions/utils/starred.js.
+      - profile/ — Каталог profile.
+        - user-popover.route.test.js — JS-файл user popover.route.test. Связи: импортирует app/api/profile/user-popover/route.js.
+    - battlecoin/ — Каталог battlecoin.
+      - battle-chat-validation.test.js — JS-файл battle chat validation.test. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - dm/ — Каталог dm.
+          - utils/ — Каталог utils.
+            - dmLoaders.test.js — JS-файл dm Loaders.test. Связи: импортирует forum/features/dm/utils/dmLoaders.js.
+        - feed/ — Каталог feed.
+          - utils/ — Каталог utils.
+            - cardMemo.test.js — JS-файл card Memo.test. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js.
+            - interleaveRecommendationRails.test.js — JS-файл interleave Recommendation Rails.test. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js.
+        - media/ — Каталог media.
+          - utils/ — Каталог utils.
+            - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
+      - media/ — Каталог media.
+        - mediaStatePolicy.test.js — JS-файл media State Policy.test. Связи: импортирует forum/features/media/utils/mediaStatePolicy.js.
+      - shared/ — Каталог shared.
+        - config/ — Каталог config.
+          - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
+        - utils/ — Каталог utils.
+          - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+      - serverCompleteReaderUserPosts.test.js — JS-файл server Complete Reader User Posts.test. Связи: импортирует lib/forum/forum-server-complete-reader.cjs.
+      - serverPageReaderGeo.test.js — JS-файл server Page Reader Geo.test. Связи: импортирует lib/forum/forum-server-page-reader.cjs, lib/forum/ql7-forum-architecture.cjs, lib/geo/geo-rings.cjs.
+      - snapshotTransforms.test.js — JS-файл snapshot Transforms.test. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js.
+      - windowing-registry.test.js — JS-файл windowing registry.test. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+    - i18n/ — Каталог i18n.
+      - i18nDictionaries.test.js — JS-файл i18n Dictionaries.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - metamarket/ — Каталог metamarket.
+      - catalog.test.js — JS-файл catalog.test. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js, components/metamarket/metaMarketFormat.js.
+    - mongo/ — Каталог mongo.
+      - ads-primary.test.js — JS-файл ads primary.test. Связи: импортирует lib/mongo/ads-primary.cjs.
+      - battlecoin-chat-primary.test.js — JS-файл battlecoin chat primary.test. Связи: импортирует lib/mongo/battlecoin-chat-primary.cjs, lib/mongo/profile-primary.cjs.
+      - battlecoin-primary.test.js — JS-файл battlecoin primary.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - dm-primary.test.js — JS-файл dm primary.test. Связи: импортирует lib/mongo/dm-primary.cjs.
+      - forum-primary.test.js — JS-файл forum primary.test. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - metamarket-primary.test.js — JS-файл metamarket primary.test. Связи: импортирует lib/mongo/metamarket-primary.cjs, lib/mongo/qcoin-primary.cjs.
+      - payments-metastudio-primary.test.js — JS-файл payments metastudio primary.test. Связи: импортирует lib/mongo/metastudio-primary.cjs, lib/mongo/payments-primary.cjs.
+      - profile-primary.test.js — JS-файл profile primary.test. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs.
+      - qcoin-primary.test.js — JS-файл qcoin primary.test. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+      - quest-primary.test.js — JS-файл quest primary.test. Связи: импортирует lib/mongo/quest-primary.cjs.
+      - referral-primary.test.js — JS-файл referral primary.test. Связи: импортирует lib/mongo/referral-primary.cjs.
+      - subscriptions-primary.test.js — JS-файл subscriptions primary.test. Связи: импортирует lib/mongo/subscriptions-primary.cjs.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.test.js — JS-файл runtime Governance.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js.
+    - notification-center.test.js — JS-файл notification center.test. Связи: импортирует lib/notificationCenter.js.
+- tools/ — Локальные скрипты аудита, генерации и техобслуживания.
+  - ingest/ — Подкаталог инструментов: ingest.
+    - harCaptureProtocol.md — Локальный скрипт/инструмент har Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - heapCaptureProtocol.md — Локальный скрипт/инструмент heap Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHar.js — Локальный скрипт/инструмент normalize Har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHeap.js — Локальный скрипт/инструмент normalize Heap для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-adaptive-actions.js — Локальный скрипт/инструмент audit adaptive actions для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-adaptive-core.js — Локальный скрипт/инструмент audit adaptive core для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-cascade.js — Локальный скрипт/инструмент audit auth cascade для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-console-noise.js — Локальный скрипт/инструмент audit console noise для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-diagnostics-boundaries.js — Локальный скрипт/инструмент audit diagnostics boundaries для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-feature-flag-safety.js — Локальный скрипт/инструмент audit feature flag safety для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forensic-mode-bounds.js — Локальный скрипт/инструмент audit forensic mode bounds для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-media-churn.js — Локальный скрипт/инструмент audit forum media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-scroll-runtime.js — Локальный скрипт/инструмент audit forum scroll runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-iframe-restore.js — Локальный скрипт/инструмент audit iframe restore для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-layout-stability.js — Локальный скрипт/инструмент audit layout stability для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-post-video-lifecycle.js — Локальный скрипт/инструмент audit post video lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - audit-provider-baseline.js — Локальный скрипт/инструмент audit provider baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-budgets.js — Локальный скрипт/инструмент audit route budgets для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-priority-policies.js — Локальный скрипт/инструмент audit route priority policies для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-teardown.js — Локальный скрипт/инструмент audit route teardown для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-runtime-mode-resolution.js — Локальный скрипт/инструмент audit runtime mode resolution для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-passports.js — Локальный скрипт/инструмент audit runtime passports для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-same-src-thrash.js — Локальный скрипт/инструмент audit same src thrash для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - compare-baselines.js — Локальный скрипт/инструмент compare baselines для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - generate-project-dependencies.js — Локальный скрипт/инструмент generate project dependencies для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-docs.js — Локальный скрипт/инструмент generate project docs для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-ownership.js — Локальный скрипт/инструмент generate project ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-risks.js — Локальный скрипт/инструмент generate project risks для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-routes.js — Локальный скрипт/инструмент generate project routes для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
+  - ql7-faststart-browser-smoke-v68.mjs — Локальный скрипт/инструмент ql7 faststart browser smoke v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-faststart-local-v68-check.mjs — Локальный скрипт/инструмент ql7 faststart local v68 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-ffmpeg-assets-check-v68.mjs — Локальный скрипт/инструмент ql7 ffmpeg assets check v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-har-media-churn.mjs — Локальный скрипт/инструмент ql7 har media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-install-local-ffmpeg-v68.mjs — Локальный скрипт/инструмент ql7 install local ffmpeg v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-owner-audit.mjs — Локальный скрипт/инструмент ql7 media owner audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-pressure-watch.mjs — Локальный скрипт/инструмент ql7 media pressure watch для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-check.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-smoke.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 smoke для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-mp4-atom-audit.mjs — Локальный скрипт/инструмент ql7 mp4 atom audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-governance-group.mjs — Локальный скрипт/инструмент run governance group для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-scenario-telemetry.mjs — Локальный скрипт/инструмент run scenario telemetry для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - run-verification-audits.mjs — Локальный скрипт/инструмент run verification audits для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - runtime-governance-baseline.mjs — Локальный скрипт/инструмент runtime governance baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - runtime-governance.js — Локальный скрипт/инструмент runtime governance для аудита или техобслуживания. Связи: используется в tools/audit-adaptive-actions.js, tools/audit-adaptive-core.js, tools/audit-auth-cascade.js.
+  - smoke-wallet-session.mjs — Локальный скрипт/инструмент smoke wallet session для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - split-i18n-dicts.mjs — Локальный скрипт/инструмент split i18n dicts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - verify-docs-workflow.mjs — Локальный скрипт/инструмент verify docs workflow для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-environment.mjs — Локальный скрипт/инструмент verify environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+- .env.local — Локальный runtime-конфиг и секреты окружения. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .env.local.example — Пример переменных окружения для локального запуска. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .env.production.local — .local-файл .env.production. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .eslintrc.json — Конфигурация ESLint для всего проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .npmrc — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- account-sync-audit.report.json — Сводный JSON-отчет аудита синхронизации аккаунта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- ad-runtime.audit.report.json — JSON-файл ad runtime.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- adaptive-actions.report.json — JSON-файл adaptive actions.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- adaptive-core.report.json — JSON-файл adaptive core.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- auth-bus.audit.report.json — JSON-файл auth bus.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- auth-cascade.report.json — JSON-файл auth cascade.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- baseline-after.stage0.json — JSON-файл baseline after.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- baseline-before.stage0.json — JSON-файл baseline before.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- console-noise-classification.report.json — JSON-файл console noise classification.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- decorative-media-budget.report.json — JSON-файл decorative media budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- deep-audit.report.json — Сводный JSON-отчет глубокого аудита проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- diagnostics-boundaries.report.json — JSON-файл diagnostics boundaries.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- diff.stage0.json — JSON-файл diff.stage0. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- effects-leak.report.json — JSON-отчет аудита утечек эффектов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- feature-flag-safety.report.json — JSON-файл feature flag safety.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forensic-bounds.report.json — JSON-файл forensic bounds.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-deps-audit.report.json — JSON-отчет аудита зависимостей форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-diag.jsonl — Потоковый лог диагностики форума в формате JSONL. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-media-churn.audit.report.json — JSON-файл forum media churn.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-media-har.report.json — JSON-файл forum media har.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-scroll.audit.report.json — JSON-файл forum scroll.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- forum-startup.audit.report.json — JSON-файл forum startup.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- GEO_DETECT_WORLD_FEED_PREMIUM_IMPLEMENTATION_AUDIT_RU.md — Markdown-документ GEO DETECT WORLD FEED PREMIUM IMPLEMENTATION AUDIT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- geo.md — Markdown-документ geo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- heapsnapshot-analysis.report.json — JSON-файл heapsnapshot analysis.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- heavy-audit.report.json — JSON-отчет тяжелого аудита hot-path зон. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- iframe-restore.report.json — JSON-файл iframe restore.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- layout-stability.report.json — JSON-файл layout stability.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-audit.report.json — JSON-отчет аудита медиа-подсистемы. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-budget.audit.report.json — JSON-файл media budget.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-heap.verify.report.json — JSON-файл media heap.verify.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- media-ownership.audit.report.json — JSON-файл media ownership.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- middleware.js — JS-файл middleware. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- mobile-matrix.report.json — JSON-файл mobile matrix.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- mode-contract.validation.report.json — JSON-файл mode contract.validation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- native-post-video.audit.report.json — JSON-файл native post video.audit.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- observer-cleanup.report.json — JSON-файл observer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- player-budget.report.json — JSON-файл player budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-lock.yaml — Lockfile pnpm с зафиксированными версиями зависимостей. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-workspace.yaml — Конфиг workspace для pnpm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- preload-waste.report.json — JSON-файл preload waste.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pressure-ladder.report.json — JSON-файл pressure ladder.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- prod-lite-discipline.report.json — JSON-файл prod lite discipline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_DEPENDENCIES.md — Markdown-документ PROJECT DEPENDENCIES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_OWNERSHIP.md — Markdown-документ PROJECT OWNERSHIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- provider-baseline.report.json — JSON-файл provider baseline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- qcast-ownership.report.json — JSON-файл qcast ownership.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_DATA_ROUTES_STORAGE_README_RU.md — Markdown-документ QL7 DATA ROUTES STORAGE README RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_DATABASE_ARCHITECTURE_RU.md — Markdown-документ QL7 DATABASE ARCHITECTURE RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_FORUM_PREMIUM_GEO_SERVER_SURFACES_TZ_DRAFT_V3_RU.md — Markdown-документ QL7 FORUM PREMIUM GEO SERVER SURFACES TZ DRAFT V3 RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_REDIS_MONGO_PREMIUM_CLOSEOUT_AUDIT_RU.md — Markdown-документ QL7 REDIS MONGO PREMIUM CLOSEOUT AUDIT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-budget.report.json — JSON-файл route budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-priority-policies.report.json — JSON-файл route priority policies.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- route-teardown.report.json — JSON-файл route teardown.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-hotspots.report.json — JSON-отчет по runtime-hotspots. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-mode-resolution.report.json — JSON-файл runtime mode resolution.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-passport.snapshot.json — JSON-файл runtime passport.snapshot. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- runtime-passports.report.json — JSON-файл runtime passports.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- same-src-thrash.report.json — JSON-файл same src thrash.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.adaptive-pressure.report.json — JSON-файл scenario.adaptive pressure.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.auth-cascade.report.json — JSON-файл scenario.auth cascade.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.console-noise.report.json — JSON-файл scenario.console noise.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.decorative-media.report.json — JSON-файл scenario.decorative media.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.exchange-route.report.json — JSON-файл scenario.exchange route.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forensic-mode.report.json — JSON-файл scenario.forensic mode.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-background-restore.report.json — JSON-файл scenario.forum background restore.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-desktop.report.json — JSON-файл scenario.forum desktop.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-long-scroll.report.json — JSON-файл scenario.forum long scroll.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-mobile.report.json — JSON-файл scenario.forum mobile.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-route-return.report.json — JSON-файл scenario.forum route return.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.forum-wallet-untouched.report.json — JSON-файл scenario.forum wallet untouched.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.preload-waste.report.json — JSON-файл scenario.preload waste.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.provider-baseline.report.json — JSON-файл scenario.provider baseline.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.qcast-mixed.report.json — JSON-файл scenario.qcast mixed.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.route-teardown.report.json — JSON-файл scenario.route teardown.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- scenario.startup-shell.report.json — JSON-файл scenario.startup shell.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- startup-budget.report.json — JSON-файл startup budget.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- timer-cleanup.report.json — JSON-файл timer cleanup.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.tsbuildinfo — .tsbuildinfo-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- widget-isolation.report.json — JSON-файл widget isolation.report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

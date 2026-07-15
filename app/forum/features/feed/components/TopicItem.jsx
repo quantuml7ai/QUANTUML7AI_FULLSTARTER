@@ -1,0 +1,372 @@
+'use client'
+
+import React from 'react'
+import { useI18n } from '../../../../../components/i18n'
+import { cls } from '../../../shared/utils/classnames'
+import { human } from '../../../shared/utils/formatters'
+import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
+import HydrateText from '../../../shared/components/HydrateText'
+import ConfirmDeleteOverlay from '../../ui/components/ConfirmDeleteOverlay'
+import StarButton from '../../ui/components/StarButton'
+import AvatarEmoji from '../../profile/components/AvatarEmoji'
+import VipFlipBadge from '../../profile/components/VipFlipBadge'
+import useVipFlag from '../../profile/hooks/useVipFlag'
+import {
+  resolveProfileAccountId,
+  resolveNickForDisplay,
+  resolveIconForDisplay,
+  safeReadProfile,
+} from '../../profile/utils/profileCache'
+import { areTopicItemPropsEqual } from '../utils/cardMemo'
+
+function finiteCount(value) {
+  const n = Number(value)
+  return Number.isFinite(n) && n >= 0 ? n : 0
+}
+
+function hasTopicCounterAuthority(topic) {
+  if (!topic || typeof topic !== 'object') return false
+  return Boolean(
+    topic.__ql7TopicCountersCoreHydrated ||
+    topic.__ql7TopicCountersPostTotalsHydrated ||
+    topic.counters?.__ql7TopicCountersCoreHydrated ||
+    topic.counters?.__ql7TopicCountersPostTotalsHydrated ||
+    String(topic.__ql7CounterSource || topic.counters?.__ql7CounterSource || '').trim(),
+  )
+}
+
+function maxTopicCount(topic, aggregate, keys) {
+  const authoritative = hasTopicCounterAuthority(topic)
+  let topicMax = NaN
+  for (const key of keys) {
+    const values = authoritative
+      ? [topic?.[key], topic?.counters?.[key]]
+      : [topic?.[key], topic?.counters?.[key], topic?.sort?.[key]]
+    for (const value of values) {
+      const n = Number(value)
+      if (Number.isFinite(n) && n >= 0) topicMax = Number.isFinite(topicMax) ? Math.max(topicMax, n) : n
+    }
+  }
+  if (authoritative) return Number.isFinite(topicMax) ? topicMax : 0
+  let aggregateMax = 0
+  for (const key of keys) {
+    aggregateMax = Math.max(aggregateMax, finiteCount(aggregate?.[key]))
+  }
+  if (Number.isFinite(topicMax)) {
+    return topicMax
+  }
+  return aggregateMax
+}
+
+const ANONYMOUS_AVATAR_URL = '/anonymous/anonymous.png'
+const DEFAULT_ICON_FALLBACKS = new Set(['', '/upload.jpg', 's:', '👤', 'рџ‘¤'])
+
+function hasProfileAvatar(icon) {
+  const value = String(icon || '').trim()
+  return !!value && !DEFAULT_ICON_FALLBACKS.has(value)
+}
+
+function fallbackShortId(id) {
+  const raw = String(id || '')
+  return raw ? `${raw.slice(0, 6)}...${raw.slice(-4)}` : ''
+}
+
+function fallbackShortIdAlt(id) {
+  const raw = String(id || '')
+  return raw ? `${raw.slice(0, 6)}…${raw.slice(-4)}` : ''
+}
+
+function stripTmaPrefix(id) {
+  return String(id || '').trim().replace(/^(?:tguid:|tg:|telegramid:|telegram:id:)/i, '')
+}
+
+function isGeneratedFallbackNick(nick, ...ids) {
+  const value = String(nick || '').trim()
+  if (!value) return true
+  const lower = value.toLowerCase()
+  if (/^0x[a-f0-9]{4}(?:\.{3}|…)[a-f0-9]{4}$/i.test(value)) return true
+  if (/^(?:tg:|tguid:|telegramid:|telegram:id:)?\d{5,}$/i.test(value)) return true
+  if (/^(?:tg:|tguid:|telegramid:|telegram:id:)?\d{3,}(?:\.{3}|…)\d{3,}$/i.test(value)) return true
+  return ids.some((id) => {
+    const raw = String(id || '').trim()
+    const cleaned = stripTmaPrefix(raw)
+    return [raw, cleaned].some((candidate) => {
+      const item = String(candidate || '').trim()
+      return item && (
+        fallbackShortId(item).toLowerCase() === lower ||
+        fallbackShortIdAlt(item).toLowerCase() === lower
+      )
+    })
+  })
+}
+
+const TopicItem = React.memo(function TopicItem({
+  t,
+  agg,
+  onOpen,
+  onView,
+  isAdmin,
+  onDelete,
+  authId,
+  onOwnerDelete,
+  isSelfAuthor = false,
+  isStarredAuthor = false,
+  onToggleStar,
+  onUserInfoToggle,
+  formatCount,
+  dataProfileBranchStart,
+}) {
+  const { t: tt } = useI18n()
+  const avatarRef = React.useRef(null)
+  const displayViews = maxTopicCount(t, agg, ['views'])
+  const displayPosts = maxTopicCount(t, agg, ['postsCount', 'posts', 'replies', 'repliesCount'])
+  const displayLikes = maxTopicCount(t, agg, ['likes', 'reactions', 'reactionCount'])
+  const displayDislikes = maxTopicCount(t, agg, ['dislikes'])
+  const countFormatter = typeof formatCount === 'function' ? formatCount : formatCompactCount
+  const entryId = t?.id != null ? `topic_${t.id}` : ''
+  const authorId = String(resolveProfileAccountId(t?.userId || t?.accountId) || '').trim()
+  const rawUserId = String(t?.userId || t?.accountId || '').trim()
+  const isSelf = !!isSelfAuthor
+  const isStarred = !!isStarredAuthor
+  const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)
+  const cachedProfile = safeReadProfile(authorId)
+  const rawNickname = String(cachedProfile?.nickname || t?.nickname || '').trim()
+  const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || t?.icon || ''
+  const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)
+  const displayNickname = useAnonymousProfile
+    ? tt('forum_subscriptions_unknown_user')
+    : resolveNickForDisplay(authorId, t.nickname)
+  const shouldRenderAuthorRow = !!authorId || !!t.nickname || !!t.icon
+  const userPreview = {
+    userId: rawUserId || authorId,
+    nickname: displayNickname,
+    icon: resolveIconForDisplay(authorId, t.icon),
+    avatar: resolveIconForDisplay(authorId, t.icon),
+    vipActive: !!isVipAuthor,
+    sourceKind: 'topic-item',
+    sourceId: String(t?.id || ''),
+  }
+
+  const [ownDelConfirm, setOwnDelConfirm] = React.useState(null)
+  const requestOwnerDelete = (e) => {
+    e?.preventDefault?.()
+    e?.stopPropagation?.()
+    let r = null
+    try {
+      const b = e?.currentTarget?.getBoundingClientRect?.()
+      if (b) r = { top: b.top, left: b.left, right: b.right, bottom: b.bottom, width: b.width, height: b.height }
+    } catch {}
+    setOwnDelConfirm(r || { top: 0, left: 0, right: 0, bottom: 0 })
+  }
+  const confirmOwnerDelete = () => {
+    setOwnDelConfirm(null)
+    onOwnerDelete?.(t)
+  }
+
+  const ref = React.useRef(null)
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!ref.current) return
+    if (typeof onView !== 'function') return
+
+    const el = ref.current
+    let fired = false
+    const io = new IntersectionObserver(
+      (entries) => {
+        const e = entries && entries[0]
+        if (!e) return
+        if (fired) return
+        if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+          fired = true
+          onView(t?.id)
+          io.disconnect()
+        }
+      },
+      { threshold: [0.6] },
+    )
+
+    io.observe(el)
+    return () => {
+      try {
+        io.disconnect()
+      } catch {}
+    }
+  }, [onView, t?.id])
+
+  return (
+    <div
+      ref={ref}
+      id={entryId || undefined}
+      className="item qshine cursor-pointer"
+      data-feed-card="1"
+      data-feed-kind="topic"
+      data-profile-branch-start={dataProfileBranchStart}
+      onClick={() => onOpen?.(t, entryId)}
+      style={{ position: 'relative' }}
+    >
+      <div className="postBodyFrame">
+        <div className="flex flex-col gap-3">
+          {shouldRenderAuthorRow && (
+            <div className="topicUserRow">
+              <div
+                ref={avatarRef}
+                className="avaMini"
+                data-no-thread-open="1"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onUserInfoToggle?.(rawUserId, avatarRef.current, userPreview)
+                }}
+              >
+                {useAnonymousProfile ? (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundImage: `url("${ANONYMOUS_AVATAR_URL}")`,
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: 'cover',
+                      borderRadius: 'inherit',
+                    }}
+                  />
+                ) : (
+                  <AvatarEmoji userId={authorId} pIcon={resolveIconForDisplay(authorId, t.icon)} />
+                )}
+              </div>
+              <button
+                type="button"
+                className={cls('nick-badge nick-animate', isVipAuthor && 'vipNick')}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onUserInfoToggle?.(rawUserId, avatarRef.current, userPreview)
+                }}
+                title={authorId || ''}
+                style={{ flex: '0 1 auto', minWidth: 0 }}
+                translate="no"
+              >
+                <span className="nick-text">{displayNickname}</span>
+              </button>
+
+              {!!authorId && !isSelf && (
+                <StarButton
+                  on={isStarred}
+                  onClick={() => onToggleStar?.(rawUserId || authorId)}
+                  title={isStarred ? tt('forum_subscribed') : tt('forum_subscribe_author')}
+                />
+              )}
+
+              {isVipAuthor && <VipFlipBadge />}
+            </div>
+          )}
+
+          <div className="min-w-0">
+            <div
+              className="
+    topicTitle text-[#eaf4ff]
+    !whitespace-normal break-words
+    [overflow-wrap:anywhere]
+    max-w-full"
+            >
+              {t.title}
+            </div>
+
+            {t.description && (
+              <div
+                className="
+      topicDesc text-[#eaf4ff]/75 text-sm
+      !whitespace-normal break-words
+      [overflow-wrap:anywhere]
+      max-w-full mt-1"
+              >
+                {t.description}
+              </div>
+            )}
+          </div>
+          <div className="btn btnGhost btnXs" suppressHydrationWarning>
+            <HydrateText value={human(t.ts)} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1">
+          <span className="tag">👓 <HydrateText value={countFormatter(displayViews)} /></span>
+          <span className="tag">📣 <HydrateText value={countFormatter(displayPosts)} /></span>
+          <span className="tag">💕 <HydrateText value={countFormatter(displayLikes)} /></span>
+          <span className="tag">🤮 <HydrateText value={countFormatter(displayDislikes)} /></span>
+          {isAdmin && (
+            <button
+              className="tag"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onDelete?.(t)
+              }}
+              title="Удалить тему"
+            >
+              🗑
+            </button>
+          )}
+        </div>
+
+        {authId && authId === (t.userId || t.accountId) && (
+          <div
+            className="ownerKebab"
+            data-no-thread-open="1"
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+            onPointerDownCapture={(e) => {
+              e.stopPropagation()
+            }}
+            onMouseDownCapture={(e) => {
+              e.stopPropagation()
+            }}
+            onTouchStartCapture={(e) => {
+              e.stopPropagation()
+            }}
+          >
+            <button
+              className="kebabBtn"
+              type="button"
+              aria-label="Меню темы"
+              data-no-thread-open="1"
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+              onPointerDownCapture={(e) => {
+                e.stopPropagation()
+              }}
+              onMouseDownCapture={(e) => {
+                e.stopPropagation()
+              }}
+              onTouchStartCapture={(e) => {
+                e.stopPropagation()
+              }}
+            >
+              ⋮
+            </button>
+            <div className="ownerMenu">
+              <button type="button" className="danger" onClick={requestOwnerDelete}>
+                🗑
+              </button>
+            </div>
+          </div>
+        )}
+
+        <ConfirmDeleteOverlay
+          open={!!ownDelConfirm}
+          rect={ownDelConfirm}
+          text={tt?.('forum_delete_confirm')}
+          onCancel={() => setOwnDelConfirm(null)}
+          onConfirm={confirmOwnerDelete}
+        />
+      </div>
+    </div>
+  )
+}, areTopicItemPropsEqual)
+
+TopicItem.displayName = 'TopicItem'
+
+export default TopicItem

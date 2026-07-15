@@ -1,0 +1,498 @@
+export function normalizeDmDialogId(value) {
+  return String(value || '').trim()
+}
+
+export function resolveDmDialogPeerId(dialog, meId = '') {
+  const directId = normalizeDmDialogId(dialog?.userId)
+  const last = dialog?.lastMessage || null
+  const me = normalizeDmDialogId(meId)
+  const fromCanonical = normalizeDmDialogId(last?.fromCanonical)
+  const toCanonical = normalizeDmDialogId(last?.toCanonical)
+  const fromRaw = normalizeDmDialogId(last?.from)
+  const toRaw = normalizeDmDialogId(last?.to)
+
+  if (me) {
+    if (fromCanonical && fromCanonical === me) return toCanonical || toRaw || directId
+    if (toCanonical && toCanonical === me) return fromCanonical || fromRaw || directId
+    if (fromRaw && fromRaw === me) return toCanonical || toRaw || directId
+    if (toRaw && toRaw === me) return fromCanonical || fromRaw || directId
+  }
+
+  return directId || fromCanonical || toCanonical || fromRaw || toRaw || ''
+}
+
+export function dialogMatchesUser(dialog, uid, meId = '') {
+  const target = normalizeDmDialogId(uid)
+  if (!target) return false
+  const last = dialog?.lastMessage || null
+  const candidates = new Set([
+    normalizeDmDialogId(dialog?.userId),
+    resolveDmDialogPeerId(dialog, meId),
+    normalizeDmDialogId(last?.fromCanonical),
+    normalizeDmDialogId(last?.toCanonical),
+    normalizeDmDialogId(last?.from),
+    normalizeDmDialogId(last?.to),
+  ].filter(Boolean))
+  return candidates.has(target)
+}
+
+export function dedupeDmDialogs(dialogs, meId = '') {
+  const list = Array.isArray(dialogs) ? dialogs : []
+  if (!list.length) return []
+  const byUid = new Map()
+  for (const dialog of list) {
+    const uid = resolveDmDialogPeerId(dialog, meId)
+    if (!uid) continue
+    const prev = byUid.get(uid)
+    const prevTs = Number(prev?.lastMessage?.ts || 0)
+    const nextTs = Number(dialog?.lastMessage?.ts || 0)
+    if (!prev || nextTs >= prevTs) {
+      byUid.set(uid, {
+        ...(prev || {}),
+        ...(dialog || {}),
+        userId: uid,
+        lastMessage: dialog?.lastMessage || prev?.lastMessage || null,
+      })
+    }
+  }
+  return Array.from(byUid.values())
+    .sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
+}
+
+function normalizeServerDeletedDialogs(raw) {
+  const out = {}
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out
+  for (const [key, value] of Object.entries(raw)) {
+    const id = normalizeDmDialogId(key)
+    const ts = Number(value || 0)
+    if (!id || !ts) continue
+    out[id] = Math.max(Number(out[id] || 0), ts)
+  }
+  return out
+}
+
+function readDialogDeletedAt(dialog, deletedDialogs, meId = '') {
+  if (!deletedDialogs || typeof deletedDialogs !== 'object') return 0
+  const last = dialog?.lastMessage || null
+  const ids = new Set([
+    normalizeDmDialogId(dialog?.userId),
+    resolveDmDialogPeerId(dialog, meId),
+    normalizeDmDialogId(last?.fromCanonical),
+    normalizeDmDialogId(last?.toCanonical),
+    normalizeDmDialogId(last?.from),
+    normalizeDmDialogId(last?.to),
+  ].filter(Boolean))
+  let out = 0
+  for (const id of ids) out = Math.max(out, Number(deletedDialogs?.[id] || 0))
+  return out
+}
+
+function filterServerDeletedDialogs(dialogs, deletedDialogs, meId = '') {
+  const list = Array.isArray(dialogs) ? dialogs : []
+  if (!deletedDialogs || !Object.keys(deletedDialogs || {}).length) return list
+  return list.filter((dialog) => {
+    const lastTs = Number(dialog?.lastMessage?.ts || 0)
+    const deletedAt = readDialogDeletedAt(dialog, deletedDialogs, meId)
+    return !deletedAt || (lastTs && lastTs > deletedAt)
+  })
+}
+
+function persistDeletedDialogs(dmDeletedKey, deletedDialogs) {
+  if (!dmDeletedKey || !deletedDialogs || !Object.keys(deletedDialogs || {}).length) return
+  try {
+    const raw = JSON.parse(localStorage.getItem(dmDeletedKey) || '{}') || {}
+    const next = { ...(raw && typeof raw === 'object' ? raw : {}) }
+    let changed = false
+    for (const [key, value] of Object.entries(deletedDialogs)) {
+      const id = normalizeDmDialogId(key)
+      const ts = Number(value || 0)
+      if (!id || !ts || Number(next[id] || 0) >= ts) continue
+      next[id] = ts
+      changed = true
+    }
+    if (changed) localStorage.setItem(dmDeletedKey, JSON.stringify(next))
+  } catch {}
+}
+
+function mergeDmDialogs(existing, incoming, meId = '', options = {}) {
+  const existingList = dedupeDmDialogs(existing, meId)
+  const incomingList = dedupeDmDialogs(incoming, meId)
+  const preserveMissingExisting = options?.preserveMissingExisting !== false
+
+  if (!existingList.length) return incomingList
+
+  // Legacy-safe behavior:
+  // some old dialogs can be stored under raw/canonical ids that a server refresh
+  // may not return in the first response window. Do not treat an empty/partial
+  // refresh as authoritative deletion, otherwise the whole dialog list flashes
+  // for a moment after reload and then disappears.
+  if (!incomingList.length) return preserveMissingExisting ? existingList : []
+
+  const byUid = new Map(incomingList.map((d) => [resolveDmDialogPeerId(d, meId), d]))
+  const merged = []
+  const used = new Set()
+  for (const d of existingList) {
+    const uid = resolveDmDialogPeerId(d, meId)
+    if (!uid) {
+      merged.push(d)
+      continue
+    }
+    const inc = byUid.get(uid)
+    if (inc) {
+      const prevLast = d?.lastMessage || null
+      const nextLast = inc?.lastMessage || null
+      let lastMessage = nextLast || prevLast
+      if (prevLast && nextLast) {
+        const prevSending = String(prevLast.status || '') === 'sending'
+        // Server is authoritative for persisted dialog preview.
+        // Keep local preview only for unsent optimistic messages.
+        if (prevSending) lastMessage = prevLast
+        else lastMessage = nextLast
+      }
+      merged.push({ ...inc, lastMessage, userId: uid })
+      used.add(uid)
+    } else {
+      const prevLast = d?.lastMessage || null
+      const prevId = String(prevLast?.id || '')
+      const prevSending =
+        String(prevLast?.status || '') === 'sending' ||
+        prevId.startsWith('tmp_dm_')
+
+      // Keep known dialogs across refreshes unless an explicit local delete hides them.
+      // This protects legacy dialogs after R2/identity migration from being wiped by a
+      // temporarily empty or partial /api/dm/dialogs response.
+      if (preserveMissingExisting || prevSending) {
+        merged.push({ ...d, userId: uid })
+        used.add(uid)
+      }
+    }
+  }
+  for (const d of incomingList) {
+    const uid = resolveDmDialogPeerId(d, meId)
+    if (!uid || used.has(uid)) continue
+    merged.push({ ...d, userId: uid })
+    used.add(uid)
+  }
+  return dedupeDmDialogs(merged, meId)
+}
+
+
+
+export function dedupeDmThreadMessagesExact(messages = []) {
+  const list = Array.isArray(messages) ? messages : []
+  if (!list.length) return []
+  const seenIds = new Set()
+  const out = []
+  for (const message of list) {
+    const id = String(message?.id || '').trim()
+    if (id && !id.startsWith('tmp_dm_')) {
+      if (seenIds.has(id)) continue
+      seenIds.add(id)
+    }
+    out.push(message)
+  }
+  return out
+}
+
+function mergeDmThreadOlderPage(existing, itemsAsc, deletedMap) {
+  const prev = Array.isArray(existing) ? existing : []
+  const incoming = Array.isArray(itemsAsc) ? itemsAsc : []
+  const deleted = deletedMap || {}
+  return dedupeDmThreadMessagesExact([...incoming, ...prev])
+    .filter((m) => !deleted[String(m?.id || '')])
+}
+
+function mergeDmThreadRefresh(existing, itemsAsc, deletedMap) {
+  if (!Array.isArray(existing) || !existing.length) {
+    return dedupeDmThreadMessagesExact(Array.isArray(itemsAsc) ? itemsAsc : []).filter(
+      (m) => !deletedMap[String(m?.id || '')]
+    )
+  }
+  if (!Array.isArray(itemsAsc) || !itemsAsc.length) {
+    // Server is authoritative on refresh:
+    // if thread is now empty, keep only local optimistic sends.
+    const optimisticOnly = existing.filter((m) => {
+      const id = String(m?.id || '')
+      return String(m?.status || '') === 'sending' || id.startsWith('tmp_dm_')
+    })
+    return dedupeDmThreadMessagesExact(optimisticOnly).filter((m) => !deletedMap[String(m?.id || '')])
+  }
+  const minIncomingTs = itemsAsc.length
+    ? Math.min(...itemsAsc.map((m) => Number(m?.ts || 0)))
+    : Number.POSITIVE_INFINITY
+  const byId = new Map(itemsAsc.map((m) => [String(m?.id || ''), m]))
+  let changed = false
+  const merged = []
+  for (const m of existing) {
+    const id = String(m?.id || '')
+    if (!byId.has(id)) {
+      const prevTs = Number(m?.ts || 0)
+      const prevSending =
+        String(m?.status || '') === 'sending' ||
+        id.startsWith('tmp_dm_')
+      // If refreshed recent window doesn't contain this persisted message,
+      // it was likely deleted server-side: drop it.
+      if (!prevSending && prevTs >= minIncomingTs) {
+        changed = true
+        continue
+      }
+      merged.push(m)
+      continue
+    }
+    const inc = byId.get(id)
+    const prevTs = Number(m?.ts || 0)
+    const nextTs = Number(inc?.ts || 0)
+    const prevSt = String(m?.status || '')
+    const nextSt = String(inc?.status || '')
+    const prevTxt = String(m?.text || m?.message || m?.body || '')
+    const nextTxt = String(inc?.text || inc?.message || inc?.body || '')
+    if (prevTs !== nextTs || prevSt !== nextSt || prevTxt !== nextTxt) changed = true
+    merged.push({ ...m, ...inc })
+  }
+  const existingIds = new Set(merged.map((m) => String(m?.id || '')))
+  for (const m of itemsAsc) {
+    const id = String(m?.id || '')
+    if (id && !existingIds.has(id)) {
+      merged.push(m)
+      changed = true
+    }
+  }
+  if (!changed) return existing
+  return dedupeDmThreadMessagesExact(merged).filter((m) => !deletedMap[String(m?.id || '')])
+}
+
+function mergeDmThreadInitial(existing, itemsAsc, deletedMap) {
+  if (!Array.isArray(existing) || !existing.length) return dedupeDmThreadMessagesExact(itemsAsc)
+  const pending = existing.filter(
+    (m) =>
+      String(m?.status || '') === 'sending' ||
+      String(m?.id || '').startsWith('tmp_dm_')
+  )
+  if (!pending.length) return itemsAsc
+  const existingIds = new Set(itemsAsc.map((m) => String(m?.id || '')))
+  const add = pending
+    .filter((m) => {
+      const id = String(m?.id || '')
+      return id && !existingIds.has(id)
+    })
+    .sort((a, b) => Number(a?.ts || 0) - Number(b?.ts || 0))
+  const next = add.length ? [...itemsAsc, ...add] : itemsAsc
+  return dedupeDmThreadMessagesExact(next).filter((m) => !deletedMap[String(m?.id || '')])
+}
+
+export async function dmFetchCached({
+  meId,
+  cacheRef,
+  inflightRef,
+  key,
+  url,
+  opts = {},
+  fetchImpl = fetch,
+}) {
+  if (!meId) return null
+  if (opts?.force) cacheRef.current.delete(key)
+  if (!opts?.force && cacheRef.current.has(key)) return cacheRef.current.get(key)
+  if (inflightRef.current.has(key)) return inflightRef.current.get(key)
+  const p = (async () => {
+    const r = await fetchImpl(url, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: { 'x-forum-user-id': String(meId) },
+    })
+    const j = await r.json().catch(() => null)
+    return j
+  })()
+  inflightRef.current.set(key, p)
+  try {
+    const j = await p
+    cacheRef.current.set(key, j)
+    return j
+  } finally {
+    inflightRef.current.delete(key)
+  }
+}
+
+export async function loadDmDialogs(cursor = null, opts = {}, ctx = {}) {
+  const {
+    meId,
+    dmDialogsHasMore,
+    dmDialogsLoadingRef,
+    dmDialogsLastFetchRef,
+    DM_BG_THROTTLE_MS,
+    DM_ACTIVE_THROTTLE_MS,
+    DM_PAGE_SIZE,
+    setDmDialogsLoading,
+    dmFetchCachedFn,
+    dmDialogsCacheRef,
+    dmDialogsInFlightRef,
+    setDmDialogs,
+    setDmDialogsCursor,
+    setDmDialogsHasMore,
+    setDmDialogsLoaded,
+    dmDeletedKey,
+    setDmDeletedMap,
+  } = ctx
+
+  if (!meId) return
+  const isPaginating = !!cursor
+  if (cursor && !dmDialogsHasMore && !opts.force) return
+  if (dmDialogsLoadingRef.current) return
+
+  const nowTs = Date.now()
+  const isBackground = !!opts.background
+  const throttleMs = Number(
+    opts.throttleMs || (isBackground ? DM_BG_THROTTLE_MS : DM_ACTIVE_THROTTLE_MS)
+  )
+  const shouldThrottle = !isPaginating && (opts.refresh || isBackground)
+  if (shouldThrottle && throttleMs > 0) {
+    const throttleKey = isBackground ? 'bg' : 'active'
+    const last = Number(dmDialogsLastFetchRef.current?.[throttleKey] || 0)
+    if (nowTs - last < throttleMs) return
+    dmDialogsLastFetchRef.current = {
+      ...(dmDialogsLastFetchRef.current || {}),
+      [throttleKey]: nowTs,
+    }
+  }
+
+  const showLoading = !opts.refresh && !opts.background && !isPaginating
+  dmDialogsLoadingRef.current = true
+  if (showLoading) setDmDialogsLoading(true)
+
+  const qs = new URLSearchParams()
+  qs.set('limit', String(DM_PAGE_SIZE))
+  if (cursor) qs.set('cursor', String(cursor))
+  const key = `dlg:${meId}:${cursor || ''}:${DM_PAGE_SIZE}`
+  try {
+    const j = await dmFetchCachedFn(
+      dmDialogsCacheRef,
+      dmDialogsInFlightRef,
+      key,
+      `/api/dm/dialogs?${qs.toString()}`,
+      opts
+    )
+    if (j?.ok) {
+      const serverDeleted = normalizeServerDeletedDialogs(j.deletedDialogs)
+      if (Object.keys(serverDeleted).length) {
+        persistDeletedDialogs(dmDeletedKey, serverDeleted)
+        setDmDeletedMap?.((prev) => {
+          const next = { ...(prev || {}) }
+          let changed = false
+          for (const [key, value] of Object.entries(serverDeleted)) {
+            const ts = Number(value || 0)
+            if (!key || !ts || Number(next[key] || 0) >= ts) continue
+            next[key] = ts
+            changed = true
+          }
+          return changed ? next : prev
+        })
+      }
+      const incoming = filterServerDeletedDialogs(
+        dedupeDmDialogs(Array.isArray(j.items) ? j.items : [], meId),
+        serverDeleted,
+        meId,
+      )
+      setDmDialogs((prev) => {
+        const existing = filterServerDeletedDialogs(Array.isArray(prev) ? prev : [], serverDeleted, meId)
+        const merged = mergeDmDialogs(existing, incoming, meId, { preserveMissingExisting: true })
+        return filterServerDeletedDialogs(merged, serverDeleted, meId)
+      })
+      setDmDialogsCursor(j.nextCursor || null)
+      setDmDialogsHasMore(!!j.hasMore)
+      setDmDialogsLoaded(true)
+    }
+  } finally {
+    dmDialogsLoadingRef.current = false
+    if (showLoading) setDmDialogsLoading(false)
+  }
+}
+
+export async function loadDmThread(withUserId, cursor = null, opts = {}, ctx = {}) {
+  const {
+    meId,
+    dmThreadHasMore,
+    dmThreadLoadingRef,
+    dmThreadLastFetchRef,
+    DM_ACTIVE_THROTTLE_MS,
+    DM_PAGE_SIZE,
+    setDmThreadLoading,
+    dmFetchCachedFn,
+    dmThreadCacheRef,
+    dmThreadInFlightRef,
+    dmDeletedMsgMap,
+    dmDeletedKey,
+    setDmDeletedMap,
+    setDmDialogs,
+    setDmWithUserId,
+    setDmThreadItems,
+    setDmThreadCursor,
+    setDmThreadHasMore,
+    setDmThreadSeenTs,
+  } = ctx
+
+  const uid = String(withUserId || '').trim()
+  if (!meId || !uid) return
+  const isPaginating = !!cursor
+  if (cursor && !dmThreadHasMore && !opts.force) return
+  if (dmThreadLoadingRef.current) return
+
+  const nowTs = Date.now()
+  const throttleMs = Number(opts.throttleMs || DM_ACTIVE_THROTTLE_MS)
+  const shouldThrottle = !isPaginating && !!opts.refresh
+  if (shouldThrottle && throttleMs > 0) {
+    const tKey = `refresh:${uid}`
+    const lastTs = Number(dmThreadLastFetchRef.current.get(tKey) || 0)
+    if (nowTs - lastTs < throttleMs) return
+    dmThreadLastFetchRef.current.set(tKey, nowTs)
+  }
+
+  const showLoading = !opts.refresh && !isPaginating
+  dmThreadLoadingRef.current = true
+  if (showLoading) setDmThreadLoading(true)
+
+  const qs = new URLSearchParams()
+  qs.set('limit', String(DM_PAGE_SIZE))
+  qs.set('dir', 'older')
+  qs.set('with', uid)
+  if (cursor) qs.set('cursor', String(cursor))
+  const key = `thr:${meId}:${uid}:${cursor || ''}:${DM_PAGE_SIZE}`
+  try {
+    const j = await dmFetchCachedFn(
+      dmThreadCacheRef,
+      dmThreadInFlightRef,
+      key,
+      `/api/dm/thread?${qs.toString()}`,
+      opts
+    )
+    if (j?.ok) {
+      const deletedMap = dmDeletedMsgMap || {}
+      const rawItems = Array.isArray(j.items) ? j.items : []
+      const dialogDeletedAt = Number(j.dialogDeletedAt || 0)
+      if (dialogDeletedAt && !rawItems.length && !cursor) {
+        const serverDeleted = { [uid]: dialogDeletedAt }
+        persistDeletedDialogs(dmDeletedKey, serverDeleted)
+        setDmDeletedMap?.((prev) => {
+          const next = { ...(prev || {}) }
+          if (Number(next[uid] || 0) >= dialogDeletedAt) return prev
+          next[uid] = dialogDeletedAt
+          return next
+        })
+        setDmDialogs?.((prev) => (Array.isArray(prev) ? prev.filter((d) => !dialogMatchesUser(d, uid, meId)) : prev))
+        setDmWithUserId?.((prev) => (String(prev || '') === uid ? '' : prev))
+      }
+      const items = rawItems.filter((m) => !deletedMap[String(m?.id || '')])
+      const itemsAsc = items.slice().reverse()
+      setDmThreadItems((prev) => {
+        const existing = Array.isArray(prev) ? prev : []
+        if (cursor) return mergeDmThreadOlderPage(existing, itemsAsc, deletedMap)
+        if (opts?.refresh) return mergeDmThreadRefresh(existing, itemsAsc, deletedMap)
+        return mergeDmThreadInitial(existing, itemsAsc, deletedMap)
+      })
+      setDmThreadCursor(j.nextCursor || null)
+      setDmThreadHasMore(!!j.hasMore)
+      setDmThreadSeenTs(Number(j.peerSeenTs || 0))
+    }
+  } finally {
+    dmThreadLoadingRef.current = false
+    if (showLoading) setDmThreadLoading(false)
+  }
+}

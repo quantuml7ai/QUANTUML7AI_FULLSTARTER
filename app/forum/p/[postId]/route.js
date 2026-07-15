@@ -1,0 +1,612 @@
+// app/forum/p/[postId]/route.js
+// OG/Twitter preview + human redirect entrypoint.
+
+import { redis, K, safeParse } from '../../../api/forum/_db.js'
+import forumPrimary from '../../../../lib/mongo/forum-primary.cjs'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
+export const runtime = 'nodejs'
+
+const QCAST_OG_IMAGE_REL = '/audio/Q-Cast.png'
+const FALLBACK_OG_IMAGE_REL = '/metab/forum1.png'
+const MAX_CHAIN_DEPTH = 60
+const VERSION_PARAM = 'v'
+const SHARE_VERSION_PARAM = 'sv'
+const RAW_META_VERSION =
+  process.env.NEXT_PUBLIC_META_VERSION ||
+  process.env.NEXT_PUBLIC_OG_VERSION ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.VERCEL_DEPLOYMENT_ID ||
+  process.env.npm_package_version ||
+  '1'
+
+function normalizeVersion(value, fallback = '1') {
+  const out = String(value || '').trim().slice(0, 80)
+  return out || fallback
+}
+
+const META_VERSION = normalizeVersion(RAW_META_VERSION)
+
+function withQueryParam(rawUrl, key, value) {
+  const url = String(rawUrl || '').trim()
+  const paramKey = String(key || '').trim()
+  const paramValue = String(value || '').trim()
+  if (!url || !paramKey || !paramValue) return url
+
+  const hashIndex = url.indexOf('#')
+  const beforeHash = hashIndex >= 0 ? url.slice(0, hashIndex) : url
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : ''
+
+  const queryIndex = beforeHash.indexOf('?')
+  const pathname = queryIndex >= 0 ? beforeHash.slice(0, queryIndex) : beforeHash
+  const queryString = queryIndex >= 0 ? beforeHash.slice(queryIndex + 1) : ''
+
+  const params = new URLSearchParams(queryString)
+  params.set(paramKey, paramValue)
+  const nextQuery = params.toString()
+  return `${pathname}${nextQuery ? `?${nextQuery}` : ''}${hash}`
+}
+
+function withMetaVersion(rawUrl, version = META_VERSION) {
+  return withQueryParam(rawUrl, VERSION_PARAM, normalizeVersion(version, META_VERSION))
+}
+
+function buildMetaVersionToken(...parts) {
+  const items = parts
+    .map((x) => String(x || '').trim().slice(0, 80))
+    .filter(Boolean)
+  return normalizeVersion(items.join('-'), META_VERSION)
+}
+
+function escapeAttr(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+function toPlainText(raw) {
+  const s0 = String(raw || '')
+  if (!s0) return ''
+  const s1 = s0
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+  return s1
+    // remove urls and storage details from meta text (keep only meaningful body text)
+    .replace(/\b(?:https?:\/\/|blob:|tg:\/\/|viber:\/\/|whatsapp:\/\/)[^\s<>'")]+/gi, ' ')
+    .replace(/\/uploads\/[A-Za-z0-9._\-\/]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function truncateOnWord(s, maxLen = 220) {
+  const text = String(s || '').trim()
+  const lim = Math.max(60, Math.min(320, Number(maxLen) || 220))
+  if (text.length <= lim) return text
+  const cut = text.slice(0, lim)
+  const lastSpace = cut.lastIndexOf(' ')
+  const out = (lastSpace >= 40 ? cut.slice(0, lastSpace) : cut).trim()
+  return out ? `${out}...` : `${cut.trim()}...`
+}
+
+function extractPreviewImageUrl(text) {
+  const s = String(text || '')
+  if (!s) return ''
+  const re =
+    /(?:https?:\/\/[^\s<>'")]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?|\/uploads\/[A-Za-z0-9._\-\/]+?\.(?:webp|png|jpe?g|gif|avif|bmp|svg)(?:[?#][^\s<>'")]+)?)/i
+  const m = s.match(re)
+  return m ? String(m[0] || '').trim() : ''
+}
+
+// QL7_OG_PREVIEW_POST_IMAGE_FIELDS_V1
+// OG crawlers use og:image as the visible card thumbnail. Prefer real post poster/image fields
+// before falling back to text parsing, so video/image previews can be rendered no-crop.
+function normalizeImageCandidate(raw) {
+  return String(raw || '').trim().replace(/[)\].,!?;:]+$/g, '')
+}
+
+function normalizedImagePath(raw) {
+  const s = normalizeImageCandidate(raw)
+  if (!s) return ''
+  try {
+    if (/^https?:\/\//i.test(s)) {
+      const u = new URL(s)
+      return String((u.pathname || '') + (u.search || '') + (u.hash || '')).toLowerCase()
+    }
+  } catch {}
+  return s.toLowerCase()
+}
+
+function isImageUrlLike(raw, kind = '') {
+  const s = normalizedImagePath(raw)
+  const k = String(kind || '').toLowerCase()
+  if (!s) return false
+  if (k.startsWith('image/') || k === 'image' || k === 'poster' || k === 'thumbnail') return true
+  const base = String(s || '').split(/[?#]/)[0] || ''
+  return /\.(?:webp|png|jpe?g|gif|avif|bmp|svg)$/i.test(base)
+}
+
+function imageUrlCandidatesFromPost(post = {}) {
+  const out = []
+  const push = (value, kind = '') => {
+    const url = normalizeImageCandidate(value)
+    if (url) out.push({ url, kind: String(kind || '').trim().toLowerCase() })
+  }
+
+  push(post?.posterUrl, 'poster')
+  push(post?.thumbnailUrl, 'thumbnail')
+  push(post?.thumbUrl, 'thumbnail')
+  push(post?.previewImageUrl, 'image')
+  push(post?.imageUrl, 'image')
+  push(post?.coverUrl, 'image')
+  push(post?.poster, 'poster')
+  push(post?.thumbnail, 'thumbnail')
+  push(post?.thumb, 'thumbnail')
+
+  const media = post?.media && typeof post.media === 'object' ? post.media : null
+  if (media) {
+    push(media.posterUrl, 'poster')
+    push(media.thumbnailUrl, 'thumbnail')
+    push(media.thumbUrl, 'thumbnail')
+    push(media.previewImageUrl, 'image')
+    push(media.imageUrl, 'image')
+    push(media.coverUrl, 'image')
+    push(media.poster, 'poster')
+    push(media.thumbnail, 'thumbnail')
+    push(media.thumb, 'thumbnail')
+    push(media.url, media.kind || media.type || media.mediaKind || media.mime || media.contentType)
+  }
+
+  const attachments = Array.isArray(post?.attachments) ? post.attachments : []
+  for (const entry of attachments) {
+    if (!entry || typeof entry !== 'object') continue
+    const kind = String(entry.kind || entry.type || entry.mediaKind || entry.mime || entry.contentType || '').trim().toLowerCase()
+    push(entry.posterUrl, 'poster')
+    push(entry.thumbnailUrl, 'thumbnail')
+    push(entry.thumbUrl, 'thumbnail')
+    push(entry.previewImageUrl, 'image')
+    push(entry.imageUrl, 'image')
+    push(entry.coverUrl, 'image')
+    push(entry.poster, 'poster')
+    push(entry.thumbnail, 'thumbnail')
+    push(entry.thumb, 'thumbnail')
+    push(entry.url, kind)
+  }
+
+  return out
+}
+
+function extractPreviewImageUrlFromPost(post, text) {
+  const direct = imageUrlCandidatesFromPost(post).find((entry) => isImageUrlLike(entry.url, entry.kind))
+  return direct?.url || extractPreviewImageUrl(text)
+}
+
+function extractYouTubeId(text) {
+  const s = String(text || '')
+  if (!s) return ''
+  const m = s.match(
+    /(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{6,})/i,
+  )
+  return m ? String(m[1] || '').trim() : ''
+}
+
+function absUrl(origin, maybeRelative) {
+  const v = String(maybeRelative || '').trim()
+  if (!v) return ''
+  if (/^https?:\/\//i.test(v)) return v
+  if (v.startsWith('/')) return `${origin}${v}`
+  return v
+}
+
+// QL7_DEEPLINK_OG_VIDEO_PRIORITY_V1
+// QL7_DEEPLINK_OG_VIDEO_REGEX_SAFE_V1A
+// WebM is ambiguous: MediaRecorder video and voice/QCast can both use .webm.
+// Generic recorder .webm is treated as video unless the URL/post fields clearly say audio, voice, or qcast.
+function normalizeMediaUrl(raw) {
+  return String(raw || '').trim().replace(/[)\].,!?;:]+$/g, '')
+}
+
+function normalizedMediaPath(raw) {
+  const s = normalizeMediaUrl(raw)
+  if (!s) return ''
+  try {
+    if (/^https?:\/\//i.test(s)) {
+      const u = new URL(s)
+      return String((u.pathname || '') + (u.search || '') + (u.hash || '')).toLowerCase()
+    }
+  } catch {}
+  return s.toLowerCase()
+}
+
+function stripQueryHash(raw) {
+  return String(raw || '').split(/[?#]/)[0] || ''
+}
+
+function mediaUrlCandidatesFromPost(post = {}) {
+  const out = []
+  const push = (value, kind = '') => {
+    const url = normalizeMediaUrl(value)
+    if (url) out.push({ url, kind: String(kind || '').trim().toLowerCase() })
+  }
+
+  push(post?.videoUrl, 'video')
+  push(post?.audioUrl, 'audio')
+  push(post?.posterUrl, 'image')
+  push(post?.mediaUrl, post?.mediaKind || post?.kind || post?.type || post?.mime || post?.contentType)
+
+  const media = post?.media && typeof post.media === 'object' ? post.media : null
+  if (media) {
+    push(media.videoUrl, 'video')
+    push(media.audioUrl, 'audio')
+    push(media.posterUrl, 'image')
+    push(media.url, media.kind || media.type || media.mediaKind || media.mime || media.contentType)
+  }
+
+  const attachments = Array.isArray(post?.attachments) ? post.attachments : []
+  for (const entry of attachments) {
+    if (!entry || typeof entry !== 'object') continue
+    const kind = String(entry.kind || entry.type || entry.mediaKind || entry.mime || entry.contentType || '').trim().toLowerCase()
+    push(entry.videoUrl, 'video')
+    push(entry.audioUrl, 'audio')
+    push(entry.posterUrl, 'image')
+    push(entry.url, kind)
+  }
+
+  return out
+}
+
+function hasMediaExtension(raw, extensions) {
+  const base = stripQueryHash(normalizedMediaPath(raw))
+  return extensions.some((ext) => base.endsWith(ext))
+}
+
+function hasExplicitVideoHint(raw, kind = '') {
+  const s = normalizedMediaPath(raw)
+  const k = String(kind || '').toLowerCase()
+  if (k.startsWith('video/') || k === 'video' || k.includes('forum_video')) return true
+  return (
+    s.includes('/forum/video') ||
+    s.includes('/videos/') ||
+    s.includes('/forum_video') ||
+    s.includes('video-') ||
+    s.includes('kind=forum_video') ||
+    s.includes('mediakind=forum_video') ||
+    s.includes('contenttype=video%2f') ||
+    s.includes('type=video%2f')
+  )
+}
+
+function hasExplicitAudioHint(raw, kind = '') {
+  const s = normalizedMediaPath(raw)
+  const k = String(kind || '').toLowerCase()
+  if (k.startsWith('audio/') || k === 'audio' || k === 'qcast' || k.includes('qcast')) return true
+  return (
+    s.includes('/uploads/audio/') ||
+    s.includes('/forum/voice') ||
+    s.includes('/voice-') ||
+    s.includes('/voice/') ||
+    s.includes('qcast') ||
+    s.includes('audio') ||
+    s.includes('kind=voice') ||
+    s.includes('kind=audio') ||
+    s.includes('mediakind=audio') ||
+    s.includes('contenttype=audio%2f') ||
+    s.includes('type=audio%2f')
+  )
+}
+
+function isVideoUrlLike(raw, kind = '') {
+  const s = normalizeMediaUrl(raw)
+  if (!s) return false
+  if (hasExplicitVideoHint(s, kind)) return true
+  if (hasMediaExtension(s, ['.mp4', '.mov', '.m4v', '.ogv'])) return true
+  // Generic .webm shared from the forum recorder is a video unless it is explicitly audio/voice/QCast.
+  if (hasMediaExtension(s, ['.webm']) && !hasExplicitAudioHint(s, kind)) return true
+  return false
+}
+
+function isAudioUrlLike(raw, kind = '') {
+  const s = normalizeMediaUrl(raw)
+  if (!s) return false
+  if (isVideoUrlLike(s, kind)) return false
+  if (hasExplicitAudioHint(s, kind)) return true
+  if (hasMediaExtension(s, ['.ogg', '.mp3', '.m4a', '.wav'])) return true
+  if (hasMediaExtension(s, ['.webm']) && hasExplicitAudioHint(s, kind)) return true
+  return false
+}
+
+function extractMediaUrlCandidatesFromText(text) {
+  const s = String(text || '')
+  if (!s) return []
+  const re = /(?:https?:\/\/[^\s<>'")]+|\/uploads\/[^\s<>'")]+|\/forum\/voice[^\s<>'")]*)/ig
+  return Array.from(s.matchAll(re)).map((m) => normalizeMediaUrl(m[0])).filter(Boolean)
+}
+
+function extractPreviewVideoUrl(text) {
+  return extractMediaUrlCandidatesFromText(text).find((url) => isVideoUrlLike(url)) || ''
+}
+
+function extractPreviewVideoUrlFromPost(post, text) {
+  const candidates = mediaUrlCandidatesFromPost(post)
+  const direct = candidates.find((entry) => isVideoUrlLike(entry.url, entry.kind))
+  return direct?.url || extractPreviewVideoUrl(text)
+}
+
+function extractPreviewAudioUrl(text) {
+  return extractMediaUrlCandidatesFromText(text).find((url) => isAudioUrlLike(url)) || ''
+}
+
+function extractPreviewAudioUrlFromPost(post, text) {
+  const candidates = mediaUrlCandidatesFromPost(post)
+  const direct = candidates.find((entry) => isAudioUrlLike(entry.url, entry.kind))
+  return direct?.url || extractPreviewAudioUrl(text)
+}
+
+function hasAudioInText(text) {
+  return !!extractPreviewAudioUrl(text)
+}
+
+function videoMime(url) {
+  const s = String(url || '').toLowerCase()
+  if (s.includes('.webm')) return 'video/webm'
+  if (s.includes('.ogv')) return 'video/ogg'
+  if (s.includes('.mov')) return 'video/quicktime'
+  // mp4/m4v default
+  return 'video/mp4'
+}
+
+function isWhatsAppCrawler(userAgentRaw) {
+  const ua = String(userAgentRaw || '').toLowerCase()
+  if (!ua) return false
+  return (
+    ua.includes('whatsapp') ||
+    ua.includes('facebookexternalhit') ||
+    ua.includes('facebot') ||
+    ua.includes('meta-externalagent') ||
+    ua.includes('meta-externalfetcher')
+  )
+}
+
+function buildWaPreviewImageUrl(origin, srcUrl, version, kind = '') {
+  const base = `${origin}/api/forum/wa-preview`
+  const withSrc = withQueryParam(base, 'src', srcUrl)
+  const withVersion = withQueryParam(withSrc, VERSION_PARAM, version)
+  const previewKind = String(kind || '').trim()
+  return previewKind ? withQueryParam(withVersion, 'kind', previewKind) : withVersion
+}
+
+async function readPostById(postId) {
+  const id = String(postId || '').trim()
+  if (!id) return null
+  const mongoPost = await forumPrimary.getPost(id).catch(() => null)
+  if (mongoPost?.id) return mongoPost
+  const raw = await redis.get(K.postKey(id)).catch(() => null)
+  return raw ? safeParse(raw) : null
+}
+
+export async function GET(req, { params }) {
+  const postId = String(params?.postId || '').trim()
+  const url = new URL(req.url)
+  const origin = url.origin
+  const userAgent = req.headers.get('user-agent') || ''
+  const waCrawler = isWhatsAppCrawler(userAgent)
+  const shareVersion = normalizeVersion(url.searchParams.get(SHARE_VERSION_PARAM), '')
+
+  const canonicalUrl = `${origin}/forum/p/${encodeURIComponent(postId)}`
+  const ogUrlRaw = shareVersion
+    ? withQueryParam(canonicalUrl, SHARE_VERSION_PARAM, shareVersion)
+    : canonicalUrl
+
+  let post = null
+  try {
+    post = await readPostById(postId)
+  } catch {
+    post = null
+  }
+
+  const found = !!post && !!post?.id
+  const topicId = found && post?.topicId != null ? String(post.topicId) : ''
+
+  let rootId = found ? String(post?.id || postId) : ''
+  if (found) {
+    try {
+      const visited = new Set([String(postId)])
+      let cur = post
+      for (let depth = 0; depth < MAX_CHAIN_DEPTH; depth += 1) {
+        const parentIdRaw = cur?.parentId
+        const parentId = parentIdRaw != null ? String(parentIdRaw).trim() : ''
+        if (!parentId) break
+        if (visited.has(parentId)) break
+        visited.add(parentId)
+
+        const parent = await readPostById(parentId)
+        if (!parent) {
+          rootId = parentId
+          break
+        }
+
+        rootId = String(parent?.id || parentId).trim() || parentId
+        cur = parent
+      }
+    } catch {}
+  }
+
+  const redirectUrl = `${origin}/forum?post=${encodeURIComponent(postId)}${
+    topicId ? `&topic=${encodeURIComponent(topicId)}` : ''
+  }${rootId ? `&root=${encodeURIComponent(rootId)}` : ''}`
+
+  const nick = found ? String(post?.nickname || '').trim() : ''
+  const titleRaw = found
+    ? (nick ? `Post by @${nick.replace(/^@/, '')}` : 'Forum post')
+    : 'Post not found'
+
+  const plain = found ? toPlainText(post?.text || '') : ''
+  const descRaw = found
+    ? (truncateOnWord(plain, 220) || 'Forum post')
+    : 'This post does not exist or was deleted.'
+
+  const textRaw = found ? String(post?.text || '') : ''
+  const ytId = found ? extractYouTubeId(textRaw) : ''
+  const ytEmbedUrl = ytId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(ytId)}` : ''
+  const ytThumbUrl = ytId ? `https://i.ytimg.com/vi/${encodeURIComponent(ytId)}/hqdefault.jpg` : ''
+
+  const imgRel = found ? extractPreviewImageUrlFromPost(post, textRaw) : ''
+  const vidRel = found ? extractPreviewVideoUrlFromPost(post, textRaw) : ''
+  const audioRel = found ? extractPreviewAudioUrlFromPost(post, textRaw) : ''
+  const isAudioPost = found ? Boolean(audioRel && !vidRel && !ytEmbedUrl) : false
+
+  // QL7_DEEPLINK_OG_VIDEO_PRIORITY_V1
+  // Media priority for share previews:
+  // - YouTube: try to provide a playable embed via og:video (fallback thumbnail via og:image)
+  // - Video file: og:video points to the real file URL, including recorder .webm
+  // - Image: og:image points to the real image URL
+  // - Audio/QCast: only when the post has a true audio/voice URL and no video URL
+  // - No media: forum default preview image
+  const chosen = (() => {
+    if (ytEmbedUrl) {
+      return {
+        kind: 'youtube',
+        imageRel: ytThumbUrl || FALLBACK_OG_IMAGE_REL,
+        videoUrl: ytEmbedUrl,
+        videoType: 'text/html',
+      }
+    }
+    if (vidRel) {
+      const v = absUrl(origin, vidRel)
+      return {
+        kind: 'video',
+        imageRel: imgRel || FALLBACK_OG_IMAGE_REL,
+        videoUrl: v,
+        videoType: videoMime(v),
+      }
+    }
+    if (imgRel) {
+      return { kind: 'image', imageRel: imgRel, videoUrl: '', videoType: '' }
+    }
+    if (isAudioPost) {
+      // IMPORTANT: true audio/QCast posts use a fixed OG image, but video .webm must never fall here.
+      return { kind: 'audio', imageRel: QCAST_OG_IMAGE_REL, videoUrl: '', videoType: '' }
+    }
+    return { kind: 'default', imageRel: FALLBACK_OG_IMAGE_REL, videoUrl: '', videoType: '' }
+  })()
+
+  const lastModifiedMs = found ? Number(post?.ts || 0) || Date.now() : Date.now()
+  const imageVersion = buildMetaVersionToken(
+    META_VERSION,
+    shareVersion,
+    postId,
+    String(lastModifiedMs),
+    chosen.imageRel,
+  )
+  const imageBaseUrl = absUrl(origin, chosen.imageRel)
+  // QL7_OG_PREVIEW_MESSENGER_NO_CROP_CONTAIN_V2
+  // Every crawler/messenger must receive the same 1200x630 no-crop preview canvas.
+  // Telegram used to receive the raw Q-Cast image directly, so it cropped/zoomed it as cover.
+  // The existing wa-preview renderer draws blurred side fields + contained foreground.
+  const waVideoPost = waCrawler && (chosen.kind === 'video' || chosen.kind === 'youtube')
+  const fallbackImageAbs = absUrl(origin, FALLBACK_OG_IMAGE_REL)
+  const qcastImageAbs = absUrl(origin, QCAST_OG_IMAGE_REL)
+  const hasRealPreviewImage = Boolean(imageBaseUrl && imageBaseUrl !== fallbackImageAbs && imageBaseUrl !== qcastImageAbs)
+  const sourceForMessengerPreview = waVideoPost
+    ? (hasRealPreviewImage ? imageBaseUrl : fallbackImageAbs)
+    : (imageBaseUrl || fallbackImageAbs)
+  const messengerPreviewKind = chosen.kind === 'audio' || imageBaseUrl === qcastImageAbs ? 'qcast' : ''
+  const messengerPreviewImageUrl = sourceForMessengerPreview
+    ? buildWaPreviewImageUrl(origin, sourceForMessengerPreview, imageVersion, messengerPreviewKind)
+    : ''
+  const imageUrl = messengerPreviewImageUrl || (imageBaseUrl ? withMetaVersion(imageBaseUrl, imageVersion) : '')
+  const videoUrlRaw = String(chosen.videoUrl || '').trim()
+  const videoTypeRaw = String(chosen.videoType || '').trim()
+  const exposeVideoMeta = !(waCrawler && videoUrlRaw)
+  const videoUrl = exposeVideoMeta ? videoUrlRaw : ''
+  const videoType = exposeVideoMeta ? videoTypeRaw : ''
+  const twitterCard = imageUrl ? 'summary_large_image' : 'summary'
+
+  const cacheControl = 'no-store, no-cache, must-revalidate, max-age=0'
+
+  const headers = new Headers({
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': cacheControl,
+    pragma: 'no-cache',
+    expires: '0',
+    'last-modified': new Date(lastModifiedMs).toUTCString(),
+  })
+  if (!waCrawler) {
+    headers.set('x-robots-tag', 'noindex, nofollow')
+  }
+
+  const title = escapeAttr(titleRaw.slice(0, 80))
+  const desc = escapeAttr(descRaw.slice(0, 240))
+  const canonicalEsc = escapeAttr(canonicalUrl)
+  const ogUrl = escapeAttr(ogUrlRaw)
+  const ogImg = escapeAttr(imageUrl)
+  const ogVid = escapeAttr(videoUrl)
+  const ogVidType = escapeAttr(videoType)
+  const redirectEsc = escapeAttr(redirectUrl)
+
+  const html = `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>${title}</title>
+    <meta name="description" content="${desc}"/>
+    <link rel="canonical" href="${canonicalEsc}"/>
+
+    <meta property="og:title" content="${title}"/>
+    <meta property="og:description" content="${desc}"/>
+    <meta property="og:url" content="${ogUrl}"/>
+    <meta property="og:site_name" content="Q-Line"/>
+    <meta property="og:type" content="${videoUrl ? 'video.other' : 'article'}"/>
+    <meta property="og:image" content="${ogImg}"/>
+    <meta property="og:image:secure_url" content="${ogImg}"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    ${videoUrl ? `<meta property="og:video" content="${ogVid}"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:secure_url" content="${ogVid}"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:type" content="${ogVidType}"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:width" content="1280"/>` : ''}
+    ${videoUrl ? `<meta property="og:video:height" content="720"/>` : ''}
+
+    <meta name="twitter:card" content="${twitterCard}"/>
+    <meta name="twitter:url" content="${ogUrl}"/>
+    <meta name="twitter:title" content="${title}"/>
+    <meta name="twitter:description" content="${desc}"/>
+    <meta name="twitter:image" content="${ogImg}"/>
+
+    ${waCrawler ? '' : `<meta http-equiv="refresh" content="1;url=${redirectEsc}"/>`}
+    <style>
+      body{margin:0;background:#060a12;color:#eaf4ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+      .wrap{max-width:720px;margin:0 auto;padding:24px}
+      a{color:#8fd0ff}
+      .card{border:1px solid rgba(120,170,255,.24);border-radius:16px;padding:16px;background:rgba(10,16,28,.55)}
+      .t{font-weight:700;margin:0 0 6px}
+      .d{opacity:.88;margin:0 0 14px}
+      .btn{display:inline-block;padding:10px 12px;border-radius:12px;border:1px solid rgba(120,170,255,.28);text-decoration:none;background:rgba(10,16,28,.35)}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <p class="t">${title}</p>
+        <p class="d">${desc}</p>
+        <a class="btn" href="${redirectEsc}">Open post</a>
+      </div>
+    </div>
+    ${waCrawler ? '' : `<script>
+      try{ window.location.replace(${JSON.stringify(redirectUrl)}); }catch(e){}
+    </script>`}
+  </body>
+</html>`
+
+  return new Response(html, { status: found ? 200 : 404, headers })
+}

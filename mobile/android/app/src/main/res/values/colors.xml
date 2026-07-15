@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="quantum_bg">#020812</color>
+    <color name="quantum_cyan">#4FEAFF</color>
+    <color name="quantum_gold">#FFD45A</color>
+    <color name="ic_launcher_background">#020812</color>
+</resources>
