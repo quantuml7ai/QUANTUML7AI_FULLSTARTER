@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const require = createRequire(import.meta.url)
 const battleChatPrimary = require('../../../lib/mongo/battlecoin-chat-primary.cjs')
+const battleChatAuth = require('../../../lib/auth/battlecoin-chat-auth.cjs')
 const profilePrimary = require('../../../lib/mongo/profile-primary.cjs')
 
 function clone(value) {
@@ -128,13 +129,17 @@ describe('Battle Chat Mongo primary adapter', () => {
   let db
 
   beforeEach(() => {
+    vi.restoreAllMocks()
     db = createDb()
     battleChatPrimary.__setTestDb(db)
-    vi.spyOn(profilePrimary, 'readProfile').mockImplementation(async (accountId) => {
+    profilePrimary.__setTestDb(db)
+    const readProfileMock = async (accountId) => {
       if (accountId === '0xprofile') return { nickname: 'Trader One', avatar: '/uploads/trader.png', vipActive: true, vipUntil: Date.now() + 86_400_000 }
       if (accountId === '0xtech') return { nickname: '0x0000000000000000000000000000000000000001', avatar: '' }
       return {}
-    })
+    }
+    vi.spyOn(profilePrimary, 'readProfile').mockImplementation(readProfileMock)
+    vi.spyOn(profilePrimary, 'getUserProfile').mockImplementation(readProfileMock)
   })
 
   test('stores messages in Mongo and lists them oldest to newest', async () => {
@@ -281,5 +286,141 @@ describe('Battle Chat Mongo primary adapter', () => {
       avatar: '/anonymous/anonymous.png',
     })
     expect(JSON.stringify(sent.message.author)).not.toContain('telegram:123456')
+  })
+
+  test('hydrates linked Telegram authors from the canonical profile instead of stale anonymous snapshots', async () => {
+    vi.restoreAllMocks()
+    profilePrimary.__setTestDb(db)
+    await db.collection('profiles').insertOne({
+      _id: 'profile:wallet-linked',
+      accountId: 'wallet-linked',
+      nickname: 'QL7 AI GLOBAL',
+      icon: '/uploads/ql7.png',
+      updatedAtMs: 1000,
+      updatedAt: new Date(1000).toISOString(),
+    })
+    await db.collection('account_aliases').insertOne({
+      _id: 'alias:telegram:777001',
+      alias: 'telegram:777001',
+      aliasId: 'telegram:777001',
+      aliasValue: '777001',
+      accountId: 'wallet-linked',
+      canonicalAccountId: 'wallet-linked',
+      updatedAtMs: 1000,
+      updatedAt: new Date(1000).toISOString(),
+    })
+    await db.collection('battlecoin_chat_messages').insertOne({
+      _id: 'linked-message',
+      messageId: 'linked-message',
+      channel: 'global',
+      status: 'visible',
+      text: 'Linked hello',
+      authorAccountId: 'wallet-linked',
+      authorIdentityIds: ['wallet-linked', 'telegram:777001', '777001'],
+      authorSnapshot: {
+        kind: 'anonymous',
+        key: 'battlechat-author:old',
+        nickname: '',
+        avatar: '/anonymous/anonymous.png',
+      },
+      likesCount: 0,
+      createdAtMs: 1000,
+      updatedAtMs: 1000,
+    })
+
+    const page = await battleChatPrimary.listBattleChatMessages({
+      viewerAccountId: 'wallet-linked',
+      viewerIdentityIds: ['telegram:777001', '777001'],
+    })
+
+    expect(page.messages[0].author).toMatchObject({
+      kind: 'profile',
+      accountId: 'wallet-linked',
+      nickname: 'QL7 AI GLOBAL',
+      avatar: '/uploads/ql7.png',
+    })
+  })
+
+  test('treats Telegram alias likes as the same viewer like and prevents duplicate increments', async () => {
+    vi.restoreAllMocks()
+    profilePrimary.__setTestDb(db)
+    await db.collection('battlecoin_chat_messages').insertOne({
+      _id: 'alias-like-message',
+      messageId: 'alias-like-message',
+      channel: 'global',
+      status: 'visible',
+      text: 'Alias like',
+      authorAccountId: 'wallet-linked',
+      authorIdentityIds: ['wallet-linked', 'telegram:777001', '777001'],
+      authorSnapshot: {
+        kind: 'profile',
+        key: 'battlechat-author:linked',
+        accountId: 'wallet-linked',
+        nickname: 'QL7 AI GLOBAL',
+        avatar: '/uploads/ql7.png',
+      },
+      likesCount: 1,
+      createdAtMs: 1000,
+      updatedAtMs: 1000,
+    })
+    await db.collection('battlecoin_chat_likes').insertOne({
+      _id: 'like:alias-like-message:telegram',
+      messageId: 'alias-like-message',
+      accountId: 'telegram:777001',
+      status: 'liked',
+      createdAtMs: 1000,
+      updatedAtMs: 1000,
+    })
+
+    const actor = { accountId: 'wallet-linked', identityIds: ['wallet-linked', 'telegram:777001', '777001'] }
+    const page = await battleChatPrimary.listBattleChatMessages({
+      viewerAccountId: actor.accountId,
+      viewerIdentityIds: actor.identityIds,
+    })
+    const likedAgain = await battleChatPrimary.toggleBattleChatLike({
+      actor,
+      messageId: 'alias-like-message',
+      like: true,
+      now: 2000,
+    })
+
+    expect(page.messages[0]).toMatchObject({ likesCount: 1, myLiked: true })
+    expect(likedAgain).toMatchObject({ ok: true, liked: true, likesCount: 1 })
+    expect(likedAgain.message.myLiked).toBe(true)
+  })
+})
+
+describe('Battle Chat auth identity bridge', () => {
+  test('prefers linked account headers over raw Telegram Mini App actor', async () => {
+    const resolveSpy = vi.spyOn(profilePrimary, 'resolveCanonicalAccountId').mockImplementation(async (raw) => {
+      if (String(raw || '') === 'telegram-linked-wallet') return '0xlinked'
+      return String(raw || '')
+    })
+    const aliasesSpy = vi.spyOn(profilePrimary, 'listAliasesForAccount').mockResolvedValue([
+      { accountId: '0xlinked', canonicalAccountId: '0xlinked', alias: 'telegram:777001', aliasValue: '777001' },
+    ])
+
+    const req = {
+      headers: {
+        get(name) {
+          const key = String(name || '').toLowerCase()
+          if (key === 'x-auth-account-id') return 'telegram-linked-wallet'
+          if (key === 'x-telegram-init-data') return 'user=%7B%22id%22%3A777001%7D&hash=fake'
+          return ''
+        },
+      },
+    }
+
+    const actor = await battleChatAuth.readOptionalBattleChatActor(req, {})
+
+    expect(actor).toMatchObject({
+      provider: 'linked-account',
+      accountId: '0xlinked',
+      rawAccountId: 'telegram-linked-wallet',
+    })
+    expect(actor.identityIds).toEqual(expect.arrayContaining(['0xlinked', 'telegram-linked-wallet']))
+
+    resolveSpy.mockRestore()
+    aliasesSpy.mockRestore()
   })
 })

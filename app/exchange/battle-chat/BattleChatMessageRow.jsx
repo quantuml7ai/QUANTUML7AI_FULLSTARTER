@@ -144,7 +144,10 @@ export default function BattleChatMessageRow({ message, t, locale, onToggleLike,
   }, [canTranslate, cleanText, locale, translation.active, translation.loading, translation.text])
 
   return (
-    <article className={styles.messageRow} tabIndex={emojiOnly ? 0 : undefined}>
+    <article
+      className={[styles.messageRow, emojiOnly ? styles.messageRowEmoji : ''].filter(Boolean).join(' ')}
+      tabIndex={emojiOnly ? 0 : undefined}
+    >
       <div className={styles.avatarColumn}>
         <div className={styles.avatarWrap}>
           <Image
@@ -174,7 +177,7 @@ export default function BattleChatMessageRow({ message, t, locale, onToggleLike,
         </button>
         <time className={styles.avatarTime}>{timeLabel}</time>
       </div>
-      <div className={styles.messageBubble}>
+      <div className={[styles.messageBubble, emojiOnly ? styles.messageBubbleEmoji : ''].filter(Boolean).join(' ')}>
         <div className={styles.messageBodyLine}>
           <p className={[styles.messageText, emojiOnly ? styles.messageTextEmoji : ''].filter(Boolean).join(' ')}>
             <span className={[emojiOnly ? styles.emojiBurst : '', emojiTone].filter(Boolean).join(' ')}>

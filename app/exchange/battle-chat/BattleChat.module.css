@@ -2349,3 +2349,46 @@
     transform: none;
   }
 }
+
+/* Emoji-only messages must stay content-sized. Do not let the animated emoji
+   body consume spare chat height on mobile/TMA or desktop. */
+.messageRowEmoji {
+  align-items: center;
+}
+
+.messageBubbleEmoji {
+  align-self: center;
+  min-height: clamp(62px, 6.4vw, 82px);
+  padding-block: 6px;
+}
+
+.messageRowEmoji .messageBodyLine {
+  min-height: 0;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.messageRowEmoji .messageTextEmoji {
+  min-height: 0;
+  line-height: 1;
+  padding-block: 0;
+}
+
+.messageRowEmoji .emojiBurst {
+  line-height: 1;
+}
+
+@media (max-width: 620px) {
+  .messageBubbleEmoji {
+    min-height: 58px;
+    padding-block: 5px;
+  }
+
+  .messageRowEmoji .messageBodyLine {
+    grid-template-columns: minmax(0, 1fr) 74px;
+  }
+
+  .messageRowEmoji .messageTextEmoji {
+    font-size: clamp(34px, 10vw, 44px);
+  }
+}

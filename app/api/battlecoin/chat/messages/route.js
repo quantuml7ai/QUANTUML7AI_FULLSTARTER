@@ -37,8 +37,8 @@ export async function GET(req) {
     const limit = url.searchParams.get('limit') || undefined
     const after = String(url.searchParams.get('after') || '').trim()
     const data = after
-      ? await battleChatPrimary.listBattleChatDelta({ since: after, limit, viewerAccountId })
-      : await battleChatPrimary.listBattleChatMessages({ limit, viewerAccountId })
+      ? await battleChatPrimary.listBattleChatDelta({ since: after, limit, viewerAccountId, viewerIdentityIds: actor?.identityIds || [] })
+      : await battleChatPrimary.listBattleChatMessages({ limit, viewerAccountId, viewerIdentityIds: actor?.identityIds || [] })
     return noStore(data)
   } catch (error) {
     return noStore({

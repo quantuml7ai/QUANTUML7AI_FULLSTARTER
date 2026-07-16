@@ -108,6 +108,29 @@ export function useBattleChat() {
   }, [loadSnapshot])
 
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    let timer = null
+    const refresh = () => {
+      if (timer) window.clearTimeout(timer)
+      timer = window.setTimeout(() => {
+        timer = null
+        if (mountedRef.current) void loadSnapshot()
+      }, 80)
+    }
+    window.addEventListener('auth:ok', refresh)
+    window.addEventListener('auth:success', refresh)
+    window.addEventListener('wallet-session:verified', refresh)
+    window.addEventListener('tg:link-status', refresh)
+    return () => {
+      if (timer) window.clearTimeout(timer)
+      window.removeEventListener('auth:ok', refresh)
+      window.removeEventListener('auth:success', refresh)
+      window.removeEventListener('wallet-session:verified', refresh)
+      window.removeEventListener('tg:link-status', refresh)
+    }
+  }, [loadSnapshot])
+
+  useEffect(() => {
     if (typeof window === 'undefined' || typeof window.EventSource !== 'function') return undefined
     let closed = false
     let es = null
