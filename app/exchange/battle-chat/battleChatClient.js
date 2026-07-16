@@ -1,6 +1,7 @@
 'use client'
 
 import { getStoredWalletSession } from '../../../lib/walletSessionClient'
+import { readAuthorizedAccountId } from '../../../lib/authActionGateClient'
 
 export const BATTLE_CHAT_INITIAL_LIMIT = 100
 export const BATTLE_CHAT_FALLBACK_FOREGROUND_MS = 9000
@@ -35,6 +36,8 @@ function tmaInitData() {
 export function battleChatAuthHeaders() {
   const session = getStoredWalletSession()
   const headers = {}
+  const authorizedAccountId = readAuthorizedAccountId()
+  if (authorizedAccountId) headers['x-auth-account-id'] = authorizedAccountId
   if (session?.token) headers['x-battlecoin-chat-session-token'] = session.token
   if (session?.walletAddress) headers['x-wallet-address'] = session.walletAddress
   if (session?.accountId) headers['x-wallet-account-id'] = session.accountId

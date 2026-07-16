@@ -2349,3 +2349,58 @@
     transform: none;
   }
 }
+
+/* Telegram/mobile emoji-only rows must stay compact: animated emoji effects
+   are visual, not layout drivers. */
+.messageRowEmoji {
+  align-items: start;
+  padding-block: 9px;
+}
+
+.messageBubbleEmoji {
+  min-height: clamp(76px, 7.5vw, 96px);
+  max-height: clamp(88px, 8.8vw, 112px);
+  padding-block: 2px;
+}
+
+.messageBodyLineEmoji {
+  flex: 0 0 auto;
+  min-height: clamp(72px, 7vw, 92px);
+  height: clamp(72px, 7vw, 92px);
+  align-items: center;
+}
+
+.messageBodyLineEmoji .messageActions {
+  align-self: center;
+  justify-content: center;
+  padding-top: 0;
+}
+
+.messageBodyLineEmoji .messageTextEmoji {
+  min-height: 0;
+  height: auto;
+  padding-block: 2px;
+  line-height: 1;
+}
+
+@media (max-width: 620px) {
+  .messageRowEmoji {
+    padding-block: 7px;
+  }
+
+  .messageBubbleEmoji {
+    min-height: 82px;
+    max-height: 96px;
+    padding-block: 1px;
+  }
+
+  .messageBodyLineEmoji {
+    min-height: 78px;
+    height: 78px;
+    grid-template-columns: minmax(0, 1fr) 84px;
+  }
+
+  .messageBodyLineEmoji .messageTextEmoji {
+    font-size: clamp(38px, 10.5vw, 50px);
+  }
+}
