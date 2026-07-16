@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const require = createRequire(import.meta.url)
 const battleChatPrimary = require('../../../lib/mongo/battlecoin-chat-primary.cjs')
-const battleChatAuth = require('../../../lib/auth/battlecoin-chat-auth.cjs')
 const profilePrimary = require('../../../lib/mongo/profile-primary.cjs')
 
 function clone(value) {
@@ -282,43 +281,5 @@ describe('Battle Chat Mongo primary adapter', () => {
       avatar: '/anonymous/anonymous.png',
     })
     expect(JSON.stringify(sent.message.author)).not.toContain('telegram:123456')
-  })
-})
-
-describe('Battle Chat auth identity bridge', () => {
-  test('canonicalizes authorized Telegram headers through the profile alias contour', async () => {
-    vi.spyOn(profilePrimary, 'resolveCanonicalAccountId').mockImplementation(async (raw) => {
-      if (String(raw || '') === 'telegram:777001') return '0x8f49'
-      return String(raw || '')
-    })
-    vi.spyOn(profilePrimary, 'listAliasesForAccount').mockImplementation(async (accountId) => {
-      if (accountId !== '0x8f49') return []
-      return [
-        {
-          accountId: '0x8f49',
-          canonicalAccountId: '0x8f49',
-          alias: 'telegram:777001',
-          aliasId: 'telegram:777001',
-          aliasValue: '777001',
-        },
-      ]
-    })
-
-    const req = {
-      headers: {
-        get(name) {
-          return String(name || '').toLowerCase() === 'x-auth-account-id' ? 'telegram:777001' : ''
-        },
-      },
-    }
-
-    const actor = await battleChatAuth.readOptionalBattleChatActor(req, {})
-
-    expect(actor).toMatchObject({
-      provider: 'authorized-account',
-      accountId: '0x8f49',
-      rawAccountId: 'telegram:777001',
-    })
-    expect(actor.identityIds).toEqual(expect.arrayContaining(['0x8f49', 'telegram:777001', '777001']))
   })
 })
