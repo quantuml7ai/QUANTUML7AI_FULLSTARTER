@@ -17,6 +17,42 @@ function pauseOtherDmThreadMedia(currentMedia) {
   } catch {}
 }
 
+const DM_VOICE_DURATION_CACHE = new Map()
+const DM_VOICE_DURATION_PROBE_TIMEOUT_MS = 4000
+
+function normalizeVoiceDuration(value) {
+  const next = Number(value || 0)
+  return Number.isFinite(next) && next > 0 && next < Number.POSITIVE_INFINITY ? next : 0
+}
+
+function readMediaDuration(media) {
+  if (!media) return 0
+  let next = normalizeVoiceDuration(media.duration)
+  if (!next && media.seekable?.length > 0) {
+    try {
+      next = normalizeVoiceDuration(media.seekable.end(media.seekable.length - 1))
+    } catch {}
+  }
+  return next
+}
+
+function readCachedVoiceDuration(src) {
+  const key = String(src || '')
+  return key ? normalizeVoiceDuration(DM_VOICE_DURATION_CACHE.get(key)) : 0
+}
+
+function rememberVoiceDuration(src, duration) {
+  const key = String(src || '')
+  const next = normalizeVoiceDuration(duration)
+  if (!key || !next) return 0
+  if (DM_VOICE_DURATION_CACHE.size > 120) {
+    const firstKey = DM_VOICE_DURATION_CACHE.keys().next().value
+    if (firstKey) DM_VOICE_DURATION_CACHE.delete(firstKey)
+  }
+  DM_VOICE_DURATION_CACHE.set(key, next)
+  return next
+}
+
 export default function DmVoicePlayer({ src, dmScope = false }) {
   const audioRef = React.useRef(null)
   const waveRef = React.useRef(null)
@@ -24,6 +60,8 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
   const rafRef = React.useRef(0)
   const draggingRef = React.useRef(false)
   const durationPollRef = React.useRef(0)
+  const durationProbeCleanupRef = React.useRef(null)
+  const srcRef = React.useRef('')
 
   const [playing, setPlaying] = React.useState(false)
   const [dur, setDur] = React.useState(0)
@@ -79,6 +117,17 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
     if (durationPollRef.current) clearInterval(durationPollRef.current)
     durationPollRef.current = 0
   }, [])
+
+  const stopDurationProbe = React.useCallback(() => {
+    const cleanup = durationProbeCleanupRef.current
+    durationProbeCleanupRef.current = null
+    if (typeof cleanup === 'function') {
+      try {
+        cleanup()
+      } catch {}
+    }
+  }, [])
+
   const syncDmMutex = React.useCallback((audio) => {
     if (!dmScope) return
     pauseOtherDmThreadMedia(audio || audioRef.current)
@@ -86,15 +135,7 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
 
   const readDuration = React.useCallback((audio) => {
     const a = audio || audioRef.current
-    if (!a) return 0
-    let next = Number(a.duration || 0)
-    if ((!Number.isFinite(next) || next <= 0 || next === Number.POSITIVE_INFINITY) && a.seekable?.length > 0) {
-      try {
-        const tail = Number(a.seekable.end(a.seekable.length - 1) || 0)
-        if (Number.isFinite(tail) && tail > 0) next = tail
-      } catch {}
-    }
-    return Number.isFinite(next) && next > 0 && next < Number.POSITIVE_INFINITY ? next : 0
+    return readMediaDuration(a)
   }, [])
 
   const syncAudioMetrics = React.useCallback((audio) => {
@@ -102,14 +143,16 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
     if (!a) return
     const nextDur = readDuration(a)
     if (nextDur > 0) {
+      rememberVoiceDuration(srcRef.current || src, nextDur)
       setDur((prev) => (Math.abs(Number(prev || 0) - nextDur) > 0.05 ? nextDur : prev))
       stopDurationPoll()
+      stopDurationProbe()
     }
     if (!draggingRef.current) {
       const t = Number(a.currentTime || 0) || 0
       setPos(t)
     }
-  }, [readDuration, stopDurationPoll])
+  }, [readDuration, src, stopDurationPoll, stopDurationProbe])
 
   const startRaf = React.useCallback(() => {
     stopRaf()
@@ -123,21 +166,114 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
     rafRef.current = requestAnimationFrame(tick)
   }, [stopRaf, syncAudioMetrics])
 
+  const startDurationProbe = React.useCallback((source) => {
+    const key = String(source || '')
+    if (!key || typeof window === 'undefined' || typeof document === 'undefined') return
+
+    const cached = readCachedVoiceDuration(key)
+    if (cached > 0) {
+      setDur((prev) => (Math.abs(Number(prev || 0) - cached) > 0.05 ? cached : prev))
+      return
+    }
+
+    stopDurationProbe()
+
+    let disposed = false
+    let forceTimer = 0
+    let timeoutTimer = 0
+    const probe = document.createElement('audio')
+
+    const cleanup = () => {
+      disposed = true
+      if (forceTimer) window.clearTimeout(forceTimer)
+      if (timeoutTimer) window.clearTimeout(timeoutTimer)
+      ;['loadedmetadata', 'loadeddata', 'canplay', 'durationchange', 'progress', 'seeked', 'timeupdate'].forEach((eventName) => {
+        probe.removeEventListener(eventName, onMediaSignal)
+      })
+      try {
+        probe.pause()
+      } catch {}
+      try {
+        probe.removeAttribute('src')
+        probe.load()
+      } catch {}
+    }
+
+    const clearSelf = () => {
+      if (durationProbeCleanupRef.current === cleanup) {
+        durationProbeCleanupRef.current = null
+      }
+    }
+
+    const finish = (value) => {
+      if (disposed) return true
+      const next = rememberVoiceDuration(key, value || readMediaDuration(probe))
+      if (!next) return false
+      if (srcRef.current === key) {
+        setDur((prev) => (Math.abs(Number(prev || 0) - next) > 0.05 ? next : prev))
+        stopDurationPoll()
+      }
+      cleanup()
+      clearSelf()
+      return true
+    }
+
+    const forceDurationRead = () => {
+      if (disposed || finish(readMediaDuration(probe))) return
+      try {
+        probe.currentTime = Number.MAX_SAFE_INTEGER
+      } catch {
+        try {
+          probe.currentTime = 1e7
+        } catch {}
+      }
+    }
+
+    function onMediaSignal() {
+      if (finish(readMediaDuration(probe))) return
+      if (!forceTimer) {
+        forceTimer = window.setTimeout(forceDurationRead, 80)
+      }
+    }
+
+    durationProbeCleanupRef.current = cleanup
+    ;['loadedmetadata', 'loadeddata', 'canplay', 'durationchange', 'progress', 'seeked', 'timeupdate'].forEach((eventName) => {
+      probe.addEventListener(eventName, onMediaSignal)
+    })
+
+    try {
+      probe.preload = 'auto'
+      probe.src = key
+      probe.load()
+    } catch {}
+
+    forceTimer = window.setTimeout(forceDurationRead, 180)
+    timeoutTimer = window.setTimeout(() => {
+      if (!finish(readMediaDuration(probe))) {
+        cleanup()
+        clearSelf()
+      }
+    }, DM_VOICE_DURATION_PROBE_TIMEOUT_MS)
+  }, [stopDurationPoll, stopDurationProbe])
+
   React.useEffect(() => {
     const a = audioRef.current
     if (!a) return
 
+    const sourceKey = String(src || '')
+    srcRef.current = sourceKey
     setPlaying(false)
-    setDur(0)
+    setDur(readCachedVoiceDuration(sourceKey))
     setPos(0)
     draggingRef.current = false
     stopRaf()
     stopDurationPoll()
-  try {
-    const pollId = durationPollRef.current
-    durationPollRef.current = 0
-    if (pollId) clearInterval(pollId)
-  } catch {}
+    stopDurationProbe()
+    try {
+      const pollId = durationPollRef.current
+      durationPollRef.current = 0
+      if (pollId) clearInterval(pollId)
+    } catch {}
 
     try {
       a.pause?.()
@@ -176,12 +312,17 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
     a.addEventListener('play', onPlay)
     a.addEventListener('pause', onPause)
     a.addEventListener('ended', onEnded)
-  try {
-    const pollId = durationPollRef.current
-    if (pollId) clearInterval(pollId)
-  } catch {}    
+    try {
+      const pollId = durationPollRef.current
+      if (pollId) clearInterval(pollId)
+    } catch {}
     durationPollRef.current = window.setInterval(() => syncAudioMetrics(a), 350)
+    try {
+      a.preload = 'auto'
+      a.load?.()
+    } catch {}
     syncAudioMetrics(a)
+    startDurationProbe(sourceKey)
 
     return () => {
       a.removeEventListener('loadedmetadata', onLoaded)
@@ -193,15 +334,16 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
       a.removeEventListener('play', onPlay)
       a.removeEventListener('pause', onPause)
       a.removeEventListener('ended', onEnded)
-    try {
-      const pollId = durationPollRef.current
-      durationPollRef.current = 0
-      if (pollId) clearInterval(pollId)
-    } catch {}      
+      try {
+        const pollId = durationPollRef.current
+        durationPollRef.current = 0
+        if (pollId) clearInterval(pollId)
+      } catch {}
       stopRaf()
       stopDurationPoll()
+      stopDurationProbe()
     }
-  }, [src, startRaf, stopDurationPoll, stopRaf, syncAudioMetrics, syncDmMutex])
+  }, [src, startDurationProbe, startRaf, stopDurationPoll, stopDurationProbe, stopRaf, syncAudioMetrics, syncDmMutex])
 
   React.useEffect(() => {
     const a = audioRef.current
@@ -225,7 +367,11 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
     setRate(next)
   }
 
-  const progress = dur > 0 ? Math.min(1, Math.max(0, pos / dur)) : 0
+  const progress = dur > 0
+    ? Math.min(1, Math.max(0, pos / dur))
+    : playing
+      ? Math.min(0.98, Math.max(0.02, (pos % 30) / 30))
+      : 0
 
   const seekToClientX = React.useCallback(
     (clientX) => {
@@ -352,7 +498,7 @@ export default function DmVoicePlayer({ src, dmScope = false }) {
 
         <div className="dmVoiceMeta">
           <span className="dmVoiceTime">
-            {fmt(pos)} / {fmt(dur)}
+            {fmt(pos)} / {dur > 0 ? fmt(dur) : '...'}
           </span>
 
           <button type="button" className="dmVoiceRate" onClick={cycleRate} title="Speed">

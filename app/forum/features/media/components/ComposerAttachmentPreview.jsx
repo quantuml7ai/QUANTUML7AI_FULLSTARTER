@@ -17,6 +17,99 @@ export default function ComposerAttachmentPreview({
   onRemoveAudio,
   AudioPreviewPlayer,
 }) {
+  const videoRef = React.useRef(null)
+  const [videoReady, setVideoReady] = React.useState(false)
+  const [videoPoster, setVideoPoster] = React.useState('')
+
+  React.useEffect(() => {
+    setVideoReady(false)
+    setVideoPoster('')
+    if (!pendingVideo || typeof document === 'undefined') return undefined
+
+    let disposed = false
+    let nudgeTimer = 0
+    let readyTimer = 0
+    const visibleVideo = videoRef.current
+    const probe = document.createElement('video')
+
+    const cleanup = () => {
+      disposed = true
+      if (nudgeTimer) window.clearTimeout(nudgeTimer)
+      if (readyTimer) window.clearTimeout(readyTimer)
+      ;['loadedmetadata', 'loadeddata', 'canplay', 'seeked', 'timeupdate'].forEach((eventName) => {
+        probe.removeEventListener(eventName, onProbeSignal)
+      })
+      try {
+        probe.pause()
+      } catch {}
+      try {
+        probe.removeAttribute('src')
+        probe.load()
+      } catch {}
+    }
+
+    const drawPoster = () => {
+      if (disposed || !probe.videoWidth || !probe.videoHeight) return false
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = probe.videoWidth
+        canvas.height = probe.videoHeight
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return false
+        ctx.drawImage(probe, 0, 0, canvas.width, canvas.height)
+        const poster = canvas.toDataURL('image/jpeg', 0.82)
+        if (!disposed && poster) {
+          setVideoPoster(poster)
+          setVideoReady(true)
+        }
+        return true
+      } catch {
+        return false
+      }
+    }
+
+    const nudgeFirstFrame = () => {
+      if (disposed || drawPoster()) return
+      try {
+        const duration = Number(probe.duration || 0)
+        const target = Number.isFinite(duration) && duration > 0 ? Math.min(0.08, Math.max(0.01, duration / 20)) : 0.05
+        if (Math.abs(Number(probe.currentTime || 0) - target) > 0.005) {
+          probe.currentTime = target
+        }
+      } catch {}
+    }
+
+    function onProbeSignal() {
+      if (!drawPoster()) nudgeFirstFrame()
+    }
+
+    try {
+      if (visibleVideo) {
+        visibleVideo.preload = 'auto'
+        visibleVideo.load?.()
+      }
+    } catch {}
+
+    ;['loadedmetadata', 'loadeddata', 'canplay', 'seeked', 'timeupdate'].forEach((eventName) => {
+      probe.addEventListener(eventName, onProbeSignal)
+    })
+
+    try {
+      probe.muted = true
+      probe.playsInline = true
+      probe.preload = 'auto'
+      probe.src = pendingVideo
+      probe.load()
+    } catch {}
+
+    nudgeTimer = window.setTimeout(nudgeFirstFrame, 180)
+    readyTimer = window.setTimeout(() => {
+      if (!disposed && visibleVideo?.readyState >= 2) setVideoReady(true)
+    }, 700)
+
+    return cleanup
+  }, [pendingVideo])
+
   return (
     <>
       {pendingImgs.length > 0 && (
@@ -58,13 +151,15 @@ export default function ComposerAttachmentPreview({
               borderRadius: 12,
               overflow: 'hidden',
               border: '1px solid rgba(255,255,255,.12)',
-              background: '#000',
+              background: 'radial-gradient(circle at 50% 45%, rgba(68,170,255,.18), rgba(8,13,28,.96) 58%, rgba(2,5,12,.98))',
             }}
           >
             <video
+              ref={videoRef}
               src={pendingVideo}
               playsInline
-              preload="metadata"
+              preload="auto"
+              poster={videoPoster || undefined}
               controlsList="nodownload noplaybackrate noremoteplayback"
               disablePictureInPicture
               style={{
@@ -73,7 +168,17 @@ export default function ComposerAttachmentPreview({
                 maxHeight: 620,
                 display: 'block',
                 objectFit: 'contain',
-                background: '#000',
+                background: 'transparent',
+                position: 'relative',
+                zIndex: 1,
+              }}
+              onLoadedData={() => setVideoReady(true)}
+              onCanPlay={() => setVideoReady(true)}
+              onLoadedMetadata={(e) => {
+                const node = e.currentTarget
+                try {
+                  if (node.readyState < 2 && Number(node.currentTime || 0) === 0) node.currentTime = 0.001
+                } catch {}
               }}
               onPointerDown={(e) => {
                 enableVideoControlsOnTap(e)
@@ -83,6 +188,40 @@ export default function ComposerAttachmentPreview({
                 e.stopPropagation()
               }}
             />
+
+            {!videoReady && !videoPoster && (
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  zIndex: 2,
+                  pointerEvents: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, rgba(8,20,42,.78), rgba(7,10,22,.9))',
+                  color: 'rgba(180,230,255,.9)',
+                }}
+              >
+                <span
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(120,220,255,.35)',
+                    boxShadow: '0 0 24px rgba(70,190,255,.24)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+                    <path d="M8 5v14l11-7L8 5Z" fill="currentColor" />
+                  </svg>
+                </span>
+              </div>
+            )}
 
             <button
               type="button"
@@ -103,6 +242,7 @@ export default function ComposerAttachmentPreview({
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                zIndex: 3,
               }}
             >
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden>
@@ -131,6 +271,7 @@ export default function ComposerAttachmentPreview({
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                zIndex: 3,
               }}
             >
               {ICON_REMOVE}
