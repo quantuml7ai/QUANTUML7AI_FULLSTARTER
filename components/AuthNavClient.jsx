@@ -145,6 +145,7 @@ function readAccountId() {
   try {
     if (typeof window === 'undefined') return ''
     const stored = getStoredWalletSession()
+    if (!stored.token) return ''
     return String(stored.accountId || stored.walletAddress || '').trim()
   } catch {
     return ''
@@ -330,8 +331,9 @@ export default function AuthNavClient() {
   useEffect(() => { if (mounted) void refreshTgLinkStatus() }, [mounted, accountId, refreshTgLinkStatus])
 
   const onOpenAuth = useCallback(() => {
-    const account = readAccountId() || accountId
+    const account = readAccountId()
     const mode = account ? 'account' : 'connect'
+    if (!account && accountId) setAccountId('')
     if (mode === 'connect') markMobileOAuthGrace()
     setOpening(true)
     if (openingTimerRef.current) clearTimeout(openingTimerRef.current)
@@ -382,12 +384,13 @@ export default function AuthNavClient() {
     }
   }, [onLinkTelegram, onLogout, refreshTgLinkStatus, tgLinked])
 
-  const isAuthed = !!accountId
+  const effectiveAccountId = isTMA ? accountId : readAccountId()
+  const isAuthed = !!effectiveAccountId
   const authLabel = useMemo(() => {
-    if (isAuthed) return shortAddr(accountId)
+    if (isAuthed) return shortAddr(effectiveAccountId)
     const v = t('auth_signin')
     return v && v !== 'auth_signin' ? v : 'Sign in'
-  }, [accountId, isAuthed, t])
+  }, [effectiveAccountId, isAuthed, t])
 
   if (!mounted) return null
   if (isTMA && isAuthed) return null

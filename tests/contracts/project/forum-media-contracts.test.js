@@ -22,6 +22,20 @@ describe('forum media contracts', () => {
     expect(src).not.toMatch(/localStorage\.setItem\(MEDIA_VIDEO_MUTED_KEY,\s*['"]1['"]\)/)
   })
 
+  test('camera recording opens the video preview before slow duration probing', () => {
+    const src = read('app/forum/features/media/hooks/useVideoCaptureController.js')
+    const blobIdx = src.indexOf('const blob = new Blob(videoChunksRef.current')
+    const urlIdx = src.indexOf('const url = URL.createObjectURL(blob)', blobIdx)
+    const previewIdx = src.indexOf("setVideoState('preview')", urlIdx)
+    const probeIdx = src.indexOf('recordedDurationSec = await readVideoDurationSecFn(blob)', blobIdx)
+
+    expect(blobIdx).toBeGreaterThanOrEqual(0)
+    expect(urlIdx).toBeGreaterThan(blobIdx)
+    expect(previewIdx).toBeGreaterThan(urlIdx)
+    expect(probeIdx).toBeGreaterThan(previewIdx)
+    expect(src).toContain('duration probing continues in the background')
+  })
+
   test('qcast toggle does not use its own local mute storage', () => {
     const src = read('app/forum/features/media/components/QCastPlayer.jsx')
     expect(src).not.toContain('forum:qcastMuted')

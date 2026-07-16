@@ -6701,6 +6701,8 @@ html[data-tma="1"] .inboxTabs{
 .dmThreadHeader{ --vip-badge-w: 38px; --vip-badge-h: 40px; }
 .dmThreadHeader{
   display:flex; align-items:center; gap:10px;
+  flex-wrap:nowrap;
+  min-width:0;
   padding:8px 10px;
   margin:0 6px;
   border-radius:14px;
@@ -6709,16 +6711,16 @@ html[data-tma="1"] .inboxTabs{
   box-shadow:0 10px 22px rgba(0,0,0,.22), inset 0 0 16px rgba(120,180,255,.1);
 }
 .dmThreadAvatar{
-  width:46px; height:46px; border-radius:16px; padding:2px;
-  background: linear-gradient(135deg, rgba(255,215,130,.45), rgba(120,180,255,.45));
-  box-shadow:0 0 18px rgba(120,180,255,.4), inset 0 0 8px rgba(255,220,150,.35);
+  width:46px; height:46px; flex:0 0 46px; border-radius:16px; padding:0;
+  background:transparent;
+  box-shadow:0 0 18px rgba(120,180,255,.34);
   cursor:pointer;
 }
-.dmThreadAvatarImg{ width:100%; height:100%; border-radius:14px; overflow:hidden; }
-.dmThreadMeta{ min-width:0; flex:1 1 auto; display:flex; flex-direction:column; }
+.dmThreadAvatarImg{ width:100%; height:100%; border-radius:14px; overflow:hidden; background:transparent; }
+.dmThreadMeta{ min-width:0; flex:0 1 auto; display:flex; flex-direction:column; }
 .dmThreadName{ font-weight:800; letter-spacing:.3px; color:#eaf4ff; text-shadow:0 0 12px rgba(120,190,255,.35); }
 .dmThreadId{ font-size:12px; opacity:.7; color:#b6cce4; }
-.dmThreadUser{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.dmThreadUser{ display:flex; align-items:center; gap:8px; flex-wrap:nowrap; min-width:0; }
 .dmThreadNick{ font-size:1.05rem; padding:.3rem .6rem; }
 .dmThreadHeaderRail{
   height:1px;
@@ -6741,50 +6743,53 @@ html[data-tma="1"] .inboxTabs{
   animation: dmRailPulse 2.6s linear infinite;
 }
 .dmThreadPresenceBadge{
-  flex:0 0 auto;
+  flex:0 1 104px;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  gap:7px;
-  min-height:30px;
-  padding:0 12px;
+  gap:0;
+  min-width:0;
+  max-width:104px;
+  min-height:27px;
+  margin-left:auto;
+  padding:0 9px;
   border-radius:999px;
-  border:1px solid rgba(112,226,255,.35);
+  border:1px solid rgba(255,81,109,.76);
   color:#dff8ff;
-  font-size:11px;
+  font-size:10px;
+  line-height:1;
   font-weight:900;
-  letter-spacing:.08em;
+  letter-spacing:.055em;
   text-transform:uppercase;
   white-space:nowrap;
+  overflow:hidden;
   background:linear-gradient(135deg, rgba(8,24,34,.92), rgba(12,20,34,.78));
-  box-shadow:0 0 18px rgba(80,220,255,.16), inset 0 0 12px rgba(90,210,255,.1);
+  box-shadow:0 0 16px rgba(255,81,109,.22), inset 0 0 12px rgba(255,81,109,.08);
 }
-.dmThreadPresenceDot{
-  width:8px;
-  height:8px;
-  border-radius:999px;
-  background:rgba(120,180,210,.78);
-  box-shadow:0 0 10px rgba(120,180,210,.32);
+.dmThreadPresenceText{
+  flex:0 0 auto;
+  display:inline-block;
+  font-size:calc(1em * var(--dm-presence-text-scale, 1));
+  letter-spacing:.025em;
+  line-height:1;
+  white-space:nowrap;
+  transform-origin:left center;
 }
 .dmThreadPresenceBadge.online{
   border-color:rgba(60,255,190,.55);
   color:#eafff8;
   box-shadow:0 0 20px rgba(60,255,190,.22), inset 0 0 14px rgba(60,255,190,.1);
-}
-.dmThreadPresenceBadge.online .dmThreadPresenceDot{
-  background:#35ffb8;
-  box-shadow:0 0 0 0 rgba(53,255,184,.55), 0 0 14px rgba(53,255,184,.78);
   animation: dmPresencePulse 1.65s ease-in-out infinite;
 }
 @keyframes dmPresencePulse{
-  0%{ transform:scale(.82); box-shadow:0 0 0 0 rgba(53,255,184,.48), 0 0 10px rgba(53,255,184,.62); }
-  55%{ transform:scale(1.08); box-shadow:0 0 0 8px rgba(53,255,184,0), 0 0 18px rgba(53,255,184,.86); }
-  100%{ transform:scale(.82); box-shadow:0 0 0 0 rgba(53,255,184,0), 0 0 10px rgba(53,255,184,.62); }
+  0%{ border-color:rgba(60,255,190,.42); box-shadow:0 0 12px rgba(60,255,190,.14), inset 0 0 10px rgba(60,255,190,.08); }
+  55%{ border-color:rgba(60,255,190,.92); box-shadow:0 0 0 5px rgba(60,255,190,0), 0 0 24px rgba(60,255,190,.36), inset 0 0 16px rgba(60,255,190,.16); }
+  100%{ border-color:rgba(60,255,190,.42); box-shadow:0 0 12px rgba(60,255,190,.14), inset 0 0 10px rgba(60,255,190,.08); }
 }
 @media (max-width:560px){
   .dmThreadHeader{ gap:8px; }
   .dmThreadHeaderRail{ margin:10px 8px 12px; }
-  .dmThreadPresenceBadge{ margin-left:auto; min-height:26px; padding:0 9px; font-size:9px; letter-spacing:.06em; }
+  .dmThreadPresenceBadge{ flex-basis:88px; max-width:88px; min-height:24px; padding:0 7px; font-size:8.5px; letter-spacing:.035em; }
 }
 .dmThread{ display:flex; flex-direction:column; gap:8px; padding:0 6px; }
 .dmBackBtn{ margin-bottom:6px; }

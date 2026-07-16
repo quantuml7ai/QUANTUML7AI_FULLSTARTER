@@ -341,12 +341,8 @@ export default function useVideoCaptureController({
 
           const blob = new Blob(videoChunksRef.current, { type: mediaRecorder.mimeType || 'video/webm' })
           videoChunksRef.current = []
-          let recordedDurationSec = NaN
-          try {
-            recordedDurationSec = await readVideoDurationSecFn(blob)
-          } catch {}
 
-          if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0) {
+          const deriveFallbackDurationSec = (emit = false) => {
             const elapsedByStart = recordStartedAt
               ? Math.max(0.1, Math.min(
                   forumVideoMaxSeconds,
@@ -359,43 +355,54 @@ export default function useVideoCaptureController({
               || (Number.isFinite(elapsedByStart) && elapsedByStart > 0 ? elapsedByStart : NaN)
               || (Number.isFinite(elapsedByState) && elapsedByState > 0 ? elapsedByState : NaN)
 
+            let fallbackDurationSec = forumVideoMaxSeconds
             if (Number.isFinite(derived) && derived > 0) {
-              recordedDurationSec = Math.max(0.1, Math.min(forumVideoMaxSeconds, derived))
-            } else {
-              recordedDurationSec = forumVideoMaxSeconds
+              fallbackDurationSec = Math.max(0.1, Math.min(forumVideoMaxSeconds, derived))
             }
-            try {
-              emitDiag?.('camera_record_duration_fallback', {
-                source: autoStoppedAtLimit ? 'auto_limit' : 'timer',
-                durationSec: Math.round(recordedDurationSec * 100) / 100,
-              })
-            } catch {}
-          }
-
-          if (recordedDurationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec)) {
-            try {
-              setVideoOpen(false)
-              setVideoState('idle')
-              showVideoLimitOverlay?.({
-                source: 'camera_record',
-                durationSec: recordedDurationSec,
-                reason: 'too_long',
-              })
-            } catch {}
-            videoChunksRef.current = []
-            try {
-              if (pendingVideo && /^blob:/.test(pendingVideo)) {
-                try { pendingVideoBlobMetaRef.current?.delete?.(String(pendingVideo)) } catch {}
-                URL.revokeObjectURL(pendingVideo)
-              }
-            } catch {}
-            setPendingVideo(null)
-            try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
-            try { restoreComposerScroll() } catch {}
-            return
+            if (emit) {
+              try {
+                emitDiag?.('camera_record_duration_fallback', {
+                  source: autoStoppedAtLimit ? 'auto_limit' : 'timer',
+                  durationSec: Math.round(fallbackDurationSec * 100) / 100,
+                })
+              } catch {}
+            }
+            return fallbackDurationSec
           }
 
           const url = URL.createObjectURL(blob)
+          const writeCameraRecordMeta = (durationSec) => {
+            try {
+              const safeDurationSec = Math.min(
+                forumVideoMaxSeconds,
+                Math.max(0.1, Number(durationSec || 0))
+              )
+              const map = pendingVideoBlobMetaRef.current
+              if (map && typeof map.set === 'function' && /^blob:/.test(String(url || ''))) {
+                map.set(String(url), {
+                  source: 'camera_record',
+                  durationSec: safeDurationSec,
+                })
+                if (map.size > 32) {
+                  const first = map.keys().next()?.value
+                  if (first) map.delete(first)
+                }
+              }
+              pendingVideoInfoRef.current = {
+                source: 'camera_record',
+                durationSec: safeDurationSec,
+              }
+            } catch {}
+          }
+          const isCurrentRecordedPreview = () => {
+            try {
+              const map = pendingVideoBlobMetaRef.current
+              return !map || typeof map.has !== 'function' || map.has(String(url))
+            } catch {
+              return true
+            }
+          }
+
           try {
             const prev = pendingVideo
             if (prev && /^blob:/.test(prev)) {
@@ -404,23 +411,44 @@ export default function useVideoCaptureController({
             }
           } catch {}
 
+          // Show the just-recorded blob immediately; duration probing continues in the background.
           setPendingVideo(url)
-          try {
-            const map = pendingVideoBlobMetaRef.current
-            if (map && typeof map.set === 'function' && /^blob:/.test(String(url || ''))) {
-              map.set(String(url), {
-                source: 'camera_record',
-                durationSec: Math.min(forumVideoMaxSeconds, Math.max(0.1, Number(recordedDurationSec || 0))),
-              })
-              if (map.size > 32) {
-                const first = map.keys().next()?.value
-                if (first) map.delete(first)
-              }
-            }
-          } catch {}
-          try { pendingVideoInfoRef.current = { source: 'camera_record', durationSec: recordedDurationSec } } catch {}
+          writeCameraRecordMeta(deriveFallbackDurationSec(false))
           setVideoState('preview')
           try { restoreComposerScroll() } catch {}
+
+          void (async () => {
+            let recordedDurationSec = NaN
+            try {
+              recordedDurationSec = await readVideoDurationSecFn(blob)
+            } catch {}
+
+            if (!Number.isFinite(recordedDurationSec) || recordedDurationSec <= 0) {
+              recordedDurationSec = deriveFallbackDurationSec(true)
+            }
+
+            if (!isCurrentRecordedPreview()) return
+
+            if (recordedDurationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec)) {
+              try {
+                setVideoOpen(false)
+                setVideoState('idle')
+                showVideoLimitOverlay?.({
+                  source: 'camera_record',
+                  durationSec: recordedDurationSec,
+                  reason: 'too_long',
+                })
+              } catch {}
+              try { pendingVideoBlobMetaRef.current?.delete?.(String(url)) } catch {}
+              try { URL.revokeObjectURL(url) } catch {}
+              setPendingVideo(null)
+              try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
+              try { restoreComposerScroll() } catch {}
+              return
+            }
+
+            writeCameraRecordMeta(recordedDurationSec)
+          })()
         } catch {
           try { videoChunksRef.current = [] } catch {}
           setVideoState('idle')

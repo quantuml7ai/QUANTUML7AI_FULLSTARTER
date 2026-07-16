@@ -50,6 +50,8 @@ export default function DmThreadHeader({
   const prof = safeReadProfile(threadUid) || {}
   const [presenceAt, setPresenceAt] = useState(() => readLastActiveAt(prof))
   const [presenceTick, setPresenceTick] = useState(() => Date.now())
+  const presenceBadgeRef = React.useRef(null)
+  const presenceTextRef = React.useRef(null)
   const isVipAuthor = useVipFlag(
     threadUid,
     prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null,
@@ -127,15 +129,55 @@ export default function DmThreadHeader({
     [presenceAt, presenceTick],
   )
 
-  if (!threadUid) return null
-  const nick = resolveNickForDisplay(threadUid, '')
-  const isSelf = !!meId && String(meId) === String(threadUid)
-  const isStarred = !!threadUid && !!starredAuthors?.has?.(threadUid)
   const presenceLabel = presenceKind === 'online'
     ? (t?.('dm_presence_online') || 'Online')
     : presenceKind === 'recent'
       ? (t?.('dm_presence_recently') || 'Recently active')
       : (t?.('dm_presence_long_ago') || 'Away for a while')
+
+  React.useLayoutEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const badge = presenceBadgeRef.current
+    const text = presenceTextRef.current
+    if (!badge || !text) return undefined
+
+    let raf = 0
+    const fit = () => {
+      try {
+        text.style.setProperty('--dm-presence-text-scale', '1')
+        const styles = window.getComputedStyle?.(badge)
+        const pad =
+          (Number.parseFloat(styles?.paddingLeft || '0') || 0) +
+          (Number.parseFloat(styles?.paddingRight || '0') || 0)
+        const available = Math.max(20, badge.clientWidth - pad)
+        const natural = Math.max(1, text.scrollWidth || text.getBoundingClientRect?.().width || 1)
+        const scale = Math.min(1, Math.max(0.46, available / natural))
+        text.style.setProperty('--dm-presence-text-scale', scale.toFixed(3))
+      } catch {}
+    }
+    const schedule = () => {
+      try { if (raf) window.cancelAnimationFrame(raf) } catch {}
+      raf = window.requestAnimationFrame(fit)
+    }
+
+    schedule()
+    let resizeObserver = null
+    try {
+      resizeObserver = new ResizeObserver(schedule)
+      resizeObserver.observe(badge)
+    } catch {}
+    window.addEventListener('resize', schedule)
+    return () => {
+      try { if (raf) window.cancelAnimationFrame(raf) } catch {}
+      try { resizeObserver?.disconnect?.() } catch {}
+      window.removeEventListener('resize', schedule)
+    }
+  }, [presenceLabel])
+
+  if (!threadUid) return null
+  const nick = resolveNickForDisplay(threadUid, '')
+  const isSelf = !!meId && String(meId) === String(threadUid)
+  const isStarred = !!threadUid && !!starredAuthors?.has?.(threadUid)
   const openProfile = (e) => {
     e?.preventDefault?.()
     e?.stopPropagation?.()
@@ -182,9 +224,11 @@ export default function DmThreadHeader({
           {isVipAuthor && <VipFlipBadge />}
         </div>
       </div>
-      <span className={cls('dmThreadPresenceBadge', presenceKind === 'online' && 'online')}>
-        <span className="dmThreadPresenceDot" aria-hidden="true" />
-        <span>{presenceLabel}</span>
+      <span
+        ref={presenceBadgeRef}
+        className={cls('dmThreadPresenceBadge', presenceKind === 'online' && 'online')}
+      >
+        <span ref={presenceTextRef} className="dmThreadPresenceText">{presenceLabel}</span>
       </span>
     </div>
   )

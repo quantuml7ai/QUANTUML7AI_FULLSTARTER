@@ -18,6 +18,8 @@ const MOBILE_OAUTH_GRACE_MS = 15000
 const MOBILE_OAUTH_RECHECK_MS = 900
 const RUNTIME_OPEN_DELAY_MS = 180
 const ACCOUNT_VIEW_RESTORE_DELAY_MS = 900
+const MODAL_OPEN_BOOTSTRAP_TIMEOUT_MS = 12000
+const MODAL_CLOSE_CONFIRM_MS = 500
 
 function isMobileOAuthBrowser() {
   try {
@@ -147,6 +149,9 @@ function RuntimeController({ request, finish }) {
   const hadConnectedRef = useRef(false)
   const creatingRef = useRef(false)
   const finishedRef = useRef(false)
+  const openAttemptedRef = useRef(false)
+  const modalWasOpenRef = useRef(false)
+  const openStartedAtRef = useRef(0)
   const latestAccountRef = useRef({ isConnected: false, address: '' })
   const [oauthGraceTick, setOauthGraceTick] = useState(0)
 
@@ -157,6 +162,16 @@ function RuntimeController({ request, finish }) {
   useEffect(() => {
     latestAccountRef.current = { isConnected: !!isConnected, address: address || '' }
   }, [address, isConnected])
+
+  useEffect(() => {
+    if (!modalOpen) return
+    modalWasOpenRef.current = true
+    updateStatus({
+      runtimeOpening: false,
+      modalWasOpen: true,
+      lastDoneReason: 'modal_open',
+    })
+  }, [modalOpen])
 
   useEffect(() => {
     updateStatus({
@@ -175,9 +190,17 @@ function RuntimeController({ request, finish }) {
 
   useEffect(() => {
     if (openedRef.current) return
-    openedRef.current = true
     const run = async () => {
       try {
+        if (typeof open !== 'function') {
+          updateStatus({ lastError: 'wallet_open_unavailable', lastDoneReason: 'open_failed' })
+          return
+        }
+        const openView = async (params) => {
+          openAttemptedRef.current = true
+          updateStatus({ openAttempted: true })
+          await open(params)
+        }
         if (mode === 'account') {
           // Reown throws "w3m-account-view: No account provided" when Account
           // is opened before wagmi has restored the connector. Wait briefly,
@@ -187,16 +210,16 @@ function RuntimeController({ request, finish }) {
           if (latest.isConnected && latest.address) {
             accountViewOpenedRef.current = true
             try {
-              await open?.({ view: 'Account' })
+              await openView({ view: 'Account' })
             } catch {
-              await open?.()
+              await openView()
             }
             return
           }
 
           // Server session can be valid while the wallet connector cache is gone.
           // In that case show Connect instead of crashing the Account widget.
-          await open?.({ view: 'Connect' })
+          await openView({ view: 'Connect' })
           return
         }
         if (isConnected && address) return
@@ -208,13 +231,22 @@ function RuntimeController({ request, finish }) {
             lastDoneReason: 'connect_opened_oauth_grace',
           })
         }
-        await open?.({ view: 'Connect' })
+        await openView({ view: 'Connect' })
       } catch (err) {
         updateStatus({ lastError: err?.message || String(err), lastDoneReason: 'open_failed' })
       }
     }
-    updateStatus({ runtimeOpening: true })
-    const id = setTimeout(() => { void run() }, RUNTIME_OPEN_DELAY_MS)
+    openStartedAtRef.current = Date.now()
+    updateStatus({
+      runtimeOpening: true,
+      openAttempted: false,
+      modalWasOpen: false,
+    })
+    const id = setTimeout(() => {
+      if (openedRef.current) return
+      openedRef.current = true
+      void run()
+    }, RUNTIME_OPEN_DELAY_MS)
     return () => clearTimeout(id)
   }, [address, isConnected, mode, open])
 
@@ -323,6 +355,7 @@ function RuntimeController({ request, finish }) {
     if (finishedRef.current) return
     if (modalOpen) return
     if (!openedRef.current) return
+    if (!openAttemptedRef.current) return
     if (creatingRef.current) return
 
     if (mode === 'connect' && !isConnected && !address && isMobileOAuthGraceActive()) {
@@ -339,6 +372,30 @@ function RuntimeController({ request, finish }) {
       return () => clearTimeout(id)
     }
 
+    if (!modalWasOpenRef.current) {
+      const elapsed = Date.now() - openStartedAtRef.current
+      if (elapsed < MODAL_OPEN_BOOTSTRAP_TIMEOUT_MS) {
+        updateStatus({
+          lastDoneReason: 'awaiting_modal_open',
+          modalOpen: false,
+          modalOpenBootstrapRemainingMs: MODAL_OPEN_BOOTSTRAP_TIMEOUT_MS - elapsed,
+        })
+        const id = setTimeout(() => {
+          setOauthGraceTick((value) => value + 1)
+        }, Math.min(MOBILE_OAUTH_RECHECK_MS, MODAL_OPEN_BOOTSTRAP_TIMEOUT_MS - elapsed))
+        return () => clearTimeout(id)
+      }
+      finishedRef.current = true
+      updateStatus({
+        runtimeOpening: false,
+        lastDoneReason: 'modal_open_timeout',
+        modalOpen: false,
+        mobileOAuthGrace: false,
+      })
+      finish('modal_open_timeout')
+      return undefined
+    }
+
     const id = setTimeout(() => {
       if (finishedRef.current || creatingRef.current) return
       if (mode === 'connect' && !isConnected && !address && isMobileOAuthGraceActive()) {
@@ -347,9 +404,14 @@ function RuntimeController({ request, finish }) {
       }
       clearMobileOAuthGrace()
       finishedRef.current = true
-      updateStatus({ lastDoneReason: 'modal_closed', modalOpen: false, mobileOAuthGrace: false })
+      updateStatus({
+        runtimeOpening: false,
+        lastDoneReason: 'modal_closed',
+        modalOpen: false,
+        mobileOAuthGrace: false,
+      })
       finish('modal_closed')
-    }, 500)
+    }, MODAL_CLOSE_CONFIRM_MS)
     return () => clearTimeout(id)
   }, [address, finish, isConnected, modalOpen, mode, oauthGraceTick])
 
@@ -397,6 +459,11 @@ function WalletRuntimeMounted({ request, finish }) {
 
 export default function WalletRuntimeBridge() {
   const [request, setRequest] = useState(null)
+  const requestRef = useRef(null)
+
+  useEffect(() => {
+    requestRef.current = request
+  }, [request])
 
   const finish = useCallback((reason) => {
     try { delete window.__QL7_WALLET_PENDING_MODE__ } catch {}
@@ -424,7 +491,7 @@ export default function WalletRuntimeBridge() {
     })
     setRequest((prev) => {
       if (!prev) return { mode: nextMode, nonce: Date.now() }
-      if (prev.mode === nextMode) return prev
+      if (prev.mode === nextMode) return { mode: nextMode, nonce: Date.now() }
       return { mode: nextMode, nonce: Date.now() }
     })
   }, [])
@@ -434,12 +501,12 @@ export default function WalletRuntimeBridge() {
 
     window.__QL7_OPEN_WALLET_RUNTIME__ = (mode = 'connect') => mountRuntime(mode)
     window.__QL7_WALLET_RUNTIME_STATUS__ = () => ({
-      runtimeMounted: !!request,
-      runtimeActive: !!request,
-      reactProvidersMounted: !!request,
+      runtimeMounted: !!requestRef.current,
+      runtimeActive: !!requestRef.current,
+      reactProvidersMounted: !!requestRef.current,
       modalCreated: !!getRuntimeSingleton()?.modalCreated,
       modalOpen: false,
-      requestMode: request?.mode || null,
+      requestMode: requestRef.current?.mode || null,
       ...(window.__QL7_WALLET_RUNTIME_LAST_STATUS__ || {}),
     })
 
@@ -453,7 +520,7 @@ export default function WalletRuntimeBridge() {
     window.addEventListener('open-auth', onMount)
 
     const pending = window.__QL7_WALLET_PENDING_MODE__
-    if (pending && !request) {
+    if (pending && !requestRef.current) {
       try { delete window.__QL7_WALLET_PENDING_MODE__ } catch {}
       setTimeout(() => mountRuntime(pending), 0)
     }
@@ -464,7 +531,7 @@ export default function WalletRuntimeBridge() {
       try { delete window.__QL7_OPEN_WALLET_RUNTIME__ } catch {}
       try { delete window.__QL7_WALLET_RUNTIME_STATUS__ } catch {}
     }
-  }, [mountRuntime, request])
+  }, [mountRuntime])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
