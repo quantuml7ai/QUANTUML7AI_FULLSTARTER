@@ -229,6 +229,17 @@ describe('Forum hook contracts', () => {
     expect(vipStateSource).not.toContain('/api/forum/vip/batch')
   })
 
+  it('keeps the forum invite button behind the shared auth continuation gate', () => {
+    const actionRowSource = readRepoFile('app/forum/features/ui/components/ForumActionRow.jsx')
+
+    expect(actionRowSource).toContain('runAuthorizedClientAction')
+    expect(actionRowSource).toContain("actionKey: 'forum-invite-open'")
+    expect(actionRowSource).toContain("source: 'forum-invite-button'")
+    expect(actionRowSource).toContain("window.dispatchEvent(new CustomEvent('invite:open'")
+    expect(actionRowSource).toContain('accountId,')
+    expect(actionRowSource).toContain("source: 'forum-invite-button'")
+  })
+
   it('keeps forum nickname badges capped and fitted instead of ellipsized', () => {
     const forumRootSource = readRepoFile('app/forum/ForumRoot.jsx')
     const forumStylesSource = readRepoFile('app/forum/styles/ForumStyles.jsx')

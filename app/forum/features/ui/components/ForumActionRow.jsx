@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { formatCount as formatCompactCount } from '../../../shared/utils/counts'
+import { runAuthorizedClientAction } from '../../../../../lib/authActionGateClient'
 
 import ForumActionNavIcon from './ForumActionNavIcon'
 import VideoFeedNavIcon from './VideoFeedNavIcon'
@@ -26,6 +27,22 @@ export default function ForumActionRow({
   onBackClick,
 }) {
   const countFormatter = typeof formatCount === 'function' ? formatCount : formatCompactCount
+  const openInviteFriends = () => {
+    void runAuthorizedClientAction({
+      actionKey: 'forum-invite-open',
+      source: 'forum-invite-button',
+      action: (accountId) => {
+        try {
+          window.dispatchEvent(new CustomEvent('invite:open', {
+            detail: {
+              accountId,
+              source: 'forum-invite-button',
+            },
+          }))
+        } catch {}
+      },
+    })
+  }
 
   return (
     <div className="forumRowBar forumGlobalRow">
@@ -57,11 +74,7 @@ export default function ForumActionRow({
             marginRight: 8,
             transform: `translate(${inviteBtnOffsetX}px, ${inviteBtnOffsetY}px)`,
           }}
-          onClick={() => {
-            try {
-              window.dispatchEvent(new CustomEvent('invite:open'))
-            } catch {}
-          }}
+          onClick={openInviteFriends}
           onMouseDown={(e) => e.preventDefault()}
           aria-label={t('forum_invite_friends')}
         >
