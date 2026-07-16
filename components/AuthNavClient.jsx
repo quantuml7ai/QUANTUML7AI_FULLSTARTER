@@ -12,6 +12,7 @@ import {
 
 const MOBILE_OAUTH_GRACE_KEY = 'ql7_wallet_mobile_oauth_grace_until'
 const MOBILE_OAUTH_GRACE_MS = 15000
+const WALLET_SESSION_REVERIFY_MS = 60 * 1000
 
 const shortAddr = (value) => {
   const address = String(value || '').trim()
@@ -177,9 +178,11 @@ export default function AuthNavClient() {
   const [mounted, setMounted] = useState(false)
   const [accountId, setAccountId] = useState('')
   const [checking, setChecking] = useState(true)
+  const [opening, setOpening] = useState(false)
   const [isTMA, setIsTMA] = useState(false)
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
+  const openingTimerRef = useRef(null)
 
   const refreshLocalAuth = useCallback(() => {
     const tmaMode = detectTMAHard()
@@ -204,8 +207,9 @@ export default function AuthNavClient() {
     return account
   }, [])
 
-  const verifySession = useCallback(async () => {
-    setChecking(true)
+  const verifySession = useCallback(async (options = {}) => {
+    const silent = !!options.silent
+    if (!silent) setChecking(true)
     try {
       if (detectTMAHard()) {
         const tmaAccount = readTmaAccountId()
@@ -229,10 +233,15 @@ export default function AuthNavClient() {
         setAccountId(result.accountId || result.walletAddress || '')
         return true
       }
+      if (result?.transient) {
+        const fallbackAccount = stored.accountId || stored.walletAddress || ''
+        if (fallbackAccount) setAccountId(fallbackAccount)
+        return !!fallbackAccount
+      }
       setAccountId('')
       return false
     } finally {
-      setChecking(false)
+      if (!silent) setChecking(false)
     }
   }, [])
 
@@ -246,6 +255,18 @@ export default function AuthNavClient() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
+    const id = window.setInterval(() => {
+      try {
+        if (detectTMAHard()) return
+        if (!getStoredWalletSession().token) return
+        void verifySession({ silent: true })
+      } catch {}
+    }, WALLET_SESSION_REVERIFY_MS)
+    return () => window.clearInterval(id)
+  }, [verifySession])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
     const onAuthOk = (event) => {
       const next = String(
         event?.detail?.accountId ||
@@ -253,9 +274,15 @@ export default function AuthNavClient() {
         (detectTMAHard() ? readTmaAccountId() : readAccountId()) ||
         ''
       ).trim()
-      if (next) setAccountId(next)
+      if (next) {
+        setOpening(false)
+        setAccountId(next)
+      }
     }
-    const onLogout = () => setAccountId('')
+    const onLogout = () => {
+      setOpening(false)
+      setAccountId('')
+    }
     const onFocus = () => { void verifySession() }
     window.addEventListener('auth:ok', onAuthOk)
     window.addEventListener('wallet-session:verified', onAuthOk)
@@ -268,6 +295,10 @@ export default function AuthNavClient() {
       window.removeEventListener('focus', onFocus)
     }
   }, [verifySession])
+
+  useEffect(() => () => {
+    if (openingTimerRef.current) clearTimeout(openingTimerRef.current)
+  }, [])
 
   const refreshTgLinkStatus = useCallback(async () => {
     if (checkingRef.current) return false
@@ -302,12 +333,16 @@ export default function AuthNavClient() {
     const account = readAccountId() || accountId
     const mode = account ? 'account' : 'connect'
     if (mode === 'connect') markMobileOAuthGrace()
+    setOpening(true)
+    if (openingTimerRef.current) clearTimeout(openingTimerRef.current)
+    openingTimerRef.current = window.setTimeout(() => setOpening(false), 8000)
     openWalletRuntime(mode)
   }, [accountId])
 
   const onLogout = useCallback(async () => {
     await logoutStoredWalletSession()
     clearWalletAuthStorage()
+    setOpening(false)
     setAccountId('')
   }, [])
 
@@ -366,7 +401,8 @@ export default function AuthNavClient() {
         aria-label="Open connect modal"
         data-auth-open
         data-auth={isAuthed ? 'true' : 'false'}
-        data-checking={checking ? 'true' : 'false'}
+        data-checking={(checking || opening) ? 'true' : 'false'}
+        aria-busy={checking || opening ? 'true' : 'false'}
         title={isAuthed ? (t('auth_account') || 'Account') : (t('auth_signin') || 'Sign in')}
         translate="no"
         dir="ltr"

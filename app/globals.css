@@ -1497,6 +1497,22 @@ header nav ul{ display:flex; flex-wrap:wrap; gap:.5rem; margin:0; padding:0; }
 
 .topbar .nav-auth-btn:active{ transform: translateY(1px) scale(.98); }
 
+.topbar .nav-auth-btn[data-checking="true"]::after{
+  content:"";
+  width: 10px;
+  height: 10px;
+  margin-left: 6px;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  opacity: .86;
+  animation: authBtnSpin .72s linear infinite;
+}
+
+@keyframes authBtnSpin{
+  to{ transform: rotate(360deg); }
+}
+
 /* --- Гость (не авторизован): мигает красным как QCoinX2.needVip --- */
 .topbar .nav-auth-btn.is-guest{
   color:#ffffff;

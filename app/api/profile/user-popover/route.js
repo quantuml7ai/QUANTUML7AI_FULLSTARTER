@@ -54,11 +54,11 @@ async function readProjectionUserStats(accountId) {
 
 export async function GET(req) {
   try {
+    const { searchParams } = new URL(req.url)
     let userId = ''
     try { userId = requireUserId(req, {}) } catch {}
 
     if (!userId) {
-      const { searchParams } = new URL(req.url)
       userId = searchParams.get('uid') || ''
     }
 
@@ -73,6 +73,20 @@ export async function GET(req) {
     }
 
     const legacyId = rawUserId && rawUserId !== accountId ? rawUserId : ''
+
+    if (searchParams.get('presence') === '1') {
+      const qcoinState = await qcoinPrimary.readAccount(accountId).catch(() => null)
+      return NextResponse.json({
+        ok: true,
+        accountId,
+        userId: accountId,
+        lastActiveAt: Number(qcoinState?.lastActiveAt || 0),
+        serverNow: Date.now(),
+        presenceOnly: true,
+        storagePrimary: 'mongo',
+      })
+    }
+
     const [
       aboutCanonical,
       followersCanonical,

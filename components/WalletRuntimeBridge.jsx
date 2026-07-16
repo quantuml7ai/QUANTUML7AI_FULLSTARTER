@@ -16,6 +16,8 @@ const chainsArr = [mainnet, polygon, arbitrum, base, bsc, optimism, avalanche]
 const MOBILE_OAUTH_GRACE_KEY = 'ql7_wallet_mobile_oauth_grace_until'
 const MOBILE_OAUTH_GRACE_MS = 15000
 const MOBILE_OAUTH_RECHECK_MS = 900
+const RUNTIME_OPEN_DELAY_MS = 180
+const ACCOUNT_VIEW_RESTORE_DELAY_MS = 900
 
 function isMobileOAuthBrowser() {
   try {
@@ -180,7 +182,7 @@ function RuntimeController({ request, finish }) {
           // Reown throws "w3m-account-view: No account provided" when Account
           // is opened before wagmi has restored the connector. Wait briefly,
           // then choose the correct view from the actual restored state.
-          await new Promise((resolve) => setTimeout(resolve, 900))
+          await new Promise((resolve) => setTimeout(resolve, ACCOUNT_VIEW_RESTORE_DELAY_MS))
           const latest = latestAccountRef.current || {}
           if (latest.isConnected && latest.address) {
             accountViewOpenedRef.current = true
@@ -211,7 +213,9 @@ function RuntimeController({ request, finish }) {
         updateStatus({ lastError: err?.message || String(err), lastDoneReason: 'open_failed' })
       }
     }
-    setTimeout(() => { void run() }, 0)
+    updateStatus({ runtimeOpening: true })
+    const id = setTimeout(() => { void run() }, RUNTIME_OPEN_DELAY_MS)
+    return () => clearTimeout(id)
   }, [address, isConnected, mode, open])
 
   useEffect(() => {
@@ -418,7 +422,11 @@ export default function WalletRuntimeBridge() {
       lastError: null,
       lastDoneReason: 'mount_requested',
     })
-    setRequest((prev) => prev || { mode: nextMode, nonce: Date.now() })
+    setRequest((prev) => {
+      if (!prev) return { mode: nextMode, nonce: Date.now() }
+      if (prev.mode === nextMode) return prev
+      return { mode: nextMode, nonce: Date.now() }
+    })
   }, [])
 
   useEffect(() => {

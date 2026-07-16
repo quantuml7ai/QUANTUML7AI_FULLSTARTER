@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic'
 
 const TOKEN_PREFIX = 'ql7ws_'
 const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 30
+const LATEST_SESSION_PREFIX = 'wallet_session_latest:'
 const memoryStore = globalThis.__QL7_WALLET_SESSION_MEMORY__ || new Map()
 globalThis.__QL7_WALLET_SESSION_MEMORY__ = memoryStore
 
@@ -28,6 +29,10 @@ function normalizeAddress(value) {
 
 function sameAddress(a, b) {
   return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase()
+}
+
+function normalizeIdentity(value) {
+  return String(value || '').trim().toLowerCase()
 }
 
 function json(data, status = 200) {
@@ -88,6 +93,94 @@ function sessionKey(token) {
   return `wallet_session:${token}`
 }
 
+function latestSessionKey(identity) {
+  const key = normalizeIdentity(identity)
+  return key ? `${LATEST_SESSION_PREFIX}${key}` : ''
+}
+
+function getSessionIdentities(session, extra = []) {
+  return Array.from(new Set([
+    session?.walletAddress,
+    session?.accountId,
+    ...extra,
+  ].map(normalizeIdentity).filter(Boolean)))
+}
+
+function readLatestToken(record) {
+  if (!record) return ''
+  if (typeof record === 'string') return record
+  return String(record?.token || '').trim()
+}
+
+function readLatestStatus(record) {
+  if (!record || typeof record === 'string') return 'active'
+  return String(record?.status || 'active').trim().toLowerCase()
+}
+
+async function writeLatestSession(session, token, ttlSeconds, status = 'active') {
+  const identities = getSessionIdentities(session)
+  if (!identities.length) return
+  const record = {
+    token,
+    status,
+    walletAddress: session.walletAddress,
+    accountId: session.accountId || session.walletAddress,
+    updatedAt: nowMs(),
+    expiresAt: session.expiresAt || nowMs() + ttlSeconds * 1000,
+  }
+  await Promise.all(identities.map((identity) => storeSet(latestSessionKey(identity), record, ttlSeconds)))
+}
+
+async function ensureSessionIsLatest(token, session, candidates = []) {
+  const identities = getSessionIdentities(session, candidates)
+  if (!identities.length) return { ok: false, error: 'missing_identity' }
+
+  const records = await Promise.all(identities.map(async (identity) => ({
+    identity,
+    record: await storeGet(latestSessionKey(identity)),
+  })))
+  const existing = records.filter((row) => row.record)
+
+  if (!existing.length) {
+    await writeLatestSession(session, token, getTtlSeconds(), 'active')
+    return { ok: true, backfilled: true }
+  }
+
+  const stale = existing.find(({ record }) => {
+    const latestToken = readLatestToken(record)
+    const latestStatus = readLatestStatus(record)
+    return latestToken !== token || latestStatus !== 'active'
+  })
+  if (stale) return { ok: false, error: readLatestStatus(stale.record) === 'logout' ? 'logged_out' : 'stale_session' }
+
+  const missing = records.filter((row) => !row.record)
+  if (missing.length) {
+    await writeLatestSession(session, token, getTtlSeconds(), 'active')
+  }
+  return { ok: true }
+}
+
+async function markLatestLoggedOutIfCurrent(token, session) {
+  const identities = getSessionIdentities(session)
+  if (!identities.length) return
+  const ttlSeconds = Math.min(getTtlSeconds(), 60 * 60 * 24 * 7)
+  const logoutRecord = {
+    token,
+    status: 'logout',
+    walletAddress: session.walletAddress,
+    accountId: session.accountId || session.walletAddress,
+    updatedAt: nowMs(),
+    expiresAt: nowMs() + ttlSeconds * 1000,
+  }
+  await Promise.all(identities.map(async (identity) => {
+    const key = latestSessionKey(identity)
+    const current = await storeGet(key)
+    const currentToken = readLatestToken(current)
+    if (current && currentToken && currentToken !== token) return
+    await storeSet(key, logoutRecord, ttlSeconds)
+  }))
+}
+
 async function createSession(body) {
   const walletAddress = normalizeAddress(body.walletAddress || body.address || body.accountId)
   if (!isValidEvmAddress(walletAddress)) {
@@ -104,12 +197,14 @@ async function createSession(body) {
     accountId,
     provider,
     status: 'active',
+    latestBound: true,
     createdAt: nowMs(),
     expiresAt,
     logoutAt: null,
   }
 
   await storeSet(sessionKey(token), session, ttlSeconds)
+  await writeLatestSession(session, token, ttlSeconds, 'active')
 
   return json({
     ok: true,
@@ -143,6 +238,14 @@ async function verifySession(body) {
     return json({ ok: false, authorized: false, error: 'wallet_mismatch' }, 401)
   }
 
+  const latest = await ensureSessionIsLatest(token, session, [walletAddress, body.accountId])
+  if (!latest.ok) {
+    session.status = latest.error || 'stale_session'
+    session.logoutAt = nowMs()
+    await storeSet(sessionKey(token), session, Math.min(getTtlSeconds(), 60 * 60 * 24 * 7))
+    return json({ ok: false, authorized: false, error: latest.error || 'stale_session' }, 401)
+  }
+
   return json({
     ok: true,
     authorized: true,
@@ -164,6 +267,7 @@ async function logoutSession(body) {
     session.status = 'logout'
     session.logoutAt = nowMs()
     await storeSet(key, session, Math.min(getTtlSeconds(), 60 * 60 * 24 * 7))
+    await markLatestLoggedOutIfCurrent(token, session)
   }
   return json({ ok: true, loggedOut: true })
 }
