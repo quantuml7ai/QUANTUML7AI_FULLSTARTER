@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module'
+import crypto from 'node:crypto'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 const require = createRequire(import.meta.url)
@@ -8,6 +9,21 @@ const profilePrimary = require('../../../lib/mongo/profile-primary.cjs')
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value))
+}
+
+function makeTelegramInitData(userId, botToken = 'battle-chat-test-bot-token') {
+  const payload = {
+    auth_date: '1',
+    query_id: 'battle-chat-test',
+    user: JSON.stringify({ id: Number(userId), username: 'ql7_global' }),
+  }
+  const checkString = Object.keys(payload)
+    .sort()
+    .map((key) => `${key}=${payload[key]}`)
+    .join('\n')
+  const secret = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest()
+  const hash = crypto.createHmac('sha256', secret).update(checkString).digest('hex')
+  return new URLSearchParams({ ...payload, hash }).toString()
 }
 
 function getByPath(row, path) {
@@ -391,7 +407,7 @@ describe('Battle Chat Mongo primary adapter', () => {
 })
 
 describe('Battle Chat auth identity bridge', () => {
-  test('prefers linked account headers over raw Telegram Mini App actor', async () => {
+  test('prefers linked account headers over stale wallet sessions and raw Telegram Mini App actor', async () => {
     const resolveSpy = vi.spyOn(profilePrimary, 'resolveCanonicalAccountId').mockImplementation(async (raw) => {
       if (String(raw || '') === 'telegram-linked-wallet') return '0xlinked'
       return String(raw || '')
@@ -399,12 +415,24 @@ describe('Battle Chat auth identity bridge', () => {
     const aliasesSpy = vi.spyOn(profilePrimary, 'listAliasesForAccount').mockResolvedValue([
       { accountId: '0xlinked', canonicalAccountId: '0xlinked', alias: 'telegram:777001', aliasValue: '777001' },
     ])
+    const sessionStore = globalThis.__QL7_WALLET_SESSION_MEMORY__
+    sessionStore?.set('wallet_session:ql7ws_stale_session', {
+      expiresAt: Date.now() + 60_000,
+      value: {
+        status: 'active',
+        provider: 'wallet',
+        accountId: '0x0000000000000000000000000000000000000001',
+        walletAddress: '0x0000000000000000000000000000000000000001',
+        expiresAt: Date.now() + 60_000,
+      },
+    })
 
     const req = {
       headers: {
         get(name) {
           const key = String(name || '').toLowerCase()
           if (key === 'x-auth-account-id') return 'telegram-linked-wallet'
+          if (key === 'x-battlecoin-chat-session-token') return 'ql7ws_stale_session'
           if (key === 'x-telegram-init-data') return 'user=%7B%22id%22%3A777001%7D&hash=fake'
           return ''
         },
@@ -422,5 +450,59 @@ describe('Battle Chat auth identity bridge', () => {
 
     resolveSpy.mockRestore()
     aliasesSpy.mockRestore()
+    sessionStore?.delete('wallet_session:ql7ws_stale_session')
+  })
+
+  test('prefers verified Telegram Mini App identity over stale wallet sessions before auth hydration', async () => {
+    const botToken = 'battle-chat-test-bot-token'
+    const previousToken = process.env.TELEGRAM_BOT_TOKEN
+    process.env.TELEGRAM_BOT_TOKEN = botToken
+    const resolveSpy = vi.spyOn(profilePrimary, 'resolveCanonicalAccountId').mockImplementation(async (raw) => {
+      if (String(raw || '') === 'telegram:777001') return '0xlinked'
+      if (String(raw || '') === '777001') return '0xlinked'
+      return String(raw || '')
+    })
+    const aliasesSpy = vi.spyOn(profilePrimary, 'listAliasesForAccount').mockResolvedValue([
+      { accountId: '0xlinked', canonicalAccountId: '0xlinked', alias: 'telegram:777001', aliasValue: '777001' },
+    ])
+    const sessionStore = globalThis.__QL7_WALLET_SESSION_MEMORY__
+    sessionStore?.set('wallet_session:ql7ws_stale_tma_session', {
+      expiresAt: Date.now() + 60_000,
+      value: {
+        status: 'active',
+        provider: 'wallet',
+        accountId: '0x0000000000000000000000000000000000000001',
+        walletAddress: '0x0000000000000000000000000000000000000001',
+        expiresAt: Date.now() + 60_000,
+      },
+    })
+
+    const initData = makeTelegramInitData('777001', botToken)
+    const req = {
+      headers: {
+        get(name) {
+          const key = String(name || '').toLowerCase()
+          if (key === 'x-battlecoin-chat-session-token') return 'ql7ws_stale_tma_session'
+          if (key === 'x-telegram-init-data') return initData
+          return ''
+        },
+      },
+    }
+
+    const actor = await battleChatAuth.readOptionalBattleChatActor(req, {})
+
+    expect(actor).toMatchObject({
+      provider: 'tma',
+      accountId: '0xlinked',
+      rawAccountId: 'telegram:777001',
+      telegramId: '777001',
+    })
+    expect(actor.identityIds).toEqual(expect.arrayContaining(['0xlinked', 'telegram:777001', '777001']))
+
+    resolveSpy.mockRestore()
+    aliasesSpy.mockRestore()
+    sessionStore?.delete('wallet_session:ql7ws_stale_tma_session')
+    if (previousToken == null) delete process.env.TELEGRAM_BOT_TOKEN
+    else process.env.TELEGRAM_BOT_TOKEN = previousToken
   })
 })

@@ -866,7 +866,43 @@ section[data-ads-slot] :global(video) {
   height: auto;
   object-fit: contain;
 }
+/* Адаптивная высота рекламной карточки:
+   минимум 250px;
+   максимум остаётся ровно таким, каким его задаёт AdCard */
+section[data-ads-slot] :global([data-site-ad-card="1"]) {
+  --site-ad-current-max-height: var(--ad-slot-h-m);
 
+  min-height: 330px !important;
+  height: clamp(
+    250px,
+    50vw,
+    var(--site-ad-current-max-height)
+  ) !important;
+  max-height: var(--site-ad-current-max-height) !important;
+}
+
+/* Внутренний медиаслот занимает доступную высоту карточки,
+   а не продолжает удерживать старую фиксированную высоту */
+section[data-ads-slot] :global([data-site-ad-media-slot="1"]) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: 100% !important;
+}
+
+/* Планшет: сохраняем существующий планшетный максимум */
+@media (min-width: 640px) {
+  section[data-ads-slot] :global([data-site-ad-card="1"]) {
+    --site-ad-current-max-height: var(--ad-slot-h-t);
+  }
+}
+
+/* Десктоп: сохраняем существующий десктопный максимум */
+@media (min-width: 1024px) {
+  section[data-ads-slot] :global([data-site-ad-card="1"]) {
+    --site-ad-current-max-height: var(--ad-slot-h-d);
+  }
+}
         /* Для iframe / svg / canvas — только центрируем и ограничиваем ширину,
            размеры (width/height) берём из inline-стилей AdCard (YouTube и т.п.) */
         section[data-ads-slot] :global(iframe),

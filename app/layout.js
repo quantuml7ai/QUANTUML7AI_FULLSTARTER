@@ -467,6 +467,8 @@ export const metadata = {
 
 
 export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#0b1220',
   colorScheme: 'dark',
 }
@@ -543,7 +545,7 @@ export default function RootLayout({ children }) {
 
             <NotRobotHost />
 
-              <BgAudio src="/audio/cosmic.mp3" defaultVolume={1.35} />
+              <BgAudio src="/audio/cosmic.mp3" defaultVolume={0.9} />
 
             {/* 🔹 Глобальный поп-ап «Пригласи друга» */}
            <InviteFriendHost />
