@@ -93,10 +93,13 @@ export default function useThreadOpenNavigation({
   setVideoFeedOpen,
   setThreadRoot,
   setSel,
+  setPostSort,
   navPendingThreadRootRef,
   navRestoringRef,
   isBrowserFn,
   threadRoot,
+  postSort = 'new',
+  threadFeedMode = 'world',
 }) {
   const pendingThreadRootIdRef = useRef(null)
   const pendingThreadRootSeedRef = useRef(null)
@@ -158,9 +161,10 @@ export default function useThreadOpenNavigation({
     }
   }, [])
 
-  const hydrateThreadTarget = useCallback(async (seed, seq, attempt = 0) => {
+  const hydrateThreadTarget = useCallback(async (seed, seq, attempt = 0, sortOverride = '') => {
     const targetId = str(seed?.id)
     const topicId = str(seed?.topicId)
+    const effectivePostSort = str(sortOverride || postSort || 'new') || 'new'
     if (!targetId || !topicId || !api) {
       setOpeningState({ active: false, targetId, status: 'ready', error: '' })
       return
@@ -203,6 +207,8 @@ export default function useThreadOpenNavigation({
           rootPostId,
           targetPostId: targetId,
           pageSize: 120,
+          sort: effectivePostSort,
+          feedMode: threadFeedMode || 'world',
         })
       }
       if (!isCurrent()) return
@@ -220,6 +226,8 @@ export default function useThreadOpenNavigation({
           rootPostId,
           targetPostId: targetId,
           pageSize: 160,
+          sort: effectivePostSort,
+          feedMode: threadFeedMode || 'world',
         })
         if (!isCurrent()) return
         const retryPosts = normalizeThreadPosts(retryPage)
@@ -248,7 +256,7 @@ export default function useThreadOpenNavigation({
         })
         setTimeout(() => {
           if (!isCurrent()) return
-          try { hydrateThreadTargetRef.current?.(seed, seq, Number(attempt || 0) + 1) } catch {}
+          try { hydrateThreadTargetRef.current?.(seed, seq, Number(attempt || 0) + 1, effectivePostSort) } catch {}
         }, 420)
         return
       }
@@ -260,7 +268,7 @@ export default function useThreadOpenNavigation({
         error: str(error?.message || error || 'thread_open_failed'),
       })
     }
-  }, [api, setOpeningState, setThreadRoot])
+  }, [api, postSort, setOpeningState, setThreadRoot, threadFeedMode])
 
   useEffect(() => {
     hydrateThreadTargetRef.current = hydrateThreadTarget
@@ -275,6 +283,7 @@ export default function useThreadOpenNavigation({
     const entryId = String(opts.entryId || (post?.id ? 'post_' + post.id : '') || '')
     const seq = Number(threadOpenSeqRef.current || 0) + 1
     threadOpenSeqRef.current = seq
+    try { setPostSort?.('new') } catch {}
     setOpeningState({ active: true, targetId: rootId, status: 'locating', error: '' })
     dispatchServerItemsMerge([seed], 'thread_open_seed')
 
@@ -290,7 +299,7 @@ export default function useThreadOpenNavigation({
     if (selId && String(selId) === String(topicId)) {
       const node = idMap?.get?.(rootId) || seed
       try { setThreadRoot({ ...node, __threadOpening: true, __threadSeed: !idMap?.get?.(rootId) }) } catch {}
-      try { hydrateThreadTarget(seed, seq) } catch {}
+      try { hydrateThreadTarget(seed, seq, 0, 'new') } catch {}
       return
     }
 
@@ -324,6 +333,7 @@ export default function useThreadOpenNavigation({
     setSel,
     setOpeningState,
     hydrateThreadTarget,
+    setPostSort,
   ])
 
   const idMapForPendingRootRef = useRef(idMap)
@@ -356,10 +366,11 @@ export default function useThreadOpenNavigation({
       const seed = createThreadSeed(node || pendingThreadRootSeedRef.current || { id: String(pendingId), topicId: selId })
       pendingThreadRootSeedRef.current = null
       const seq = Number(threadOpenSeqRef.current || 0)
+      try { setPostSort?.('new') } catch {}
       try { setThreadRoot({ ...(seed || { id: String(pendingId), topicId: selId }), __threadOpening: true }) } catch {}
       if (seed) {
         dispatchServerItemsMerge([seed], 'thread_open_pending_seed')
-        try { hydrateThreadTarget(seed, seq) } catch {}
+        try { hydrateThreadTarget(seed, seq, 0, 'new') } catch {}
       }
       return
     }
@@ -368,7 +379,7 @@ export default function useThreadOpenNavigation({
     if (!topicChanged) return
     try { setThreadRoot(null) } catch {}
     setOpeningState({ active: false, targetId: '', status: 'idle', error: '' })
-  }, [selId, navPendingThreadRootRef, navRestoringRef, setThreadRoot, setOpeningState, createThreadSeed, hydrateThreadTarget])
+  }, [selId, navPendingThreadRootRef, navRestoringRef, setThreadRoot, setOpeningState, createThreadSeed, hydrateThreadTarget, setPostSort])
 
   useEffect(() => {
     const pendingId = pendingScrollToPostIdRef.current

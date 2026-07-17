@@ -9269,10 +9269,12 @@ html[data-tma="1"] .inboxTabs{
 .sortGeoRailBtn:hover,.sortGeoRailBtn:focus-visible{border-color:rgba(140,222,255,.45);box-shadow:0 0 15px rgba(75,184,255,.16),inset 0 0 12px rgba(94,205,255,.08);}
 .sortGeoRailBtn:active{transform:scale(.985);}
 .sortGeoRailBtn--active{color:#fff6bf;border-color:rgba(255,225,105,.66);background:linear-gradient(180deg,rgba(255,223,95,.18),rgba(80,170,255,.11));box-shadow:0 0 18px rgba(255,223,95,.18),inset 0 0 14px rgba(255,223,95,.10);}
+.sortGeoRailBtn--disabled{cursor:not-allowed !important;opacity:.42;filter:grayscale(.72) saturate(.42);box-shadow:none;}
 .sortGeoRailBtnMain{font-size:.72rem;font-weight:950;line-height:1.05;}
 .sortGeoRailBtnMeta{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.61rem;font-weight:800;color:rgba(220,240,255,.63);}
 .sortGeoRailBtn--active .sortGeoRailBtnMeta{color:rgba(255,248,198,.76);}
 .sortGeoRailBtn:disabled,.sortDropItem:disabled{cursor:wait;opacity:.62;}
+.sortGeoRailBtn.sortGeoRailBtn--disabled:disabled{cursor:not-allowed !important;opacity:.42;filter:grayscale(.72) saturate(.42);box-shadow:none;}
 .sortGeoApplyOverlay{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;gap:11px;background:linear-gradient(180deg,rgba(4,12,22,.86),rgba(6,13,24,.82));backdrop-filter:blur(7px);border-radius:inherit;}
 .sortGeoApplySpinner{width:28px;height:28px;border-radius:50%;border:2px solid rgba(125,226,255,.24);border-top-color:#79f2ff;border-right-color:#ffe375;box-shadow:0 0 18px rgba(95,218,255,.28);animation:ql7SortGeoSpinV1 .82s linear infinite;}
 .sortGeoApplyBrand{width:116px;height:30px;overflow:visible;filter:drop-shadow(0 0 10px rgba(108,232,255,.42));}

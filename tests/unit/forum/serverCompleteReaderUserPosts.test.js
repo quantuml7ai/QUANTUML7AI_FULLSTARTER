@@ -691,6 +691,44 @@ describe('forum complete reader user posts', () => {
     }))
   })
 
+  test('thread topic roots sort by canonical replies and expose thread server rank', async () => {
+    const slow = makeProjectionPost({ id: 'slow-root', authorId: 'wallet:slow', ts: 400 })
+    const hot = makeProjectionPost({ id: 'hot-root', authorId: 'wallet:hot', ts: 100 })
+    slow.parentId = null
+    hot.parentId = null
+    slow.sort.replies = 1
+    hot.sort.replies = 2
+    slow.counters.replies = 1
+    hot.counters.replies = 2
+    slow.post.replyCount = 1
+    hot.post.replyCount = 2
+
+    const db = fakeDb({
+      forum_thread_index: [slow, hot],
+      forum_core_posts: [
+        { _id: 'post:slow-root', id: 'slow-root', postId: 'slow-root', userId: 'wallet:slow', topicId: 'topic-1', text: 'slow', ts: 400, replyCount: 3, views: 1 },
+        { _id: 'post:hot-root', id: 'hot-root', postId: 'hot-root', userId: 'wallet:hot', topicId: 'topic-1', text: 'hot', ts: 100, replyCount: 9, views: 1 },
+      ],
+    })
+    completeReader.__setTestDb(db)
+
+    const page = await completeReader.readForumThreadPage({
+      input: { mode: 'topic_roots', topicId: 'topic-1', sort: 'replies', feedMode: 'world', pageSize: 10 },
+    })
+
+    expect(page.ok).toBe(true)
+    expect(page.mode).toBe('world')
+    expect(page.sort).toBe('replies')
+    expect(page.items.map((item) => item.id)).toEqual(['hot-root', 'slow-root'])
+    expect(page.items[0]).toEqual(expect.objectContaining({
+      replyCount: 9,
+      __ql7ServerFeedRank: 0,
+      __ql7ServerFeedMode: 'world',
+      __ql7ServerFeedSort: 'replies',
+      __ql7ServerFeedSurface: 'thread',
+    }))
+  })
+
   test('search topics exposes canonical post totals for search badges', async () => {
     const db = fakeDb({
       forum_search_index: [

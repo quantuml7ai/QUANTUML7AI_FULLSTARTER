@@ -95,6 +95,10 @@ export async function POST(req) {
           nick: saved,
           icon: savedIcon,
           avatar: savedIcon,
+          vipIcon: null,
+          vipEmoji: null,
+          gender: savedGender || '',
+          birthYear: Number(savedBirthYear || 0) || 0,
           ts: Date.now(),
         }),
       )
@@ -105,6 +109,9 @@ export async function POST(req) {
         ok: true,
         nick: saved,
         icon: savedIcon,
+        avatar: savedIcon,
+        vipIcon: null,
+        vipEmoji: null,
         accountId,
         gender: savedGender || '',
         birthYear: Number(savedBirthYear || 0) || 0,
@@ -114,7 +121,8 @@ export async function POST(req) {
     )
   } catch (e) {
     const msg = String(e?.message || e)
-    const code = msg === 'nick_taken' ? 409 : 500
-    return NextResponse.json({ ok: false, error: msg }, { status: code })
+    const isDuplicateNick = msg === 'nick_taken' || /E11000|duplicate key/i.test(msg)
+    const code = isDuplicateNick ? 409 : 500
+    return NextResponse.json({ ok: false, error: isDuplicateNick ? 'nick_taken' : msg }, { status: code })
   }
 }

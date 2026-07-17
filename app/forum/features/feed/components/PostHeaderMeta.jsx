@@ -73,7 +73,7 @@ export default function PostHeaderMeta({
   const avatarRef = React.useRef(null)
   const cachedProfile = safeReadProfile(authorId)
   const rawNickname = String(cachedProfile?.nickname || p?.nickname || '').trim()
-  const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || p?.icon || ''
+  const rawIcon = cachedProfile?.icon || cachedProfile?.avatar || cachedProfile?.vipIcon || cachedProfile?.vipEmoji || p?.icon || ''
   const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)
   const displayNickname = useAnonymousProfile
     ? anonymousLabel(t)

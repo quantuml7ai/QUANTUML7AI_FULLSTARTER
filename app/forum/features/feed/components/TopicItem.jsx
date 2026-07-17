@@ -131,7 +131,7 @@ const TopicItem = React.memo(function TopicItem({
   const isVipAuthor = useVipFlag(authorId, t?.vipActive ?? t?.isVip ?? t?.vip ?? t?.vipUntil ?? null)
   const cachedProfile = safeReadProfile(authorId)
   const rawNickname = String(cachedProfile?.nickname || t?.nickname || '').trim()
-  const rawIcon = cachedProfile?.vipIcon || cachedProfile?.vipEmoji || cachedProfile?.icon || t?.icon || ''
+  const rawIcon = cachedProfile?.icon || cachedProfile?.avatar || cachedProfile?.vipIcon || cachedProfile?.vipEmoji || t?.icon || ''
   const useAnonymousProfile = isGeneratedFallbackNick(rawNickname, authorId, rawUserId) && !hasProfileAvatar(rawIcon)
   const displayNickname = useAnonymousProfile
     ? tt('forum_subscriptions_unknown_user')

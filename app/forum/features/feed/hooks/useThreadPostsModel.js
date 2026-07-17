@@ -111,6 +111,7 @@ export default function useThreadPostsModel({
 
   const flat = useMemo(() => {
     if (!selectedTopicId) return []
+    const normalizedPostSort = String(postSort || 'new').trim() || 'new'
 
     const postScore = (post) => {
       const node = post?.children ? post : (idMap.get(String(post.id)) || post)
@@ -119,7 +120,7 @@ export default function useThreadPostsModel({
       const likes = Math.max(finiteCount(node.likes), finiteCount(node.counters?.likes), authoritative ? 0 : finiteCount(node.sort?.likes))
       const views = Math.max(finiteCount(node.views), finiteCount(node.counters?.views), authoritative ? 0 : finiteCount(node.sort?.views))
       const repliesCount = readReplyCount(node, (node.children || []).length)
-      switch (postSort) {
+      switch (normalizedPostSort) {
         case 'likes':
           return likes
         case 'views':
@@ -190,28 +191,35 @@ export default function useThreadPostsModel({
       __threadOpening: threadRoot.__threadOpening !== false,
     }
 
+    const startChildren = start.children?.length ? start.children : (childrenByParent.get(rootId) || [])
+    const hasServerRankedChildren = (startChildren || []).some((post) => Number.isFinite(serverRank(post)))
+    const shouldUseServerRankedChildren =
+      hasServerRankedChildren &&
+      normalizedPostSort === 'random'
     const sortChildren = (list) =>
       [...(list || [])].sort((a, b) => {
-        const aPath = String(a?.threadPath || a?.path || a?._threadPath || '').trim()
-        const bPath = String(b?.threadPath || b?.path || b?._threadPath || '').trim()
-        if (aPath || bPath) return aPath.localeCompare(bPath)
-
-        const aOrder = Number(a?.threadOrder ?? a?._threadOrder ?? a?.order ?? a?.rank)
-        const bOrder = Number(b?.threadOrder ?? b?._threadOrder ?? b?.order ?? b?.rank)
-        if (Number.isFinite(aOrder) || Number.isFinite(bOrder)) {
-          const left = Number.isFinite(aOrder) ? aOrder : Number.POSITIVE_INFINITY
-          const right = Number.isFinite(bOrder) ? bOrder : Number.POSITIVE_INFINITY
-          if (left !== right) return left - right
+        if (shouldUseServerRankedChildren) {
+          const ar = serverRank(a)
+          const br = serverRank(b)
+          const ah = Number.isFinite(ar)
+          const bh = Number.isFinite(br)
+          if (ah || bh) {
+            if (ah !== bh) return ah ? -1 : 1
+            if (ar !== br) return ar - br
+          }
         }
 
-        const aTs = Number(a?.ts || 0)
+        const bScore = postScore(b)
+        const aScore = postScore(a)
+        if (bScore !== aScore) return bScore - aScore
+
         const bTs = Number(b?.ts || 0)
-        if (aTs !== bTs) return aTs - bTs
+        const aTs = Number(a?.ts || 0)
+        if (bTs !== aTs) return bTs - aTs
 
         return String(a?.id || '').localeCompare(String(b?.id || ''))
       })
 
-    const startChildren = start.children?.length ? start.children : (childrenByParent.get(rootId) || [])
     const rootRepliesCount = readReplyCount(start, (startChildren || []).length)
     const directChildren = sortChildren(startChildren || [])
     const rootRow = {

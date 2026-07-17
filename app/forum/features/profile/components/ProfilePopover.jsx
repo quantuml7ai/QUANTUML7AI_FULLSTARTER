@@ -112,6 +112,36 @@ export default function ProfilePopover({
   const resolved = resolveForumUserId(base);
   const uid = resolveProfileAccountId(resolved);
 
+  const collectProfileIdentityIds = React.useCallback((extra = []) => {
+    const ids = new Set([
+      uid,
+      resolved,
+      base,
+      baseAuth?.accountId,
+      baseAuth?.asherId,
+      ...extra,
+    ].map((item) => String(item || '').trim()).filter(Boolean));
+    try {
+      const storedForumUserId = String(localStorage.getItem('forum_user_id') || '').trim();
+      if (storedForumUserId) ids.add(storedForumUserId);
+    } catch {}
+    return Array.from(ids);
+  }, [base, baseAuth?.accountId, baseAuth?.asherId, resolved, uid]);
+
+  const mergeProfileIdentityCache = React.useCallback((patch = {}, canonicalId = '') => {
+    const accountId = String(canonicalId || uid || '').trim();
+    const ids = collectProfileIdentityIds(accountId ? [accountId] : []);
+    ids.forEach((rawId) => {
+      if (accountId) {
+        try { writeProfileAlias(rawId, accountId); } catch {}
+      }
+      try { mergeProfileCache(rawId, patch); } catch {}
+    });
+    if (accountId) {
+      try { mergeProfileCache(accountId, patch); } catch {}
+    }
+  }, [collectProfileIdentityIds, uid]);
+
   const readLocal = React.useCallback(() => {
     if (!uid || typeof window === 'undefined') return null;
     return safeReadProfile(uid) || null;
@@ -887,13 +917,33 @@ const selectedBirthYearLabel = birthYear
   // если выбран файл — показываем везде то, что уже есть в превью
   const optimisticIcon = uploadFile ? (finalAvatarUrl || rawAvatarUrl || icon) : icon;
 
-  mergeProfileCache(uid, {
-    nickname: n,
-    icon: optimisticIcon,
-    gender: nextGender,
-    birthYear: nextBirthYear,
+  const previousProfilePatch = {
+    nickname: prevNick,
+    icon: prevIcon,
+    avatar: prevLocal.avatar || prevIcon,
+    vipIcon: prevLocal.vipIcon ?? null,
+    vipEmoji: prevLocal.vipEmoji ?? null,
+    gender: prevGender,
+    birthYear: prevBirthYear,
+    updatedAt: Date.now(),
+  };
+  const makeSavedProfilePatch = ({
+    nicknameValue = n,
+    iconValue = optimisticIcon,
+    genderValue = nextGender,
+    birthYearValue = nextBirthYear,
+  } = {}) => ({
+    nickname: nicknameValue,
+    icon: iconValue,
+    avatar: iconValue,
+    vipIcon: null,
+    vipEmoji: null,
+    gender: genderValue,
+    birthYear: birthYearValue,
     updatedAt: Date.now(),
   });
+
+  mergeProfileIdentityCache(makeSavedProfilePatch(), uid);
   onSaved?.({ nickname: n, icon: optimisticIcon, gender: nextGender, birthYear: nextBirthYear });
 
   // закрываем поповер мгновенно (дальше всё догружается в фоне)
@@ -931,13 +981,7 @@ const selectedBirthYearLabel = birthYear
             toastI18n('warn', 'forum_image_blocked');
             toastI18n('info', reasonKey(mod?.reason));
             // rollback optimistic
-            mergeProfileCache(uid, {
-              nickname: prevNick,
-              icon: prevIcon,
-              gender: prevGender,
-              birthYear: prevBirthYear,
-              updatedAt: Date.now(),
-            });
+            mergeProfileIdentityCache(previousProfilePatch, uid);
             onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
             cleanupObjectUrlsIfStale();      
             return;
@@ -950,13 +994,7 @@ const selectedBirthYearLabel = birthYear
           toastI18n('err', 'forum_moderation_error');
           toastI18n('info', 'forum_moderation_try_again');
           // rollback optimistic
-          mergeProfileCache(uid, {
-            nickname: prevNick,
-            icon: prevIcon,
-            gender: prevGender,
-            birthYear: prevBirthYear,
-            updatedAt: Date.now(),
-          });
+          mergeProfileIdentityCache(previousProfilePatch, uid);
           onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
            cleanupObjectUrlsIfStale();     
           return;
@@ -980,13 +1018,7 @@ const selectedBirthYearLabel = birthYear
         if (!up.ok || !uj?.urls?.[0]) {
           console.warn('avatar upload failed', uj);
           // rollback optimistic
-          mergeProfileCache(uid, {
-            nickname: prevNick,
-            icon: prevIcon,
-            gender: prevGender,
-            birthYear: prevBirthYear,
-            updatedAt: Date.now(),
-          });
+          mergeProfileIdentityCache(previousProfilePatch, uid);
           onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
           cleanupObjectUrlsIfStale();     
           return;
@@ -995,12 +1027,7 @@ const selectedBirthYearLabel = birthYear
         iconToSend = uj.urls[0];
 
         // ✅ reconcile: подменяем blob-превью на реальный URL (чтобы пережило перезагрузку)
-        mergeProfileCache(uid, {
-          icon: iconToSend,
-          gender: nextGender,
-          birthYear: nextBirthYear,
-          updatedAt: Date.now(),
-        });
+        mergeProfileIdentityCache(makeSavedProfilePatch({ iconValue: iconToSend }), uid);
         onSaved?.({ nickname: n, icon: iconToSend, gender: nextGender, birthYear: nextBirthYear });
         cleanupObjectUrlsIfStale();     
       } finally {
@@ -1040,13 +1067,7 @@ const selectedBirthYearLabel = birthYear
     if (!r.ok || !j?.ok) {
       if (j?.error === 'nick_taken' && mountedRef.current) setNickFree(false);
       // rollback optimistic
-      mergeProfileCache(uid, {
-        nickname: prevNick,
-        icon: prevIcon,
-        gender: prevGender,
-        birthYear: prevBirthYear,
-        updatedAt: Date.now(),
-      });
+      mergeProfileIdentityCache(previousProfilePatch, uid);
       onSaved?.({ nickname: prevNick, icon: prevIcon, gender: prevGender, birthYear: prevBirthYear });
       cleanupObjectUrlsIfStale();    
       return;
@@ -1063,13 +1084,12 @@ const selectedBirthYearLabel = birthYear
     setBirthYear(savedBirthYear);
 
     writeProfileAlias(uid, savedAccountId);
-    mergeProfileCache(savedAccountId, {
-      nickname: savedNick,
-      icon: savedIcon,
-      gender: savedGender,
-      birthYear: savedBirthYear,
-      updatedAt: Date.now(),
-    });
+    mergeProfileIdentityCache(makeSavedProfilePatch({
+      nicknameValue: savedNick,
+      iconValue: savedIcon,
+      genderValue: savedGender,
+      birthYearValue: savedBirthYear,
+    }), savedAccountId);
   // финальный reconcile на ответ бэка
     onSaved?.({ nickname: savedNick, icon: savedIcon, gender: savedGender, birthYear: savedBirthYear });
     cleanupObjectUrlsIfStale();
@@ -1457,4 +1477,3 @@ if (mountedRef.current) setBusy(false);
 /* =========================================================
    UI: посты/темы
 ========================================================= */
-

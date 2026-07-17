@@ -99,5 +99,5 @@ export function resolveNickForDisplay(userId, fallbackNick, shortId = fallbackSh
 export function resolveIconForDisplay(userId, pIcon) {
   const uid = resolveProfileAccountId(userId)
   const prof = safeReadProfile(uid) || {}
-  return prof.vipIcon || prof.vipEmoji || prof.icon || pIcon || '👤'
+  return prof.icon || prof.avatar || prof.vipIcon || prof.vipEmoji || pIcon || '👤'
 }

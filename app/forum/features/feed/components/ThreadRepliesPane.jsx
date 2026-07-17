@@ -143,12 +143,24 @@ export default function ThreadRepliesPane({
   const showInitialThreadSkeleton = showCenterOpeningLoader || showCenterTopicLoader
 
   return (
-    <div className="grid gap-2 threadRepliesPane">
-      {!showInitialThreadSkeleton && threadWin.top > 0 && <div aria-hidden="true" style={{ height: threadWin.top }} />}
+    <div
+      className="grid gap-2 threadRepliesPane"
+      data-thread-replies-pane="1"
+      data-thread-replies-mode={threadRoot ? 'branch' : 'topic-roots'}
+    >
+      <div data-thread-replies-start="1" aria-hidden="true" />
+      {!showInitialThreadSkeleton && threadWin.top > 0 && (
+        <div
+          data-thread-window-top-spacer="1"
+          aria-hidden="true"
+          style={{ height: threadWin.top }}
+        />
+      )}
       {showInitialThreadSkeleton && (
         <ForumPaneSkeleton rows={3} label={t?.('loading') || 'Loading'} />
       )}
-      {!showInitialThreadSkeleton && threadSlots.slice(threadWin.start, threadWin.end).map((slot) => {
+      {!showInitialThreadSkeleton && threadSlots.slice(threadWin.start, threadWin.end).map((slot, renderedIndex) => {
+        const slotIndex = Number(threadWin.start || 0) + renderedIndex
         if (slot.type === 'item') {
           const p = slot.item
 const isThreadBranchRoot =
@@ -176,6 +188,8 @@ const replyIndent = Math.min(64, 12 + (Math.max(1, offsetLevel) * 14))
               id={`post_${p.id}`}
               data-feed-card="1"
               data-feed-kind="post"
+              data-thread-slot-index={slotIndex}
+              data-thread-list-first-card={slotIndex === 0 ? '1' : undefined}
 data-thread-branch-root={isThreadBranchRoot ? '1' : undefined}
 data-thread-branch-child={isThreadBranchReply ? '1' : undefined}
 className={

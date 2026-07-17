@@ -158,6 +158,22 @@ describe('profile Mongo primary repository', () => {
     await expect(profilePrimary.isNickAvailable('Shared', 'bob')).resolves.toBe(false)
   })
 
+  test('guards legacy nickname index rows without nickLower from false free checks', async () => {
+    await memoryDb.collection('profile_nick_index').updateOne(
+      { _id: 'nick:legacy' },
+      { $set: { _id: 'nick:legacy', nickname: 'Legacy', normalizedNick: 'Legacy', ownerUserId: 'alice', updatedAt: '2026-06-25T10:00:00.000Z' } },
+      { upsert: true },
+    )
+
+    await expect(profilePrimary.isNickAvailable('Legacy', 'bob')).resolves.toBe(false)
+    await expect(profilePrimary.setUserNick('bob', 'Legacy')).rejects.toThrow('nick_taken')
+    await expect(profilePrimary.isNickAvailable('Legacy', 'alice')).resolves.toBe(true)
+    await expect(profilePrimary.setUserNick('alice', 'Legacy')).resolves.toBe('Legacy')
+
+    const row = await memoryDb.collection('profile_nick_index').findOne({ _id: 'nick:legacy' })
+    expect(row).toMatchObject({ nickLower: 'legacy', ownerUserId: 'alice' })
+  })
+
   test('resolves canonical aliases without Redis', async () => {
     const written = await profilePrimary.writeCanonicalAliases('wallet:1', ['12345', 'legacy-user'])
     expect(written).toBeGreaterThan(0)

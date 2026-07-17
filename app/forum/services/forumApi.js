@@ -175,6 +175,12 @@ function normalizeForumUserBranchSort(value) {
   return raw && raw !== 'random' && QL7_FORUM_FEED_SORT_VALUES.has(raw) ? raw : 'new'
 }
 
+function normalizeForumThreadSort(value) {
+  const raw = String(value || '').trim().toLowerCase()
+  if (raw === 'reactions') return 'likes'
+  return raw && raw !== 'random' && QL7_FORUM_FEED_SORT_VALUES.has(raw) ? raw : 'new'
+}
+
 export function readForumActorId() {
   if (typeof window === 'undefined') return ''
   try {
@@ -317,7 +323,14 @@ export const api = {
   },
 
   async threadPage(q = {}) {
-    return serverForumPagePost('/api/forum/thread/page', q)
+    const body = q && typeof q === 'object' ? q : {}
+    const actor = withForumActor({
+      ...body,
+      feedMode: String(body.feedMode || body.geoMode || '').trim() || readForumGeoFeedModePreference(),
+      sort: normalizeForumThreadSort(body.sort || 'new'),
+      randomSeed: body.randomSeed || body.seed || sessionForumFeedSeed(),
+    })
+    return serverForumPagePost('/api/forum/thread/page', actor.body, actor.headers)
   },
 
   async inboxRepliesPage(q = {}) {

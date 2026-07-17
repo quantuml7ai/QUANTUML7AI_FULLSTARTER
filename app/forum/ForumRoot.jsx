@@ -495,6 +495,17 @@ const {
 
 /* ---- выбор темы и построение данных ---- */
 const [sel, setSel] = useState(null);
+const lastTopicOpenDefaultSortIdRef = useRef('')
+useEffect(() => {
+  const topicId = String(sel?.id || '').trim()
+  if (!topicId) {
+    lastTopicOpenDefaultSortIdRef.current = ''
+    return
+  }
+  if (lastTopicOpenDefaultSortIdRef.current === topicId) return
+  lastTopicOpenDefaultSortIdRef.current = topicId
+  try { setPostSort('new') } catch {}
+}, [sel?.id, setPostSort])
 const { reactMut, delTopicOwn, delPostOwn } = useForumMutationActions({
   requireAuthStrictFn: requireAuthStrict,
   rateLimiter: rl,
@@ -747,7 +758,9 @@ const {
   setSelectedTopic: setSel,
   data,
   postSort,
+  setPostSort,
   topicSort,
+  contentRefreshToken,
   topicFilterId,
   authorFilterUserId: profileBranchMode === 'topics' ? normalizedProfileBranchUserId : null,
   query: q,
@@ -894,15 +907,25 @@ const findSortRefreshBranchStartCard = useCallback(() => {
     }
 
     if (sel?.id) {
+      const threadPane =
+        root.querySelector?.('[data-thread-replies-pane="1"]') ||
+        (root !== document ? document.querySelector?.('[data-thread-replies-pane="1"]') : null) ||
+        null
       return (
-        root.querySelector?.('[data-thread-branch-root="1"]') ||
-        root.querySelector?.('[data-forum-thread-start="1"] ~ [data-feed-card="1"]') ||
-        root.querySelector?.('[data-feed-card="1"]') ||
+        threadPane?.querySelector?.('[data-thread-list-first-card="1"][data-feed-card="1"]') ||
+        threadPane?.querySelector?.('[data-thread-branch-root="1"][data-feed-card="1"]') ||
+        threadPane?.querySelector?.('[data-thread-replies-start="1"]') ||
+        root.querySelector?.('[data-thread-replies-pane="1"] [data-thread-list-first-card="1"][data-feed-card="1"]') ||
+        root.querySelector?.('[data-thread-replies-pane="1"] [data-thread-branch-root="1"][data-feed-card="1"]') ||
+        root.querySelector?.('[data-thread-replies-pane="1"] [data-thread-replies-start="1"]') ||
+        root.querySelector?.('[data-forum-thread-start="1"]') ||
+        threadPane ||
         (root !== document
           ? (
-              document.querySelector?.('[data-thread-branch-root="1"]') ||
-              document.querySelector?.('[data-forum-thread-start="1"] ~ [data-feed-card="1"]') ||
-              document.querySelector?.('[data-feed-card="1"]') ||
+              document.querySelector?.('[data-thread-replies-pane="1"] [data-thread-list-first-card="1"][data-feed-card="1"]') ||
+              document.querySelector?.('[data-thread-replies-pane="1"] [data-thread-branch-root="1"][data-feed-card="1"]') ||
+              document.querySelector?.('[data-thread-replies-pane="1"] [data-thread-replies-start="1"]') ||
+              document.querySelector?.('[data-forum-thread-start="1"]') ||
               null
             )
           : null)

@@ -68,7 +68,9 @@ export default function useForumFeedRuntime({
   setSelectedTopic,
   data,
   postSort,
+  setPostSort,
   topicSort,
+  contentRefreshToken = 0,
   topicFilterId,
   authorFilterUserId,
   query,
@@ -104,6 +106,7 @@ export default function useForumFeedRuntime({
   const navPendingThreadRootRef = useRef(null)
   const navStateRef = useRef({})
   const topicRootsRequestSeqRef = useRef(0)
+  const threadBranchRequestSeqRef = useRef(0)
   const [topicRootsState, setTopicRootsState] = useState({
     key: '',
     loading: false,
@@ -153,6 +156,9 @@ export default function useForumFeedRuntime({
     navRestoringRef,
     isBrowserFn,
     threadRoot,
+    postSort,
+    setPostSort,
+    threadFeedMode: 'world',
   })
 
   const centerNodeInScroll = useCallback((node, behavior = 'auto') => {
@@ -244,6 +250,7 @@ export default function useForumFeedRuntime({
         topicId,
         pageSize: 80,
         limit: 80,
+        sort: postSort || 'new',
         ...(cursor ? { cursor } : null),
       })
       if (topicRootsRequestSeqRef.current !== seq) return { ok: false, skipped: true, reason: 'stale' }
@@ -277,7 +284,38 @@ export default function useForumFeedRuntime({
       setTopicRootsState(nextState)
       return { ok: false, error: nextState.error }
     }
-  }, [api, selectedTopicId, threadRoot])
+  }, [api, postSort, selectedTopicId, threadRoot])
+
+  const loadThreadBranchPage = useCallback(async () => {
+    const topicId = String(selectedTopicId || '').trim()
+    const rootPostId = String(threadRoot?.id || threadRoot?.postId || '').trim()
+    if (!topicId || !rootPostId || typeof api?.threadPage !== 'function') {
+      return { ok: false, skipped: true, reason: 'inactive' }
+    }
+    const seq = Number(threadBranchRequestSeqRef.current || 0) + 1
+    threadBranchRequestSeqRef.current = seq
+    try {
+      const page = await api.threadPage({
+        mode: 'branch',
+        topicId,
+        rootPostId,
+        targetPostId: rootPostId,
+        pageSize: 160,
+        limit: 160,
+        sort: postSort || 'new',
+        feedMode: 'world',
+      })
+      if (threadBranchRequestSeqRef.current !== seq) return { ok: false, skipped: true, reason: 'stale' }
+      if (!page?.ok) throw new Error(page?.error || 'thread_branch_page_failed')
+      const posts = normalizeThreadPagePosts(page)
+        .filter((post) => String(post.topicId || topicId) === topicId)
+      dispatchTopicRootPostsMerge(posts, topicId)
+      return { ok: true, count: posts.length }
+    } catch (error) {
+      if (threadBranchRequestSeqRef.current !== seq) return { ok: false, skipped: true, reason: 'stale_error' }
+      return { ok: false, error: String(error?.message || error || 'thread_branch_page_failed') }
+    }
+  }, [api, postSort, selectedTopicId, threadRoot?.id, threadRoot?.postId])
 
   useEffect(() => {
     const topicId = String(selectedTopicId || '').trim()
@@ -295,7 +333,16 @@ export default function useForumFeedRuntime({
       loadTopicRootsPage({ reset: true })
     }, 0)
     return () => clearTimeout(timer)
-  }, [api, loadTopicRootsPage, selectedTopicId, threadRoot])
+  }, [api, contentRefreshToken, loadTopicRootsPage, selectedTopicId, threadRoot])
+
+  useEffect(() => {
+    threadBranchRequestSeqRef.current += 1
+    if (!threadRoot) return undefined
+    const timer = setTimeout(() => {
+      loadThreadBranchPage()
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [contentRefreshToken, loadThreadBranchPage, threadRoot])
 
   const bannedSet = useMemo(() => new Set(data?.bans || []), [data?.bans])
 

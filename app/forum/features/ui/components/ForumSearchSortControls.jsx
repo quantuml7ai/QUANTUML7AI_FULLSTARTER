@@ -783,7 +783,7 @@ export default function ForumSearchSortControls({
     const nextSort = videoFeedOpen || !(sel || forcePostSort)
       ? normalizeFeedSort(sortKey, 'random')
       : normalizePostSurfaceSort(sortKey)
-    if (isFeedSurface) {
+    if (isFeedSurface || sel || forcePostSort) {
       setFeedApply({ loading: true, mode: geoSortAllowed ? geoFeedMode : 'world', sort: nextSort, token: Date.now() })
     }
     onCommitSortChange?.({
@@ -801,15 +801,17 @@ export default function ForumSearchSortControls({
     if (videoFeedOpen) {
       setVideoFeedUserSortLocked(true)
       setFeedSort(nextSort)
-    } else if (!(sel || forcePostSort)) {
+    } else if (sel || forcePostSort) {
+      setPostSort(normalizePostSurfaceSort(nextSort))
+    } else {
       setTopicSort(nextSort)
     }
     setFeedApply({ loading: true, mode: geoSortAllowed ? nextMode : 'world', sort: nextSort, token: Date.now() })
     const payload = {
       kind: 'sort',
       sortKey: nextSort,
-      target: videoFeedOpen ? 'video' : 'topic',
-      mode: nextMode,
+      target: videoFeedOpen ? 'video' : (sel || forcePostSort ? 'post' : 'topic'),
+      mode: geoSortAllowed ? nextMode : 'world',
       reason,
     }
     onCommitSortChange?.(payload)
@@ -825,6 +827,7 @@ export default function ForumSearchSortControls({
     onCommitSortChange,
     sel,
     setFeedSort,
+    setPostSort,
     setTopicSort,
     setVideoFeedUserSortLocked,
     sortControlsInactive,
@@ -1447,7 +1450,7 @@ export default function ForumSearchSortControls({
               <span className={cls('sortGeoRailPulse', geoModeIsWorld ? 'sortGeoRailPulse--world' : 'sortGeoRailPulse--geo')} aria-hidden="true" />
             </div>
             <div className="sortGeoRailBtns" role="group" aria-label={tText(t, 'forum_sort_geo_detect_title', 'GeoDetect')}>
-              <button type="button" className={cls('sortGeoRailBtn', !geoModeIsWorld && 'sortGeoRailBtn--active')} aria-pressed={!geoModeIsWorld} disabled={sortControlsInactive || geoApplyActive || !geoSortAllowed} onClick={() => commitGeoFeedMode('geo')}>
+              <button type="button" className={cls('sortGeoRailBtn', !geoModeIsWorld && 'sortGeoRailBtn--active', !geoSortAllowed && 'sortGeoRailBtn--disabled')} aria-pressed={!geoModeIsWorld} disabled={sortControlsInactive || geoApplyActive || !geoSortAllowed} onClick={() => commitGeoFeedMode('geo')}>
                 <span className="sortGeoRailBtnMain">{tText(t, 'forum_sort_geo_detect_on', 'Geo')}</span>
                 <span className="sortGeoRailBtnMeta">{geoLabel}</span>
               </button>

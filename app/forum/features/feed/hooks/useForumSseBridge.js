@@ -63,11 +63,17 @@ useEffect(() => {
           })
           const aliasCandidates = Array.from(aliasSet)
           const profilePatch = {
-            nickname: evt.nickname || evt.nick,
-            icon: evt.icon || evt.avatar,
-            vipIcon: evt.vipIcon,
             updatedAt: evt.ts || Date.now(),
           }
+          if (evt.nickname || evt.nick) profilePatch.nickname = evt.nickname || evt.nick
+          if (evt.icon || evt.avatar) {
+            profilePatch.icon = evt.icon || evt.avatar
+            profilePatch.avatar = evt.avatar || evt.icon
+          }
+          if (Object.prototype.hasOwnProperty.call(evt, 'vipIcon')) profilePatch.vipIcon = evt.vipIcon || null
+          if (Object.prototype.hasOwnProperty.call(evt, 'vipEmoji')) profilePatch.vipEmoji = evt.vipEmoji || null
+          if (Object.prototype.hasOwnProperty.call(evt, 'gender')) profilePatch.gender = evt.gender || ''
+          if (Object.prototype.hasOwnProperty.call(evt, 'birthYear')) profilePatch.birthYear = Number(evt.birthYear || 0) || 0
           aliasCandidates.forEach((rawId) => {
             try {
               writeProfileAlias(rawId, accountId)
@@ -84,12 +90,19 @@ useEffect(() => {
           if (accountId) {
             try {
               bindProfileAliases(accountId)
-              mergeProfileCache(accountId, {
-                nickname: evt.nickname || evt.nick,
-                icon: evt.icon || evt.avatar,
-                vipIcon: evt.vipIcon,
+              const profilePatch = {
                 updatedAt: evt.ts || Date.now(),
-              })
+              }
+              if (evt.nickname || evt.nick) profilePatch.nickname = evt.nickname || evt.nick
+              if (evt.icon || evt.avatar) {
+                profilePatch.icon = evt.icon || evt.avatar
+                profilePatch.avatar = evt.avatar || evt.icon
+              }
+              if (Object.prototype.hasOwnProperty.call(evt, 'vipIcon')) profilePatch.vipIcon = evt.vipIcon || null
+              if (Object.prototype.hasOwnProperty.call(evt, 'vipEmoji')) profilePatch.vipEmoji = evt.vipEmoji || null
+              if (Object.prototype.hasOwnProperty.call(evt, 'gender')) profilePatch.gender = evt.gender || ''
+              if (Object.prototype.hasOwnProperty.call(evt, 'birthYear')) profilePatch.birthYear = Number(evt.birthYear || 0) || 0
+              mergeProfileCache(accountId, profilePatch)
             } catch {}
             setProfileBump((x) => x + 1)
           }
