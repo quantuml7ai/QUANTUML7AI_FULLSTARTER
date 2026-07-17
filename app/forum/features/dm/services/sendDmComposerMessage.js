@@ -69,13 +69,34 @@ export async function sendDmComposerMessage({
     String(videoUrlToSend || '').trim() ||
     pendingVideoUrl
 
-  const buildAttachments = ({ audioUrl = '', videoUrl = '' } = {}) => {
+  const readVideoMetaForUrl = (url, fallbackMeta = null) => {
+    const src = String(url || '').trim()
+    let meta = fallbackMeta
+    try {
+      meta = pendingVideoBlobMetaRef?.current?.get?.(src) || meta
+    } catch {}
+    try {
+      if (!meta && src && src === pendingVideoUrl) meta = pendingVideoInfoRef?.current || null
+    } catch {}
+    const facingMode = String(meta?.cameraFacingMode || '').toLowerCase()
+    const frontCameraMirror = !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+    if (!frontCameraMirror) return null
+    return {
+      source: String(meta?.source || 'camera_record'),
+      cameraFacingMode: 'user',
+      frontCameraMirror: true,
+      mirrorVideo: true,
+    }
+  }
+
+  const buildAttachments = ({ audioUrl = '', videoUrl = '', videoMeta = null } = {}) => {
     const au = String(audioUrl || '').trim()
     const vv = String(videoUrl || '').trim()
+    const safeVideoMeta = vv ? readVideoMetaForUrl(vv, videoMeta) : null
     return [
       ...(Array.isArray(pendingImgs) ? pendingImgs : []).map((u) => ({ url: u, type: 'image' })),
       ...(au ? [{ url: au, type: 'audio' }] : []),
-      ...(vv ? [{ url: vv, type: 'video' }] : []),
+      ...(vv ? [{ url: vv, type: 'video', ...(safeVideoMeta || {}) }] : []),
     ].filter(Boolean)
   }
 
@@ -176,6 +197,7 @@ export async function sendDmComposerMessage({
       attachments = buildAttachments({
         audioUrl: finalAudioUrl,
         videoUrl: finalVideoUrl,
+        videoMeta: media?.videoMetaToSend || null,
       })
       if (!dmText && !attachments.length) {
         removeOptimisticMessage()

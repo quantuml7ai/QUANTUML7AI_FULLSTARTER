@@ -13,9 +13,16 @@ import {
   readForumWindowingOverscan,
 } from '../../../shared/utils/forumWindowingPresets'
 
-function ForumPaneSkeleton({ rows = 3, label = 'Loading' }) {
+const DM_THREAD_SPACER_SKELETON_MIN_PX = 96
+const DM_THREAD_SPACER_SKELETON_MAX_ROWS = 4
+
+function clampNumber(value, min, max) {
+  return Math.min(max, Math.max(min, value))
+}
+
+function ForumPaneSkeleton({ rows = 3, label = 'Loading', compact = false }) {
   return (
-    <div className="forumSkeletonPane" role="status" aria-label={label}>
+    <div className={`forumSkeletonPane${compact ? ' forumSkeletonPane--compact' : ''}`} role="status" aria-label={label}>
       {Array.from({ length: rows }).map((_, idx) => (
         <div className="forumSkeletonCard" key={`dm-thread-skeleton-${idx}`}>
           <div className="forumSkeletonHeader">
@@ -34,6 +41,79 @@ function ForumPaneSkeleton({ rows = 3, label = 'Loading' }) {
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+function DmThreadWindowSpacer({ height = 0, edge = 'top', label = 'Loading' }) {
+  const ref = React.useRef(null)
+  const [view, setView] = React.useState({ visible: false, offset: 0, rows: 1 })
+
+  React.useEffect(() => {
+    const h = Math.max(0, Number(height || 0) || 0)
+    if (h < DM_THREAD_SPACER_SKELETON_MIN_PX || typeof window === 'undefined') {
+      setView((prev) => (prev.visible ? { visible: false, offset: 0, rows: 1 } : prev))
+      return undefined
+    }
+
+    let rafId = 0
+    const update = () => {
+      rafId = 0
+      const el = ref.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const vh = Number(window.innerHeight || 0) || 0
+      const visiblePx = Math.min(rect.bottom, vh) - Math.max(rect.top, 0)
+      if (visiblePx <= DM_THREAD_SPACER_SKELETON_MIN_PX) {
+        setView((prev) => (prev.visible ? { visible: false, offset: 0, rows: 1 } : prev))
+        return
+      }
+
+      const estimate = clampNumber(Number(readForumCardEstimate('dm_message') || 260), 180, 320)
+      const rows = clampNumber(Math.ceil((visiblePx + estimate * 0.55) / estimate), 1, DM_THREAD_SPACER_SKELETON_MAX_ROWS)
+      const skeletonPx = Math.min(h, rows * estimate)
+      const viewportOffset = Math.max(0, -rect.top) + 8
+      const offset = clampNumber(viewportOffset, 0, Math.max(0, h - skeletonPx))
+      setView((prev) => (
+        prev.visible === true && prev.offset === offset && prev.rows === rows
+          ? prev
+          : { visible: true, offset, rows }
+      ))
+    }
+    const queue = () => {
+      if (rafId) return
+      rafId = window.requestAnimationFrame(update)
+    }
+
+    queue()
+    const timers = [80, 260, 620].map((ms) => window.setTimeout(queue, ms))
+    window.addEventListener('scroll', queue, { passive: true, capture: true })
+    window.addEventListener('resize', queue, { passive: true })
+    return () => {
+      if (rafId) window.cancelAnimationFrame(rafId)
+      timers.forEach((timerId) => window.clearTimeout(timerId))
+      window.removeEventListener('scroll', queue, { capture: true })
+      window.removeEventListener('resize', queue)
+    }
+  }, [height])
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className={`dmThreadWindowSpacer dmThreadWindowSpacer--${edge}`}
+      data-dm-thread-window-spacer={edge}
+      style={{ height: Math.max(0, Number(height || 0) || 0) }}
+    >
+      {view.visible && (
+        <div
+          className="dmThreadWindowSkeleton"
+          data-dm-thread-window-skeleton={edge}
+          style={{ transform: `translateY(${view.offset}px)` }}
+        >
+          <ForumPaneSkeleton rows={view.rows} label={label} compact />
+        </div>
+      )}
     </div>
   )
 }
@@ -117,10 +197,10 @@ export default function DmMessagesPane({
             <ForumPaneSkeleton rows={3} label={t?.('loading') || 'Loading'} />
           )}
           {!showInitialDmThreadSkeleton && dmThreadWin.top > 0 && (
-            <div
-              aria-hidden="true"
-              data-dm-thread-window-spacer="top"
-              style={{ height: dmThreadWin.top }}
+            <DmThreadWindowSpacer
+              edge="top"
+              height={dmThreadWin.top}
+              label={t?.('loading') || 'Loading'}
             />
           )}
           {!showInitialDmThreadSkeleton && dmThreadRenderItems.slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => (
@@ -149,10 +229,10 @@ export default function DmMessagesPane({
             </div>
           ))}
           {!showInitialDmThreadSkeleton && dmThreadWin.bottom > 0 && (
-            <div
-              aria-hidden="true"
-              data-dm-thread-window-spacer="bottom"
-              style={{ height: dmThreadWin.bottom }}
+            <DmThreadWindowSpacer
+              edge="bottom"
+              height={dmThreadWin.bottom}
+              label={t?.('loading') || 'Loading'}
             />
           )}
           {!showInitialDmThreadSkeleton && (

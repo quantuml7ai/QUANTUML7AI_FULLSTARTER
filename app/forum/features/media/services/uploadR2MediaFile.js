@@ -152,6 +152,62 @@ function putFileWithProgress({
   })
 }
 
+function canUseForumVideoFallback(kind) {
+  return String(kind || '').trim().toLowerCase() === 'forum_video'
+}
+
+async function uploadForumVideoViaServer({
+  file,
+  userId = '',
+  filename = '',
+  signal,
+  onUploadProgress,
+} = {}) {
+  if (signal?.aborted) throw createAbortError()
+
+  const fd = new FormData()
+  fd.append('file', file, String(filename || file?.name || 'video.webm'))
+
+  try {
+    onUploadProgress?.(92)
+  } catch {}
+
+  const response = await fetch('/api/forum/uploadVideo', {
+    method: 'POST',
+    body: fd,
+    cache: 'no-store',
+    headers: userId ? { 'x-forum-user-id': String(userId) } : undefined,
+    signal,
+  })
+
+  const payload = await readJsonResponse(response)
+  if (!response.ok) {
+    throw new Error(parseUploadErrorPayload(payload, `forum video upload failed with HTTP ${response.status}`))
+  }
+
+  const url = String(
+    (Array.isArray(payload?.urls) && payload.urls[0]) ||
+    payload?.url ||
+    payload?.publicUrl ||
+    '',
+  ).trim()
+
+  if (!url) throw new Error('forum video upload response is missing url')
+
+  try {
+    onUploadProgress?.(100)
+  } catch {}
+
+  return {
+    ok: true,
+    key: '',
+    url,
+    publicUrl: url,
+    pathname: '',
+    fallback: 'forum_upload_video',
+  }
+}
+
 export default async function uploadR2MediaFile({
   file,
   kind = 'forum_video',
@@ -200,13 +256,29 @@ export default async function uploadR2MediaFile({
     throw new Error('R2 sign response is missing uploadUrl or publicUrl')
   }
 
-  await putFileWithProgress({
-    uploadUrl,
-    file,
-    headers: signPayload.headers || {},
-    signal,
-    onUploadProgress,
-  })
+  try {
+    await putFileWithProgress({
+      uploadUrl,
+      file,
+      headers: signPayload.headers || {},
+      signal,
+      onUploadProgress,
+    })
+  } catch (error) {
+    if (error?.name === 'AbortError' || signal?.aborted || !canUseForumVideoFallback(kind)) {
+      throw error
+    }
+    try {
+      console.warn('ql7_forum_video_direct_upload_failed_server_fallback', error)
+    } catch {}
+    return uploadForumVideoViaServer({
+      file,
+      userId,
+      filename: resolvedFilename,
+      signal,
+      onUploadProgress,
+    })
+  }
 
   return {
     ok: true,

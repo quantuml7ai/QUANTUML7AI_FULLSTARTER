@@ -44,6 +44,8 @@ export default function ComposerCore({
   pendingSticker,
   setPendingSticker,
   pendingVideo,
+  pendingVideoInfoRef,
+  pendingVideoBlobMetaRef,
   pendingAudio,
   openPendingVideoFullscreen,
   removePendingVideoAttachment,
@@ -58,6 +60,16 @@ export default function ComposerCore({
   onFilesChosen,
   fileInputAccept,
 }) {
+  const pendingVideoMirror = React.useMemo(() => {
+    const src = String(pendingVideo || '').trim()
+    if (!src) return false
+    let meta = null
+    try { meta = pendingVideoBlobMetaRef?.current?.get?.(src) || null } catch {}
+    try { if (!meta) meta = pendingVideoInfoRef?.current || null } catch {}
+    const facingMode = String(meta?.cameraFacingMode || '').toLowerCase()
+    return !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+  }, [pendingVideo, pendingVideoBlobMetaRef, pendingVideoInfoRef])
+
   return (
     <>
       <div className="forumComposer">
@@ -112,6 +124,7 @@ export default function ComposerCore({
           pendingImgs={pendingImgs}
           setPendingImgs={setPendingImgs}
           pendingVideo={pendingVideo}
+          pendingVideoMirror={pendingVideoMirror}
           pendingAudio={pendingAudio}
           t={t}
           onOpenVideoFullscreen={openPendingVideoFullscreen}

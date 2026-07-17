@@ -57,7 +57,7 @@ export function readForumWindowingMaxRender(kind = 'post') {
     case 'dm_dialog':
       return constrained ? 17 : 21
     case 'dm_message':
-      return constrained ? 15 : 17
+      return constrained ? 24 : 30
     case 'post':
     default:
       return constrained ? 12 : 14
@@ -86,10 +86,10 @@ export function readForumWindowingOverscan(kind = 'post', velocity = 0) {
       boost: coarse ? 0.12 : 0.16,
     },
     dm_message: {
-      mobile: 1100,
-      tablet: 1200,
-      desktop: 1280,
-      boost: coarse ? 0.14 : 0.2,
+      mobile: 1600,
+      tablet: 1780,
+      desktop: 1960,
+      boost: coarse ? 0.16 : 0.22,
     },
   }
 

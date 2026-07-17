@@ -1,5 +1,6 @@
 import { describe, expect, test, beforeEach, afterEach } from 'vitest'
 import dmPrimaryModule from '../../../lib/mongo/dm-primary.cjs'
+import { normalizeAttachments } from '../../../app/api/dm/_db.js'
 
 const dmPrimary = dmPrimaryModule?.default || dmPrimaryModule
 
@@ -150,6 +151,95 @@ describe('dm Mongo primary repository', () => {
     await dmPrimary.addMessageIndexes({ msg, fromIds: ['alice'], toIds: ['bob'], score: msg.ts })
 
     await expect(dmPrimary.getMessage(id)).resolves.toMatchObject({ id, from: 'alice', to: 'bob', text: 'hello' })
+  })
+
+  test('paginates DM thread history with limit-plus-one and same-score cursor ids', async () => {
+    for (let n = 1; n <= 12; n += 1) {
+      const msg = {
+        id: String(n),
+        from: n % 2 ? 'alice' : 'bob',
+        to: n % 2 ? 'bob' : 'alice',
+        text: `message ${n}`,
+        attachments: [],
+        ts: 1000,
+      }
+      await dmPrimary.saveMessage(msg)
+      await dmPrimary.addMessageIndexes({ msg, fromIds: [msg.from], toIds: [msg.to], score: 1000 })
+    }
+
+    const first = await dmPrimary.readThreadLikeRedis({
+      me: 'bob',
+      rawMeHeader: 'bob',
+      rawMe: 'bob',
+      rawWithInput: 'alice',
+      rawWith: 'alice',
+      withId: 'alice',
+      limit: 5,
+    })
+
+    expect(first.items.map((item) => item.id)).toEqual(['12', '11', '10', '9', '8'])
+    expect(first.hasMore).toBe(true)
+    expect(first.nextCursor).toBe('1000|8')
+
+    const second = await dmPrimary.readThreadLikeRedis({
+      me: 'bob',
+      rawMeHeader: 'bob',
+      rawMe: 'bob',
+      rawWithInput: 'alice',
+      rawWith: 'alice',
+      withId: 'alice',
+      limit: 5,
+      cursorRaw: first.nextCursor,
+    })
+
+    expect(second.items.map((item) => item.id)).toEqual(['7', '6', '5', '4', '3'])
+    expect(second.hasMore).toBe(true)
+    expect(second.nextCursor).toBe('1000|3')
+
+    const third = await dmPrimary.readThreadLikeRedis({
+      me: 'bob',
+      rawMeHeader: 'bob',
+      rawMe: 'bob',
+      rawWithInput: 'alice',
+      rawWith: 'alice',
+      withId: 'alice',
+      limit: 5,
+      cursorRaw: second.nextCursor,
+    })
+
+    expect(third.items.map((item) => item.id)).toEqual(['2', '1'])
+    expect(third.hasMore).toBe(false)
+    expect(third.nextCursor).toBeNull()
+  })
+
+  test('preserves safe front-camera video metadata in DM attachments', () => {
+    const normalized = normalizeAttachments([
+      {
+        url: 'https://cdn.example.test/camera.webm',
+        type: 'video',
+        cameraFacingMode: 'user',
+        frontCameraMirror: true,
+        mirrorVideo: true,
+        arbitraryPayload: 'drop-me',
+      },
+      {
+        url: 'https://cdn.example.test/regular.webm',
+        type: 'video',
+        cameraFacingMode: 'environment',
+      },
+    ])
+
+    expect(normalized[0]).toEqual({
+      url: 'https://cdn.example.test/camera.webm',
+      type: 'video',
+      cameraFacingMode: 'user',
+      frontCameraMirror: true,
+      mirrorVideo: true,
+    })
+    expect(normalized[1]).toEqual({
+      url: 'https://cdn.example.test/regular.webm',
+      type: 'video',
+    })
   })
 
   test('marks delivery only for incoming receiver-visible messages', async () => {

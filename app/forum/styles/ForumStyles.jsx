@@ -310,6 +310,17 @@ export const FORUM_STYLES = `
       -webkit-appearance:none !important;
       appearance:none !important;
     }
+    .videoCard video[data-front-camera-mirror="1"],
+    .attachPreviewRow video[data-front-camera-mirror="1"]{
+      transform:scaleX(-1);
+      -webkit-transform:scaleX(-1);
+      transform-origin:center center;
+    }
+    .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+    .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-panel{
+      transform:scaleX(-1);
+      -webkit-transform:scaleX(-1);
+    }
 .mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
   width:100%;
   height:100%;
@@ -6792,6 +6803,34 @@ html[data-tma="1"] .inboxTabs{
   .dmThreadPresenceBadge{ flex-basis:88px; max-width:88px; min-height:24px; padding:0 7px; font-size:8.5px; letter-spacing:.035em; }
 }
 .dmThread{ display:flex; flex-direction:column; gap:8px; padding:0 6px; }
+.dmThreadWindowSpacer{
+  position:relative;
+  width:100%;
+  min-height:0;
+  overflow:hidden;
+  pointer-events:none;
+}
+.dmThreadWindowSkeleton{
+  position:absolute;
+  inset:0 0 auto;
+  will-change:transform;
+}
+.dmThread .forumSkeletonPane--compact{
+  min-height:0;
+  padding:0;
+  gap:10px;
+}
+.dmThread .forumSkeletonPane--compact .forumSkeletonCard{
+  min-height:clamp(150px,22vw,230px);
+  border-radius:16px;
+}
+.dmThread .forumSkeletonPane--compact .forumSkeletonHeader{ padding:14px 14px 0; }
+.dmThread .forumSkeletonPane--compact .forumSkeletonAvatar{ width:48px; height:48px; border-radius:13px; }
+.dmThread .forumSkeletonPane--compact .forumSkeletonBody{ padding:14px; }
+.dmThread .forumSkeletonPane--compact .forumSkeletonMetrics{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  padding:0 14px 14px;
+}
 .dmBackBtn{ margin-bottom:6px; }
 .dmMsgRow{ display:flex; }
 .dmMsgRow.me{ justify-content:flex-end; }

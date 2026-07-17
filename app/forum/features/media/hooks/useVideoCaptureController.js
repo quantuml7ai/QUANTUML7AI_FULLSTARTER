@@ -6,16 +6,6 @@ function stopCameraStream(stream) {
   try { stream?.getTracks?.().forEach((track) => track.stop()) } catch {}
 }
 
-
-function isWebCoreCameraRuntime() {
-  try {
-    const ua = String(navigator?.userAgent || '')
-    return !/Android|iPhone|iPad|iPod/i.test(ua)
-  } catch {
-    return false
-  }
-}
-
 function isLikelyBackCameraTrack(settings, track) {
   try {
     const facing = String(settings?.facingMode || '').toLowerCase()
@@ -52,113 +42,6 @@ function isLikelyFrontCameraTrack(settings, track) {
   }
 }
 
-async function createWebCoreFrontMirrorRecorderStream(baseStream) {
-  try {
-    if (!isWebCoreCameraRuntime()) return null
-    if (baseStream?.__ql7CameraFixed) return null
-
-    const srcTrack = baseStream?.getVideoTracks?.()[0]
-    if (!srcTrack) return null
-
-    const settings = srcTrack.getSettings?.() || {}
-    if (!isLikelyFrontCameraTrack(settings, srcTrack)) return null
-
-    const srcStream = new MediaStream([srcTrack])
-    const video = document.createElement('video')
-    video.muted = true
-    video.playsInline = true
-    video.autoplay = true
-    video.srcObject = srcStream
-    video.style.position = 'fixed'
-    video.style.opacity = '0'
-    video.style.pointerEvents = 'none'
-    video.style.width = '1px'
-    video.style.height = '1px'
-    video.style.left = '-10px'
-    video.style.top = '-10px'
-    document.body.appendChild(video)
-
-    await new Promise((resolve) => {
-      if (video.readyState >= 1 && (video.videoWidth || video.videoHeight)) return resolve()
-      const onMeta = () => {
-        video.removeEventListener('loadedmetadata', onMeta)
-        resolve()
-      }
-      video.addEventListener('loadedmetadata', onMeta)
-      setTimeout(resolve, 400)
-    })
-
-    try { await video.play() } catch {}
-
-    const w = video.videoWidth || settings.width || 0
-    const h = video.videoHeight || settings.height || 0
-    if (!w || !h) {
-      try { video.remove() } catch {}
-      return null
-    }
-
-    const canvas = document.createElement('canvas')
-    canvas.width = w
-    canvas.height = h
-    canvas.style.position = 'fixed'
-    canvas.style.opacity = '0'
-    canvas.style.pointerEvents = 'none'
-    canvas.style.width = '1px'
-    canvas.style.height = '1px'
-    canvas.style.left = '-10px'
-    canvas.style.top = '-10px'
-    document.body.appendChild(canvas)
-
-    const ctx = canvas.getContext('2d', { alpha: false })
-    let rafId = null
-    const draw = () => {
-      try {
-        ctx.save()
-        ctx.setTransform(1, 0, 0, 1, 0, 0)
-        ctx.clearRect(0, 0, w, h)
-        ctx.translate(w, 0)
-        ctx.scale(-1, 1)
-        ctx.drawImage(video, 0, 0, w, h)
-        ctx.restore()
-      } catch {}
-      rafId = requestAnimationFrame(draw)
-    }
-    draw()
-
-    const fps = Math.max(15, Math.min(30, Number(settings.frameRate || 30) || 30))
-    const outStream = canvas.captureStream(fps)
-    const outTrack = outStream.getVideoTracks?.()[0]
-    if (!outTrack) {
-      try { if (rafId) cancelAnimationFrame(rafId) } catch {}
-      try { outStream.getTracks().forEach((track) => track.stop()) } catch {}
-      try { canvas.remove() } catch {}
-      try { video.remove() } catch {}
-      return null
-    }
-
-    const stopMirror = () => {
-      try { if (rafId) cancelAnimationFrame(rafId) } catch {}
-      try { outStream.getTracks().forEach((track) => track.stop()) } catch {}
-      try { canvas.remove() } catch {}
-      try { video.remove() } catch {}
-    }
-
-    outStream.__stopMirror = stopMirror
-    outStream.__ql7WebCoreFrontMirrorRecorder = true
-    outStream.__ql7CameraFix = {
-      webCore: true,
-      front: true,
-      mirrorFront: true,
-      recorderOnly: true,
-      width: w,
-      height: h,
-    }
-    return outStream
-  } catch {
-    return null
-  }
-}
-
 export default function useVideoCaptureController({
   videoState,
   setVideoState,
@@ -183,7 +66,6 @@ export default function useVideoCaptureController({
   saveComposerScroll,
   restoreComposerScroll,
   readVideoDurationSecFn,
-  createUnmirroredFrontStreamFn,
   emitDiag,
   showVideoLimitOverlay,
   toast,
@@ -237,13 +119,30 @@ export default function useVideoCaptureController({
     stopVideoRef.current = stopVideo
   }, [stopVideo])
 
+  const restoreVideoComposerScroll = useCallback(() => {
+    try { restoreComposerScroll?.() } catch {}
+    if (typeof window === 'undefined') return
+
+    const retry = () => {
+      try { restoreComposerScroll?.() } catch {}
+    }
+
+    try {
+      requestAnimationFrame(() => requestAnimationFrame(retry))
+    } catch {}
+    try { setTimeout(retry, 80) } catch {}
+    try { setTimeout(retry, 180) } catch {}
+  }, [restoreComposerScroll])
+
   const startVideo = useCallback(async () => {
     const badStates = new Set(['opening', 'recording', 'processing', 'uploading'])
     if (badStates.has(videoState)) return
 
     try {
       try { videoAutoStopAtLimitRef.current = false } catch {}
-      try { saveComposerScroll() } catch {}
+      if (videoState !== 'live') {
+        try { saveComposerScroll() } catch {}
+      }
       setVideoOpen(true)
       setVideoState('opening')
 
@@ -270,35 +169,12 @@ export default function useVideoCaptureController({
         : 'video/webm'
 
       const vTrack = baseStream.getVideoTracks?.()[0] || null
-      const aTracks = (baseStream.getAudioTracks?.() || []).filter((track) => track.readyState === 'live')
+      const vSettings = (() => {
+        try { return vTrack?.getSettings?.() || {} } catch { return {} }
+      })()
+      const recordedFromFrontCamera = !!(vTrack && isLikelyFrontCameraTrack(vSettings, vTrack))
 
-      let recStream = baseStream
-      if (vTrack) {
-        const mirrorStream = await createUnmirroredFrontStreamFn(baseStream)
-        const fixedTrack = mirrorStream?.getVideoTracks?.()[0] || null
-        if (mirrorStream && fixedTrack) {
-          recStream = new MediaStream([
-            ...aTracks,
-            fixedTrack,
-          ])
-          recStream.__ql7CameraFixed = true
-          recStream.__ql7CameraFix = mirrorStream.__ql7CameraFix || null
-          videoMirrorRef.current = mirrorStream
-        } else {
-          const webCoreMirrorStream = await createWebCoreFrontMirrorRecorderStream(baseStream)
-          const webCoreFixedTrack = webCoreMirrorStream?.getVideoTracks?.()[0] || null
-          if (webCoreMirrorStream && webCoreFixedTrack) {
-            recStream = new MediaStream([
-              ...aTracks,
-              webCoreFixedTrack,
-            ])
-            recStream.__ql7WebCoreFrontMirrorRecorder = true
-            recStream.__ql7CameraFix = webCoreMirrorStream.__ql7CameraFix || null
-            videoMirrorRef.current = webCoreMirrorStream
-          }
-        }
-      }
-
+      const recStream = baseStream
       const mediaRecorder = new MediaRecorder(recStream, { mimeType: mime })
       videoChunksRef.current = []
 
@@ -382,6 +258,9 @@ export default function useVideoCaptureController({
                 map.set(String(url), {
                   source: 'camera_record',
                   durationSec: safeDurationSec,
+                  cameraFacingMode: recordedFromFrontCamera ? 'user' : 'environment',
+                  frontCameraMirror: recordedFromFrontCamera,
+                  mirrorVideo: recordedFromFrontCamera,
                 })
                 if (map.size > 32) {
                   const first = map.keys().next()?.value
@@ -391,6 +270,9 @@ export default function useVideoCaptureController({
               pendingVideoInfoRef.current = {
                 source: 'camera_record',
                 durationSec: safeDurationSec,
+                cameraFacingMode: recordedFromFrontCamera ? 'user' : 'environment',
+                frontCameraMirror: recordedFromFrontCamera,
+                mirrorVideo: recordedFromFrontCamera,
               }
             } catch {}
           }
@@ -415,7 +297,7 @@ export default function useVideoCaptureController({
           setPendingVideo(url)
           writeCameraRecordMeta(deriveFallbackDurationSec(false))
           setVideoState('preview')
-          try { restoreComposerScroll() } catch {}
+          try { restoreVideoComposerScroll() } catch {}
 
           void (async () => {
             let recordedDurationSec = NaN
@@ -443,7 +325,7 @@ export default function useVideoCaptureController({
               try { URL.revokeObjectURL(url) } catch {}
               setPendingVideo(null)
               try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
-              try { restoreComposerScroll() } catch {}
+              try { restoreVideoComposerScroll() } catch {}
               return
             }
 
@@ -479,7 +361,6 @@ export default function useVideoCaptureController({
       try { toast?.warn?.(t?.('forum_camera_denied')) } catch {}
     }
   }, [
-    createUnmirroredFrontStreamFn,
     emitDiag,
     forumVideoCameraRecordEpsilonSec,
     forumVideoMaxSeconds,
@@ -487,7 +368,7 @@ export default function useVideoCaptureController({
     pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
     readVideoDurationSecFn,
-    restoreComposerScroll,
+    restoreVideoComposerScroll,
     saveComposerScroll,
     setPendingVideo,
     setVideoElapsed,
@@ -543,7 +424,7 @@ export default function useVideoCaptureController({
     setVideoState('idle')
     setVideoElapsed(0)
     try { setVideoProgress(0) } catch {}
-    try { restoreComposerScroll() } catch {}
+    try { restoreVideoComposerScroll() } catch {}
 
     try { stopMediaProg() } catch {}
     try { setMediaPipelineOn(false) } catch {}
@@ -551,7 +432,7 @@ export default function useVideoCaptureController({
     pendingVideo,
     pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
-    restoreComposerScroll,
+    restoreVideoComposerScroll,
     setPendingVideo,
     setMediaPipelineOn,
     setVideoElapsed,
@@ -621,12 +502,12 @@ export default function useVideoCaptureController({
       if (!pendingVideo && overlayMediaKind === 'image') setVideoState('idle')
     } catch {}
     try { if (hasComposerMedia) setComposerActive(true) } catch {}
-    try { restoreComposerScroll() } catch {}
+    try { restoreVideoComposerScroll() } catch {}
   }, [
     hasComposerMedia,
     overlayMediaKind,
     pendingVideo,
-    restoreComposerScroll,
+    restoreVideoComposerScroll,
     setComposerActive,
     setOverlayMediaKind,
     setOverlayMediaUrl,
@@ -672,9 +553,11 @@ export default function useVideoCaptureController({
     try { setVideoOpen?.(false) } catch {}
     try { setVideoState?.('idle') } catch {}
     try { resetVideo?.() } catch {}
+    try { restoreVideoComposerScroll?.() } catch {}
   }, [
     pendingVideo,
     resetVideo,
+    restoreVideoComposerScroll,
     setOverlayMediaKind,
     setOverlayMediaUrl,
     setPendingVideo,

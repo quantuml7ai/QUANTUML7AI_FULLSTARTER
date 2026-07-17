@@ -28,9 +28,10 @@ export async function resolveComposerMediaPayload({
   t,
   onFail,
 }) {
+  let videoMetaToSend = null
   const fail = (msg) => {
     try { onFail?.(msg) } catch {}
-    return { failed: true, videoUrlToSend: '', audioUrlToSend: '' }
+    return { failed: true, videoUrlToSend: '', audioUrlToSend: '', videoMetaToSend: null }
   }
   const isMediaCancelled = (signal) => {
     try { return !!(signal?.aborted || mediaCancelRef?.current) } catch { return !!signal?.aborted }
@@ -79,10 +80,23 @@ export async function resolveComposerMediaPayload({
         let dMeta = NaN
         let srcMeta = ''
         let trustedBlobMeta = null
+        const readSafeVideoMeta = (candidate) => {
+          const source = String(candidate?.source || '')
+          const facingMode = String(candidate?.cameraFacingMode || '').toLowerCase()
+          const frontCameraMirror = !!(candidate?.frontCameraMirror || candidate?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+          if (!source && !facingMode && !frontCameraMirror) return null
+          return {
+            source,
+            cameraFacingMode: frontCameraMirror ? 'user' : (facingMode || ''),
+            frontCameraMirror,
+            mirrorVideo: frontCameraMirror,
+          }
+        }
         try {
           const meta = pendingVideoInfoRef.current || {}
           dMeta = Number(meta?.durationSec || 0)
           srcMeta = String(meta?.source || '')
+          videoMetaToSend = readSafeVideoMeta(meta)
         } catch {}
         try {
           const localMeta = pendingVideoBlobMetaRef.current?.get?.(String(pendingVideoCurrent || '')) || null
@@ -91,6 +105,7 @@ export async function resolveComposerMediaPayload({
               source: String(localMeta?.source || 'trimmed_local'),
               durationSec: Number(localMeta.durationSec),
             }
+            videoMetaToSend = readSafeVideoMeta(localMeta) || videoMetaToSend
             if (!srcMeta) srcMeta = trustedBlobMeta.source
             if (!Number.isFinite(dMeta) || dMeta <= 0) dMeta = trustedBlobMeta.durationSec
           }
@@ -234,6 +249,22 @@ export async function resolveComposerMediaPayload({
         if (!videoUrlToSend) throw new Error('no_url')
       } else {
         videoUrlToSend = pendingVideoCurrent
+        try {
+          const meta =
+            pendingVideoBlobMetaRef.current?.get?.(String(pendingVideoCurrent || '')) ||
+            pendingVideoInfoRef.current ||
+            null
+          const facingMode = String(meta?.cameraFacingMode || '').toLowerCase()
+          const frontCameraMirror = !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+          videoMetaToSend = meta
+            ? {
+                source: String(meta?.source || ''),
+                cameraFacingMode: frontCameraMirror ? 'user' : (facingMode || ''),
+                frontCameraMirror,
+                mirrorVideo: frontCameraMirror,
+              }
+            : null
+        } catch {}
       }
     } catch (e) {
       if (e?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail(signal)
@@ -303,6 +334,7 @@ export async function resolveComposerMediaPayload({
     failed: false,
     videoUrlToSend,
     audioUrlToSend,
+    videoMetaToSend,
   }
 }
 

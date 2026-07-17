@@ -74,7 +74,17 @@ export default function DmThreadMessageRow({
     }
     const cleanUrl = normalizeDmUrl(url)
     if (!cleanUrl) continue
-    if (!attMap.has(cleanUrl)) attMap.set(cleanUrl, { url: cleanUrl, type: typeHint })
+    if (!attMap.has(cleanUrl)) {
+      const facingMode = String(a?.cameraFacingMode || a?.facingMode || '').toLowerCase()
+      const frontCameraMirror = !!(a?.frontCameraMirror || a?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+      attMap.set(cleanUrl, {
+        url: cleanUrl,
+        type: typeHint,
+        frontCameraMirror,
+        mirrorVideo: frontCameraMirror,
+        cameraFacingMode: frontCameraMirror ? 'user' : '',
+      })
+    }
   }
   const attItems = Array.from(attMap.values())
   const stickerEntries = Array.isArray(textStickers) ? textStickers.slice() : []
@@ -93,7 +103,7 @@ export default function DmThreadMessageRow({
   const mediaItems = attItems.filter((it) => !stickerSet.has(it.url))
   const imgUrls = []
   const audioUrls = []
-  const videoUrls = []
+  const videoItems = []
   const otherUrls = []
   const seenMedia = new Set()
   for (const it of mediaItems) {
@@ -101,7 +111,7 @@ export default function DmThreadMessageRow({
     if (!url || seenMedia.has(url)) continue
     seenMedia.add(url)
     const kind = getDmMediaKind(url, it.type)
-    if (kind === 'video') videoUrls.push(url)
+    if (kind === 'video') videoItems.push(it)
     else if (kind === 'audio') audioUrls.push(url)
     else if (kind === 'image') imgUrls.push(url)
     else otherUrls.push(url)
@@ -266,25 +276,31 @@ export default function DmThreadMessageRow({
             ))}
           </div>
         )}
-        {!!videoUrls.length && (
+        {!!videoItems.length && (
           <div className="dmMediaGrid">
-            {videoUrls.map((src, i) => (
-              <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
-                <VideoMedia
-                  src={src}
-                  playsInline
-                  preload="metadata"
-                  controls
-                  controlsList="nodownload noplaybackrate noremoteplayback"
-                  disablePictureInPicture
-                  data-dm-media="1"
-                  data-dm-media-kind="video"
-                  className="mediaBoxItem"
-                  style={{ objectFit: 'contain', background: '#000' }}
-                  onPlay={onDmVideoPlay}
-                />
-              </div>
-            ))}
+            {videoItems.map((item, i) => {
+              const src = item.url
+              const mirrorVideo = !!(item.frontCameraMirror || item.mirrorVideo || String(item.cameraFacingMode || '').toLowerCase() === 'user')
+              return (
+                <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
+                  <VideoMedia
+                    src={src}
+                    frontCameraMirror={mirrorVideo}
+                    mirrorVideo={mirrorVideo}
+                    playsInline
+                    preload="metadata"
+                    controls
+                    controlsList="nodownload noplaybackrate noremoteplayback"
+                    disablePictureInPicture
+                    data-dm-media="1"
+                    data-dm-media-kind="video"
+                    className="mediaBoxItem"
+                    style={{ objectFit: 'contain', background: '#000' }}
+                    onPlay={onDmVideoPlay}
+                  />
+                </div>
+              )
+            })}
           </div>
         )}
         {!!audioUrls.length && (

@@ -45,7 +45,23 @@ export function normalizeAttachments(list) {
       const url = str(it.url || it.src || it.href || it.file || '')
       if (!url) continue
       const type = str(it.type || it.mime || it.mediaType || it.kind || '')
-      out.push(type ? { url, type } : { url })
+      const entry = type ? { url, type } : { url }
+      const isVideo = /video/i.test(type) || /\.(mp4|webm|mov|m4v)(?:[?#].*)?$/i.test(url)
+      if (isVideo) {
+        const facingMode = str(it.cameraFacingMode || it.facingMode || '').toLowerCase()
+        const frontCameraMirror = !!(
+          it.frontCameraMirror ||
+          it.mirrorVideo ||
+          facingMode === 'user' ||
+          facingMode === 'front'
+        )
+        if (frontCameraMirror) {
+          entry.cameraFacingMode = 'user'
+          entry.frontCameraMirror = true
+          entry.mirrorVideo = true
+        }
+      }
+      out.push(entry)
     }
   }
   return out

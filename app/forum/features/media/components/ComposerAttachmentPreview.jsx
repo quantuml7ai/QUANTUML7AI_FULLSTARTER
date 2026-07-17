@@ -10,6 +10,7 @@ export default function ComposerAttachmentPreview({
   pendingImgs = [],
   setPendingImgs,
   pendingVideo,
+  pendingVideoMirror = false,
   pendingAudio,
   t,
   onOpenVideoFullscreen,
@@ -56,6 +57,10 @@ export default function ComposerAttachmentPreview({
         canvas.height = probe.videoHeight
         const ctx = canvas.getContext('2d')
         if (!ctx) return false
+        if (pendingVideoMirror) {
+          ctx.translate(canvas.width, 0)
+          ctx.scale(-1, 1)
+        }
         ctx.drawImage(probe, 0, 0, canvas.width, canvas.height)
         const poster = canvas.toDataURL('image/jpeg', 0.82)
         if (!disposed && poster) {
@@ -108,7 +113,7 @@ export default function ComposerAttachmentPreview({
     }, 700)
 
     return cleanup
-  }, [pendingVideo])
+  }, [pendingVideo, pendingVideoMirror])
 
   return (
     <>
@@ -162,6 +167,7 @@ export default function ComposerAttachmentPreview({
               poster={videoPoster || undefined}
               controlsList="nodownload noplaybackrate noremoteplayback"
               disablePictureInPicture
+              data-front-camera-mirror={pendingVideoMirror ? '1' : undefined}
               style={{
                 width: '100%',
                 height: 'auto',
@@ -171,6 +177,7 @@ export default function ComposerAttachmentPreview({
                 background: 'transparent',
                 position: 'relative',
                 zIndex: 1,
+                transform: pendingVideoMirror ? 'scaleX(-1)' : undefined,
               }}
               onLoadedData={() => setVideoReady(true)}
               onCanPlay={() => setVideoReady(true)}

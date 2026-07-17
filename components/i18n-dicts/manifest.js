@@ -3,7 +3,7 @@ export const I18N_DEFAULT_LANG = "en"
 export const I18N_DICT_META = {
   "ru": {
     "keyCount": 6350,
-    "hash": "58913caf2fff22304efd4676d4a6bde8a5ea26cd021906d2a415367d446b000f"
+    "hash": "2218e3b4e238f9d0322f691a6279a5e6b4598065d6442fd25dc381c2e9513f8e"
   },
   "en": {
     "keyCount": 6343,

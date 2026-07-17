@@ -326,6 +326,8 @@ export default function VideoMedia({
   mediaVisMarginPx,
   dropActiveVideo,
   unloadVideoEl,
+  frontCameraMirror,
+  mirrorVideo,
   ...rest
 }) {
   const ref = React.useRef(null)
@@ -345,6 +347,7 @@ export default function VideoMedia({
   const [centerGlyph, setCenterGlyph] = React.useState('')
   const [fxBursts, setFxBursts] = React.useState([])
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
+  const shouldMirrorVideo = !!(frontCameraMirror || mirrorVideo)
 
   React.useEffect(() => {
     setIsIosSafariBrowser(isIosSafariBrowserRuntime())
@@ -1460,6 +1463,13 @@ const onVideoLoaded = React.useCallback(() => {
     spawnEmojiBurst('bad')
   }, [armUserIntentLease, revealHud, spawnEmojiBurst])
 
+const videoStyle = shouldMirrorVideo
+  ? {
+      ...(style || {}),
+      transform: style?.transform ? `${style.transform} scaleX(-1)` : 'scaleX(-1)',
+    }
+  : style
+
 const videoNode = (
   <video
     ref={ref}
@@ -1470,6 +1480,7 @@ const videoNode = (
     preload={renderPreload}
     muted={isPostVideo ? mutedState : undefined}
     data-default-muted={isPostVideo ? '1' : undefined}
+    data-front-camera-mirror={shouldMirrorVideo ? '1' : undefined}
     controls={isPostVideo ? undefined : renderControls}
     autoPlay={isPostVideo ? undefined : autoPlay}
     loop={isPostVideo ? true : loop}
@@ -1477,7 +1488,7 @@ const videoNode = (
     disablePictureInPicture={disablePictureInPicture}
     referrerPolicy="no-referrer"
     className={className}
-    style={style}
+    style={videoStyle}
     onPointerDown={handleRootPointerDown}
     onClick={undefined}
     onLoadedData={onVideoLoaded}
@@ -1498,6 +1509,7 @@ const videoNode = (
       ref={surfaceRef}
       className="ql7VideoSurface mediaBoxItem"
       data-forum-video-surface="1"
+      data-front-camera-mirror={shouldMirrorVideo ? '1' : undefined}
       onPointerDown={handleRootPointerDown}
       onTouchStartCapture={handleSurfaceTouchStart}
       onTouchMoveCapture={handleSurfaceTouchMove}

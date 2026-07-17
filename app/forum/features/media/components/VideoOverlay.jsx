@@ -5,11 +5,6 @@ import { createPortal } from 'react-dom'
 import LivePreview from './LivePreview'
 import usePageLock from '../../../shared/hooks/usePageLock'
 import useHtmlFlag from '../../../shared/hooks/useHtmlFlag'
-import {
-  createUnmirroredFrontStream,
-  isAndroidCameraRuntime,
-  isQuantumAndroidAppShell,
-} from '../utils/frontCameraMirror'
 
 // --- overlay камеры/плеера: fullscreen + старт/стоп ИМЕННО из оверлея ---
 export default function VideoOverlay({
@@ -21,6 +16,7 @@ export default function VideoOverlay({
   onResetConfirm,        // закрыть/сбросить
   streamRef,
   previewUrl,
+  previewMirror = false,
   mediaKind = 'video',   // 'video' | 'image' (для fullscreen-превью загруженного медиа)
   onAccept,              // зелёная галочка: принять (перенести в маленькое превью под композером)
   t,
@@ -72,24 +68,7 @@ export default function VideoOverlay({
           video: { facingMode: { ideal: 'user' } },
           audio: true,
         })
-        let effectiveStream = ms
-        try {
-          const fixedVideoStream = (isQuantumAndroidAppShell() || isAndroidCameraRuntime())
-            ? await createUnmirroredFrontStream(ms)
-            : null
-          const fixedVideoTrack = fixedVideoStream?.getVideoTracks?.()[0] || null
-          if (fixedVideoStream && fixedVideoTrack) {
-            const audioTracks = (ms.getAudioTracks?.() || []).filter((track) => track.readyState === 'live')
-            const merged = new MediaStream([...audioTracks, fixedVideoTrack])
-            merged.__ql7CameraFixed = true
-            merged.__ql7CameraFix = fixedVideoStream.__ql7CameraFix || null
-            merged.__stopCameraFix = () => {
-              try { fixedVideoStream.__stopMirror?.() } catch {}
-              try { ms.getVideoTracks?.().forEach((track) => track.stop()) } catch {}
-            }
-            effectiveStream = merged
-          }
-        } catch {}
+        const effectiveStream = ms
         if (cancelled) {
           try { effectiveStream?.__stopCameraFix?.() } catch {}
           try { effectiveStream?.getTracks?.().forEach((track) => track.stop()) } catch {}
@@ -275,27 +254,12 @@ export default function VideoOverlay({
       if (!newVideoTrack) throw new Error('no_video_track')
 
       const oldAudio = (curStream?.getAudioTracks?.() || []).filter((t) => t.readyState === 'live')
-      let finalVideoTrack = newVideoTrack
-      let fixedVideoStream = null
-      try {
-        fixedVideoStream = (isQuantumAndroidAppShell() || isAndroidCameraRuntime())
-          ? await createUnmirroredFrontStream(onlyVideoStream)
-          : null
-        finalVideoTrack = fixedVideoStream?.getVideoTracks?.()[0] || newVideoTrack
-      } catch {}
+      const finalVideoTrack = newVideoTrack
 
       const merged = new MediaStream([
         ...oldAudio,
         finalVideoTrack,
       ])
-      if (fixedVideoStream && finalVideoTrack !== newVideoTrack) {
-        merged.__ql7CameraFixed = true
-        merged.__ql7CameraFix = fixedVideoStream.__ql7CameraFix || null
-        merged.__stopCameraFix = () => {
-          try { fixedVideoStream.__stopMirror?.() } catch {}
-          try { onlyVideoStream.getVideoTracks?.().forEach((track) => track.stop()) } catch {}
-        }
-      }
 
       streamRef.current = merged
       try {
@@ -410,6 +374,8 @@ export default function VideoOverlay({
               ) : (
                 <video
                   ref={previewVidRef}
+                  className="voPreviewVideo"
+                  data-front-camera-mirror={previewMirror ? '1' : undefined}
                   src={previewUrl || ''}
                   controls
                   playsInline
@@ -419,6 +385,8 @@ export default function VideoOverlay({
                     height: '100%',
                     objectFit: 'contain',
                     background: '#000',
+                    transform: previewMirror ? 'scaleX(-1)' : undefined,
+                    transformOrigin: 'center center',
                   }}
                 />
               )}
@@ -586,6 +554,10 @@ export default function VideoOverlay({
   width:100%;
   height:100%;
   background:#000;
+}
+
+.voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel{
+  transform: scaleX(-1);
 }
 
         .voBtn{

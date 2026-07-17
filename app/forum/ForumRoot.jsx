@@ -82,7 +82,6 @@ import { createForumMediaUrlPipeline } from './features/media/utils/mediaUrlPipe
 import useForumMediaCoordinator from './features/media/hooks/useForumMediaCoordinator'
 import useVideoTrimController from './features/media/hooks/useVideoTrimController'
 import useVideoCaptureController from './features/media/hooks/useVideoCaptureController'
-import { createUnmirroredFrontStream } from './features/media/utils/frontCameraMirror'
 
 import {
   fileToJpegBlob as fileToJpegBlobForModeration,
@@ -1470,7 +1469,6 @@ const {
   saveComposerScroll,
   restoreComposerScroll,
   readVideoDurationSecFn: readVideoDurationSec,
-  createUnmirroredFrontStreamFn: createUnmirroredFrontStream,
   emitDiag,
   showVideoLimitOverlay,
   toast,
@@ -2270,6 +2268,8 @@ const profileBranchTopicsLength = useMemo(() => {
     pendingSticker,
     setPendingSticker,
     pendingVideo,
+    pendingVideoInfoRef,
+    pendingVideoBlobMetaRef,
     pendingAudio,
     openPendingVideoFullscreen,
     removePendingVideoAttachment,
@@ -2299,6 +2299,8 @@ const profileBranchTopicsLength = useMemo(() => {
     videoStreamRef,
     overlayMediaUrl,
     pendingVideo,
+    pendingVideoInfoRef,
+    pendingVideoBlobMetaRef,
     overlayMediaKind,
     acceptMediaFromOverlay,
     startVideo,

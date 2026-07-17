@@ -26,6 +26,8 @@ export default function ForumOverlayStack({
   videoStreamRef,
   overlayMediaUrl,
   pendingVideo,
+  pendingVideoInfoRef,
+  pendingVideoBlobMetaRef,
   overlayMediaKind,
   acceptMediaFromOverlay,
   startVideo,
@@ -66,6 +68,21 @@ export default function ForumOverlayStack({
   closeQuestClaimOverlay,
   confirmQuestClaim,
 }) {
+  const overlayPreviewUrl = overlayMediaUrl || pendingVideo
+  const overlayPreviewMirror = React.useMemo(() => {
+    if (overlayMediaKind === 'image') return false
+    const src = String(overlayPreviewUrl || '').trim()
+    let meta = null
+    try {
+      meta = src ? pendingVideoBlobMetaRef?.current?.get?.(src) || null : null
+    } catch {}
+    try {
+      if (!meta) meta = pendingVideoInfoRef?.current || null
+    } catch {}
+    const facingMode = String(meta?.cameraFacingMode || meta?.facingMode || '').toLowerCase()
+    return !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+  }, [overlayMediaKind, overlayPreviewUrl, pendingVideoBlobMetaRef, pendingVideoInfoRef])
+
   return (
     <>
       <DmDeletePopover
@@ -94,7 +111,8 @@ export default function ForumOverlayStack({
         }
         elapsed={videoElapsed}
         streamRef={videoStreamRef}
-        previewUrl={overlayMediaUrl || pendingVideo}
+        previewUrl={overlayPreviewUrl}
+        previewMirror={overlayPreviewMirror}
         mediaKind={overlayMediaKind}
         onAccept={acceptMediaFromOverlay}
         onStart={startVideo}
