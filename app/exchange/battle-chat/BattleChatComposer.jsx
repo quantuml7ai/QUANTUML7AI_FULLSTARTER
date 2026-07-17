@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { BATTLE_CHAT_QUICK_EMOJIS } from './battleChatClient'
 import styles from './BattleChat.module.css'
 
-const MAX_GRAPHEMES = 300
+const MAX_GRAPHEMES = 190
 
 function tr(t, key, fallback) {
   const value = typeof t === 'function' ? t(key) : ''

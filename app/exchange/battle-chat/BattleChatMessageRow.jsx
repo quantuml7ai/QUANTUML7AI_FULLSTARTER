@@ -175,17 +175,34 @@ export default function BattleChatMessageRow({ message, t, locale, onToggleLike,
         >
           <span className={styles.nickText} style={{ fontSize: `${nickFontSizePx}px` }}>{authorName}</span>
         </button>
+        <button
+          type="button"
+          className={[styles.likeButton, liked ? styles.likeButtonActive : ''].filter(Boolean).join(' ')}
+          onClick={handleToggleLike}
+          disabled={!!liking}
+          aria-label={liked ? t('battlecoin_chat_unlike') : t('battlecoin_chat_like')}
+        >
+          <span className={styles.likeIcon} aria-hidden="true">{liked ? '\u2665' : '\u2661'}</span>
+          <span className={styles.likeCount}>{compactBattleChatCount(message?.likesCount)}</span>
+          {burstKey ? (
+            <span key={burstKey} className={styles.likeBurst} aria-hidden="true">
+              <span>{'\u{1F497}'}</span>
+              <span>{'\u{1F496}'}</span>
+              <span>{'\u{1F493}'}</span>
+            </span>
+          ) : null}
+        </button>
         <time className={styles.avatarTime}>{timeLabel}</time>
       </div>
       <div className={[styles.messageBubble, emojiOnly ? styles.messageBubbleEmoji : ''].filter(Boolean).join(' ')}>
-        <div className={styles.messageBodyLine}>
+        <div className={[styles.messageBodyLine, canTranslate ? styles.messageBodyLineTranslated : ''].filter(Boolean).join(' ')}>
           <p className={[styles.messageText, emojiOnly ? styles.messageTextEmoji : ''].filter(Boolean).join(' ')}>
             <span className={[emojiOnly ? styles.emojiBurst : '', emojiTone].filter(Boolean).join(' ')}>
               {shownText}
             </span>
           </p>
-          <div className={[styles.messageActions, canTranslate ? styles.messageActionsTranslated : ''].filter(Boolean).join(' ')}>
-            {canTranslate ? (
+          {canTranslate ? (
+            <div className={[styles.messageActions, styles.messageActionsTranslated].filter(Boolean).join(' ')}>
               <button
                 type="button"
                 className={[styles.translateButton, translation.active ? styles.translateButtonActive : ''].filter(Boolean).join(' ')}
@@ -194,25 +211,8 @@ export default function BattleChatMessageRow({ message, t, locale, onToggleLike,
               >
                 {translateLabel}
               </button>
-            ) : null}
-            <button
-              type="button"
-              className={[styles.likeButton, liked ? styles.likeButtonActive : ''].filter(Boolean).join(' ')}
-              onClick={handleToggleLike}
-              disabled={!!liking}
-              aria-label={liked ? t('battlecoin_chat_unlike') : t('battlecoin_chat_like')}
-            >
-              <span className={styles.likeIcon} aria-hidden="true">{liked ? '\u2665' : '\u2661'}</span>
-              <span className={styles.likeCount}>{compactBattleChatCount(message?.likesCount)}</span>
-              {burstKey ? (
-                <span key={burstKey} className={styles.likeBurst} aria-hidden="true">
-                  <span>{'\u{1F497}'}</span>
-                  <span>{'\u{1F496}'}</span>
-                  <span>{'\u{1F493}'}</span>
-                </span>
-              ) : null}
-            </button>
-          </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </article>

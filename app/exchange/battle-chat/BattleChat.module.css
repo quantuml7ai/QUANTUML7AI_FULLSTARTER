@@ -2392,3 +2392,87 @@ height: clamp(49.5px, 5.7vw, 61.5px);
     font-size: clamp(34px, 10vw, 44px);
   }
 }
+
+/* Battle Chat message geometry contract: reactions live in the author rail on
+   every viewport; translated text always starts below the translate control and
+   gets the full message body width instead of a narrow action column. */
+.avatarColumn > .likeButton {
+  margin: -1px auto 0;
+  transform: none;
+}
+
+.avatarColumn > .likeButton .likeIcon {
+  font-size: 22px;
+}
+
+.messageBodyLine {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.messageBodyLineTranslated {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: auto auto;
+  gap: 9px 12px;
+  align-items: start;
+}
+
+.messageBodyLineTranslated .messageActions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: start;
+  padding-top: 0;
+}
+
+.messageBodyLineTranslated .messageText {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.messageActionsTranslated {
+  padding-top: 0;
+}
+
+.messageText {
+  width: 100%;
+  padding-left: clamp(18px, 2.8vw, 34px);
+  padding-right: clamp(8px, 1.5vw, 18px);
+}
+
+.messageTextEmoji {
+  padding-right: 0;
+}
+
+.translateButton {
+  min-width: 128px;
+  max-width: min(176px, 100%);
+}
+
+@media (max-width: 620px) {
+  .messageBodyLineTranslated {
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(156px, 48vw));
+    gap: 8px 10px;
+  }
+
+  .messageText {
+    padding-left: clamp(22px, 8vw, 34px);
+    padding-right: 10px;
+  }
+
+  .translateButton {
+    min-width: min(128px, 42vw);
+    max-width: min(156px, 48vw);
+    font-size: clamp(7.2px, 2.05vw, 8.8px);
+  }
+
+  .avatarColumn > .likeButton {
+    transform: none;
+  }
+
+  .avatarColumn > .likeButton .likeIcon {
+    font-size: 26px;
+  }
+}
