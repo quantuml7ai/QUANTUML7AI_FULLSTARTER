@@ -27,6 +27,22 @@ describe('App entry contracts', () => {
     expect(source).not.toContain('forumPath ||')
   })
 
+  it('keeps Telegram Mini App vertical swipe collapse disabled globally', () => {
+    const compat = readRepoFile('public/compat.js')
+    const globals = readRepoFile('app/globals.css')
+
+    expect(compat).toContain('function setupTmaSwipeGuard()')
+    expect(compat).toContain('wa.disableVerticalSwipes()')
+    expect(compat).toContain("'web_app_setup_swipe_behavior'")
+    expect(compat).toContain('allow_vertical_swipe: false')
+    expect(compat).toContain("document.documentElement.setAttribute('data-tma-swipe-lock', '1')")
+    expect(globals).toContain('html[data-tma="1"][data-tma-swipe-lock="1"] body')
+    expect(globals).toContain('overscroll-behavior: none')
+    expect(globals).toContain('html[data-tma="1"] iframe')
+    expect(globals).toContain('html[data-tma="1"] .recommendationsRail')
+    expect(globals).toContain('html[data-tma="1"] .tradingview-widget-container')
+  })
+
   it('keeps absolute preview metadata for home/about/subscribe/game', () => {
     const rootLayout = readRepoFile('app/layout.js')
     const aboutLayout = readRepoFile('app/about/layout.js')

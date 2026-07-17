@@ -40,6 +40,34 @@ body{
   }
 }
 
+/* Telegram Mini App: keep vertical swipes inside the web surface instead of
+   letting iframe/media widgets trigger the host app collapse gesture. */
+html[data-tma="1"],
+html[data-tma="1"] body {
+  overscroll-behavior-x: none;
+  overscroll-behavior-y: none;
+}
+
+html[data-tma="1"][data-tma-swipe-lock="1"] body {
+  overscroll-behavior: none;
+}
+
+html[data-tma="1"] iframe,
+html[data-tma="1"] video,
+html[data-tma="1"] canvas,
+html[data-tma="1"] [data-forum-embed-kind],
+html[data-tma="1"] [data-forum-media],
+html[data-tma="1"] [data-ad-media-kind],
+html[data-tma="1"] [data-forum-native-video-card],
+html[data-tma="1"] .recommendationsRail,
+html[data-tma="1"] .recommendationsRailScroller,
+html[data-tma="1"] .tradingview-widget-container,
+html[data-tma="1"] [id*="tradingview"],
+html[data-tma="1"] [class*="tradingview"],
+html[data-tma="1"] [class*="TradingView"] {
+  overscroll-behavior: contain;
+}
+
 /* ===== Hero background (video + effects) ===== */
 .scene{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;z-index:0}
 /* iOS fix: фон и всё внутри него не ловят тапы */

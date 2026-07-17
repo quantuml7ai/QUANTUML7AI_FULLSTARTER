@@ -44,6 +44,79 @@
     }, 300);
   }
 
+  // --- Telegram Mini App swipe-close guard
+  function postTmaEvent(eventType, eventData) {
+    try {
+      const wa = window.Telegram && window.Telegram.WebApp;
+      if (wa && typeof wa.postEvent === 'function') {
+        wa.postEvent(eventType, false, eventData);
+        return true;
+      }
+    } catch {}
+    try {
+      const proxy = window.TelegramWebviewProxy;
+      if (proxy && typeof proxy.postEvent === 'function') {
+        proxy.postEvent(eventType, JSON.stringify(eventData || {}));
+        return true;
+      }
+    } catch {}
+    try {
+      if (window.external && typeof window.external.notify === 'function') {
+        window.external.notify(JSON.stringify({ eventType, eventData: eventData || {} }));
+        return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  function setupTmaSwipeGuard() {
+    let locked = false;
+    let tries = 0;
+    let timer = 0;
+    const markLocked = () => {
+      try { document.documentElement.setAttribute('data-tma-swipe-lock', '1'); } catch {}
+    };
+    const apply = () => {
+      const isTma = setTmaFlag() || detectTMAHard();
+      if (!isTma) return false;
+      let ok = false;
+      try {
+        const wa = window.Telegram && window.Telegram.WebApp;
+        try { wa && wa.ready && wa.ready(); } catch {}
+        if (wa && typeof wa.disableVerticalSwipes === 'function') {
+          wa.disableVerticalSwipes();
+          ok = true;
+        }
+      } catch {}
+      if (!ok) {
+        ok = postTmaEvent('web_app_setup_swipe_behavior', { allow_vertical_swipe: false });
+      }
+      if (ok) {
+        locked = true;
+        markLocked();
+      }
+      return ok;
+    };
+    const retry = () => {
+      if (locked) {
+        if (timer) clearInterval(timer);
+        return;
+      }
+      tries += 1;
+      if (apply() || tries >= 40) {
+        if (timer) clearInterval(timer);
+      }
+    };
+
+    if (!apply()) timer = setInterval(retry, 300);
+    window.addEventListener('pageshow', apply);
+    window.addEventListener('focus', apply);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'hidden') apply();
+    });
+  }
+  setupTmaSwipeGuard();
+
   // --- 100vh fix
   function setVhVars() {
     const vh = window.innerHeight * 0.01;
