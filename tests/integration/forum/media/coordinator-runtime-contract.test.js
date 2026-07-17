@@ -71,6 +71,10 @@ describe('coordinator runtime contract', () => {
     expect(src).toContain('windowStickyMs = DEFAULT_WINDOW_STICKY_MS')
     expect(src).toContain('recentWindowChange')
     expect(src).toContain('stickyItems')
+    expect(src).toContain('DOWNWARD_UNMOUNT_GRACE_PX = 900')
+    expect(src).toContain('DOWNWARD_BEHIND_VIEWPORT_HOLD_ITEMS = 3')
+    expect(src).toContain('protectedVisibleStart')
+    expect(src).toContain('protectedVisibleEnd')
   })
 
   test('shared forum windowing suppresses scrollTop compensation and uses reveal locks for targets', () => {

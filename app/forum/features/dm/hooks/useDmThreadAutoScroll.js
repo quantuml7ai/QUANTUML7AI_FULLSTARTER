@@ -48,14 +48,23 @@ export default function useDmThreadAutoScroll({
   dmAutoScrollRef,
   dmThreadRef,
   bodyRef,
+  newestFirst = false,
 }) {
   useEffect(() => {
     if (!inboxOpen || inboxTab !== 'messages' || !dmWithUserId) return
+    if (newestFirst) {
+      dmAutoScrollRef.current = false
+      return
+    }
     dmAutoScrollRef.current = true
-  }, [inboxOpen, inboxTab, dmWithUserId, dmAutoScrollRef])
+  }, [inboxOpen, inboxTab, dmWithUserId, dmAutoScrollRef, newestFirst])
 
   useEffect(() => {
     if (!inboxOpen || inboxTab !== 'messages' || !dmWithUserId) return
+    if (newestFirst) {
+      dmAutoScrollRef.current = false
+      return
+    }
     const items = dmThreadItems || []
     if (!items.length) return
 
@@ -88,5 +97,6 @@ export default function useDmThreadAutoScroll({
     dmAutoScrollRef,
     dmThreadRef,
     bodyRef,
+    newestFirst,
   ])
 }

@@ -15,8 +15,10 @@ const DEFAULT_REVEAL_HOLD_MS = 1800
 const DEFAULT_MIN_SCROLLABLE_HEIGHT = 120
 const DEFAULT_FALLBACK_MAX_RENDER = 8
 const DEFAULT_FALLBACK_OVERSCAN_PX = 960
-const DOWNWARD_UNMOUNT_GRACE_PX = 400
+const DOWNWARD_UNMOUNT_GRACE_PX = 900
 const UPWARD_UNMOUNT_GRACE_PX = 400
+const DOWNWARD_BEHIND_VIEWPORT_HOLD_ITEMS = 3
+const UPWARD_AHEAD_VIEWPORT_HOLD_ITEMS = 3
 const ANCHOR_USER_SCROLL_SUPPRESSION_MS = 2600
 const STABLE_MEDIA_SHELL_SELECTOR = [
   '[data-stable-shell="1"]',
@@ -395,6 +397,14 @@ export default function useForumWindowing({
           visibleAcc2 += getHeightAtIndex(visibleEnd)
           visibleEnd += 1
         }
+        const protectedVisibleStart = Math.max(
+          0,
+          visibleStart - (direction > 0 ? DOWNWARD_BEHIND_VIEWPORT_HOLD_ITEMS : 1),
+        )
+        const protectedVisibleEnd = Math.min(
+          total,
+          visibleEnd + (direction < 0 ? UPWARD_AHEAD_VIEWPORT_HOLD_ITEMS : 1),
+        )
 
         let start = 0
         let acc = 0
@@ -411,7 +421,7 @@ export default function useForumWindowing({
         }
 
         const nextMaxRender = resolveMaxRender(velocity)
-        const visibleCount = Math.max(1, visibleEnd - visibleStart)
+        const visibleCount = Math.max(1, protectedVisibleEnd - protectedVisibleStart)
         const runwayItems = direction < 0 ? 3 : 2
         const graceItems = direction !== 0 ? 2 : 0
         const minViewportSafeWindowSize = clamp(
@@ -426,32 +436,32 @@ export default function useForumWindowing({
           if (direction < 0) {
             // При обратном скролле hard-cap не должен отрезать карточки,
             // которые реально находятся в viewport.
-            start = Math.max(0, Math.min(start, visibleStart))
+            start = Math.max(0, Math.min(start, protectedVisibleStart))
             end = Math.min(total, start + windowSize)
-            if (end < visibleEnd) {
-              end = Math.min(total, visibleEnd)
+            if (end < protectedVisibleEnd) {
+              end = Math.min(total, protectedVisibleEnd)
               start = Math.max(0, end - windowSize)
             }
           } else if (direction > 0) {
             // При прямом скролле сначала сохраняем viewport, потом режем
             // только безопасный верхний хвост.
-            end = Math.min(total, Math.max(end, visibleEnd))
+            end = Math.min(total, Math.max(end, protectedVisibleEnd))
             start = Math.max(0, end - windowSize)
-            if (start > visibleStart) {
-              start = Math.max(0, visibleStart)
+            if (start > protectedVisibleStart) {
+              start = Math.max(0, protectedVisibleStart)
               end = Math.min(total, start + windowSize)
             }
           } else {
-            const mid = Math.floor((visibleStart + visibleEnd) / 2)
+            const mid = Math.floor((protectedVisibleStart + protectedVisibleEnd) / 2)
             const half = Math.floor(windowSize / 2)
             start = clamp(mid - half, 0, Math.max(0, total - windowSize))
             end = Math.min(total, start + windowSize)
-            if (start > visibleStart) {
-              start = Math.max(0, visibleStart)
+            if (start > protectedVisibleStart) {
+              start = Math.max(0, protectedVisibleStart)
               end = Math.min(total, start + windowSize)
             }
-            if (end < visibleEnd) {
-              end = Math.min(total, visibleEnd)
+            if (end < protectedVisibleEnd) {
+              end = Math.min(total, protectedVisibleEnd)
               start = Math.max(0, end - windowSize)
             }
           }
@@ -491,8 +501,8 @@ export default function useForumWindowing({
             const holdBehindItems = direction > 0 ? 2 : 1
             const holdAheadItems = direction < 0 ? 2 : 1
             const previousCoversActiveViewport =
-              prev.start <= Math.max(0, visibleStart - holdBehindItems) &&
-              prev.end >= Math.min(total, visibleEnd + holdAheadItems)
+              prev.start <= Math.max(0, protectedVisibleStart - holdBehindItems) &&
+              prev.end >= Math.min(total, protectedVisibleEnd + holdAheadItems)
             const maxHeldWindowSize = clamp(
               Math.max(minViewportSafeWindowSize + 4, nextMaxRender + 4),
               minViewportSafeWindowSize,
@@ -573,8 +583,8 @@ export default function useForumWindowing({
           } catch {}
 
           if (total > 0) {
-            if (nextStart > visibleStart) nextStart = visibleStart
-            if (nextEnd < visibleEnd) nextEnd = visibleEnd
+            if (nextStart > protectedVisibleStart) nextStart = protectedVisibleStart
+            if (nextEnd < protectedVisibleEnd) nextEnd = protectedVisibleEnd
             if (nextEnd <= nextStart) {
               const repairedStart = clamp(prev.start, 0, Math.max(0, total - 1))
               nextStart = repairedStart
@@ -582,8 +592,8 @@ export default function useForumWindowing({
               emitWindowingDiag('windowing_window_repair', {
                 start: nextStart,
                 end: nextEnd,
-                visibleStart,
-                visibleEnd,
+                visibleStart: protectedVisibleStart,
+                visibleEnd: protectedVisibleEnd,
               })
             }
           }

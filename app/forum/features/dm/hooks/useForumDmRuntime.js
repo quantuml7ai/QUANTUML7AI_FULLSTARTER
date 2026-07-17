@@ -292,6 +292,7 @@ export default function useForumDmRuntime({
     dmAutoScrollRef,
     dmThreadRef,
     bodyRef,
+    newestFirst: true,
   })
 
   const {

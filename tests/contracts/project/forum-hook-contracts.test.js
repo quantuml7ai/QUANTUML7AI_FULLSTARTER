@@ -343,6 +343,24 @@ describe('Forum hook contracts', () => {
     }
   })
 
+  it('keeps open DM dialogs newest-first without bottom autoscroll grabs', () => {
+    const dmThreadPane = readRepoFile('app/forum/features/dm/components/DmMessagesPane.jsx')
+    const dmRuntime = readRepoFile('app/forum/features/dm/hooks/useForumDmRuntime.js')
+    const dmAutoScroll = readRepoFile('app/forum/features/dm/hooks/useDmThreadAutoScroll.js')
+    const stylesSource = readRepoFile('app/forum/styles/ForumStyles.jsx')
+
+    expect(dmThreadPane).toContain('dmThreadRenderItems')
+    expect(dmThreadPane).toContain('dmThreadItems.slice().reverse()')
+    expect(dmThreadPane).toContain('data-dm-thread-order="newest-first"')
+    expect(dmThreadPane.indexOf('<DmThreadLoadMore')).toBeGreaterThan(dmThreadPane.indexOf('dmThreadWin.bottom'))
+    expect(dmRuntime).toContain('newestFirst: true')
+    expect(dmAutoScroll).toContain('newestFirst = false')
+    expect(dmAutoScroll).toContain('if (newestFirst) {')
+    expect(stylesSource).toContain('.dmRowAvatar{')
+    expect(stylesSource).toContain('background:transparent;')
+    expect(stylesSource).toContain('.dmRowAvatarImg{\n  width:100%; height:100%; border-radius:12px; overflow:hidden; background:transparent;')
+  })
+
   it('keeps the composer emoji and sticker switcher as a sticky glass capsule above the scrolling grid', () => {
     const panel = readRepoFile('app/forum/features/ui/components/ComposerEmojiPanel.jsx')
     const stylesSource = readRepoFile('app/forum/styles/ForumStyles.jsx')

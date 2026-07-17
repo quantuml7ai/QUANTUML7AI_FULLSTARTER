@@ -78,10 +78,14 @@ export default function DmMessagesPane({
   LoadMoreSentinel,
 }) {
   const dmThreadItemCount = (dmThreadItems || []).length
+  const dmThreadRenderItems = React.useMemo(
+    () => (Array.isArray(dmThreadItems) ? dmThreadItems.slice().reverse() : []),
+    [dmThreadItems],
+  )
   const showInitialDmThreadSkeleton = !!dmWithUserId && dmThreadItemCount === 0 && (!!dmThreadLoading || !!dmThreadHasMore)
   const { win: dmThreadWin, measureRef: dmThreadMeasureRef } = useForumWindowing({
     active: !!dmWithUserId,
-    items: dmThreadItems || [],
+    items: dmThreadRenderItems,
     getItemKey: (message, index) => String(message?.id || `${message?.ts || 0}:${index}`),
     getItemDomId: (message) => (message?.id ? `dm_msg_${message.id}` : ''),
     estimateItemHeight: () => readForumCardEstimate('dm_message'),
@@ -108,16 +112,7 @@ export default function DmMessagesPane({
           onUserInfoToggle={handleUserInfoToggle}
         />
         <div className="dmThreadHeaderRail" aria-hidden="true" />
-        <div className="dmThread" ref={dmThreadRef}>
-          <DmThreadLoadMore
-            dmThreadHasMore={dmThreadHasMore}
-            dmThreadLoading={dmThreadLoading}
-            dmThreadCursor={dmThreadCursor}
-            dmWithUserId={dmWithUserId}
-            loadDmThread={loadDmThread}
-            t={t}
-            LoadMoreSentinel={LoadMoreSentinel}
-          />
+        <div className="dmThread" data-dm-thread-order="newest-first" ref={dmThreadRef}>
           {showInitialDmThreadSkeleton && (
             <ForumPaneSkeleton rows={3} label={t?.('loading') || 'Loading'} />
           )}
@@ -128,7 +123,7 @@ export default function DmMessagesPane({
               style={{ height: dmThreadWin.top }}
             />
           )}
-          {!showInitialDmThreadSkeleton && (dmThreadItems || []).slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => (
+          {!showInitialDmThreadSkeleton && dmThreadRenderItems.slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => (
             <div
               key={m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`}
               ref={dmThreadMeasureRef(String(m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`))}
@@ -158,6 +153,17 @@ export default function DmMessagesPane({
               aria-hidden="true"
               data-dm-thread-window-spacer="bottom"
               style={{ height: dmThreadWin.bottom }}
+            />
+          )}
+          {!showInitialDmThreadSkeleton && (
+            <DmThreadLoadMore
+              dmThreadHasMore={dmThreadHasMore}
+              dmThreadLoading={dmThreadLoading}
+              dmThreadCursor={dmThreadCursor}
+              dmWithUserId={dmWithUserId}
+              loadDmThread={loadDmThread}
+              t={t}
+              LoadMoreSentinel={LoadMoreSentinel}
             />
           )}
           <div aria-hidden="true" data-dm-thread-bottom-anchor="1" />

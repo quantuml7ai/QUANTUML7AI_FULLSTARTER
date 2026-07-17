@@ -244,13 +244,13 @@ html[data-tma="1"] .inboxTabs{
 .dmRow:hover::after{ opacity:.8; }
 .dmRowAvatar{
   width:44px; height:44px; border-radius:14px;
-  padding:2px;
-  background: linear-gradient(135deg, rgba(255,215,130,.45), rgba(120,200,255,.55));
-  box-shadow:0 0 18px rgba(120,200,255,.45), inset 0 0 10px rgba(255,220,150,.35);
+  padding:0;
+  background:transparent;
+  box-shadow:0 0 18px rgba(120,200,255,.28);
   cursor:pointer;
 }
 .dmRowAvatarImg{
-  width:100%; height:100%; border-radius:12px; overflow:hidden;
+  width:100%; height:100%; border-radius:12px; overflow:hidden; background:transparent;
 }
 .dmRowName{ font-weight:800; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#eaf4ff; text-shadow:0 0 12px rgba(120,200,255,.35); }
 .dmRowTime{
