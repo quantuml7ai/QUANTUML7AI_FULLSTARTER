@@ -317,6 +317,7 @@ describe('Forum hook contracts', () => {
     const dmHeader = readRepoFile('app/forum/features/dm/components/DmThreadHeader.jsx')
     const dmThreadPane = readRepoFile('app/forum/features/dm/components/DmMessagesPane.jsx')
     const userPopoverRoute = readRepoFile('app/api/profile/user-popover/route.js')
+    const userInfoPopover = readRepoFile('app/forum/features/profile/components/UserInfoPopover.jsx')
     const stylesSource = readRepoFile('app/forum/styles/ForumStyles.jsx')
     const dictFiles = [
       'components/i18n-dicts/en.js',
@@ -332,6 +333,11 @@ describe('Forum hook contracts', () => {
     expect(userPopoverRoute).toContain("searchParams.get('presence') === '1'")
     expect(userPopoverRoute).toContain('lastActiveAt: Number(qcoinState?.lastActiveAt || 0)')
     expect(userPopoverRoute).toContain('presenceOnly: true')
+    expect(userInfoPopover).toContain('USER_INFO_ONLINE_WINDOW_MS = 75 * 1000')
+    expect(userInfoPopover).toContain("qs.set('presence', '1')")
+    expect(userInfoPopover).toContain('setPresenceOnline(false)')
+    expect(userInfoPopover).toContain('userInfoPopover--onlinePulse')
+    expect(userInfoPopover).not.toContain('setInterval')
     expect(dmHeader).toContain('/api/profile/user-popover?')
     expect(dmHeader).toContain("qs.set('uid', threadUid)")
     expect(dmHeader).toContain('DM_PRESENCE_REFRESH_MS')
@@ -361,6 +367,8 @@ describe('Forum hook contracts', () => {
     expect(stylesSource).toContain('.dmThreadPresenceBadge.online{')
     expect(stylesSource).not.toContain('.dmThreadPresenceDot')
     expect(stylesSource).toContain('@keyframes dmPresencePulse')
+    expect(stylesSource).toContain('.userInfoPopover--onlinePulse')
+    expect(stylesSource).toContain('@keyframes userInfoPresencePulse')
     for (const source of dictFiles) {
       expect(source).toContain('"dm_presence_online"')
       expect(source).toContain('"dm_presence_recently"')

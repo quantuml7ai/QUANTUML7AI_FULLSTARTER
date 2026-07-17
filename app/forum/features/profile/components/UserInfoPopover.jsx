@@ -12,6 +12,13 @@ import {
 import { resolveProfileAccountId, writeProfileAlias } from '../utils/profileCache'
 import { MetaMarketGiftIcon } from '../../../../../components/MetaMarketIcons'
 
+const USER_INFO_ONLINE_WINDOW_MS = 75 * 1000
+
+function numericTs(value) {
+  const n = Number(value || 0)
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
 function readViewerId() {
   try {
     const w = typeof window !== 'undefined' ? window : {}
@@ -61,6 +68,7 @@ export default function UserInfoPopover({
   const [showOriginal, setShowOriginal] = useState(false)
   const [translateBusy, setTranslateBusy] = useState(false)
   const [position, setPosition] = useState(positionRef.current)
+  const [presenceOnline, setPresenceOnline] = useState(false)
 
   const formatCount = typeof formatCountFn === 'function' ? formatCountFn : formatCompactCount
   const safeRich = typeof renderRich === 'function' ? renderRich : (s) => String(s || '')
@@ -230,6 +238,42 @@ export default function UserInfoPopover({
       alive = false
     }
   }, [fetchUserInfo, getCachedUserInfo, open, rawUserId])
+
+  useEffect(() => {
+    if (!open || !rawUserId) {
+      setPresenceOnline(false)
+      return undefined
+    }
+
+    let alive = true
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null
+    setPresenceOnline(false)
+
+    const qs = new URLSearchParams()
+    qs.set('uid', String(rawUserId || '').trim())
+    qs.set('presence', '1')
+
+    fetch(`/api/profile/user-popover?${qs.toString()}`, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller?.signal,
+    })
+      .then((res) => res.json().catch(() => null))
+      .then((json) => {
+        if (!alive || !json?.ok) return
+        const lastActiveAt = numericTs(json.lastActiveAt)
+        const serverNow = numericTs(json.serverNow) || Date.now()
+        setPresenceOnline(!!lastActiveAt && serverNow - lastActiveAt <= USER_INFO_ONLINE_WINDOW_MS)
+      })
+      .catch(() => {
+        if (alive) setPresenceOnline(false)
+      })
+
+    return () => {
+      alive = false
+      try { controller?.abort?.() } catch {}
+    }
+  }, [open, rawUserId])
 
   useEffect(() => {
     setTranslatedBio(null)
@@ -440,7 +484,7 @@ export default function UserInfoPopover({
   const popover = (
     <div
       ref={popoverRef}
-      className="userInfoPopover"
+      className={presenceOnline ? 'userInfoPopover userInfoPopover--onlinePulse' : 'userInfoPopover'}
       data-placement={position.placement}
       style={{
         top: position.top,

@@ -1008,6 +1008,31 @@
       box-shadow:0 16px 40px rgba(0,0,0,.55), 0 0 28px rgba(80,167,255,.18);
       backdrop-filter: blur(16px) saturate(140%);
     }
+    .userInfoPopover--onlinePulse{
+      border-color:rgba(60,255,190,.68);
+      box-shadow:
+        0 16px 40px rgba(0,0,0,.55),
+        0 0 30px rgba(60,255,190,.24),
+        inset 0 0 16px rgba(60,255,190,.08);
+      animation:userInfoPresencePulse 1.65s ease-in-out infinite;
+    }
+    @keyframes userInfoPresencePulse{
+      0%{
+        border-color:rgba(60,255,190,.42);
+        box-shadow:0 16px 40px rgba(0,0,0,.55), 0 0 16px rgba(60,255,190,.14), inset 0 0 10px rgba(60,255,190,.06);
+      }
+      55%{
+        border-color:rgba(60,255,190,.96);
+        box-shadow:0 16px 40px rgba(0,0,0,.55), 0 0 0 5px rgba(60,255,190,0), 0 0 34px rgba(60,255,190,.38), inset 0 0 18px rgba(60,255,190,.14);
+      }
+      100%{
+        border-color:rgba(60,255,190,.42);
+        box-shadow:0 16px 40px rgba(60,255,190,.14), 0 16px 40px rgba(0,0,0,.55), inset 0 0 10px rgba(60,255,190,.06);
+      }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .userInfoPopover--onlinePulse{ animation:none; }
+    }
     .userInfoBioRow{
       display:flex;
       align-items:center;
