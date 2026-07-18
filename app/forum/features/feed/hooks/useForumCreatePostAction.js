@@ -80,6 +80,7 @@ export default function useForumCreatePostAction({
   setVideoOpen,
   setVideoState,
   centerPostAfterDom,
+  onDmMessageFocus,
 }) {
   const postingRef = useRef(false)
 
@@ -204,6 +205,7 @@ export default function useForumCreatePostAction({
         setVideoOpen,
         setVideoState,
         restoreComposerScroll,
+        onDmMessageFocus,
       })
       return
     }

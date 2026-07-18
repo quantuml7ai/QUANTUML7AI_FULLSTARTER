@@ -203,31 +203,38 @@ export default function DmMessagesPane({
               label={t?.('loading') || 'Loading'}
             />
           )}
-          {!showInitialDmThreadSkeleton && dmThreadRenderItems.slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => (
-            <div
-              key={m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`}
-              ref={dmThreadMeasureRef(String(m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`))}
-            >
-              <DmThreadMessageRow
-                m={m}
-                dmDeletedMsgMap={dmDeletedMsgMap}
-                dmWithUserId={dmWithUserId}
-                meId={meId}
-                dmThreadSeenTs={dmThreadSeenTs}
-                dmBlockedMap={dmBlockedMap}
-                dmTranslateMap={dmTranslateMap}
-                setDmTranslateMap={setDmTranslateMap}
-                resolveProfileAccountId={resolveProfileAccountId}
-                resolveNickForDisplay={resolveNickForDisplay}
-                resolveIconForDisplay={resolveIconForDisplay}
-                handleUserInfoToggle={handleUserInfoToggle}
-                openDmDeletePopover={openDmDeletePopover}
-                toggleDmBlock={toggleDmBlock}
-                locale={locale}
-                t={t}
-              />
-            </div>
-          ))}
+          {!showInitialDmThreadSkeleton && dmThreadRenderItems.slice(dmThreadWin.start, dmThreadWin.end).map((m, indexInWindow) => {
+            const messageKey = String(m?.id || `${m?.ts || 0}:${dmThreadWin.start + indexInWindow}`)
+            const messageDomId = m?.id ? `dm_msg_${m.id}` : ''
+            return (
+              <div
+                key={messageKey}
+                id={messageDomId || undefined}
+                data-dm-message-shell="1"
+                data-dm-message-id={m?.id ? String(m.id) : undefined}
+                ref={dmThreadMeasureRef(messageKey)}
+              >
+                <DmThreadMessageRow
+                  m={m}
+                  dmDeletedMsgMap={dmDeletedMsgMap}
+                  dmWithUserId={dmWithUserId}
+                  meId={meId}
+                  dmThreadSeenTs={dmThreadSeenTs}
+                  dmBlockedMap={dmBlockedMap}
+                  dmTranslateMap={dmTranslateMap}
+                  setDmTranslateMap={setDmTranslateMap}
+                  resolveProfileAccountId={resolveProfileAccountId}
+                  resolveNickForDisplay={resolveNickForDisplay}
+                  resolveIconForDisplay={resolveIconForDisplay}
+                  handleUserInfoToggle={handleUserInfoToggle}
+                  openDmDeletePopover={openDmDeletePopover}
+                  toggleDmBlock={toggleDmBlock}
+                  locale={locale}
+                  t={t}
+                />
+              </div>
+            )
+          })}
           {!showInitialDmThreadSkeleton && dmThreadWin.bottom > 0 && (
             <DmThreadWindowSpacer
               edge="bottom"

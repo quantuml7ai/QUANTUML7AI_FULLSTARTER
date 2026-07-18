@@ -17,12 +17,14 @@ export default function useForumComposerSubmitRuntime({
   pendingSticker,
   pendingAudio,
   pendingVideo,
+  composerBusy = false,
 }) {
-  const canSend = (String(text || '').trim().length > 0)
+  const hasSendContent = (String(text || '').trim().length > 0)
     || (pendingImgs.length > 0)
     || !!pendingSticker?.src
     || !!pendingAudio
     || !!pendingVideo
+  const canSend = hasSendContent && !composerBusy
 
   const { createTopic } = useForumCreateTopicAction(createTopicArgs)
   const { postingRef, createPost } = useForumCreatePostAction(createPostArgs)
@@ -41,6 +43,8 @@ export default function useForumComposerSubmitRuntime({
     handleComposerSendButtonClick,
   } = useComposerActionHandlers({
     ...actionHandlersArgs,
+    composerBusy,
+    canSend,
     createPost,
     postingRef,
     pendingVideo,

@@ -44,6 +44,7 @@ export async function sendDmComposerMessage({
   setVideoOpen,
   setVideoState,
   restoreComposerScroll,
+  onDmMessageFocus,
 }) {
   const fail = (msg) => {
     try { onFail?.(msg) } catch {}
@@ -107,6 +108,13 @@ export async function sendDmComposerMessage({
   if (!dmText && !attachments.length) return fail()
 
   const tmpId = `tmp_dm_${Date.now()}_${Math.random().toString(36).slice(2)}`
+  const focusMessage = (messageId, reason = 'dm-send') => {
+    const id = String(messageId || '').trim()
+    if (!id || typeof onDmMessageFocus !== 'function') return
+    try { onDmMessageFocus(id, reason) } catch {}
+    try { setTimeout(() => onDmMessageFocus(id, `${reason}:retry-1`), 80) } catch {}
+    try { setTimeout(() => onDmMessageFocus(id, `${reason}:retry-2`), 260) } catch {}
+  }
   const optimistic = {
     id: tmpId,
     from: uid,
@@ -118,6 +126,7 @@ export async function sendDmComposerMessage({
   }
   const matchesTargetDialog = (dialog) => dialogMatchesUser(dialog, dmTarget, uid)
   setDmThreadItems((prev) => [...(prev || []), optimistic])
+  focusMessage(tmpId, 'dm-send-optimistic')
   setDmDialogs((prev) => {
     const list = dedupeDmDialogs(Array.isArray(prev) ? prev.slice() : [], uid)
     const idx = list.findIndex(matchesTargetDialog)
@@ -248,6 +257,7 @@ export async function sendDmComposerMessage({
           ? { ...m, id: realId, ts: realTs, status: 'sent' }
           : m
       ))
+      focusMessage(realId, 'dm-send-confirmed')
       setDmDialogs((prev) =>
         dedupeDmDialogs(
           (prev || []).map((d) => {
@@ -298,7 +308,9 @@ export async function sendDmComposerMessage({
   try { setPendingVideo(null) } catch {}
   try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
   try { setVideoOpen(false); setVideoState('idle') } catch {}
-  try { restoreComposerScroll() } catch {}
+  if (!dmSendOk) {
+    try { restoreComposerScroll() } catch {}
+  }
 
   return true
 }

@@ -1,9 +1,42 @@
 // app/api/dm/delete/route.js
 import { getMessage, addAliasesFor, expandAliasIds } from '../_db.js'
 import { bad, ok, requireUserIdCanonical, canonicalizeUserId, getUserIdFromReq, normalizeRawUserId } from '../_utils.js'
+import { NOTIFICATION_SOURCES } from '../../../../lib/notificationCenter.js'
+import { publishStoredNotificationImpulse } from '../../../../lib/webPush.js'
 import dmPrimary from '../../../../lib/mongo/dm-primary.cjs'
 
 const toStr = (v) => String(v ?? '').trim()
+
+async function publishDmDeleteImpulse(entries = [], reason = 'dm_delete') {
+  const list = Array.isArray(entries) ? entries : []
+  const jobs = []
+  const seen = new Set()
+  for (const entry of list) {
+    const value = entry && typeof entry === 'object' ? entry : { userId: entry }
+    const userId = String(value.userId || '').trim()
+    if (!userId) continue
+    const key = [
+      userId,
+      String(value.peerId || ''),
+      String(value.messageId || ''),
+      value.dialog === true ? 'dialog' : 'message',
+    ].join('|')
+    if (seen.has(key)) continue
+    seen.add(key)
+    jobs.push(publishStoredNotificationImpulse(userId, {
+      source: NOTIFICATION_SOURCES.MESSENGER_MESSAGES,
+      count: 0,
+      totalCount: 0,
+      forceSync: true,
+      reason,
+      dmDeletedMessageId: value.messageId,
+      dmDeletedPeerId: value.peerId,
+      dmDeletedDialog: value.dialog === true,
+    }))
+  }
+  if (!jobs.length) return
+  await Promise.allSettled(jobs)
+}
 
 export async function POST(req) {
   const body = await req.json().catch(() => null)
@@ -35,6 +68,10 @@ export async function POST(req) {
       if (!isParticipant) return bad('forbidden', 403)
 
       await dmPrimary.deleteMessage(msgId)
+      await publishDmDeleteImpulse([
+        { userId: from, peerId: to, messageId: msgId },
+        { userId: to, peerId: from, messageId: msgId },
+      ], 'dm_message_delete_for_all')
       return ok({ deleted: true, id: msgId, storagePrimary: 'mongo' })
     }
 
@@ -55,6 +92,10 @@ export async function POST(req) {
         withIds,
         deletedAt: Date.now(),
       })
+      await publishDmDeleteImpulse([
+        { userId: me, peerId: withId, dialog: true },
+        { userId: withId, peerId: me, dialog: true },
+      ], 'dm_dialog_delete_for_all')
 
       return ok({
         deleted: true,

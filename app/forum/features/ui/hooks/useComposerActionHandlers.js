@@ -18,6 +18,8 @@ export default function useComposerActionHandlers({
   setCooldownLeft,
   resetVideo,
   setEmojiOpen,
+  composerBusy = false,
+  canSend = false,
 }) {
   const handleComposerVideoButtonClick = useCallback((event) => {
     try { event?.preventDefault?.() } catch {}
@@ -42,7 +44,7 @@ export default function useComposerActionHandlers({
   ])
 
   const handleComposerSendButtonClick = useCallback(async () => {
-    if (postingRef.current || cooldownLeft > 0) return
+    if (postingRef.current || cooldownLeft > 0 || composerBusy || !canSend) return
     try {
       setVideoState((state) => (pendingVideo ? 'uploading' : state))
       try { if (videoOpen) setVideoOpen(false) } catch {}
@@ -54,7 +56,9 @@ export default function useComposerActionHandlers({
     }
   }, [
     cooldownLeft,
+    composerBusy,
     createPost,
+    canSend,
     pendingVideo,
     postingRef,
     resetVideo,

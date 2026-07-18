@@ -54,6 +54,7 @@ export default function ComposerActionRail({
   postingRef,
   cooldownLeft,
   canSend,
+  composerBusy,
   dmMode,
   onSendClick,
 }) {
@@ -61,6 +62,7 @@ export default function ComposerActionRail({
   const sendDisabled =
     !!postingRef?.current ||
     cooldownLeft > 0 ||
+    !!composerBusy ||
     !canSend ||
     textLen > textLimit
 

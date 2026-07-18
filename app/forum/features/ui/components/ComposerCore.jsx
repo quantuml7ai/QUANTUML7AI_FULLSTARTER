@@ -35,6 +35,7 @@ export default function ComposerCore({
   postingRef,
   cooldownLeft,
   canSend,
+  composerBusy,
   dmMode,
   onSendClick,
   setText,
@@ -101,6 +102,7 @@ export default function ComposerCore({
             postingRef={postingRef}
             cooldownLeft={cooldownLeft}
             canSend={canSend}
+            composerBusy={composerBusy}
             dmMode={dmMode}
             onSendClick={onSendClick}
           />

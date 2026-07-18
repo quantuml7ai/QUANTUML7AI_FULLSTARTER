@@ -224,9 +224,6 @@ export default function useDmDeleteController({
     // Defensive against fast checkbox->confirm race:
     // stale false from render must never override fresh true from tracked ref.
     let forAll = !!(dmDeleteForAllRef.current || forAllOverride === true)
-    // Dialog delete must remain server-authoritative.
-    // Local-only dialog removal causes cross-device divergence.
-    if (kind === 'dialog') forAll = true
     try {
       if (kind === 'dialog') {
         const uid = String(info.uid || '').trim()

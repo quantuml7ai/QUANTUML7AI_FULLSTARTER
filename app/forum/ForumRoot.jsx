@@ -1286,6 +1286,7 @@ useForumHeadCollapse({
     mediaPct,
     setMediaPct,
     formatMediaPhase,
+    mediaPipelineOn,
     setMediaPipelineOn,
     mediaAbortRef,
     mediaCancelRef,
@@ -1313,6 +1314,30 @@ useForumHeadCollapse({
   })
 
   // === Режим редактирования поста (owner) ===
+  const focusDmMessageById = React.useCallback((messageId, reason = 'dm-send-focus') => {
+    const id = String(messageId || '').trim()
+    if (!id || typeof window === 'undefined' || typeof document === 'undefined') return
+    const domId = `dm_msg_${id}`
+    try { revealForumWindowedDomId(domId, { holdMs: 2600, reason }) } catch {}
+
+    const attemptFocus = (attempt = 0) => {
+      const node = document.getElementById(domId)
+      if (node) {
+        try { window.__forumProgrammaticScrollTs = Date.now() } catch {}
+        try {
+          node.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' })
+        } catch {
+          try { node.scrollIntoView(false) } catch {}
+        }
+        return
+      }
+      if (attempt >= 12) return
+      try { window.setTimeout(() => attemptFocus(attempt + 1), attempt < 4 ? 70 : 140) } catch {}
+    }
+
+    attemptFocus()
+  }, [])
+
   const [editPostId, setEditPostId] = React.useState(null)
   const editModeAlignTimersRef = React.useRef([])
   const editModeAlignRafsRef = React.useRef([])
@@ -1514,6 +1539,29 @@ const {
   hasComposerMedia,
   setComposerActive,
 });
+
+const composerBusy = React.useMemo(() => {
+  const phase = String(mediaPhase || '').toLowerCase()
+  const phaseBusy = (
+    phase === 'queued' ||
+    phase === 'preparing' ||
+    phase === 'moderating' ||
+    phase === 'processing' ||
+    phase === 'optimizing' ||
+    phase === 'uploading' ||
+    phase === 'sending' ||
+    phase === 'transcoding'
+  )
+  const busyPhase = !!(phaseBusy || (mediaPipelineOn && phase !== 'ready' && phase !== 'idle'))
+  const videoBusy = (
+    videoState === 'live' ||
+    videoState === 'recording' ||
+    videoState === 'stopping' ||
+    videoState === 'processing' ||
+    videoState === 'uploading'
+  )
+  return !!(busyPhase || videoBusy || recState === 'rec')
+}, [mediaPhase, mediaPipelineOn, recState, videoState])
 const {
   canSend,
   createTopic,
@@ -1630,6 +1678,7 @@ const {
     setVideoOpen,
     setVideoState,
     centerPostAfterDom,
+    onDmMessageFocus: focusDmMessageById,
   },
   viewTrackingArgs: {
     isBrowserFn: isBrowser,
@@ -1702,6 +1751,7 @@ const {
   pendingSticker,
   pendingAudio,
   pendingVideo,
+  composerBusy,
 })
 
 const {
@@ -2282,6 +2332,7 @@ const profileBranchTopicsLength = useMemo(() => {
     postingRef,
     cooldownLeft,
     canSend,
+    composerBusy,
     dmMode,
     onSendClick: handleComposerSendButtonClick,
     setText,

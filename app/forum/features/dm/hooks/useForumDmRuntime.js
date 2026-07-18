@@ -12,9 +12,13 @@ import useDmDeleteController from './useDmDeleteController'
 import usePublishedPostsModel from '../../feed/hooks/usePublishedPostsModel'
 import { mergeForumEntitiesById } from '../../feed/utils/postMerge'
 import {
+  dialogMatchesUser,
   dmFetchCached as dmFetchCachedFlow,
+  filterServerDeletedDialogs,
   loadDmDialogs as loadDmDialogsFlow,
   loadDmThread as loadDmThreadFlow,
+  normalizeServerDeletedDialogs,
+  persistDeletedDialogs,
 } from '../utils/dmLoaders'
 
 const DM_REALTIME_SOURCE = 'messenger_messages'
@@ -47,11 +51,40 @@ function realtimeDedupeMessagesAsc(messages, deletedMap = {}) {
     .sort((a, b) => realtimeMessageTs(a) - realtimeMessageTs(b))
 }
 
-function mergeRealtimeThreadItems(existing, incomingDesc, deletedMap = {}) {
+function isRealtimeOptimisticMessage(item) {
+  const id = normalizeDmRealtimeId(item?.id)
+  return (
+    String(item?.status || '') === 'sending' ||
+    (!!id && id.startsWith('tmp_dm_'))
+  )
+}
+
+function mergeRealtimeThreadItems(existing, incomingDesc, deletedMap = {}, options = {}) {
   const current = Array.isArray(existing) ? existing : []
   const incomingAsc = (Array.isArray(incomingDesc) ? incomingDesc : []).slice().reverse()
-  if (!incomingAsc.length) return current
-  return realtimeDedupeMessagesAsc([...current, ...incomingAsc], deletedMap)
+  const filteredCurrent = current.filter((item) => !deletedMap[normalizeDmRealtimeId(item?.id)])
+  if (!incomingAsc.length) return filteredCurrent
+
+  let base = filteredCurrent
+  if (options?.authoritative === true) {
+    const incomingIds = new Set(incomingAsc.map((item) => normalizeDmRealtimeId(item?.id)).filter(Boolean))
+    const incomingTs = incomingAsc
+      .map((item) => realtimeMessageTs(item))
+      .filter((ts) => Number.isFinite(ts) && ts > 0)
+    const minIncomingTs = incomingTs.length ? Math.min(...incomingTs) : 0
+    const maxIncomingTs = incomingTs.length ? Math.max(...incomingTs) : 0
+    if (minIncomingTs && maxIncomingTs) {
+      base = filteredCurrent.filter((item) => {
+        if (isRealtimeOptimisticMessage(item)) return true
+        const id = normalizeDmRealtimeId(item?.id)
+        if (!id || incomingIds.has(id)) return true
+        const ts = realtimeMessageTs(item)
+        return !(ts >= minIncomingTs && ts <= maxIncomingTs)
+      })
+    }
+  }
+
+  return realtimeDedupeMessagesAsc([...base, ...incomingAsc], deletedMap)
 }
 
 function dispatchDmThreadSeenScan(uid, reason = 'dm-thread-refresh') {
@@ -120,6 +153,7 @@ function isRealtimeRuntimeVisible() {
 
 function isMessengerRealtimePayload(detail) {
   if (!detail || typeof detail !== 'object') return false
+  if (detail?.clientOnly === true || detail?.localUnreadProjection === true) return false
   const source = normalizeDmRealtimeId(detail?.source || detail?.data?.source || detail?.payload?.source)
   const counts = detail?.counts && typeof detail.counts === 'object' ? detail.counts : null
   const count = Math.max(
@@ -182,6 +216,18 @@ function scoreInboxReplyPost(post, postSort = 'new') {
 function messengerRealtimeCountFromState(detail) {
   const counts = detail?.counts && typeof detail.counts === 'object' ? detail.counts : {}
   return Math.max(0, Number(counts[DM_REALTIME_SOURCE]) || 0)
+}
+
+function persistDmRuntimeMapEntry(storageKey, id, value) {
+  const key = String(storageKey || '').trim()
+  const safeId = normalizeDmRealtimeId(id)
+  if (!key || !safeId || typeof localStorage === 'undefined') return
+  try {
+    const raw = JSON.parse(localStorage.getItem(key) || '{}') || {}
+    const next = raw && typeof raw === 'object' && !Array.isArray(raw) ? { ...raw } : {}
+    next[safeId] = value
+    localStorage.setItem(key, JSON.stringify(next))
+  } catch {}
 }
 
 export default function useForumDmRuntime({
@@ -508,7 +554,7 @@ export default function useForumDmRuntime({
     repliesToMe,
   })
 
-  const { dmUnreadCount } = useDmUnreadState({
+  const { dmUnreadCount: rawDmUnreadCount } = useDmUnreadState({
     mounted,
     dmDialogs,
     dmSeenMap,
@@ -520,6 +566,20 @@ export default function useForumDmRuntime({
     dmWithUserId,
     dmThreadItems,
   })
+  const dmListMode = !!inboxOpen && inboxTab === 'messages' && !dmWithUserId
+  const [dmUnreadCount, setDmUnreadCount] = useState(0)
+
+  useEffect(() => {
+    const next = Math.max(0, Number(rawDmUnreadCount) || 0)
+    setDmUnreadCount((prevRaw) => {
+      const prev = Math.max(0, Number(prevRaw) || 0)
+      // The dialog list can be momentarily incomplete during realtime merges.
+      // It may raise the local unread projection, but only the open thread
+      // viewport + /api/dm/seen contour is allowed to lower it.
+      if (dmListMode && next < prev) return prev
+      return next
+    })
+  }, [dmListMode, rawDmUnreadCount])
 
   useEffect(() => {
     if (!forumDataReady) return
@@ -540,6 +600,8 @@ export default function useForumDmRuntime({
       detail: {
         source: 'messenger_messages',
         count: Math.max(0, Number(dmUnreadCount) || 0),
+        clientOnly: true,
+        localUnreadProjection: true,
       },
     }))
   }, [dmDialogsLoaded, dmUnreadCount])
@@ -573,8 +635,10 @@ export default function useForumDmRuntime({
       setDmDialogsCursor,
       setDmDialogsHasMore,
       setDmDialogsLoaded,
+      dmDeletedKey,
+      setDmDeletedMap,
     })
-  }, [meId, dmDialogsHasMore, dmBgThrottleMs, dmActiveThrottleMs, dmPageSize, dmFetchCached])
+  }, [meId, dmDialogsHasMore, dmBgThrottleMs, dmActiveThrottleMs, dmPageSize, dmFetchCached, dmDeletedKey, setDmDeletedMap])
 
   const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) => {
     return loadDmThreadFlow(withUserId, cursor, opts, {
@@ -589,12 +653,27 @@ export default function useForumDmRuntime({
       dmThreadCacheRef,
       dmThreadInFlightRef,
       dmDeletedMsgMap,
+      dmDeletedKey,
+      setDmDeletedMap,
+      setDmDialogs,
+      setDmWithUserId,
       setDmThreadItems,
       setDmThreadCursor,
       setDmThreadHasMore,
       setDmThreadSeenTs,
     })
-  }, [meId, dmThreadHasMore, dmActiveThrottleMs, dmPageSize, dmFetchCached, dmDeletedMsgMap])
+  }, [
+    meId,
+    dmThreadHasMore,
+    dmActiveThrottleMs,
+    dmPageSize,
+    dmFetchCached,
+    dmDeletedMsgMap,
+    dmDeletedKey,
+    setDmDeletedMap,
+    setDmDialogs,
+    setDmWithUserId,
+  ])
 
   const fetchDmDialogsRealtime = useCallback(async (reason = 'dm-realtime') => {
     if (!meId) return null
@@ -612,13 +691,36 @@ export default function useForumDmRuntime({
     })
     const payload = await response.json().catch(() => null)
     if (!response.ok || !payload?.ok) return payload
-    const incoming = Array.isArray(payload.items) ? payload.items : []
-    setDmDialogs((prev) => mergeRealtimeDialogs(prev, incoming, meId))
+    const serverDeleted = normalizeServerDeletedDialogs(payload.deletedDialogs)
+    if (Object.keys(serverDeleted).length) {
+      persistDeletedDialogs(dmDeletedKey, serverDeleted)
+      setDmDeletedMap?.((prev) => {
+        const next = { ...(prev || {}) }
+        let changed = false
+        for (const [key, value] of Object.entries(serverDeleted)) {
+          const ts = Number(value || 0)
+          if (!key || !ts || Number(next[key] || 0) >= ts) continue
+          next[key] = ts
+          changed = true
+        }
+        return changed ? next : prev
+      })
+    }
+    const incoming = filterServerDeletedDialogs(
+      Array.isArray(payload.items) ? payload.items : [],
+      serverDeleted,
+      meId,
+    )
+    setDmDialogs((prev) => {
+      const existing = filterServerDeletedDialogs(prev, serverDeleted, meId)
+      const merged = mergeRealtimeDialogs(existing, incoming, meId)
+      return filterServerDeletedDialogs(merged, serverDeleted, meId)
+    })
     setDmDialogsCursor(payload.nextCursor || null)
     setDmDialogsHasMore(!!payload.hasMore)
     setDmDialogsLoaded(true)
     return payload
-  }, [meId, dmPageSize])
+  }, [meId, dmPageSize, dmDeletedKey, setDmDeletedMap])
 
   const fetchDmThreadRealtime = useCallback(async (withUserId, reason = 'dm-realtime-thread') => {
     const uid = String(withUserId || '').trim()
@@ -641,13 +743,107 @@ export default function useForumDmRuntime({
     const payload = await response.json().catch(() => null)
     if (!response.ok || !payload?.ok) return payload
     const incoming = Array.isArray(payload.items) ? payload.items : []
-    setDmThreadItems((prev) => mergeRealtimeThreadItems(prev, incoming, dmDeletedMsgMap))
+    const dialogDeletedAt = Number(payload.dialogDeletedAt || 0)
+    if (dialogDeletedAt && !incoming.length) {
+      const serverDeleted = { [uid]: dialogDeletedAt }
+      persistDeletedDialogs(dmDeletedKey, serverDeleted)
+      setDmDeletedMap?.((prev) => {
+        const next = { ...(prev || {}) }
+        if (Number(next[uid] || 0) >= dialogDeletedAt) return prev
+        next[uid] = dialogDeletedAt
+        return next
+      })
+      setDmDialogs((prev) => (
+        Array.isArray(prev)
+          ? prev.filter((dialog) => !dialogMatchesUser(dialog, uid, meId))
+          : prev
+      ))
+      setDmThreadItems([])
+      setDmThreadCursor(null)
+      setDmThreadHasMore(false)
+      if (String(dmWithUserId || '').trim() === uid) setDmWithUserId('')
+      return payload
+    }
+    setDmThreadItems((prev) => mergeRealtimeThreadItems(prev, incoming, dmDeletedMsgMap, { authoritative: true }))
     setDmThreadCursor(payload.nextCursor || null)
     setDmThreadHasMore(!!payload.hasMore)
     setDmThreadSeenTs(Number(payload.peerSeenTs || 0))
     dispatchDmThreadSeenScan(uid, reason)
     return payload
-  }, [meId, dmPageSize, dmDeletedMsgMap])
+  }, [
+    meId,
+    dmPageSize,
+    dmDeletedMsgMap,
+    dmDeletedKey,
+    setDmDeletedMap,
+    setDmDialogs,
+    dmWithUserId,
+    setDmWithUserId,
+  ])
+
+  const applyDmRealtimeDeleteImpulse = useCallback((detail = {}) => {
+    const source = normalizeDmRealtimeId(detail?.source || detail?.data?.source || detail?.payload?.source)
+    if (source && source !== DM_REALTIME_SOURCE) return
+
+    const deletedMessageId = normalizeDmRealtimeId(detail?.dmDeletedMessageId || detail?.data?.dmDeletedMessageId || detail?.payload?.dmDeletedMessageId)
+    const deletedPeerId = normalizeDmRealtimeId(detail?.dmDeletedPeerId || detail?.data?.dmDeletedPeerId || detail?.payload?.dmDeletedPeerId)
+    const deletedDialog = detail?.dmDeletedDialog === true || detail?.data?.dmDeletedDialog === true || detail?.payload?.dmDeletedDialog === true
+    if (!deletedMessageId && !(deletedDialog && deletedPeerId)) return
+
+    if (deletedMessageId) {
+      persistDmRuntimeMapEntry(dmDeletedMsgKey, deletedMessageId, 1)
+      setDmDeletedMsgMap((prev) => (
+        prev?.[deletedMessageId] ? prev : { ...(prev || {}), [deletedMessageId]: 1 }
+      ))
+      setDmThreadItems((prev) => (
+        Array.isArray(prev)
+          ? prev.filter((message) => normalizeDmRealtimeId(message?.id) !== deletedMessageId)
+          : prev
+      ))
+      setDmDialogs((prev) => {
+        if (!Array.isArray(prev) || !prev.length) return prev
+        let changed = false
+        const next = prev.filter((dialog) => {
+          const lastId = normalizeDmRealtimeId(dialog?.lastMessage?.id)
+          if (lastId !== deletedMessageId) return true
+          changed = true
+          return false
+        })
+        return changed ? next : prev
+      })
+    }
+
+    if (deletedDialog && deletedPeerId) {
+      const deletedAt = Number(detail?.ts || Date.now()) || Date.now()
+      persistDeletedDialogs(dmDeletedKey, { [deletedPeerId]: deletedAt })
+      setDmDeletedMap((prev) => {
+        const next = { ...(prev || {}) }
+        if (Number(next[deletedPeerId] || 0) >= deletedAt) return prev
+        next[deletedPeerId] = deletedAt
+        return next
+      })
+      setDmDialogs((prev) => (
+        Array.isArray(prev)
+          ? prev.filter((dialog) => !dialogMatchesUser(dialog, deletedPeerId, meId))
+          : prev
+      ))
+      if (String(dmWithUserId || '').trim() === deletedPeerId) {
+        setDmThreadItems([])
+        setDmThreadCursor(null)
+        setDmThreadHasMore(false)
+        setDmWithUserId('')
+      }
+    }
+  }, [
+    dmDeletedKey,
+    dmDeletedMsgKey,
+    dmWithUserId,
+    meId,
+    setDmDeletedMap,
+    setDmDeletedMsgMap,
+    setDmDialogs,
+    setDmWithUserId,
+  ])
 
   const runDmRealtimeRefresh = useCallback((reason = 'dm-realtime') => {
     if (!meId || typeof window === 'undefined') return
@@ -771,18 +967,23 @@ export default function useForumDmRuntime({
       runOpenDmThreadRealtimeImpulse('notification-state')
     }
     const onNotificationCount = (event) => {
-      if (!isMessengerRealtimePayload(event?.detail || {})) return
+      const detail = event?.detail || {}
+      if (!isMessengerRealtimePayload(detail)) return
+      applyDmRealtimeDeleteImpulse(detail)
       runDmRealtimeRefresh('notification-count')
       runOpenDmThreadRealtimeImpulse('notification-count')
     }
     const onOpenNotification = (event) => {
-      if (!isMessengerRealtimePayload(event?.detail || {})) return
+      const detail = event?.detail || {}
+      if (!isMessengerRealtimePayload(detail)) return
+      applyDmRealtimeDeleteImpulse(detail)
       runDmRealtimeRefresh('open-notification')
       runOpenDmThreadRealtimeImpulse('open-notification')
     }
     const onWorkerMessage = (event) => {
       if (event?.data?.type !== 'ql7:notification-received') return
       if (!isMessengerRealtimePayload(event?.data || {})) return
+      applyDmRealtimeDeleteImpulse(event?.data || {})
       runDmRealtimeRefresh('service-worker-push')
       runOpenDmThreadRealtimeImpulse('service-worker-push')
     }
@@ -816,7 +1017,7 @@ export default function useForumDmRuntime({
         retryTimers: new Set(),
       }
     }
-  }, [mounted, meId, runDmRealtimeRefresh, runOpenDmThreadRealtimeImpulse])
+  }, [mounted, meId, runDmRealtimeRefresh, runOpenDmThreadRealtimeImpulse, applyDmRealtimeDeleteImpulse])
 
   useDmLocalCache({
     isBrowserFn,

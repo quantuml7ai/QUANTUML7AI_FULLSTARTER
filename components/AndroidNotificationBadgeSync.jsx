@@ -92,6 +92,15 @@ function isMobileNotificationRuntime() {
   }
 }
 
+function isRealtimeNotificationRuntime() {
+  try {
+    if (typeof document !== 'undefined' && document.visibilityState && document.visibilityState !== 'visible') {
+      return false
+    }
+  } catch {}
+  return true
+}
+
 function nativeLinkAttemptIsFresh(accountId, lang) {
   try {
     const value = JSON.parse(localStorage.getItem(NATIVE_LINK_STORAGE_KEY) || 'null')
@@ -354,23 +363,27 @@ export default function AndroidNotificationBadgeSync() {
       mobileStreamAbort = null
     }
 
-    const dispatchImpulseFallback = (payload) => {
+    const dispatchImpulseFallback = (payload, state = null) => {
       const source = normalizeNotificationSource(payload?.source, '')
       if (!source) return
+      const serverCounts = state?.counts && typeof state.counts === 'object' ? state.counts : null
       window.dispatchEvent(new CustomEvent(SOURCE_EVENT, {
         detail: {
           source,
-          count: Math.max(0, Number(payload?.count) || 0),
-          totalCount: Math.max(0, Number(payload?.totalCount) || 0),
+          count: Math.max(0, Number(serverCounts?.[source] ?? payload?.count) || 0),
+          totalCount: Math.max(0, Number(state?.totalCount ?? payload?.totalCount) || 0),
           pushReceived: true,
           forceSync: payload?.forceSync === true,
           reason: String(payload?.reason || ''),
+          dmDeletedMessageId: String(payload?.dmDeletedMessageId || ''),
+          dmDeletedPeerId: String(payload?.dmDeletedPeerId || ''),
+          dmDeletedDialog: payload?.dmDeletedDialog === true,
         },
       }))
     }
 
     function scheduleMobileImpulseStream() {
-      if (cancelled || !isMobileNotificationRuntime() || !readAccountId()) return
+      if (cancelled || !isRealtimeNotificationRuntime() || !readAccountId()) return
       if (mobileStreamRetry) window.clearTimeout(mobileStreamRetry)
       const delay = Math.min(15_000, 1_000 * (2 ** Math.min(mobileStreamAttempt, 4)))
       mobileStreamRetry = window.setTimeout(() => {
@@ -380,7 +393,7 @@ export default function AndroidNotificationBadgeSync() {
     }
 
     function startMobileImpulseStream() {
-      if (cancelled || !isMobileNotificationRuntime()) return
+      if (cancelled || !isRealtimeNotificationRuntime()) return
       const accountId = String(accountIdRef.current || readAccountId() || '').trim()
       if (!accountId || mobileStreamAbort) return
 
@@ -419,7 +432,7 @@ export default function AndroidNotificationBadgeSync() {
                 if (payload?.type === 'notification-state-changed') {
                   refreshFromNotificationImpulse()
                     .then((state) => {
-                      if (!state?.ok || payload?.forceSync === true) dispatchImpulseFallback(payload)
+                      if (!state?.ok || payload?.forceSync === true) dispatchImpulseFallback(payload, state)
                     })
                     .catch(() => dispatchImpulseFallback(payload))
                 }
@@ -459,14 +472,36 @@ export default function AndroidNotificationBadgeSync() {
       const previousCount = Math.max(0, Number(countsRef.current?.[source]) || 0)
       const nextCount = Math.max(0, Number(event?.detail?.count) || 0)
       const explicitRead = event?.detail?.read === true
-      if (nextCount === previousCount && !explicitRead && event?.detail?.forceSync !== true) return
+      const forceSync = event?.detail?.forceSync === true
+      const clientOnly = event?.detail?.clientOnly === true || event?.detail?.localUnreadProjection === true
+      if (nextCount === previousCount && !explicitRead && !forceSync) return
+      if (forceSync && !explicitRead && nextCount <= previousCount) {
+        sync()
+        return
+      }
       countsRef.current = normalizeNotificationCounts({
         ...countsRef.current,
         [source]: nextCount,
       })
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(countsRef.current)) } catch {}
       sync()
-      if (event?.detail?.forceSync === true && nextCount === previousCount && !explicitRead) return
+      if (clientOnly || forceSync) return
+      if (source === 'messenger_messages') {
+        // DM read receipts are owned by /api/dm/seen after a real message row
+        // enters the open thread viewport. Dialog-list projections must never
+        // collapse the canonical unread state by writing readSources here.
+        if (nextCount > 0) {
+          apiPost('/api/push/sync', accountIdRef.current || readAccountId(), {
+            counts: { [source]: nextCount },
+          })
+            .then((response) => response?.json?.().catch(() => null))
+            .then((state) => {
+              if (state?.ok) applyServerState(state)
+            })
+            .catch(() => {})
+        }
+        return
+      }
       const isCanonicalForumReplies = source === 'messenger_replies' && event?.detail?.canonicalForumUnread === true
       const isServerReplyReadSync = source === 'messenger_replies' && event?.detail?.serverItemsRead === true
       if (source === 'messenger_replies' && (isCanonicalForumReplies || isServerReplyReadSync)) {
@@ -580,6 +615,7 @@ export default function AndroidNotificationBadgeSync() {
       ensurePushSubscription()
         .then(() => ensureNativePushLink())
         .then(() => fetchServerState())
+        .then(() => startMobileImpulseStream())
         .catch(() => fetchServerState().catch(() => {}))
     }
 

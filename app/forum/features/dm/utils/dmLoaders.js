@@ -59,7 +59,7 @@ export function dedupeDmDialogs(dialogs, meId = '') {
     .sort((a, b) => Number(b?.lastMessage?.ts || 0) - Number(a?.lastMessage?.ts || 0))
 }
 
-function normalizeServerDeletedDialogs(raw) {
+export function normalizeServerDeletedDialogs(raw) {
   const out = {}
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out
   for (const [key, value] of Object.entries(raw)) {
@@ -71,7 +71,7 @@ function normalizeServerDeletedDialogs(raw) {
   return out
 }
 
-function readDialogDeletedAt(dialog, deletedDialogs, meId = '') {
+export function readDialogDeletedAt(dialog, deletedDialogs, meId = '') {
   if (!deletedDialogs || typeof deletedDialogs !== 'object') return 0
   const last = dialog?.lastMessage || null
   const ids = new Set([
@@ -87,7 +87,7 @@ function readDialogDeletedAt(dialog, deletedDialogs, meId = '') {
   return out
 }
 
-function filterServerDeletedDialogs(dialogs, deletedDialogs, meId = '') {
+export function filterServerDeletedDialogs(dialogs, deletedDialogs, meId = '') {
   const list = Array.isArray(dialogs) ? dialogs : []
   if (!deletedDialogs || !Object.keys(deletedDialogs || {}).length) return list
   return list.filter((dialog) => {
@@ -97,7 +97,7 @@ function filterServerDeletedDialogs(dialogs, deletedDialogs, meId = '') {
   })
 }
 
-function persistDeletedDialogs(dmDeletedKey, deletedDialogs) {
+export function persistDeletedDialogs(dmDeletedKey, deletedDialogs) {
   if (!dmDeletedKey || !deletedDialogs || !Object.keys(deletedDialogs || {}).length) return
   try {
     const raw = JSON.parse(localStorage.getItem(dmDeletedKey) || '{}') || {}
@@ -142,14 +142,26 @@ function mergeDmDialogs(existing, incoming, meId = '', options = {}) {
       const prevLast = d?.lastMessage || null
       const nextLast = inc?.lastMessage || null
       let lastMessage = nextLast || prevLast
+      let mergedDialog = { ...inc, userId: uid }
       if (prevLast && nextLast) {
         const prevSending = String(prevLast.status || '') === 'sending'
-        // Server is authoritative for persisted dialog preview.
-        // Keep local preview only for unsent optimistic messages.
-        if (prevSending) lastMessage = prevLast
-        else lastMessage = nextLast
+        const prevTs = Number(prevLast?.ts || 0)
+        const nextTs = Number(nextLast?.ts || 0)
+        const incomingIsOlder = !!(prevTs && nextTs && nextTs < prevTs)
+        if (prevSending || incomingIsOlder) {
+          lastMessage = prevLast
+          mergedDialog = {
+            ...inc,
+            ...d,
+            userId: uid,
+            unreadCount: Math.max(Number(d?.unreadCount || 0), Number(inc?.unreadCount || 0)),
+            lastSeenTs: Math.max(Number(d?.lastSeenTs || 0), Number(inc?.lastSeenTs || 0)),
+          }
+        } else {
+          lastMessage = nextLast
+        }
       }
-      merged.push({ ...inc, lastMessage, userId: uid })
+      merged.push({ ...mergedDialog, lastMessage, userId: uid })
       used.add(uid)
     } else {
       const prevLast = d?.lastMessage || null

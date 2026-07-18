@@ -4,6 +4,7 @@ import { resolveForumUserId } from '../utils/account'
 const INC_PER_SEC = 1 / (365 * 24 * 60 * 60)
 const GRACE_MS = 4 * 60 * 60 * 1000
 const SYNC_MS = 10 * 60 * 1000
+const PRESENCE_KEEPALIVE_MS = 45 * 1000
 
 // === Q COIN: client-side live ticker with rare sync (AUTH-ONLY) ===
 export default function useQCoinLive(userKey, isVip){
@@ -51,6 +52,7 @@ export default function useQCoinLive(userKey, isVip){
   const heartbeatInFlight = React.useRef(false);
   const syncErrors        = React.useRef(0); // для мягкого backoff
   const bootPresenceRef   = React.useRef({ uid: '', at: 0 });
+  const lastPresencePushRef = React.useRef(0);
 
   const markUi = React.useCallback(function(){
     lastUiRef.current = Date.now();
@@ -77,6 +79,7 @@ export default function useQCoinLive(userKey, isVip){
     }));
     displayRef.current = 0;
     lastSyncRef.current = 0;
+    lastPresencePushRef.current = 0;
     becameActiveRef.current = !!uid;
   }, [uid]);
 
@@ -153,14 +156,14 @@ export default function useQCoinLive(userKey, isVip){
     const onAny = () => { if (uid) markUi(); };
     const onVis = () => { if (uid && document.visibilityState === 'visible') markUi(); };
 
-    ['click','keydown'].forEach((e)=>{
+    ['click','keydown','pointerdown','touchstart'].forEach((e)=>{
       root.addEventListener(e, onAny, {passive:true});
     });
     document.addEventListener('visibilitychange', onVis);
     window.addEventListener('focus', onAny);
 
     return function(){
-      ['click','keydown'].forEach((e)=>{
+      ['click','keydown','pointerdown','touchstart'].forEach((e)=>{
         root.removeEventListener(e, onAny);
       });
       document.removeEventListener('visibilitychange', onVis);
@@ -249,6 +252,7 @@ export default function useQCoinLive(userKey, isVip){
         displayRef.current = Number(j.balance ?? displayRef.current);
         setDisplayBalance(displayRef.current);
         lastSyncRef.current = Date.now();
+        lastPresencePushRef.current = Date.now();
         lastUiRef.current = Date.now();
         becameActiveRef.current = false;
         syncErrors.current = 0;
@@ -287,17 +291,27 @@ export default function useQCoinLive(userKey, isVip){
 
       const needPeriodicSync  = (now - (lastSyncRef.current || 0)) >= SYNC_MS;
       const needImmediateSync = becameActiveRef.current;
+      const visibleDocument = (() => {
+        try {
+          return !document.visibilityState || document.visibilityState === 'visible'
+        } catch {
+          return true
+        }
+      })()
+      const needPresenceKeepalive = visibleDocument && (now - (lastPresencePushRef.current || 0)) >= PRESENCE_KEEPALIVE_MS;
       const backoffDelayMs    = Math.min(5, syncErrors.current) * 2000;
 
-      if ((needPeriodicSync || needImmediateSync) && uid && !heartbeatInFlight.current){
+      if ((needPeriodicSync || needImmediateSync || needPresenceKeepalive) && uid && !heartbeatInFlight.current){
         if (now - (lastSyncRef.current || 0) < backoffDelayMs) return;
 
         becameActiveRef.current = false;
-        lastSyncRef.current = now;
+        if (needPeriodicSync || needImmediateSync) lastSyncRef.current = now;
+        if (needPresenceKeepalive) lastPresencePushRef.current = now;
         heartbeatInFlight.current = true;
 
         // active: были ли действия в последнюю минуту — чтобы сервер обновил lastConfirmAt
         const active = (now - (lastUiRef.current || 0)) < 60000;
+        const activeForPresence = !!(active || needPresenceKeepalive);
 
         try{
           const controller = new AbortController();
@@ -311,7 +325,11 @@ export default function useQCoinLive(userKey, isVip){
               'x-forum-client-id': cidRef.current,  // для alive-ключей
               'x-forum-vip': isVip ? '1' : '0',     // ← VIP-множитель (Х2)
             },
-            body: JSON.stringify({ active: !!active, now }),
+            body: JSON.stringify({
+              active: activeForPresence,
+              now,
+              presencePush: needPresenceKeepalive || needImmediateSync,
+            }),
             signal: controller.signal
           });
 
@@ -343,6 +361,7 @@ export default function useQCoinLive(userKey, isVip){
 
             displayRef.current = Number(j.balance ?? displayRef.current);
             setDisplayBalance(displayRef.current);
+            lastPresencePushRef.current = Date.now();
             syncErrors.current = 0;
           } else {
             syncErrors.current = Math.min(10, syncErrors.current + 1);

@@ -334,6 +334,23 @@ export const FORUM_STYLES = `
       -webkit-transform:scaleX(-1);
       transform-origin:center center;
     }
+    @supports (-webkit-touch-callout:none){
+      .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls,
+      .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls,
+      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+      .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls,
+      .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+      .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls,
+      .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure{
+        transform:none !important;
+        -webkit-transform:none !important;
+      }
+    }
 .mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
   width:100%;
   height:100%;
