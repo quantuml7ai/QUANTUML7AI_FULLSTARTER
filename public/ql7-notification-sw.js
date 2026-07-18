@@ -32,6 +32,9 @@ async function notifyOpenClients(payload) {
       source: String(payload?.source || 'system'),
       count: Math.max(0, Number(payload?.count) || 0),
       totalCount: Math.max(0, Number(payload?.totalCount) || 0),
+      forceSync: payload?.forceSync === true,
+      realtimeOnly: payload?.realtimeOnly === true,
+      reason: String(payload?.reason || ''),
     })
   })
 }
@@ -104,9 +107,10 @@ self.addEventListener('message', (event) => {
 self.addEventListener('push', (event) => {
   let payload = {}
   try { payload = event.data?.json?.() || {} } catch {}
+  const realtimeOnly = payload?.realtimeOnly === true
   event.waitUntil(Promise.all([
-    updateSourceNotification(payload, false),
-    updateLauncherBadge(payload?.totalCount),
+    realtimeOnly ? Promise.resolve() : updateSourceNotification(payload, false),
+    realtimeOnly ? Promise.resolve() : updateLauncherBadge(payload?.totalCount),
     notifyOpenClients(payload),
   ]))
 })

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 const DM_SEEN_ZONE_MARGIN_PX = 0
 const DM_SEEN_MIN_VISIBLE_RATIO = 0.35
 const DM_SEEN_MIN_VISIBLE_PX = 12
+const DM_THREAD_SEEN_SCAN_EVENT = 'ql7:dm-thread-scan-seen'
 
 function safeNormalizeId(resolveProfileAccountIdFn, value) {
   const raw = String(value || '').trim()
@@ -109,6 +110,20 @@ function buildDmSeenTargetIds({ uidRaw, meId, dmDialogs, resolveProfileAccountId
   return Array.from(out).filter(Boolean)
 }
 
+function dmSeenScanMatchesTarget(detail, uidRaw, resolveProfileAccountIdFn) {
+  const eventUid = String(detail?.uid || detail?.withUserId || '').trim()
+  if (!eventUid) return true
+  const targetRaw = String(uidRaw || '').trim()
+  const target = safeNormalizeId(resolveProfileAccountIdFn, targetRaw)
+  const eventNormalized = safeNormalizeId(resolveProfileAccountIdFn, eventUid)
+  return (
+    eventUid === targetRaw ||
+    eventUid === target ||
+    eventNormalized === targetRaw ||
+    (!!eventNormalized && !!target && eventNormalized === target)
+  )
+}
+
 export default function useDmSeenObservers({
   mounted,
   inboxOpen,
@@ -175,11 +190,42 @@ export default function useDmSeenObservers({
     const uidRaw = String(dmWithUserId || '').trim()
     if (!uidRaw || !meId || !dmThreadItems?.length) return
 
+    let io = null
+    let mo = null
+    const observedNodes = new Set()
+
+    const readSeenCandidateNodes = () => {
+      try {
+        return Array.from(document.querySelectorAll('.dmThread .dmMsgRow[data-dm-ts][data-dm-mine="0"]'))
+      } catch {
+        return []
+      }
+    }
+
+    const refreshObservedNodes = () => {
+      const nodes = readSeenCandidateNodes()
+      if (!io) return nodes
+      const mountedNodes = new Set(nodes)
+      for (const node of Array.from(observedNodes)) {
+        if (mountedNodes.has(node) && node?.isConnected !== false) continue
+        try { io.unobserve(node) } catch {}
+        observedNodes.delete(node)
+      }
+      nodes.forEach((node) => {
+        if (observedNodes.has(node)) return
+        try {
+          io.observe(node)
+          observedNodes.add(node)
+        } catch {}
+      })
+      return nodes
+    }
+
     const scanVisibleMessages = () => {
       if (!isDocumentVisibleForDmSeen()) return
       let maxTs = 0
       try {
-        const nodes = document.querySelectorAll('.dmThread .dmMsgRow[data-dm-ts][data-dm-mine="0"]')
+        const nodes = refreshObservedNodes()
         nodes.forEach((node) => {
           const ts = Number(node?.getAttribute?.('data-dm-ts') || 0)
           if (!ts) return
@@ -204,7 +250,13 @@ export default function useDmSeenObservers({
       }
     }
 
-    let io = null
+    const queueScanBurst = () => {
+      queueScan()
+      timers.push(setTimeout(queueScan, 80))
+      timers.push(setTimeout(queueScan, 240))
+      timers.push(setTimeout(queueScan, 600))
+    }
+
     if (typeof IntersectionObserver !== 'undefined') {
       io = new IntersectionObserver((entries) => {
         if (!isDocumentVisibleForDmSeen()) return
@@ -223,20 +275,36 @@ export default function useDmSeenObservers({
         rootMargin: `${DM_SEEN_ZONE_MARGIN_PX}px 0px ${DM_SEEN_ZONE_MARGIN_PX}px 0px`,
         threshold: 0,
       })
-      try {
-        const nodes = document.querySelectorAll('.dmThread .dmMsgRow[data-dm-ts][data-dm-mine="0"]')
-        nodes.forEach((node) => io.observe(node))
-      } catch {}
+      try { refreshObservedNodes() } catch {}
     }
 
-    queueScan()
-    timers.push(setTimeout(queueScan, 80))
-    timers.push(setTimeout(queueScan, 240))
-    timers.push(setTimeout(queueScan, 600))
+    try {
+      const root = document.querySelector('.dmThread')
+      if (root && typeof MutationObserver !== 'undefined') {
+        mo = new MutationObserver(() => {
+          refreshObservedNodes()
+          queueScan()
+        })
+        mo.observe(root, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style', 'data-dm-ts', 'data-dm-mine'],
+        })
+      }
+    } catch {}
+
+    const onThreadSeenScan = (event) => {
+      if (!dmSeenScanMatchesTarget(event?.detail || {}, uidRaw, resolveProfileAccountIdFn)) return
+      queueScanBurst()
+    }
+
+    queueScanBurst()
 
     try {
       window.addEventListener('scroll', queueScan, { passive: true, capture: true })
       window.addEventListener('resize', queueScan, { passive: true })
+      window.addEventListener(DM_THREAD_SEEN_SCAN_EVENT, onThreadSeenScan)
     } catch {}
 
     return () => {
@@ -244,10 +312,12 @@ export default function useDmSeenObservers({
       timers.forEach((timerId) => {
         try { clearTimeout(timerId) } catch {}
       })
+      try { mo?.disconnect?.() } catch {}
       try { io?.disconnect?.() } catch {}
       try {
         window.removeEventListener('scroll', queueScan, { capture: true })
         window.removeEventListener('resize', queueScan)
+        window.removeEventListener(DM_THREAD_SEEN_SCAN_EVENT, onThreadSeenScan)
       } catch {}
     }
   }, [
@@ -257,6 +327,7 @@ export default function useDmSeenObservers({
     dmWithUserId,
     dmThreadItems,
     meId,
+    resolveProfileAccountIdFn,
     syncDmSeen,
   ])
 }

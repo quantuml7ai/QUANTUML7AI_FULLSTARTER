@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
+import { enableVideoControlsOnTap } from '../utils/mediaLifecycleRuntime'
 
 const ICON_REMOVE = '\u2716'
 
@@ -20,6 +21,18 @@ export default function ComposerAttachmentPreview({
   const videoRef = React.useRef(null)
   const [videoReady, setVideoReady] = React.useState(false)
   const [videoPoster, setVideoPoster] = React.useState('')
+  const [previewTouchWebKit, setPreviewTouchWebKit] = React.useState(false)
+
+  React.useEffect(() => {
+    try {
+      const ua = String(navigator.userAgent || '')
+      const iOS = /iP(hone|ad|od)/i.test(ua)
+      const iPadDesktopMode = /Macintosh/i.test(ua) && Number(navigator.maxTouchPoints || 0) > 1
+      setPreviewTouchWebKit(iOS || iPadDesktopMode)
+    } catch {
+      setPreviewTouchWebKit(false)
+    }
+  }, [])
 
   React.useEffect(() => {
     setVideoReady(false)
@@ -114,6 +127,9 @@ export default function ComposerAttachmentPreview({
     return cleanup
   }, [pendingVideo, pendingVideoMirror])
 
+  const previewControlTop = previewTouchWebKit ? 'calc(env(safe-area-inset-top, 0px) + 48px)' : 8
+  const previewRemoveTop = previewTouchWebKit ? 'calc(env(safe-area-inset-top, 0px) + 50px)' : 10
+
   return (
     <>
       {pendingImgs.length > 0 && (
@@ -188,6 +204,7 @@ export default function ComposerAttachmentPreview({
               }}
               onPointerDown={(e) => {
                 e.stopPropagation()
+                enableVideoControlsOnTap(e)
               }}
               onClick={(e) => {
                 e.stopPropagation()
@@ -237,7 +254,7 @@ export default function ComposerAttachmentPreview({
               style={{
                 position: 'absolute',
                 right: 8,
-                top: 8,
+                top: previewControlTop,
                 width: 34,
                 height: 34,
                 borderRadius: 10,
@@ -264,9 +281,8 @@ export default function ComposerAttachmentPreview({
               style={{
                 fontSize: '20px',
                 position: 'absolute',
-                top: 10,
+                top: previewRemoveTop,
                 left: 5,
-                bottom: 60,
                 width: 54,
                 height: 54,
                 borderRadius: 10,

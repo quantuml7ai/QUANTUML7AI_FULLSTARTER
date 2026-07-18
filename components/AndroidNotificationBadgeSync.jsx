@@ -363,6 +363,8 @@ export default function AndroidNotificationBadgeSync() {
           count: Math.max(0, Number(payload?.count) || 0),
           totalCount: Math.max(0, Number(payload?.totalCount) || 0),
           pushReceived: true,
+          forceSync: payload?.forceSync === true,
+          reason: String(payload?.reason || ''),
         },
       }))
     }
@@ -416,7 +418,9 @@ export default function AndroidNotificationBadgeSync() {
                 const payload = JSON.parse(data)
                 if (payload?.type === 'notification-state-changed') {
                   refreshFromNotificationImpulse()
-                    .then((state) => { if (!state?.ok) dispatchImpulseFallback(payload) })
+                    .then((state) => {
+                      if (!state?.ok || payload?.forceSync === true) dispatchImpulseFallback(payload)
+                    })
                     .catch(() => dispatchImpulseFallback(payload))
                 }
               } catch {}
@@ -462,6 +466,7 @@ export default function AndroidNotificationBadgeSync() {
       })
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(countsRef.current)) } catch {}
       sync()
+      if (event?.detail?.forceSync === true && nextCount === previousCount && !explicitRead) return
       const isCanonicalForumReplies = source === 'messenger_replies' && event?.detail?.canonicalForumUnread === true
       const isServerReplyReadSync = source === 'messenger_replies' && event?.detail?.serverItemsRead === true
       if (source === 'messenger_replies' && (isCanonicalForumReplies || isServerReplyReadSync)) {

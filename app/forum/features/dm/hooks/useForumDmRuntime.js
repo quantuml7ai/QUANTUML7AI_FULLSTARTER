@@ -18,6 +18,7 @@ import {
 } from '../utils/dmLoaders'
 
 const DM_REALTIME_SOURCE = 'messenger_messages'
+const DM_THREAD_SEEN_SCAN_EVENT = 'ql7:dm-thread-scan-seen'
 const DM_REALTIME_THREAD_RETRY_MS = [0, 350, 900, 1800, 3200]
 const DM_REALTIME_MIN_GAP_MS = 650
 
@@ -51,6 +52,25 @@ function mergeRealtimeThreadItems(existing, incomingDesc, deletedMap = {}) {
   const incomingAsc = (Array.isArray(incomingDesc) ? incomingDesc : []).slice().reverse()
   if (!incomingAsc.length) return current
   return realtimeDedupeMessagesAsc([...current, ...incomingAsc], deletedMap)
+}
+
+function dispatchDmThreadSeenScan(uid, reason = 'dm-thread-refresh') {
+  if (typeof window === 'undefined') return
+  const targetUid = normalizeDmRealtimeId(uid)
+  if (!targetUid) return
+  const detail = {
+    uid: targetUid,
+    reason: String(reason || '').trim().slice(0, 80),
+    ts: Date.now(),
+  }
+  const emit = () => {
+    try {
+      window.dispatchEvent(new CustomEvent(DM_THREAD_SEEN_SCAN_EVENT, { detail }))
+    } catch {}
+  }
+  emit()
+  try { window.setTimeout(emit, 80) } catch {}
+  try { window.setTimeout(emit, 240) } catch {}
 }
 
 function resolveRealtimeDialogPeerId(dialog, meId = '') {
@@ -99,10 +119,18 @@ function isRealtimeRuntimeVisible() {
 }
 
 function isMessengerRealtimePayload(detail) {
-  const source = normalizeDmRealtimeId(detail?.source)
-  if (source !== DM_REALTIME_SOURCE) return false
-  const count = Math.max(0, Number(detail?.count ?? detail?.totalCount ?? 0) || 0)
-  return count > 0 || detail?.pushReceived === true || detail?.forceSync === true
+  if (!detail || typeof detail !== 'object') return false
+  const source = normalizeDmRealtimeId(detail?.source || detail?.data?.source || detail?.payload?.source)
+  const counts = detail?.counts && typeof detail.counts === 'object' ? detail.counts : null
+  const count = Math.max(
+    0,
+    Number(detail?.count ?? 0) || 0,
+    Number(detail?.totalCount ?? 0) || 0,
+    Number(counts?.[DM_REALTIME_SOURCE] ?? 0) || 0,
+  )
+  const sourceMatches = source === DM_REALTIME_SOURCE
+  if (sourceMatches && (detail?.forceSync === true || detail?.pushReceived === true)) return true
+  return sourceMatches ? count >= 0 : count > 0
 }
 
 
@@ -617,6 +645,7 @@ export default function useForumDmRuntime({
     setDmThreadCursor(payload.nextCursor || null)
     setDmThreadHasMore(!!payload.hasMore)
     setDmThreadSeenTs(Number(payload.peerSeenTs || 0))
+    dispatchDmThreadSeenScan(uid, reason)
     return payload
   }, [meId, dmPageSize, dmDeletedMsgMap])
 
@@ -687,6 +716,31 @@ export default function useForumDmRuntime({
     fetchDmThreadRealtime,
   ])
 
+  const runOpenDmThreadRealtimeImpulse = useCallback((reason = 'dm-thread-impulse') => {
+    if (!meId || typeof window === 'undefined') return
+    if (!inboxOpen || inboxTab !== 'messages') return
+    if (!isRealtimeRuntimeVisible()) return
+    const uid = String(dmWithUserId || '').trim()
+    if (!uid) return
+
+    const state = dmRealtimeRef.current || {}
+    const retryTimers = state.retryTimers instanceof Set ? state.retryTimers : new Set()
+    for (const delay of DM_REALTIME_THREAD_RETRY_MS) {
+      const timer = window.setTimeout(() => {
+        if (!isRealtimeRuntimeVisible()) return
+        const currentUid = String(dmWithUserId || '').trim()
+        if (!currentUid || currentUid !== uid) return
+        fetchDmThreadRealtime(uid, `${reason}:thread-${delay}`).catch(() => null)
+        try { dmRealtimeRef.current?.retryTimers?.delete?.(timer) } catch {}
+      }, delay)
+      retryTimers.add(timer)
+    }
+    dmRealtimeRef.current = {
+      ...(dmRealtimeRef.current || {}),
+      retryTimers,
+    }
+  }, [meId, inboxOpen, inboxTab, dmWithUserId, fetchDmThreadRealtime])
+
   useEffect(() => {
     if (!mounted || !meId) return
     if (!inboxOpen || inboxTab !== 'messages') return
@@ -714,19 +768,23 @@ export default function useForumDmRuntime({
     const onNotificationState = (event) => {
       if (messengerRealtimeCountFromState(event?.detail || {}) <= 0) return
       runDmRealtimeRefresh('notification-state')
+      runOpenDmThreadRealtimeImpulse('notification-state')
     }
     const onNotificationCount = (event) => {
       if (!isMessengerRealtimePayload(event?.detail || {})) return
       runDmRealtimeRefresh('notification-count')
+      runOpenDmThreadRealtimeImpulse('notification-count')
     }
     const onOpenNotification = (event) => {
       if (!isMessengerRealtimePayload(event?.detail || {})) return
       runDmRealtimeRefresh('open-notification')
+      runOpenDmThreadRealtimeImpulse('open-notification')
     }
     const onWorkerMessage = (event) => {
       if (event?.data?.type !== 'ql7:notification-received') return
       if (!isMessengerRealtimePayload(event?.data || {})) return
       runDmRealtimeRefresh('service-worker-push')
+      runOpenDmThreadRealtimeImpulse('service-worker-push')
     }
 
     window.addEventListener('ql7:notification-state', onNotificationState)
@@ -737,6 +795,7 @@ export default function useForumDmRuntime({
     const currentState = window.__QL7_NOTIFICATION_STATE__
     if (messengerRealtimeCountFromState(currentState || {}) > 0) {
       runDmRealtimeRefresh('mounted-notification-state')
+      runOpenDmThreadRealtimeImpulse('mounted-notification-state')
     }
 
     return () => {
@@ -757,7 +816,7 @@ export default function useForumDmRuntime({
         retryTimers: new Set(),
       }
     }
-  }, [mounted, meId, runDmRealtimeRefresh])
+  }, [mounted, meId, runDmRealtimeRefresh, runOpenDmThreadRealtimeImpulse])
 
   useDmLocalCache({
     isBrowserFn,

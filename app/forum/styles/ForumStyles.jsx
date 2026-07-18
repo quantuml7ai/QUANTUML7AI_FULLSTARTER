@@ -316,15 +316,23 @@ export const FORUM_STYLES = `
       -webkit-transform:scaleX(-1);
       transform-origin:center center;
     }
-    @media (hover:hover) and (pointer:fine){
-      .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
-      .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
-      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
-      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure{
-        transform:scaleX(-1);
-        -webkit-transform:scaleX(-1);
-        transform-origin:center center;
-      }
+    /* QL7_FRONT_CAMERA_NATIVE_CONTROLS_FIX_V1:
+       the recorded front-camera pixels stay mirrored, native controls do not. */
+    .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls,
+    .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+    .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+    .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls,
+    .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+    .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+    .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls,
+    .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+    .dmMediaBox[data-kind="video"] video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+    .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls,
+    .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+    .dmMediaBox[data-kind="video"] > video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure{
+      transform:scaleX(-1);
+      -webkit-transform:scaleX(-1);
+      transform-origin:center center;
     }
 .mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
   width:100%;
@@ -6948,10 +6956,28 @@ html[data-tma="1"] .inboxTabs{
 .dmMediaBox[data-kind="video"]{
   --mb-video-min-h:350px;
   min-height:350px;
+  height:auto;
+  max-height:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
+.dmMediaBox[data-kind="video"] > video,
 .dmMediaBox[data-kind="video"] > .mediaBoxItem,
 .dmMediaBox[data-kind="video"] > .ql7VideoSurface{
   min-height:350px;
+  height:auto;
+  max-height:min(72vh, 650px);
+  width:100%;
+  object-fit:contain;
+}
+.dmMediaBox[data-kind="video"] .ql7VideoSurface > video,
+.dmMediaBox[data-kind="video"] > video{
+  min-height:350px;
+  height:auto;
+  max-height:min(72vh, 650px);
+  width:100%;
+  object-fit:contain;
 }
 /* ===== DM Voice Player (Quantum Neon) ===== */
 .dmVoice{

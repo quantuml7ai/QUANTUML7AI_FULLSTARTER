@@ -1,6 +1,8 @@
 // app/api/dm/seen/route.js
 import { addAliasesFor, expandAliasIds } from '../_db.js'
 import { bad, ok, requireUserIdCanonical, canonicalizeUserId, parseIntSafe, getUserIdFromReq, normalizeRawUserId } from '../_utils.js'
+import { publishNotificationImpulse } from '../../../../lib/webPush.js'
+import { NOTIFICATION_SOURCES } from '../../../../lib/notificationCenter.js'
 import dmPrimary from '../../../../lib/mongo/dm-primary.cjs'
 
 export async function POST(req) {
@@ -22,6 +24,15 @@ export async function POST(req) {
     const currentMax = await dmPrimary.readLastSeenMax(meIds, withIds)
     const nextSeenTs = Math.max(Number(lastSeenTs || 0), Number(currentMax || 0))
     await dmPrimary.markSeenForPairs(meIds, withIds, nextSeenTs)
+    if (nextSeenTs > Number(currentMax || 0)) {
+      await publishNotificationImpulse(withId, {
+        source: NOTIFICATION_SOURCES.MESSENGER_MESSAGES,
+        count: 0,
+        totalCount: 0,
+        forceSync: true,
+        reason: 'dm_seen_receipt',
+      }).catch(() => {})
+    }
 
     return ok({ with: withId, lastSeenTs: Number(nextSeenTs || 0), storagePrimary: 'mongo' })
   } catch (e) {

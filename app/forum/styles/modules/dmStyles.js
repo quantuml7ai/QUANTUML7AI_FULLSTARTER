@@ -582,10 +582,28 @@ html[data-tma="1"] .inboxTabs{
 .dmMediaBox[data-kind="video"]{
   --mb-video-min-h:350px;
   min-height:350px;
+  height:auto;
+  max-height:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
+.dmMediaBox[data-kind="video"] > video,
 .dmMediaBox[data-kind="video"] > .mediaBoxItem,
 .dmMediaBox[data-kind="video"] > .ql7VideoSurface{
   min-height:350px;
+  height:auto;
+  max-height:min(72vh, 650px);
+  width:100%;
+  object-fit:contain;
+}
+.dmMediaBox[data-kind="video"] .ql7VideoSurface > video,
+.dmMediaBox[data-kind="video"] > video{
+  min-height:350px;
+  height:auto;
+  max-height:min(72vh, 650px);
+  width:100%;
+  object-fit:contain;
 }
 /* ===== DM Voice Player (Quantum Neon) ===== */
 .dmVoice{
