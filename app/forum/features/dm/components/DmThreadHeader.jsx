@@ -31,8 +31,13 @@ function readLastActiveAt(profile = {}) {
   )
 }
 
-function classifyPresence(lastActiveAt, now = Date.now()) {
+function readPresenceOfflineAt(profile = {}) {
+  return numericTs(profile?.presenceOfflineAt)
+}
+
+function classifyPresence(lastActiveAt, now = Date.now(), presenceOfflineAt = 0) {
   const ts = numericTs(lastActiveAt)
+  if (presenceOfflineAt && ts && presenceOfflineAt >= ts) return 'away'
   if (ts && now - ts <= DM_ONLINE_WINDOW_MS) return 'online'
   if (ts && now - ts <= DM_RECENT_WINDOW_MS) return 'recent'
   return 'away'
@@ -49,6 +54,7 @@ export default function DmThreadHeader({
   const threadUid = String(uid || '').trim()
   const prof = safeReadProfile(threadUid) || {}
   const [presenceAt, setPresenceAt] = useState(() => readLastActiveAt(prof))
+  const [presenceOfflineAt, setPresenceOfflineAt] = useState(() => readPresenceOfflineAt(prof))
   const [presenceTick, setPresenceTick] = useState(() => Date.now())
   const presenceBadgeRef = React.useRef(null)
   const presenceTextRef = React.useRef(null)
@@ -60,6 +66,7 @@ export default function DmThreadHeader({
     if (!threadUid) return undefined
     const cached = safeReadProfile(threadUid) || {}
     setPresenceAt(readLastActiveAt(cached))
+    setPresenceOfflineAt(readPresenceOfflineAt(cached))
     setPresenceTick(Date.now())
     let alive = true
     let inFlight = false
@@ -83,9 +90,11 @@ export default function DmThreadHeader({
           if (!alive || !json?.ok) return
           const accountId = String(json.accountId || json.userId || threadUid).trim()
           const lastActiveAt = numericTs(json.lastActiveAt)
+          const offlineAt = numericTs(json.presenceOfflineAt)
           if (accountId) {
             const patch = {
               lastActiveAt,
+              presenceOfflineAt: offlineAt,
               presenceCheckedAt: Date.now(),
             }
             if (!json.presenceOnly) {
@@ -97,6 +106,7 @@ export default function DmThreadHeader({
             mergeProfileCache(accountId, patch)
           }
           setPresenceAt(lastActiveAt)
+          setPresenceOfflineAt(offlineAt)
           setPresenceTick(Date.now())
         })
         .catch(() => {})
@@ -125,8 +135,8 @@ export default function DmThreadHeader({
   }, [threadUid])
 
   const presenceKind = useMemo(
-    () => classifyPresence(presenceAt, presenceTick),
-    [presenceAt, presenceTick],
+    () => classifyPresence(presenceAt, presenceTick, presenceOfflineAt),
+    [presenceAt, presenceTick, presenceOfflineAt],
   )
 
   const presenceLabel = presenceKind === 'online'

@@ -316,11 +316,6 @@ export const FORUM_STYLES = `
       -webkit-transform:scaleX(-1);
       transform-origin:center center;
     }
-    .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
-    .attachPreviewRow video[data-front-camera-mirror="1"]::-webkit-media-controls-panel{
-      transform:scaleX(-1);
-      -webkit-transform:scaleX(-1);
-    }
 .mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
   width:100%;
   height:100%;
@@ -6940,6 +6935,14 @@ html[data-tma="1"] .inboxTabs{
 .dmStatus.seen{ color:#7fd7ff; text-shadow:0 0 8px rgba(120,200,255,.5); }
 .dmMediaGrid{ display:grid; gap:8px; margin-top:8px; }
 .dmMediaBox{ margin:0; }
+.dmMediaBox[data-kind="video"]{
+  --mb-video-min-h:350px;
+  min-height:350px;
+}
+.dmMediaBox[data-kind="video"] > .mediaBoxItem,
+.dmMediaBox[data-kind="video"] > .ql7VideoSurface{
+  min-height:350px;
+}
 /* ===== DM Voice Player (Quantum Neon) ===== */
 .dmVoice{
   --qA: rgba(120,220,255,.92);

@@ -21,6 +21,7 @@ function defaultPayload(uid, isVip) {
     startedAt: now,
     lastActiveAt: now,
     lastConfirmAt: 0,
+    presenceOfflineAt: 0,
     seconds: 0,
     minutes: 0,
     balance: 0,

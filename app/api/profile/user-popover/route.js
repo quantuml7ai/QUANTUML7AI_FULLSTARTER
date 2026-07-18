@@ -81,6 +81,7 @@ export async function GET(req) {
         accountId,
         userId: accountId,
         lastActiveAt: Number(qcoinState?.lastActiveAt || 0),
+        presenceOfflineAt: Number(qcoinState?.presenceOfflineAt || 0),
         serverNow: Date.now(),
         presenceOnly: true,
         storagePrimary: 'mongo',
@@ -152,6 +153,7 @@ export async function GET(req) {
       icon: profile.icon,
       vipActive: !!(vipCanonical?.active || vipLegacy?.active),
       lastActiveAt: Number(qcoinState?.lastActiveAt || 0),
+      presenceOfflineAt: Number(qcoinState?.presenceOfflineAt || 0),
       about: String(aboutCanonical || aboutLegacy || ''),
       stats: {
         followers: n(followers, 0),

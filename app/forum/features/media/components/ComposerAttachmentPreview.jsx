@@ -2,7 +2,6 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { enableVideoControlsOnTap } from '../utils/mediaLifecycleRuntime'
 
 const ICON_REMOVE = '\u2716'
 
@@ -188,7 +187,6 @@ export default function ComposerAttachmentPreview({
                 } catch {}
               }}
               onPointerDown={(e) => {
-                enableVideoControlsOnTap(e)
                 e.stopPropagation()
               }}
               onClick={(e) => {

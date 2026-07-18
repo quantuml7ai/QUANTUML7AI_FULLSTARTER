@@ -262,8 +262,13 @@ export default function UserInfoPopover({
       .then((json) => {
         if (!alive || !json?.ok) return
         const lastActiveAt = numericTs(json.lastActiveAt)
+        const presenceOfflineAt = numericTs(json.presenceOfflineAt)
         const serverNow = numericTs(json.serverNow) || Date.now()
-        setPresenceOnline(!!lastActiveAt && serverNow - lastActiveAt <= USER_INFO_ONLINE_WINDOW_MS)
+        setPresenceOnline(
+          !!lastActiveAt &&
+          (!presenceOfflineAt || presenceOfflineAt < lastActiveAt) &&
+          serverNow - lastActiveAt <= USER_INFO_ONLINE_WINDOW_MS
+        )
       })
       .catch(() => {
         if (alive) setPresenceOnline(false)

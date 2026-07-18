@@ -31,6 +31,18 @@ export async function POST(req) {
     if (!uid) return NextResponse.json({ ok:false, error:'unauthorized' }, { status:401 })
 
     const now = Number(body?.now || Date.now())
+    if (body?.offline === true || body?.presence === 'offline') {
+      const state = await qcoinPrimary.markPresenceOffline({ uid, now })
+      return NextResponse.json({
+        ok: true,
+        userId: uid,
+        lastActiveAt: state.lastActiveAt,
+        presenceOfflineAt: state.presenceOfflineAt,
+        presenceOffline: true,
+        storagePrimary: 'mongo',
+      })
+    }
+
     const activeFlag = !!body?.active
 
     let cid = (req.headers.get('x-forum-client-id') || '').trim()
@@ -62,6 +74,7 @@ export async function POST(req) {
       startedAt: s.startedAt,
       lastActiveAt: s.lastActiveAt,
       lastConfirmAt: s.lastConfirmAt,
+      presenceOfflineAt: s.presenceOfflineAt,
       seconds: s.seconds,
       minutes: Math.floor((s.seconds || 0) / 60),
       balance: s.balance,

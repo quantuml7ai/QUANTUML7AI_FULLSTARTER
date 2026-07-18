@@ -556,10 +556,6 @@ export default function VideoOverlay({
   background:#000;
 }
 
-.voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel{
-  transform: scaleX(-1);
-}
-
         .voBtn{
           width:44px; height:44px; border-radius:12px;
           display:inline-flex; align-items:center; justify-content:center;

@@ -50,6 +50,7 @@ export default function useQCoinLive(userKey, isVip){
   // Защиты для heartbeat
   const heartbeatInFlight = React.useRef(false);
   const syncErrors        = React.useRef(0); // для мягкого backoff
+  const bootPresenceRef   = React.useRef({ uid: '', at: 0 });
 
   const markUi = React.useCallback(function(){
     lastUiRef.current = Date.now();
@@ -194,6 +195,75 @@ export default function useQCoinLive(userKey, isVip){
     window.addEventListener('qcoin:balance-changed', onBalanceChanged);
     return () => window.removeEventListener('qcoin:balance-changed', onBalanceChanged);
   }, [uid]);
+
+  React.useEffect(function(){
+    if (!uid || typeof window === 'undefined') return;
+    const now = Date.now();
+    const lastBoot = bootPresenceRef.current || {};
+    if (lastBoot.uid === uid && now - Number(lastBoot.at || 0) < 30000) return;
+    if (heartbeatInFlight.current) return;
+
+    bootPresenceRef.current = { uid, at: now };
+    let dead = false;
+    heartbeatInFlight.current = true;
+
+    async function pushPresence(){
+      try{
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch('/api/qcoin/heartbeat', {
+          method:'POST',
+          headers:{
+            'content-type':'application/json',
+            'x-forum-user-id': uid,
+            'x-forum-client-id': cidRef.current,
+            'x-forum-vip': isVip ? '1' : '0',
+          },
+          body: JSON.stringify({ active: true, now, presencePush: true }),
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        let j = null;
+        try { j = await res.json(); } catch(e){ j = null; }
+        if (dead || !j?.ok) return;
+
+        const safeInc = Math.max(0, Number(j.incPerSec ?? INC_PER_SEC));
+        const safeGrace = Math.max(60000, Number(j.graceMs ?? GRACE_MS));
+        const clampedInc = Math.min(safeInc, INC_PER_SEC * 100);
+        const clampedGrace = Math.min(safeGrace, 24 * 60 * 60 * 1000);
+
+        setServer(s => ({
+          ...s,
+          startedAt:     (j.startedAt     ?? s.startedAt),
+          lastActiveAt:  (j.lastActiveAt  ?? now),
+          lastConfirmAt: (j.lastConfirmAt ?? s.lastConfirmAt),
+          seconds: Number(j.seconds ?? s.seconds),
+          balance: Number(j.balance ?? s.balance),
+          paused: !!j.paused,
+          loading: false,
+          incPerSec: clampedInc,
+          graceMs: clampedGrace,
+        }));
+
+        displayRef.current = Number(j.balance ?? displayRef.current);
+        setDisplayBalance(displayRef.current);
+        lastSyncRef.current = Date.now();
+        lastUiRef.current = Date.now();
+        becameActiveRef.current = false;
+        syncErrors.current = 0;
+      } catch(e){
+        syncErrors.current = Math.min(10, syncErrors.current + 1);
+      } finally {
+        heartbeatInFlight.current = false;
+      }
+    }
+
+    pushPresence();
+    return () => {
+      dead = true;
+    };
+  }, [uid, isVip]);
 
   // Интервальный тик + heartbeat
   React.useEffect(function(){
