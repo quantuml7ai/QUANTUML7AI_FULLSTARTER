@@ -20,6 +20,7 @@ export default function useDmOpenEvents({
   setInboxOpen,
   setInboxTab,
   setDmWithUserId,
+  reopenDeletedDmDialog,
 }) {
   useEffect(() => {
     if (!isBrowserFn()) return
@@ -52,6 +53,7 @@ export default function useDmOpenEvents({
       try { pushNavStateStable(`dm_${uid}`) } catch {}
       try { setInboxOpen(true) } catch {}
       try { setInboxTab('messages') } catch {}
+      try { reopenDeletedDmDialog?.(uid, rawUid) } catch {}
       try { setDmWithUserId(uid) } catch {}
     }
 
@@ -111,5 +113,6 @@ export default function useDmOpenEvents({
     setInboxOpen,
     setInboxTab,
     setDmWithUserId,
+    reopenDeletedDmDialog,
   ])
 }

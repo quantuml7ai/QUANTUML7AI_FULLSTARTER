@@ -670,6 +670,7 @@ const {
   dmDeletedMsgMap,
   loadDmDialogs,
   loadDmThread,
+  reopenDeletedDmDialog,
   sortedRepliesToMe,
   visibleRepliesToMe,
   repliesHasMore,
@@ -1881,6 +1882,7 @@ const {
     setInboxOpen,
     setInboxTab,
     setDmWithUserId,
+    reopenDeletedDmDialog,
     requestAlignInboxStartUnderTabs,
   },
   openInboxGlobalArgs: {

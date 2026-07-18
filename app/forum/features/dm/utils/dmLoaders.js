@@ -479,6 +479,7 @@ export async function loadDmThread(withUserId, cursor = null, opts = {}, ctx = {
       const deletedMap = dmDeletedMsgMap || {}
       const rawItems = Array.isArray(j.items) ? j.items : []
       const dialogDeletedAt = Number(j.dialogDeletedAt || 0)
+      const allowDeletedDialogCompose = opts?.allowDeletedDialogCompose === true
       if (dialogDeletedAt && !rawItems.length && !cursor) {
         const serverDeleted = { [uid]: dialogDeletedAt }
         persistDeletedDialogs(dmDeletedKey, serverDeleted)
@@ -489,7 +490,15 @@ export async function loadDmThread(withUserId, cursor = null, opts = {}, ctx = {
           return next
         })
         setDmDialogs?.((prev) => (Array.isArray(prev) ? prev.filter((d) => !dialogMatchesUser(d, uid, meId)) : prev))
-        setDmWithUserId?.((prev) => (String(prev || '') === uid ? '' : prev))
+        if (!allowDeletedDialogCompose) {
+          setDmWithUserId?.((prev) => (String(prev || '') === uid ? '' : prev))
+        } else {
+          setDmThreadItems?.([])
+          setDmThreadCursor?.(null)
+          setDmThreadHasMore?.(false)
+          setDmThreadSeenTs?.(Number(j.peerSeenTs || 0))
+          return
+        }
       }
       const items = rawItems.filter((m) => !deletedMap[String(m?.id || '')])
       const itemsAsc = items.slice().reverse()

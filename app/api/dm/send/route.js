@@ -46,6 +46,7 @@ export async function POST(req) {
     await sendBackgroundPush(to, {
       source: 'messenger_messages',
       dedupeKey: `dm:${id}`,
+      itemId: id,
     }).catch(() => {})
 
     return ok({ id, ts: msg.ts, storagePrimary: 'mongo' })

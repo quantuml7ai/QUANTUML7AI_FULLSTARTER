@@ -267,6 +267,7 @@ export default function useForumDmRuntime({
   const dmMessagesModeRef = useRef(false)
   const dmThreadRef = useRef(null)
   const dmAutoScrollRef = useRef(false)
+  const dmDeletedComposeOpenRef = useRef(new Set())
 
   useEffect(() => {
     const isDmList = !!inboxOpen && inboxTab === 'messages' && !dmWithUserId
@@ -641,7 +642,9 @@ export default function useForumDmRuntime({
   }, [meId, dmDialogsHasMore, dmBgThrottleMs, dmActiveThrottleMs, dmPageSize, dmFetchCached, dmDeletedKey, setDmDeletedMap])
 
   const loadDmThread = useCallback(async (withUserId, cursor = null, opts = {}) => {
-    return loadDmThreadFlow(withUserId, cursor, opts, {
+    const uid = normalizeDmRealtimeId(withUserId)
+    const allowDeletedDialogCompose = uid && dmDeletedComposeOpenRef.current.has(uid)
+    return loadDmThreadFlow(withUserId, cursor, allowDeletedDialogCompose ? { ...opts, allowDeletedDialogCompose: true } : opts, {
       meId,
       dmThreadHasMore,
       dmThreadLoadingRef,
@@ -674,6 +677,26 @@ export default function useForumDmRuntime({
     setDmDialogs,
     setDmWithUserId,
   ])
+
+  const reopenDeletedDmDialog = useCallback((uid, rawUid = '') => {
+    const candidates = [
+      uid,
+      rawUid,
+      resolveProfileAccountIdFn(uid),
+      resolveProfileAccountIdFn(rawUid),
+    ].map(normalizeDmRealtimeId).filter(Boolean)
+    if (!candidates.length) return
+    for (const id of candidates) {
+      dmDeletedComposeOpenRef.current.add(id)
+      const key = `thr:${meId}:${id}::${dmPageSize}`
+      try { dmThreadCacheRef.current.delete(key) } catch {}
+      try { dmThreadInFlightRef.current.delete(key) } catch {}
+    }
+    setDmThreadItems([])
+    setDmThreadCursor(null)
+    setDmThreadHasMore(false)
+    setDmThreadLoading(false)
+  }, [meId, dmPageSize, resolveProfileAccountIdFn])
 
   const fetchDmDialogsRealtime = useCallback(async (reason = 'dm-realtime') => {
     if (!meId) return null
@@ -744,6 +767,7 @@ export default function useForumDmRuntime({
     if (!response.ok || !payload?.ok) return payload
     const incoming = Array.isArray(payload.items) ? payload.items : []
     const dialogDeletedAt = Number(payload.dialogDeletedAt || 0)
+    const allowDeletedDialogCompose = dmDeletedComposeOpenRef.current.has(uid)
     if (dialogDeletedAt && !incoming.length) {
       const serverDeleted = { [uid]: dialogDeletedAt }
       persistDeletedDialogs(dmDeletedKey, serverDeleted)
@@ -761,7 +785,8 @@ export default function useForumDmRuntime({
       setDmThreadItems([])
       setDmThreadCursor(null)
       setDmThreadHasMore(false)
-      if (String(dmWithUserId || '').trim() === uid) setDmWithUserId('')
+      setDmThreadSeenTs(Number(payload.peerSeenTs || 0))
+      if (!allowDeletedDialogCompose && String(dmWithUserId || '').trim() === uid) setDmWithUserId('')
       return payload
     }
     setDmThreadItems((prev) => mergeRealtimeThreadItems(prev, incoming, dmDeletedMsgMap, { authoritative: true }))
@@ -1155,6 +1180,7 @@ export default function useForumDmRuntime({
     dmDeletedMsgMap,
     loadDmDialogs,
     loadDmThread,
+    reopenDeletedDmDialog,
     repliesToMe,
     sortedRepliesToMe,
     visibleRepliesToMe,
