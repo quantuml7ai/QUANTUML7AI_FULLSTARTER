@@ -7,8 +7,10 @@ export default function LivePreview({ streamRef, mirror }) {
 
   React.useEffect(() => {
     let rafId = 0
+    let pollId = 0
     let closed = false
     let boundEl = ref.current
+    let boundStream = null
 
     const bindStream = () => {
       if (closed) return
@@ -17,26 +19,42 @@ export default function LivePreview({ streamRef, mirror }) {
         boundEl = el
         const s = streamRef?.current || null
         if (el.srcObject !== s) {
+          boundStream = s
           try {
             el.srcObject = s
           } catch {}
+          if (s) {
+            try {
+              const p = el.play?.()
+              if (p && typeof p.catch === 'function') p.catch(() => {})
+            } catch {}
+          }
         }
         el.muted = true
         el.playsInline = true
-        if (s) {
-          try {
-            const p = el.play?.()
-            if (p && typeof p.catch === 'function') p.catch(() => {})
-          } catch {}
-        }
       }
-      rafId = requestAnimationFrame(bindStream)
+      return !!boundStream
     }
 
-    bindStream()
+    const waitForStream = () => {
+      if (closed) return
+      const bound = bindStream()
+      if (!bound) {
+        rafId = requestAnimationFrame(waitForStream)
+      }
+    }
+
+    waitForStream()
+    pollId = window.setInterval(() => {
+      if (closed) return
+      const next = streamRef?.current || null
+      if (next !== boundStream) bindStream()
+    }, 350)
+
     return () => {
       closed = true
       if (rafId) cancelAnimationFrame(rafId)
+      if (pollId) window.clearInterval(pollId)
       const el = boundEl
       if (el) {
         try {

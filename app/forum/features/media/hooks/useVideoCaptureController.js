@@ -42,6 +42,79 @@ function isLikelyFrontCameraTrack(settings, track) {
   }
 }
 
+function isAppleMobileRecorderRuntime() {
+  try {
+    const ua = String(navigator?.userAgent || '')
+    const platform = String(navigator?.platform || '')
+    const maxTouchPoints = Number(navigator?.maxTouchPoints || 0)
+    return /iP(?:hone|ad|od)/i.test(ua) ||
+      (/Macintosh/i.test(platform) && maxTouchPoints > 1)
+  } catch {
+    return false
+  }
+}
+
+function isMobileRecorderRuntime() {
+  try {
+    return isAppleMobileRecorderRuntime() || /Android|Mobile/i.test(String(navigator?.userAgent || ''))
+  } catch {
+    return false
+  }
+}
+
+function getCameraVideoConstraints() {
+  if (isMobileRecorderRuntime()) {
+    return {
+      width: { ideal: 720, max: 1280 },
+      height: { ideal: 1280, max: 1280 },
+      frameRate: { ideal: 24, max: 30 },
+      facingMode: { ideal: 'user' },
+    }
+  }
+  return {
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    frameRate: { ideal: 30, max: 30 },
+    facingMode: { ideal: 'user' },
+  }
+}
+
+function selectVideoRecorderMimeType() {
+  try {
+    if (typeof MediaRecorder === 'undefined') return ''
+    const apple = isAppleMobileRecorderRuntime()
+    const candidates = apple
+      ? [
+          'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+          'video/mp4;codecs=h264,aac',
+          'video/mp4',
+          'video/webm;codecs=vp8,opus',
+          'video/webm',
+        ]
+      : [
+          'video/webm;codecs=vp8,opus',
+          'video/webm;codecs=vp9,opus',
+          'video/webm;codecs=vp8',
+          'video/webm;codecs=vp9',
+          'video/webm',
+          'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+          'video/mp4',
+        ]
+    for (const mime of candidates) {
+      try {
+        if (!mime || MediaRecorder.isTypeSupported?.(mime)) return mime
+      } catch {}
+    }
+  } catch {}
+  return ''
+}
+
+function getRecorderTimesliceMs() {
+  // iOS/WebKit can truncate MediaRecorder blobs when short timeslices are flushed.
+  if (isAppleMobileRecorderRuntime()) return 0
+  return 1000
+}
+
 export default function useVideoCaptureController({
   videoState,
   setVideoState,
@@ -89,6 +162,7 @@ export default function useVideoCaptureController({
   setComposerActive,
 }) {
   const stopVideoRef = useRef(null)
+  const recordingClockStartedRef = useRef(false)
 
   const stopVideo = useCallback((opts = {}) => {
     const auto = !!opts?.auto
@@ -99,7 +173,9 @@ export default function useVideoCaptureController({
     videoStopRequestedRef.current = true
     try { videoAutoStopAtLimitRef.current = auto } catch {}
     setVideoState('processing')
-    try { rec.requestData?.() } catch {}
+    try {
+      if (!rec.__ql7SkipRequestDataOnStop) rec.requestData?.()
+    } catch {}
     try { rec.stop?.() } catch {
       try { setVideoState('idle') } catch {}
       try { videoStopRequestedRef.current = false } catch {}
@@ -153,8 +229,12 @@ export default function useVideoCaptureController({
       try { videoStopRequestedRef.current = false } catch {}
       if (!hasTracks) {
         baseStream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720, facingMode: { ideal: 'user' } },
-          audio: true,
+          video: getCameraVideoConstraints(),
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
         })
         videoStreamRef.current = baseStream
       }
@@ -164,9 +244,7 @@ export default function useVideoCaptureController({
       } catch {}
       videoMirrorRef.current = null
 
-      const mime = MediaRecorder.isTypeSupported?.('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm'
+      const mime = selectVideoRecorderMimeType()
 
       const vTrack = baseStream.getVideoTracks?.()[0] || null
       const vSettings = (() => {
@@ -175,16 +253,49 @@ export default function useVideoCaptureController({
       const recordedFromFrontCamera = !!(vTrack && isLikelyFrontCameraTrack(vSettings, vTrack))
 
       const recStream = baseStream
-      const mediaRecorder = new MediaRecorder(recStream, { mimeType: mime })
+      const mediaRecorder = mime
+        ? new MediaRecorder(recStream, { mimeType: mime })
+        : new MediaRecorder(recStream)
+      const recorderTimesliceMs = getRecorderTimesliceMs()
+      mediaRecorder.__ql7SkipRequestDataOnStop = recorderTimesliceMs <= 0
       videoChunksRef.current = []
+      recordingClockStartedRef.current = false
 
       mediaRecorder.ondataavailable = (evt) => {
         if (evt?.data?.size) videoChunksRef.current.push(evt.data)
       }
 
+      const startRecordingClock = (source = 'recorder') => {
+        if (recordingClockStartedRef.current) return
+        recordingClockStartedRef.current = true
+        const started = Date.now()
+        try { videoRecordStartedAtRef.current = started } catch {}
+        setVideoElapsed(0)
+        clearInterval(videoTimerRef.current)
+        videoTimerRef.current = setInterval(() => {
+          const elapsedMs = Math.max(0, Date.now() - started)
+          const sec = Math.floor(elapsedMs / 1000)
+          setVideoElapsed(Math.min(forumVideoMaxSeconds, sec))
+          if (elapsedMs >= ((forumVideoMaxSeconds * 1000) - 750)) {
+            try { setVideoElapsed(forumVideoMaxSeconds) } catch {}
+            try { stopVideoRef.current?.({ auto: true }) } catch {}
+          }
+        }, 200)
+        try {
+          emitDiag?.('camera_record_clock_start', {
+            source,
+            timesliceMs: recorderTimesliceMs,
+            mimeType: mediaRecorder.mimeType || mime || '',
+          })
+        } catch {}
+      }
+
+      mediaRecorder.onstart = () => startRecordingClock('recorder_onstart')
+
       mediaRecorder.onstop = async () => {
         clearInterval(videoTimerRef.current)
         videoTimerRef.current = null
+        try { recordingClockStartedRef.current = false } catch {}
         try { videoRecRef.current = null } catch {}
         try { videoStopRequestedRef.current = false } catch {}
         const recordStartedAt = Number(videoRecordStartedAtRef.current || 0)
@@ -215,7 +326,7 @@ export default function useVideoCaptureController({
             return
           }
 
-          const blob = new Blob(videoChunksRef.current, { type: mediaRecorder.mimeType || 'video/webm' })
+          const blob = new Blob(videoChunksRef.current, { type: mediaRecorder.mimeType || mime || 'video/webm' })
           videoChunksRef.current = []
 
           const deriveFallbackDurationSec = (emit = false) => {
@@ -338,24 +449,18 @@ export default function useVideoCaptureController({
       }
 
       videoRecRef.current = mediaRecorder
-      mediaRecorder.start(250)
+      if (recorderTimesliceMs > 0) mediaRecorder.start(recorderTimesliceMs)
+      else mediaRecorder.start()
 
       setVideoState('recording')
       setVideoElapsed(0)
-
-      const started = Date.now()
-      try { videoRecordStartedAtRef.current = started } catch {}
-      clearInterval(videoTimerRef.current)
-      videoTimerRef.current = setInterval(() => {
-        const elapsedMs = Math.max(0, Date.now() - started)
-        const sec = Math.floor(elapsedMs / 1000)
-        setVideoElapsed(Math.min(forumVideoMaxSeconds, sec))
-        if (elapsedMs >= ((forumVideoMaxSeconds * 1000) - 750)) {
-          try { setVideoElapsed(forumVideoMaxSeconds) } catch {}
-          try { stopVideoRef.current?.({ auto: true }) } catch {}
-        }
-      }, 200)
+      setTimeout(() => {
+        try {
+          if (mediaRecorder.state === 'recording') startRecordingClock('recorder_onstart_fallback')
+        } catch {}
+      }, 350)
     } catch {
+      try { recordingClockStartedRef.current = false } catch {}
       setVideoState('idle')
       setVideoOpen(false)
       try { toast?.warn?.(t?.('forum_camera_denied')) } catch {}
@@ -372,6 +477,7 @@ export default function useVideoCaptureController({
     saveComposerScroll,
     setPendingVideo,
     setVideoElapsed,
+    recordingClockStartedRef,
     setVideoOpen,
     setVideoState,
     showVideoLimitOverlay,

@@ -7,6 +7,43 @@ import { NativeSafeVideoPlayer } from '../utils/mediaLifecycleRuntime'
 import usePageLock from '../../../shared/hooks/usePageLock'
 import useHtmlFlag from '../../../shared/hooks/useHtmlFlag'
 
+function isAppleMobileTorchRiskRuntime() {
+  try {
+    const ua = String(navigator?.userAgent || '')
+    const platform = String(navigator?.platform || '')
+    const maxTouchPoints = Number(navigator?.maxTouchPoints || 0)
+    return /iP(?:hone|ad|od)/i.test(ua) ||
+      (/Macintosh/i.test(platform) && maxTouchPoints > 1)
+  } catch {
+    return false
+  }
+}
+
+function isMobileCameraRuntime() {
+  try {
+    return isAppleMobileTorchRiskRuntime() || /Android|Mobile/i.test(String(navigator?.userAgent || ''))
+  } catch {
+    return false
+  }
+}
+
+function getOverlayCameraVideoConstraints() {
+  if (isMobileCameraRuntime()) {
+    return {
+      width: { ideal: 720, max: 1280 },
+      height: { ideal: 1280, max: 1280 },
+      frameRate: { ideal: 24, max: 30 },
+      facingMode: { ideal: 'user' },
+    }
+  }
+  return {
+    width: { ideal: 1280 },
+    height: { ideal: 720 },
+    frameRate: { ideal: 30, max: 30 },
+    facingMode: { ideal: 'user' },
+  }
+}
+
 // --- overlay камеры/плеера: fullscreen + старт/стоп ИМЕННО из оверлея ---
 export default function VideoOverlay({
   open,
@@ -24,6 +61,7 @@ export default function VideoOverlay({
 }) {
   const tt = t || ((k) => k)
   const rootRef = React.useRef(null)
+  const appleTorchRisk = isAppleMobileTorchRiskRuntime()
 
   // нормализуем состояние
   const st = !open ? 'hidden' : (state || 'live')
@@ -66,8 +104,12 @@ export default function VideoOverlay({
     ;(async () => {
       try {
         const ms = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: 'user' } },
-          audio: true,
+          video: getOverlayCameraVideoConstraints(),
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
         })
         const effectiveStream = ms
         if (cancelled) {
@@ -154,7 +196,7 @@ export default function VideoOverlay({
 
   React.useEffect(() => {
     if (!open) return
-    if (st !== 'recording' && torchOn) {
+    if (!(st === 'live' || st === 'recording') && torchOn) {
       ;(async () => {
         try {
           const track = streamRef?.current?.getVideoTracks?.()[0]
@@ -177,6 +219,7 @@ export default function VideoOverlay({
 
   const toggleTorch = async () => {
     try {
+      if (appleTorchRisk && st === 'recording') return
       const track = streamRef?.current?.getVideoTracks?.()[0]
       const caps = track?.getCapabilities?.()
       if (!caps || !('torch' in caps)) return
@@ -328,12 +371,14 @@ export default function VideoOverlay({
         }}
       />
 
-      <div className="voTop" style={{ pointerEvents: 'none' }}>
-        <div className={`voTimer ${st === 'recording' ? 'isRec' : 'isIdle'}`} aria-live="polite">
-          {st === 'recording' && (<><span className="dot" /><span className="rec">REC</span></>)}
-          <span className="time">{fmtTime(elapsed)}</span>
+      {st === 'recording' && (
+        <div className="voTop" style={{ pointerEvents: 'none' }}>
+          <div className="voTimer isRec" aria-live="polite">
+            <span className="dot" /><span className="rec">REC</span>
+            <span className="time">{fmtTime(elapsed)}</span>
+          </div>
         </div>
-      </div>
+      )}
 
       <div
         style={{
@@ -474,7 +519,7 @@ export default function VideoOverlay({
           zIndex: 7,
         }}
       >
-        {st === 'recording' && (
+        {(st === 'live' || (st === 'recording' && !appleTorchRisk)) && (
           <button
             type="button"
             className="voBtn voFlash"

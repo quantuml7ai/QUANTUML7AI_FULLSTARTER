@@ -36,6 +36,40 @@ describe('forum media contracts', () => {
     expect(src).toContain('duration probing continues in the background')
   })
 
+  test('camera recorder keeps iOS/WebKit on a single safe blob and starts timing from MediaRecorder', () => {
+    const src = read('app/forum/features/media/hooks/useVideoCaptureController.js')
+
+    expect(src).toContain('function isAppleMobileRecorderRuntime()')
+    expect(src).toContain('function selectVideoRecorderMimeType()')
+    expect(src).toContain('function getRecorderTimesliceMs()')
+    expect(src).toContain('if (isAppleMobileRecorderRuntime()) return 0')
+    expect(src).toContain('mediaRecorder.__ql7SkipRequestDataOnStop = recorderTimesliceMs <= 0')
+    expect(src).toContain('if (!rec.__ql7SkipRequestDataOnStop) rec.requestData?.()')
+    expect(src).toContain("mediaRecorder.onstart = () => startRecordingClock('recorder_onstart')")
+    expect(src).toContain('if (recorderTimesliceMs > 0) mediaRecorder.start(recorderTimesliceMs)')
+    expect(src).toContain('else mediaRecorder.start()')
+    expect(src).not.toContain('mediaRecorder.start(250)')
+  })
+
+  test('camera live preview does not rebind and replay the stream every animation frame', () => {
+    const src = read('app/forum/features/media/components/LivePreview.jsx')
+
+    expect(src).toContain('window.setInterval')
+    expect(src).toContain('if (el.srcObject !== s)')
+    expect(src).toContain('if (next !== boundStream) bindStream()')
+    expect(src).not.toContain('requestAnimationFrame(bindStream)')
+  })
+
+  test('camera overlay allows pre-record torch and hides the recorder badge after stop', () => {
+    const src = read('app/forum/features/media/components/VideoOverlay.jsx')
+
+    expect(src).toContain("if (appleTorchRisk && st === 'recording') return")
+    expect(src).toContain("{(st === 'live' || (st === 'recording' && !appleTorchRisk)) && (")
+    expect(src).toContain("{st === 'recording' && (")
+    expect(src).toContain('<div className="voTimer isRec"')
+    expect(src).not.toContain("voTimer ${st === 'recording' ? 'isRec' : 'isIdle'}")
+  })
+
   test('qcast toggle does not use its own local mute storage', () => {
     const src = read('app/forum/features/media/components/QCastPlayer.jsx')
     expect(src).not.toContain('forum:qcastMuted')
