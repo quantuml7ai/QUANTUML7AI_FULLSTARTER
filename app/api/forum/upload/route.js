@@ -5,6 +5,7 @@ import sharp from 'sharp'
 import { isMediaLocked } from '../_db.js'
 import { putR2Object } from '../../../../lib/storage/r2.js'
 import { createMediaObjectKey } from '../../../../lib/storage/mediaKeys.js'
+import { FORUM_IMAGE_MAX_BYTES } from '../../../forum/shared/constants/media.js'
 export const runtime = 'nodejs' // нужен nodejs-рантайм
 
 // Допустимые типы (расширения/мимы)
@@ -13,7 +14,8 @@ const ALLOWED_MIME = /^(image\/webp|image\/png|image\/jpe?g|image\/gif)$/i
 
 // Пределы
 const MAX_FILES = 10
-const MAX_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
+const MAX_FILE_SIZE_BYTES = FORUM_IMAGE_MAX_BYTES
+const MAX_TOTAL_SIZE_BYTES = FORUM_IMAGE_MAX_BYTES
 
 export async function POST(req) {
   try {
@@ -40,6 +42,13 @@ export async function POST(req) {
     if (files.length > MAX_FILES) {
       return NextResponse.json({ urls: [], errors: ['too_many_files'] }, { status: 413, headers: { 'cache-control': 'no-store' } })
     }
+    const totalSize = files.reduce((sum, file) => sum + Math.max(0, Number(file?.size || 0)), 0)
+    if (totalSize > MAX_TOTAL_SIZE_BYTES) {
+      return NextResponse.json(
+        { urls: [], errors: ['too_large_total'], limitBytes: MAX_TOTAL_SIZE_BYTES },
+        { status: 413, headers: { 'cache-control': 'no-store' } },
+      )
+    }
 
     const urls = []
     const errors = []
@@ -53,7 +62,7 @@ export async function POST(req) {
         const input = Buffer.from(await f.arrayBuffer())
 
         // 🚫 проверка размера
-        if (input.length > MAX_SIZE_BYTES) {
+        if (input.length > MAX_FILE_SIZE_BYTES) {
           errors.push(`too_large:${origName}`)
           continue
         }
@@ -64,7 +73,7 @@ export async function POST(req) {
         // остальные преобразуем в webp (rotate по EXIF + resize)
         const outBuf = isGif
           ? input
-          : await sharp(input)
+          : await sharp(input, { failOn: 'none', limitInputPixels: 16000 * 16000 })
               .rotate() // по EXIF
               .resize({
                 width: 1600,
@@ -97,9 +106,11 @@ export async function POST(req) {
       }
     }
 
+    const failedTooLarge = errors.some((error) => String(error || '').startsWith('too_large'))
+    const status = urls.length ? 200 : (failedTooLarge ? 413 : (errors.length ? 422 : 200))
     return NextResponse.json(
-      { urls, errors },
-      { headers: { 'cache-control': 'no-store' } },
+      { urls, errors, limitBytes: MAX_TOTAL_SIZE_BYTES },
+      { status, headers: { 'cache-control': 'no-store' } },
     )
   } catch (e) {
     console.error('upload_failed', e)

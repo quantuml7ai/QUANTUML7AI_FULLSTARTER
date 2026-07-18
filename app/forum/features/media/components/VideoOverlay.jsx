@@ -3,6 +3,7 @@
 import React from 'react'
 import { createPortal } from 'react-dom'
 import LivePreview from './LivePreview'
+import { NativeSafeVideoPlayer } from '../utils/mediaLifecycleRuntime'
 import usePageLock from '../../../shared/hooks/usePageLock'
 import useHtmlFlag from '../../../shared/hooks/useHtmlFlag'
 
@@ -372,21 +373,26 @@ export default function VideoOverlay({
                   style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }}
                 />
               ) : (
-                <video
+                <NativeSafeVideoPlayer
                   ref={previewVidRef}
                   className="voPreviewVideo"
-                  data-front-camera-mirror={previewMirror ? '1' : undefined}
                   src={previewUrl || ''}
-                  controls
                   playsInline
+                  preload="auto"
+                  fill
+                  frontCameraMirror={previewMirror}
+                  mirrorVideo={previewMirror}
                   onLoadedMetadata={onMeta}
                   style={{
                     width: '100%',
                     height: '100%',
+                    background: '#000',
+                  }}
+                  videoStyle={{
+                    width: '100%',
+                    height: '100%',
                     objectFit: 'contain',
                     background: '#000',
-                    transform: previewMirror ? 'scaleX(-1)' : undefined,
-                    transformOrigin: 'center center',
                   }}
                 />
               )}

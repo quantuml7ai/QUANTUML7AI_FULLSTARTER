@@ -6455,6 +6455,7 @@ const dict = {
   "forum_video_reset": "重置",
   "forum_video_reset_confirm": "丢弃录制并关闭？",
   "forum_video_too_big": "视频过大",
+  "forum_image_too_big": "图片过大",
   "forum_video_upload_failed": "视频上传失败",
   "forum_video_limit_title": "糟糕，视频太长了",
   "forum_video_limit_body": "论坛视频最长可达 5 分钟。请先裁剪视频，然后再试一次。",

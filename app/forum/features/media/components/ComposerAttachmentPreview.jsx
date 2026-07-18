@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { enableVideoControlsOnTap } from '../utils/mediaLifecycleRuntime'
+import { NativeSafeVideoPlayer } from '../utils/mediaLifecycleRuntime'
 
 const ICON_REMOVE = '\u2716'
 
@@ -174,7 +174,7 @@ export default function ComposerAttachmentPreview({
               background: 'radial-gradient(circle at 50% 45%, rgba(68,170,255,.18), rgba(8,13,28,.96) 58%, rgba(2,5,12,.98))',
             }}
           >
-            <video
+            <NativeSafeVideoPlayer
               ref={videoRef}
               src={pendingVideo}
               playsInline
@@ -182,17 +182,22 @@ export default function ComposerAttachmentPreview({
               poster={videoPoster || undefined}
               controlsList="nodownload noplaybackrate noremoteplayback"
               disablePictureInPicture
-              data-front-camera-mirror={pendingVideoMirror ? '1' : undefined}
+              frontCameraMirror={pendingVideoMirror}
+              mirrorVideo={pendingVideoMirror}
               style={{
+                width: '100%',
+                maxHeight: 620,
+                background: 'transparent',
+                position: 'relative',
+                zIndex: 1,
+              }}
+              videoStyle={{
                 width: '100%',
                 height: 'auto',
                 maxHeight: 620,
                 display: 'block',
                 objectFit: 'contain',
                 background: 'transparent',
-                position: 'relative',
-                zIndex: 1,
-                transform: pendingVideoMirror ? 'scaleX(-1)' : undefined,
               }}
               onLoadedData={() => setVideoReady(true)}
               onCanPlay={() => setVideoReady(true)}
@@ -201,13 +206,6 @@ export default function ComposerAttachmentPreview({
                 try {
                   if (node.readyState < 2 && Number(node.currentTime || 0) === 0) node.currentTime = 0.001
                 } catch {}
-              }}
-              onPointerDown={(e) => {
-                e.stopPropagation()
-                enableVideoControlsOnTap(e)
-              }}
-              onClick={(e) => {
-                e.stopPropagation()
               }}
             />
 

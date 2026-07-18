@@ -4,11 +4,12 @@ import { createR2PresignedPutUrl } from '../../../../lib/storage/r2.js'
 import { createMediaObjectKey, getMediaPrefixByKind } from '../../../../lib/storage/mediaKeys.js'
 import { isMediaLocked } from '../_db.js'
 import { resolveCanonicalAccountId } from '../../profile/_identity.js'
+import { FORUM_VIDEO_MAX_BYTES } from '../../../forum/shared/constants/media.js'
 
 export const runtime = 'nodejs'
 
 const ALLOWED = ['video/mp4', 'video/webm', 'video/quicktime']
-const MAX_SIZE = 300 * 1024 * 1024
+const MAX_SIZE = FORUM_VIDEO_MAX_BYTES
 const UPLOAD_URL_TTL_SECONDS = 10 * 60
 const CACHE_CONTROL = 'public, max-age=31536000, immutable'
 
@@ -84,7 +85,7 @@ export async function POST(req) {
         error: {
           code: 'too_large',
           message: `File is too large: ${size} bytes`,
-          hint: `Максимум: ${MAX_SIZE} bytes (300MB).`,
+          hint: `Максимум: ${MAX_SIZE} bytes (500MB).`,
         },
         request_meta: { filename, kind, mime: mimeRaw, size },
       })

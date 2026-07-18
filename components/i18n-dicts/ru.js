@@ -6462,6 +6462,7 @@ const dict = {
   "forum_video_reset": "Сбросить",
   "forum_video_reset_confirm": "Сбросить запись и закрыть?",
   "forum_video_too_big": "Видео слишком большое",
+  "forum_image_too_big": "Изображение слишком большое",
   "forum_video_upload_failed": "Не удалось загрузить видео",
   "forum_video_limit_title": "Упс, видео слишком длинное",
   "forum_video_limit_body": "На форуме можно загружать видео длительностью до 5 минут. Пожалуйста, обрежьте ролик и попробуйте ещё раз.",

@@ -6455,6 +6455,7 @@ const dict = {
   "forum_video_reset": "Sıfırla",
   "forum_video_reset_confirm": "Kaydı silip kapatılsın mı?",
   "forum_video_too_big": "Video çok büyük",
+  "forum_image_too_big": "Görsel çok büyük",
   "forum_video_upload_failed": "Video yükleme başarısız",
   "forum_video_limit_title": "Ups, video çok uzun",
   "forum_video_limit_body": "Forumda en fazla 5 dakikalık videolar paylaşılabilir. Lütfen klibi kırpıp tekrar deneyin.",

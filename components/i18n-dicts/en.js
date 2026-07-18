@@ -6455,6 +6455,7 @@ const dict = {
   "forum_video_reset": "Reset",
   "forum_video_reset_confirm": "Discard the recording and close?",
   "forum_video_too_big": "Video is too large",
+  "forum_image_too_big": "Image is too large",
   "forum_video_upload_failed": "Video upload failed",
   "forum_video_limit_title": "Oops, the video is too long",
   "forum_video_limit_body": "Forum videos can be up to 5 minutes long. Please trim the clip and try again.",

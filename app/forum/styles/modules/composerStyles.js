@@ -158,12 +158,21 @@ const composerStyles = String.raw`/* ---- ATTACH (скрепка) — стиль
     box-shadow: 0 14px 32px rgba(25,129,255,.10), inset 0 0 0 1px rgba(255,255,255,.03);
     backdrop-filter: blur(10px) saturate(120%);
   }
+  .composerMediaBar[data-ready="1"]{
+    border-color: rgba(97,255,181,.34);
+    background: linear-gradient(180deg, rgba(8,22,18,.66), rgba(8,18,24,.42));
+    box-shadow: 0 14px 34px rgba(37,214,133,.13), inset 0 0 0 1px rgba(133,255,201,.06);
+  }
+  .composerMediaBar[data-ready="1"] .cmbFill{
+    background: linear-gradient(90deg, rgba(36,222,133,.94), rgba(115,250,197,.86), rgba(91,170,255,.72));
+    box-shadow: 0 0 16px rgba(82,255,178,.36), 0 0 24px rgba(87,175,255,.22);
+  }
   .cmbLeft{
     display:flex;
     align-items:center;
     justify-content:center;
-    width: 36px;
-    padding-left: 18px;
+    width: 42px;
+    min-width: 42px;
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,.08);
     background: rgba(0,0,0,.18);
@@ -173,6 +182,40 @@ const composerStyles = String.raw`/* ---- ATTACH (скрепка) — стиль
     position: relative;
     width: 22px;
     height: 22px;
+  }
+  .cmbReadyIcon{
+    width:32px;
+    height:32px;
+    color:#7dffba;
+    display:grid;
+    place-items:center;
+    filter:drop-shadow(0 0 11px rgba(89,255,168,.52));
+  }
+  .cmbReadyIcon svg{
+    width:31px;
+    height:31px;
+    display:block;
+  }
+  .cmbReadyRing{
+    opacity:.82;
+    transform-origin:center;
+    stroke-dasharray:64;
+    animation:cmbReadyRing .72s ease-out both;
+  }
+  .cmbReadyPath{
+    stroke-dasharray:28;
+    stroke-dashoffset:28;
+    filter:drop-shadow(0 0 5px rgba(126,255,191,.65));
+    animation:cmbReadyDraw .56s cubic-bezier(.2,.9,.2,1) .14s forwards;
+  }
+  @keyframes cmbReadyRing{
+    0%{ transform:scale(.72); opacity:0; }
+    48%{ transform:scale(1.18); opacity:1; }
+    72%{ transform:scale(.96); opacity:.92; }
+    100%{ transform:scale(1); opacity:.82; }
+  }
+  @keyframes cmbReadyDraw{
+    to{ stroke-dashoffset:0; }
   }
   .cmbDot{
     position: absolute;

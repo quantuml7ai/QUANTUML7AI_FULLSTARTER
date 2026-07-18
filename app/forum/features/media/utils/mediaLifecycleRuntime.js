@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import VideoMediaLeaf from '../components/VideoMedia'
+import VideoMediaLeaf, { NativeSafeVideoPlayer as NativeSafeVideoPlayerLeaf } from '../components/VideoMedia'
 import QCastPlayerLeaf from '../components/QCastPlayer'
 import { createEnableVideoControlsOnTap } from './videoControls'
 
@@ -681,6 +681,14 @@ export function VideoMedia(props) {
       mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
       dropActiveVideo={__dropActiveVideoEl}
       unloadVideoEl={__unloadVideoEl}
+    />
+  )
+}
+
+export function NativeSafeVideoPlayer(props) {
+  return (
+    <NativeSafeVideoPlayerLeaf
+      {...props}
     />
   )
 }

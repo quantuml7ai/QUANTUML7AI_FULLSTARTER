@@ -8,7 +8,7 @@ import { shortId, human } from '../../../shared/utils/formatters'
 import HydrateText from '../../../shared/components/HydrateText'
 import { translateText } from '../../../shared/api/translate'
 import AvatarEmoji from '../../profile/components/AvatarEmoji'
-import { VideoMedia } from '../../media/utils/mediaLifecycleRuntime'
+import { NativeSafeVideoPlayer } from '../../media/utils/mediaLifecycleRuntime'
 import DmVoicePlayer from './DmVoicePlayer'
 import {
   normalizeDmUrl,
@@ -283,19 +283,28 @@ export default function DmThreadMessageRow({
               const mirrorVideo = !!(item.frontCameraMirror || item.mirrorVideo || String(item.cameraFacingMode || '').toLowerCase() === 'user')
               return (
                 <div key={`${m?.id || 'm'}:vid:${i}`} className="videoCard mediaBox dmMediaBox" data-kind="video">
-                  <VideoMedia
+                  <NativeSafeVideoPlayer
                     src={src}
                     frontCameraMirror={mirrorVideo}
                     mirrorVideo={mirrorVideo}
                     playsInline
                     preload="metadata"
-                    controls
                     controlsList="nodownload noplaybackrate noremoteplayback"
                     disablePictureInPicture
                     data-dm-media="1"
                     data-dm-media-kind="video"
                     className="mediaBoxItem"
-                    style={{ objectFit: 'contain', background: '#000' }}
+                    videoClassName="mediaBoxItem"
+                    style={{
+                      minHeight: 350,
+                      maxHeight: 'min(72vh, 650px)',
+                      background: '#000',
+                    }}
+                    videoStyle={{
+                      minHeight: 350,
+                      maxHeight: 'min(72vh, 650px)',
+                      background: '#000',
+                    }}
                     onPlay={onDmVideoPlay}
                   />
                 </div>

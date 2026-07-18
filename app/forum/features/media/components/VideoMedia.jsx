@@ -209,6 +209,487 @@ function Ql7IconVolume({ muted = false, ...props }) {
   )
 }
 
+function formatNativeSafeVideoTime(value) {
+  const total = Math.max(0, Math.floor(Number(value || 0)))
+  const minutes = Math.floor(total / 60)
+  const seconds = total % 60
+  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
+}
+
+function setVideoRef(targetRef, node) {
+  try {
+    if (typeof targetRef === 'function') {
+      targetRef(node)
+      return
+    }
+    if (targetRef && typeof targetRef === 'object') targetRef.current = node
+  } catch {}
+}
+
+export const NativeSafeVideoPlayer = React.forwardRef(function NativeSafeVideoPlayer(
+  {
+    src,
+    poster,
+    className = '',
+    videoClassName = '',
+    style,
+    videoStyle,
+    preload = 'metadata',
+    playsInline = true,
+    autoPlay,
+    loop,
+    muted,
+    defaultMuted,
+    controlsList = 'nodownload noplaybackrate noremoteplayback',
+    disablePictureInPicture = true,
+    frontCameraMirror,
+    mirrorVideo,
+    fit = 'contain',
+    fill = false,
+    onLoadedMetadata,
+    onLoadedData,
+    onCanPlay,
+    onPlay,
+    onPause,
+    onEnded,
+    onError,
+    ...rest
+  },
+  forwardedRef,
+) {
+  const localRef = React.useRef(null)
+  const [playing, setPlaying] = React.useState(false)
+  const [mutedState, setMutedState] = React.useState(() => !!(muted ?? defaultMuted))
+  const [duration, setDuration] = React.useState(0)
+  const [current, setCurrent] = React.useState(0)
+  const [controlsVisible, setControlsVisible] = React.useState(true)
+  const controlsHideTimerRef = React.useRef(null)
+  const shouldMirrorVideo = !!(frontCameraMirror || mirrorVideo)
+
+  const assignRef = React.useCallback(
+    (node) => {
+      localRef.current = node
+      setVideoRef(forwardedRef, node)
+    },
+    [forwardedRef],
+  )
+
+  React.useEffect(() => {
+    const node = localRef.current
+    if (!node) return
+    try {
+      node.muted = !!mutedState
+    } catch {}
+  }, [mutedState, src])
+
+  const syncTime = React.useCallback((node) => {
+    try {
+      const nextDuration = Number(node?.duration || 0)
+      const nextCurrent = Number(node?.currentTime || 0)
+      setDuration(Number.isFinite(nextDuration) ? nextDuration : 0)
+      setCurrent(Number.isFinite(nextCurrent) ? nextCurrent : 0)
+    } catch {}
+  }, [])
+
+  const clearControlsHideTimer = React.useCallback(() => {
+    try {
+      if (controlsHideTimerRef.current) {
+        clearTimeout(controlsHideTimerRef.current)
+        controlsHideTimerRef.current = null
+      }
+    } catch {}
+  }, [])
+
+  const queueControlsHide = React.useCallback(() => {
+    clearControlsHideTimer()
+    try {
+      const node = localRef.current
+      if (!node || node.paused || node.ended) return
+      controlsHideTimerRef.current = setTimeout(() => {
+        setControlsVisible(false)
+        controlsHideTimerRef.current = null
+      }, 1800)
+    } catch {}
+  }, [clearControlsHideTimer])
+
+  const revealControls = React.useCallback(() => {
+    setControlsVisible(true)
+    queueControlsHide()
+  }, [queueControlsHide])
+
+  const playPause = React.useCallback((options = {}) => {
+    const node = localRef.current
+    if (!node) return
+    try {
+      if (node.paused || node.ended) {
+        if (options?.withSound) {
+          node.muted = false
+          setMutedState(false)
+        }
+        const p = node.play?.()
+        if (p && typeof p.catch === 'function') p.catch(() => {})
+        setPlaying(true)
+        setControlsVisible(false)
+        clearControlsHideTimer()
+      } else {
+        node.pause?.()
+        setPlaying(false)
+        setControlsVisible(true)
+        clearControlsHideTimer()
+      }
+    } catch {}
+  }, [clearControlsHideTimer])
+
+  const handleVideoAreaClick = React.useCallback((event) => {
+    try {
+      event?.stopPropagation?.()
+    } catch {}
+    setControlsVisible(true)
+    try {
+      playPause({ withSound: true })
+    } catch {}
+  }, [playPause])
+
+  React.useEffect(() => () => clearControlsHideTimer(), [clearControlsHideTimer])
+
+  React.useEffect(() => {
+    if (playing) {
+      setControlsVisible(false)
+      clearControlsHideTimer()
+    } else {
+      setControlsVisible(true)
+      clearControlsHideTimer()
+    }
+  }, [clearControlsHideTimer, playing])
+
+  React.useEffect(() => {
+    setControlsVisible(true)
+  }, [src])
+
+  const seekTo = React.useCallback((event) => {
+    const node = localRef.current
+    if (!node) return
+    try {
+      const next = Number(event?.target?.value || 0)
+      if (Number.isFinite(next)) {
+        node.currentTime = next
+        setCurrent(next)
+      }
+    } catch {}
+  }, [])
+
+  const toggleMute = React.useCallback(() => {
+    setMutedState((prev) => {
+      const next = !prev
+      try {
+        const node = localRef.current
+        if (node) node.muted = next
+      } catch {}
+      return next
+    })
+  }, [])
+
+  const baseVideoStyle = fill
+    ? {
+        width: '100%',
+        height: '100%',
+        objectFit: fit,
+      }
+    : {
+        width: '100%',
+        height: 'auto',
+        objectFit: fit,
+      }
+
+  const mirroredVideoStyle = shouldMirrorVideo
+    ? {
+        ...baseVideoStyle,
+        ...(videoStyle || {}),
+        transform: videoStyle?.transform ? `${videoStyle.transform} scaleX(-1)` : 'scaleX(-1)',
+        transformOrigin: 'center center',
+      }
+    : {
+        ...baseVideoStyle,
+        ...(videoStyle || {}),
+      }
+
+  const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0
+  const safeCurrent = Number.isFinite(current) && current > 0 ? Math.min(current, safeDuration || current) : 0
+
+  return (
+    <div
+      className={`ql7NativeSafeVideoSurface ${fill ? 'isFill' : ''} ${className || ''}`.trim()}
+      data-native-safe-video-player="1"
+      data-front-camera-mirror={shouldMirrorVideo ? '1' : undefined}
+      style={style}
+      onClick={handleVideoAreaClick}
+      onPointerDown={revealControls}
+    >
+      <video
+        ref={assignRef}
+        src={src}
+        poster={poster || undefined}
+        playsInline={playsInline}
+        preload={preload}
+        autoPlay={autoPlay}
+        loop={loop}
+        muted={mutedState}
+        controls={false}
+        controlsList={controlsList}
+        disablePictureInPicture={disablePictureInPicture}
+        disableRemotePlayback
+        referrerPolicy="no-referrer"
+        data-front-camera-mirror={shouldMirrorVideo ? '1' : undefined}
+        className={`ql7NativeSafeVideo ${videoClassName || ''}`.trim()}
+        style={mirroredVideoStyle}
+        onLoadedMetadata={(event) => {
+          syncTime(event.currentTarget)
+          try { onLoadedMetadata?.(event) } catch {}
+        }}
+        onLoadedData={(event) => {
+          syncTime(event.currentTarget)
+          try { onLoadedData?.(event) } catch {}
+        }}
+        onCanPlay={(event) => {
+          syncTime(event.currentTarget)
+          try { onCanPlay?.(event) } catch {}
+        }}
+        onTimeUpdate={(event) => syncTime(event.currentTarget)}
+        onPlay={(event) => {
+          setPlaying(true)
+          setControlsVisible(false)
+          clearControlsHideTimer()
+          try { onPlay?.(event) } catch {}
+        }}
+        onPause={(event) => {
+          setPlaying(false)
+          try { onPause?.(event) } catch {}
+        }}
+        onEnded={(event) => {
+          setPlaying(false)
+          syncTime(event.currentTarget)
+          try { onEnded?.(event) } catch {}
+        }}
+        onError={onError}
+        onPointerDown={(event) => {
+          event.stopPropagation()
+          revealControls()
+        }}
+        onClick={handleVideoAreaClick}
+        {...rest}
+      />
+
+      <button
+        type="button"
+        className={`ql7NativeSafeCenter ${playing ? '' : 'isVisible'}`}
+        onClick={(event) => {
+          event.stopPropagation()
+          playPause({ withSound: true })
+        }}
+        aria-label={playing ? 'Pause video' : 'Play video'}
+      >
+        {playing ? <Ql7IconPause /> : <Ql7IconPlay />}
+      </button>
+
+      <div
+        className={`ql7NativeSafeControls ${controlsVisible ? 'isVisible' : ''}`}
+        onPointerDown={(event) => event.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="ql7NativeSafeBtn"
+          onClick={() => playPause({ withSound: true })}
+          aria-label={playing ? 'Pause video' : 'Play video'}
+        >
+          {playing ? <Ql7IconPause /> : <Ql7IconPlay />}
+        </button>
+        <span className="ql7NativeSafeTime" aria-label="Current video time">
+          {formatNativeSafeVideoTime(safeCurrent)}
+        </span>
+        <input
+          className="ql7NativeSafeSeek"
+          type="range"
+          min="0"
+          max={safeDuration || 0}
+          step="0.01"
+          value={safeDuration ? safeCurrent : 0}
+          onChange={seekTo}
+          aria-label="Seek video"
+          disabled={!safeDuration}
+        />
+        <span className="ql7NativeSafeTime" aria-label="Video duration">
+          {formatNativeSafeVideoTime(safeDuration)}
+        </span>
+        <button
+          type="button"
+          className="ql7NativeSafeBtn"
+          onClick={toggleMute}
+          aria-label={mutedState ? 'Unmute video' : 'Mute video'}
+        >
+          <Ql7IconVolume muted={mutedState} />
+        </button>
+      </div>
+
+      <style>{`
+        .ql7NativeSafeVideoSurface{
+          position:relative;
+          display:block;
+          width:100%;
+          max-width:100%;
+          overflow:hidden;
+          isolation:isolate;
+          background:radial-gradient(circle at 50% 48%, rgba(44,148,205,.12), rgba(0,0,0,.98) 68%);
+          touch-action:manipulation;
+          -webkit-tap-highlight-color:transparent;
+        }
+        .ql7NativeSafeVideoSurface.isFill{
+          height:100%;
+        }
+        .ql7NativeSafeVideo{
+          position:relative;
+          z-index:1;
+          display:block;
+          max-width:100%;
+          background:#000;
+          -webkit-appearance:none !important;
+          appearance:none !important;
+        }
+        .ql7NativeSafeVideo::-webkit-media-controls,
+        .ql7NativeSafeVideo::-webkit-media-controls-enclosure,
+        .ql7NativeSafeVideo::-webkit-media-controls-panel,
+        .ql7NativeSafeVideo::-webkit-media-controls-play-button,
+        .ql7NativeSafeVideo::-webkit-media-controls-start-playback-button,
+        .ql7NativeSafeVideo::-webkit-media-controls-timeline,
+        .ql7NativeSafeVideo::-webkit-media-controls-current-time-display,
+        .ql7NativeSafeVideo::-webkit-media-controls-time-remaining-display,
+        .ql7NativeSafeVideo::-webkit-media-controls-volume-slider,
+        .ql7NativeSafeVideo::-webkit-media-controls-mute-button,
+        .ql7NativeSafeVideo::-webkit-media-controls-fullscreen-button,
+        .ql7NativeSafeVideo::-webkit-media-controls-overlay-play-button{
+          display:none !important;
+          opacity:0 !important;
+          pointer-events:none !important;
+        }
+        .ql7NativeSafeCenter{
+          position:absolute;
+          left:50%;
+          top:50%;
+          z-index:3;
+          width:86px;
+          height:86px;
+          border:0;
+          border-radius:0;
+          transform:translate(-50%,-50%) scale(.92);
+          color:#b9f5ff;
+          background:transparent;
+          box-shadow:none;
+          opacity:0;
+          pointer-events:none;
+          transition:opacity .18s ease, transform .18s ease, filter .18s ease;
+          filter:drop-shadow(0 0 20px rgba(102,220,255,.28));
+        }
+        .ql7NativeSafeCenter.isVisible{
+          opacity:1;
+          pointer-events:auto;
+          transform:translate(-50%,-50%) scale(1);
+        }
+        .ql7NativeSafeCenter .ql7Glyph{
+          width:100%;
+          height:100%;
+        }
+        .ql7NativeSafeControls{
+          position:absolute;
+          left:12px;
+          right:12px;
+          bottom:12px;
+          z-index:4;
+          display:grid;
+          grid-template-columns:34px auto minmax(72px, 1fr) auto 34px;
+          align-items:center;
+          gap:8px;
+          min-height:44px;
+          padding:7px 9px;
+          border-radius:18px;
+          border:1px solid rgba(126,220,255,.26);
+          background:linear-gradient(120deg, rgba(6,14,25,.82), rgba(8,21,38,.58));
+          box-shadow:inset 0 0 18px rgba(89,202,255,.12), 0 0 24px rgba(0,0,0,.32);
+          backdrop-filter:blur(12px) saturate(1.2);
+          opacity:0;
+          pointer-events:none;
+          transform:translateY(8px);
+          transition:opacity .18s ease, transform .18s ease;
+        }
+        .ql7NativeSafeControls.isVisible{
+          opacity:1;
+          pointer-events:auto;
+          transform:translateY(0);
+        }
+        .ql7NativeSafeBtn{
+          width:34px;
+          height:34px;
+          border:1px solid rgba(125,218,255,.26);
+          border-radius:13px;
+          color:#dffaff;
+          background:radial-gradient(circle at 50% 35%, rgba(103,203,255,.2), rgba(13,25,45,.76));
+          box-shadow:inset 0 0 12px rgba(103,203,255,.11), 0 0 12px rgba(75,190,255,.14);
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          cursor:pointer;
+        }
+        .ql7NativeSafeBtn .ql7Glyph{
+          width:25px;
+          height:25px;
+        }
+        .ql7NativeSafeTime{
+          min-width:31px;
+          color:#ecfbff;
+          font-size:11px;
+          font-weight:800;
+          font-variant-numeric:tabular-nums;
+          text-shadow:0 0 10px rgba(126,220,255,.32);
+          text-align:center;
+          white-space:nowrap;
+        }
+        .ql7NativeSafeSeek{
+          width:100%;
+          min-width:72px;
+          height:16px;
+          accent-color:#8ae8ff;
+          cursor:pointer;
+        }
+        .ql7NativeSafeSeek:disabled{
+          opacity:.45;
+          cursor:default;
+        }
+        @media (max-width:520px){
+          .ql7NativeSafeControls{
+            left:8px;
+            right:8px;
+            bottom:8px;
+            grid-template-columns:32px auto minmax(48px, 1fr) auto 32px;
+            gap:5px;
+            padding:6px;
+          }
+          .ql7NativeSafeBtn{
+            width:32px;
+            height:32px;
+          }
+          .ql7NativeSafeTime{
+            font-size:10px;
+            min-width:27px;
+          }
+          .ql7NativeSafeCenter{
+            width:74px;
+            height:74px;
+          }
+        }
+      `}</style>
+    </div>
+  )
+})
+
 function Ql7IconGood(props) {
   return (
     <svg className="ql7Glyph ql7Glyph--good" viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>

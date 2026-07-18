@@ -6455,6 +6455,7 @@ const dict = {
   "forum_video_reset": "إعادة ضبط",
   "forum_video_reset_confirm": "هل تريد حذف التسجيل وإغلاقه؟",
   "forum_video_too_big": "الفيديو كبير جدًا",
+  "forum_image_too_big": "الصورة كبيرة جدًا",
   "forum_video_upload_failed": "فشل رفع الفيديو",
   "forum_video_limit_title": "عذرًا، الفيديو طويل جدًا",
   "forum_video_limit_body": "يسمح المنتدى بمقاطع فيديو تصل مدتها إلى 5 دقائق فقط. يرجى قص المقطع ثم المحاولة مرة أخرى.",

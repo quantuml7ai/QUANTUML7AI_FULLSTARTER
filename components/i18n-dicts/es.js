@@ -6455,6 +6455,7 @@ const dict = {
   "forum_video_reset": "Restablecer",
   "forum_video_reset_confirm": "¿Descartar la grabación y cerrar?",
   "forum_video_too_big": "El video es demasiado grande",
+  "forum_image_too_big": "La imagen es demasiado grande",
   "forum_video_upload_failed": "Falló la carga del video",
   "forum_video_limit_title": "Ups, el video es demasiado largo",
   "forum_video_limit_body": "En el foro se permiten videos de hasta 5 minutos. Recorta el clip y vuelve a intentarlo.",

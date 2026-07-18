@@ -1,7 +1,14 @@
 import { useCallback, useRef } from 'react'
 import uploadR2MediaFile from '../services/uploadR2MediaFile'
+import { FORUM_IMAGE_MAX_BYTES } from '../../../shared/constants/media'
 
 const MAX_COMPOSER_IMAGE_ATTACHMENTS = 10
+
+function hasTooLargeImageUploadError(errors) {
+  return (Array.isArray(errors) ? errors : []).some((error) =>
+    String(error || '').toLowerCase().startsWith('too_large')
+  )
+}
 
 export default function useForumComposerAttachments({
   mediaLocked,
@@ -133,6 +140,18 @@ export default function useForumComposerAttachments({
       if (rawImgFiles.length > 0 && imgFiles.length === 0 && vidFiles.length === 0) {
         return
       }
+      if (imgFiles.length) {
+        const totalImageBytes = imgFiles.reduce((sum, file) => sum + Math.max(0, Number(file?.size || 0)), 0)
+        if (totalImageBytes > FORUM_IMAGE_MAX_BYTES) {
+          try {
+            toast?.err?.(t?.('forum_image_too_big'))
+          } catch {}
+          try {
+            endMediaPipeline?.()
+          } catch {}
+          return
+        }
+      }
 
       let signal
       if ((imgFiles?.length || 0) > 0 || (vidFiles?.length || 0) > 0) {
@@ -209,17 +228,37 @@ export default function useForumComposerAttachments({
         const fd = new FormData()
         for (const f of imgFiles) fd.append('files', f, f.name)
 
-        const res = await fetch('/api/forum/upload', {
-          method: 'POST',
-          body: fd,
-          cache: 'no-store',
-          signal,
-          headers: { 'x-forum-user-id': String(viewerId || '') },
-        })
-        if (!res.ok) throw new Error('upload_failed')
-
-        const up = await res.json().catch(() => ({ urls: [] }))
+        let res = null
+        let up = { urls: [], errors: [] }
+        try {
+          res = await fetch('/api/forum/upload', {
+            method: 'POST',
+            body: fd,
+            cache: 'no-store',
+            signal,
+            headers: { 'x-forum-user-id': String(viewerId || '') },
+          })
+          up = await res.json().catch(() => ({ urls: [], errors: ['upload_failed'] }))
+        } catch (uploadErr) {
+          if (uploadErr?.name === 'AbortError' || signal?.aborted) {
+            finishCancelledPipeline()
+            return
+          }
+          throw uploadErr
+        }
+        const errors = Array.isArray(up?.errors) ? up.errors : []
+        if (!res?.ok || hasTooLargeImageUploadError(errors)) {
+          if (res?.status === 413 || hasTooLargeImageUploadError(errors)) {
+            try {
+              toast?.err?.(t?.('forum_image_too_big'))
+            } catch {}
+            finishCancelledPipeline()
+            return
+          }
+          throw new Error(errors[0] || 'upload_failed')
+        }
         const urls = Array.isArray(up?.urls) ? up.urls : []
+        if (!urls.length && errors.length) throw new Error(errors[0] || 'upload_failed')
         try {
           stopMediaProg?.()
         } catch {}
@@ -227,7 +266,7 @@ export default function useForumComposerAttachments({
           setMediaPhase?.('Ready')
         } catch {}
         try {
-          setMediaPct?.((p) => Math.max(85, Number(p || 0)))
+          setMediaPct?.(100)
         } catch {}
         try {
           endMediaPipeline?.()
@@ -469,6 +508,9 @@ export default function useForumComposerAttachments({
       }
     } catch (err) {
       console.error(err)
+      try {
+        finishCancelledPipeline()
+      } catch {}
       try {
         toast?.error?.(t?.('forum_files_upload_failed'))
       } catch {}
