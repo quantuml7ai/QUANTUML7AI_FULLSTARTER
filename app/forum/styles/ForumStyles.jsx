@@ -316,6 +316,16 @@ export const FORUM_STYLES = `
       -webkit-transform:scaleX(-1);
       transform-origin:center center;
     }
+    @media (hover:hover) and (pointer:fine){
+      .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .videoCard video[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure,
+      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-panel,
+      .voPreviewVideo[data-front-camera-mirror="1"]::-webkit-media-controls-enclosure{
+        transform:scaleX(-1);
+        -webkit-transform:scaleX(-1);
+        transform-origin:center center;
+      }
+    }
 .mediaBox[data-kind="iframe"] > .ql7ExternalVideoSurface{
   width:100%;
   height:100%;
