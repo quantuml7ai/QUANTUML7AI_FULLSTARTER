@@ -34,10 +34,26 @@ describe('Battle Chat isolated contour contracts', () => {
     const events = read('lib/battlecoin/battle-chat-events.cjs')
     const primary = read('lib/mongo/battlecoin-chat-primary.cjs')
     expect(events).toContain('pubsub-accelerator-only')
+    expect(events).toContain('compactBattleChatRedisImpulse')
+    expect(events).toContain("redisRole: 'realtime-impulse-only'")
+    expect(events).toContain('messageId')
+    expect(events).toContain('await redis.publish(EVENT_CHANNEL, JSON.stringify(redisPayload))')
+    expect(events).not.toContain('await redis.publish(EVENT_CHANNEL, JSON.stringify(payload))')
     expect(primary).toContain("storagePrimary: 'mongo'")
     expect(primary).toContain('battlecoin_chat_messages')
     expect(primary).not.toContain('redis.set')
     expect(primary).not.toContain('redis.get')
+  })
+
+  test('Battle Chat clients hydrate compact Redis impulses from Mongo deltas', () => {
+    const hook = read('app/exchange/battle-chat/useBattleChat.js')
+    const docs = read('docs/exchange/BATTLE_CHAT_CONTOUR_CONTRACT.md')
+    expect(hook).toContain('scheduleDeltaRefresh')
+    expect(hook).toContain('payload?.compact')
+    expect(hook).toContain('fetchBattleChatDelta')
+    expect(hook).toContain('deltaRefreshInFlightRef')
+    expect(docs).toContain('compact transient realtime impulses')
+    expect(docs).toContain('Clients hydrate compact impulses through `GET /api/battlecoin/chat/messages` Mongo deltas.')
   })
 
   test('client chat module does not import forum runtime or snapshots', () => {

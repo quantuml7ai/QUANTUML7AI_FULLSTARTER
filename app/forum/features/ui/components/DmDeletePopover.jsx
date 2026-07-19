@@ -15,6 +15,7 @@ export default function DmDeletePopover({
   cancelLabel,
   confirmLabel,
   title,
+  pending = false,
 }) {
   const [pos, setPos] = React.useState({ top: 0, left: 0 })
   const popRef = React.useRef(null)
@@ -50,11 +51,11 @@ export default function DmDeletePopover({
     if (!open) return
     if (typeof window === 'undefined') return
     const onKey = (e) => {
-      if (e.key === 'Escape') onCancel?.()
+      if (!pending && e.key === 'Escape') onCancel?.()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onCancel])
+  }, [open, onCancel, pending])
 
   if (!open || typeof document === 'undefined') return null
 
@@ -63,10 +64,10 @@ export default function DmDeletePopover({
       className="confirmOverlayRoot dmConfirmOverlay"
       role="presentation"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onCancel?.()
+        if (!pending && e.target === e.currentTarget) onCancel?.()
       }}
       onTouchStart={(e) => {
-        if (e.target === e.currentTarget) onCancel?.()
+        if (!pending && e.target === e.currentTarget) onCancel?.()
       }}
     >
       <div
@@ -83,6 +84,7 @@ export default function DmDeletePopover({
             <input
               type="checkbox"
               checked={!!checked}
+              disabled={!!pending}
               onChange={(e) => {
                 const value = !!e.target.checked
                 checkedRef.current = value
@@ -96,9 +98,11 @@ export default function DmDeletePopover({
           <button
             type="button"
             className="dmConfirmBtn ghost"
+            disabled={!!pending}
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              if (pending) return
               onCancel?.()
             }}
           >
@@ -106,14 +110,18 @@ export default function DmDeletePopover({
           </button>
           <button
             type="button"
-            className="dmConfirmBtn primary"
+            className={`dmConfirmBtn primary${pending ? ' isPending' : ''}`}
+            disabled={!!pending}
+            aria-busy={!!pending}
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              if (pending) return
               onConfirm?.(!!checkedRef.current)
             }}
           >
-            {confirmLabel}
+            {pending ? <span className="dmConfirmSpinner" aria-hidden="true" /> : null}
+            <span>{confirmLabel}</span>
           </button>
         </div>
       </div>

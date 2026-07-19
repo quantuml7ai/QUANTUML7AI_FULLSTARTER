@@ -1,4 +1,5 @@
 // app/api/qcoin/heartbeat/route.js
+import { createHash } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 import { requireUserId } from '../../forum/_utils.js'
@@ -8,7 +9,17 @@ const redis = Redis.fromEnv()
 
 const INC_PER_SEC = 1 / (365 * 24 * 60 * 60)
 const GRACE_MS = 4 * 60 * 60 * 1000
-const aliveKey = (uid, cid = '') => cid ? `qcoin:alive:${uid}:${cid}` : `qcoin:alive:${uid}`
+function shortAlivePart(value, size = 18) {
+  const raw = String(value || '').trim()
+  if (!raw) return 'unknown'
+  return createHash('sha256').update(raw).digest('base64url').slice(0, size)
+}
+
+const aliveKey = (uid, cid = '') => {
+  const userPart = shortAlivePart(uid, 18)
+  const clientPart = cid ? shortAlivePart(cid, 12) : ''
+  return clientPart ? `qa:${userPart}:${clientPart}` : `qa:${userPart}`
+}
 
 async function getUid(req, body) {
   const hx = (req.headers.get('x-forum-user') || '').trim()
@@ -53,7 +64,7 @@ export async function POST(req) {
       try {
         await redis.set(aliveKey(uid, cid), 1, { px: 60_000 })
         // The successful SET already proves this exact client is alive.
-        // Avoid the old read-after-write GET on the same qcoin:alive:* key.
+        // Avoid the old read-after-write GET on the same compact qa:* key.
         anyClientAlive = true
       } catch {
         anyClientAlive = false

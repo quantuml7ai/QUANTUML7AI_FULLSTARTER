@@ -4,7 +4,9 @@ import { resolveForumUserId } from '../utils/account'
 const INC_PER_SEC = 1 / (365 * 24 * 60 * 60)
 const GRACE_MS = 4 * 60 * 60 * 1000
 const SYNC_MS = 10 * 60 * 1000
-const PRESENCE_KEEPALIVE_MS = 45 * 1000
+const PRESENCE_ACTIVE_WINDOW_MS = 60 * 1000
+const PRESENCE_ACTIVE_KEEPALIVE_MS = 45 * 1000
+const PRESENCE_IDLE_KEEPALIVE_MS = 65 * 1000
 
 // === Q COIN: client-side live ticker with rare sync (AUTH-ONLY) ===
 export default function useQCoinLive(userKey, isVip){
@@ -298,7 +300,9 @@ export default function useQCoinLive(userKey, isVip){
           return true
         }
       })()
-      const needPresenceKeepalive = visibleDocument && (now - (lastPresencePushRef.current || 0)) >= PRESENCE_KEEPALIVE_MS;
+      const recentlyActive = (now - (lastUiRef.current || 0)) < PRESENCE_ACTIVE_WINDOW_MS;
+      const presenceKeepaliveMs = recentlyActive ? PRESENCE_ACTIVE_KEEPALIVE_MS : PRESENCE_IDLE_KEEPALIVE_MS;
+      const needPresenceKeepalive = visibleDocument && (now - (lastPresencePushRef.current || 0)) >= presenceKeepaliveMs;
       const backoffDelayMs    = Math.min(5, syncErrors.current) * 2000;
 
       if ((needPeriodicSync || needImmediateSync || needPresenceKeepalive) && uid && !heartbeatInFlight.current){
@@ -310,7 +314,7 @@ export default function useQCoinLive(userKey, isVip){
         heartbeatInFlight.current = true;
 
         // active: были ли действия в последнюю минуту — чтобы сервер обновил lastConfirmAt
-        const active = (now - (lastUiRef.current || 0)) < 60000;
+        const active = (now - (lastUiRef.current || 0)) < PRESENCE_ACTIVE_WINDOW_MS;
         const activeForPresence = !!(active || needPresenceKeepalive);
 
         try{

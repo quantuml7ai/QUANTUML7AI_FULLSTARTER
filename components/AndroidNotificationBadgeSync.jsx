@@ -15,8 +15,10 @@ const SERVICE_WORKER_URL = '/ql7-notification-sw.js'
 const STORAGE_KEY = 'ql7_notification_counts_v1'
 const READ_AT_STORAGE_KEY = 'ql7_notification_read_at_v1'
 const NATIVE_LINK_STORAGE_KEY = 'ql7_native_push_linked_account_v1'
+const PUSH_SUBSCRIPTION_FINGERPRINT_STORAGE_KEY = 'ql7_push_subscription_fingerprint_v1'
 const NOTICE_PARAM = 'ql7Notice'
 const NATIVE_LINK_RETRY_MS = 10 * 60 * 1000
+const PUSH_SUBSCRIPTION_REGISTER_TTL_MS = 12 * 60 * 60 * 1000
 
 function readCounts() {
   try {
@@ -114,6 +116,44 @@ function nativeLinkAttemptIsFresh(accountId, lang) {
   } catch {
     return false
   }
+}
+
+async function sha256Base64Url(value) {
+  try {
+    const webCrypto = globalThis.crypto
+    if (!webCrypto?.subtle || typeof TextEncoder === 'undefined') throw new Error('subtle_unavailable')
+    const buffer = await webCrypto.subtle.digest('SHA-256', new TextEncoder().encode(String(value || '')))
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/g, '')
+  } catch {
+    const raw = String(value || '')
+    return `${raw.length}:${raw.slice(0, 16)}:${raw.slice(-16)}`
+  }
+}
+
+function pushSubscriptionRegistrationIsFresh(accountId, fingerprint) {
+  try {
+    const value = JSON.parse(localStorage.getItem(PUSH_SUBSCRIPTION_FINGERPRINT_STORAGE_KEY) || 'null')
+    return (
+      String(value?.accountId || '') === String(accountId || '') &&
+      String(value?.fingerprint || '') === String(fingerprint || '') &&
+      Date.now() - Number(value?.registeredAt || 0) < PUSH_SUBSCRIPTION_REGISTER_TTL_MS
+    )
+  } catch {
+    return false
+  }
+}
+
+function rememberPushSubscriptionRegistration(accountId, fingerprint) {
+  try {
+    localStorage.setItem(PUSH_SUBSCRIPTION_FINGERPRINT_STORAGE_KEY, JSON.stringify({
+      accountId: String(accountId || ''),
+      fingerprint: String(fingerprint || ''),
+      registeredAt: Date.now(),
+    }))
+  } catch {}
 }
 
 export default function AndroidNotificationBadgeSync() {
@@ -254,11 +294,24 @@ export default function AndroidNotificationBadgeSync() {
         applicationServerKey: toApplicationServerKey(config.publicKey),
       })
     }
-    await apiPost('/api/push/subscribe', accountId, {
+    const nativeShell = isInstalledAndroidShell()
+    const payload = subscription.toJSON()
+    const fingerprint = await sha256Base64Url(JSON.stringify({
+      accountId,
+      endpoint: payload?.endpoint || '',
+      expirationTime: payload?.expirationTime || null,
+      p256dh: payload?.keys?.p256dh || '',
+      auth: payload?.keys?.auth || '',
       lang: langRef.current,
-      nativeShell: isInstalledAndroidShell(),
-      subscription: subscription.toJSON(),
+      nativeShell,
+    }))
+    if (pushSubscriptionRegistrationIsFresh(accountId, fingerprint)) return subscription
+    const response = await apiPost('/api/push/subscribe', accountId, {
+      lang: langRef.current,
+      nativeShell,
+      subscription: payload,
     })
+    if (response?.ok) rememberPushSubscriptionRegistration(accountId, fingerprint)
     return subscription
   }, [apiPost])
 
@@ -363,6 +416,16 @@ export default function AndroidNotificationBadgeSync() {
       mobileStreamAbort = null
     }
 
+    const shouldUseForegroundImpulseStream = () => {
+      if (cancelled || !isRealtimeNotificationRuntime()) return false
+      const accountId = String(accountIdRef.current || readAccountId() || '').trim()
+      if (!accountId) return false
+      try {
+        if (document.visibilityState && document.visibilityState !== 'visible') return false
+      } catch {}
+      return true
+    }
+
     const dispatchImpulseFallback = (payload, state = null) => {
       const source = normalizeNotificationSource(payload?.source, '')
       if (!source) return
@@ -374,7 +437,9 @@ export default function AndroidNotificationBadgeSync() {
           totalCount: Math.max(0, Number(state?.totalCount ?? payload?.totalCount) || 0),
           pushReceived: true,
           forceSync: payload?.forceSync === true,
+          clientOnly: payload?.forceSync !== true,
           reason: String(payload?.reason || ''),
+          version: Math.max(0, Number(state?.version ?? payload?.version) || 0),
           dmDeletedMessageId: String(payload?.dmDeletedMessageId || ''),
           dmDeletedPeerId: String(payload?.dmDeletedPeerId || ''),
           dmDeletedDialog: payload?.dmDeletedDialog === true,
@@ -383,7 +448,10 @@ export default function AndroidNotificationBadgeSync() {
     }
 
     function scheduleMobileImpulseStream() {
-      if (cancelled || !isRealtimeNotificationRuntime() || !readAccountId()) return
+      if (!shouldUseForegroundImpulseStream()) {
+        stopMobileImpulseStream()
+        return
+      }
       if (mobileStreamRetry) window.clearTimeout(mobileStreamRetry)
       const delay = Math.min(15_000, 1_000 * (2 ** Math.min(mobileStreamAttempt, 4)))
       mobileStreamRetry = window.setTimeout(() => {
@@ -393,7 +461,10 @@ export default function AndroidNotificationBadgeSync() {
     }
 
     function startMobileImpulseStream() {
-      if (cancelled || !isRealtimeNotificationRuntime()) return
+      if (!shouldUseForegroundImpulseStream()) {
+        stopMobileImpulseStream()
+        return
+      }
       const accountId = String(accountIdRef.current || readAccountId() || '').trim()
       if (!accountId || mobileStreamAbort) return
 
@@ -430,11 +501,18 @@ export default function AndroidNotificationBadgeSync() {
               try {
                 const payload = JSON.parse(data)
                 if (payload?.type === 'notification-state-changed') {
-                  refreshFromNotificationImpulse()
-                    .then((state) => {
-                      if (!state?.ok || payload?.forceSync === true) dispatchImpulseFallback(payload, state)
-                    })
-                    .catch(() => dispatchImpulseFallback(payload))
+                  const exactImpulse = Number.isFinite(Number(payload?.count)) &&
+                    Number.isFinite(Number(payload?.totalCount)) &&
+                    payload?.forceSync !== true
+                  if (exactImpulse) {
+                    dispatchImpulseFallback(payload)
+                  } else {
+                    refreshFromNotificationImpulse()
+                      .then((state) => {
+                        if (!state?.ok || payload?.forceSync === true) dispatchImpulseFallback(payload, state)
+                      })
+                      .catch(() => dispatchImpulseFallback(payload))
+                  }
                 }
               } catch {}
             })
@@ -484,6 +562,19 @@ export default function AndroidNotificationBadgeSync() {
         [source]: nextCount,
       })
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(countsRef.current)) } catch {}
+      window.__QL7_NOTIFICATION_STATE__ = {
+        counts: countsRef.current,
+        readAt: readAtRef.current,
+        readItems: window.__QL7_NOTIFICATION_STATE__?.readItems &&
+          typeof window.__QL7_NOTIFICATION_STATE__.readItems === 'object'
+          ? window.__QL7_NOTIFICATION_STATE__.readItems
+          : {},
+        totalCount: totalCounts(countsRef.current),
+        version: Math.max(0, Number(event?.detail?.version) || Number(window.__QL7_NOTIFICATION_STATE__?.version) || 0),
+      }
+      window.dispatchEvent(new CustomEvent('ql7:notification-state', {
+        detail: window.__QL7_NOTIFICATION_STATE__,
+      }))
       sync()
       if (clientOnly || forceSync) return
       if (source === 'messenger_messages') {
@@ -534,8 +625,13 @@ export default function AndroidNotificationBadgeSync() {
       if (event?.data?.type !== 'ql7:notification-received') return
       const source = normalizeNotificationSource(event?.data?.source, '')
       if (!source) return
-      // Push is only an exact event impulse. The server remains canonical,
-      // so read it once per event instead of polling mobile devices.
+      const exactImpulse = Number.isFinite(Number(event?.data?.count)) &&
+        Number.isFinite(Number(event?.data?.totalCount)) &&
+        event?.data?.forceSync !== true
+      if (exactImpulse) {
+        dispatchImpulseFallback(event.data)
+        return
+      }
       refreshFromNotificationImpulse().then((state) => {
         if (state?.ok) return
         dispatchImpulseFallback(event.data)
@@ -581,6 +677,7 @@ export default function AndroidNotificationBadgeSync() {
         localStorage.removeItem(STORAGE_KEY)
         localStorage.removeItem(READ_AT_STORAGE_KEY)
         localStorage.removeItem(NATIVE_LINK_STORAGE_KEY)
+        localStorage.removeItem(PUSH_SUBSCRIPTION_FINGERPRINT_STORAGE_KEY)
       } catch {}
       window.__QL7_NOTIFICATION_STATE__ = {
         counts: countsRef.current,
@@ -606,7 +703,10 @@ export default function AndroidNotificationBadgeSync() {
     }
 
     const refreshCanonicalState = () => {
-      if (document.visibilityState && document.visibilityState !== 'visible') return
+      if (document.visibilityState && document.visibilityState !== 'visible') {
+        stopMobileImpulseStream()
+        return
+      }
       const now = Date.now()
       if (now - lastRefreshAtRef.current < 5000) return
       lastRefreshAtRef.current = now

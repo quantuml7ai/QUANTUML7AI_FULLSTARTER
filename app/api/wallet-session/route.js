@@ -9,6 +9,10 @@ const DEFAULT_TTL_SECONDS = 60 * 60 * 24 * 30
 const LATEST_SESSION_PREFIX = 'wallet_session_latest:'
 const memoryStore = globalThis.__QL7_WALLET_SESSION_MEMORY__ || new Map()
 globalThis.__QL7_WALLET_SESSION_MEMORY__ = memoryStore
+const redisReadCache = globalThis.__QL7_WALLET_SESSION_READ_CACHE__ || new Map()
+const redisReadInflight = globalThis.__QL7_WALLET_SESSION_READ_INFLIGHT__ || new Map()
+globalThis.__QL7_WALLET_SESSION_READ_CACHE__ = redisReadCache
+globalThis.__QL7_WALLET_SESSION_READ_INFLIGHT__ = redisReadInflight
 
 function nowMs() {
   return Date.now()
@@ -17,6 +21,57 @@ function nowMs() {
 function getTtlSeconds() {
   const raw = Number(process.env.WALLET_SESSION_TTL_SECONDS || '')
   return Number.isFinite(raw) && raw > 60 ? Math.floor(raw) : DEFAULT_TTL_SECONDS
+}
+
+function getProcessCacheMs() {
+  const raw = Number(process.env.WALLET_SESSION_PROCESS_CACHE_MS || '')
+  if (!Number.isFinite(raw) || raw <= 0) return 1500
+  return Math.max(200, Math.min(Math.floor(raw), 5000))
+}
+
+function cloneSessionValue(value) {
+  if (value == null) return null
+  try {
+    return JSON.parse(JSON.stringify(value))
+  } catch {
+    return value
+  }
+}
+
+function readCacheGet(key) {
+  const row = redisReadCache.get(key)
+  if (!row) return undefined
+  if (Number(row.expiresAt || 0) <= nowMs()) {
+    redisReadCache.delete(key)
+    return undefined
+  }
+  return cloneSessionValue(row.value)
+}
+
+function readCacheSet(key, value) {
+  if (!key || value == null) return
+  const ttlMs = getProcessCacheMs()
+  if (ttlMs <= 0) return
+  const now = nowMs()
+  if (redisReadCache.size > 512) {
+    for (const [cacheKey, row] of redisReadCache) {
+      if (Number(row?.expiresAt || 0) <= now) redisReadCache.delete(cacheKey)
+      if (redisReadCache.size <= 512) break
+    }
+  }
+  redisReadCache.set(key, {
+    value: cloneSessionValue(value),
+    expiresAt: now + ttlMs,
+  })
+}
+
+function readCacheDelete(key) {
+  redisReadCache.delete(key)
+  redisReadInflight.delete(key)
+}
+
+function canPersistReadCache(key) {
+  return !String(key || '').startsWith(LATEST_SESSION_PREFIX)
 }
 
 function isValidEvmAddress(value) {
@@ -63,6 +118,8 @@ async function storeSet(key, value, ttlSeconds) {
   const redis = getRedis()
   if (redis) {
     await redis.set(key, value, { ex: ttlSeconds })
+    if (canPersistReadCache(key)) readCacheSet(key, value)
+    else readCacheDelete(key)
     return
   }
   memoryStore.set(key, { value, expiresAt: nowMs() + ttlSeconds * 1000 })
@@ -70,7 +127,24 @@ async function storeSet(key, value, ttlSeconds) {
 
 async function storeGet(key) {
   const redis = getRedis()
-  if (redis) return redis.get(key)
+  if (redis) {
+    if (canPersistReadCache(key)) {
+      const cached = readCacheGet(key)
+      if (cached !== undefined) return cached
+    }
+    const inflight = redisReadInflight.get(key)
+    if (inflight) return inflight
+    const promise = redis.get(key)
+      .then((value) => {
+        if (value != null && canPersistReadCache(key)) readCacheSet(key, value)
+        return cloneSessionValue(value)
+      })
+      .finally(() => {
+        redisReadInflight.delete(key)
+      })
+    redisReadInflight.set(key, promise)
+    return promise
+  }
   const row = memoryStore.get(key)
   if (!row) return null
   if (Number(row.expiresAt || 0) <= nowMs()) {
@@ -82,6 +156,7 @@ async function storeGet(key) {
 
 async function storeDelete(key) {
   const redis = getRedis()
+  readCacheDelete(key)
   if (redis) {
     await redis.del(key)
     return

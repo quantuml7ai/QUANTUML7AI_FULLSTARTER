@@ -233,6 +233,10 @@ describe('android native shell contracts', () => {
     expect(sync).toContain("fetch('/api/push/events'");
     expect(sync).toContain("payload?.type === 'notification-state-changed'");
     expect(sync).toContain('refreshFromNotificationImpulse()');
+    expect(sync).toContain('PUSH_SUBSCRIPTION_FINGERPRINT_STORAGE_KEY');
+    expect(sync).toContain('pushSubscriptionRegistrationIsFresh(accountId, fingerprint)');
+    expect(sync).toContain('clientOnly: payload?.forceSync !== true');
+    expect(sync).toContain('const exactImpulse = Number.isFinite(Number(payload?.count))');
     expect(sync).toContain('/android|iphone|ipad|ipod|mobile|crios|fxios|edgios/i');
     expect(sync).toContain('isIPadOSDesktopMode');
     expect(sync).toContain('readSources');
@@ -251,6 +255,16 @@ describe('android native shell contracts', () => {
     expect(fileText('app/api/metamarket/gift/route.js')).toContain("source: 'metamarket_gifts'");
     expect(fileText('lib/webPush.js')).toContain('markPushSourcesRead');
     expect(fileText('lib/webPush.js')).toContain('markPushItemsRead');
+    expect(fileText('lib/webPush.js')).toContain("require('./mongo/push-primary.cjs')");
+    expect(fileText('lib/webPush.js')).toContain("runtimeState: (userId) => `notif:${shortUserId(userId)}`");
+    expect(fileText('lib/webPush.js')).toContain("return `push:events:${shortUserId(rawUserId)}`");
+    expect(fileText('lib/webPush.js')).toContain('writeRuntimePushSnapshot(userId, normalized)');
+    expect(fileText('lib/webPush.js')).toContain('migrateLegacyPushSubscriptionsToMongo');
+    expect(fileText('lib/webPush.js')).toContain('const migrated = await migrateLegacyPushSubscriptionsToMongo(userId, legacy)');
+    expect(fileText('lib/mongo/push-primary.cjs')).toContain("const NOTIFICATION_STATES = 'notification_states'");
+    expect(fileText('lib/mongo/push-primary.cjs')).toContain("const PUSH_SUBSCRIPTIONS = 'push_subscriptions'");
+    expect(fileText('lib/mongo/permanent-policy.cjs')).toContain("push: true");
+    expect(fileText('lib/mongo/permanent-policy.cjs')).toContain('including push notification state and push subscriptions');
     expect(fileText('app/forum/features/dm/hooks/useDmRepliesSeen.js')).toContain(
       'readItems: { messenger_replies: freshIds }',
     );
@@ -297,6 +311,9 @@ describe('android native shell contracts', () => {
     expect(sync).not.toContain('getToken(');
     expect(fileText('package.json')).not.toContain('"firebase"');
     expect(sync).not.toContain('__QL7_PENDING_NOTIFICATION_READ__');
+    expect(sync).toContain('shouldUseForegroundImpulseStream');
+    expect(sync).toContain("document.visibilityState !== 'visible'");
+    expect(sync).toContain('stopMobileImpulseStream()');
     expect(worker).not.toContain('event.notification.close()');
     expect(fileText('lib/webPush.js')).toContain('record.nativeShell === true && Number(native?.sent || 0) > 0');
     expect(fileText('lib/webPush.js')).toContain('publishMetaMarketGiftImpulse(userId');

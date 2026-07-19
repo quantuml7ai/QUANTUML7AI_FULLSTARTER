@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-07-15T18:24:13.080Z
-Исходных файлов в анализе: 1211
-Локальных зависимостей: 1125
+Сгенерировано автоматически: 2026-07-18T19:56:03.080Z
+Исходных файлов в анализе: 1413
+Локальных зависимостей: 1142
 
 ## Охват
 
@@ -94,7 +94,7 @@
 - `lib/identity` — 2 файлов
 - `lib/indicators.js` — 1 файлов
 - `lib/metadataCache.js` — 1 файлов
-- `lib/mongo` — 20 файлов
+- `lib/mongo` — 21 файлов
 - `lib/nativePush.js` — 1 файлов
 - `lib/notificationCenter.js` — 1 файлов
 - `lib/redis.js` — 1 файлов
@@ -120,7 +120,7 @@
 - `public/vendor` — 4 файлов
 - `public/vip` — 2 файлов
 - `public/workers` — 2 файлов
-- `root` — 342 файлов
+- `root` — 543 файлов
 - `src/shared` — 32 файлов
 - `tools` — 71 файлов
 
@@ -136,15 +136,15 @@
 - `forum/dm` -> `forum/dm` — 28 локальных импортов
 - `forum/media` -> `forum/media` — 28 локальных импортов
 - `tools` -> `tools` — 28 локальных импортов
-- `lib/mongo` -> `lib/mongo` — 25 локальных импортов
+- `lib/mongo` -> `lib/mongo` — 27 локальных импортов
 - `root` -> `src/shared` — 25 локальных импортов
 - `root` -> `root` — 23 локальных импортов
 - `root` -> `components` — 19 локальных импортов
 - `forum/root` -> `forum/ui` — 18 локальных импортов
 - `forum/dm` -> `forum/shared` — 17 локальных импортов
 - `forum/feed` -> `forum/profile` — 16 локальных импортов
+- `root` -> `lib/mongo` — 16 локальных импортов
 - `api/forum` -> `lib/forum` — 15 локальных импортов
-- `root` -> `lib/mongo` — 15 локальных импортов
 - `forum/root` -> `forum/shared` — 14 локальных импортов
 - `api/dm` -> `api/dm` — 13 локальных импортов
 - `app/layout.js` -> `components` — 13 локальных импортов
@@ -153,13 +153,13 @@
 - `forum/root` -> `forum/feed` — 13 локальных импортов
 - `root` -> `forum/feed` — 13 локальных импортов
 - `api/forum` -> `api/profile` — 12 локальных импортов
-- `forum/root` -> `forum/media` — 12 локальных импортов
+- `forum/media` -> `forum/shared` — 12 локальных импортов
 - `app/exchange` -> `app/exchange` — 11 локальных импортов
-- `forum/media` -> `forum/shared` — 11 локальных импортов
+- `forum/root` -> `forum/media` — 11 локальных импортов
 - `api/forum` -> `lib/mongo` — 10 локальных импортов
+- `api/profile` -> `lib/mongo` — 10 локальных импортов
 - `forum/dm` -> `forum/profile` — 10 локальных импортов
 - `forum/ui` -> `forum/media` — 10 локальных импортов
-- `api/profile` -> `lib/mongo` — 9 локальных импортов
 - `forum/quests` -> `forum/quests` — 9 локальных импортов
 - `forum/root` -> `forum/profile` — 9 локальных импортов
 - `lib/forum` -> `lib/mongo` — 9 локальных импортов
@@ -240,8 +240,9 @@
 
 - `api/dm` — 13
 - `lib/mongo` — 8
+- `lib/webPush.js` — 3
+- `lib/notificationCenter.js` — 2
 - `api/profile` — 1
-- `lib/webPush.js` — 1
 
 ### api/forum
 
@@ -250,6 +251,7 @@
 - `api/profile` — 12
 - `lib/mongo` — 10
 - `lib/storage` — 8
+- `forum/shared` — 3
 - `lib/subscriptions.js` — 2
 - `lib/geo` — 1
 - `lib/webPush.js` — 1
@@ -292,7 +294,7 @@
 
 ### api/profile
 
-- `lib/mongo` — 9
+- `lib/mongo` — 10
 - `api/profile` — 8
 - `api/forum` — 7
 - `lib/identity` — 1
@@ -495,7 +497,7 @@
 ### forum/media
 
 - `forum/media` — 28
-- `forum/shared` — 11
+- `forum/shared` — 12
 - `forum/feed` — 4
 - `lib/forumVideoTrim.js` — 2
 - `components` — 1
@@ -532,7 +534,7 @@
 - `forum/ui` — 18
 - `forum/shared` — 14
 - `forum/feed` — 13
-- `forum/media` — 12
+- `forum/media` — 11
 - `forum/profile` — 9
 - `forum/root` — 6
 - `components` — 5
@@ -570,6 +572,7 @@
 - `forum/quests` — 2
 - `forum/moderation` — 1
 - `forum/subscriptions` — 1
+- `lib/authActionGateClient.js` — 1
 
 ### lib/adsCore.js
 
@@ -578,6 +581,7 @@
 
 ### lib/auth
 
+- `lib/identity` — 1
 - `lib/mongo` — 1
 - `lib/tma.js` — 1
 
@@ -636,7 +640,7 @@
 
 ### lib/mongo
 
-- `lib/mongo` — 25
+- `lib/mongo` — 27
 - `lib/battlecoin` — 2
 - `lib/forum` — 1
 - `lib/geo` — 1
@@ -688,6 +692,7 @@
 ### lib/webPush.js
 
 - `api/profile` — 1
+- `lib/mongo` — 1
 - `lib/nativePush.js` — 1
 - `lib/notificationCenter.js` — 1
 
@@ -752,7 +757,7 @@
 - `src/shared` — 25
 - `root` — 23
 - `components` — 19
-- `lib/mongo` — 15
+- `lib/mongo` — 16
 - `forum/feed` — 13
 - `forum/media` — 6
 - `forum/shared` — 3
@@ -760,7 +765,7 @@
 - `lib/seo` — 3
 - `api/forum` — 2
 - `forum/subscriptions` — 2
-- `api/metamarket` — 1
+- `api/dm` — 1
 
 ### src/shared
 
@@ -776,7 +781,7 @@
 - `app/api/forum/_utils.js` — fan-in 44; основные потребители: `app/api/academy/exam/route.js`, `app/api/forum/_db.js`, `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/inbox/replies/page/route.js`
 - `components/i18n.js` — fan-in 36; основные потребители: `app/about/page.js`, `app/academy/AcademyExamBlock.js`, `app/academy/page.js`, `app/ads/GeoTargetingPicker.jsx`, `app/ads/home.js`, `app/ads/page.jsx`, `app/components/CryptoNewsLens.jsx`, `app/contact/page.js`
 - `app/api/profile/_identity.js` — fan-in 26; основные потребители: `app/api/dm/_utils.js`, `app/api/forum/_db.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/own/route.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/report/route.js`, `app/api/forum/subs/count/route.js`
-- `lib/mongo/client.cjs` — fan-in 25; основные потребители: `app/api/forum/recommendations/users/route.js`, `app/api/profile/user-popover/route.js`, `lib/forum/forum-index-maintenance.cjs`, `lib/forum/forum-projection-rebuild.cjs`, `lib/forum/forum-server-complete-reader.cjs`, `lib/forum/forum-server-page-reader.cjs`, `lib/mongo/academy-primary.cjs`, `lib/mongo/account-deletion-primary.cjs`
+- `lib/mongo/client.cjs` — fan-in 26; основные потребители: `app/api/forum/recommendations/users/route.js`, `app/api/profile/user-popover/route.js`, `lib/forum/forum-index-maintenance.cjs`, `lib/forum/forum-projection-rebuild.cjs`, `lib/forum/forum-server-complete-reader.cjs`, `lib/forum/forum-server-page-reader.cjs`, `lib/mongo/academy-primary.cjs`, `lib/mongo/account-deletion-primary.cjs`
 - `tools/runtime-governance.js` — fan-in 25; основные потребители: `tools/audit-adaptive-actions.js`, `tools/audit-adaptive-core.js`, `tools/audit-auth-cascade.js`, `tools/audit-console-noise.js`, `tools/audit-diagnostics-boundaries.js`, `tools/audit-feature-flag-safety.js`, `tools/audit-forensic-mode-bounds.js`, `tools/audit-iframe-restore.js`
 - `lib/mongo/profile-primary.cjs` — fan-in 24; основные потребители: `app/api/debug/vip/grant/route.js`, `app/api/forum/_db.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/user-search/rebuild/route.js`, `app/api/pay/create/route.js`, `app/api/profile/_identity.js`, `app/api/profile/batch/route.js`, `app/api/profile/check-nick/route.js`
 - `app/api/forum/_db.js` — fan-in 22; основные потребители: `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/mediaLock/route.js`, `app/api/forum/mutate/route.js`, `app/api/forum/recommendations/users/route.js`
@@ -784,35 +789,35 @@
 - `app/forum/shared/utils/classnames.js` — fan-in 18; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationsRail.jsx`, `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`
 - `app/api/metamarket/_format.js` — fan-in 15; основные потребители: `app/api/metamarket/_catalog.js`, `app/api/metamarket/_db.js`, `app/api/metamarket/_identity.js`, `app/api/metamarket/_locks.js`, `app/api/metamarket/_transactions.js`, `app/api/metamarket/buy/route.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/gift/route.js`
 - `app/api/dm/_utils.js` — fan-in 14; основные потребители: `app/api/dm/_db.js`, `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/dialogs/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/thread/route.js`, `app/api/dm/unblock/route.js`
+- `lib/mongo/qcoin-primary.cjs` — fan-in 14; основные потребители: `app/api/academy/exam/route.js`, `app/api/profile/user-popover/route.js`, `app/api/qcoin/drop/route.js`, `app/api/qcoin/get/route.js`, `app/api/qcoin/heartbeat/route.js`, `app/api/qcoin/topup/cancel/route.js`, `app/api/qcoin/topup/create/route.js`, `app/api/qcoin/topup/webhook/route.js`
 - `lib/subscriptions.js` — fan-in 14; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/debug/vip/grant/route.js`, `app/api/debug/vip/route.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/vip/batch/route.js`, `app/api/metamarket/_db.js`, `app/api/metamarket/state/route.js`
 - `lib/forum/forum-server-complete-reader.cjs` — fan-in 13; основные потребители: `app/api/forum/inbox/replies/page/route.js`, `app/api/forum/post-by-id/route.js`, `app/api/forum/post-chain/route.js`, `app/api/forum/post-locate/route.js`, `app/api/forum/post-meta/route.js`, `app/api/forum/search/page/route.js`, `app/api/forum/snapshot/route.js`, `app/api/forum/thread/locate/route.js`
-- `lib/mongo/qcoin-primary.cjs` — fan-in 13; основные потребители: `app/api/academy/exam/route.js`, `app/api/qcoin/drop/route.js`, `app/api/qcoin/get/route.js`, `app/api/qcoin/heartbeat/route.js`, `app/api/qcoin/topup/cancel/route.js`, `app/api/qcoin/topup/create/route.js`, `app/api/qcoin/topup/webhook/route.js`, `app/api/quest/progress/route.js`
 - `tests/support/runtimeGovernance.js` — fan-in 12; основные потребители: `tests/component/runtime/runtimeComponentSurfaces.test.jsx`, `tests/contracts/forum/media-budget-owner.contract.test.js`, `tests/contracts/forum/player-budget-profiles.contract.test.js`, `tests/contracts/forum/qcast-shared-mute-owner.contract.test.js`, `tests/contracts/forum/same-src-thrash-guard.contract.test.js`, `tests/contracts/mobile/android-shell-contracts.test.js`, `tests/contracts/project/runtime-governance-contracts.test.js`, `tests/contracts/root/auth-bus-budget.contract.test.js`
 - `app/forum/shared/utils/counts.js` — fan-in 11; основные потребители: `app/forum/features/dm/components/InboxTabsHeader.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`
 - `app/api/metamarket/_identity.js` — fan-in 10; основные потребители: `app/api/metamarket/_transactions.js`, `app/api/metamarket/buy/route.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/gift/route.js`, `app/api/metamarket/my-collection/route.js`, `app/api/metamarket/owners/route.js`, `app/api/metamarket/quote/route.js`, `app/api/metamarket/sell/route.js`
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — fan-in 10; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`
 - `lib/metadataCache.js` — fan-in 10; основные потребители: `app/about/layout.js`, `app/academy/layout.js`, `app/ads/layout.js`, `app/contact/layout.js`, `app/exchange/layout.js`, `app/forum/layout.js`, `app/game/layout.js`, `app/layout.js`
 - `lib/mongo/forum-primary.cjs` — fan-in 10; основные потребители: `app/api/forum/_db.js`, `app/api/forum/mutate/route.js`, `app/api/forum/own/route.js`, `app/api/forum/recommendations/users/route.js`, `app/api/forum/rev/route.js`, `app/api/forum/subs/people/route.js`, `app/forum/p/[postId]/route.js`, `lib/forum/forum-server-complete-reader.cjs`
+- `lib/webPush.js` — fan-in 10; основные потребители: `app/api/dm/delete/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/forum/mutate/route.js`, `app/api/metamarket/gift/route.js`, `app/api/push/config/route.js`, `app/api/push/events/route.js`, `app/api/push/subscribe/route.js`
 - `app/forum/shared/components/HydrateText.jsx` — fan-in 9; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`
+- `app/forum/shared/constants/media.js` — fan-in 9; основные потребители: `app/ads/home.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/upload/route.js`, `app/api/forum/uploadVideo/route.js`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/hooks/useForumComposerAttachments.js`, `app/forum/features/media/utils/mediaRuntime.js`
 - `app/forum/shared/utils/forumWindowingRegistry.js` — fan-in 9; основные потребители: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/feed/hooks/usePostParentReplyNav.js`, `app/forum/features/feed/hooks/useThreadOpenNavigation.js`, `app/forum/features/feed/utils/navScroll.js`, `app/forum/features/feed/utils/openThreadFromPost.js`, `app/forum/features/feed/utils/postFocus.js`, `app/forum/ForumRoot.jsx`, `app/forum/shared/hooks/useForumWindowing.js`
 - `lib/mongo/dm-primary.cjs` — fan-in 9; основные потребители: `app/api/dm/_db.js`, `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/dialogs/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/thread/route.js`, `app/api/dm/unblock/route.js`
 - `app/api/metamarket/_db.js` — fan-in 8; основные потребители: `app/api/metamarket/_ledger.js`, `app/api/metamarket/_locks.js`, `app/api/metamarket/_transactions.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/my-collection/route.js`, `app/api/metamarket/owners/route.js`, `app/api/metamarket/state/route.js`, `app/api/metamarket/token-history/route.js`
 - `app/forum/features/feed/utils/postMerge.js` — fan-in 8; основные потребители: `app/forum/features/dm/hooks/useForumDmRuntime.js`, `app/forum/features/feed/hooks/useForumDataRuntime.js`, `app/forum/features/feed/hooks/useForumSyncLoop.js`, `app/forum/features/feed/hooks/usePublishedPostsModel.js`, `app/forum/features/feed/utils/snapshotTransforms.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/media/hooks/useVideoFeedState.js`, `tests/unit/forum/features/feed/utils/cardMemo.test.js`
 - `app/forum/features/profile/components/VipFlipBadge.jsx` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`, `components/MetaMarket.jsx`
 - `app/forum/shared/hooks/useForumWindowing.js` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogsPane.jsx`, `app/forum/features/dm/components/DmMessagesPane.jsx`, `app/forum/features/dm/components/InboxRepliesPane.jsx`, `app/forum/features/feed/components/PublishedPostsPane.jsx`, `app/forum/features/feed/components/ThreadRepliesPane.jsx`, `app/forum/features/feed/components/TopicsPane.jsx`, `app/forum/features/feed/components/UserPostsPane.jsx`, `app/forum/features/media/hooks/useVideoFeedWindowing.js`
-- `lib/webPush.js` — fan-in 8; основные потребители: `app/api/dm/send/route.js`, `app/api/forum/mutate/route.js`, `app/api/metamarket/gift/route.js`, `app/api/push/config/route.js`, `app/api/push/events/route.js`, `app/api/push/subscribe/route.js`, `app/api/push/sync/route.js`, `app/api/push/unsubscribe/route.js`
+- `lib/identity/ql7IdentityContract.cjs` — fan-in 8; основные потребители: `app/api/academy/exam/route.js`, `app/api/profile/_identity.js`, `app/api/referral/hit/route.js`, `app/api/referral/link/route.js`, `lib/auth/battlecoin-chat-auth.cjs`, `lib/identity/geo-identity.cjs`, `lib/mongo/qcoin-primary.cjs`, `tests/unit/mongo/profile-primary.test.js`
 - `src/shared/runtime/budgets/routeProfiles.js` — fan-in 8; основные потребители: `src/shared/runtime/budgets/routeCapabilities.js`, `tests/contracts/decorative/autoplay-budget.contract.test.js`, `tests/contracts/forum/ads-shared-budget.contract.test.js`, `tests/contracts/forum/iframe-singleton-mobile.contract.test.js`, `tests/contracts/forum/native-video-cold-offscreen.contract.test.js`, `tests/contracts/root/wallet-intent-only.contract.test.js`, `tests/integration/runtime/runtimeGovernance.integration.test.js`, `tests/unit/runtime/runtimeGovernance.test.js`
 - `app/api/metamarket/_catalog.js` — fan-in 7; основные потребители: `app/api/metamarket/_db.js`, `app/api/metamarket/_transactions.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/my-collection/route.js`, `app/api/metamarket/owners/route.js`, `app/api/metamarket/state/route.js`, `app/api/metamarket/token-history/route.js`
 - `app/forum/shared/utils/browser.js` — fan-in 7; основные потребители: `app/forum/features/media/hooks/useForumMediaCoordinator.js`, `app/forum/features/moderation/hooks/useAdminFlag.js`, `app/forum/features/profile/hooks/useForumProfileSync.js`, `app/forum/features/profile/utils/profileCache.js`, `app/forum/ForumRoot.jsx`, `app/forum/shared/config/runtime.js`, `app/forum/shared/storage/localStorage.js`
 - `app/forum/shared/utils/forumWindowingPresets.js` — fan-in 7; основные потребители: `app/forum/features/dm/components/DmDialogsPane.jsx`, `app/forum/features/dm/components/DmMessagesPane.jsx`, `app/forum/features/dm/components/InboxRepliesPane.jsx`, `app/forum/features/feed/components/PublishedPostsPane.jsx`, `app/forum/features/feed/components/ThreadRepliesPane.jsx`, `app/forum/features/feed/components/TopicsPane.jsx`, `app/forum/features/feed/components/UserPostsPane.jsx`
-- `lib/identity/ql7IdentityContract.cjs` — fan-in 7; основные потребители: `app/api/academy/exam/route.js`, `app/api/profile/_identity.js`, `app/api/referral/hit/route.js`, `app/api/referral/link/route.js`, `lib/identity/geo-identity.cjs`, `lib/mongo/qcoin-primary.cjs`, `tests/unit/mongo/profile-primary.test.js`
 - `tests/support/projectSurface.js` — fan-in 7; основные потребители: `tests/contracts/metamarket/metamarket-contracts.test.js`, `tests/contracts/project/api-route-contracts.test.js`, `tests/contracts/project/app-entry-contracts.test.js`, `tests/contracts/project/forum-hook-contracts.test.js`, `tests/contracts/project/seo-indexing-contracts.test.js`, `tests/support/runtimeGovernance.js`, `tests/unit/metamarket/catalog.test.js`
 - `app/ads.js` — fan-in 6; основные потребители: `app/about/page.js`, `app/academy/page.js`, `app/exchange/page.js`, `app/game/page.js`, `app/page.js`, `app/subscribe/subscribe.client.jsx`
+- `app/api/dm/_db.js` — fan-in 6; основные потребители: `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/unblock/route.js`, `tests/unit/mongo/dm-primary.test.js`
+- `app/forum/features/media/utils/mediaLifecycleRuntime.js` — fan-in 6; основные потребители: `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostCardBridge.jsx`, `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/media/components/ExternalVideoPlayer.jsx`, `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/hooks/useForumMediaCoordinator.js`
 - `app/forum/shared/hooks/useEvent.js` — fan-in 6; основные потребители: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/feed/hooks/useForumFeedRuntime.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/hooks/useForumProfileSync.js`, `app/forum/shared/hooks/useForumNavBridge.js`
 - `app/forum/shared/utils/formatters.js` — fan-in 6; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/ForumRoot.jsx`
-- `lib/geo/request-geo.cjs` — fan-in 6; основные потребители: `app/api/forum/mutate/route.js`, `app/api/geo/session-touch/route.js`, `lib/forum/forum-server-complete-reader.cjs`, `lib/forum/forum-server-page-reader.cjs`, `lib/geo/geo-rings.cjs`, `lib/mongo/profile-geo-primary.cjs`
-- `app/api/dm/_db.js` — fan-in 5; основные потребители: `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/unblock/route.js`
-- `app/forum/features/dm/utils/dmLoaders.js` — fan-in 5; основные потребители: `app/forum/features/dm/hooks/useDmDeleteController.js`, `app/forum/features/dm/hooks/useDmLocalCache.js`, `app/forum/features/dm/hooks/useForumDmRuntime.js`, `app/forum/features/dm/services/sendDmComposerMessage.js`, `tests/unit/forum/features/dm/utils/dmLoaders.test.js`
 
 ## Вывод
 

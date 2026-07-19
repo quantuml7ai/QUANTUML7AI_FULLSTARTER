@@ -13,6 +13,8 @@ import {
 const MOBILE_OAUTH_GRACE_KEY = 'ql7_wallet_mobile_oauth_grace_until'
 const MOBILE_OAUTH_GRACE_MS = 15000
 const WALLET_SESSION_REVERIFY_MS = 60 * 1000
+const WALLET_SESSION_FOCUS_REVERIFY_MS = 20 * 1000
+const WALLET_SESSION_SILENT_REVERIFY_MIN_MS = 30 * 1000
 
 const shortAddr = (value) => {
   const address = String(value || '').trim()
@@ -184,6 +186,8 @@ export default function AuthNavClient() {
   const [tgLinked, setTgLinked] = useState(false)
   const checkingRef = useRef(false)
   const openingTimerRef = useRef(null)
+  const verifyInFlightRef = useRef(null)
+  const lastVerifyAtRef = useRef(0)
 
   const refreshLocalAuth = useCallback(() => {
     const tmaMode = detectTMAHard()
@@ -210,37 +214,57 @@ export default function AuthNavClient() {
 
   const verifySession = useCallback(async (options = {}) => {
     const silent = !!options.silent
+    const force = options.force === true
+    const minAgeMs = Math.max(0, Number(options.minAgeMs || 0))
+    const verifiedRecently = !force && minAgeMs > 0 && Date.now() - Number(lastVerifyAtRef.current || 0) < minAgeMs
+    if (verifiedRecently) return !!readAccountId()
     if (!silent) setChecking(true)
-    try {
-      if (detectTMAHard()) {
-        const tmaAccount = readTmaAccountId()
-        if (tmaAccount) {
-          publishTmaAuth(tmaAccount)
-          setAccountId(tmaAccount)
+    if (verifyInFlightRef.current) {
+      try {
+        return await verifyInFlightRef.current
+      } finally {
+        if (!silent) setChecking(false)
+      }
+    }
+    const task = (async () => {
+      try {
+        if (detectTMAHard()) {
+          const tmaAccount = readTmaAccountId()
+          if (tmaAccount) {
+            publishTmaAuth(tmaAccount)
+            setAccountId(tmaAccount)
+            return true
+          }
+          setAccountId('')
+          return false
+        }
+
+        const stored = getStoredWalletSession()
+        if (!stored.token) {
+          if (isMobileOAuthGraceActive()) return false
+          setAccountId('')
+          return false
+        }
+        const result = await verifyStoredWalletSession()
+        if (result?.authorized) {
+          setAccountId(result.accountId || result.walletAddress || '')
           return true
+        }
+        if (result?.transient) {
+          const fallbackAccount = stored.accountId || stored.walletAddress || ''
+          if (fallbackAccount) setAccountId(fallbackAccount)
+          return !!fallbackAccount
         }
         setAccountId('')
         return false
+      } finally {
+        lastVerifyAtRef.current = Date.now()
+        verifyInFlightRef.current = null
       }
-
-      const stored = getStoredWalletSession()
-      if (!stored.token) {
-        if (isMobileOAuthGraceActive()) return false
-        setAccountId('')
-        return false
-      }
-      const result = await verifyStoredWalletSession()
-      if (result?.authorized) {
-        setAccountId(result.accountId || result.walletAddress || '')
-        return true
-      }
-      if (result?.transient) {
-        const fallbackAccount = stored.accountId || stored.walletAddress || ''
-        if (fallbackAccount) setAccountId(fallbackAccount)
-        return !!fallbackAccount
-      }
-      setAccountId('')
-      return false
+    })()
+    verifyInFlightRef.current = task
+    try {
+      return await task
     } finally {
       if (!silent) setChecking(false)
     }
@@ -251,7 +275,7 @@ export default function AuthNavClient() {
     const tmaMode = detectTMAHard()
     setIsTMA(tmaMode)
     refreshLocalAuth()
-    void verifySession()
+    void verifySession({ force: true })
   }, [refreshLocalAuth, verifySession])
 
   useEffect(() => {
@@ -260,7 +284,7 @@ export default function AuthNavClient() {
       try {
         if (detectTMAHard()) return
         if (!getStoredWalletSession().token) return
-        void verifySession({ silent: true })
+        void verifySession({ silent: true, minAgeMs: WALLET_SESSION_SILENT_REVERIFY_MIN_MS })
       } catch {}
     }, WALLET_SESSION_REVERIFY_MS)
     return () => window.clearInterval(id)
@@ -284,7 +308,7 @@ export default function AuthNavClient() {
       setOpening(false)
       setAccountId('')
     }
-    const onFocus = () => { void verifySession() }
+    const onFocus = () => { void verifySession({ minAgeMs: WALLET_SESSION_FOCUS_REVERIFY_MS }) }
     window.addEventListener('auth:ok', onAuthOk)
     window.addEventListener('wallet-session:verified', onAuthOk)
     window.addEventListener('auth:logout', onLogout)

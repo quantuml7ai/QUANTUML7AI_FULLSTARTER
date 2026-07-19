@@ -4833,9 +4833,20 @@ padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
   letter-spacing:.02em;
   cursor:pointer;
   transition: transform .12s ease, filter .12s ease, box-shadow .18s ease;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:30px;
 }
 .dmConfirmBtn:hover{ filter:brightness(1.08) saturate(1.08); box-shadow:0 0 16px rgba(80,167,255,.25); }
 .dmConfirmBtn:active{ transform:translateY(1px) scale(.98); }
+.dmConfirmBtn:disabled{
+  cursor:wait;
+  opacity:.82;
+  transform:none;
+  filter:none;
+}
 .dmConfirmBtn.primary{
   border-color: rgba(140,200,255,.65);
   background: linear-gradient(120deg, rgba(40,140,255,.65), rgba(100,200,255,.35));
@@ -4843,7 +4854,28 @@ padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
   text-shadow:0 0 8px rgba(255,255,255,.4);
 }
 .dmConfirmBtn.primary:hover{ filter:brightness(1.1) saturate(1.1); }
+.dmConfirmBtn.primary.isPending{
+  border-color:rgba(96,214,255,.82);
+  box-shadow:0 0 18px rgba(80,188,255,.22), inset 0 0 14px rgba(255,255,255,.14);
+}
+.dmConfirmSpinner{
+  width:13px;
+  height:13px;
+  border-radius:999px;
+  border:2px solid rgba(10,27,46,.28);
+  border-top-color:#f7fbff;
+  border-right-color:#87e6ff;
+  box-shadow:0 0 10px rgba(117,225,255,.45);
+  animation:dmConfirmSpin .72s linear infinite;
+}
 .dmConfirmBtn.ghost{ background: transparent; color:#d6e9ff; }
+.dmConfirmBtn:disabled:hover{
+  filter:none;
+  box-shadow:0 0 14px rgba(80,188,255,.18);
+}
+@keyframes dmConfirmSpin{
+  to{ transform:rotate(360deg); }
+}
 @keyframes dmPopIn{
   0%{ opacity:0; transform: translateY(6px) scale(.98); }
   100%{ opacity:1; transform: translateY(0) scale(1); }

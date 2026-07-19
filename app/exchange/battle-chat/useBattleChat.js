@@ -49,6 +49,8 @@ export function useBattleChat() {
   const mountedRef = useRef(false)
   const syncTokenRef = useRef('')
   const requestSeqRef = useRef(0)
+  const deltaRefreshTimerRef = useRef(null)
+  const deltaRefreshInFlightRef = useRef(false)
 
   const acceptPayload = useCallback((payload) => {
     if (!payload) return
@@ -98,11 +100,38 @@ export function useBattleChat() {
     }
   }, [acceptPayload, loadSnapshot])
 
+  const scheduleDeltaRefresh = useCallback((delay = 60) => {
+    if (!mountedRef.current) return
+    if (typeof window === 'undefined') {
+      void loadDelta()
+      return
+    }
+    if (deltaRefreshTimerRef.current) window.clearTimeout(deltaRefreshTimerRef.current)
+    deltaRefreshTimerRef.current = window.setTimeout(async () => {
+      deltaRefreshTimerRef.current = null
+      if (!mountedRef.current) return
+      if (deltaRefreshInFlightRef.current) {
+        scheduleDeltaRefresh(160)
+        return
+      }
+      deltaRefreshInFlightRef.current = true
+      try {
+        await loadDelta()
+      } finally {
+        deltaRefreshInFlightRef.current = false
+      }
+    }, delay)
+  }, [loadDelta])
+
   useEffect(() => {
     mountedRef.current = true
     loadSnapshot()
     return () => {
       mountedRef.current = false
+      if (deltaRefreshTimerRef.current && typeof window !== 'undefined') {
+        window.clearTimeout(deltaRefreshTimerRef.current)
+        deltaRefreshTimerRef.current = null
+      }
       requestSeqRef.current += 1
     }
   }, [loadSnapshot])
@@ -135,19 +164,32 @@ export function useBattleChat() {
     let closed = false
     let es = null
     let reconnectTimer = null
+    const handleRealtimeEvent = (event) => {
+      try {
+        const payload = JSON.parse(event.data)
+        if (payload?.compact && !payload?.message && !payload?.messages) {
+          scheduleDeltaRefresh()
+          return
+        }
+        acceptPayload(payload)
+      } catch {}
+    }
+    const closeEventSource = () => {
+      if (!es) return
+      try { es.removeEventListener('battlecoin-chat-message', handleRealtimeEvent) } catch {}
+      try { es.removeEventListener('battlecoin-chat-reaction', handleRealtimeEvent) } catch {}
+      try { es.close?.() } catch {}
+      es = null
+    }
 
     const connect = () => {
       if (closed) return
       try {
         es = new window.EventSource('/api/battlecoin/chat/events')
-        es.addEventListener('battlecoin-chat-message', (event) => {
-          try { acceptPayload(JSON.parse(event.data)) } catch {}
-        })
-        es.addEventListener('battlecoin-chat-reaction', (event) => {
-          try { acceptPayload(JSON.parse(event.data)) } catch {}
-        })
+        es.addEventListener('battlecoin-chat-message', handleRealtimeEvent)
+        es.addEventListener('battlecoin-chat-reaction', handleRealtimeEvent)
         es.onerror = () => {
-          try { es?.close?.() } catch {}
+          closeEventSource()
           if (!closed) reconnectTimer = window.setTimeout(connect, 1800)
         }
       } catch {}
@@ -157,9 +199,9 @@ export function useBattleChat() {
     return () => {
       closed = true
       if (reconnectTimer) window.clearTimeout(reconnectTimer)
-      try { es?.close?.() } catch {}
+      closeEventSource()
     }
-  }, [acceptPayload])
+  }, [acceptPayload, scheduleDeltaRefresh])
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined

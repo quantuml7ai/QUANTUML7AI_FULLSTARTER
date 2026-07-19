@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-07-15T18:24:12.261Z
+Сгенерировано автоматически: 2026-07-18T19:56:01.922Z
 
 ## Общий Принцип
 
@@ -559,6 +559,13 @@
 - Зона: `public/qcoind`
 - Назначение: Статические ассеты namespace qcoind.
 - Точки входа: `public/qcoind/mini.mp4`
+- Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
+
+### public/ql7
+
+- Зона: `public/ql7`
+- Назначение: Статические ассеты namespace ql7.
+- Точки входа: `public/ql7/ql7support.png`
 - Связанные зоны: `app`, `components`, `app/forum`, `styles/public URLs`
 
 ### public/Quest

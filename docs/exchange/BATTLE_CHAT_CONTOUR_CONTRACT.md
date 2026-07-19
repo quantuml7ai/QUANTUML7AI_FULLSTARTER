@@ -7,7 +7,8 @@ Battle Chat is an isolated BattleCoin surface. It must not be implemented throug
 - Durable messages live only in Mongo collection `battlecoin_chat_messages`.
 - Durable likes live only in Mongo collection `battlecoin_chat_likes`.
 - Cooldown, minute rate limits, and session hard limits live in Mongo collection `battlecoin_chat_sender_state`.
-- Redis may only publish transient realtime events through `battlecoin:chat:events:v1`; it is not a message, like, profile, or counter database for Battle Chat.
+- Redis may only publish compact transient realtime impulses through `battlecoin:chat:events:v1`; payloads contain only `type`, `channel`, `messageId`, `syncToken`, timestamp, and Mongo-primary metadata.
+- Redis BattleChat events must never contain message text, author profiles, avatars, aliases, like rows, or full message DTOs. Clients hydrate compact impulses through `GET /api/battlecoin/chat/messages` Mongo deltas.
 
 ## API Boundary
 

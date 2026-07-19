@@ -17,6 +17,7 @@ export default function ForumOverlayStack({
   dmDeleteCheckboxLabel,
   dmDeleteForAll,
   setDmDeleteForAll,
+  dmDeletePending,
   closeDmDeletePopover,
   confirmDmDelete,
   t,
@@ -93,6 +94,7 @@ export default function ForumOverlayStack({
         checkboxLabel={dmDeleteCheckboxLabel}
         checked={dmDeleteForAll}
         onChecked={setDmDeleteForAll}
+        pending={dmDeletePending}
         onCancel={closeDmDeletePopover}
         onConfirm={confirmDmDelete}
         cancelLabel={t('dm_delete_cancel') || t('forum_cancel')}

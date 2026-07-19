@@ -24,7 +24,9 @@ export default function useDmDeleteController({
 }) {
   const [dmDeletePopover, setDmDeletePopover] = useState(null)
   const [dmDeleteForAll, setDmDeleteForAll] = useState(false)
+  const [dmDeletePending, setDmDeletePending] = useState(false)
   const dmDeleteForAllRef = useRef(false)
+  const dmDeletePendingRef = useRef(false)
 
   const setDmDeleteForAllTracked = useCallback((next) => {
     const resolved = typeof next === 'function' ? next(dmDeleteForAllRef.current) : next
@@ -209,6 +211,8 @@ export default function useDmDeleteController({
     // Default to "delete for all" for both dialog/message.
     // User can still uncheck in the popover.
     setDmDeleteForAllTracked(true)
+    dmDeletePendingRef.current = false
+    setDmDeletePending(false)
     setDmDeletePopover({ kind, rect, ...payload })
   }, [setDmDeleteForAllTracked])
 
@@ -219,7 +223,9 @@ export default function useDmDeleteController({
 
   const confirmDmDelete = useCallback(async (forAllOverride) => {
     const info = dmDeletePopover
-    if (!info) return
+    if (!info || dmDeletePendingRef.current) return
+    dmDeletePendingRef.current = true
+    setDmDeletePending(true)
     const kind = String(info.kind || '').trim()
     // Defensive against fast checkbox->confirm race:
     // stale false from render must never override fresh true from tracked ref.
@@ -261,6 +267,8 @@ export default function useDmDeleteController({
         toast?.err?.(t('forum_delete_failed'))
       } catch {}
     } finally {
+      dmDeletePendingRef.current = false
+      setDmDeletePending(false)
       closeDmDeletePopover()
     }
   }, [
@@ -283,6 +291,7 @@ export default function useDmDeleteController({
     setDmDeletePopover,
     dmDeleteForAll,
     setDmDeleteForAll: setDmDeleteForAllTracked,
+    dmDeletePending,
     toggleDmBlock,
     openDmDeletePopover,
     closeDmDeletePopover,
