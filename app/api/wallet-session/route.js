@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
+import { notifyQl7Welcome } from '../../../lib/ql7-support/events.js'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -280,6 +281,13 @@ async function createSession(body) {
 
   await storeSet(sessionKey(token), session, ttlSeconds)
   await writeLatestSession(session, token, ttlSeconds, 'active')
+  await notifyQl7Welcome({
+    userId: accountId,
+    userAliases: [walletAddress],
+    registeredAt: new Date(session.createdAt).toISOString(),
+  }).catch((error) => {
+    console.warn('[ql7-support:welcome]', error?.message || error)
+  })
 
   return json({
     ok: true,

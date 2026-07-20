@@ -256,6 +256,7 @@ export default function useForumDmRuntime({
   dmPageSize,
   dmActiveThrottleMs,
   dmBgThrottleMs,
+  locale = '',
 }) {
   const [inboxOpen, setInboxOpen] = useState(false)
   const [inboxTab, setInboxTab] = useState('messages')
@@ -664,6 +665,7 @@ export default function useForumDmRuntime({
       setDmThreadCursor,
       setDmThreadHasMore,
       setDmThreadSeenTs,
+      locale,
     })
   }, [
     meId,
@@ -676,6 +678,7 @@ export default function useForumDmRuntime({
     setDmDeletedMap,
     setDmDialogs,
     setDmWithUserId,
+    locale,
   ])
 
   const reopenDeletedDmDialog = useCallback((uid, rawUid = '') => {
@@ -709,6 +712,7 @@ export default function useForumDmRuntime({
       headers: {
         'x-forum-user-id': String(meId),
         'x-auth-account-id': String(meId),
+        'x-forum-locale': String(locale || ''),
         'x-ql7-dm-refresh-reason': String(reason),
       },
     })
@@ -743,7 +747,7 @@ export default function useForumDmRuntime({
     setDmDialogsHasMore(!!payload.hasMore)
     setDmDialogsLoaded(true)
     return payload
-  }, [meId, dmPageSize, dmDeletedKey, setDmDeletedMap])
+  }, [meId, dmPageSize, dmDeletedKey, setDmDeletedMap, locale])
 
   const fetchDmThreadRealtime = useCallback(async (withUserId, reason = 'dm-realtime-thread') => {
     const uid = String(withUserId || '').trim()
@@ -760,6 +764,7 @@ export default function useForumDmRuntime({
       headers: {
         'x-forum-user-id': String(meId),
         'x-auth-account-id': String(meId),
+        'x-forum-locale': String(locale || ''),
         'x-ql7-dm-refresh-reason': String(reason),
       },
     })
@@ -804,6 +809,7 @@ export default function useForumDmRuntime({
     setDmDialogs,
     dmWithUserId,
     setDmWithUserId,
+    locale,
   ])
 
   const applyDmRealtimeDeleteImpulse = useCallback((detail = {}) => {

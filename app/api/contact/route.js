@@ -1,43 +1,25 @@
 import { NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
+import { sendSupportEmail, validateContactEmailPayload } from '../../../lib/supportEmailTransport.js'
 
 export async function POST(req) {
   try {
-    const { name, email, message } = await req.json()
+    const body = await req.json()
+    const payload = validateContactEmailPayload(body)
 
-    const safeName = (name || '').toString().trim()
-    const safeEmail = (email || '').toString().trim()
-    const safeMessage = (message || '').toString().trim()
-
-    if (!safeName || !safeEmail || !safeMessage) {
+    if (!payload.ok) {
       return NextResponse.json(
         { ok: false, error: 'missing_fields' },
         { status: 400 }
       )
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT || 587),
-      secure: Number(process.env.SMTP_PORT) === 465, // true для 465
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    })
-
-    const toEmail =
-      process.env.CONTACT_EMAIL_TO || process.env.SMTP_FROM || process.env.SMTP_USER
-
-    await transporter.sendMail({
-      from: `"Q Coin Site" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
-      to: toEmail,
-      subject: `Новое сообщение с формы контактов от ${safeName}`,
-      replyTo: `"${safeName}" <${safeEmail}>`,
-      text:
-        `Имя: ${safeName}\n` +
-        `E-mail: ${safeEmail}\n\n` +
-        `Сообщение:\n${safeMessage}`,
+    await sendSupportEmail({
+      source: 'contact_form',
+      name: payload.name,
+      email: payload.email,
+      replyTo: payload.email,
+      subject: `Новое сообщение с формы контактов от ${payload.name}`,
+      message: `Сообщение:\n${payload.message}`,
     })
 
     return NextResponse.json({ ok: true })

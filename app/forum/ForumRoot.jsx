@@ -23,6 +23,7 @@ import {
   FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES,
   FORUM_VIDEO_CAMERA_RECORD_EPSILON_SEC,
 } from './shared/constants/media'
+import { QL7_SUPPORT_ID, isQl7SupportId } from '../../lib/ql7-support/systemActor'
 import { readForumRuntimeConfig } from './shared/config/runtime'
 import useForumNavBridge from './shared/hooks/useForumNavBridge'
 import { hasAnyLink } from './shared/utils/linkDetection'
@@ -721,7 +722,25 @@ const {
   dmPageSize: DM_PAGE_SIZE,
   dmActiveThrottleMs: DM_ACTIVE_THROTTLE_MS,
   dmBgThrottleMs: DM_BG_THROTTLE_MS,
+  locale,
 })
+const dmSupportMode = !!dmMode && isQl7SupportId(dmWithUserId)
+const openQl7SupportThread = useCallback(() => {
+  const uid = QL7_SUPPORT_ID
+  try { reopenDeletedDmDialog?.(uid, uid) } catch {}
+  try { pushNavState?.(`dm_${uid}`) } catch {}
+  try { setInboxOpen(true) } catch {}
+  try { setInboxTab('messages') } catch {}
+  try { setDmWithUserId(uid) } catch {}
+  try { requestAlignInboxStartUnderTabs?.({ reason: 'ql7_support_launcher' }) } catch {}
+}, [
+  pushNavState,
+  reopenDeletedDmDialog,
+  requestAlignInboxStartUnderTabs,
+  setDmWithUserId,
+  setInboxOpen,
+  setInboxTab,
+])
 inboxMessagesModeRef.current = !!inboxOpen && inboxTab === 'messages'
 useHtmlFlag('data-inbox-open', inboxOpen ? '1' : null)
 const {
@@ -1648,6 +1667,7 @@ const {
     setPendingVideo,
     textLimit,
     dmMode,
+    dmSupportMode,
     resolveProfileAccountId,
     dmWithUserId,
     selectedTopic: sel,
@@ -1661,6 +1681,7 @@ const {
     loadDmDialogs,
     setDmBlockedByReceiverMap,
     toastI18n,
+    locale,
     hasAnyLink,
     safeReadProfile,
     resolveNickForDisplay,
@@ -1755,6 +1776,50 @@ const {
   pendingVideo,
   composerBusy,
 })
+
+React.useEffect(() => {
+  if (!dmSupportMode) return
+  try { setEmojiOpen(false) } catch {}
+  try { setPendingImgs([]) } catch {}
+  try { setPendingSticker(null) } catch {}
+  try { if (pendingAudio && /^blob:/i.test(String(pendingAudio))) URL.revokeObjectURL(pendingAudio) } catch {}
+  try { setPendingAudio(null) } catch {}
+  try {
+    if (pendingVideo && /^blob:/i.test(String(pendingVideo))) {
+      pendingVideoBlobMetaRef.current?.delete?.(String(pendingVideo))
+      URL.revokeObjectURL(pendingVideo)
+    }
+  } catch {}
+  try { setPendingVideo(null) } catch {}
+  try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
+  try { setVideoOpen(false) } catch {}
+  try { setVideoState('idle') } catch {}
+  try { setVideoProgress(0) } catch {}
+  try { stopMediaProg() } catch {}
+  try { setMediaPipelineOn(false) } catch {}
+  try { setMediaBarOn(false) } catch {}
+  try { setMediaPhase('idle') } catch {}
+  try { setMediaPct(0) } catch {}
+}, [
+  dmSupportMode,
+  pendingAudio,
+  pendingVideo,
+  pendingVideoBlobMetaRef,
+  pendingVideoInfoRef,
+  setEmojiOpen,
+  setMediaBarOn,
+  setMediaPct,
+  setMediaPhase,
+  setMediaPipelineOn,
+  setPendingAudio,
+  setPendingImgs,
+  setPendingSticker,
+  setPendingVideo,
+  setVideoOpen,
+  setVideoProgress,
+  setVideoState,
+  stopMediaProg,
+])
 
 const {
   openProfilePostsBranch,
@@ -1901,6 +1966,7 @@ const {
     setDmDeleteForAll,
     setInboxTab,
     setDmWithUserId,
+    openQl7SupportThread,
     requestAlignInboxStartUnderTabs,
     setInboxOpen,
     pushNavStateStable,
@@ -2104,6 +2170,7 @@ const profileBranchTopicsLength = useMemo(() => {
     getScrollEl,
     data,
     pushNavState,
+    openQl7SupportThread,
     setTopicFilterId,
     setSel,
     setThreadRoot,
@@ -2337,6 +2404,7 @@ const profileBranchTopicsLength = useMemo(() => {
     canSend,
     composerBusy,
     dmMode,
+    dmSupportMode,
     onSendClick: handleComposerSendButtonClick,
     setText,
     setComposerActive,

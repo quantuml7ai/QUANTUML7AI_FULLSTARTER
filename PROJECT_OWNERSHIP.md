@@ -4,7 +4,7 @@
 > Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
 
-Сгенерировано автоматически: 2026-07-18T19:56:01.922Z
+Сгенерировано автоматически: 2026-07-20T09:07:09.711Z
 
 ## Общий Принцип
 
@@ -408,7 +408,7 @@
 
 - Зона: `lib`
 - Назначение: Глобальные библиотеки проекта: metadata, geo, subscriptions, forum-share, trim, redis, tma и бизнес-хелперы.
-- Точки входа: `lib/adsCore.js`, `lib/authActionGateClient.js`, `lib/brain.js`, `lib/databroker.js`, `lib/fcm.js`, `lib/forumShareManager.js`, `lib/forumVideoTrim.js`, `lib/geo/countries.js`, `lib/geo/regions.js`, `lib/indicators.js`, `lib/metadataCache.js`, `lib/nativePush.js`, `lib/notificationCenter.js`, `lib/redis.js`, `lib/safeWin.js`, `lib/seo/siteIndex.js`, `lib/seo/siteOrigin.js`, `lib/seo/structuredData.js`, `lib/storage/mediaKeys.js`, `lib/storage/r2.js`, `lib/subscriptions.js`, `lib/tma.js`, `lib/walletSessionClient.js`, `lib/webPush.js`
+- Точки входа: `lib/adsCore.js`, `lib/authActionGateClient.js`, `lib/brain.js`, `lib/databroker.js`, `lib/fcm.js`, `lib/forumShareManager.js`, `lib/forumVideoTrim.js`, `lib/geo/countries.js`, `lib/geo/regions.js`, `lib/indicators.js`, `lib/metadataCache.js`, `lib/nativePush.js`, `lib/notificationCenter.js`, `lib/ql7-support/broadcast.js`, `lib/ql7-support/events.js`, `lib/ql7-support/scheduler.js`, `lib/ql7-support/server.js`, `lib/ql7-support/systemActor.js`, `lib/ql7-support/templates.js`, `lib/redis.js`, `lib/safeWin.js`, `lib/seo/siteIndex.js`, `lib/seo/siteOrigin.js`, `lib/seo/structuredData.js`, `lib/storage/mediaKeys.js`, `lib/storage/r2.js`, `lib/subscriptions.js`, `lib/supportEmailTransport.js`, `lib/tma.js`, `lib/walletSessionClient.js`, `lib/webPush.js`
 - Связанные зоны: `app`, `app/api`, `components`, `app/forum`
 - Примечания: Это не UI-слой; здесь должна жить инфраструктура и общая прикладная логика.
 

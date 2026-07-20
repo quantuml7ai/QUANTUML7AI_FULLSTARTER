@@ -306,10 +306,11 @@ export async function dmFetchCached({
   if (!opts?.force && cacheRef.current.has(key)) return cacheRef.current.get(key)
   if (inflightRef.current.has(key)) return inflightRef.current.get(key)
   const p = (async () => {
+    const extraHeaders = opts?.headers && typeof opts.headers === 'object' ? opts.headers : {}
     const r = await fetchImpl(url, {
       method: 'GET',
       cache: 'no-store',
-      headers: { 'x-forum-user-id': String(meId) },
+      headers: { 'x-forum-user-id': String(meId), ...extraHeaders },
     })
     const j = await r.json().catch(() => null)
     return j
@@ -439,6 +440,7 @@ export async function loadDmThread(withUserId, cursor = null, opts = {}, ctx = {
     setDmThreadCursor,
     setDmThreadHasMore,
     setDmThreadSeenTs,
+    locale = '',
   } = ctx
 
   const uid = String(withUserId || '').trim()
@@ -473,7 +475,13 @@ export async function loadDmThread(withUserId, cursor = null, opts = {}, ctx = {
       dmThreadInFlightRef,
       key,
       `/api/dm/thread?${qs.toString()}`,
-      opts
+      {
+        ...opts,
+        headers: {
+          ...(opts?.headers && typeof opts.headers === 'object' ? opts.headers : {}),
+          'x-forum-locale': String(locale || ''),
+        },
+      }
     )
     if (j?.ok) {
       const deletedMap = dmDeletedMsgMap || {}

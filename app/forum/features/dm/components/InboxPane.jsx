@@ -70,6 +70,7 @@ export default function InboxPane({
   dmDeletedMap,
   dmSeenMap,
   pushNavState,
+  openQl7SupportThread,
   stripMediaUrlsFromText,
   dmDialogsHasMore,
   dmDialogsLoading,
@@ -210,6 +211,7 @@ export default function InboxPane({
             dmDeletedMap={dmDeletedMap}
             dmSeenMap={dmSeenMap}
             pushNavState={pushNavState}
+            openQl7SupportThread={openQl7SupportThread}
             setInboxTab={setInboxTab}
             setDmWithUserId={setDmWithUserId}
             stripMediaUrlsFromText={stripMediaUrlsFromText}

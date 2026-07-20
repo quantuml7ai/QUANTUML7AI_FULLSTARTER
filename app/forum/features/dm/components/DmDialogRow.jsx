@@ -7,12 +7,17 @@ import StarButton from '../../ui/components/StarButton'
 import AvatarEmoji from '../../profile/components/AvatarEmoji'
 import VipFlipBadge from '../../profile/components/VipFlipBadge'
 import useVipFlag from '../../profile/hooks/useVipFlag'
+import Ql7SupportPopover from './Ql7SupportPopover'
 import {
   safeReadProfile,
   resolveProfileAccountId,
   resolveNickForDisplay,
   resolveIconForDisplay,
 } from '../../profile/utils/profileCache'
+import {
+  isQl7SupportId,
+  resolveQl7SupportDisplayName,
+} from '../../../../../lib/ql7-support/systemActor'
 import {
   normalizeDmUrl,
   isDmStickerUrl,
@@ -96,6 +101,8 @@ export default function DmDialogRow({
   stripMediaUrlsFromText,
 }) {
   const uid = String(dialog?.userId || '').trim()
+  const isSupportDialog = isQl7SupportId(uid)
+  const [supportPopoverAnchor, setSupportPopoverAnchor] = React.useState(null)
   const prof = safeReadProfile(uid) || {}
   const isVipAuthor = useVipFlag(uid, prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null)
   if (!uid) return null
@@ -116,7 +123,9 @@ export default function DmDialogRow({
     serverUnreadCount > 0 ||
     (!!uid && !!lastFrom && lastFrom !== String(meId))
   )
-  const nick = resolveNickForDisplay(uid, '')
+  const nick = isSupportDialog
+    ? (t?.('ql7_support_display_name') || resolveQl7SupportDisplayName(t))
+    : resolveNickForDisplay(uid, '')
   const lastTextRaw = String(last?.text || '')
   const { text: lastCleanText, stickers: lastTextStickers } = extractDmStickersFromText(lastTextRaw)
   const lastAtts = Array.isArray(last?.attachments) ? last.attachments : []
@@ -168,6 +177,10 @@ export default function DmDialogRow({
   const openProfile = (e) => {
     e?.preventDefault?.()
     e?.stopPropagation?.()
+    if (isSupportDialog) {
+      setSupportPopoverAnchor(e?.currentTarget || null)
+      return
+    }
     const anchor =
       e?.currentTarget?.closest?.('.dmRow')?.querySelector?.('.dmRowAvatar') ||
       e?.currentTarget
@@ -212,20 +225,21 @@ export default function DmDialogRow({
             </div>
             <button
               type="button"
-              className={cls('nick-badge nick-animate dmRowNick', isVipAuthor && 'vipNick')}
+              className={cls('nick-badge nick-animate dmRowNick', isVipAuthor && !isSupportDialog && 'vipNick', isSupportDialog && 'systemNick')}
               translate="no"
               onClick={openProfile}
+              aria-label={isSupportDialog ? (t?.('ql7_support_verified') || nick) : undefined}
             >
-              <span className="nick-text">{nick || shortId(uid)}</span>
+              <span className="nick-text"><bdi>{nick || shortId(uid)}</bdi></span>
             </button>
-            {!!uid && !isSelf && (
+            {!!uid && !isSelf && !isSupportDialog && (
               <StarButton
                 on={isStarred}
                 onClick={() => onToggleStar?.(uid)}
                 title={isStarred ? t?.('forum_subscribed') : t?.('forum_subscribe')}
               />
             )}
-            {isVipAuthor && <VipFlipBadge />}
+            {isVipAuthor && !isSupportDialog && <VipFlipBadge />}
           </div>
         </div>
 
@@ -289,6 +303,14 @@ export default function DmDialogRow({
         </svg>
       </button>
       {unread && <span className="dmUnreadDot" aria-hidden="true" />}
+      {isSupportDialog && (
+        <Ql7SupportPopover
+          anchor={supportPopoverAnchor}
+          open={!!supportPopoverAnchor}
+          onClose={() => setSupportPopoverAnchor(null)}
+          t={t}
+        />
+      )}
     </div>
   )
 }

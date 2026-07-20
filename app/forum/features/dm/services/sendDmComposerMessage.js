@@ -11,6 +11,8 @@ export async function sendDmComposerMessage({
   videoUrlToSend,
   resolveMediaPayloadFn,
   dmBlockedMap,
+  dmSupportMode = false,
+  locale = '',
   t,
   onFail,
   setDmThreadItems,
@@ -52,17 +54,18 @@ export async function sendDmComposerMessage({
   }
 
   if (String(uid) === String(dmTarget)) return fail(t('dm_blocked'))
-  if (dmBlockedMap?.[dmTarget]) return fail(t('dm_you_blocked'))
+  if (!dmSupportMode && dmBlockedMap?.[dmTarget]) return fail(t('dm_you_blocked'))
 
   const dmText = [
     String(text || '').trim(),
-    pendingSticker?.src
+    !dmSupportMode && pendingSticker?.src
       ? `[${String(pendingSticker?.kind || '') === 'mozi' ? 'MOZI' : 'VIP_EMOJI'}:${String(pendingSticker.src)}]`
       : '',
   ].filter(Boolean).join('\n')
+  const dmSupportBroadcastCommandMode = !!dmSupportMode && /^\s*Admin\b/iu.test(dmText)
   const rawToId = String(dmWithUserId || '').trim()
-  const pendingAudioUrl = String(pendingAudio || '').trim()
-  const pendingVideoUrl = String(pendingVideo || '').trim()
+  const pendingAudioUrl = dmSupportMode ? '' : String(pendingAudio || '').trim()
+  const pendingVideoUrl = dmSupportMode ? '' : String(pendingVideo || '').trim()
   const optimisticAudioUrl =
     String(audioUrlToSend || '').trim() ||
     pendingAudioUrl
@@ -95,7 +98,7 @@ export async function sendDmComposerMessage({
     const vv = String(videoUrl || '').trim()
     const safeVideoMeta = vv ? readVideoMetaForUrl(vv, videoMeta) : null
     return [
-      ...(Array.isArray(pendingImgs) ? pendingImgs : []).map((u) => ({ url: u, type: 'image' })),
+      ...(!dmSupportMode && Array.isArray(pendingImgs) ? pendingImgs : []).map((u) => ({ url: u, type: 'image' })),
       ...(au ? [{ url: au, type: 'audio' }] : []),
       ...(vv ? [{ url: vv, type: 'video', ...(safeVideoMeta || {}) }] : []),
     ].filter(Boolean)
@@ -125,22 +128,24 @@ export async function sendDmComposerMessage({
     status: 'sending',
   }
   const matchesTargetDialog = (dialog) => dialogMatchesUser(dialog, dmTarget, uid)
-  setDmThreadItems((prev) => [...(prev || []), optimistic])
-  focusMessage(tmpId, 'dm-send-optimistic')
-  setDmDialogs((prev) => {
-    const list = dedupeDmDialogs(Array.isArray(prev) ? prev.slice() : [], uid)
-    const idx = list.findIndex(matchesTargetDialog)
-    const prevLastMessage = idx >= 0 ? (list[idx]?.lastMessage || null) : null
-    const lastMessage = { ...optimistic, __optimisticPrevLastMessage: prevLastMessage }
-    if (idx >= 0) {
-      const next = { ...list[idx], userId: dmTarget, lastMessage }
-      list.splice(idx, 1)
-      return dedupeDmDialogs([next, ...list], uid)
-    }
-    return dedupeDmDialogs([{ userId: dmTarget, lastMessage }, ...list], uid)
-  })
-  dmDialogsCacheRef.current.clear()
-  dmThreadCacheRef.current.clear()
+  if (!dmSupportBroadcastCommandMode) {
+    setDmThreadItems((prev) => [...(prev || []), optimistic])
+    focusMessage(tmpId, 'dm-send-optimistic')
+    setDmDialogs((prev) => {
+      const list = dedupeDmDialogs(Array.isArray(prev) ? prev.slice() : [], uid)
+      const idx = list.findIndex(matchesTargetDialog)
+      const prevLastMessage = idx >= 0 ? (list[idx]?.lastMessage || null) : null
+      const lastMessage = { ...optimistic, __optimisticPrevLastMessage: prevLastMessage }
+      if (idx >= 0) {
+        const next = { ...list[idx], userId: dmTarget, lastMessage }
+        list.splice(idx, 1)
+        return dedupeDmDialogs([next, ...list], uid)
+      }
+      return dedupeDmDialogs([{ userId: dmTarget, lastMessage }, ...list], uid)
+    })
+    dmDialogsCacheRef.current.clear()
+    dmThreadCacheRef.current.clear()
+  }
 
   const removeOptimisticMessage = () => {
     setDmThreadItems((prev) => (prev || []).filter((m) => String(m?.id || '') !== String(tmpId)))
@@ -185,6 +190,7 @@ export async function sendDmComposerMessage({
   }
 
   let dmSendOk = false
+  let dmBroadcastOk = false
   try {
     let finalAudioUrl = String(audioUrlToSend || '').trim()
     let finalVideoUrl = String(videoUrlToSend || '').trim()
@@ -215,12 +221,16 @@ export async function sendDmComposerMessage({
       patchOptimisticAttachments(attachments)
     }
 
-    const payload = { to: dmTarget, text: dmText, attachments }
+    const payload = { to: dmTarget, text: dmText, attachments, locale: String(locale || '') }
     if (rawToId && rawToId !== dmTarget) payload.toRaw = rawToId
     if (rawFromId && rawFromId !== uid) payload.fromRaw = rawFromId
     const resp = await fetch('/api/dm/send', {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-forum-user-id': String(uid) },
+      headers: {
+        'content-type': 'application/json',
+        'x-forum-user-id': String(uid),
+        'x-forum-locale': String(locale || ''),
+      },
       body: JSON.stringify(payload),
     })
     const j = await resp.json().catch(() => null)
@@ -246,34 +256,40 @@ export async function sendDmComposerMessage({
       const realId = String(j?.id || tmpId)
       const realTs = Number(j?.ts || optimistic.ts)
       dmSendOk = true
-      setDmBlockedByReceiverMap((prev) => {
-        if (!prev || !prev[String(dmTarget)]) return prev
-        const next = { ...(prev || {}) }
-        delete next[String(dmTarget)]
-        return next
-      })
-      setDmThreadItems((prev) => (prev || []).map((m) =>
-        (String(m.id) === String(tmpId))
-          ? { ...m, id: realId, ts: realTs, status: 'sent' }
-          : m
-      ))
-      focusMessage(realId, 'dm-send-confirmed')
-      setDmDialogs((prev) =>
-        dedupeDmDialogs(
-          (prev || []).map((d) => {
-            if (!matchesTargetDialog(d)) return d
-            const last = d?.lastMessage || null
-            if (!last || String(last.id) !== String(tmpId)) return d
-            const { __optimisticPrevLastMessage, ...safeLast } = (last || {})
-            return {
-              ...d,
-              userId: dmTarget,
-              lastMessage: { ...safeLast, id: realId, ts: realTs, status: 'sent' },
-            }
-          }),
-          uid,
+      if (j?.supportBroadcast) {
+        dmBroadcastOk = true
+        removeOptimisticMessage()
+        try { toastI18n?.('ok', 'ql7_support_broadcast_sent') } catch {}
+      } else {
+        setDmBlockedByReceiverMap((prev) => {
+          if (!prev || !prev[String(dmTarget)]) return prev
+          const next = { ...(prev || {}) }
+          delete next[String(dmTarget)]
+          return next
+        })
+        setDmThreadItems((prev) => (prev || []).map((m) =>
+          (String(m.id) === String(tmpId))
+            ? { ...m, id: realId, ts: realTs, status: 'sent' }
+            : m
+        ))
+        focusMessage(realId, 'dm-send-confirmed')
+        setDmDialogs((prev) =>
+          dedupeDmDialogs(
+            (prev || []).map((d) => {
+              if (!matchesTargetDialog(d)) return d
+              const last = d?.lastMessage || null
+              if (!last || String(last.id) !== String(tmpId)) return d
+              const { __optimisticPrevLastMessage, ...safeLast } = (last || {})
+              return {
+                ...d,
+                userId: dmTarget,
+                lastMessage: { ...safeLast, id: realId, ts: realTs, status: 'sent' },
+              }
+            }),
+            uid,
+          )
         )
-      )
+      }
     }
   } catch {
     removeOptimisticMessage()
@@ -294,7 +310,7 @@ export async function sendDmComposerMessage({
   try { setMediaPct(0) } catch {}
   try { setVideoProgress(0) } catch {}
   try { setReplyTo(null) } catch {}
-  if (dmSendOk) {
+  if (dmSendOk && !dmBroadcastOk) {
     try { toast?.ok?.(t('dm_sent')) } catch {}
   }
   try { postingRef.current = false } catch {}

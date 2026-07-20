@@ -1,6 +1,7 @@
 // app/api/dm/_utils.js
 import { cookies } from 'next/headers'
 import { resolveCanonicalAccountId } from '../profile/_identity.js'
+import { isQl7SupportId, QL7_SUPPORT_ID } from '../../../lib/ql7-support/systemActor.js'
 
 export function now() { return Date.now() }
 export function toStr(x) { return String(x ?? '') }
@@ -88,6 +89,7 @@ export function requireUserId(req, body = null) {
 export async function canonicalizeUserId(raw) {
   const id = normalizeRawUserId(raw)
   if (!id) return ''
+  if (isQl7SupportId(id)) return QL7_SUPPORT_ID
   try {
     return String(await resolveCanonicalAccountId(id)).trim()
   } catch {

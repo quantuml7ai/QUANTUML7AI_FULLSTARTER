@@ -1,4 +1,9 @@
 import { isBrowser } from '../../../shared/utils/browser'
+import {
+  QL7_SUPPORT_AVATAR_URL,
+  isQl7SupportId,
+  resolveQl7SupportDisplayName,
+} from '../../../../../lib/ql7-support/systemActor'
 
 export const PROFILE_ALIAS_PREFIX = 'profile:alias:'
 const ID_PREFIXES = ['telegram:id:', 'telegramid:', 'telegram:', 'tguid:', 'tg:', 'wallet:']
@@ -47,6 +52,16 @@ export function resolveProfileAccountId(userId) {
 }
 
 export function safeReadProfile(userId) {
+  if (isQl7SupportId(userId)) {
+    return {
+      nickname: resolveQl7SupportDisplayName(),
+      icon: QL7_SUPPORT_AVATAR_URL,
+      avatar: QL7_SUPPORT_AVATAR_URL,
+      isSystem: true,
+      systemRole: 'support',
+      verified: true,
+    }
+  }
   if (!isBrowser() || !userId) return {}
   const uid = resolveProfileAccountId(userId)
   try {
@@ -91,12 +106,14 @@ function fallbackShortId(id) {
 }
 
 export function resolveNickForDisplay(userId, fallbackNick, shortId = fallbackShortId) {
+  if (isQl7SupportId(userId)) return resolveQl7SupportDisplayName()
   const uid = resolveProfileAccountId(userId)
   const prof = safeReadProfile(uid) || {}
   return prof.nickname || fallbackNick || (uid ? shortId(uid) : '')
 }
 
 export function resolveIconForDisplay(userId, pIcon) {
+  if (isQl7SupportId(userId)) return QL7_SUPPORT_AVATAR_URL
   const uid = resolveProfileAccountId(userId)
   const prof = safeReadProfile(uid) || {}
   return prof.icon || prof.avatar || prof.vipIcon || prof.vipEmoji || pIcon || '👤'

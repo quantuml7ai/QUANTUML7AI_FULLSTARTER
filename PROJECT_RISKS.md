@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-07-18T19:56:03.774Z
-Исходных файлов в анализе: 1413
+Сгенерировано автоматически: 2026-07-20T09:07:11.494Z
+Исходных файлов в анализе: 1427
 Route-aware файлов: 149
 
 ## Что Считается Риском
@@ -171,41 +171,43 @@ Route-aware файлов: 149
 
 - `app/api/forum/_utils.js` — используют 44 локальных модулей
 - `components/i18n.js` — используют 36 локальных модулей
-- `app/api/profile/_identity.js` — используют 26 локальных модулей
-- `lib/mongo/client.cjs` — используют 26 локальных модулей
+- `lib/mongo/client.cjs` — используют 30 локальных модулей
+- `app/api/profile/_identity.js` — используют 27 локальных модулей
 - `tools/runtime-governance.js` — используют 25 локальных модулей
 - `lib/mongo/profile-primary.cjs` — используют 24 локальных модулей
 - `app/api/forum/_db.js` — используют 22 локальных модулей
 - `app/forum/features/profile/utils/profileCache.js` — используют 20 локальных модулей
 - `app/forum/shared/utils/classnames.js` — используют 18 локальных модулей
+- `lib/ql7-support/systemActor.js` — используют 18 локальных модулей
 - `app/api/metamarket/_format.js` — используют 15 локальных модулей
 - `app/api/dm/_utils.js` — используют 14 локальных модулей
 - `lib/mongo/qcoin-primary.cjs` — используют 14 локальных модулей
 - `lib/subscriptions.js` — используют 14 локальных модулей
 - `lib/forum/forum-server-complete-reader.cjs` — используют 13 локальных модулей
+- `lib/webPush.js` — используют 12 локальных модулей
 - `tests/support/runtimeGovernance.js` — используют 12 локальных модулей
 - `app/forum/shared/utils/counts.js` — используют 11 локальных модулей
+- `lib/mongo/dm-primary.cjs` — используют 11 локальных модулей
+- `lib/mongo/forum-primary.cjs` — используют 11 локальных модулей
 - `app/api/metamarket/_identity.js` — используют 10 локальных модулей
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 10 локальных модулей
 - `lib/metadataCache.js` — используют 10 локальных модулей
-- `lib/mongo/forum-primary.cjs` — используют 10 локальных модулей
-- `lib/webPush.js` — используют 10 локальных модулей
 - `app/forum/shared/components/HydrateText.jsx` — используют 9 локальных модулей
 - `app/forum/shared/constants/media.js` — используют 9 локальных модулей
-- `app/forum/shared/utils/forumWindowingRegistry.js` — используют 9 локальных модулей
-- `lib/mongo/dm-primary.cjs` — используют 9 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
-- `app/forum/ForumRoot.jsx` — импортирует 65 локальных модулей
+- `app/forum/ForumRoot.jsx` — импортирует 66 локальных модулей
 - `app/layout.js` — импортирует 16 локальных модулей
 - `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 13 локальных модулей
 - `app/forum/features/feed/components/TopicItem.jsx` — импортирует 12 локальных модулей
+- `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 11 локальных модулей
+- `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 11 локальных модулей
+- `tests/integration/ql7-support-scenarios.test.js` — импортирует 11 локальных модулей
 - `app/forum/features/ui/components/ForumSearchSortControls.jsx` — импортирует 10 локальных модулей
 - `tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx` — импортирует 10 локальных модулей
-- `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 9 локальных модулей
-- `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 9 локальных модулей
+- `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ComposerCore.jsx` — импортирует 9 локальных модулей
 - `app/forum/features/ui/components/ForumOverlayStack.jsx` — импортирует 9 локальных модулей
 - `tests/unit/i18n/i18nDictionaries.test.js` — импортирует 9 локальных модулей
@@ -216,45 +218,43 @@ Route-aware файлов: 149
 - `components/i18n.js` — импортирует 8 локальных модулей
 - `components/MetaMarket.jsx` — импортирует 8 локальных модулей
 - `tests/contracts/metamarket/metamarket-contracts.test.js` — импортирует 8 локальных модулей
+- `app/api/dm/send/route.js` — импортирует 7 локальных модулей
 - `app/api/forum/recommendations/users/route.js` — импортирует 7 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 7 локальных модулей
-- `app/forum/features/dm/components/DmThreadHeader.jsx` — импортирует 7 локальных модулей
 - `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
-- `app/forum/features/feed/hooks/useForumFeedRuntime.js` — импортирует 7 локальных модулей
-- `app/forum/features/media/hooks/useForumVideoFeedRuntime.js` — импортирует 7 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 16; плотность: 16
-- `forum/root` — файлов: 14; исходящих связей: 89; плотность: 6.36
+- `forum/root` — файлов: 14; исходящих связей: 90; плотность: 6.43
 - `api/referral` — файлов: 2; исходящих связей: 10; плотность: 5
+- `lib/adsCore.js` — файлов: 1; исходящих связей: 5; плотность: 5
 - `api/academy` — файлов: 1; исходящих связей: 4; плотность: 4
 - `api/geo` — файлов: 1; исходящих связей: 4; плотность: 4
-- `lib/adsCore.js` — файлов: 1; исходящих связей: 4; плотность: 4
 - `lib/webPush.js` — файлов: 1; исходящих связей: 4; плотность: 4
+- `api/dm` — файлов: 9; исходящих связей: 35; плотность: 3.89
 - `api/metamarket` — файлов: 16; исходящих связей: 55; плотность: 3.44
-- `api/dm` — файлов: 9; исходящих связей: 27; плотность: 3
 - `api/pay` — файлов: 2; исходящих связей: 6; плотность: 3
 - `app/page.js` — файлов: 1; исходящих связей: 3; плотность: 3
 - `lib/auth` — файлов: 1; исходящих связей: 3; плотность: 3
 - `lib/nativePush.js` — файлов: 1; исходящих связей: 3; плотность: 3
+- `lib/subscriptions.js` — файлов: 1; исходящих связей: 3; плотность: 3
+- `api/profile` — файлов: 10; исходящих связей: 29; плотность: 2.9
 - `lib/forum` — файлов: 7; исходящих связей: 20; плотность: 2.86
 - `app/ads` — файлов: 4; исходящих связей: 11; плотность: 2.75
-- `api/profile` — файлов: 10; исходящих связей: 27; плотность: 2.7
+- `lib/ql7-support` — файлов: 6; исходящих связей: 15; плотность: 2.5
 - `app/game` — файлов: 2; исходящих связей: 5; плотность: 2.5
-- `api/forum` — файлов: 43; исходящих связей: 101; плотность: 2.35
+- `api/forum` — файлов: 43; исходящих связей: 103; плотность: 2.4
 - `forum/subscriptions` — файлов: 4; исходящих связей: 9; плотность: 2.25
 - `api/battlecoin` — файлов: 5; исходящих связей: 11; плотность: 2.2
+- `forum/dm` — файлов: 32; исходящих связей: 69; плотность: 2.16
 - `app/exchange` — файлов: 10; исходящих связей: 21; плотность: 2.1
-- `forum/dm` — файлов: 31; исходящих связей: 62; плотность: 2
+- `forum/profile` — файлов: 18; исходящих связей: 36; плотность: 2
 - `api/brain` — файлов: 1; исходящих связей: 2; плотность: 2
 - `api/market` — файлов: 1; исходящих связей: 2; плотность: 2
 - `app/robots.js` — файлов: 1; исходящих связей: 2; плотность: 2
 - `app/sitemap.js` — файлов: 1; исходящих связей: 2; плотность: 2
-- `lib/subscriptions.js` — файлов: 1; исходящих связей: 2; плотность: 2
-- `forum/profile` — файлов: 18; исходящих связей: 34; плотность: 1.89
 - `forum/feed` — файлов: 60; исходящих связей: 111; плотность: 1.85
-- `api/telegram` — файлов: 4; исходящих связей: 7; плотность: 1.75
 
 ## Серверные И Инфраструктурные Хотспоты
 

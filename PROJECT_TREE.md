@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-07-18T19:56:04.433Z
-Файлов в реестре: 4917
+Сгенерировано автоматически: 2026-07-20T09:07:12.141Z
+Файлов в реестре: 4935
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -21,7 +21,7 @@
 Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.
 Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.
 
-- `.codex_tmp` — 888 файлов
+- `.codex_tmp` — 895 файлов
 - `.env.local` — 1 файлов
 - `.env.local.example` — 1 файлов
 - `.env.production.local` — 1 файлов
@@ -34,7 +34,7 @@
 - `adaptive-actions.report.json` — 1 файлов
 - `adaptive-core.report.json` — 1 файлов
 - `AGENTS.md` — 1 файлов
-- `app` — 465 файлов
+- `app` — 466 файлов
 - `audit` — 170 файлов
 - `auth-bus.audit.report.json` — 1 файлов
 - `auth-cascade.report.json` — 1 файлов
@@ -47,7 +47,7 @@
 - `deep-audit.report.json` — 1 файлов
 - `diagnostics-boundaries.report.json` — 1 файлов
 - `diff.stage0.json` — 1 файлов
-- `docs` — 17 файлов
+- `docs` — 18 файлов
 - `effects-leak.report.json` — 1 файлов
 - `feature-flag-safety.report.json` — 1 файлов
 - `forensic-bounds.report.json` — 1 файлов
@@ -64,7 +64,7 @@
 - `iframe-restore.report.json` — 1 файлов
 - `jsconfig.json` — 1 файлов
 - `layout-stability.report.json` — 1 файлов
-- `lib` — 63 файлов
+- `lib` — 70 файлов
 - `media-audit.report.json` — 1 файлов
 - `media-budget.audit.report.json` — 1 файлов
 - `media-heap.verify.report.json` — 1 файлов
@@ -124,7 +124,7 @@
 - `scenario.startup-shell.report.json` — 1 файлов
 - `src` — 32 файлов
 - `startup-budget.report.json` — 1 файлов
-- `tests` — 67 файлов
+- `tests` — 69 файлов
 - `timer-cleanup.report.json` — 1 файлов
 - `tools` — 74 файлов
 - `tsconfig.json` — 1 файлов
@@ -185,6 +185,18 @@
         - crl-set — Служебный-файл crl set. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
         - LICENSE — Служебный-файл LICENSE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
         - manifest.json — JSON-файл manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - 10656/ — Каталог 10656.
+        - _metadata/ — Каталог _metadata.
+          - verified_contents.json — JSON-файл verified contents. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - crl-set — Служебный-файл crl set. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - LICENSE — Служебный-файл LICENSE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - manifest.json — JSON-файл manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - 10657/ — Каталог 10657.
+        - _metadata/ — Каталог _metadata.
+          - verified_contents.json — JSON-файл verified contents. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - crl-set — Служебный-файл crl set. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - LICENSE — Служебный-файл LICENSE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - manifest.json — JSON-файл manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - component_crx_cache/ — Каталог component_crx_cache.
       - 3eb16d6c28b502ac4cfee8f4a148df05f4d93229fa36a71db8b08d06329ff18a — Служебный-файл 3eb16d6c28b502ac4cfee8f4a148df05f4d93229fa36a71db8b08d06329ff18a. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 7b05c14dba04ed522210b733f004cb0e74d7679a653b19bd029f9bc0e6b19903 — Служебный-файл 7b05c14dba04ed522210b733f004cb0e74d7679a653b19bd029f9bc0e6b19903. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -193,7 +205,7 @@
       - 099f62c68adc50985876bdb5de795ace61c8a3a73ef604662913d09277fb759e — Служебный-файл 099f62c68adc50985876bdb5de795ace61c8a3a73ef604662913d09277fb759e. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 261bea60d22ebca3a95ce335c03ec751a0b58b2b7bdbd6ea51dfa54381b07775 — Служебный-файл 261bea60d22ebca3a95ce335c03ec751a0b58b2b7bdbd6ea51dfa54381b07775. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 578fa292f5f9e343eed1139cb1a629cc66f44533c29e81a1642c5b69c2b0cf48 — Служебный-файл 578fa292f5f9e343eed1139cb1a629cc66f44533c29e81a1642c5b69c2b0cf48. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - 4629cfb9d94bfcb50f0b9227bdada63bb2d1029c646716428c0bb425aa7109fc — Служебный-файл 4629cfb9d94bfcb50f0b9227bdada63bb2d1029c646716428c0bb425aa7109fc. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - 894a93e7a7c1b97ceb1a10284b328b4b5cac94c32b790f012fe781e947074387 — Служебный-файл 894a93e7a7c1b97ceb1a10284b328b4b5cac94c32b790f012fe781e947074387. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 6782f4e9b12bd4f38a701caf825445aa82f36f7cb81cc3fb19ee6f326eba1d1c — Служебный-файл 6782f4e9b12bd4f38a701caf825445aa82f36f7cb81cc3fb19ee6f326eba1d1c. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 545666a4efd056351597bb386aea1368105ededc976ed5650d8682daab9f37ff — Служебный-файл 545666a4efd056351597bb386aea1368105ededc976ed5650d8682daab9f37ff. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - 3770574eab473ba14abab39c82ad7c7137a12e3b35e6d8df0dea47af25cd3f3b — Служебный-файл 3770574eab473ba14abab39c82ad7c7137a12e3b35e6d8df0dea47af25cd3f3b. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1252,37 +1264,37 @@
         - mtc_config.pb — .pb-файл mtc config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - Safe Browsing/ — Каталог Safe Browsing.
       - ChromeExtMalware.store — .store-файл Chrome Ext Malware. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - ChromeExtMalware.store.32_13428832354080778 — .32_13428832354080778-файл Chrome Ext Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - ChromeExtMalware.store.32_13428835924404863 — .32_13428835924404863-файл Chrome Ext Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ChromeExtMalware.store.32_13428915082433472 — .32_13428915082433472-файл Chrome Ext Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlBilling.store — .store-файл Url Billing. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlBilling.store.4_13428875437263576 — .4_13428875437263576-файл Url Billing.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlBilling.store.4_13428877241368252 — .4_13428877241368252-файл Url Billing.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlBilling.store.4_13428958271009984 — .4_13428958271009984-файл Url Billing.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlBilling.store.4_13428960055002552 — .4_13428960055002552-файл Url Billing.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlCsdAllowlist.store — .store-файл Url Csd Allowlist. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlCsdAllowlist.store.4_13428695553043786 — .4_13428695553043786-файл Url Csd Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlCsdAllowlist.store.32_13428695553043947 — .32_13428695553043947-файл Url Csd Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlCsdDownloadAllowlist.store — .store-файл Url Csd Download Allowlist. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlCsdDownloadAllowlist.store.32_13428695553041860 — .32_13428695553041860-файл Url Csd Download Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlHighConfidenceAllowlist.store — .store-файл Url High Confidence Allowlist. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlHighConfidenceAllowlist.store.32_13428839481602518 — .32_13428839481602518-файл Url High Confidence Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlHighConfidenceAllowlist.store.32_13428841290704470 — .32_13428841290704470-файл Url High Confidence Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlHighConfidenceAllowlist.store.32_13428927625227000 — .32_13428927625227000-файл Url High Confidence Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlHighConfidenceAllowlist.store.32_13428929442314024 — .32_13428929442314024-файл Url High Confidence Allowlist.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlMalBin.store — .store-файл Url Mal Bin. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlMalBin.store.4_13428875437260582 — .4_13428875437260582-файл Url Mal Bin.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlMalBin.store.4_13428877241365864 — .4_13428877241365864-файл Url Mal Bin.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlMalBin.store.4_13428958271006939 — .4_13428958271006939-файл Url Mal Bin.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlMalBin.store.4_13428960055000763 — .4_13428960055000763-файл Url Mal Bin.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlMalware.store — .store-файл Url Malware. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlMalware.store.4_13428875437254382 — .4_13428875437254382-файл Url Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlMalware.store.4_13428877241359828 — .4_13428877241359828-файл Url Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlMalware.store.4_13428958270999131 — .4_13428958270999131-файл Url Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlMalware.store.4_13428960054996349 — .4_13428960054996349-файл Url Malware.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlSoceng.store — .store-файл Url Soceng. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSoceng.store.4_13428875437135547 — .4_13428875437135547-файл Url Soceng.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSoceng.store.4_13428877241235825 — .4_13428877241235825-файл Url Soceng.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSoceng.store.4_13428958270886556 — .4_13428958270886556-файл Url Soceng.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSoceng.store.4_13428960054969081 — .4_13428960054969081-файл Url Soceng.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlSubresourceFilter.store — .store-файл Url Subresource Filter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSubresourceFilter.store.4_13428862958130151 — .4_13428862958130151-файл Url Subresource Filter.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSubresourceFilter.store.4_13428866515504538 — .4_13428866515504538-файл Url Subresource Filter.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSubresourceFilter.store.4_13428895231247372 — .4_13428895231247372-файл Url Subresource Filter.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSubresourceFilter.store.4_13428898808462439 — .4_13428898808462439-файл Url Subresource Filter.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlSuspiciousSite.store — .store-файл Url Suspicious Site. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSuspiciousSite.store.4_13428812561997998 — .4_13428812561997998-файл Url Suspicious Site.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlSuspiciousSite.store.4_13428855736694107 — .4_13428855736694107-файл Url Suspicious Site.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSuspiciousSite.store.4_13428922270769664 — .4_13428922270769664-файл Url Suspicious Site.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlSuspiciousSite.store.4_13428940264908041 — .4_13428940264908041-файл Url Suspicious Site.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - UrlUws.store — .store-файл Url Uws. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlUws.store.4_13428875437257381 — .4_13428875437257381-файл Url Uws.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-      - UrlUws.store.4_13428877241362549 — .4_13428877241362549-файл Url Uws.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlUws.store.4_13428958271003504 — .4_13428958271003504-файл Url Uws.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - UrlUws.store.4_13428960054998572 — .4_13428960054998572-файл Url Uws.store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - SafetyTips/ — Каталог SafetyTips.
       - 3091/ — Каталог 3091.
         - _metadata/ — Каталог _metadata.
@@ -1355,7 +1367,6 @@
     - Last Browser — Служебный-файл Last Browser. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - Last Version — Служебный-файл Last Version. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - Local State — Служебный-файл Local State. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-    - lockfile — Служебный-файл lockfile. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - Variations — Служебный-файл Variations. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - auth-cdp-result.json — JSON-файл auth cdp result. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - auth-cdp-visible-click.json — JSON-файл auth cdp visible click. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1419,7 +1430,7 @@
     - coins/ — Каталог coins.
       - route.js — API-route coins для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - contact/ — Каталог contact.
-      - route.js — API-route contact для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - route.js — API-route contact для серверной логики Next.js. Связи: импортирует lib/supportEmailTransport.js.
     - crypto-news/ — Каталог crypto-news.
       - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - debug/ — Каталог debug.
@@ -1454,13 +1465,13 @@
       - seen/ — Каталог seen.
         - route.js — API-route dm/seen для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
       - send/ — Каталог send.
-        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs; используется в tests/integration/ql7-support-scenarios.test.js.
       - thread/ — Каталог thread.
-        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs, lib/ql7-support/server.js.
       - unblock/ — Каталог unblock.
         - route.js — API-route dm/unblock для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
       - _db.js — Внутренний db для API-сегмента dm. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs; используется в app/api/dm/block/route.js, app/api/dm/delete/route.js, app/api/dm/seen/route.js.
-      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js, lib/ql7-support/systemActor.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
     - forum/ — Серверный контур форума: снапшоты, мутации, модерация, upload.
       - admin/ — Каталог admin.
         - banUser/ — Каталог banUser.
@@ -1662,7 +1673,7 @@
         - create/ — Каталог create.
           - route.js — API-route qcoin/topup/create для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
         - webhook/ — Каталог webhook.
-          - route.js — API-route qcoin/topup/webhook для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+          - route.js — API-route qcoin/topup/webhook для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs, lib/ql7-support/events.js.
     - quest/ — Серверные маршруты квестов.
       - env/ — Каталог env.
         - route.js — API-route quest/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1694,7 +1705,7 @@
       - auto/ — Каталог auto.
         - route.js — API-route tma/auto для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
     - wallet-session/ — Каталог wallet-session.
-      - route.js — API-route wallet-session для серверной логики Next.js. Связи: используется в tests/contracts/project/api-route-contracts.test.js.
+      - route.js — API-route wallet-session для серверной логики Next.js. Связи: импортирует lib/ql7-support/events.js; используется в tests/contracts/project/api-route-contracts.test.js.
   - components/ — Локальные компоненты верхнего уровня внутри app.
     - CryptoNewsLens.jsx — JSX-файл Crypto News Lens сегмента components. Связи: импортирует components/i18n.js; используется в app/page.js.
   - contact/ — Страница контактов.
@@ -1724,17 +1735,18 @@
           - emitPolicy.js — Утилита emit Policy домена диагностики. Связи: используется в forum/features/diagnostics/hooks/useForumDiagnostics.js.
       - dm/ — Подсистема Quantum Messenger / DM.
         - components/ — Каталог слоя компоненты внутри feature dm.
-          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
+          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
           - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
           - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
-          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/hooks/useVipFlag.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmThreadLoadMore.jsx — UI-компонент Dm Thread Load More домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
-          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/dm/utils/mediaParsing.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
           - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
           - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
           - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: импортирует forum/shared/utils/counts.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - Ql7SupportPopover.jsx — UI-компонент Ql7 Support Popover домена DM/мессенджера. Связи: импортирует lib/ql7-support/systemActor.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
         - hooks/ — Каталог слоя хуки внутри feature dm.
           - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
           - useDmDeleteCopy.js — Хук use Dm Delete Copy домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
@@ -1894,7 +1906,7 @@
       - profile/ — Подсистема профиля, about, VIP и popover.
         - components/ — Каталог слоя компоненты внутри feature profile.
           - AboutRail.jsx — UI-компонент About Rail домена профиля/VIP. Связи: импортирует forum/features/profile/utils/aboutText.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
-          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js, lib/ql7-support/systemActor.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
           - ForumVipControl.jsx — UI-компонент Forum Vip Control домена профиля/VIP. Связи: импортирует forum/features/profile/components/VipPopover.jsx, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
           - ProfilePopover.jsx — UI-компонент Profile Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/account.js, forum/features/subscriptions/components/FollowersCounterInline.jsx; используется в forum/ForumHeaderPanel.jsx.
           - ProfilePopover.jsx.avatar-click-v3.20260611-004401.bak — UI-компонент Profile Popover.jsx.avatar click v3.20260611 004401 домена профиля/VIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -1913,7 +1925,7 @@
         - utils/ — Каталог слоя утилиты внутри feature profile.
           - aboutText.js — Утилита about Text домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/AboutRail.jsx.
           - avatar.js — Утилита avatar домена профиля/VIP. Связи: используется в forum/features/profile/components/AvatarEmoji.jsx.
-          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js, lib/ql7-support/systemActor.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
           - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
       - qcoin/ — Подсистема QCoin в форуме.
         - components/ — Каталог слоя компоненты внутри feature qcoin.
@@ -2318,6 +2330,7 @@
     - BATTLE_CHAT_CONTOUR_CONTRACT.md — Markdown-документ BATTLE CHAT CONTOUR CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - forum/ — Каталог forum.
     - QL7_FORUM_GEO_CURSOR_COUNTER_CONTRACT.md — Markdown-документ QL7 FORUM GEO CURSOR COUNTER CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_SUPPORT_DM_CONTRACT.md — Markdown-документ QL7 SUPPORT DM CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - mongo/ — Каталог mongo.
     - ads-metamarket-synthetic-write-proof-v55.md — Markdown-документ ads metamarket synthetic write proof v55. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - qcoin-ledger-canary-v53.md — Markdown-документ qcoin ledger canary v53. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -2381,6 +2394,13 @@
     - quest-primary.cjs — Общая библиотека/утилита quest primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/quest/progress/route.js, app/api/quest/status/route.js, tests/unit/mongo/quest-primary.test.js.
     - referral-primary.cjs — Общая библиотека/утилита referral primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/referral/hit/route.js, app/api/referral/link/route.js, tests/unit/mongo/referral-primary.test.js.
     - subscriptions-primary.cjs — Общая библиотека/утилита subscriptions primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/mongo/battlecoin-chat-primary.cjs, lib/subscriptions.js, tests/unit/mongo/subscriptions-primary.test.js.
+  - ql7-support/ — Каталог ql7-support.
+    - broadcast.js — Общая библиотека/утилита broadcast инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/client.cjs, lib/ql7-support/events.js; используется в app/api/dm/send/route.js, tests/integration/ql7-support-scenarios.test.js.
+    - events.js — Общая библиотека/утилита events инфраструктурного слоя. Связи: импортирует lib/ql7-support/server.js, lib/ql7-support/templates.js; используется в app/api/forum/report/route.js, app/api/qcoin/topup/webhook/route.js, app/api/wallet-session/route.js.
+    - scheduler.js — Общая библиотека/утилита scheduler инфраструктурного слоя. Связи: импортирует lib/adsCore.js, lib/mongo/client.cjs, lib/ql7-support/events.js; используется в tests/integration/ql7-support-scenarios.test.js.
+    - server.js — Общая библиотека/утилита server инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/dm-primary.cjs, lib/ql7-support/systemActor.js; используется в app/api/dm/send/route.js, app/api/dm/thread/route.js, lib/ql7-support/events.js.
+    - systemActor.js — Общая библиотека/утилита system Actor инфраструктурного слоя. Связи: используется в app/api/dm/_utils.js, app/api/dm/block/route.js, app/api/dm/send/route.js.
+    - templates.js — Общая библиотека/утилита templates инфраструктурного слоя. Связи: используется в lib/ql7-support/events.js, lib/ql7-support/server.js, tests/contracts/project/ql7-support-contracts.test.js.
   - security/ — Каталог security.
     - ql7-server-secret.cjs — Общая библиотека/утилита ql7 server secret инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/forum/signed-cursor.cjs.
   - seo/ — Каталог seo.
@@ -2390,7 +2410,7 @@
   - storage/ — Каталог storage.
     - mediaKeys.js — Общая библиотека/утилита media Keys инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
     - r2.js — Общая библиотека/утилита r2 инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
-  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: импортирует lib/mongo/ads-primary.cjs, lib/mongo/profile-primary.cjs, lib/storage/mediaKeys.js; используется в app/api/ads/route.js, app/api/debug/ads/grant/route.js, app/api/pay/create/route.js.
+  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: импортирует lib/mongo/ads-primary.cjs, lib/mongo/profile-primary.cjs, lib/ql7-support/events.js; используется в app/api/ads/route.js, app/api/debug/ads/grant/route.js, app/api/pay/create/route.js.
   - authActionGateClient.js — Общая библиотека/утилита auth Action Gate Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/useBattleChat.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js, forum/features/ui/components/ForumActionRow.jsx.
   - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js, app/exchange/page.js.
   - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js.
@@ -2403,7 +2423,8 @@
   - notificationCenter.js — Общая библиотека/утилита notification Center инфраструктурного слоя. Связи: используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, components/AndroidNotificationBadgeSync.jsx.
   - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/debug/redis/route.js, app/api/telegram/link/confirm/route.js, app/api/telegram/link/start/route.js.
   - safeWin.js — Общая библиотека/утилита safe Win инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/mongo/subscriptions-primary.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/debug/vip/grant/route.js.
+  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/mongo/subscriptions-primary.cjs, lib/ql7-support/events.js; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/debug/vip/grant/route.js.
+  - supportEmailTransport.js — Общая библиотека/утилита support Email Transport инфраструктурного слоя. Связи: используется в app/api/contact/route.js, lib/ql7-support/server.js, tests/integration/ql7-support-scenarios.test.js.
   - tma.js — Общая библиотека/утилита tma инфраструктурного слоя. Связи: используется в lib/auth/battlecoin-chat-auth.cjs.
   - walletSessionClient.js — Общая библиотека/утилита wallet Session Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/battleChatClient.js, forum/features/profile/components/ProfilePopover.jsx, app/game/page.js.
   - webPush.js — Общая библиотека/утилита web Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/push-primary.cjs, lib/nativePush.js; используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, app/api/dm/send/route.js.
@@ -6315,6 +6336,7 @@
       - battlecoin-chat-contracts.test.js — JS-файл battlecoin chat contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-contracts.test.js — JS-файл ql7 support contracts.test. Связи: импортирует lib/ql7-support/systemActor.js, lib/ql7-support/templates.js.
       - runtime-governance-contracts.test.js — JS-файл runtime governance contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
       - seo-indexing-contracts.test.js — JS-файл seo indexing contracts.test. Связи: импортирует app/robots.js, app/sitemap.js, components/i18n-dicts/manifest.js.
     - root/ — Каталог root.
@@ -6340,6 +6362,7 @@
         - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
     - runtime/ — Каталог runtime.
       - runtimeGovernance.integration.test.js — JS-файл runtime Governance.integration.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeCapabilities.js, src/shared/runtime/budgets/routeProfiles.js.
+    - ql7-support-scenarios.test.js — JS-файл ql7 support scenarios.test. Связи: импортирует app/api/dm/send/route.js, lib/adsCore.js, lib/mongo/client.cjs.
   - mocks/ — Каталог mocks.
     - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - smoke/ — Каталог smoke.

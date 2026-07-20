@@ -37,6 +37,7 @@ export default function ComposerCore({
   canSend,
   composerBusy,
   dmMode,
+  dmSupportMode,
   onSendClick,
   setText,
   setComposerActive,
@@ -104,6 +105,7 @@ export default function ComposerCore({
             canSend={canSend}
             composerBusy={composerBusy}
             dmMode={dmMode}
+            dmSupportMode={dmSupportMode}
             onSendClick={onSendClick}
           />
 
@@ -116,18 +118,18 @@ export default function ComposerCore({
           />
 
           <ComposerEmojiPreview
-            pendingSticker={pendingSticker}
+            pendingSticker={dmSupportMode ? null : pendingSticker}
             setPendingSticker={setPendingSticker}
             t={t}
           />
         </div>
 
         <ComposerAttachmentPreview
-          pendingImgs={pendingImgs}
+          pendingImgs={dmSupportMode ? [] : pendingImgs}
           setPendingImgs={setPendingImgs}
-          pendingVideo={pendingVideo}
+          pendingVideo={dmSupportMode ? '' : pendingVideo}
           pendingVideoMirror={pendingVideoMirror}
-          pendingAudio={pendingAudio}
+          pendingAudio={dmSupportMode ? '' : pendingAudio}
           t={t}
           onOpenVideoFullscreen={openPendingVideoFullscreen}
           onRemoveVideo={removePendingVideoAttachment}
@@ -136,7 +138,7 @@ export default function ComposerCore({
         />
 
         <ComposerEmojiPanel
-          emojiOpen={emojiOpen}
+          emojiOpen={dmSupportMode ? false : emojiOpen}
           emojiTab={emojiTab}
           setEmojiTab={setEmojiTab}
           setEmojiOpen={setEmojiOpen}
@@ -151,7 +153,7 @@ export default function ComposerCore({
       <ComposerFileInput
         fileInputRef={fileInputRef}
         onFilesChosen={onFilesChosen}
-        mediaLocked={mediaLocked}
+        mediaLocked={mediaLocked || dmSupportMode}
         accept={fileInputAccept}
       />
     </>

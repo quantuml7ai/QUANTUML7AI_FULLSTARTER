@@ -147,6 +147,7 @@ export default function DmMessagesPane({
   dmDeletedMap,
   dmSeenMap,
   pushNavState,
+  openQl7SupportThread,
   setInboxTab,
   setDmWithUserId,
   stripMediaUrlsFromText,
@@ -270,6 +271,7 @@ export default function DmMessagesPane({
       dmSeenMap={dmSeenMap}
       t={t}
       pushNavState={pushNavState}
+      openQl7SupportThread={openQl7SupportThread}
       setInboxTab={setInboxTab}
       setDmWithUserId={setDmWithUserId}
       openDmDeletePopover={openDmDeletePopover}

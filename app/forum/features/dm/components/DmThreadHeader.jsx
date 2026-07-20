@@ -7,6 +7,7 @@ import StarButton from '../../ui/components/StarButton'
 import AvatarEmoji from '../../profile/components/AvatarEmoji'
 import VipFlipBadge from '../../profile/components/VipFlipBadge'
 import useVipFlag from '../../profile/hooks/useVipFlag'
+import Ql7SupportPopover from './Ql7SupportPopover'
 import {
   mergeProfileCache,
   safeReadProfile,
@@ -14,6 +15,10 @@ import {
   resolveIconForDisplay,
 } from '../../profile/utils/profileCache'
 import { shortId } from '../../../shared/utils/formatters'
+import {
+  isQl7SupportId,
+  resolveQl7SupportDisplayName,
+} from '../../../../../lib/ql7-support/systemActor'
 
 const DM_ONLINE_WINDOW_MS = 75 * 1000
 const DM_RECENT_WINDOW_MS = 24 * 60 * 60 * 1000
@@ -52,7 +57,9 @@ export default function DmThreadHeader({
   onUserInfoToggle,
 }) {
   const threadUid = String(uid || '').trim()
+  const isSupportThread = isQl7SupportId(threadUid)
   const prof = safeReadProfile(threadUid) || {}
+  const [supportPopoverAnchor, setSupportPopoverAnchor] = useState(null)
   const [presenceAt, setPresenceAt] = useState(() => readLastActiveAt(prof))
   const [presenceOfflineAt, setPresenceOfflineAt] = useState(() => readPresenceOfflineAt(prof))
   const [presenceTick, setPresenceTick] = useState(() => Date.now())
@@ -60,9 +67,15 @@ export default function DmThreadHeader({
   const presenceTextRef = React.useRef(null)
   const isVipAuthor = useVipFlag(
     threadUid,
-    prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null,
+    isSupportThread ? null : (prof.vipActive ?? prof.isVip ?? prof.vip ?? prof.vipUntil ?? null),
   )
   useEffect(() => {
+    if (isSupportThread) {
+      setPresenceAt(0)
+      setPresenceOfflineAt(0)
+      setPresenceTick(Date.now())
+      return undefined
+    }
     if (!threadUid) return undefined
     const cached = safeReadProfile(threadUid) || {}
     setPresenceAt(readLastActiveAt(cached))
@@ -132,14 +145,16 @@ export default function DmThreadHeader({
       document.removeEventListener('visibilitychange', syncIfVisible)
       try { controller?.abort?.() } catch {}
     }
-  }, [threadUid])
+  }, [isSupportThread, threadUid])
 
   const presenceKind = useMemo(
     () => classifyPresence(presenceAt, presenceTick, presenceOfflineAt),
     [presenceAt, presenceTick, presenceOfflineAt],
   )
 
-  const presenceLabel = presenceKind === 'online'
+  const presenceLabel = isSupportThread
+    ? (t?.('ql7_support_system_contact') || 'System support contact')
+    : presenceKind === 'online'
     ? (t?.('dm_presence_online') || 'Online')
     : presenceKind === 'recent'
       ? (t?.('dm_presence_recently') || 'Recently active')
@@ -185,12 +200,18 @@ export default function DmThreadHeader({
   }, [presenceLabel])
 
   if (!threadUid) return null
-  const nick = resolveNickForDisplay(threadUid, '')
+  const nick = isSupportThread
+    ? (t?.('ql7_support_display_name') || resolveQl7SupportDisplayName(t))
+    : resolveNickForDisplay(threadUid, '')
   const isSelf = !!meId && String(meId) === String(threadUid)
   const isStarred = !!threadUid && !!starredAuthors?.has?.(threadUid)
   const openProfile = (e) => {
     e?.preventDefault?.()
     e?.stopPropagation?.()
+    if (isSupportThread) {
+      setSupportPopoverAnchor(e?.currentTarget || null)
+      return
+    }
     const anchor =
       e?.currentTarget?.closest?.('.dmThreadHeader')?.querySelector?.('.dmThreadAvatar') ||
       e?.currentTarget
@@ -221,25 +242,36 @@ export default function DmThreadHeader({
             className={cls('nick-badge nick-animate dmThreadNick', isVipAuthor && 'vipNick')}
             translate="no"
             onClick={openProfile}
+            aria-label={isSupportThread ? (t?.('ql7_support_verified') || nick) : undefined}
           >
-            <span className="nick-text">{nick || shortId(threadUid)}</span>
+            <span className="nick-text"><bdi>{nick || shortId(threadUid)}</bdi></span>
           </button>
-          {!!threadUid && !isSelf && (
+          {!!threadUid && !isSelf && !isSupportThread && (
             <StarButton
               on={isStarred}
               onClick={() => onToggleStar?.(threadUid)}
               title={isStarred ? t?.('forum_subscribed') : t?.('forum_subscribe')}
             />
           )}
-          {isVipAuthor && <VipFlipBadge />}
+          {isVipAuthor && !isSupportThread && <VipFlipBadge />}
         </div>
       </div>
-      <span
-        ref={presenceBadgeRef}
-        className={cls('dmThreadPresenceBadge', presenceKind === 'online' && 'online')}
-      >
-        <span ref={presenceTextRef} className="dmThreadPresenceText">{presenceLabel}</span>
-      </span>
+      {!isSupportThread && (
+        <span
+          ref={presenceBadgeRef}
+          className={cls('dmThreadPresenceBadge', presenceKind === 'online' && 'online')}
+        >
+          <span ref={presenceTextRef} className="dmThreadPresenceText">{presenceLabel}</span>
+        </span>
+      )}
+      {isSupportThread && (
+        <Ql7SupportPopover
+          anchor={supportPopoverAnchor}
+          open={!!supportPopoverAnchor}
+          onClose={() => setSupportPopoverAnchor(null)}
+          t={t}
+        />
+      )}
     </div>
   )
 }

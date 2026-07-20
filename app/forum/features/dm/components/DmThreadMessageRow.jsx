@@ -10,6 +10,11 @@ import { translateText } from '../../../shared/api/translate'
 import AvatarEmoji from '../../profile/components/AvatarEmoji'
 import { NativeSafeVideoPlayer } from '../../media/utils/mediaLifecycleRuntime'
 import DmVoicePlayer from './DmVoicePlayer'
+import Ql7SupportPopover from './Ql7SupportPopover'
+import {
+  isQl7SupportId,
+  resolveQl7SupportDisplayName,
+} from '../../../../../lib/ql7-support/systemActor'
 import {
   normalizeDmUrl,
   inferDmStickerKind,
@@ -53,10 +58,12 @@ export default function DmThreadMessageRow({
   t,
 }) {
   const msgId = String(m?.id || '')
+  const [supportPopoverAnchor, setSupportPopoverAnchor] = React.useState(null)
   if (dmDeletedMsgMap?.[msgId]) return null
 
   const fromRaw = String(m?.fromCanonical || m?.from || '').trim()
   const fromId = String(resolveProfileAccountId(fromRaw) || fromRaw || '').trim()
+  const fromIsSupport = isQl7SupportId(fromId) || isQl7SupportId(fromRaw)
   const mine = !!fromId && (String(fromId) === String(meId || '') || String(fromRaw) === String(meId || ''))
   const rawText = String(m?.text || '')
   const { text: cleanedText, stickers: textStickers } = extractDmStickersFromText(rawText)
@@ -117,9 +124,14 @@ export default function DmThreadMessageRow({
     else otherUrls.push(url)
   }
   const threadUid = String(dmWithUserId || '').trim()
-  const threadNick = resolveNickForDisplay(threadUid, '')
+  const threadIsSupport = isQl7SupportId(threadUid)
+  const threadNick = threadIsSupport
+    ? (t?.('ql7_support_display_name') || resolveQl7SupportDisplayName(t))
+    : resolveNickForDisplay(threadUid, '')
   const threadBlocked = !!dmBlockedMap?.[threadUid]
-  const msgNick = resolveNickForDisplay(fromId, '')
+  const msgNick = fromIsSupport
+    ? (t?.('ql7_support_display_name') || resolveQl7SupportDisplayName(t))
+    : resolveNickForDisplay(fromId, '')
   const msgIcon = resolveIconForDisplay(fromId, '')
   const seen = mine && dmThreadSeenTs && Number(m?.ts || 0) <= Number(dmThreadSeenTs || 0)
   const delivered = mine && (seen || Number(m?.deliveredTs || 0) > 0 || String(m?.status || '') === 'sent')
@@ -202,6 +214,10 @@ export default function DmThreadMessageRow({
             onClick={(e) => {
               e?.preventDefault?.()
               e?.stopPropagation?.()
+              if (fromIsSupport) {
+                setSupportPopoverAnchor(e?.currentTarget || null)
+                return
+              }
               handleUserInfoToggle?.(fromId, e?.currentTarget, {
                 userId: fromId,
                 nickname: msgNick || shortId(fromId),
@@ -226,6 +242,10 @@ export default function DmThreadMessageRow({
             onClick={(e) => {
               e?.preventDefault?.()
               e?.stopPropagation?.()
+              if (fromIsSupport) {
+                setSupportPopoverAnchor(e?.currentTarget || null)
+                return
+              }
               handleUserInfoToggle?.(fromId, e?.currentTarget, {
                 userId: fromId,
                 nickname: msgNick || shortId(fromId),
@@ -237,7 +257,7 @@ export default function DmThreadMessageRow({
               })
             }}
           >
-            <span className="nick-text">{msgNick || shortId(fromId)}</span>
+            <span className="nick-text"><bdi>{msgNick || shortId(fromId)}</bdi></span>
           </button>
         </div>
         {!!(stickers && stickers.length) && (
@@ -378,7 +398,7 @@ export default function DmThreadMessageRow({
                   {t('forum_delete')}
                 </button>
               )}
-              {!mine && (
+              {!mine && !threadIsSupport && (
                 <button
                   type="button"
                   className="dmActionBtn"
@@ -400,6 +420,14 @@ export default function DmThreadMessageRow({
             )}
           </div>
         </div>
+        {fromIsSupport && (
+          <Ql7SupportPopover
+            anchor={supportPopoverAnchor}
+            open={!!supportPopoverAnchor}
+            onClose={() => setSupportPopoverAnchor(null)}
+            t={t}
+          />
+        )}
       </div>
     </div>
   )

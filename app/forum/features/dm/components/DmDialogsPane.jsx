@@ -16,6 +16,7 @@ export default function DmDialogsPane({
   dmSeenMap,
   t,
   pushNavState,
+  openQl7SupportThread,
   setInboxTab,
   setDmWithUserId,
   openDmDeletePopover,
@@ -44,9 +45,31 @@ export default function DmDialogsPane({
     overscanPx: ({ velocity }) => readForumWindowingOverscan('dm_dialog', velocity),
     listId: 'forum:dm-dialogs',
   })
+  const supportLabel = t?.('ql7_support_open_cta') || 'QL7 Support'
+  const supportHint = t?.('ql7_support_open_hint') || supportLabel
 
   return (
     <>
+      <div className="dmSupportLauncher" aria-label={supportHint}>
+        <button
+          type="button"
+          className="dmSupportLauncherBtn"
+          onClick={() => openQl7SupportThread?.()}
+          aria-label={supportHint}
+        >
+          <span className="dmSupportLauncherIcon" aria-hidden="true">
+            <svg viewBox="0 0 32 32" focusable="false">
+              <path d="M7 18v-3a9 9 0 0 1 18 0v3" />
+              <path d="M7 18h4v7H8.5A2.5 2.5 0 0 1 6 22.5v-2A2.5 2.5 0 0 1 8.5 18H11" />
+              <path d="M25 18h-4v7h2.5A2.5 2.5 0 0 0 26 22.5v-2A2.5 2.5 0 0 0 23.5 18H21" />
+              <path d="M21 25c0 2-1.7 3-5 3h-2" />
+              <path d="M13 28h3" />
+            </svg>
+          </span>
+          <span className="dmSupportLauncherText">{supportLabel}</span>
+        </button>
+      </div>
+      <div className="dmSupportLauncherRail" aria-hidden="true" />
       {dialogsWin.top > 0 && <div aria-hidden="true" style={{ height: dialogsWin.top }} />}
       {(dmDialogs || []).slice(dialogsWin.start, dialogsWin.end).map((d) => (
         <div

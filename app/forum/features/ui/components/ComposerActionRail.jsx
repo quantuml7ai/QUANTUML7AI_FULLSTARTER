@@ -56,6 +56,7 @@ export default function ComposerActionRail({
   canSend,
   composerBusy,
   dmMode,
+  dmSupportMode,
   onSendClick,
 }) {
   const textLen = String(text || '').trim().length
@@ -70,6 +71,39 @@ export default function ComposerActionRail({
   const emojiDisabled = !!mediaLocked || !!(composerMediaKind && composerMediaKind !== 'sticker')
   const videoDisabled = !!mediaLocked || !!composerMediaKind || videoState === 'uploading'
   const voiceDisabled = !!mediaLocked || !!composerMediaKind
+
+  if (dmSupportMode) {
+    return (
+      <div className="topRail supportOnly" role="toolbar" aria-label={t('ql7_support_text_only')}>
+        <div className="railInner">
+          <div className="railItem">
+            <div className="miniCounter" aria-live="polite">
+              <span>{textLen}</span>
+              <span className="sep">/</span>
+              <span className={textLen > textLimit ? 'max over' : 'max'}>{textLimit}</span>
+            </div>
+          </div>
+          <div className="railItem supportRailNotice">
+            <span>{t?.('ql7_support_text_only') || 'Text only'}</span>
+          </div>
+          <div className="railItem">
+            <button
+              type="button"
+              className={cls('iconBtn planeBtn', sendDisabled && 'disabled')}
+              title={cooldownLeft > 0 ? `${cooldownLeft}s` : t('dm_send')}
+              aria-label={t('dm_send')}
+              disabled={sendDisabled}
+              onClick={onSendClick}
+            >
+              <svg viewBox="0 0 24 24" className="plane" aria-hidden>
+                <path d="M3 11.5l17-8.5-7.2 18.5-2.3-6.2-6.5-3.8z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="topRail" role="toolbar" aria-label={t('forum_composer_actions')}>

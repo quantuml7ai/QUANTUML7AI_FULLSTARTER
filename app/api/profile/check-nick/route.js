@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { requireUserId } from '../../forum/_utils.js'
 import { resolveCanonicalAccountId } from '../_identity.js'
 import profilePrimary from '../../../../lib/mongo/profile-primary.cjs'
+import { isQl7SupportId } from '../../../../lib/ql7-support/systemActor.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -13,6 +14,9 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url)
     const nick = profilePrimary.normNick(searchParams.get('nick') || '')
     if (!nick) return NextResponse.json({ ok: false, error: 'empty_nick' }, { status: 400 })
+    if (isQl7SupportId(nick)) {
+      return NextResponse.json({ ok: true, free: false, nick, reserved: true, storagePrimary: 'mongo' })
+    }
 
     let uid = ''
     try { uid = requireUserId(req, {}) } catch {}

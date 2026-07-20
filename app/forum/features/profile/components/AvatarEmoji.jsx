@@ -7,17 +7,26 @@ import {
   resolveIconUrl,
   defaultAvatarUrl,
 } from '../utils/avatar'
+import {
+  QL7_SUPPORT_AVATAR_URL,
+  isQl7SupportId,
+} from '../../../../../lib/ql7-support/systemActor'
 
 export default function AvatarEmoji({ userId, pIcon, className }) {
-  const fallbackUrl = React.useMemo(() => defaultAvatarUrl(userId), [userId])
+  const isSupport = isQl7SupportId(userId)
+  const fallbackUrl = React.useMemo(() => (
+    isSupport ? QL7_SUPPORT_AVATAR_URL : defaultAvatarUrl(userId)
+  ), [isSupport, userId])
 
   // Re-resolve avatar URL on every render so profile cache updates from SSE
   // are reflected immediately for other users as soon as ForumRoot re-renders.
-  let resolvedUrl = resolveIconUrl(normalizeIconId(pIcon), userId)
+  let resolvedUrl = isSupport ? QL7_SUPPORT_AVATAR_URL : resolveIconUrl(normalizeIconId(pIcon), userId)
   try {
-    const prof = safeReadProfile(userId)
-    const iconId = normalizeIconId(prof?.icon || pIcon)
-    resolvedUrl = resolveIconUrl(iconId, userId)
+    if (!isSupport) {
+      const prof = safeReadProfile(userId)
+      const iconId = normalizeIconId(prof?.icon || pIcon)
+      resolvedUrl = resolveIconUrl(iconId, userId)
+    }
   } catch {}
 
   const targetUrl = resolvedUrl || fallbackUrl

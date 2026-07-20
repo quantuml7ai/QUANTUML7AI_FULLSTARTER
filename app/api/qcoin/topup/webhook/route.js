@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { Redis } from '@upstash/redis'
 import crypto from 'crypto'
 import qcoinPrimary from '../../../../../lib/mongo/qcoin-primary.cjs'
+import { notifyQl7QcoinCredited } from '../../../../../lib/ql7-support/events.js'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -252,6 +253,17 @@ export async function POST(req) {
         createdAt: nowIso,
       }
       await qcoinPrimary.saveTopupEvent(event)
+      await notifyQl7QcoinCredited({
+        userId: invoice.accountId,
+        userAliases: [rawInvoiceAccountId, invoice.rawAccountId, invoice.accountId],
+        amount: credit,
+        balance: Number(newBalance),
+        invoiceId: invoice.internalId,
+        paymentId: paymentId || invoice.paymentId || '',
+        creditedAt: nowIso,
+      }).catch((error) => {
+        console.warn('[ql7-support:qcoin-credit]', error?.message || error)
+      })
       return NextResponse.json({
         ok: true,
         type: 'qcoin_topup',

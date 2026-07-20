@@ -4,6 +4,7 @@ import { Redis } from '@upstash/redis'
 import { requireUserId } from '../../forum/_utils.js'
 import { resolveCanonicalAccountId, writeCanonicalAliases } from '../_identity.js'
 import profilePrimary from '../../../../lib/mongo/profile-primary.cjs'
+import { isQl7SupportId } from '../../../../lib/ql7-support/systemActor.js'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,6 +43,9 @@ export async function POST(req) {
     const nick = profilePrimary.normNick(body?.nick || '')
     if (!nick) {
       return NextResponse.json({ ok: false, error: 'empty_nick' }, { status: 400 })
+    }
+    if (isQl7SupportId(nick)) {
+      return NextResponse.json({ ok: false, error: 'reserved_nick' }, { status: 409 })
     }
 
     const hasGenderInput = body?.gender != null && String(body?.gender || '').trim() !== ''

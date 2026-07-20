@@ -2,6 +2,7 @@
 import { addAliasesFor, expandAliasIds } from '../_db.js'
 import { bad, ok, requireUserIdCanonical, canonicalizeUserId, normalizeRawUserId } from '../_utils.js'
 import dmPrimary from '../../../../lib/mongo/dm-primary.cjs'
+import { isQl7SupportId } from '../../../../lib/ql7-support/systemActor.js'
 
 export async function POST(req) {
   const body = await req.json().catch(() => null)
@@ -11,6 +12,7 @@ export async function POST(req) {
     const rawId = normalizeRawUserId(rawIdInput)
     const userId = await canonicalizeUserId(rawIdInput || rawId)
     if (!userId) return bad('missing_userId', 400)
+    if (isQl7SupportId(userId)) return ok({ userId, supportThread: true, storagePrimary: 'mongo' })
 
     await addAliasesFor(userId, [rawIdInput, rawId])
     const ids = await expandAliasIds([userId, rawIdInput, rawId])
