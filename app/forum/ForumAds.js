@@ -2067,7 +2067,7 @@ export function AdCard({
     align-items: center;
     gap: 9px;
     padding: 9px 10px;
-    border: 1px solid rgba(255, 221, 116, .66);
+    border: 1px solid rgba(255, 220, 116, 0.03);
     border-radius: 16px;
     color: #f8fbff;
     text-decoration: none;
