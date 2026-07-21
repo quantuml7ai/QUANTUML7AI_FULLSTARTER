@@ -2,31 +2,31 @@ export const I18N_SUPPORTED_LANGS = ["ru","en","zh","uk","ar","tr","es"]
 export const I18N_DEFAULT_LANG = "en"
 export const I18N_DICT_META = {
   "ru": {
-    "keyCount": 6391,
-    "hash": "6779f3857c49cb5940e386c03f12aee10055c2637778a453aca5da42bb605d28"
+    "keyCount": 6399,
+    "hash": "915c0dcb285c856cab63e0056417d3eca77825866e93b5e7712cc31e8f3181ac"
   },
   "en": {
-    "keyCount": 6384,
-    "hash": "7da0e81eaa9f982b859d034c0401f9263d855f94638488ebb784efb3df9daa72"
+    "keyCount": 6392,
+    "hash": "948f4b018c26100b5c9d3312dfaf5f747dd04b4bea339e26f9bad359fdbe0c28"
   },
   "zh": {
-    "keyCount": 6384,
-    "hash": "9cf8a42bc26564cc5d2afafa6c6ed24b2356054d3d2565224ee9a3846421a65c"
+    "keyCount": 6392,
+    "hash": "93a9973f6088dcd0e2d3a156992cdb2246e25d4dacf464bebe5d4f027169f7dd"
   },
   "uk": {
-    "keyCount": 6384,
-    "hash": "9fb5bb339597eaf95a8f459d4b1429b1f6e8cd26f6eacb5fef7dfbe8267f4abd"
+    "keyCount": 6392,
+    "hash": "be1e8265fa62184a08b52d7e7d3caf4f68fb668d40269564777cf25096d8b2bd"
   },
   "ar": {
-    "keyCount": 6384,
-    "hash": "f34b35d566d6b68e1c1eaf67b8d5acaa5844f70f6873bfcfd1861147ce5513ac"
+    "keyCount": 6392,
+    "hash": "0e84b22b71811ebc751df65c0667d533161a5c4c1fb6c1cdd429e975c1e9beaf"
   },
   "tr": {
-    "keyCount": 6384,
-    "hash": "a3f59d379f84a61fa6b46395bdf0c17d8a09d953980a394a6930e1bfac94809a"
+    "keyCount": 6392,
+    "hash": "e6f499afaca1045fbc692eb7b9b427796deb9b7e521c6ffdc767dad26da0c6fd"
   },
   "es": {
-    "keyCount": 6384,
-    "hash": "99ab8388a18c1743f98c24ebe78d65a47afae939d15564718414dbfc79c0e2f9"
+    "keyCount": 6392,
+    "hash": "d8e2d7a8128b4e19da01dfe199eb58c99b4f0fcc409373a81d16cb3de27915b4"
   }
 }
