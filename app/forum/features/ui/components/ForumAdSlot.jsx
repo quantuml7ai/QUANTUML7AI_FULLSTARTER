@@ -5,6 +5,31 @@ import { AdCard } from '../../../ForumAds'
 
 const MEDIA_MUTED_EVENT = 'forum:media-mute'
 
+const SITE_MEDIA_PLAY_EVENT = 'site-media-play'
+
+function applyAdVideoSound(video, muted) {
+  if (!video) return
+  try { video.muted = !!muted } catch {}
+  try { video.defaultMuted = !!muted } catch {}
+  try { if (muted) video.setAttribute('muted', '') ; else video.removeAttribute('muted') } catch {}
+}
+
+function activateAdFrame(frame, kind) {
+  if (!frame) return
+  if (kind === 'youtube') {
+    try { frame.contentWindow?.postMessage?.(JSON.stringify({ event: 'command', func: 'unMute', args: '' }), '*') } catch {}
+    try { frame.contentWindow?.postMessage?.(JSON.stringify({ event: 'command', func: 'playVideo', args: '' }), '*') } catch {}
+    return
+  }
+  if (kind === 'tiktok') {
+    try { frame.contentWindow?.postMessage?.({ method: 'play', value: 1, muted: false }, '*') } catch {}
+    try { frame.contentWindow?.postMessage?.({ type: 'play', command: 'play', muted: false }, '*') } catch {}
+    return
+  }
+  try { frame.contentWindow?.postMessage?.({ method: 'play', muted: false }, '*') } catch {}
+  try { frame.contentWindow?.postMessage?.('play', '*') } catch {}
+}
+
 function normalizeMuted(value) {
   return value === false ? false : true
 }
@@ -164,6 +189,72 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
   const mediaSrc = String(adMedia?.media?.src || adMedia?.mediaHref || '')
   const clickHref = String(adMedia?.clickHref || mountedAdUrl || '')
 
+  const handleForumAdMediaActivate = (event, info) => {
+    event?.preventDefault?.()
+    event?.stopPropagation?.()
+    const nextMuted = false
+    setMuted(nextMuted)
+    writeMutedToDocument(nextMuted)
+    try {
+      window.dispatchEvent(
+        new CustomEvent(MEDIA_MUTED_EVENT, {
+          detail: {
+            muted: false,
+            id: stableSlotKey,
+            source: 'forum-ad-surface-activate',
+          },
+        }),
+      )
+    } catch {}
+
+    if (mediaKind === 'video') {
+      const video = info?.video || videoRef.current
+      if (!video) return
+      applyAdVideoSound(video, false)
+      try {
+        const source = String(video.currentSrc || video.getAttribute?.('src') || video.dataset?.adMediaSrc || video.dataset?.src || '').trim()
+        if (!video.currentSrc && !video.getAttribute?.('src') && source) {
+          video.src = source
+          video.preload = 'auto'
+          video.load?.()
+        }
+      } catch {}
+      try {
+        window.dispatchEvent(new CustomEvent(SITE_MEDIA_PLAY_EVENT, {
+          detail: {
+            source: 'forum_ads',
+            mediaKind: 'video',
+            element: video,
+            manual: true,
+            audible: true,
+            id: stableSlotKey,
+            gestureType: event?.type || 'click',
+          },
+        }))
+      } catch {}
+      try { video.play?.().catch(() => {}) } catch {}
+      return
+    }
+
+    if (mediaKind === 'youtube' || mediaKind === 'tiktok') {
+      const frame = info?.iframe || iframeRef.current
+      activateAdFrame(frame, mediaKind)
+      try {
+        window.dispatchEvent(new CustomEvent(SITE_MEDIA_PLAY_EVENT, {
+          detail: {
+            source: 'forum_ads',
+            mediaKind,
+            element: frame,
+            manual: true,
+            audible: true,
+            id: stableSlotKey,
+            gestureType: event?.type || 'click',
+          },
+        }))
+      } catch {}
+    }
+  }
+
   const handleForumAdSoundToggle = (event, info) => {
     const next = normalizeMuted(info?.nextMuted)
     setMuted(next)
@@ -204,6 +295,7 @@ export default function ForumAdSlot({ url, slotKind, nearId, slotKey, onResizeDe
         nearId={nearId}
         muted={muted}
         onSoundToggle={handleForumAdSoundToggle}
+        onMediaSurfaceActivate={handleForumAdMediaActivate}
         videoRef={videoRef}
         iframeRef={iframeRef}
         rootAttrs={{

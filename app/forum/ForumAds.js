@@ -6,6 +6,12 @@ import NextImage from 'next/image';
 import { useI18n } from '../../components/i18n';
 import { useRouter } from 'next/navigation';
 import AndroidChromiumVideoCanvas from '../../components/AndroidChromiumVideoCanvas';
+import {
+  AD_DISCOVERY_PROMPT_VARIANTS,
+  AD_DISCOVERY_VISIBLE_MS,
+  buildAdDiscoveryVariantOrder,
+  getAdDiscoveryThresholdMs,
+} from '../../lib/ads/adDiscoveryPrompt';
 
 /* ======================= CAMPAIGN META ======================= */
 const AD_LABEL_FONT_SIZE_PX = 20;
@@ -18,7 +24,7 @@ const AD_SLOT_HEIGHT_PX = {
   desktop: 650,  // >= 1024px
 };
 const AD_LENS_UI = Object.freeze({
-  sizePx: 40,
+  sizePx: 50,
   rightPx: 10,
   bottomPx: 10,
 
@@ -34,10 +40,10 @@ const AD_LENS_UI = Object.freeze({
   handleWidth: 2.2,
   orbitWidth: 1,
 
-  floatDurationMs: 2800,
-  sweepDurationMs: 2400,
-  pulseDurationMs: 1800,
-  sparkleDurationMs: 1600,
+  floatDurationMs: 2100,
+  sweepDurationMs: 1650,
+  pulseDurationMs: 1350,
+  sparkleDurationMs: 980,
 });
 const CAMPAIGN_ID = 'forum_ads_v1';
 const FALLBACK_CAMPAIGN_SEED = 'forum_ads_seed';
@@ -1404,6 +1410,7 @@ export function AdCard({
   layout = 'fixed',
   muted = true,
   onSoundToggle,
+  onMediaSurfaceActivate,
   rootRef,
   videoRef,
   iframeRef,
@@ -1434,6 +1441,93 @@ export function AdCard({
     conf,
     freezeForMount: freezeMediaForMount,
   });
+  const [discoveryVisible, setDiscoveryVisible] = useState(false);
+  const [discoveryVariantIndex, setDiscoveryVariantIndex] = useState(0);
+
+  useEffect(() => {
+    setDiscoveryVisible(false);
+    setDiscoveryVariantIndex(0);
+    if (!isBrowser() || media.kind !== 'video' || !media.src || !clickHref) return undefined;
+
+    const video = localVideoRef.current;
+    if (!video) return undefined;
+
+    let interval = 0;
+    let hideTimer = 0;
+    let watchedMs = 0;
+    let lastTickMs = 0;
+    let promptNumber = 0;
+    let variantCursor = 0;
+    let variantOrder = buildAdDiscoveryVariantOrder();
+
+    const clearTicker = () => {
+      if (interval) window.clearInterval(interval);
+      interval = 0;
+      lastTickMs = 0;
+    };
+
+    const hidePrompt = () => {
+      setDiscoveryVisible(false);
+      if (hideTimer) window.clearTimeout(hideTimer);
+      hideTimer = 0;
+    };
+
+    const showPrompt = () => {
+      if (!variantOrder.length || variantCursor >= variantOrder.length) {
+        variantOrder = buildAdDiscoveryVariantOrder();
+        variantCursor = 0;
+      }
+      const nextVariant = variantOrder[variantCursor] ?? 0;
+      variantCursor += 1;
+      setDiscoveryVariantIndex(nextVariant);
+      setDiscoveryVisible(true);
+      if (hideTimer) window.clearTimeout(hideTimer);
+      hideTimer = window.setTimeout(hidePrompt, AD_DISCOVERY_VISIBLE_MS);
+    };
+
+    const tick = () => {
+      if (document.visibilityState === 'hidden' || video.paused || video.ended) {
+        lastTickMs = 0;
+        return;
+      }
+      const now = performance.now();
+      if (!lastTickMs) {
+        lastTickMs = now;
+        return;
+      }
+      watchedMs += Math.min(1000, Math.max(0, now - lastTickMs));
+      lastTickMs = now;
+      const threshold = getAdDiscoveryThresholdMs(promptNumber);
+      if (watchedMs >= threshold) {
+        promptNumber += 1;
+        showPrompt();
+      }
+    };
+
+    const startTicker = () => {
+      if (interval) return;
+      lastTickMs = performance.now();
+      interval = window.setInterval(tick, 250);
+    };
+    const stopTicker = () => {
+      clearTicker();
+    };
+
+    video.addEventListener('playing', startTicker);
+    video.addEventListener('play', startTicker);
+    video.addEventListener('pause', stopTicker);
+    video.addEventListener('ended', stopTicker);
+    if (!video.paused && !video.ended) startTicker();
+
+    return () => {
+      clearTicker();
+      if (hideTimer) window.clearTimeout(hideTimer);
+      video.removeEventListener('playing', startTicker);
+      video.removeEventListener('play', startTicker);
+      video.removeEventListener('pause', stopTicker);
+      video.removeEventListener('ended', stopTicker);
+    };
+  }, [clickHref, media.kind, media.src]);
 
   useEffect(() => {
     onMediaChange?.({ media, mediaHref, clickHref, slotKind, nearId });
@@ -1589,7 +1683,9 @@ export function AdCard({
     }
   };
 
-  const handleClick = () => {
+  const handleDestinationClick = (event) => {
+    event?.stopPropagation?.();
+    setDiscoveryVisible(false);
     emitAdEvent(
       'ad_click',
       {
@@ -1603,6 +1699,34 @@ export function AdCard({
   };
 
   const isAdMuted = normalizeAdMuted(muted);
+  const canActivateMedia =
+    (media.kind === 'video' || media.kind === 'youtube' || media.kind === 'tiktok') &&
+    typeof onMediaSurfaceActivate === 'function';
+
+  const activateMediaSurface = (event) => {
+    if (!canActivateMedia) return;
+    const target = event?.target;
+    const interactive = target?.closest?.(
+      'a,button,[data-ad-destination-trigger="1"],[data-ad-sound-toggle="1"]',
+    );
+    if (interactive && interactive !== event?.currentTarget) return;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    onMediaSurfaceActivate?.(event, {
+      media,
+      mediaHref,
+      clickHref,
+      slotKind,
+      nearId,
+      video: localVideoRef.current,
+      iframe: localIframeRef.current,
+    });
+  };
+
+  const handleMediaSurfaceKeyDown = (event) => {
+    if (!canActivateMedia || (event.key !== 'Enter' && event.key !== ' ')) return;
+    activateMediaSurface(event);
+  };
 
   const handleToggleSound = (e) => {
     e.preventDefault();
@@ -1640,6 +1764,22 @@ export function AdCard({
 
   const youtubeSrc = media.kind === 'youtube' && media.src ? buildYouTubeEmbedSrc(media.src) : '';
   const tiktokSrc = media.kind === 'tiktok' && media.src ? buildTikTokEmbedSrc(media.src) : '';
+  const discoveryVariant =
+    AD_DISCOVERY_PROMPT_VARIANTS[discoveryVariantIndex] || AD_DISCOVERY_PROMPT_VARIANTS[0];
+  const discoveryTitle = discoveryVariant
+    ? t?.(discoveryVariant.titleKey, 'Discover what is behind this offer')
+    : '';
+  const discoveryBody = discoveryVariant
+    ? t?.(discoveryVariant.bodyKey, 'Tap here to learn more about the product or service.')
+    : '';
+  const mediaActivationLabel = t?.(
+    'forum_ad_media_activate_aria',
+    'Play this advertisement with sound',
+  );
+  const destinationLabel = t?.(
+    'forum_ad_discovery_open_aria',
+    'Open product or service details',
+  );
 
   return (
 <div
@@ -1784,8 +1924,10 @@ export function AdCard({
     bottom: var(--forum-ad-lens-bottom, 10px);
     width: var(--forum-ad-lens-size, 40px);
     height: var(--forum-ad-lens-size, 40px);
-    z-index: 5;
-    pointer-events: none;
+    z-index: 9;
+    pointer-events: auto;
+    cursor: pointer;
+    touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
     opacity: var(--forum-ad-lens-opacity, .98);
@@ -1794,7 +1936,31 @@ export function AdCard({
     filter:
       drop-shadow(0 0 8px var(--forum-ad-lens-glow, rgba(111, 231, 255, .42)))
       drop-shadow(0 0 16px var(--forum-ad-lens-glow-2, rgba(183, 125, 255, .22)));
-    animation: forumAdLensFloat var(--forum-ad-lens-float-dur, 2800ms) ease-in-out infinite;
+    border-radius: 999px;
+    outline: none;
+    animation:
+      forumAdLensFloat var(--forum-ad-lens-float-dur, 2100ms) ease-in-out infinite,
+      forumAdLensAura 3200ms linear infinite;
+  }
+  .forum-ad-lens::before,
+  .forum-ad-lens::after {
+    content: '';
+    position: absolute;
+    inset: 7%;
+    border-radius: 999px;
+    pointer-events: none;
+  }
+  .forum-ad-lens::before {
+    border: 1px solid rgba(111, 231, 255, .5);
+    animation: forumAdLensRadar 1900ms ease-out infinite;
+  }
+  .forum-ad-lens::after {
+    inset: 28%;
+    background: radial-gradient(circle, rgba(255, 231, 133, .34), rgba(111, 231, 255, .08) 48%, transparent 70%);
+    animation: forumAdLensCoreGlow 1200ms ease-in-out infinite;
+  }
+  .forum-ad-lens:focus-visible {
+    box-shadow: 0 0 0 2px rgba(255, 228, 123, .94), 0 0 0 5px rgba(111, 231, 255, .3);
   }
   .forum-ad-audio-toggle{
     position:absolute;
@@ -1889,6 +2055,106 @@ export function AdCard({
       animation:none !important;
     }
   }
+  .forum-ad-discoveryPrompt {
+    position: absolute;
+    right: calc(var(--forum-ad-lens-right, 10px) + var(--forum-ad-lens-size, 50px) + 10px);
+    bottom: var(--forum-ad-lens-bottom, 10px);
+    z-index: 8;
+    width: min(330px, calc(100% - 126px));
+    min-height: 52px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 1px solid rgba(255, 221, 116, .66);
+    border-radius: 16px;
+    color: #f8fbff;
+    text-decoration: none;
+    background:
+      linear-gradient(118deg, rgba(5, 23, 42, .96), rgba(7, 54, 72, .9) 58%, rgba(68, 42, 9, .92)),
+      radial-gradient(120% 160% at 10% 10%, rgba(111, 231, 255, .24), transparent 62%);
+    box-shadow:
+      inset 0 0 24px rgba(111, 231, 255, .1),
+      0 12px 30px rgba(0, 0, 0, .48),
+      0 0 18px rgba(255, 211, 87, .12);
+    backdrop-filter: blur(12px) saturate(1.18);
+    -webkit-backdrop-filter: blur(12px) saturate(1.18);
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(16px, 6px, 0) scale(.94);
+    clip-path: inset(0 0 0 100% round 16px);
+    transition:
+      opacity .38s ease,
+      transform .48s cubic-bezier(.2,.8,.2,1),
+      clip-path .52s cubic-bezier(.2,.8,.2,1),
+      filter .25s ease;
+  }
+  .forum-ad-discoveryPrompt::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-130%) skewX(-20deg);
+    width: 48%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+    pointer-events: none;
+  }
+  .forum-ad-discoveryPrompt[data-visible="1"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate3d(0, 0, 0) scale(1);
+    clip-path: inset(0 0 0 0 round 16px);
+  }
+  .forum-ad-discoveryPrompt[data-visible="1"]::before {
+    animation: forumAdPromptShine 2100ms 350ms ease-in-out infinite;
+  }
+  .forum-ad-discoveryPrompt:hover {
+    filter: brightness(1.08) saturate(1.08);
+    transform: translate3d(-2px, -1px, 0) scale(1.01);
+  }
+  .forum-ad-discoveryPrompt:focus-visible {
+    outline: 2px solid rgba(255, 226, 111, .96);
+    outline-offset: 2px;
+  }
+  .forum-ad-discoveryIcon {
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    color: #06131f;
+    font-size: 16px;
+    font-weight: 1000;
+    background: linear-gradient(135deg, #72ecff, #fff29a 62%, #ffca4e);
+    box-shadow: 0 0 16px rgba(111, 231, 255, .38);
+  }
+  .forum-ad-discoveryCopy {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+    text-align: left;
+  }
+  .forum-ad-discoveryCopy strong {
+    font-size: clamp(11px, 2.3vw, 13px);
+    line-height: 1.12;
+    letter-spacing: .01em;
+    color: #fff1a5;
+    text-shadow: 0 0 10px rgba(255, 215, 85, .2);
+  }
+  .forum-ad-discoveryCopy small {
+    font-size: clamp(9px, 2vw, 11px);
+    line-height: 1.2;
+    color: rgba(230, 246, 255, .9);
+    overflow-wrap: anywhere;
+  }
+  .forum-ad-discoveryArrow {
+    color: #7deeff;
+    font-size: 18px;
+    line-height: 1;
+    animation: forumAdPromptArrow 1100ms ease-in-out infinite;
+  }
+
   .forum-ad-lensSvg {
     width: 100%;
     height: 100%;
@@ -1999,10 +2265,47 @@ export function AdCard({
     }
   }
 
+  @keyframes forumAdLensAura {
+    0% { filter: drop-shadow(0 0 7px rgba(111,231,255,.34)) drop-shadow(0 0 14px rgba(183,125,255,.18)); }
+    50% { filter: drop-shadow(0 0 13px rgba(111,231,255,.62)) drop-shadow(0 0 24px rgba(255,211,87,.32)); }
+    100% { filter: drop-shadow(0 0 7px rgba(111,231,255,.34)) drop-shadow(0 0 14px rgba(183,125,255,.18)); }
+  }
+  @keyframes forumAdLensRadar {
+    0% { opacity: .9; transform: scale(.72); }
+    80%, 100% { opacity: 0; transform: scale(1.42); }
+  }
+  @keyframes forumAdLensCoreGlow {
+    0%, 100% { opacity: .55; transform: scale(.82); }
+    50% { opacity: 1; transform: scale(1.16); }
+  }
+  @keyframes forumAdPromptShine {
+    0%, 22% { transform: translateX(-130%) skewX(-20deg); }
+    58%, 100% { transform: translateX(340%) skewX(-20deg); }
+  }
+  @keyframes forumAdPromptArrow {
+    0%, 100% { transform: translateX(0); opacity: .66; }
+    50% { transform: translateX(3px); opacity: 1; }
+  }
+
   @media (max-width: 640px) {
     .forum-ad-lens {
-      width: calc(var(--forum-ad-lens-size, 40px) - 6px);
-      height: calc(var(--forum-ad-lens-size, 40px) - 6px);
+      width: calc(var(--forum-ad-lens-size, 50px) - 4px);
+      height: calc(var(--forum-ad-lens-size, 50px) - 4px);
+    }
+    .forum-ad-discoveryPrompt {
+      right: calc(var(--forum-ad-lens-right, 10px) + var(--forum-ad-lens-size, 50px) + 6px);
+      width: min(300px, calc(100% - 118px));
+      min-height: 48px;
+      grid-template-columns: 26px minmax(0, 1fr) 14px;
+      gap: 7px;
+      padding: 8px;
+      border-radius: 14px;
+    }
+    .forum-ad-discoveryIcon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      font-size: 14px;
     }
   }
 
@@ -2011,20 +2314,18 @@ export function AdCard({
     .forum-ad-lensOrbit,
     .forum-ad-lensRing,
     .forum-ad-lensHandle,
-    .forum-ad-lensSpark {
+    .forum-ad-lensSpark,
+    .forum-ad-discoveryPrompt::before,
+    .forum-ad-discoveryArrow {
       animation: none !important;
     }
   }
 `}</style>
 
 
-      <a
-        href={clickHref}
-        target="_blank"
-        rel="noopener noreferrer nofollow ugc"
-        onClick={handleClick}
+      <div
         aria-label={`${label} • ${host}`}
-        className="forum-ad-link no-underline focus:outline-none focus-visible:ring focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+        className="forum-ad-link no-underline"
       >
         <div className="forum-ad-card-body">
           {/* header: только бейдж + домен, без url-строки */}
@@ -2071,8 +2372,14 @@ export function AdCard({
           {/* media: заполняет карточку */}
 <div
   className="relative mt-0.5 border border-[color:var(--border,#27272a)] forum-ad-media-slot"
-data-layout={isFluid ? 'fluid' : 'fixed'}
-{...(mediaSlotAttrs || {})}
+  data-layout={isFluid ? 'fluid' : 'fixed'}
+  data-ad-surface-activate={canActivateMedia ? '1' : undefined}
+  role={canActivateMedia ? 'button' : undefined}
+  tabIndex={canActivateMedia ? 0 : undefined}
+  aria-label={canActivateMedia ? mediaActivationLabel : undefined}
+  onClick={activateMediaSurface}
+  onKeyDown={handleMediaSurfaceKeyDown}
+  {...(mediaSlotAttrs || {})}
 >
 
  {media.kind === 'skeleton' && (
@@ -2210,7 +2517,36 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
   </button>
 )}
 
-            <div className="forum-ad-lens" aria-hidden="true">
+            {media.kind === 'video' && clickHref && (
+              <a
+                href={clickHref}
+                target="_blank"
+                rel="noopener noreferrer nofollow ugc"
+                className="forum-ad-discoveryPrompt"
+                data-visible={discoveryVisible ? '1' : '0'}
+                data-ad-destination-trigger="1"
+                aria-hidden={discoveryVisible ? undefined : 'true'}
+                tabIndex={discoveryVisible ? 0 : -1}
+                onClick={handleDestinationClick}
+              >
+                <span className="forum-ad-discoveryIcon" aria-hidden="true">✦</span>
+                <span className="forum-ad-discoveryCopy">
+                  <strong>{discoveryTitle}</strong>
+                  <small>{discoveryBody}</small>
+                </span>
+                <span className="forum-ad-discoveryArrow" aria-hidden="true">›</span>
+              </a>
+            )}
+
+            <a
+              href={clickHref}
+              target="_blank"
+              rel="noopener noreferrer nofollow ugc"
+              className="forum-ad-lens"
+              data-ad-destination-trigger="1"
+              aria-label={destinationLabel}
+              onClick={handleDestinationClick}
+            >
               <svg
                 className="forum-ad-lensSvg"
                 viewBox="0 0 40 40"
@@ -2256,12 +2592,12 @@ data-layout={isFluid ? 'fluid' : 'fixed'}
                   r="1.05"
                 />
               </svg>
-            </div>
+            </a>
 
             <div className="pointer-events-none абсолют inset-0 rounded-lg border border-transparent qshine" />
           </div>
         </div>
-      </a>
+      </div>
     </div>
   );
 }

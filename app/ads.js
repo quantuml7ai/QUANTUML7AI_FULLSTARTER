@@ -746,6 +746,47 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
 
   if (!url) return null;
   const effectiveSlotKind = (slotKind && String(slotKind)) || (slotKey && String(slotKey)) || 'home_between';
+  const handleMediaSurfaceActivate = (event, info) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const next = syncMutedPrefEverywhere(false, playerIdRef.current, 'site-ads-surface-activate');
+    mutedRef.current = next;
+    setMuted((prev) => (prev === next ? prev : next));
+    shouldPlayRef.current = true;
+
+    if (currentKind === 'video') {
+      const video = info?.video || videoRef.current;
+      if (!video) return;
+      try {
+        const srcKey = String(currentSrc || info?.media?.src || '').trim();
+        if (srcKey) ensureSiteNativeVideoSrc(video, srcKey, false);
+        applyMutedToVideo(video, false);
+        video.playsInline = true;
+        video.setAttribute('playsinline', '');
+        video.setAttribute('webkit-playsinline', '');
+        markSiteAdPlaying(true, 'surface_activate');
+        emitAdPlayToCoordinator('site_ad_video');
+        video.play?.().catch(() => {});
+      } catch {}
+      return;
+    }
+
+    if (currentKind === 'youtube') {
+      try { ytPlayerRef.current?.unMute?.(); } catch {}
+      try { ytPlayerRef.current?.playVideo?.(); } catch {}
+      commandExternalFrame(info?.iframe || iframeRef.current, 'play', false);
+      markSiteAdPlaying(true, 'surface_activate');
+      emitAdPlayToCoordinator('site_ad_youtube');
+      return;
+    }
+
+    if (currentKind === 'tiktok') {
+      commandExternalFrame(info?.iframe || iframeRef.current, 'play', false);
+      markSiteAdPlaying(true, 'surface_activate');
+      emitAdPlayToCoordinator('site_ad_tiktok');
+    }
+  };
+
   const handleSoundToggle = (event, info) => {
     const next = syncMutedPrefEverywhere(info?.nextMuted, playerIdRef.current, 'site-ads-toggle');
     mutedRef.current = next;
@@ -836,6 +877,7 @@ export function HomeBetweenBlocksAd({ slotKey, slotKind }) {
           layout="flex"
           muted={muted}
           onSoundToggle={handleSoundToggle}
+          onMediaSurfaceActivate={handleMediaSurfaceActivate}
           rootRef={rootRef}
           videoRef={videoRef}
           iframeRef={iframeRef}
