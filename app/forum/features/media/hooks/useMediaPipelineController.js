@@ -18,11 +18,13 @@ export default function useMediaPipelineController({
 
   const formatMediaPhase = useCallback((phase) => {
     const p = String(phase || '')
-    if (!p || p === 'idle' || p === 'Ready') return t('forum_media_ready')
+    if (!p || p === 'idle' || p === 'Ready') return t('media_pipeline_ready') || t('forum_media_ready')
+    if (p === 'Preparing') return t('media_pipeline_preparing') || t('forum_media_processing')
     if (p === 'Moderating') return t('forum_media_moderating')
-    if (p === 'Processing') return t('forum_media_processing')
-    if (p === 'Uploading') return t('forum_media_uploading')
-    if (p === 'Sending') return t('forum_media_sending')
+    if (p === 'Processing') return t('media_pipeline_processing') || t('forum_media_processing')
+    if (p === 'Verifying') return t('media_pipeline_verifying')
+    if (p === 'Uploading') return t('media_pipeline_uploading') || t('forum_media_uploading')
+    if (p === 'Finalizing' || p === 'Sending') return t('media_pipeline_finalizing') || t('forum_media_sending')
     return p
   }, [t])
 
@@ -90,13 +92,16 @@ export default function useMediaPipelineController({
     setMediaBarOn(true)
     setMediaPhase(phase)
     setMediaPct(1)
-    if (String(phase || '').toLowerCase() === 'uploading' || String(phase || '').toLowerCase() === 'processing') {
-      startSoftProgress(55, 140, 92)
-    } else {
+    const phaseKey = String(phase || '').toLowerCase()
+    if (phaseKey === 'uploading') {
+      startSoftProgress(72, 160, 94)
+    } else if (phaseKey === 'moderating') {
       startSoftProgress(32, 120, 45)
+    } else {
+      stopMediaProg()
     }
     return ac
-  }, [startSoftProgress, ensureMediaAbortController])
+  }, [startSoftProgress, ensureMediaAbortController, stopMediaProg])
 
   const endMediaPipeline = useCallback(() => {
     stopMediaProg()
@@ -116,10 +121,10 @@ export default function useMediaPipelineController({
     const hasRealMedia =
       (pendingImgs?.length || 0) > 0 || !!pendingAudio || !!pendingVideo
     if (!hasRealMedia) return
-    if (mediaPhase === 'Moderating' || mediaPhase === 'Uploading') {
+    if (!mediaPipelineOn && (mediaPhase === 'Moderating' || mediaPhase === 'Uploading')) {
       markMediaReady()
     }
-  }, [pendingImgs, pendingAudio, pendingVideo, mediaPhase, markMediaReady])
+  }, [pendingImgs, pendingAudio, pendingVideo, mediaPhase, mediaPipelineOn, markMediaReady])
 
   useEffect(() => {
     if (!hasComposerMedia) {
@@ -131,6 +136,17 @@ export default function useMediaPipelineController({
       setVideoProgress(0)
       return
     }
+
+    const localVideoPreviewOnly = /^blob:/i.test(String(pendingVideo || '')) && !mediaPipelineOn
+    if (localVideoPreviewOnly) {
+      stopMediaProg()
+      setMediaBarOn(false)
+      setMediaPhase('idle')
+      setMediaPct(0)
+      setVideoProgress(0)
+      return
+    }
+
     setMediaBarOn(true)
     setMediaPhase((p) => (p && p !== 'idle' ? p : 'Ready'))
     setMediaPct((p) => {
@@ -138,7 +154,7 @@ export default function useMediaPipelineController({
       if (cur > 0) return cur
       return mediaPipelineOn ? 1 : 100
     })
-  }, [hasComposerMedia, stopMediaProg, mediaPipelineOn])
+  }, [hasComposerMedia, stopMediaProg, mediaPipelineOn, pendingVideo])
 
   return {
     videoProgress,

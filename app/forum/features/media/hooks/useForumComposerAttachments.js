@@ -1,6 +1,6 @@
 import { useCallback, useRef } from 'react'
-import uploadR2MediaFile from '../services/uploadR2MediaFile'
 import { FORUM_IMAGE_MAX_BYTES } from '../../../shared/constants/media'
+import { FORUM_CLIENT_VIDEO_OPTIMIZER_SOURCE_MAX_BYTES } from '../../../../../lib/forumClientVideoOptimizer'
 
 const MAX_COMPOSER_IMAGE_ATTACHMENTS = 10
 
@@ -34,15 +34,12 @@ export default function useForumComposerAttachments({
   setVideoOpen,
   viewerId,
   showVideoLimitOverlay,
-  readVideoDurationSecFn,
   forumVideoMaxSeconds,
-  forumVideoMaxBytes,
-  forumVideoFaststartTranscodeMaxBytes,
-  optimizeForumVideoFastStartFn,
-  emitDiag,
+  pendingVideo,
   setPendingVideo,
   pendingVideoInfoRef,
-  mediaCancelRef,
+  pendingVideoBlobMetaRef,
+  readVideoDurationSecFn,
   setVideoProgress,
 }) {
   const fileInputRef = useRef(null)
@@ -53,14 +50,6 @@ export default function useForumComposerAttachments({
     })
     return message
   }, [t])
-  const isMediaCancelled = useCallback((signal) => {
-    try {
-      return !!(signal?.aborted || mediaCancelRef?.current);
-    } catch {
-      return !!signal?.aborted;
-    }
-  }, [mediaCancelRef])
-
   const finishCancelledPipeline = useCallback(() => {
     try {
       stopMediaProg?.()
@@ -81,7 +70,7 @@ export default function useForumComposerAttachments({
 
   const fileInputAccept = composerMediaKind === 'image'
     ? 'image/*,image/jpeg,image/png,image/webp,image/gif'
-    : 'image/*,image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov'
+    : 'image/*,image/jpeg,image/png,image/webp,image/gif,video/*,video/mp4,video/webm,video/quicktime,video/x-matroska,video/mp2t,video/ogg,.mp4,.webm,.mov,.m4v,.mkv,.ts,.mts,.m2ts,.ogg,.ogv'
 
   const handleAttachClick = useCallback((e) => {
     e?.preventDefault?.()
@@ -107,7 +96,7 @@ export default function useForumComposerAttachments({
       )
       const vidFiles = picked.filter((f) =>
         /^video\//i.test(String(f?.type || '')) ||
-        /\.(mp4|webm|mov|m4v|mkv)$/i.test(String(f?.name || ''))
+        /\.(mp4|webm|mov|m4v|mkv|ts|mts|m2ts|ogg|ogv)$/i.test(String(f?.name || ''))
       )
 
       if (composerMediaKind === 'image' && !rawImgFiles.length) return
@@ -154,26 +143,21 @@ export default function useForumComposerAttachments({
       }
 
       let signal
-      if ((imgFiles?.length || 0) > 0 || (vidFiles?.length || 0) > 0) {
+      if ((imgFiles?.length || 0) > 0) {
         const ac = (() => {
           try {
-            return beginMediaPipeline?.(
-              imgFiles.length ? 'Moderating' : (vidFiles.length ? 'Processing' : 'Moderating')
-            )
+            return beginMediaPipeline?.('Moderating')
           } catch {
             return null
           }
         })()
         signal = ac?.signal
       } else {
-        try {
-          endMediaPipeline?.()
-        } catch {}
+        try { endMediaPipeline?.() } catch {}
       }
 
       try {
-        if (vidFiles.length) toast?.info?.(t?.('forum_video_processing_wait'))
-        else if (imgFiles.length) toast?.info?.(t?.('forum_image_processing_wait'))
+        if (imgFiles.length) toast?.info?.(t?.('forum_image_processing_wait'))
       } catch {}
       if (!imgFiles.length && !vidFiles.length) {
         try {
@@ -291,217 +275,76 @@ export default function useForumComposerAttachments({
       if (vidFiles.length) {
         const vf = vidFiles[0]
         const mime = String(vf?.type || '').split(';')[0].trim().toLowerCase()
-        let uploadVideoBlob = vf
-        let uploadVideoMime = mime
         const okMime =
-          /^video\/(mp4|webm|quicktime)$/i.test(mime) ||
-          /\.(mp4|webm|mov)$/i.test(String(vf?.name || ''))
+          /^video\//i.test(mime) ||
+          /\.(mp4|webm|mov|m4v|mkv|ts|mts|m2ts|ogg|ogv)$/i.test(String(vf?.name || ''))
+
         if (!okMime) {
-          try {
-            toast?.warn?.(t?.('forum_video_bad_type'))
-          } catch {}
-          try {
-            endMediaPipeline?.()
-          } catch {}
+          try { toast?.warn?.(t?.('forum_video_bad_type')) } catch {}
           return
         }
-        let pickedDurationSec = Number.NaN
-        try {
-          pickedDurationSec = await readVideoDurationSecFn?.(vf, 32000)
-        } catch {}
-        if (!Number.isFinite(pickedDurationSec) || pickedDurationSec <= 0) {
-          try {
-            showVideoLimitOverlay?.({
-              source: 'attach_picker',
-              durationSec: null,
-              reason: 'bad_duration',
-            })
-          } catch {}
-          try {
-            endMediaPipeline?.()
-          } catch {}
+        if (Number(vf?.size || 0) > FORUM_CLIENT_VIDEO_OPTIMIZER_SOURCE_MAX_BYTES) {
+          try { toast?.err?.(t?.('forum_video_too_big')) } catch {}
           return
         }
-        if (pickedDurationSec > forumVideoMaxSeconds) {
-          try {
-            showVideoLimitOverlay?.({
-              source: 'attach_picker',
-              durationSec: pickedDurationSec,
-              reason: 'too_long',
-            })
-          } catch {}
-          try {
-            endMediaPipeline?.()
-          } catch {}
-          return
-        }
-        if (Number(vf.size || 0) > forumVideoMaxBytes) {
-          try {
-            toast?.err?.(t?.('forum_video_too_big'))
-          } catch {}
-          try {
-            endMediaPipeline?.()
-          } catch {}
+
+        let previewUrl = ''
+        try { previewUrl = URL.createObjectURL(vf) } catch {}
+        if (!previewUrl) {
+          try { toast?.err?.(t?.('forum_video_upload_failed')) } catch {}
           return
         }
 
         try {
-          const shouldFaststart =
-            /^(video\/mp4|video\/quicktime)$/i.test(uploadVideoMime) &&
-            Number(uploadVideoBlob?.size || 0) > 0 &&
-            Number(uploadVideoBlob?.size || 0) <= forumVideoFaststartTranscodeMaxBytes
-          if (shouldFaststart) {
-            try { setMediaPhase?.('Processing') } catch {}
-            try { startSoftProgress?.(64, 180, 92) } catch {}
-            const fast = await optimizeForumVideoFastStartFn?.(uploadVideoBlob, {
-              signal,
-              allowTranscode: false,
-              strictFlatFaststart: true,
-              abortFaststartOnSignal: true,
-              maxTranscodeBytes: forumVideoFaststartTranscodeMaxBytes,
-              onProgress: (fastPctRaw) => {
-                let fastPct = Number(fastPctRaw)
-                if (!Number.isFinite(fastPct)) fastPct = 0
-                fastPct = Math.max(0, Math.min(1, fastPct))
-                try { setVideoProgress?.(fastPct * 100) } catch {}
-                try { setMediaPct?.((prev) => Math.max(Number(prev || 0), 8 + (fastPct * 72))) } catch {}
-              },
-            })
-            if (isMediaCancelled(signal)) {
-              finishCancelledPipeline()
-              return
-            }
-            if (!fast?.flatFaststart) throw new Error('faststart_output_not_flat')
-            if (fast?.blob && fast.blob !== uploadVideoBlob) {
-              uploadVideoBlob = fast.blob
-              uploadVideoMime = String(fast?.mime || 'video/mp4').toLowerCase()
+          if (pendingVideo && /^blob:/i.test(String(pendingVideo))) {
+            pendingVideoBlobMetaRef?.current?.delete?.(String(pendingVideo))
+            URL.revokeObjectURL(pendingVideo)
+          }
+        } catch {}
+
+        const previewMeta = {
+          source: 'paperclip_preview',
+          durationSec: null,
+          filename: String(vf?.name || 'forum-video'),
+          contentType: mime || 'video/mp4',
+          sizeBytes: Number(vf?.size || 0),
+          selectedAtMs: Date.now(),
+          frontCameraMirror: false,
+          mirrorVideo: false,
+        }
+        try { pendingVideoInfoRef.current = previewMeta } catch {}
+        try { pendingVideoBlobMetaRef?.current?.set?.(previewUrl, previewMeta) } catch {}
+        try { setPendingVideo?.(previewUrl) } catch {}
+        try { setOverlayMediaKind?.('video') } catch {}
+        try { setOverlayMediaUrl?.(previewUrl) } catch {}
+        try { setVideoState?.('preview') } catch {}
+        try { setVideoOpen?.(true) } catch {}
+        try { setMediaPhase?.('idle') } catch {}
+        try { setMediaPct?.(0) } catch {}
+        try { setVideoProgress?.(0) } catch {}
+
+        Promise.resolve()
+          .then(async () => {
+            if (typeof readVideoDurationSecFn !== 'function') return
+            const durationSec = Number(await readVideoDurationSecFn(vf))
+            if (!Number.isFinite(durationSec) || durationSec <= 0) return
+            previewMeta.durationSec = durationSec
+            try { pendingVideoInfoRef.current = { ...previewMeta } } catch {}
+            try { pendingVideoBlobMetaRef?.current?.set?.(previewUrl, { ...previewMeta }) } catch {}
+            if (durationSec > Number(forumVideoMaxSeconds || 0)) {
               try {
-                emitDiag?.('video_faststart_applied', {
-                  source: 'attach_picker',
-                  pipeline: String(fast?.pipeline || 'worker_faststart'),
-                  inputMime: mime,
-                  outputMime: uploadVideoMime,
-                  sizeBefore: Number(vf?.size || 0) || null,
-                  sizeAfter: Number(uploadVideoBlob?.size || 0) || null,
+                showVideoLimitOverlay?.({
+                  source: 'attach_preview',
+                  durationSec,
+                  reason: 'too_long',
                 })
               } catch {}
             }
-          }
-        } catch (fastErr) {
-          if (isMediaCancelled(signal) || fastErr?.name === 'AbortError') {
-            finishCancelledPipeline()
-            return
-          }
-          try { console.warn('ql7_video_container_remux_failed', fastErr) } catch {}
-          try { toast?.err?.(t?.('forum_video_upload_failed')) } catch {}
-          try { endMediaPipeline?.() } catch {}
-          return
-        }
-
-        try {
-          if (isMediaCancelled(signal)) {
-            finishCancelledPipeline()
-            return
-          }
-          const ext =
-            /quicktime/i.test(uploadVideoMime) || /\.(mov)$/i.test(String(vf?.name || ''))
-              ? 'mov'
-              : /mp4/i.test(uploadVideoMime) || /\.(mp4)$/i.test(String(vf?.name || ''))
-                ? 'mp4'
-                : 'webm'
-          const name = `forum-video.${ext}`
-
-          try {
-            stopMediaProg?.()
-          } catch {}
-          try {
-            setMediaPhase?.('Uploading')
-          } catch {}
-          try {
-            setMediaPct?.((p) => Math.max(40, Number(p || 0)))
-          } catch {}
-          try {
-            startSoftProgress?.(55, 140, 92)
-          } catch {}
-          const result = await uploadR2MediaFile({
-            file: uploadVideoBlob,
-            kind: 'forum_video',
-            userId: String(viewerId || ''),
-            filename: name,
-            contentType: uploadVideoMime || (ext === 'mp4' ? 'video/mp4' : (ext === 'mov' ? 'video/quicktime' : 'video/webm')),
-            signal,
-            onUploadProgress: (upPctRaw) => {
-              let upPct = Number(upPctRaw)
-              if (!Number.isFinite(upPct)) upPct = 0
-              if (upPct > 0 && upPct <= 1) upPct *= 100
-              upPct = Math.max(0, Math.min(100, upPct))
-              const overall = 40 + (upPct * 0.55)
-              try {
-                stopMediaProg?.()
-              } catch {}
-              try {
-                setMediaPhase?.('Uploading')
-              } catch {}
-              try {
-                setVideoProgress?.(upPct)
-              } catch {}
-              try {
-                setMediaPct?.((prev) => Math.max(Number(prev || 0), overall))
-              } catch {}
-            },
           })
-
-          if (isMediaCancelled(signal)) {
-            finishCancelledPipeline()
-            return
-          }
-          const url = result?.url || ''
-          if (url) {
-            setPendingVideo?.(url)
-            try {
-              pendingVideoInfoRef.current = { source: 'uploaded_attach', durationSec: pickedDurationSec }
-            } catch {}
-            try {
-              setOverlayMediaKind?.('video')
-            } catch {}
-            try {
-              setOverlayMediaUrl?.(null)
-            } catch {}
-            try {
-              setVideoState?.('preview')
-            } catch {}
-            try {
-              setVideoOpen?.(true)
-            } catch {}
-            try {
-              stopMediaProg?.()
-            } catch {}
-            try {
-              setMediaPhase?.('Ready')
-            } catch {}
-            try {
-              setMediaPct?.(100)
-            } catch {}
-            try {
-              endMediaPipeline?.()
-            } catch {}
-          } else {
-            throw new Error('no_url')
-          }
-        } catch (e3) {
-          if (e3?.name === 'AbortError' || isMediaCancelled(signal)) {
-            finishCancelledPipeline()
-            return
-          }
-          console.error('video_client_upload_failed', e3)
-          try {
-            toast?.err?.(t?.('forum_video_upload_failed'))
-          } catch {}
-          return
-        }
+          .catch(() => {})
       }
 
-      if (imgFiles.length || vidFiles.length) {
+      if (imgFiles.length) {
         try {
           toast?.success?.(t?.('forum_files_uploaded'))
         } catch {}
@@ -522,18 +365,15 @@ export default function useForumComposerAttachments({
     }
   }, [
     beginMediaPipeline,
-    emitDiag,
     endMediaPipeline,
-    forumVideoFaststartTranscodeMaxBytes,
-    forumVideoMaxBytes,
     forumVideoMaxSeconds,
     finishCancelledPipeline,
     formatI18nMessage,
     moderateImageFiles,
-    optimizeForumVideoFastStartFn,
     pendingImgs,
+    pendingVideo,
+    pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
-    isMediaCancelled,
     readVideoDurationSecFn,
     reasonKey,
     restoreComposerScroll,

@@ -1,4 +1,5 @@
 import uploadR2MediaFile from './uploadR2MediaFile'
+import { mapVideoPrepareProgress, mapVideoUploadProgress } from '../../../../../lib/videoPipelineProgress'
 
 export async function resolveComposerMediaPayload({
   pendingVideo,
@@ -8,15 +9,11 @@ export async function resolveComposerMediaPayload({
   pendingVideoRef,
   pendingVideoInfoRef,
   pendingVideoBlobMetaRef,
-  forumVideoFaststartTranscodeMaxBytes,
-  optimizeForumVideoFastStartFn,
   emitDiag,
-  readVideoDurationSecFn,
   forumVideoMaxSeconds,
   forumVideoCameraRecordEpsilonSec,
   showVideoLimitOverlay,
   endMediaPipeline,
-  forumVideoMaxBytes,
   viewerId,
   stopMediaProg,
   setMediaPhase,
@@ -63,7 +60,7 @@ export async function resolveComposerMediaPayload({
     signal = ac?.signal
   }
 
-  // 0) ВИДЕО: прямая загрузка в Cloudflare R2 через /api/forum/blobUploadUrl
+  // 0) VIDEO: every local camera/trim/blob path goes through the shared client gateway before signing R2.
   let videoUrlToSend = ''
   const pendingVideoCurrent = String(pendingVideoRef.current || pendingVideo || '')
   if (pendingVideoCurrent) {
@@ -72,18 +69,21 @@ export async function resolveComposerMediaPayload({
         const resp = await fetch(pendingVideoCurrent, { signal })
         const fileBlob = await resp.blob()
         const mime = String(fileBlob.type || '').split(';')[0].trim().toLowerCase()
-        if (!/^video\/(mp4|webm|quicktime)$/.test(mime)) throw new Error('bad_type')
+        if (!/^video\//.test(mime)) throw new Error('bad_type')
 
-        let uploadBlob = fileBlob
-        let uploadMime = mime
-        let durationSec = NaN
         let dMeta = NaN
         let srcMeta = ''
-        let trustedBlobMeta = null
+        let sourceFilename = ''
+        let sourceContentType = ''
         const readSafeVideoMeta = (candidate) => {
           const source = String(candidate?.source || '')
           const facingMode = String(candidate?.cameraFacingMode || '').toLowerCase()
-          const frontCameraMirror = !!(candidate?.frontCameraMirror || candidate?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+          const frontCameraMirror = !!(
+            candidate?.frontCameraMirror ||
+            candidate?.mirrorVideo ||
+            facingMode === 'user' ||
+            facingMode === 'front'
+          )
           if (!source && !facingMode && !frontCameraMirror) return null
           return {
             source,
@@ -96,157 +96,83 @@ export async function resolveComposerMediaPayload({
           const meta = pendingVideoInfoRef.current || {}
           dMeta = Number(meta?.durationSec || 0)
           srcMeta = String(meta?.source || '')
+          sourceFilename = String(meta?.filename || '')
+          sourceContentType = String(meta?.contentType || '')
           videoMetaToSend = readSafeVideoMeta(meta)
         } catch {}
         try {
           const localMeta = pendingVideoBlobMetaRef.current?.get?.(String(pendingVideoCurrent || '')) || null
-          if (localMeta && Number.isFinite(Number(localMeta?.durationSec || 0)) && Number(localMeta.durationSec) > 0) {
-            trustedBlobMeta = {
-              source: String(localMeta?.source || 'trimmed_local'),
-              durationSec: Number(localMeta.durationSec),
-            }
+          if (localMeta) {
+            if (!srcMeta) srcMeta = String(localMeta?.source || '')
+            if (!sourceFilename) sourceFilename = String(localMeta?.filename || '')
+            if (!sourceContentType) sourceContentType = String(localMeta?.contentType || '')
+            if (!Number.isFinite(dMeta) || dMeta <= 0) dMeta = Number(localMeta?.durationSec || 0)
             videoMetaToSend = readSafeVideoMeta(localMeta) || videoMetaToSend
-            if (!srcMeta) srcMeta = trustedBlobMeta.source
-            if (!Number.isFinite(dMeta) || dMeta <= 0) dMeta = trustedBlobMeta.durationSec
           }
         } catch {}
-        const trustedLocalClip =
-          /^blob:/.test(String(pendingVideoCurrent || '')) &&
-          ((srcMeta === 'camera_record' || String(srcMeta || '').startsWith('trimmed_local')) || !!trustedBlobMeta)
-        try {
-          const shouldFaststart =
-            /^(video\/mp4|video\/quicktime)$/i.test(uploadMime) &&
-            Number(uploadBlob?.size || 0) > 0 &&
-            Number(uploadBlob?.size || 0) <= forumVideoFaststartTranscodeMaxBytes &&
-            !String(srcMeta || '').startsWith('trimmed_local')
-          if (shouldFaststart) {
-            try { setMediaPhase?.('Processing') } catch {}
-            const fast = await optimizeForumVideoFastStartFn?.(uploadBlob, {
-              signal,
-              allowTranscode: false,
-              strictFlatFaststart: true,
-              abortFaststartOnSignal: true,
-              maxTranscodeBytes: forumVideoFaststartTranscodeMaxBytes,
-              onProgress: (fastPctRaw) => {
-                let fastPct = Number(fastPctRaw)
-                if (!Number.isFinite(fastPct)) fastPct = 0
-                fastPct = Math.max(0, Math.min(1, fastPct))
-                try { setVideoProgress?.(fastPct * 100) } catch {}
-                try { setMediaPct?.((prev) => Math.max(Number(prev || 0), 8 + (fastPct * 72))) } catch {}
-              },
-            })
-            if (isMediaCancelled(signal)) return cancelFail(signal)
-            if (!fast?.flatFaststart) throw new Error('faststart_output_not_flat')
-            if (fast?.blob && fast.blob !== uploadBlob) {
-              uploadBlob = fast.blob
-              uploadMime = String(fast?.mime || 'video/mp4').toLowerCase()
-              try {
-                emitDiag?.('video_faststart_applied', {
-                  source: String(srcMeta || 'composer_blob'),
-                  pipeline: String(fast?.pipeline || 'worker_faststart'),
-                  inputMime: mime,
-                  outputMime: uploadMime,
-                  sizeBefore: Number(fileBlob?.size || 0) || null,
-                  sizeAfter: Number(uploadBlob?.size || 0) || null,
-                })
-              } catch {}
-            }
-          }
-        } catch (fastErr) {
-          if (isMediaCancelled(signal) || fastErr?.name === 'AbortError') return cancelFail(signal)
-          try { console.warn('ql7_video_container_remux_failed', fastErr) } catch {}
-          try { toast?.err?.(t?.('forum_video_upload_failed')) } catch {}
-          try { endMediaPipeline?.() } catch {}
-          return fail()
-        }
 
         if (isMediaCancelled(signal)) return cancelFail(signal)
-        try { durationSec = await readVideoDurationSecFn?.(uploadBlob, 32000) } catch {}
-        if (!Number.isFinite(durationSec) || durationSec <= 0) {
-          try {
-            if (
-              trustedLocalClip &&
-              Number.isFinite(dMeta) &&
-              dMeta > 0 &&
-              dMeta <= (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec)
-            ) {
-              durationSec = dMeta
-            } else if (trustedLocalClip) {
-              durationSec = forumVideoMaxSeconds
-            }
-          } catch {}
-        }
-        if (
-          trustedLocalClip &&
-          Number.isFinite(dMeta) &&
-          dMeta > 0 &&
-          dMeta <= (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec) &&
-          (!Number.isFinite(durationSec) || durationSec <= 0 || durationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec))
-        ) {
-          durationSec = dMeta
-        }
-        if (
-          trustedLocalClip &&
-          (!Number.isFinite(durationSec) || durationSec <= 0 || durationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec))
-        ) {
-          durationSec = Math.min(
-            forumVideoMaxSeconds,
-            Math.max(0.1, Number.isFinite(dMeta) && dMeta > 0 ? dMeta : forumVideoMaxSeconds)
-          )
-        }
-        if (!Number.isFinite(durationSec) || durationSec <= 0) {
-          try {
-            showVideoLimitOverlay?.({
-              source: 'post_blob_upload',
-              durationSec: null,
-              reason: 'bad_duration',
-            })
-          } catch {}
-          try { endMediaPipeline?.() } catch {}
-          return fail()
-        }
-        if (durationSec > (forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec) && !trustedLocalClip) {
-          try {
-            showVideoLimitOverlay?.({
-              source: 'post_blob_upload',
-              durationSec,
-              reason: 'too_long',
-            })
-          } catch {}
-          try { endMediaPipeline?.() } catch {}
-          return fail()
-        }
-        if (uploadBlob.size > forumVideoMaxBytes) {
-          try { toast?.err?.(t?.('forum_video_too_big')) } catch {}
-          try { endMediaPipeline?.() } catch {}
-          return fail()
-        }
-
-        const ext = uploadMime.includes('mp4') ? 'mp4' : (uploadMime.includes('quicktime') ? 'mov' : 'webm')
-        const name = `forum-video.${ext}`
-
+        const resolvedMime = mime || String(sourceContentType || '').split(';')[0].trim().toLowerCase()
+        const ext = resolvedMime.includes('mp4') ? 'mp4' : (resolvedMime.includes('quicktime') ? 'mov' : 'webm')
+        const sourceName = sourceFilename || `${srcMeta || 'composer-video'}.${ext}`
         const result = await uploadR2MediaFile({
-          file: uploadBlob,
+          file: fileBlob,
           kind: 'forum_video',
           userId: String(viewerId || ''),
-          filename: name,
-          contentType: uploadMime,
+          filename: sourceName,
+          contentType: resolvedMime,
           signal,
+          videoPolicy: {
+            mode: 'video-required',
+            maxDurationSeconds: forumVideoMaxSeconds + forumVideoCameraRecordEpsilonSec,
+            source: srcMeta || 'composer_blob',
+          },
+          onPrepareProgress: (event) => {
+            try { stopMediaProg?.() } catch {}
+            try {
+              setMediaPct?.((previous) => {
+                const mapped = mapVideoPrepareProgress(event, previous)
+                const phaseName = mapped.phase.charAt(0).toUpperCase() + mapped.phase.slice(1)
+                try { setMediaPhase?.(phaseName) } catch {}
+                try { setVideoProgress?.(mapped.rawProgress * 100) } catch {}
+                return mapped.percent
+              })
+            } catch {}
+          },
           onUploadProgress: (upPctRaw) => {
-            let upPct = Number(upPctRaw)
-            if (!Number.isFinite(upPct)) upPct = 0
-            if (upPct > 0 && upPct <= 1) upPct *= 100
-            upPct = Math.max(0, Math.min(100, upPct))
-            const overall = 30 + (upPct * 0.55)
-            try { stopMediaProg() } catch {}
-            try { setMediaPhase('Uploading') } catch {}
-            try { setVideoProgress(upPct) } catch {}
-            try { setMediaPct((prev) => Math.max(Number(prev || 0), overall)) } catch {}
+            try { stopMediaProg?.() } catch {}
+            try {
+              setMediaPct?.((previous) => {
+                const mapped = mapVideoUploadProgress(upPctRaw, previous)
+                try { setMediaPhase?.('Uploading') } catch {}
+                try { setVideoProgress?.(mapped.rawProgress * 100) } catch {}
+                return mapped.percent
+              })
+            } catch {}
           },
         })
         if (isMediaCancelled(signal)) return cancelFail(signal)
-        videoUrlToSend = result?.url || ''
+        videoUrlToSend = String(result?.url || '')
         if (!videoUrlToSend) throw new Error('no_url')
+
+        const preparation = result?.preparation || {}
+        try {
+          emitDiag?.('video_client_gateway_applied', {
+            source: srcMeta || 'composer_blob',
+            policyId: preparation?.policyId || null,
+            sourceUploadedBeforeOptimization: false,
+            optimized: !!preparation?.optimized,
+            bypassReason: String(preparation?.bypassReason || ''),
+            inputMime: mime,
+            outputMime: 'video/mp4',
+            sizeBefore: Number(fileBlob?.size || 0) || null,
+            sizeAfter: Number(preparation?.outputSizeBytes || 0) || null,
+            durationSec: Number(preparation?.durationSec || dMeta) || null,
+            width: Number(preparation?.width || 0) || null,
+            height: Number(preparation?.height || 0) || null,
+            profileId: preparation?.profileId || null,
+          })
+        } catch {}
       } else {
         videoUrlToSend = pendingVideoCurrent
         try {
@@ -255,7 +181,12 @@ export async function resolveComposerMediaPayload({
             pendingVideoInfoRef.current ||
             null
           const facingMode = String(meta?.cameraFacingMode || '').toLowerCase()
-          const frontCameraMirror = !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+          const frontCameraMirror = !!(
+            meta?.frontCameraMirror ||
+            meta?.mirrorVideo ||
+            facingMode === 'user' ||
+            facingMode === 'front'
+          )
           videoMetaToSend = meta
             ? {
                 source: String(meta?.source || ''),
@@ -266,9 +197,18 @@ export async function resolveComposerMediaPayload({
             : null
         } catch {}
       }
-    } catch (e) {
-      if (e?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail(signal)
-      console.error('video_client_upload_failed', e)
+    } catch (error) {
+      if (error?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail(signal)
+      if (error?.code === 'VIDEO_TOO_LONG') {
+        try {
+          showVideoLimitOverlay?.({
+            source: 'post_blob_upload',
+            durationSec: Number(error?.details?.durationSeconds) || null,
+            reason: 'too_long',
+          })
+        } catch {}
+      }
+      try { console.error('video_client_gateway_failed', error) } catch {}
       try { toast?.err?.(t?.('forum_video_upload_failed')) } catch {}
       try { endMediaPipeline?.() } catch {}
       return fail()

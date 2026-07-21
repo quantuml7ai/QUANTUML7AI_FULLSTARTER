@@ -83,6 +83,7 @@ export default function ComposerCore({
             formatMediaPhase={formatMediaPhase}
             t={t}
             onCancel={cancelMediaOperation}
+            pipelineKind={pendingVideo ? 'video' : (pendingAudio ? 'audio' : 'media')}
           />
           <ComposerActionRail
             text={text}

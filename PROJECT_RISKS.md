@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-07-20T09:07:11.494Z
-Исходных файлов в анализе: 1427
+Сгенерировано автоматически: 2026-07-21T00:48:51.687Z
+Исходных файлов в анализе: 1206
 Route-aware файлов: 149
 
 ## Что Считается Риском
@@ -193,7 +193,7 @@ Route-aware файлов: 149
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — используют 10 локальных модулей
 - `lib/metadataCache.js` — используют 10 локальных модулей
 - `app/forum/shared/components/HydrateText.jsx` — используют 9 локальных модулей
-- `app/forum/shared/constants/media.js` — используют 9 локальных модулей
+- `app/forum/shared/utils/forumWindowingRegistry.js` — используют 9 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
@@ -218,10 +218,10 @@ Route-aware файлов: 149
 - `components/i18n.js` — импортирует 8 локальных модулей
 - `components/MetaMarket.jsx` — импортирует 8 локальных модулей
 - `tests/contracts/metamarket/metamarket-contracts.test.js` — импортирует 8 локальных модулей
+- `tests/contracts/project/video-pipeline-progress-contracts.test.js` — импортирует 8 локальных модулей
 - `app/api/dm/send/route.js` — импортирует 7 локальных модулей
 - `app/api/forum/recommendations/users/route.js` — импортирует 7 локальных модулей
 - `app/forum/features/dm/components/DmMessagesPane.jsx` — импортирует 7 локальных модулей
-- `app/forum/features/feed/components/PostHeaderMeta.jsx` — импортирует 7 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
@@ -389,6 +389,7 @@ Route-aware файлов: 149
 - `app/api/tma/auto/route.js`
 - `app/api/wallet-session/route.js`
 - `components/i18n.js`
+- `lib/forumClientVideoOptimizer.js`
 - `lib/forumShareManager.js`
 - `lib/forumVideoTrim.js`
 - `lib/geo/countries.js`
@@ -404,7 +405,6 @@ Route-aware файлов: 149
 - `next.config.mjs`
 - `jsconfig.json`
 - `.eslintrc.json`
-- `.env.local.example`
 - `README.md`
 
 ## Практический Вывод

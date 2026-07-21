@@ -87,7 +87,7 @@ export default function useForumCreatePostAction({
   const postingRef = useRef(false)
 
   const createPost = async () => {
-    if (postingRef.current) return
+    if (postingRef.current) return false
     postingRef.current = true
     try { saveComposerScroll() } catch {}
 
@@ -99,7 +99,7 @@ export default function useForumCreatePostAction({
         const safeText = String(text || '').slice(0, 8000)
         if (!safeText.trim()) {
           done()
-          return
+          return false
         }
         setOverlay((prev) => ({
           ...prev,
@@ -113,7 +113,7 @@ export default function useForumCreatePostAction({
         done()
         try { restoreComposerScroll() } catch {}
       }
-      return
+      return true
     }
 
     // === Обычный режим: создание поста ===
@@ -123,6 +123,7 @@ export default function useForumCreatePostAction({
       }
       postingRef.current = false
       try { restoreComposerScroll() } catch {}
+      return false
     }
 
     if (!rateLimiter?.allowAction?.()) return fail(t('forum_too_fast'))
@@ -136,7 +137,7 @@ export default function useForumCreatePostAction({
       const uid = String(resolveProfileAccountId(r.asherId || r.accountId || '') || '').trim()
       const rawFromId = String(r.asherId || r.accountId || '').trim()
 
-      await sendDmComposerMessage({
+      const dmSent = await sendDmComposerMessage({
         uid,
         dmTarget,
         text,
@@ -211,7 +212,7 @@ export default function useForumCreatePostAction({
         restoreComposerScroll,
         onDmMessageFocus,
       })
-      return
+      return dmSent === true
     }
 
     const media = await resolveComposerMediaPayload({
@@ -242,7 +243,7 @@ export default function useForumCreatePostAction({
       t,
       onFail: fail,
     })
-    if (media.failed) return
+    if (media.failed) return false
 
     const { videoUrlToSend, audioUrlToSend } = media
 
@@ -365,9 +366,9 @@ export default function useForumCreatePostAction({
       setThreadRoot(parentPost || { id: String(parentId) })
     }
 
-    // батч на бэк
-    try { if (hasComposerMedia) setMediaPhase('Sending') } catch {}
-    try { if (hasComposerMedia) setMediaPct((pp) => Math.max(98, Number(pp || 0))) } catch {}
+    // Final server mutation: hold the visual pipeline at 99% until the post is queued.
+    try { if (hasComposerMedia) setMediaPhase('Finalizing') } catch {}
+    try { if (hasComposerMedia) setMediaPct((pp) => Math.max(99, Number(pp || 0))) } catch {}
     pushOp('create_post', {
       topicId: selectedTopic.id,
       text: body,
@@ -378,6 +379,11 @@ export default function useForumCreatePostAction({
       id: tmpId,
     })
     try { syncNowRef.current?.() } catch {}
+    if (hasComposerMedia) {
+      try { setMediaPhase('Ready') } catch {}
+      try { setMediaPct(100) } catch {}
+      await new Promise((resolve) => setTimeout(resolve, 360))
+    }
 
     setComposerActive(false)
     emitPostCreated?.(p.id, selectedTopic.id)
@@ -410,6 +416,7 @@ export default function useForumCreatePostAction({
     try { pendingVideoInfoRef.current = { source: '', durationSec: NaN } } catch {}
     try { setVideoOpen(false); setVideoState('idle') } catch {}
     try { restoreComposerScroll() } catch {}
+    return true
   }
 
   return {

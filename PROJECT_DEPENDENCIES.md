@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-07-20T09:07:10.799Z
-Исходных файлов в анализе: 1427
-Локальных зависимостей: 1197
+Сгенерировано автоматически: 2026-07-21T00:48:50.885Z
+Исходных файлов в анализе: 1206
+Локальных зависимостей: 1215
 
 ## Охват
 
@@ -64,7 +64,7 @@
 - `app/subscribe` — 3 файлов
 - `app/tma` — 2 файлов
 - `audit` — 170 файлов
-- `components` — 48 файлов
+- `components` — 49 файлов
 - `config` — 1 файлов
 - `forum/diagnostics` — 2 файлов
 - `forum/dm` — 32 файлов
@@ -88,6 +88,7 @@
 - `lib/databroker.js` — 1 файлов
 - `lib/fcm.js` — 1 файлов
 - `lib/forum` — 7 файлов
+- `lib/forumClientVideoOptimizer.js` — 1 файлов
 - `lib/forumShareManager.js` — 1 файлов
 - `lib/forumVideoTrim.js` — 1 файлов
 - `lib/geo` — 6 файлов
@@ -106,23 +107,10 @@
 - `lib/subscriptions.js` — 1 файлов
 - `lib/supportEmailTransport.js` — 1 файлов
 - `lib/tma.js` — 1 файлов
+- `lib/videoPipelineProgress.js` — 1 файлов
 - `lib/walletSessionClient.js` — 1 файлов
 - `lib/webPush.js` — 1 файлов
-- `public/.well-known` — 1 файлов
-- `public/academy` — 1 файлов
-- `public/coins` — 1 файлов
-- `public/compat.js` — 1 файлов
-- `public/game` — 1 файлов
-- `public/metab` — 1 файлов
-- `public/metamarket` — 8 файлов
-- `public/models` — 1 файлов
-- `public/ql7-notification-sw.js` — 1 файлов
-- `public/robot` — 1 файлов
-- `public/tonconnect-manifest.json` — 1 файлов
-- `public/vendor` — 4 файлов
-- `public/vip` — 2 файлов
-- `public/workers` — 2 файлов
-- `root` — 549 файлов
+- `root` — 351 файлов
 - `src/shared` — 32 файлов
 - `tools` — 71 файлов
 
@@ -136,12 +124,12 @@
 - `forum/ui` -> `forum/ui` — 31 локальных импортов
 - `src/shared` -> `src/shared` — 31 локальных импортов
 - `forum/feed` -> `forum/shared` — 30 локальных импортов
-- `forum/media` -> `forum/media` — 28 локальных импортов
 - `tools` -> `tools` — 28 локальных импортов
+- `forum/media` -> `forum/media` — 27 локальных импортов
 - `lib/mongo` -> `lib/mongo` — 27 локальных импортов
+- `root` -> `components` — 27 локальных импортов
 - `root` -> `src/shared` — 25 локальных импортов
 - `root` -> `root` — 23 локальных импортов
-- `root` -> `components` — 19 локальных импортов
 - `forum/root` -> `forum/ui` — 18 локальных импортов
 - `root` -> `lib/mongo` — 18 локальных импортов
 - `forum/dm` -> `forum/shared` — 17 локальных импортов
@@ -162,6 +150,7 @@
 - `api/profile` -> `lib/mongo` — 10 локальных импортов
 - `forum/dm` -> `forum/profile` — 10 локальных импортов
 - `forum/ui` -> `forum/media` — 10 локальных импортов
+- `root` -> `forum/media` — 10 локальных импортов
 - `forum/quests` -> `forum/quests` — 9 локальных импортов
 - `forum/root` -> `forum/profile` — 9 локальных импортов
 - `lib/forum` -> `lib/mongo` — 9 локальных импортов
@@ -177,7 +166,6 @@
 - `forum/feed` -> `forum/media` — 6 локальных импортов
 - `forum/feed` -> `forum/ui` — 6 локальных импортов
 - `forum/moderation` -> `forum/moderation` — 6 локальных импортов
-- `forum/root` -> `forum/root` — 6 локальных импортов
 
 ## Исходящие Зависимости По Зонам
 
@@ -367,13 +355,12 @@
 
 ### app/ads
 
-- `components` — 3
+- `components` — 4
 - `app/ads` — 2
 - `lib/geo` — 2
 - `forum/media` — 1
-- `forum/shared` — 1
-- `lib/forumVideoTrim.js` — 1
 - `lib/metadataCache.js` — 1
+- `lib/videoPipelineProgress.js` — 1
 
 ### app/ads.js
 
@@ -503,13 +490,15 @@
 
 ### forum/media
 
-- `forum/media` — 28
+- `forum/media` — 27
 - `forum/shared` — 12
 - `forum/feed` — 4
+- `lib/forumClientVideoOptimizer.js` — 2
 - `lib/forumVideoTrim.js` — 2
 - `components` — 1
 - `forum/profile` — 1
 - `forum/root` — 1
+- `lib/videoPipelineProgress.js` — 1
 
 ### forum/moderation
 
@@ -573,10 +562,10 @@
 - `forum/media` — 10
 - `forum/feed` — 6
 - `forum/profile` — 5
+- `components` — 4
 - `forum/dm` — 4
 - `forum/root` — 4
 - `forum/shared` — 4
-- `components` — 3
 - `forum/quests` — 2
 - `forum/moderation` — 1
 - `forum/subscriptions` — 1
@@ -620,6 +609,10 @@
 - `lib/forum` — 6
 - `lib/geo` — 4
 - `lib/security` — 1
+
+### lib/forumClientVideoOptimizer.js
+
+- Нет локальных исходящих импортов.
 
 ### lib/forumShareManager.js
 
@@ -708,6 +701,10 @@
 
 - Нет локальных исходящих импортов.
 
+### lib/videoPipelineProgress.js
+
+- Нет локальных исходящих импортов.
+
 ### lib/walletSessionClient.js
 
 - Нет локальных исходящих импортов.
@@ -719,71 +716,15 @@
 - `lib/nativePush.js` — 1
 - `lib/notificationCenter.js` — 1
 
-### public/.well-known
-
-- Нет локальных исходящих импортов.
-
-### public/academy
-
-- Нет локальных исходящих импортов.
-
-### public/coins
-
-- Нет локальных исходящих импортов.
-
-### public/compat.js
-
-- Нет локальных исходящих импортов.
-
-### public/game
-
-- Нет локальных исходящих импортов.
-
-### public/metab
-
-- Нет локальных исходящих импортов.
-
-### public/metamarket
-
-- Нет локальных исходящих импортов.
-
-### public/models
-
-- Нет локальных исходящих импортов.
-
-### public/ql7-notification-sw.js
-
-- Нет локальных исходящих импортов.
-
-### public/robot
-
-- Нет локальных исходящих импортов.
-
-### public/tonconnect-manifest.json
-
-- Нет локальных исходящих импортов.
-
-### public/vendor
-
-- Нет локальных исходящих импортов.
-
-### public/vip
-
-- Нет локальных исходящих импортов.
-
-### public/workers
-
-- Нет локальных исходящих импортов.
-
 ### root
 
+- `components` — 27
 - `src/shared` — 25
 - `root` — 23
-- `components` — 19
 - `lib/mongo` — 18
 - `forum/feed` — 13
+- `forum/media` — 10
 - `lib/ql7-support` — 7
-- `forum/media` — 6
 - `forum/shared` — 3
 - `lib/forum` — 3
 - `lib/seo` — 3
@@ -825,11 +766,11 @@
 - `app/forum/features/profile/components/AvatarEmoji.jsx` — fan-in 10; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`
 - `lib/metadataCache.js` — fan-in 10; основные потребители: `app/about/layout.js`, `app/academy/layout.js`, `app/ads/layout.js`, `app/contact/layout.js`, `app/exchange/layout.js`, `app/forum/layout.js`, `app/game/layout.js`, `app/layout.js`
 - `app/forum/shared/components/HydrateText.jsx` — fan-in 9; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`
-- `app/forum/shared/constants/media.js` — fan-in 9; основные потребители: `app/ads/home.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/upload/route.js`, `app/api/forum/uploadVideo/route.js`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/hooks/useForumComposerAttachments.js`, `app/forum/features/media/utils/mediaRuntime.js`
 - `app/forum/shared/utils/forumWindowingRegistry.js` — fan-in 9; основные потребители: `app/forum/features/feed/hooks/useForumDeepLinkFlow.js`, `app/forum/features/feed/hooks/usePostParentReplyNav.js`, `app/forum/features/feed/hooks/useThreadOpenNavigation.js`, `app/forum/features/feed/utils/navScroll.js`, `app/forum/features/feed/utils/openThreadFromPost.js`, `app/forum/features/feed/utils/postFocus.js`, `app/forum/ForumRoot.jsx`, `app/forum/shared/hooks/useForumWindowing.js`
 - `app/api/metamarket/_db.js` — fan-in 8; основные потребители: `app/api/metamarket/_ledger.js`, `app/api/metamarket/_locks.js`, `app/api/metamarket/_transactions.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/my-collection/route.js`, `app/api/metamarket/owners/route.js`, `app/api/metamarket/state/route.js`, `app/api/metamarket/token-history/route.js`
 - `app/forum/features/feed/utils/postMerge.js` — fan-in 8; основные потребители: `app/forum/features/dm/hooks/useForumDmRuntime.js`, `app/forum/features/feed/hooks/useForumDataRuntime.js`, `app/forum/features/feed/hooks/useForumSyncLoop.js`, `app/forum/features/feed/hooks/usePublishedPostsModel.js`, `app/forum/features/feed/utils/snapshotTransforms.js`, `app/forum/features/media/hooks/useForumVideoFeedRuntime.js`, `app/forum/features/media/hooks/useVideoFeedState.js`, `tests/unit/forum/features/feed/utils/cardMemo.test.js`
 - `app/forum/features/profile/components/VipFlipBadge.jsx` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/TopicItem.jsx`, `app/forum/features/feed/components/UserRecommendationCard.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/ui/components/ForumSearchSortControls.jsx`, `components/MetaMarket.jsx`
+- `app/forum/shared/constants/media.js` — fan-in 8; основные потребители: `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/upload/route.js`, `app/api/forum/uploadVideo/route.js`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`, `app/forum/features/media/hooks/useForumComposerAttachments.js`, `app/forum/features/media/utils/mediaRuntime.js`, `app/forum/ForumRoot.jsx`
 - `app/forum/shared/hooks/useForumWindowing.js` — fan-in 8; основные потребители: `app/forum/features/dm/components/DmDialogsPane.jsx`, `app/forum/features/dm/components/DmMessagesPane.jsx`, `app/forum/features/dm/components/InboxRepliesPane.jsx`, `app/forum/features/feed/components/PublishedPostsPane.jsx`, `app/forum/features/feed/components/ThreadRepliesPane.jsx`, `app/forum/features/feed/components/TopicsPane.jsx`, `app/forum/features/feed/components/UserPostsPane.jsx`, `app/forum/features/media/hooks/useVideoFeedWindowing.js`
 - `lib/identity/ql7IdentityContract.cjs` — fan-in 8; основные потребители: `app/api/academy/exam/route.js`, `app/api/profile/_identity.js`, `app/api/referral/hit/route.js`, `app/api/referral/link/route.js`, `lib/auth/battlecoin-chat-auth.cjs`, `lib/identity/geo-identity.cjs`, `lib/mongo/qcoin-primary.cjs`, `tests/unit/mongo/profile-primary.test.js`
 - `lib/ql7-support/events.js` — fan-in 8; основные потребители: `app/api/forum/report/route.js`, `app/api/qcoin/topup/webhook/route.js`, `app/api/wallet-session/route.js`, `lib/adsCore.js`, `lib/ql7-support/broadcast.js`, `lib/ql7-support/scheduler.js`, `lib/subscriptions.js`, `tests/integration/ql7-support-scenarios.test.js`

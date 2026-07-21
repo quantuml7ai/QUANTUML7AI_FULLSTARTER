@@ -1,5 +1,7 @@
 // app/forum/features/media/services/uploadR2MediaFile.js
 
+import { prepareForumVideoForUpload } from '../../../../../lib/forumClientVideoOptimizer'
+
 function parseUploadErrorPayload(payload, fallback) {
   if (!payload || typeof payload !== 'object') return fallback
 
@@ -215,15 +217,35 @@ export default async function uploadR2MediaFile({
   filename = '',
   contentType = '',
   signal,
+  onPrepareProgress,
   onUploadProgress,
+  videoPolicy = null,
 } = {}) {
   if (!file) {
     throw new Error('R2 upload file is required')
   }
 
-  const resolvedFilename = String(filename || file?.name || 'media').trim() || 'media'
-  const resolvedContentType = String(contentType || file?.type || 'application/octet-stream').trim()
-  const size = Number(file?.size || 0)
+  const preparation = await prepareForumVideoForUpload({
+    file,
+    kind,
+    filename,
+    contentType,
+    signal,
+    onProgress: onPrepareProgress,
+    videoPolicy,
+  })
+
+  const uploadFile = preparation?.file || file
+  const resolvedFilename = String(preparation?.filename || filename || uploadFile?.name || 'media').trim() || 'media'
+  const resolvedContentType = String(preparation?.contentType || contentType || uploadFile?.type || 'application/octet-stream').trim()
+  const size = Number(uploadFile?.size || 0)
+
+  if (!uploadFile || size <= 0) {
+    throw new Error('R2 upload prepared file is empty')
+  }
+  if (preparation?.isVideo && resolvedContentType !== 'video/mp4') {
+    throw new Error('R2 video gateway requires verified video/mp4 output')
+  }
 
   const signResponse = await fetch('/api/forum/blobUploadUrl', {
     method: 'POST',
@@ -259,7 +281,7 @@ export default async function uploadR2MediaFile({
   try {
     await putFileWithProgress({
       uploadUrl,
-      file,
+      file: uploadFile,
       headers: signPayload.headers || {},
       signal,
       onUploadProgress,
@@ -271,13 +293,29 @@ export default async function uploadR2MediaFile({
     try {
       console.warn('ql7_forum_video_direct_upload_failed_server_fallback', error)
     } catch {}
-    return uploadForumVideoViaServer({
-      file,
+    const fallbackResult = await uploadForumVideoViaServer({
+      file: uploadFile,
       userId,
       filename: resolvedFilename,
       signal,
       onUploadProgress,
     })
+    return {
+      ...fallbackResult,
+      preparation: {
+        isVideo: !!preparation?.isVideo,
+        optimized: !!preparation?.optimized,
+        bypassReason: String(preparation?.bypassReason || ''),
+        policyId: preparation?.policyId || null,
+        durationSec: Number(preparation?.durationSec) || null,
+        width: Number(preparation?.width) || null,
+        height: Number(preparation?.height) || null,
+        frameRate: Number(preparation?.frameRate) || null,
+        profileId: preparation?.profileId || null,
+        sourceSizeBytes: Number(preparation?.sourceSizeBytes || file?.size || 0),
+        outputSizeBytes: size,
+      },
+    }
   }
 
   return {
@@ -286,5 +324,19 @@ export default async function uploadR2MediaFile({
     url: publicUrl,
     publicUrl,
     pathname: key,
+    preparation: {
+      isVideo: !!preparation?.isVideo,
+      optimized: !!preparation?.optimized,
+      bypassReason: String(preparation?.bypassReason || ''),
+      policyId: preparation?.policyId || null,
+      durationSec: Number(preparation?.durationSec) || null,
+      width: Number(preparation?.width) || null,
+      height: Number(preparation?.height) || null,
+      frameRate: Number(preparation?.frameRate) || null,
+      profileId: preparation?.profileId || null,
+      targetOutputBytes: Number(preparation?.targetOutputBytes) || null,
+      sourceSizeBytes: Number(preparation?.sourceSizeBytes || file?.size || 0),
+      outputSizeBytes: size,
+    },
   }
 }

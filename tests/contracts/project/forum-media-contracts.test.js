@@ -178,12 +178,22 @@ describe('forum media contracts', () => {
     expect(adSlotSrc).toContain('data-ad-media-src={mediaSrc}')
   })
 
-  test('ads video upload uses the shared faststart path before blob storage', () => {
+  test('ads video upload uses the shared fail-closed gateway before blob storage', () => {
     const src = read('app/ads/home.js')
-    expect(src).toContain("import { optimizeForumVideoFastStart } from '../../lib/forumVideoTrim'")
-    expect(src).toContain('FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES')
-    expect(src).toContain('const fast = await optimizeForumVideoFastStart(file, {')
-    expect(src).toContain('contentType: uploadContentType || file.type || \'video/mp4\'')
+    const gateway = read('app/forum/features/media/services/uploadR2MediaFile.js')
+
+    expect(src).toContain("import uploadR2MediaFile from '../forum/features/media/services/uploadR2MediaFile'")
+    expect(src).toContain('const res = await uploadR2MediaFile({')
+    expect(src).toContain("kind: 'ads_video'")
+    expect(src).toContain("mode: 'video-required'")
+    expect(src).toContain("source: 'ads_creative'")
+    expect(src).not.toContain('optimizeForumVideoFastStart')
+    expect(src).not.toContain('FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES')
+
+    const prepareIndex = gateway.indexOf('await prepareForumVideoForUpload({')
+    const signIndex = gateway.indexOf("fetch('/api/forum/blobUploadUrl'")
+    expect(prepareIndex).toBeGreaterThanOrEqual(0)
+    expect(signIndex).toBeGreaterThan(prepareIndex)
   })
 
   test('video feed windowing routes through the shared forum windowing core with reveal safety', () => {

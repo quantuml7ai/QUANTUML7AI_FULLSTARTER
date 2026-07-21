@@ -1,11 +1,20 @@
 'use client'
 
-import React, { useEffect, useMemo, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { useI18n } from '../../components/i18n'
+import MediaPipelineProgress from '../../components/MediaPipelineProgress'
+import {
+  mapVideoFinalizingProgress,
+  mapVideoPrepareProgress,
+  mapVideoReadyProgress,
+  mapVideoUploadProgress,
+} from '../../lib/videoPipelineProgress'
 import uploadR2MediaFile from '../forum/features/media/services/uploadR2MediaFile'
-import { optimizeForumVideoFastStart } from '../../lib/forumVideoTrim'
-import { FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES } from '../forum/shared/constants/media'
-import GeoTargetingPicker from './GeoTargetingPicker'
+import AdsGeoTargetingPortal from './AdsGeoTargetingPortal'
+import {
+  countAdsGeoRegions,
+  isAdsCampaignBasicsReady,
+} from '../../lib/adsGeoTargetingFlow'
 /* ===== Вспомогалки i18n ===== */
 const TX = (t, key, fb) => {
   try {
@@ -155,10 +164,10 @@ function makeEmptyCreative() {
 }
 
 /* ===== Расширенный MetricPill ===== */
-function MetricPill({ label, value, hint, icon, tone = 'blue' }) {
+function MetricPill({ label, value, hint, icon, tone = 'blue', variant = 'pill', railIndex = 0 }) {
   return (
     <div
-      className={`ads-pill ads-pill-${tone}`}
+      className={`ads-pill ads-pill-${tone} ads-pill-${variant} ads-pill-rail-${railIndex}`}
       title={hint}
     >
       <div className="ads-pill-icon-wrap">
@@ -185,6 +194,47 @@ function MetricPill({ label, value, hint, icon, tone = 'blue' }) {
             0 14px 30px rgba(0, 0, 0, 0.8),
             0 0 22px rgba(56, 189, 248, 0.35);
         }
+        .ads-pill-rail {
+          position: relative;
+          min-width: 0;
+          min-height: 72px;
+          width: 100%;
+          padding: 11px 12px;
+          border: 0;
+          border-radius: 0;
+          gap: 9px;
+          background: transparent;
+          box-shadow: none;
+        }
+        .ads-pill-rail:not(.ads-pill-rail-0)::before {
+          content: '';
+          position: absolute;
+          z-index: 2;
+          inset-block: 10px;
+          inset-inline-start: 0;
+          width: 1px;
+          pointer-events: none;
+          background: linear-gradient(180deg, transparent, rgba(91, 213, 255, .5), transparent);
+        }
+        .ads-pill-rail .ads-pill-icon-wrap {
+          width: 30px;
+          height: 30px;
+        }
+        .ads-pill-rail .ads-pill-main {
+          min-width: 0;
+        }
+        .ads-pill-rail .ads-pill-label {
+          min-height: 24px;
+          display: flex;
+          align-items: flex-end;
+          white-space: normal;
+          line-height: 1.15;
+          font-size: 9px;
+          letter-spacing: .11em;
+        }
+        .ads-pill-rail .ads-pill-value {
+          font-size: 17px;
+        }
         .ads-pill-blue {
           border-color: rgba(56, 189, 248, 0.72);
         }
@@ -193,6 +243,10 @@ function MetricPill({ label, value, hint, icon, tone = 'blue' }) {
           box-shadow:
             0 14px 40px rgba(0, 0, 0, 0.85),
             0 0 30px rgba(250, 204, 21, 0.45);
+        }
+        .ads-pill-rail.ads-pill-gold {
+          border-color: transparent;
+          box-shadow: none;
         }
         .ads-pill-icon-wrap {
           width: 26px;
@@ -226,6 +280,38 @@ function MetricPill({ label, value, hint, icon, tone = 'blue' }) {
           font-weight: 800;
           letter-spacing: 0.06em;
           color: #e2e8f0;
+        }
+        @media (max-width: 640px) {
+          .ads-pill-rail {
+            min-height: 68px;
+            padding: 9px 10px;
+          }
+          .ads-pill-rail:not(.ads-pill-rail-0)::before {
+            display: none;
+          }
+          .ads-pill-rail-1::before,
+          .ads-pill-rail-3::before {
+            display: block !important;
+          }
+          .ads-pill-rail .ads-pill-icon-wrap {
+            width: 27px;
+            height: 27px;
+          }
+          .ads-pill-rail .ads-pill-label {
+            min-height: 22px;
+            font-size: 8px;
+            letter-spacing: .08em;
+          }
+          .ads-pill-rail .ads-pill-value {
+            font-size: 16px;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ads-cabinet-home-btn::after,
+          .ads-home-roof,
+          .ads-home-signal {
+            animation: none !important;
+          }
         }
       `}</style>
     </div>
@@ -1257,8 +1343,8 @@ function CampaignCard({
 
 /* ====== Основной компонент кабинета ====== */
 
-export default function AdsHome() {
-  const { t, lang } = useI18n()
+export default function AdsHome({ onExitCabinet }) {
+  const { t } = useI18n()
   // NOTE: t используется также во вложенных компонентах через TX
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -1276,8 +1362,16 @@ export default function AdsHome() {
   const [creative, setCreative] = useState(() => makeEmptyCreative())
   const [creating, setCreating] = useState(false)
   const [newError, setNewError] = useState(null)
+  const [creativeProgress, setCreativeProgress] = useState({
+    active: false,
+    phase: 'preparing',
+    percent: 0,
+  })
+  const creativeUploadAbortRef = useRef(null)
   const [targetCountries, setTargetCountries] = useState([])
   const [targetRegions, setTargetRegions] = useState({})
+  const [geoTargetingOpen, setGeoTargetingOpen] = useState(false)
+  const [geoTargetingConfirmed, setGeoTargetingConfirmed] = useState(false)
   // Аналитика
   const [selectedId, setSelectedId] = useState(null)
   const [analytics, setAnalytics] = useState(null)
@@ -1305,10 +1399,29 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
 
   const accountId = useMemo(() => getAccountIdSafe(), [])
   const primaryCreative = creative
+  const mediaPipelineLabels = useMemo(() => ({
+    preparing: TX(t, 'media_pipeline_preparing', 'Подготовка'),
+    processing: TX(t, 'media_pipeline_processing', 'Обработка видео'),
+    verifying: TX(t, 'media_pipeline_verifying', 'Проверка'),
+    uploading: TX(t, 'media_pipeline_uploading', 'Загрузка'),
+    finalizing: TX(t, 'media_pipeline_finalizing', 'Завершение'),
+    ready: TX(t, 'media_pipeline_ready', 'Готово'),
+    stagesAria: TX(t, 'media_pipeline_stages', 'Этапы обработки медиа'),
+  }), [t])
 
   const updateCreative = (patch) => {
     setCreative((prev) => ({ ...prev, ...patch }))
   }
+
+  const cancelCreativePipeline = () => {
+    try { creativeUploadAbortRef.current?.abort?.() } catch {}
+    creativeUploadAbortRef.current = null
+    setCreativeProgress({ active: false, phase: 'preparing', percent: 0 })
+  }
+
+  useEffect(() => () => {
+    try { creativeUploadAbortRef.current?.abort?.() } catch {}
+  }, [])
 
   // Проверка скролла в правилах
   useEffect(() => {
@@ -1395,9 +1508,58 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
   const geoLimitExceeded =
     remainingCampaigns != null && geoSpend > remainingCampaigns
   const geoSelectionMissing = geoSpend === 0
+  const geoRegionCount = useMemo(
+    () => countAdsGeoRegions(targetRegions),
+    [targetRegions],
+  )
+  const campaignBasicsReady = isAdsCampaignBasicsReady({
+    hasActivePkg,
+    name: newName,
+    clickUrl: primaryCreative.clickUrl,
+  })
+
+  const openGeoTargeting = () => {
+    setNewError(null)
+
+    if (!hasActivePkg) {
+      setNewError(
+        TX(
+          t,
+          'ads_new_err_pkg_inactive',
+          'Пакет не активен — продли или купи новый на странице пакетов.',
+        ),
+      )
+      return
+    }
+
+    if (!newName.trim() || !String(primaryCreative.clickUrl || '').trim()) {
+      setNewError(
+        TX(
+          t,
+          'ads_new_err_required',
+          'Заполните название кампании и ссылку для перехода.',
+        ),
+      )
+      return
+    }
+
+    setGeoTargetingOpen(true)
+  }
+
+  const closeGeoTargeting = useCallback(() => {
+    setGeoTargetingOpen(false)
+  }, [])
+
+  const confirmGeoTargeting = ({ countries, regions }) => {
+    setTargetCountries(countries)
+    setTargetRegions(regions)
+    setGeoTargetingConfirmed(true)
+    setGeoTargetingOpen(false)
+    setNewError(null)
+  }
 
   /* ===== Upload media (для одного креатива) ===== */
-  async function uploadMediaForCreative(cr) {
+  async function uploadMediaForCreative(cr, { signal } = {}) {
     const { videoFile, imageFile } = cr
 
     // Если нет ни видео, ни картинки — ничего не загружаем
@@ -1405,69 +1567,42 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       return { mediaUrl: '', mediaType: 'none' }
     }
 
-    // 1) ВИДЕО: грузим НАПРЯМУЮ в Cloudflare R2 через presigned PUT.
-    // Финальное имя/ключ всегда уникализируется сервером в /api/forum/blobUploadUrl.
+    // 1) ВИДЕО: сначала общий client video gateway, затем Cloudflare R2 presigned PUT.
+    // Исходник не получает upload URL до успешных optimize + verify; ключ уникализирует сервер.
     if (videoFile) {
       const file = videoFile
       const mediaType = 'video'
-      let uploadFile = file
-      let uploadContentType = String(file?.type || '').split(';')[0].trim().toLowerCase()
-
-      // Берём оригинальное имя или "ad", если его нет
-      const rawName = (file.name && String(file.name)) || 'ad'
-
-      // Выделяем базу и расширение (как в uploadMedia на бэке)
+      const rawName = (file.name && String(file.name)) || 'ad-video'
       const lastDot = rawName.lastIndexOf('.')
       const base = lastDot > 0 ? rawName.slice(0, lastDot) : rawName
-      const rawExt = lastDot > 0 ? rawName.slice(lastDot) : ''
-      if (!uploadContentType) {
-        if (/\.webm$/i.test(rawName)) uploadContentType = 'video/webm'
-        else if (/\.mov$/i.test(rawName)) uploadContentType = 'video/quicktime'
-        else if (/\.mp4$/i.test(rawName)) uploadContentType = 'video/mp4'
-      }
-
-      try {
-        const shouldFaststart =
-          (
-            /^(video\/mp4|video\/quicktime)$/i.test(uploadContentType) ||
-            /\.(mp4|mov)$/i.test(rawName)
-          ) &&
-          Number(file?.size || 0) > 0 &&
-          Number(file?.size || 0) <= FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES
-
-        if (shouldFaststart) {
-          const fast = await optimizeForumVideoFastStart(file, {
-            allowTranscode: false,
-            strictFlatFaststart: true,
-            abortFaststartOnSignal: true,
-            maxTranscodeBytes: FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES,
-          })
-          if (!fast?.flatFaststart) throw new Error('ads_video_faststart_not_flat')
-          if (fast?.blob && fast.blob !== file) {
-            uploadFile = fast.blob
-            uploadContentType = String(fast?.mime || 'video/mp4').toLowerCase()
-          }
-        }
-      } catch (fastErr) {
-        try { console.warn('ql7_ads_video_container_remux_failed', fastErr) } catch {}
-        throw fastErr
-      }
-
-      const ext = uploadContentType.includes('mp4')
-        ? '.mp4'
-        : (uploadContentType.includes('quicktime') ? '.mov' : (rawExt || '.webm'))
-
-      // Чистим базу от странных символов
-      const safeBase = base.replace(/[^\w.-]+/g, '_') || 'ad'
-
-      const uploadName = `${safeBase}${ext}`
+      const safeBase = base.replace(/[^\w.-]+/g, '_') || 'ad-video'
+      const uploadName = `${safeBase}${lastDot > 0 ? rawName.slice(lastDot) : '.mp4'}`
+      const uploadContentType = String(file?.type || '').split(';')[0].trim().toLowerCase() || 'video/mp4'
 
       const res = await uploadR2MediaFile({
-        file: uploadFile,
+        file,
         kind: 'ads_video',
         userId: String(accountId || ''),
         filename: uploadName,
-        contentType: uploadContentType || file.type || 'video/mp4',
+        contentType: uploadContentType,
+        signal,
+        videoPolicy: {
+          mode: 'video-required',
+          maxDurationSeconds: MAX_VIDEO_SECONDS,
+          source: 'ads_creative',
+        },
+        onPrepareProgress: (event) => {
+          setCreativeProgress((previous) => {
+            const mapped = mapVideoPrepareProgress(event, previous.percent)
+            return { active: true, phase: mapped.phase, percent: mapped.percent }
+          })
+        },
+        onUploadProgress: (value) => {
+          setCreativeProgress((previous) => {
+            const mapped = mapVideoUploadProgress(value, previous.percent)
+            return { active: true, phase: mapped.phase, percent: mapped.percent }
+          })
+        },
       })
 
       const mediaUrl = res?.url
@@ -1483,10 +1618,16 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
     const fd = new FormData()
     fd.append('file', file)
 
+    setCreativeProgress((previous) => ({
+      active: true,
+      phase: 'uploading',
+      percent: Math.max(94, Number(previous.percent || 0)),
+    }))
     const r = await fetch('/api/ads?action=upload', {
       method: 'POST',
       body: fd,
       cache: 'no-store',
+      signal,
     })
 
     const j = await r.json().catch(() => null)
@@ -1553,6 +1694,10 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       return
     }
 
+    const uploadController = new AbortController()
+    creativeUploadAbortRef.current = uploadController
+    setCreativeProgress({ active: true, phase: 'preparing', percent: 1 })
+
     try {
       setCreating(true)
 
@@ -1576,8 +1721,14 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
       }
 
       const { mediaUrl, mediaType } = await uploadMediaForCreative(
-        cleanedCreative
+        cleanedCreative,
+        { signal: uploadController.signal }
       )
+
+      setCreativeProgress((previous) => {
+        const mapped = mapVideoFinalizingProgress(previous.percent)
+        return { active: true, phase: mapped.phase, percent: mapped.percent }
+      })
 
       const payload = {
         action: 'campaignCreate',
@@ -1595,6 +1746,7 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         cache: 'no-store',
+        signal: uploadController.signal,
       })
 
       const j = await r.json().catch(() => null)
@@ -1604,20 +1756,34 @@ const [campaignMetrics, setCampaignMetrics] = useState({})
 
       await reloadCabinet({ silent: true })
 
+      const ready = mapVideoReadyProgress()
+      setCreativeProgress({ active: true, phase: ready.phase, percent: ready.percent })
+      await new Promise((resolve) => setTimeout(resolve, 720))
+
       setNewName('')
       setCreative(makeEmptyCreative())
       setTargetCountries([])
       setTargetRegions({})
+      setGeoTargetingConfirmed(false)
+      setGeoTargetingOpen(false)
+      setCreativeProgress({ active: false, phase: 'preparing', percent: 0 })
     } catch (e) {
-      console.error('[ADS] create campaign error', e)
-      setNewError(
-        TX(
-          t,
-          'ads_new_err_generic',
-          'Не удалось создать кампанию, попробуй ещё раз.'
-        ) + ` (${e.message || e})`
-      )
+      const cancelled = e?.name === 'AbortError' || uploadController.signal.aborted
+      if (!cancelled) {
+        console.error('[ADS] create campaign error', e)
+        setNewError(
+          TX(
+            t,
+            'ads_new_err_generic',
+            'Не удалось создать кампанию, попробуй ещё раз.'
+          ) + ` (${e.message || e})`
+        )
+      }
+      setCreativeProgress({ active: false, phase: 'preparing', percent: 0 })
     } finally {
+      if (creativeUploadAbortRef.current === uploadController) {
+        creativeUploadAbortRef.current = null
+      }
       setCreating(false)
     }
   }
@@ -2319,93 +2485,116 @@ useEffect(() => {
 
         {/* ===== HEADER-УРОВЕНЬ ===== */}
         <section className="panel ads-panel ads-header-panel">
-          <div className="ads-header-grid">
-            {/* Левая часть: заголовок + пакет */}
-            <div className="ads-header-left">
-              <div className="ads-panel-title">
-                <h1 className="ads-main-title">
-                  {TX(t, 'ads_title', 'Рекламный кабинет')}
-                </h1>
-                <p className="ads-panel-sub">
-                  {TX(
-                    t,
-                    'ads_subtitle',
-                    'Управляй кампаниями, загружай креативы, смотри аналитику в реальном времени.'
-                  )}
-                </p>
-              </div>
+          <div className="ads-panel-title ads-panel-title-with-home">
+            <div className="ads-panel-title-copy">
+              <h1 className="ads-main-title">
+                {TX(t, 'ads_title', 'Рекламный кабинет')}
+              </h1>
+              <p className="ads-panel-sub">
+                {TX(
+                  t,
+                  'ads_subtitle',
+                  'Управляй кампаниями, загружай креативы, смотри аналитику в реальном времени.'
+                )}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="ads-cabinet-home-btn"
+              onClick={() => onExitCabinet?.()}
+              aria-label="Advertising packages"
+              title="Advertising packages"
+            >
+              <svg viewBox="0 0 32 32" aria-hidden="true">
+                <path className="ads-home-roof" d="M4.5 15.2 16 5.6l11.5 9.6" />
+                <path className="ads-home-body" d="M7.7 14.2v12.2h16.6V14.2" />
+                <path className="ads-home-door" d="M13 26.4v-7.2h6v7.2" />
+                <circle className="ads-home-signal" cx="25.2" cy="7.2" r="2.1" />
+              </svg>
+            </button>
+          </div>
 
+          <div className="ads-header-grid">
+            <div className="ads-header-left">
               {!loading && !error && pkgInfo && (
-                <div className="ads-pkg-premium">
-                  <div className="ads-pkg-row">
-                    <span className="ads-pkg-label">
-                      {TX(
-                        t,
-                        'ads_pkg_features_title',
-                        'Текущий пакет'
-                      )}
-                    </span>
-                    <span className="ads-pkg-name">{pkgLabel}</span>
+                <div
+                  className={
+                    'ads-pkg-premium ads-pkg-premium-detailed' +
+                    (hasActivePkg ? ' is-active' : ' is-expired')
+                  }
+                >
+                  <div className="ads-pkg-premium-icon" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" role="presentation">
+                      <defs>
+                        <linearGradient id="adsCabinetPackageGlow" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0" stopColor="#62e8ff" />
+                          <stop offset="0.55" stopColor="#8aa8ff" />
+                          <stop offset="1" stopColor="#ffe45c" />
+                        </linearGradient>
+                      </defs>
+                      <path
+                        d="M14 20.5 32 10l18 10.5v22L32 54 14 42.5z"
+                        fill="none"
+                        stroke="url(#adsCabinetPackageGlow)"
+                        strokeWidth="3"
+                      />
+                      <path
+                        d="m20 24 12 7 12-7M32 31v15"
+                        fill="none"
+                        stroke="url(#adsCabinetPackageGlow)"
+                        strokeLinecap="round"
+                        strokeWidth="3"
+                      />
+                      <circle cx="47" cy="17" r="4" fill="#ffe45c" />
+                    </svg>
                   </div>
-                  <div className="ads-pkg-row">
-                    {hasActivePkg ? (
-                      <>
-                        <div className="ads-pkg-bell">
-                          <span role="img" aria-label="bell">
-                            🔔
-                          </span>
-                        </div>
-                        <div className="ads-pkg-exp-text">
-                           <span className="ads-pkg-exp-label">
-                            {TX(
-                              t,
-                              'ads_pkg_remaining_label',
-                              'Осталось'
-                            )}
-                          </span>
-                          <span className="ads-pkg-exp-value">
-                            {humanDaysLeft(t, pkgInfo?.daysLeft ?? 0)}
-                          </span>
-                          {pkgInfo?.expiresAt && (
-                            <span className="ads-pkg-exp-date">
-                              {' '}
-                              (до {formatDateShort(pkgInfo.expiresAt)})
-                            </span>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="ads-pkg-expired-banner">
-                        {TX(
-                          t,
-                          'ads_pkg_expired',
-                          'Срок действия пакета истёк — купи новый на странице пакетов.'
-                        )}
+
+                  <div className="ads-pkg-premium-copy">
+                    <span className="ads-pkg-label">
+                      {TX(t, 'ads_landing_package_status_title', 'Ваш рекламный пакет')}
+                    </span>
+                    <div className="ads-pkg-premium-headline">
+                      <span className="ads-pkg-name">{pkgLabel}</span>
+                      <span className={'ads-package-state ' + (hasActivePkg ? 'is-active' : 'is-expired')}>
+                        {hasActivePkg
+                          ? TX(t, 'ads_landing_package_active', 'Пакет активен')
+                          : TX(t, 'ads_landing_package_expired', 'Срок пакета истёк')}
+                      </span>
+                    </div>
+                    <div className="ads-pkg-premium-metrics">
+                      <div>
+                        <span>{TX(t, 'ads_landing_package_started_at', 'Активирован')}</span>
+                        <strong>{formatDate(pkgInfo?.startsAt || pkgInfo?.createdAt)}</strong>
                       </div>
-                    )}
+                      <div>
+                        <span>{TX(t, 'ads_landing_package_expires_at', 'Действует до')}</span>
+                        <strong>{formatDate(pkgInfo?.expiresAt)}</strong>
+                      </div>
+                      <div>
+                        <span>{TX(t, 'ads_landing_package_days_left', 'Осталось дней')}</span>
+                        <strong>{pkgInfo?.daysLeft == null ? '—' : Math.max(0, Number(pkgInfo.daysLeft) || 0)}</strong>
+                      </div>
+                      <div>
+                        <span>{TX(t, 'ads_landing_package_campaigns', 'Кампаний')}</span>
+                        <strong>{Number(pkgInfo?.usedCampaigns || 0)}/{Number(pkgInfo?.maxCampaigns || 0) || '—'}</strong>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Правая часть: сводка по аккаунту */}
             <div className="ads-header-right">
               {loading && (
                 <div className="ads-loading">
                   <div className="ads-spinner" />
-                  <span>
-                    {TX(t, 'ads_loading_cabinet', 'Загружаем кабинет…')}
-                  </span>
+                  <span>{TX(t, 'ads_loading_cabinet', 'Загружаем кабинет…')}</span>
                 </div>
               )}
               {!loading && error && (
                 <div className="ads-error">
                   <span>
-                    {TX(
-                      t,
-                      'ads_error_cabinet',
-                      'Ошибка загрузки кабинета:'
-                    )}{' '}
+                    {TX(t, 'ads_error_cabinet', 'Ошибка загрузки кабинета:')}{' '}
                     {String(error)}
                   </span>
                 </div>
@@ -2413,65 +2602,41 @@ useEffect(() => {
               {!loading && !error && (
                 <div className="ads-header-metrics">
                   <MetricPill
+                    variant="rail"
+                    railIndex={0}
                     tone="blue"
                     icon="📡"
-                    label={TX(
-                      t,
-                      'ads_header_active_campaigns_label',
-                      'Активных кампаний'
-                   )}
+                    label={TX(t, 'ads_header_active_campaigns_label', 'Активных кампаний')}
                     value={activeCampaigns.length}
-                    hint={TX(
-                      t,
-                      'ads_header_active_campaigns_hint',
-                      'Количество кампаний в статусах Active / Running / Paused / Pending'
-                    )}
-                 />
-                  <MetricPill
-                    tone="blue"
-                    icon="👁‍🗨"
-                    label={TX(
-                      t,
-                      'ads_header_impressions_label',
-                      'Всего показов'
-                    )}
-                    value={globalImpressions}
-                    hint={TX(
-                      t,
-                      'ads_header_impressions_hint',
-                      'Суммарные показы по всем кампаниям за всё время'
-                    )}
-                 />
-                  <MetricPill
-                    tone="blue"
-                    icon="🖱"
-                    label={TX(
-                      t,
-                      'ads_header_clicks_label',
-                      'Всего кликов'
-                    )}
-                    value={globalClicks}
-                    hint={TX(
-                      t,
-                      'ads_header_clicks_hint',
-                      'Суммарные клики по всем кампаниям за всё время'
-                    )}
+                    hint={TX(t, 'ads_header_active_campaigns_hint', 'Количество кампаний в статусах Active / Running / Paused / Pending')}
                   />
                   <MetricPill
+                    variant="rail"
+                    railIndex={1}
+                    tone="blue"
+                    icon="👁‍🗨"
+                    label={TX(t, 'ads_header_impressions_label', 'Всего показов')}
+                    value={globalImpressions}
+                    hint={TX(t, 'ads_header_impressions_hint', 'Суммарные показы по всем кампаниям за всё время')}
+                  />
+                  <MetricPill
+                    variant="rail"
+                    railIndex={2}
+                    tone="blue"
+                    icon="🖱"
+                    label={TX(t, 'ads_header_clicks_label', 'Всего кликов')}
+                    value={globalClicks}
+                    hint={TX(t, 'ads_header_clicks_hint', 'Суммарные клики по всем кампаниям за всё время')}
+                  />
+                  <MetricPill
+                    variant="rail"
+                    railIndex={3}
                     tone="gold"
                     icon="🎯"
-                    label={TX(
-                      t,
-                      'ads_header_ctr_label',
-                      'Общий CTR'
-                    )}
+                    label={TX(t, 'ads_header_ctr_label', 'Общий CTR')}
                     value={globalCtr}
-                    hint={TX(
-                      t,
-                      'ads_header_ctr_hint',
-                      'CTR по всем показам и кликам за всё время'
-                    )}
-                 />
+                    hint={TX(t, 'ads_header_ctr_hint', 'CTR по всем показам и кликам за всё время')}
+                  />
                 </div>
               )}
             </div>
@@ -2612,23 +2777,34 @@ useEffect(() => {
               <div className="ads-form-footer">
                 <button
                   type="button"
-                  className="btn ads-submit-btn"
+                  className={`btn ads-submit-btn ${
+                    geoTargetingConfirmed ? 'is-launch-ready' : 'is-next-step'
+                  }`}
                   disabled={
-                    creating || geoSelectionMissing || geoLimitExceeded
+                    creating ||
+                    !campaignBasicsReady ||
+                    (geoTargetingConfirmed &&
+                      (geoSelectionMissing || geoLimitExceeded))
                   }
-                  onClick={handleCreateCampaign}
+                  onClick={
+                    geoTargetingConfirmed
+                      ? handleCreateCampaign
+                      : openGeoTargeting
+                  }
                 >
                   {creating
                     ? TX(
                         t,
                         'ads_new_campaign_submiting',
-                        'Запускаем…'
+                        'Запускаем…',
                       )
-                    : TX(
-                        t,
-                        'ads_new_campaign_submit',
-                        'Запустить кампанию'
-                      )}
+                    : geoTargetingConfirmed
+                      ? TX(
+                          t,
+                          'ads_new_campaign_submit',
+                          'Запустить кампанию',
+                        )
+                      : TX(t, 'ads_geo_next', 'Далее')}
                 </button>
                 <div className="ads-remaining">
                   {TX(
@@ -2640,6 +2816,52 @@ useEffect(() => {
                     {remainingCampaigns != null ? remainingCampaigns : '∞'}
                   </strong>
                 </div>
+              </div>
+
+              {geoTargetingConfirmed && (
+                <div className="ads-geo-confirmed">
+                  <span className="ads-geo-confirmed-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="m5 12.5 4.1 4.1L19.5 6.8" />
+                    </svg>
+                  </span>
+                  <div className="ads-geo-confirmed-copy">
+                    <strong>
+                      {TX(
+                        t,
+                        'ads_geo_targeting_confirmed',
+                        'Геотаргетинг подтверждён',
+                      )}
+                    </strong>
+                    <span>
+                      {TX(t, 'ads_geo_selected_count', 'Выбрано стран')}{' '}
+                      <b>{targetCountries.length}</b>
+                      <i aria-hidden="true" />
+                      {TX(t, 'ads_geo_regions_label', 'Регионы')}{' '}
+                      <b>{geoRegionCount}</b>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="ads-geo-edit"
+                    onClick={openGeoTargeting}
+                    disabled={creating}
+                  >
+                    {TX(t, 'ads_geo_edit', 'Изменить')}
+                  </button>
+                </div>
+              )}
+
+              <div className="ads-create-progress">
+                <MediaPipelineProgress
+                  active={creativeProgress.active}
+                  phase={creativeProgress.phase}
+                  percent={creativeProgress.percent}
+                  labels={mediaPipelineLabels}
+                  theme="ads"
+                  onCancel={creating ? cancelCreativePipeline : undefined}
+                  cancelLabel={TX(t, 'forum_cancel_upload', 'Отменить')}
+                />
               </div>
             </div>
 
@@ -2697,16 +2919,6 @@ useEffect(() => {
               </div>
             </div>
           </div>
-              <GeoTargetingPicker
-                lang={lang}
-                selectedCountries={targetCountries}
-                selectedRegions={targetRegions}
-                remaining={remainingCampaigns}
-                onSelectionChange={({ countries, regions }) => {
-                  setTargetCountries(countries)
-                  setTargetRegions(regions)
-                }}
-              />
         </section>
 
         {/* ===== СПИСОК КАМПАНИЙ + АНАЛИТИКА ===== */}
@@ -3169,8 +3381,10 @@ useEffect(() => {
 
                       {/* Сводка по цифрам кампании */}
                       {analytics && (
-                        <div className="ads-analytics-metrics">
+                        <div className={`ads-analytics-metrics ${campaignDurationDays == null ? 'is-three' : 'is-four'}`}>
                           <MetricPill
+                            variant="rail"
+                            railIndex={0}
                             tone="blue"
                             icon="👁‍🗨"
                             label={TX(
@@ -3181,6 +3395,8 @@ useEffect(() => {
                             value={analytics.impressionsTotal ?? 0}
                           />
                           <MetricPill
+                            variant="rail"
+                            railIndex={1}
                             tone="blue"
                             icon="🖱"
                             label={TX(
@@ -3191,6 +3407,8 @@ useEffect(() => {
                             value={analytics.clicksTotal ?? 0}
                           />
                           <MetricPill
+                            variant="rail"
+                            railIndex={2}
                             tone="gold"
                             icon="🎯"
                             label={TX(
@@ -3208,6 +3426,8 @@ useEffect(() => {
                           />
             {campaignDurationDays != null && (
               <MetricPill
+                            variant="rail"
+                            railIndex={3}
                 tone="blue"
                 icon="⏱"
                 label={TX(
@@ -3466,6 +3686,15 @@ useEffect(() => {
         )}
       </main>
 
+      <AdsGeoTargetingPortal
+        open={geoTargetingOpen}
+        selectedCountries={targetCountries}
+        selectedRegions={targetRegions}
+        remaining={remainingCampaigns}
+        onClose={closeGeoTargeting}
+        onConfirm={confirmGeoTargeting}
+      />
+
       {/* ===== СТИЛИ ===== */}
       <style jsx>{`
 
@@ -3594,6 +3823,96 @@ useEffect(() => {
           flex-direction: column;
           gap: 10px;
         }
+        .ads-panel-title-with-home {
+          min-width: 0;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 14px;
+        }
+        .ads-panel-title-copy {
+          min-width: 0;
+          flex: 1 1 auto;
+        }
+        .ads-cabinet-home-btn {
+          position: relative;
+          flex: 0 0 auto;
+          width: 48px;
+          height: 48px;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          border: 1px solid rgba(103, 232, 249, .64);
+          border-radius: 16px;
+          color: #ecfeff;
+          background:
+            radial-gradient(circle at 28% 22%, rgba(100, 236, 255, .34), transparent 38%),
+            radial-gradient(circle at 82% 88%, rgba(255, 216, 70, .26), transparent 44%),
+            linear-gradient(145deg, rgba(8, 51, 75, .96), rgba(4, 16, 31, .98));
+          box-shadow:
+            0 12px 30px rgba(0, 0, 0, .34),
+            0 0 24px rgba(68, 214, 255, .18),
+            inset 0 0 0 1px rgba(255,255,255,.05);
+          cursor: pointer;
+          transition: transform 160ms ease, border-color 160ms ease, filter 160ms ease, box-shadow 160ms ease;
+        }
+        .ads-cabinet-home-btn::after {
+          content: '';
+          position: absolute;
+          inset: -40% auto -40% -36%;
+          width: 30%;
+          transform: skewX(-18deg);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+          animation: adsHomeButtonScan 3.1s ease-in-out infinite;
+        }
+        .ads-cabinet-home-btn:hover {
+          transform: translateY(-2px) scale(1.035);
+          border-color: rgba(255, 222, 82, .84);
+          filter: brightness(1.1);
+          box-shadow: 0 15px 34px rgba(0,0,0,.4), 0 0 30px rgba(76,220,255,.3), 0 0 22px rgba(255,218,70,.16);
+        }
+        .ads-cabinet-home-btn:focus-visible {
+          outline: 2px solid #7cf1ff;
+          outline-offset: 3px;
+        }
+        .ads-cabinet-home-btn svg {
+          position: relative;
+          z-index: 1;
+          width: 28px;
+          height: 28px;
+          overflow: visible;
+          filter: drop-shadow(0 0 7px rgba(94, 232, 255, .55));
+        }
+        .ads-cabinet-home-btn path {
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 2;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+        .ads-home-roof {
+          stroke-dasharray: 34;
+          animation: adsHomeRoofFlow 2.8s linear infinite;
+        }
+        .ads-home-signal {
+          fill: #ffe45d;
+          stroke: #fff4b2;
+          stroke-width: 1;
+          transform-origin: 25.2px 7.2px;
+          animation: adsHomeSignalPulse 1.7s ease-in-out infinite;
+        }
+        @keyframes adsHomeButtonScan {
+          0%, 20% { left: -36%; opacity: 0; }
+          44% { opacity: .8; }
+          72%, 100% { left: 118%; opacity: 0; }
+        }
+        @keyframes adsHomeRoofFlow {
+          to { stroke-dashoffset: -68; }
+        }
+        @keyframes adsHomeSignalPulse {
+          0%, 100% { opacity: .55; transform: scale(.8); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
         .ads-main-title {
           margin: 0;
           font-size: clamp(22px, 3vw, 30px);
@@ -3608,78 +3927,119 @@ useEffect(() => {
         }
 
         .ads-pkg-premium {
-          border-radius: 16px;
+          min-width: 0;
+          height: 100%;
+          border-radius: 17px;
           padding: 10px 12px;
           background:
-            radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.3), transparent 60%),
-            radial-gradient(circle at 100% 100%, rgba(250, 204, 21, 0.25), transparent 60%),
-            linear-gradient(135deg, #020617, #020617);
-          border: 1px solid rgba(148, 163, 184, 0.7);
+            radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.24), transparent 52%),
+            radial-gradient(circle at 100% 100%, rgba(250, 204, 21, 0.2), transparent 58%),
+            linear-gradient(135deg, #061929, #07131f 58%, #2b270d);
+          border: 1px solid rgba(102, 222, 255, 0.52);
           box-shadow:
-            inset 0 0 0 1px rgba(15, 23, 42, 0.9),
-            0 18px 40px rgba(0, 0, 0, 0.9);
+            inset 0 0 0 1px rgba(255, 255, 255, 0.035),
+            0 16px 34px rgba(0, 0, 0, 0.42),
+            0 0 24px rgba(57, 199, 255, 0.1);
+          display: grid;
+          grid-template-columns: 44px minmax(0, 1fr);
+          align-items: center;
+          gap: 10px;
+          overflow: hidden;
+        }
+        .ads-pkg-premium.is-expired {
+          border-color: rgba(248, 113, 113, 0.52);
+        }
+        .ads-pkg-premium-icon {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          display: grid;
+          place-items: center;
+          background: linear-gradient(145deg, rgba(10, 55, 80, .96), rgba(6, 16, 31, .98));
+          border: 1px solid rgba(103, 232, 249, .42);
+          box-shadow: 0 0 20px rgba(69, 222, 255, .16), inset 0 0 0 1px rgba(255,255,255,.04);
+        }
+        .ads-pkg-premium-icon svg {
+          width: 33px;
+          height: 33px;
+          filter: drop-shadow(0 0 8px rgba(83, 222, 255, .35));
+        }
+        .ads-pkg-premium-copy {
+          min-width: 0;
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 5px;
         }
-        .ads-pkg-row {
+        .ads-pkg-label {
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          color: #a9bed0;
+        }
+        .ads-pkg-premium-headline {
           display: flex;
           align-items: center;
           gap: 8px;
           flex-wrap: wrap;
         }
-        .ads-pkg-label {
-          font-size: 10px;
-          text-transform: uppercase;
-          letter-spacing: 0.16em;
-          color: #94a3b8;
-        }
         .ads-pkg-name {
-          font-size: 18px;
-          font-weight: 800;
-          letter-spacing: 0.12em;
+          font-size: 17px;
+          font-weight: 900;
+          letter-spacing: 0.1em;
           text-transform: uppercase;
+          color: #f8fbff;
         }
-        .ads-pkg-bell {
-          width: 32px;
-          height: 32px;
+        .ads-package-state {
+          display: inline-flex;
+          align-items: center;
+          min-height: 18px;
+          padding: 2px 7px;
           border-radius: 999px;
+          font-size: 9px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+        .ads-package-state.is-active {
+          color: #b9ffd2;
+          background: rgba(23, 117, 67, .34);
+          border: 1px solid rgba(80, 238, 145, .52);
+        }
+        .ads-package-state.is-expired {
+          color: #ffd0d0;
+          background: rgba(127, 29, 29, .38);
+          border: 1px solid rgba(248, 113, 113, .56);
+        }
+        .ads-pkg-premium-metrics {
+          min-width: 0;
           display: grid;
-          place-items: center;
-          background: radial-gradient(
-              circle at 30% 0,
-              rgba(56, 189, 248, 0.9),
-              transparent 60%
-            ),
-            radial-gradient(
-              circle at 70% 120%,
-              rgba(250, 204, 21, 0.9),
-              transparent 70%
-            );
-          box-shadow:
-            0 0 18px rgba(56, 189, 248, 0.8),
-            0 0 26px rgba(250, 204, 21, 0.9);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          border: 1px solid rgba(88, 211, 255, .2);
+          border-radius: 10px;
+          overflow: hidden;
+          background: rgba(3, 16, 29, .72);
         }
-        .ads-pkg-exp-text {
-          font-size: 12px;
+        .ads-pkg-premium-metrics > div {
+          min-width: 0;
+          padding: 5px 7px;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
         }
-        .ads-pkg-exp-label {
-          color: #94a3b8;
-          margin-right: 4px;
+        .ads-pkg-premium-metrics > div + div {
+          border-inline-start: 1px solid rgba(91, 213, 255, .18);
         }
-        .ads-pkg-exp-value {
-          font-weight: 700;
+        .ads-pkg-premium-metrics span {
+          color: #91a9bc;
+          font-size: 7px;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+          overflow-wrap: anywhere;
         }
-        .ads-pkg-exp-date {
-          color: #94a3b8;
-        }
-        .ads-pkg-expired-banner {
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(127, 29, 29, 0.75);
-          border: 1px solid rgba(248, 113, 113, 0.9);
-          font-size: 12px;
-          color: #fee2e2;
+        .ads-pkg-premium-metrics strong {
+          color: #f5fbff;
+          font-size: 9px;
+          line-height: 1.15;
+          overflow-wrap: anywhere;
         }
 
         .ads-header-right {
@@ -3689,10 +4049,22 @@ useEffect(() => {
           min-height: 80px;
         }
         .ads-header-metrics {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          justify-content: flex-end;
+          position: relative;
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 0;
+          overflow: hidden;
+          border: 1px solid rgba(88, 211, 255, 0.34);
+          border-radius: 19px;
+          background:
+            radial-gradient(circle at 5% 0, rgba(58, 205, 255, .17), transparent 34%),
+            radial-gradient(circle at 95% 100%, rgba(255, 216, 60, .11), transparent 36%),
+            linear-gradient(110deg, rgba(4, 21, 38, .96), rgba(15, 24, 33, .94));
+          box-shadow:
+            0 18px 42px rgba(0,0,0,.28),
+            inset 0 0 0 1px rgba(255,255,255,.03),
+            0 0 30px rgba(53, 198, 255, .1);
         }
 
         /* Форма */
@@ -3797,10 +4169,146 @@ useEffect(() => {
         }
         .ads-submit-btn {
           min-width: 190px;
+          position: relative;
+          overflow: hidden;
+          transition:
+            transform 160ms ease,
+            filter 160ms ease,
+            box-shadow 180ms ease,
+            opacity 160ms ease;
+        }
+        .ads-submit-btn.is-next-step:not(:disabled) {
+          border-color: rgba(94, 225, 255, 0.76);
+          background: linear-gradient(110deg, #1b6f9b, #287eb7 52%, #22566f);
+          box-shadow:
+            0 12px 26px rgba(11, 127, 184, 0.34),
+            0 0 22px rgba(62, 221, 255, 0.2);
+        }
+        .ads-submit-btn.is-next-step:not(:disabled)::after {
+          content: '›';
+          margin-left: 9px;
+          font-size: 18px;
+          line-height: 0;
+        }
+        .ads-submit-btn.is-launch-ready:not(:disabled) {
+          box-shadow:
+            0 12px 28px rgba(56, 189, 248, 0.34),
+            0 0 28px rgba(250, 204, 21, 0.5);
+        }
+        .ads-submit-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+          filter: brightness(1.08);
+        }
+        .ads-submit-btn:disabled {
+          cursor: not-allowed;
+          opacity: 0.42;
+          filter: grayscale(0.5);
+          box-shadow: none;
         }
         .ads-remaining {
           font-size: 13px;
           opacity: 0.9;
+        }
+        .ads-create-progress {
+          width: 100%;
+          margin-top: 12px;
+          min-height: 0;
+        }
+
+        .ads-geo-confirmed {
+          width: 100%;
+          display: grid;
+          grid-template-columns: auto minmax(0, 1fr) auto;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 12px;
+          border: 1px solid rgba(88, 222, 255, 0.36);
+          border-radius: 14px;
+          background:
+            linear-gradient(90deg, rgba(41, 181, 225, 0.15), rgba(255, 209, 62, 0.07)),
+            rgba(3, 17, 31, 0.56);
+          box-shadow:
+            0 12px 24px rgba(0, 0, 0, 0.22),
+            0 0 20px rgba(45, 194, 238, 0.08) inset;
+        }
+
+        .ads-geo-confirmed-icon {
+          width: 32px;
+          height: 32px;
+          display: grid;
+          place-items: center;
+          border-radius: 50%;
+          color: #07131f;
+          background: linear-gradient(135deg, #57efff, #ffe15a);
+          box-shadow: 0 0 18px rgba(76, 222, 255, 0.35);
+        }
+
+        .ads-geo-confirmed-icon svg {
+          width: 20px;
+          height: 20px;
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 2.6;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .ads-geo-confirmed-copy {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+        }
+
+        .ads-geo-confirmed-copy strong {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          font-size: 12px;
+          color: #f1fbff;
+        }
+
+        .ads-geo-confirmed-copy span {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 6px;
+          font-size: 11px;
+          color: rgba(222, 243, 255, 0.7);
+        }
+
+        .ads-geo-confirmed-copy b {
+          color: #fff;
+          font-size: 13px;
+        }
+
+        .ads-geo-confirmed-copy i {
+          width: 1px;
+          height: 13px;
+          background: rgba(105, 220, 255, 0.36);
+        }
+
+        .ads-geo-edit {
+          min-height: 34px;
+          padding: 0 12px;
+          border: 1px solid rgba(93, 219, 255, 0.44);
+          border-radius: 11px;
+          color: #ddf8ff;
+          background: rgba(13, 55, 78, 0.68);
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: transform 150ms ease, border-color 150ms ease;
+        }
+
+        .ads-geo-edit:hover:not(:disabled) {
+          transform: translateY(-1px);
+          border-color: rgba(111, 237, 255, 0.82);
+        }
+
+        .ads-geo-edit:disabled {
+          opacity: 0.45;
+          cursor: not-allowed;
         }
 
         .ads-form-preview {
@@ -4185,9 +4693,26 @@ useEffect(() => {
         }
 
         .ads-analytics-metrics {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 8px;
+          position: relative;
+          width: 100%;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 0;
+          overflow: hidden;
+          border: 1px solid rgba(88, 211, 255, 0.34);
+          border-radius: 19px;
+          background:
+            radial-gradient(circle at 5% 0, rgba(58, 205, 255, .17), transparent 34%),
+            radial-gradient(circle at 95% 100%, rgba(255, 216, 60, .11), transparent 36%),
+            linear-gradient(110deg, rgba(4, 21, 38, .96), rgba(15, 24, 33, .94));
+          box-shadow:
+            0 18px 42px rgba(0,0,0,.28),
+            inset 0 0 0 1px rgba(255,255,255,.03),
+            0 0 30px rgba(53, 198, 255, .1);
+        }
+
+        .ads-analytics-metrics.is-three {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         .ads-analytics-controls {
@@ -4330,7 +4855,7 @@ useEffect(() => {
          overflow-y: auto;
        }
         /* АДАПТИВ */
-        @media (max-width: 1200px) {
+        @media (max-width: 760px) {
           .ads-header-grid {
             grid-template-columns: minmax(0, 1fr);
           }
@@ -4358,6 +4883,18 @@ useEffect(() => {
   }
 }
         @media (max-width: 640px) {
+          .ads-panel-title-with-home {
+            gap: 9px;
+          }
+          .ads-cabinet-home-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+          }
+          .ads-cabinet-home-btn svg {
+            width: 24px;
+            height: 24px;
+          }
           /* MOBILE FULL-BLEED:
              убираем боковые гуттеры, которые даёт глобальный layout (.page-center / .page-content)
              ТОЛЬКО внутри AdsHome */
@@ -4376,12 +4913,29 @@ useEffect(() => {
           }
 
           .ads-page-root .ads-panel {
-            border-left: 0 !important;
+            border-inline-start: 0 !important;
             border-right: 0 !important;
             border-radius: 0 !important;
           }
-          .ads-header-metrics {
-            justify-content: flex-start;
+          .ads-header-metrics,
+          .ads-analytics-metrics,
+          .ads-analytics-metrics.is-three {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            border-radius: 17px;
+          }
+
+          .ads-header-metrics::after,
+          .ads-analytics-metrics::after {
+            content: '';
+            position: absolute;
+            z-index: 3;
+            top: 50%;
+            left: 10px;
+            right: 10px;
+            height: 1px;
+            pointer-events: none;
+            background: linear-gradient(90deg, transparent, rgba(255, 218, 67, .94), transparent);
+            box-shadow: 0 0 12px rgba(255, 214, 56, .36);
           }
           .ads-header-right {
             align-items: flex-start;
@@ -4411,6 +4965,69 @@ useEffect(() => {
        }
 
        }
+
+        /* ===== V6.11 desktop cabinet alignment + detailed package card ===== */
+        @media (min-width: 761px) {
+          .ads-header-panel {
+            padding-top: 18px;
+          }
+          .ads-panel-title-with-home {
+            position: relative;
+            align-items: flex-start;
+            padding-right: 62px;
+          }
+          .ads-cabinet-home-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 4;
+          }
+          .ads-header-grid {
+            margin-top: 12px;
+            grid-template-columns: minmax(0, .96fr) minmax(0, 1.04fr);
+            align-items: stretch;
+          }
+          .ads-header-left,
+          .ads-header-right {
+            min-width: 0;
+            min-height: 0;
+            align-items: stretch;
+          }
+          .ads-header-metrics {
+            height: 100%;
+            min-height: 92px;
+            align-self: stretch;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .ads-header-grid {
+            grid-template-columns: minmax(0, 1fr);
+          }
+          .ads-pkg-premium {
+            grid-template-columns: 38px minmax(0, 1fr);
+            padding: 9px;
+          }
+          .ads-pkg-premium-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+          }
+          .ads-pkg-premium-icon svg {
+            width: 29px;
+            height: 29px;
+          }
+          .ads-pkg-premium-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          .ads-pkg-premium-metrics > div:nth-child(3),
+          .ads-pkg-premium-metrics > div:nth-child(4) {
+            border-top: 1px solid rgba(255, 218, 67, .24);
+          }
+          .ads-pkg-premium-metrics > div:nth-child(3) {
+            border-inline-start: 0;
+          }
+        }
       `}</style>
     </div>
   )

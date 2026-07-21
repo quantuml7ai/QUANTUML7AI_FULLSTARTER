@@ -16,7 +16,6 @@ export default function useComposerActionHandlers({
   videoOpen,
   createPost,
   setCooldownLeft,
-  resetVideo,
   setEmojiOpen,
   composerBusy = false,
   canSend = false,
@@ -48,9 +47,10 @@ export default function useComposerActionHandlers({
     try {
       setVideoState((state) => (pendingVideo ? 'uploading' : state))
       try { if (videoOpen) setVideoOpen(false) } catch {}
-      await createPost()
-      try { setCooldownLeft?.(10) } catch {}
-      try { resetVideo() } catch {}
+      const sent = await createPost()
+      if (sent) {
+        try { setCooldownLeft?.(10) } catch {}
+      }
     } finally {
       try { setEmojiOpen(false) } catch {}
     }
@@ -61,7 +61,6 @@ export default function useComposerActionHandlers({
     canSend,
     pendingVideo,
     postingRef,
-    resetVideo,
     setCooldownLeft,
     setVideoOpen,
     setVideoState,

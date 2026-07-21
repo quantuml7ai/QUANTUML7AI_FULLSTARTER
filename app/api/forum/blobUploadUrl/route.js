@@ -85,7 +85,7 @@ export async function POST(req) {
         error: {
           code: 'too_large',
           message: `File is too large: ${size} bytes`,
-          hint: `Максимум: ${MAX_SIZE} bytes (500MB).`,
+          hint: `Максимум: ${MAX_SIZE} bytes (100MB).`,
         },
         request_meta: { filename, kind, mime: mimeRaw, size },
       })
