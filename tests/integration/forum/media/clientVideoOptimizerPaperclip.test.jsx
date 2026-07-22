@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import React from 'react'
 import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
@@ -17,6 +19,8 @@ vi.mock('next/image', () => ({
 }))
 
 import ComposerAttachmentPreview from '../../../../app/forum/features/media/components/ComposerAttachmentPreview.jsx'
+import ComposerEmojiPreview from '../../../../app/forum/features/ui/components/ComposerEmojiPreview.jsx'
+import ComposerFileInput from '../../../../app/forum/features/ui/components/ComposerFileInput.jsx'
 import useForumComposerAttachments from '../../../../app/forum/features/media/hooks/useForumComposerAttachments.js'
 import useMediaPipelineController from '../../../../app/forum/features/media/hooks/useMediaPipelineController.js'
 import resolveComposerMediaPayload from '../../../../app/forum/features/media/services/resolveComposerMediaPayload.js'
@@ -124,6 +128,83 @@ describe('paperclip deferred video gateway integration', () => {
     } finally {
       restoreUrl()
       createElementSpy.mockRestore()
+    }
+  })
+
+  test('uses a native single-file picker while video is selectable and preserves image batch mode after image ownership', () => {
+    const ref = React.createRef()
+    const props = {
+      fileInputRef: ref,
+      onFilesChosen: vi.fn(),
+      mediaLocked: false,
+      accept: 'image/*,video/*',
+      allowMultiple: false,
+    }
+    const { container, rerender } = render(React.createElement(ComposerFileInput, props))
+    const input = container.querySelector('input[type="file"]')
+
+    expect(input).toBeTruthy()
+    expect(input.multiple).toBe(false)
+
+    rerender(React.createElement(ComposerFileInput, {
+      ...props,
+      accept: 'image/*',
+      allowMultiple: true,
+    }))
+    expect(container.querySelector('input[type="file"]').multiple).toBe(true)
+  })
+
+  test('rejects a multi-video paperclip selection before preview, optimization or upload', async () => {
+    const restoreUrl = installObjectUrlStubs()
+    const first = new File([new Uint8Array(128)], 'first.mp4', { type: 'video/mp4' })
+    const second = new File([new Uint8Array(128)], 'second.webm', { type: 'video/webm' })
+    const props = createProps()
+
+    try {
+      vi.mocked(URL.createObjectURL).mockClear()
+      const { result } = renderHook(() => useForumComposerAttachments(props))
+      const target = { files: [first, second], value: 'selected' }
+
+      await act(async () => {
+        await result.current.onFilesChosen({ target })
+      })
+
+      expect(props.toast.warn).toHaveBeenCalledWith('forum_attach_info')
+      expect(URL.createObjectURL).not.toHaveBeenCalled()
+      expect(props.readVideoDurationSecFn).not.toHaveBeenCalled()
+      expect(props.setPendingVideo).not.toHaveBeenCalled()
+      expect(props.setVideoOpen).not.toHaveBeenCalled()
+      expect(uploadR2MediaFile).not.toHaveBeenCalled()
+      expect(target.value).toBe('')
+    } finally {
+      restoreUrl()
+    }
+  })
+
+  test('rejects replacing an already pending paperclip video until it is removed', async () => {
+    const restoreUrl = installObjectUrlStubs()
+    const source = new File([new Uint8Array(128)], 'replacement.mp4', { type: 'video/mp4' })
+    const props = createProps({
+      pendingVideo: 'blob:existing-video',
+      pendingVideoBlobMetaRef: { current: new Map([['blob:existing-video', { source: 'paperclip_preview' }]]) },
+    })
+
+    try {
+      vi.mocked(URL.createObjectURL).mockClear()
+      const { result } = renderHook(() => useForumComposerAttachments(props))
+      const target = { files: [source], value: 'selected' }
+
+      await act(async () => {
+        await result.current.onFilesChosen({ target })
+      })
+
+      expect(props.toast.warn).toHaveBeenCalledWith('forum_attach_info')
+      expect(URL.createObjectURL).not.toHaveBeenCalled()
+      expect(props.setPendingVideo).not.toHaveBeenCalled()
+      expect(uploadR2MediaFile).not.toHaveBeenCalled()
+      expect(target.value).toBe('')
+    } finally {
+      restoreUrl()
     }
   })
 
@@ -402,6 +483,53 @@ describe('composer image send-time pipeline', () => {
     expect(toastI18n).toHaveBeenCalledWith('warn', 'forum_image_blocked')
     const removeUpdater = setPendingImgs.mock.calls[0][0]
     expect(removeUpdater(['/remote.webp', 'blob:blocked'])).toEqual(['/remote.webp'])
+  })
+})
+
+describe('composer VIP sticker preview UI', () => {
+  test('renders VIP emoji at full-width media-card semantics and removes it with the top-right trash control', () => {
+    const setPendingSticker = vi.fn()
+    const { container, rerender } = render(React.createElement(ComposerEmojiPreview, {
+      pendingSticker: { src: '/vip/emoji/e1.gif', kind: 'vip' },
+      setPendingSticker,
+      t: (key) => key,
+    }))
+
+    const preview = container.querySelector('[data-composer-sticker-preview="true"]')
+    expect(preview).toHaveClass('vipMediaBox', 'composerStickerPreviewRow')
+    expect(preview).toHaveAttribute('data-kind', 'vip-emoji')
+    expect(preview.querySelector('img')).toHaveClass('emojiPreviewBig')
+    expect(container.querySelector('.composerStickerTrash')).toHaveAttribute('data-composer-sticker-control', 'true')
+
+    fireEvent.pointerDown(screen.getByLabelText('forum_remove_attachment'))
+    fireEvent.click(screen.getByLabelText('forum_remove_attachment'))
+    expect(setPendingSticker).toHaveBeenCalledWith(null)
+
+    rerender(React.createElement(ComposerEmojiPreview, {
+      pendingSticker: { src: '/mozi/sticker.gif', kind: 'mozi' },
+      setPendingSticker,
+      t: (key) => key,
+    }))
+    expect(container.querySelector('[data-composer-sticker-preview="true"]')).toHaveAttribute('data-kind', 'sticker')
+  })
+})
+
+describe('composer video preview controls UI', () => {
+  test('ships the same premium control classes as image previews with fullscreen first and trash second', () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), 'app/forum/features/media/components/ComposerAttachmentPreview.jsx'),
+      'utf8',
+    )
+    const expandOffset = source.indexOf('composerVideoControl--expand')
+    const trashOffset = source.indexOf('composerVideoControl--trash')
+
+    expect(expandOffset).toBeGreaterThanOrEqual(0)
+    expect(trashOffset).toBeGreaterThan(expandOffset)
+    expect(source).toContain('composerImageControl--expand composerVideoControl')
+    expect(source).toContain('composerImageControl--trash composerVideoControl')
+    expect(source).toContain('data-composer-video-control="true"')
+    expect(source.slice(expandOffset, trashOffset)).toContain('<ExpandIcon />')
+    expect(source.slice(trashOffset)).toContain('<TrashIcon />')
   })
 })
 

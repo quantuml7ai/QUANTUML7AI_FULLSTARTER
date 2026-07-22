@@ -29,11 +29,13 @@ export default function GeoTargetingPicker({
   selectedRegions,
   remaining,
   onSelectionChange,
+  onSearchFocusChange,
 }) {
   const { t, lang } = useI18n()
   const [search, setSearch] = useState('')
   const [expanded, setExpanded] = useState(() => new Set())
   const [limitNotice, setLimitNotice] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
 
   const remainingValue = clampRemaining(remaining)
   const remainingSlots = remainingValue == null ? Infinity : remainingValue
@@ -98,6 +100,20 @@ export default function GeoTargetingPicker({
     if (!limitExceeded) return
     setLimitNotice(tx(t, 'ads_geo_limit_exceeded', 'Not enough campaigns.'))
   }, [limitExceeded, t])
+
+  useEffect(() => () => {
+    onSearchFocusChange?.(false)
+  }, [onSearchFocusChange])
+
+  const handleSearchFocus = useCallback(() => {
+    setSearchFocused(true)
+    onSearchFocusChange?.(true)
+  }, [onSearchFocusChange])
+
+  const handleSearchBlur = useCallback(() => {
+    setSearchFocused(false)
+    onSearchFocusChange?.(false)
+  }, [onSearchFocusChange])
 
   const updateSelection = (nextCountries, nextRegions) => {
     onSelectionChange?.({
@@ -252,7 +268,7 @@ export default function GeoTargetingPicker({
   }
 
   return (
-    <div className={`ads-geo-picker ${variant === 'portal' ? 'is-portal' : ''}`}>
+    <div className={`ads-geo-picker ${variant === 'portal' ? 'is-portal' : ''} ${variant === 'portal' && searchFocused ? 'is-search-focused' : ''}`}>
       <div className="ads-geo-header">
         <div>
           <h3 className="ads-geo-title">
@@ -316,6 +332,8 @@ export default function GeoTargetingPicker({
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onFocus={handleSearchFocus}
+            onBlur={handleSearchBlur}
             placeholder={tx(
               t,
               'ads_geo_search_placeholder',
@@ -902,6 +920,8 @@ export default function GeoTargetingPicker({
             flex: 0 0 auto;
             margin-inline: 1px;
             padding: 7px;
+            max-height: 68px;
+            transition: max-height 160ms ease, margin 160ms ease, padding 160ms ease, opacity 120ms ease;
           }
 
           .is-portal .ads-geo-actions {
@@ -974,6 +994,36 @@ export default function GeoTargetingPicker({
           :global([dir='rtl']) .ads-geo-region-toggle {
             margin-left: 0;
             margin-right: 0;
+          }
+
+          .is-portal.is-search-focused {
+            padding-top: 0;
+          }
+
+          .is-portal.is-search-focused .ads-geo-header,
+          .is-portal.is-search-focused .ads-geo-metrics,
+          .is-portal.is-search-focused .ads-geo-warning {
+            flex-basis: 0;
+            min-height: 0;
+            max-height: 0;
+            margin-block: 0;
+            padding-block: 0;
+            border-width: 0;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+          }
+
+          .is-portal.is-search-focused .ads-geo-metrics::after {
+            display: none;
+          }
+
+          .is-portal.is-search-focused .ads-geo-list {
+            min-height: 0;
+            flex: 1 1 auto;
+            margin-top: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
           }
         }
 

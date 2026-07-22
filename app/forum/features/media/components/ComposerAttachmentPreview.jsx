@@ -195,7 +195,6 @@ export default function ComposerAttachmentPreview({
   }, [pendingVideo, pendingVideoMirror])
 
   const previewControlTop = previewTouchWebKit ? 'calc(env(safe-area-inset-top, 0px) + 48px)' : 8
-  const previewRemoveTop = previewTouchWebKit ? 'calc(env(safe-area-inset-top, 0px) + 50px)' : 10
 
   return (
     <>
@@ -343,12 +342,40 @@ export default function ComposerAttachmentPreview({
               </div>
             )}
 
-            <button type="button" title={t?.('forum_open_fullscreen')} onClick={() => { try { onOpenVideoFullscreen?.() } catch {} }} style={{ position: 'absolute', right: 8, top: previewControlTop, width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'rgba(0,0,0,.55)', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
+            <button
+              type="button"
+              className="composerImageControl composerImageControl--expand composerVideoControl composerVideoControl--expand"
+              data-composer-video-control="true"
+              title={t?.('forum_open_fullscreen')}
+              aria-label={t?.('forum_open_fullscreen')}
+              style={{ top: previewControlTop }}
+              onPointerDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                try { onOpenVideoFullscreen?.() } catch {}
+              }}
+            >
               <ExpandIcon />
             </button>
 
-            <button type="button" title={t?.('forum_remove')} onClick={() => { try { onRemoveVideo?.() } catch {} }} style={{ fontSize: '20px', position: 'absolute', top: previewRemoveTop, left: 5, width: 54, height: 54, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.4)', background: 'rgba(0, 0, 0, 0.52)', color: '#ff0000ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
-              {ICON_REMOVE}
+            <button
+              type="button"
+              className="composerImageControl composerImageControl--trash composerVideoControl composerVideoControl--trash"
+              data-composer-video-control="true"
+              title={t?.('forum_remove_attachment') || t?.('forum_remove')}
+              aria-label={t?.('forum_remove_attachment') || t?.('forum_remove')}
+              style={{ top: previewControlTop }}
+              onPointerDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                try { onRemoveVideo?.() } catch {}
+              }}
+            >
+              <TrashIcon />
             </button>
           </div>
         </div>

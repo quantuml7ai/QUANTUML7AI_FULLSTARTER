@@ -4204,6 +4204,89 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 }
 
 
+/* full-width composer VIP emoji / MOZI preview */
+.forumComposer .composerStickerPreviewRow{
+  position:relative;
+  width:100% !important;
+  max-width:none !important;
+  min-width:0;
+  height:var(--vipmb-h, var(--mb-vip-emoji-h, 260px));
+  min-height:var(--vipmb-h, var(--mb-vip-emoji-h, 260px));
+  max-height:var(--vipmb-h, var(--mb-vip-emoji-h, 260px));
+  align-self:stretch;
+  margin:8px 0 0 !important;
+  padding:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  isolation:isolate;
+  border-radius:16px;
+  border:1px solid rgba(119,197,255,.2);
+  background:#000 !important;
+  box-shadow:0 16px 36px rgba(0,0,0,.42), inset 0 0 0 1px rgba(255,255,255,.035);
+}
+.forumComposer .composerStickerPreviewRow > img{
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100% !important;
+  height:100% !important;
+  max-width:100% !important;
+  max-height:100% !important;
+  margin:auto !important;
+  object-fit:contain !important;
+  object-position:center center !important;
+  border-radius:12px;
+}
+.forumComposer .composerStickerTrash{
+  appearance:none;
+  -webkit-appearance:none;
+  position:absolute;
+  z-index:10;
+  top:12px;
+  right:12px;
+  width:42px;
+  height:42px;
+  min-width:42px;
+  padding:0 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  border-radius:13px;
+  color:#ff6b82;
+  border:1px solid rgba(255,98,124,.54) !important;
+  background:linear-gradient(145deg, rgba(54,5,17,.92), rgba(9,12,22,.84)) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 22px rgba(255,67,102,.2), inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  transition:transform 160ms ease, filter 160ms ease, border-color 160ms ease;
+}
+.forumComposer .composerStickerTrash:hover{
+  transform:translateY(-1px) scale(1.04);
+  filter:brightness(1.12);
+  border-color:rgba(255,130,150,.76) !important;
+}
+.forumComposer .composerStickerTrash:active{ transform:scale(.96); }
+.forumComposer .composerStickerTrash svg{ display:block; margin:0; }
+@media (max-width:640px){
+  .forumComposer .composerStickerPreviewRow{
+    padding:10px;
+    border-radius:13px;
+  }
+  .forumComposer .composerStickerTrash{
+    top:10px;
+    right:10px;
+    width:38px;
+    height:38px;
+    min-width:38px;
+    border-radius:12px;
+  }
+}
+
 /* composer image carousel: local draft preview + send-time moderation/upload */
 .forumComposer .composerImagePreviewRow{
   width:100% !important;

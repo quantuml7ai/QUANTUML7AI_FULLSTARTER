@@ -7,6 +7,7 @@ export default function ComposerFileInput({
   onFilesChosen,
   mediaLocked,
   accept,
+  allowMultiple = false,
 }) {
   return (
     <input
@@ -14,7 +15,7 @@ export default function ComposerFileInput({
       ref={fileInputRef}
       type="file"
       accept={accept || 'image/*,image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov'}
-      multiple
+      multiple={allowMultiple}
       style={{ display: 'none' }}
       onChange={onFilesChosen}
       disabled={mediaLocked}

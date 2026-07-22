@@ -3,6 +3,8 @@ import { FORUM_IMAGE_MAX_BYTES } from '../../../shared/constants/media'
 import { FORUM_CLIENT_VIDEO_OPTIMIZER_SOURCE_MAX_BYTES } from '../../../../../lib/forumClientVideoOptimizer'
 
 const MAX_COMPOSER_IMAGE_ATTACHMENTS = 10
+const MAX_COMPOSER_VIDEO_ATTACHMENTS = 1
+const SINGLE_VIDEO_ATTACH_TYPES = '1 video: MP4, WEBM, MOV, M4V, MKV, TS, MTS, M2TS, OGG or OGV'
 
 export default function useForumComposerAttachments({
   mediaLocked,
@@ -76,6 +78,22 @@ export default function useForumComposerAttachments({
       if (rawImgFiles.length && vidFiles.length) {
         try {
           toast?.info?.(t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF or MP4/WEBM/MOV' }))
+        } catch {}
+        return
+      }
+
+      const hasPendingPaperclipVideo = Boolean(
+        pendingVideo ||
+        (pendingVideoBlobMetaRef?.current instanceof Map && pendingVideoBlobMetaRef.current.size > 0),
+      )
+      if (
+        vidFiles.length > MAX_COMPOSER_VIDEO_ATTACHMENTS ||
+        (vidFiles.length > 0 && hasPendingPaperclipVideo)
+      ) {
+        try {
+          toast?.warn?.(
+            formatI18nMessage('forum_attach_info', { types: SINGLE_VIDEO_ATTACH_TYPES }),
+          )
         } catch {}
         return
       }

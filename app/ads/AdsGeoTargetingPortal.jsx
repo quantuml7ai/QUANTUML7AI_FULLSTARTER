@@ -109,6 +109,7 @@ export default function AdsGeoTargetingPortal({
   const [draftCountries, setDraftCountries] = useState([])
   const [draftRegions, setDraftRegions] = useState({})
   const [viewportTop, setViewportTop] = useState(0)
+  const [searchFocused, setSearchFocused] = useState(false)
   const closeButtonRef = useRef(null)
   const onCloseRef = useRef(onClose)
   const lastFocusRef = useRef(null)
@@ -122,7 +123,10 @@ export default function AdsGeoTargetingPortal({
   }, [onClose])
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setSearchFocused(false)
+      return
+    }
     setDraftCountries(normalizeAdsGeoCountries(selectedCountries))
     setDraftRegions(normalizeAdsGeoRegions(selectedRegions))
   }, [open, selectedCountries, selectedRegions])
@@ -272,7 +276,8 @@ export default function AdsGeoTargetingPortal({
         }}
       >
         <section
-          className="ads-geo-portal"
+          className={`ads-geo-portal ${searchFocused ? 'is-search-focused' : ''}`}
+          data-search-focused={searchFocused ? 'true' : 'false'}
           role="dialog"
           aria-modal="true"
           aria-labelledby="ads-geo-portal-title"
@@ -324,6 +329,7 @@ export default function AdsGeoTargetingPortal({
                 setDraftCountries(countries)
                 setDraftRegions(regions)
               }}
+              onSearchFocusChange={setSearchFocused}
             />
           </div>
 
@@ -861,6 +867,18 @@ export default function AdsGeoTargetingPortal({
           .ads-geo-portal-header {
             gap: 6px;
             padding: 7px 7px 6px;
+            max-height: 96px;
+            transition: max-height 160ms ease, padding 160ms ease, opacity 120ms ease, border-color 120ms ease;
+          }
+
+          .ads-geo-portal.is-search-focused .ads-geo-portal-header {
+            max-height: 0;
+            min-height: 0;
+            padding-block: 0;
+            border-bottom-color: transparent;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
           }
 
           .ads-geo-portal-heading {

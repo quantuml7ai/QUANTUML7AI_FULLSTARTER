@@ -118,13 +118,13 @@ export default function ComposerCore({
             t={t}
             setComposerActive={setComposerActive}
           />
-
-          <ComposerEmojiPreview
-            pendingSticker={dmSupportMode ? null : pendingSticker}
-            setPendingSticker={setPendingSticker}
-            t={t}
-          />
         </div>
+
+        <ComposerEmojiPreview
+          pendingSticker={dmSupportMode ? null : pendingSticker}
+          setPendingSticker={setPendingSticker}
+          t={t}
+        />
 
         <ComposerAttachmentPreview
           pendingImgs={dmSupportMode ? [] : pendingImgs}
@@ -158,6 +158,7 @@ export default function ComposerCore({
         onFilesChosen={onFilesChosen}
         mediaLocked={mediaLocked || dmSupportMode}
         accept={fileInputAccept}
+        allowMultiple={composerMediaKind === 'image'}
       />
     </>
   )

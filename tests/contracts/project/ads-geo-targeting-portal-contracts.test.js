@@ -121,6 +121,28 @@ describe('Ads geo targeting portal contracts', () => {
     expect(picker).toContain('flex: 1 1 0')
   })
 
+  test('collapses mobile geo badges while the country search owns focus and preserves the scrollable results list', () => {
+    const portal = read('app/ads/AdsGeoTargetingPortal.jsx')
+    const picker = read('app/ads/GeoTargetingPicker.jsx')
+
+    expect(portal).toContain('const [searchFocused, setSearchFocused] = useState(false)')
+    expect(portal).toContain("searchFocused ? 'is-search-focused' : ''")
+    expect(portal).toContain("data-search-focused={searchFocused ? 'true' : 'false'}")
+    expect(portal).toContain('onSearchFocusChange={setSearchFocused}')
+    expect(portal).toContain('.ads-geo-portal.is-search-focused .ads-geo-portal-header')
+    expect(portal).toContain('max-height: 0')
+
+    expect(picker).toContain('onSearchFocusChange,')
+    expect(picker).toContain('onFocus={handleSearchFocus}')
+    expect(picker).toContain('onBlur={handleSearchBlur}')
+    expect(picker).toContain("variant === 'portal' && searchFocused ? 'is-search-focused' : ''")
+    expect(picker).toContain('.is-portal.is-search-focused .ads-geo-header,')
+    expect(picker).toContain('.is-portal.is-search-focused .ads-geo-metrics,')
+    expect(picker).toContain('.is-portal.is-search-focused .ads-geo-list')
+    expect(picker).toContain('overflow-y: auto')
+    expect(picker).toContain('-webkit-overflow-scrolling: touch')
+  })
+
   test('returns from the cabinet to the package landing without changing the route', () => {
     const page = read('app/ads/page.jsx')
     const home = read('app/ads/home.js')
