@@ -56,12 +56,57 @@ export default function VideoOverlay({
   previewUrl,
   previewMirror = false,
   mediaKind = 'video',   // 'video' | 'image' (для fullscreen-превью загруженного медиа)
+  imageUrls = [],
+  imageIndex = 0,
+  onImageIndexChange,
+  onRemoveImage,
   onAccept,              // зелёная галочка: принять (перенести в маленькое превью под композером)
   t,
 }) {
   const tt = t || ((k) => k)
   const rootRef = React.useRef(null)
   const appleTorchRisk = isAppleMobileTorchRiskRuntime()
+  const imageItems = React.useMemo(() => (Array.isArray(imageUrls) ? imageUrls.filter(Boolean) : []), [imageUrls])
+  const activeImageIndex = imageItems.length
+    ? Math.max(0, Math.min(imageItems.length - 1, Number(imageIndex || 0)))
+    : 0
+  const activePreviewUrl = mediaKind === 'image'
+    ? (imageItems[activeImageIndex] || previewUrl || '')
+    : (previewUrl || '')
+  const hasManyImages = mediaKind === 'image' && imageItems.length > 1
+  const imageSwipeStartRef = React.useRef(null)
+  const imageSwipeDeltaRef = React.useRef(0)
+
+  const goToImage = React.useCallback((nextIndex) => {
+    if (!imageItems.length) return
+    const resolved = typeof nextIndex === 'function' ? nextIndex(activeImageIndex) : nextIndex
+    const safeIndex = Math.max(0, Math.min(imageItems.length - 1, Number(resolved || 0)))
+    onImageIndexChange?.(safeIndex)
+  }, [activeImageIndex, imageItems.length, onImageIndexChange])
+
+  const handleImageTouchStart = React.useCallback((event) => {
+    if (!hasManyImages) return
+    const touch = event.touches?.[0]
+    if (!touch) return
+    imageSwipeStartRef.current = Number(touch.clientX || 0)
+    imageSwipeDeltaRef.current = 0
+  }, [hasManyImages])
+
+  const handleImageTouchMove = React.useCallback((event) => {
+    const touch = event.touches?.[0]
+    if (!touch || imageSwipeStartRef.current == null) return
+    imageSwipeDeltaRef.current = Number(touch.clientX || 0) - Number(imageSwipeStartRef.current || 0)
+  }, [])
+
+  const handleImageTouchEnd = React.useCallback(() => {
+    if (imageSwipeStartRef.current == null) return
+    const deltaX = Number(imageSwipeDeltaRef.current || 0)
+    imageSwipeStartRef.current = null
+    imageSwipeDeltaRef.current = 0
+    if (Math.abs(deltaX) < 42) return
+    if (deltaX < 0) goToImage((current) => current + 1)
+    else goToImage((current) => current - 1)
+  }, [goToImage])
 
   // нормализуем состояние
   const st = !open ? 'hidden' : (state || 'live')
@@ -346,6 +391,8 @@ export default function VideoOverlay({
       tabIndex={-1}
       onKeyDown={(e) => {
         if (e.key === 'Escape') onResetConfirm?.()
+        if (mediaKind === 'image' && hasManyImages && e.key === 'ArrowLeft') goToImage((current) => current - 1)
+        if (mediaKind === 'image' && hasManyImages && e.key === 'ArrowRight') goToImage((current) => current + 1)
       }}
       style={{
         position: 'fixed',
@@ -390,6 +437,9 @@ export default function VideoOverlay({
           zIndex: 2,
           pointerEvents: st === 'preview' ? 'auto' : 'none',
         }}
+        onTouchStart={mediaKind === 'image' ? handleImageTouchStart : undefined}
+        onTouchMove={mediaKind === 'image' ? handleImageTouchMove : undefined}
+        onTouchEnd={mediaKind === 'image' ? handleImageTouchEnd : undefined}
       >
         <div style={{ width: '100%', height: '100%', aspectRatio: aspect, overflow: 'hidden' }}>
           {(st === 'live' || st === 'recording' || st === 'processing') ? (
@@ -404,7 +454,7 @@ export default function VideoOverlay({
               {mediaKind === 'image' ? (
                 // eslint-disable-next-line @next/next/no-img-element -- preview can be blob/data URL from camera/file pipeline and must bypass next/image optimization.
                 <img
-                  src={previewUrl || ''}
+                  src={activePreviewUrl}
                   alt=""
                   draggable={false}
                   onLoad={(e) => {
@@ -421,7 +471,7 @@ export default function VideoOverlay({
                 <NativeSafeVideoPlayer
                   ref={previewVidRef}
                   className="voPreviewVideo"
-                  src={previewUrl || ''}
+                  src={activePreviewUrl}
                   playsInline
                   preload="auto"
                   fill
@@ -445,6 +495,35 @@ export default function VideoOverlay({
           )}
         </div>
       </div>
+
+      {st === 'preview' && mediaKind === 'image' && imageItems.length > 0 && (
+        <>
+          <button
+            type="button"
+            className="voImageTrash"
+            aria-label={tt('forum_remove_attachment') || tt('forum_remove')}
+            title={tt('forum_remove_attachment') || tt('forum_remove')}
+            onClick={() => onRemoveImage?.(activeImageIndex)}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden>
+              <path d="M8 7V5.8A1.8 1.8 0 0 1 9.8 4h4.4A1.8 1.8 0 0 1 16 5.8V7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+              <path d="M5.5 7h13M7.2 7l.7 12h8.2l.7-12M10 10.2v5.7M14 10.2v5.7" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          {hasManyImages && (
+            <>
+              <button type="button" className="voImageNav voImageNav--prev" aria-label={`${activeImageIndex + 1}/${imageItems.length}`} onClick={() => goToImage((current) => current - 1)}>
+                <svg viewBox="0 0 24 24" aria-hidden><path d="M14.5 6.5 9 12l5.5 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <button type="button" className="voImageNav voImageNav--next" aria-label={`${activeImageIndex + 1}/${imageItems.length}`} onClick={() => goToImage((current) => current + 1)}>
+                <svg viewBox="0 0 24 24" aria-hidden><path d="M9.5 6.5 15 12l-5.5 5.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <div className="voImageCounter" aria-live="polite">{activeImageIndex + 1}/{imageItems.length}</div>
+            </>
+          )}
+        </>
+      )}
 
       {(st === 'live' || st === 'recording') && (
         <div className="voBottom" style={{ pointerEvents: 'auto', zIndex: 6 }}>
@@ -672,6 +751,70 @@ export default function VideoOverlay({
 
         .voSwitch .rot{ transform-origin:12px 12px; animation:spin 1.8s linear infinite; opacity:.65 }
         @keyframes spin{ to{ transform:rotate(360deg) } }
+
+
+        .voImageTrash{
+          position:absolute;
+          top:calc(env(safe-area-inset-top, 0px) + 22px);
+          right:22px;
+          z-index:9;
+          width:48px;
+          height:48px;
+          border-radius:15px;
+          border:1px solid rgba(255,104,126,.55);
+          background:linear-gradient(145deg, rgba(46,5,15,.88), rgba(8,10,20,.76));
+          color:#ff657d;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          box-shadow:0 12px 28px rgba(0,0,0,.36), 0 0 22px rgba(255,60,92,.18), inset 0 0 0 1px rgba(255,255,255,.05);
+          pointer-events:auto;
+        }
+        .voImageTrash svg{ width:23px; height:23px; }
+        .voImageNav{
+          position:absolute;
+          top:50%;
+          transform:translateY(-50%);
+          z-index:9;
+          width:58px;
+          height:92px;
+          border:0;
+          background:transparent;
+          color:#f7fbff;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          pointer-events:auto;
+        }
+        .voImageNav::before{
+          content:'';
+          position:absolute;
+          width:42px;
+          height:42px;
+          border-radius:999px;
+          border:1px solid rgba(255,255,255,.2);
+          background:linear-gradient(180deg, rgba(10,18,31,.88), rgba(13,27,47,.62));
+          box-shadow:0 12px 30px rgba(0,0,0,.34), 0 0 24px rgba(75,172,255,.2), inset 0 0 0 1px rgba(255,255,255,.05);
+        }
+        .voImageNav svg{ width:22px; height:22px; position:relative; z-index:1; }
+        .voImageNav--prev{ left:max(12px, env(safe-area-inset-left, 0px)); }
+        .voImageNav--next{ right:max(12px, env(safe-area-inset-right, 0px)); }
+        .voImageCounter{
+          position:absolute;
+          left:50%;
+          bottom:calc(env(safe-area-inset-bottom, 0px) + 24px);
+          transform:translateX(-50%);
+          z-index:9;
+          padding:7px 13px;
+          border-radius:999px;
+          border:1px solid rgba(255,222,120,.35);
+          background:rgba(3,8,17,.68);
+          color:#fff2bd;
+          font:800 12px/1 ui-monospace, monospace;
+          letter-spacing:.08em;
+          box-shadow:0 0 22px rgba(255,205,79,.12);
+          pointer-events:none;
+        }
 
         @media (max-width:520px){
           .forum_video_overlay{ --vo-line-h: 88px; }

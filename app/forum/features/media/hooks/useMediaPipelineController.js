@@ -137,8 +137,10 @@ export default function useMediaPipelineController({
       return
     }
 
+    const localImagePreviewOnly = (Array.isArray(pendingImgs) ? pendingImgs : [])
+      .some((url) => /^blob:/i.test(String(url || ''))) && !mediaPipelineOn
     const localVideoPreviewOnly = /^blob:/i.test(String(pendingVideo || '')) && !mediaPipelineOn
-    if (localVideoPreviewOnly) {
+    if (localImagePreviewOnly || localVideoPreviewOnly) {
       stopMediaProg()
       setMediaBarOn(false)
       setMediaPhase('idle')
@@ -154,7 +156,7 @@ export default function useMediaPipelineController({
       if (cur > 0) return cur
       return mediaPipelineOn ? 1 : 100
     })
-  }, [hasComposerMedia, stopMediaProg, mediaPipelineOn, pendingVideo])
+  }, [hasComposerMedia, stopMediaProg, mediaPipelineOn, pendingImgs, pendingVideo])
 
   return {
     videoProgress,

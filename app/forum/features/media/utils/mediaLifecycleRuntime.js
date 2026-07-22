@@ -668,41 +668,35 @@ export function __rearmPooledFxNode(el) {
 }
 
 export function VideoMedia(props) {
-  return (
-    <VideoMediaLeaf
-      {...props}
-      readMutedPref={__readMediaMutedPref}
-      writeMutedPref={__writeMediaMutedPref}
-      mutedEventName={MEDIA_MUTED_EVENT}
-      restoreVideoEl={__restoreVideoEl}
-      touchActiveVideo={__touchActiveVideoEl}
-      enforceActiveVideoCap={__enforceActiveVideoCap}
-      isVideoNearViewport={__isVideoNearViewport}
-      mediaVisMarginPx={__MEDIA_VIS_MARGIN_PX}
-      dropActiveVideo={__dropActiveVideoEl}
-      unloadVideoEl={__unloadVideoEl}
-    />
-  )
+  return React.createElement(VideoMediaLeaf, {
+    ...props,
+    readMutedPref: __readMediaMutedPref,
+    writeMutedPref: __writeMediaMutedPref,
+    mutedEventName: MEDIA_MUTED_EVENT,
+    restoreVideoEl: __restoreVideoEl,
+    touchActiveVideo: __touchActiveVideoEl,
+    enforceActiveVideoCap: __enforceActiveVideoCap,
+    isVideoNearViewport: __isVideoNearViewport,
+    mediaVisMarginPx: __MEDIA_VIS_MARGIN_PX,
+    dropActiveVideo: __dropActiveVideoEl,
+    unloadVideoEl: __unloadVideoEl,
+  })
 }
 
 export function NativeSafeVideoPlayer(props) {
-  return (
-    <NativeSafeVideoPlayerLeaf
-      {...props}
-    />
-  )
+  return React.createElement(NativeSafeVideoPlayerLeaf, {
+    ...props,
+  })
 }
 
 export function QCastPlayer(props) {
-  return (
-    <QCastPlayerLeaf
-      {...props}
-      readMutedPrefFromStorage={__readMediaMutedPref}
-      writeMutedPref={__writeMediaMutedPref}
-      mutedEventName={MEDIA_MUTED_EVENT}
-      rearmPooledFxNode={__rearmPooledFxNode}
-    />
-  )
+  return React.createElement(QCastPlayerLeaf, {
+    ...props,
+    readMutedPrefFromStorage: __readMediaMutedPref,
+    writeMutedPref: __writeMediaMutedPref,
+    mutedEventName: MEDIA_MUTED_EVENT,
+    rearmPooledFxNode: __rearmPooledFxNode,
+  })
 }
 
 export const enableVideoControlsOnTap = createEnableVideoControlsOnTap({

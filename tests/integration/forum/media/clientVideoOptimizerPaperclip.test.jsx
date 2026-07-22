@@ -1,13 +1,27 @@
-import { act, renderHook, waitFor } from '@testing-library/react'
+import React from 'react'
+import { act, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('../../../../app/forum/features/media/services/uploadR2MediaFile.js', () => ({
   default: vi.fn(),
 }))
 
+vi.mock('next/image', () => ({
+  default: (props) => {
+    const imageProps = { ...props }
+    delete imageProps.fill
+    delete imageProps.priority
+    delete imageProps.unoptimized
+    return React.createElement('img', imageProps)
+  },
+}))
+
+import ComposerAttachmentPreview from '../../../../app/forum/features/media/components/ComposerAttachmentPreview.jsx'
 import useForumComposerAttachments from '../../../../app/forum/features/media/hooks/useForumComposerAttachments.js'
+import useMediaPipelineController from '../../../../app/forum/features/media/hooks/useMediaPipelineController.js'
 import resolveComposerMediaPayload from '../../../../app/forum/features/media/services/resolveComposerMediaPayload.js'
 import uploadR2MediaFile from '../../../../app/forum/features/media/services/uploadR2MediaFile.js'
+import { readForumVideoDurationFromBrowser } from '../../../../lib/forumClientVideoOptimizer.js'
 
 function createStateSetter(initial = 0) {
   let value = initial
@@ -69,6 +83,48 @@ function installObjectUrlStubs() {
 describe('paperclip deferred video gateway integration', () => {
   beforeEach(() => {
     vi.mocked(uploadR2MediaFile).mockReset()
+  })
+
+  test('accepts a browser-reported 11.7 second source without any 30-second minimum gate', async () => {
+    const originalCreateElement = document.createElement.bind(document)
+    const listeners = new Map()
+    let currentTime = 0
+    const fakeVideo = {
+      duration: Number.NaN,
+      readyState: 1,
+      seekable: { length: 0, end: () => Number.NaN },
+      preload: '',
+      muted: false,
+      playsInline: false,
+      addEventListener: vi.fn((name, fn) => listeners.set(name, fn)),
+      removeEventListener: vi.fn((name) => listeners.delete(name)),
+      removeAttribute: vi.fn(),
+      load: vi.fn(),
+      set src(value) {
+        void value
+        queueMicrotask(() => {
+          fakeVideo.duration = 11.712
+          listeners.get('loadedmetadata')?.()
+        })
+      },
+      get currentTime() { return currentTime },
+      set currentTime(value) { currentTime = value },
+    }
+
+    const createElementSpy = vi.spyOn(document, 'createElement').mockImplementation((tagName, options) => {
+      if (String(tagName).toLowerCase() === 'video') return fakeVideo
+      return originalCreateElement(tagName, options)
+    })
+    const restoreUrl = installObjectUrlStubs()
+
+    try {
+      const source = new File([new Uint8Array(128)], 'short-11s.webm', { type: 'video/webm' })
+      await expect(readForumVideoDurationFromBrowser(source, { timeoutMs: 1500 })).resolves.toBeCloseTo(11.712, 3)
+      expect(currentTime).toBe(0)
+    } finally {
+      restoreUrl()
+      createElementSpy.mockRestore()
+    }
   })
 
   test('selection creates a local fullscreen/composer preview without optimization, presign or upload', async () => {
@@ -231,5 +287,171 @@ describe('paperclip deferred video gateway integration', () => {
     } finally {
       errorSpy.mockRestore()
     }
+  })
+})
+
+function createImageResolverArgs(overrides = {}) {
+  return {
+    pendingVideo: null,
+    pendingAudio: null,
+    pendingImgs: [],
+    pendingImageDraftsRef: { current: new Map() },
+    moderateImageFiles: vi.fn(async () => ({ decision: 'allow', reason: 'unknown' })),
+    toastI18n: vi.fn(),
+    reasonKey: (reason) => `reason:${reason}`,
+    setPendingImgs: vi.fn(),
+    startSoftProgress: vi.fn(),
+    beginMediaPipeline: vi.fn(() => new AbortController()),
+    mediaCancelRef: { current: false },
+    pendingVideoRef: { current: '' },
+    pendingVideoInfoRef: { current: { source: '', durationSec: Number.NaN } },
+    pendingVideoBlobMetaRef: { current: new Map() },
+    emitDiag: vi.fn(),
+    forumVideoMaxSeconds: 300,
+    forumVideoCameraRecordEpsilonSec: 2,
+    showVideoLimitOverlay: vi.fn(),
+    endMediaPipeline: vi.fn(),
+    viewerId: 'viewer-1',
+    stopMediaProg: vi.fn(),
+    setMediaPhase: vi.fn(),
+    setVideoProgress: vi.fn(),
+    setMediaPct: vi.fn(),
+    readAudioDurationSecFn: vi.fn(),
+    forumAudioMaxSeconds: 600,
+    toast: { err: vi.fn(), error: vi.fn(), warn: vi.fn() },
+    t: (key) => key,
+    onFail: vi.fn(),
+    ...overrides,
+  }
+}
+
+describe('composer image send-time pipeline', () => {
+  test('moderates and uploads local image drafts only when the send resolver runs', async () => {
+    const first = new File(['one'], 'first.png', { type: 'image/png' })
+    const second = new File(['two'], 'second.jpg', { type: 'image/jpeg' })
+    const pendingImageDraftsRef = {
+      current: new Map([
+        ['blob:first', { draftId: 'blob:first', file: first }],
+        ['blob:second', { draftId: 'blob:second', file: second }],
+      ]),
+    }
+    const moderateImageFiles = vi.fn(async () => ({ decision: 'allow', reason: 'unknown' }))
+    const fetchMock = vi.fn(async (_url, options) => {
+      const draftIds = options.body.getAll('draftIds')
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          urls: ['https://cdn.test/first.webp', 'https://cdn.test/second.webp'],
+          errors: [],
+          items: draftIds.map((draftId, index) => ({
+            draftId,
+            index,
+            url: `https://cdn.test/${index === 0 ? 'first' : 'second'}.webp`,
+            error: null,
+          })),
+        }),
+      }
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const beginMediaPipeline = vi.fn(() => new AbortController())
+    const result = await resolveComposerMediaPayload(createImageResolverArgs({
+      pendingImgs: ['/existing.webp', 'blob:first', 'blob:second'],
+      pendingImageDraftsRef,
+      moderateImageFiles,
+      beginMediaPipeline,
+    }))
+
+    expect(beginMediaPipeline).toHaveBeenCalledWith('Moderating')
+    expect(moderateImageFiles).toHaveBeenCalledWith([first, second], { signal: expect.any(AbortSignal) })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock).toHaveBeenCalledWith('/api/forum/upload', expect.objectContaining({
+      method: 'POST',
+      signal: expect.any(AbortSignal),
+      headers: { 'x-forum-user-id': 'viewer-1' },
+    }))
+    expect(moderateImageFiles.mock.invocationCallOrder[0]).toBeLessThan(fetchMock.mock.invocationCallOrder[0])
+    expect(result).toEqual(expect.objectContaining({
+      failed: false,
+      imageUrlsToSend: [
+        '/existing.webp',
+        'https://cdn.test/first.webp',
+        'https://cdn.test/second.webp',
+      ],
+    }))
+  })
+
+  test('blocks upload and removes selected local drafts when moderation blocks them', async () => {
+    const blocked = new File(['blocked'], 'blocked.png', { type: 'image/png' })
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const setPendingImgs = vi.fn()
+    const toastI18n = vi.fn()
+
+    const result = await resolveComposerMediaPayload(createImageResolverArgs({
+      pendingImgs: ['blob:blocked'],
+      pendingImageDraftsRef: { current: new Map([['blob:blocked', { file: blocked }]]) },
+      moderateImageFiles: vi.fn(async () => ({ decision: 'block', reason: 'porn' })),
+      setPendingImgs,
+      toastI18n,
+    }))
+
+    expect(result.failed).toBe(true)
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(toastI18n).toHaveBeenCalledWith('warn', 'forum_image_blocked')
+    const removeUpdater = setPendingImgs.mock.calls[0][0]
+    expect(removeUpdater(['/remote.webp', 'blob:blocked'])).toEqual(['/remote.webp'])
+  })
+})
+
+describe('composer image preview UI', () => {
+  test('keeps a local image draft preview free of the progress bar until the pipeline starts', async () => {
+    const { result } = renderHook(() => useMediaPipelineController({
+      t: (key) => key,
+      pendingImgs: ['blob:local-image'],
+      pendingAudio: null,
+      pendingVideo: null,
+    }))
+
+    await waitFor(() => {
+      expect(result.current.mediaBarOn).toBe(false)
+      expect(result.current.mediaPhase).toBe('idle')
+      expect(result.current.mediaPct).toBe(0)
+    })
+
+    act(() => {
+      result.current.beginMediaPipeline('Moderating')
+    })
+
+    expect(result.current.mediaBarOn).toBe(true)
+    expect(result.current.mediaPhase).toBe('Moderating')
+    expect(result.current.mediaPipelineOn).toBe(true)
+  })
+
+  test('keeps fullscreen and trash controls isolated from carousel navigation and targets the focused image', () => {
+    const onOpenImageFullscreen = vi.fn()
+    const onRemoveImage = vi.fn()
+    const { container } = render(
+      React.createElement(ComposerAttachmentPreview, {
+        pendingImgs: ['/one.webp', '/two.webp', '/three.webp'],
+        pendingVideo: null,
+        pendingAudio: null,
+        t: (key) => key,
+        onOpenImageFullscreen,
+        onRemoveImage,
+      }),
+    )
+
+    fireEvent.click(container.querySelector('.composerImageNav--next'))
+    fireEvent.pointerDown(screen.getByLabelText('forum_open_fullscreen'))
+    fireEvent.click(screen.getByLabelText('forum_open_fullscreen'))
+    fireEvent.pointerDown(screen.getByLabelText('forum_remove_attachment'))
+    fireEvent.click(screen.getByLabelText('forum_remove_attachment'))
+
+    expect(onOpenImageFullscreen).toHaveBeenCalledWith(1)
+    expect(onRemoveImage).toHaveBeenCalledWith(1)
+    expect(container.querySelector('.composerImageControl--expand')).toHaveAttribute('data-composer-image-control', 'true')
+    expect(container.querySelector('.composerImageControl--trash')).toHaveAttribute('data-composer-image-control', 'true')
   })
 })

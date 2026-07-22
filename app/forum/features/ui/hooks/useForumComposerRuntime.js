@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useComposerScrollMemory from './useComposerScrollMemory'
 import useComposerUiLifecycle from './useComposerUiLifecycle'
 import useVoiceRecorder from '../../media/hooks/useVoiceRecorder'
 import useMediaPipelineController from '../../media/hooks/useMediaPipelineController'
+
+function revokeLocalImageUrl(url) {
+  const value = String(url || '')
+  if (!/^blob:/i.test(value)) return
+  try { URL.revokeObjectURL(value) } catch {}
+}
 
 export default function useForumComposerRuntime({
   bodyRef,
@@ -14,7 +20,43 @@ export default function useForumComposerRuntime({
 }) {
   const [text, setText] = useState('')
   const [replyTo, setReplyTo] = useState(null)
-  const [pendingImgs, setPendingImgs] = useState([])
+  const [pendingImgsState, setPendingImgsState] = useState([])
+  const pendingImgsRef = useRef([])
+  const pendingImageDraftsRef = useRef(new Map())
+  const setPendingImgs = useCallback((nextValue) => {
+    setPendingImgsState((previousValue) => {
+      const previous = Array.isArray(previousValue) ? previousValue : []
+      const resolved = typeof nextValue === 'function' ? nextValue(previous) : nextValue
+      const next = Array.isArray(resolved) ? resolved.filter(Boolean) : []
+      const retained = new Set(next.map((value) => String(value || '')))
+      previous.forEach((value) => {
+        const key = String(value || '')
+        if (retained.has(key)) return
+        try { pendingImageDraftsRef.current.delete(key) } catch {}
+        revokeLocalImageUrl(value)
+      })
+      pendingImgsRef.current = next
+      return next
+    })
+  }, [])
+  const pendingImgs = pendingImgsState
+  const clearPendingImages = useCallback(() => setPendingImgs([]), [setPendingImgs])
+  const removePendingImageAt = useCallback((index) => {
+    setPendingImgs((previous) => {
+      if (!previous.length) return previous
+      const safeIndex = Math.max(0, Math.min(previous.length - 1, Number(index || 0)))
+      return previous.filter((_, currentIndex) => currentIndex !== safeIndex)
+    })
+  }, [setPendingImgs])
+  useEffect(() => {
+    pendingImgsRef.current = pendingImgs
+  }, [pendingImgs])
+  useEffect(() => () => {
+    pendingImgsRef.current.forEach(revokeLocalImageUrl)
+    pendingImgsRef.current = []
+    try { pendingImageDraftsRef.current.clear() } catch {}
+  }, [])
+
   const [pendingSticker, setPendingSticker] = useState(null)
 
   const [composerActive, setComposerActive] = useState(false)
@@ -89,6 +131,32 @@ export default function useForumComposerRuntime({
 
   const [overlayMediaKind, setOverlayMediaKind] = useState('video')
   const [overlayMediaUrl, setOverlayMediaUrl] = useState(null)
+  const [overlayImageIndex, setOverlayImageIndex] = useState(0)
+  const openPendingImageFullscreen = useCallback((index = 0) => {
+    const images = pendingImgsRef.current
+    if (!images.length) return
+    const safeIndex = Math.max(0, Math.min(images.length - 1, Number(index || 0)))
+    setOverlayImageIndex(safeIndex)
+    setOverlayMediaKind('image')
+    setOverlayMediaUrl(images[safeIndex] || null)
+    setVideoState('preview')
+    setVideoOpen(true)
+  }, [])
+
+  useEffect(() => {
+    if (overlayMediaKind !== 'image') return
+    if (!pendingImgs.length) {
+      setOverlayImageIndex(0)
+      setOverlayMediaUrl(null)
+      if (videoOpen) setVideoOpen(false)
+      return
+    }
+    const safeIndex = Math.max(0, Math.min(pendingImgs.length - 1, Number(overlayImageIndex || 0)))
+    if (safeIndex !== overlayImageIndex) setOverlayImageIndex(safeIndex)
+    const nextUrl = pendingImgs[safeIndex] || null
+    if (nextUrl !== overlayMediaUrl) setOverlayMediaUrl(nextUrl)
+  }, [overlayImageIndex, overlayMediaKind, overlayMediaUrl, pendingImgs, videoOpen])
+
   const { cooldownLeft, setCooldownLeft } = useComposerUiLifecycle({
     composerActive,
     composerRef,
@@ -115,7 +183,11 @@ export default function useForumComposerRuntime({
     replyTo,
     setReplyTo,
     pendingImgs,
+    pendingImgsRef,
+    pendingImageDraftsRef,
     setPendingImgs,
+    clearPendingImages,
+    removePendingImageAt,
     pendingSticker,
     setPendingSticker,
     composerMediaKind,
@@ -173,6 +245,9 @@ export default function useForumComposerRuntime({
     setOverlayMediaKind,
     overlayMediaUrl,
     setOverlayMediaUrl,
+    overlayImageIndex,
+    setOverlayImageIndex,
+    openPendingImageFullscreen,
     cooldownLeft,
     setCooldownLeft,
     videoCancelRef,

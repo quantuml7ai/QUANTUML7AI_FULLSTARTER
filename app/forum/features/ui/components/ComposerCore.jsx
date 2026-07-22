@@ -42,7 +42,8 @@ export default function ComposerCore({
   setText,
   setComposerActive,
   pendingImgs,
-  setPendingImgs,
+  openPendingImageFullscreen,
+  removePendingImageAt,
   pendingSticker,
   setPendingSticker,
   pendingVideo,
@@ -127,7 +128,8 @@ export default function ComposerCore({
 
         <ComposerAttachmentPreview
           pendingImgs={dmSupportMode ? [] : pendingImgs}
-          setPendingImgs={setPendingImgs}
+          onOpenImageFullscreen={openPendingImageFullscreen}
+          onRemoveImage={removePendingImageAt}
           pendingVideo={dmSupportMode ? '' : pendingVideo}
           pendingVideoMirror={pendingVideoMirror}
           pendingAudio={dmSupportMode ? '' : pendingAudio}

@@ -7,6 +7,7 @@ import ComposerFabButton from './ComposerFabButton'
 
 export default function ComposeDock({
   visible,
+  composerFabVisible,
   composerActive,
   composerRef,
   replyTo,
@@ -28,10 +29,12 @@ export default function ComposeDock({
         />
         <ComposerCore {...composerCoreProps} />
       </div>
-      <ComposerFabButton
-        t={t}
-        setComposerActive={setComposerActive}
-      />
+      {composerFabVisible ? (
+        <ComposerFabButton
+          t={t}
+          setComposerActive={setComposerActive}
+        />
+      ) : null}
     </div>
   )
 }

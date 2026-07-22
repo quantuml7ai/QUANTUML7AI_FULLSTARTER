@@ -4,35 +4,24 @@ import { FORUM_CLIENT_VIDEO_OPTIMIZER_SOURCE_MAX_BYTES } from '../../../../../li
 
 const MAX_COMPOSER_IMAGE_ATTACHMENTS = 10
 
-function hasTooLargeImageUploadError(errors) {
-  return (Array.isArray(errors) ? errors : []).some((error) =>
-    String(error || '').toLowerCase().startsWith('too_large')
-  )
-}
-
 export default function useForumComposerAttachments({
   mediaLocked,
   composerMediaKind,
   pendingImgs,
+  pendingImgsRef,
+  pendingImageDraftsRef,
   saveComposerScroll,
   restoreComposerScroll,
-  beginMediaPipeline,
-  endMediaPipeline,
   toast,
   t,
-  moderateImageFiles,
-  toastI18n,
-  reasonKey,
-  stopMediaProg,
   setMediaPhase,
   setMediaPct,
-  startSoftProgress,
   setPendingImgs,
   setOverlayMediaKind,
   setOverlayMediaUrl,
+  setOverlayImageIndex,
   setVideoState,
   setVideoOpen,
-  viewerId,
   showVideoLimitOverlay,
   forumVideoMaxSeconds,
   pendingVideo,
@@ -50,23 +39,6 @@ export default function useForumComposerAttachments({
     })
     return message
   }, [t])
-  const finishCancelledPipeline = useCallback(() => {
-    try {
-      stopMediaProg?.()
-    } catch {}
-    try {
-      endMediaPipeline?.()
-    } catch {}
-    try {
-      setMediaPhase?.('idle')
-    } catch {}
-    try {
-      setMediaPct?.(0)
-    } catch {}
-    try {
-      setVideoProgress?.(0)
-    } catch {}
-  }, [endMediaPipeline, setMediaPct, setMediaPhase, setVideoProgress, stopMediaProg])
 
   const fileInputAccept = composerMediaKind === 'image'
     ? 'image/*,image/jpeg,image/png,image/webp,image/gif'
@@ -108,7 +80,8 @@ export default function useForumComposerAttachments({
         return
       }
 
-      const currentPendingImageCount = Array.isArray(pendingImgs) ? pendingImgs.length : 0
+      const livePendingImages = Array.isArray(pendingImgsRef?.current) ? pendingImgsRef.current : pendingImgs
+      const currentPendingImageCount = Array.isArray(livePendingImages) ? livePendingImages.length : 0
       const remainingImageSlots = Math.max(
         0,
         MAX_COMPOSER_IMAGE_ATTACHMENTS - currentPendingImageCount,
@@ -126,39 +99,23 @@ export default function useForumComposerAttachments({
         } catch {}
       }
 
-      if (rawImgFiles.length > 0 && imgFiles.length === 0 && vidFiles.length === 0) {
-        return
-      }
+      if (rawImgFiles.length > 0 && imgFiles.length === 0 && vidFiles.length === 0) return
       if (imgFiles.length) {
-        const totalImageBytes = imgFiles.reduce((sum, file) => sum + Math.max(0, Number(file?.size || 0)), 0)
-        if (totalImageBytes > FORUM_IMAGE_MAX_BYTES) {
-          try {
-            toast?.err?.(t?.('forum_image_too_big'))
-          } catch {}
-          try {
-            endMediaPipeline?.()
-          } catch {}
+        const existingImageBytes = (Array.isArray(livePendingImages) ? livePendingImages : [])
+          .reduce((sum, url) => {
+            const draft = pendingImageDraftsRef?.current?.get?.(String(url || ''))
+            return sum + Math.max(0, Number(draft?.sizeBytes || draft?.file?.size || 0))
+          }, 0)
+        const selectedImageBytes = imgFiles.reduce(
+          (sum, file) => sum + Math.max(0, Number(file?.size || 0)),
+          0,
+        )
+        if (existingImageBytes + selectedImageBytes > FORUM_IMAGE_MAX_BYTES) {
+          try { toast?.err?.(t?.('forum_image_too_big')) } catch {}
           return
         }
       }
 
-      let signal
-      if ((imgFiles?.length || 0) > 0) {
-        const ac = (() => {
-          try {
-            return beginMediaPipeline?.('Moderating')
-          } catch {
-            return null
-          }
-        })()
-        signal = ac?.signal
-      } else {
-        try { endMediaPipeline?.() } catch {}
-      }
-
-      try {
-        if (imgFiles.length) toast?.info?.(t?.('forum_image_processing_wait'))
-      } catch {}
       if (!imgFiles.length && !vidFiles.length) {
         try {
           toast?.info?.(t?.('forum_attach_info', { types: 'PNG, JPG, JPEG, WEBP, GIF, MP4, WEBM, MOV' }))
@@ -167,109 +124,48 @@ export default function useForumComposerAttachments({
       }
 
       if (imgFiles.length) {
-        let modImg = null
+        const previewUrls = imgFiles.map((file) => {
+          try { return URL.createObjectURL(file) } catch { return '' }
+        }).filter(Boolean)
+
+        if (previewUrls.length !== imgFiles.length) {
+          previewUrls.forEach((url) => { try { URL.revokeObjectURL(url) } catch {} })
+          try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+          return
+        }
+
         try {
-          modImg = await moderateImageFiles(imgFiles, { signal })
-        } catch (err) {
-          if (err?.name === 'AbortError' || signal?.aborted) {
-            try {
-              endMediaPipeline?.()
-            } catch {}
-            return
+          if (pendingImageDraftsRef && !(pendingImageDraftsRef.current instanceof Map)) {
+            pendingImageDraftsRef.current = new Map()
           }
-          console.error('[moderation] image check failed', err)
-          toastI18n('err', 'forum_moderation_error')
-          toastI18n('info', 'forum_moderation_try_again')
-          try {
-            endMediaPipeline?.()
-          } catch {}
-          return
-        }
-
-        if (modImg?.decision === 'block') {
-          toastI18n('warn', 'forum_image_blocked')
-          toastI18n('info', reasonKey(modImg?.reason))
-          return
-        }
-
-        if (modImg?.decision === 'review') {
-          try {
-            console.warn('[moderation] image review -> allow (balanced)', modImg?.reason, modImg?.raw)
-          } catch {}
-        }
-        try {
-          stopMediaProg?.()
-        } catch {}
-        try {
-          setMediaPhase?.('Uploading')
-        } catch {}
-        try {
-          setMediaPct?.((p) => Math.max(20, Number(p || 0)))
-        } catch {}
-        try {
-          startSoftProgress?.(72, 200, 88)
-        } catch {}
-        const fd = new FormData()
-        for (const f of imgFiles) fd.append('files', f, f.name)
-
-        let res = null
-        let up = { urls: [], errors: [] }
-        try {
-          res = await fetch('/api/forum/upload', {
-            method: 'POST',
-            body: fd,
-            cache: 'no-store',
-            signal,
-            headers: { 'x-forum-user-id': String(viewerId || '') },
+          previewUrls.forEach((draftId, index) => {
+            pendingImageDraftsRef?.current?.set?.(draftId, {
+              draftId,
+              file: imgFiles[index],
+              filename: String(imgFiles[index]?.name || `forum-image-${index + 1}`),
+              contentType: String(imgFiles[index]?.type || 'application/octet-stream'),
+              sizeBytes: Number(imgFiles[index]?.size || 0),
+              selectedAtMs: Date.now(),
+            })
           })
-          up = await res.json().catch(() => ({ urls: [], errors: ['upload_failed'] }))
-        } catch (uploadErr) {
-          if (uploadErr?.name === 'AbortError' || signal?.aborted) {
-            finishCancelledPipeline()
-            return
-          }
-          throw uploadErr
+        } catch {
+          previewUrls.forEach((url) => { try { URL.revokeObjectURL(url) } catch {} })
+          try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+          return
         }
-        const errors = Array.isArray(up?.errors) ? up.errors : []
-        if (!res?.ok || hasTooLargeImageUploadError(errors)) {
-          if (res?.status === 413 || hasTooLargeImageUploadError(errors)) {
-            try {
-              toast?.err?.(t?.('forum_image_too_big'))
-            } catch {}
-            finishCancelledPipeline()
-            return
-          }
-          throw new Error(errors[0] || 'upload_failed')
-        }
-        const urls = Array.isArray(up?.urls) ? up.urls : []
-        if (!urls.length && errors.length) throw new Error(errors[0] || 'upload_failed')
+
         try {
-          stopMediaProg?.()
+          if (pendingImgsRef) pendingImgsRef.current = [...livePendingImages, ...previewUrls]
         } catch {}
-        try {
-          setMediaPhase?.('Ready')
-        } catch {}
-        try {
-          setMediaPct?.(100)
-        } catch {}
-        try {
-          endMediaPipeline?.()
-        } catch {}
-        if (urls.length) setPendingImgs((prev) => [...prev, ...urls])
-        if (!vidFiles.length && urls.length) {
-          try {
-            setOverlayMediaKind?.('image')
-          } catch {}
-          try {
-            setOverlayMediaUrl?.(urls[0])
-          } catch {}
-          try {
-            setVideoState?.('preview')
-          } catch {}
-          try {
-            setVideoOpen?.(true)
-          } catch {}
-        }
+        setPendingImgs((previous) => [...previous, ...previewUrls])
+        try { setOverlayImageIndex?.(currentPendingImageCount) } catch {}
+        try { setOverlayMediaKind?.('image') } catch {}
+        try { setOverlayMediaUrl?.(previewUrls[0]) } catch {}
+        try { setVideoState?.('preview') } catch {}
+        try { setVideoOpen?.(true) } catch {}
+        try { setMediaPhase?.('idle') } catch {}
+        try { setMediaPct?.(0) } catch {}
+        try { setVideoProgress?.(0) } catch {}
       }
 
       if (vidFiles.length) {
@@ -343,20 +239,9 @@ export default function useForumComposerAttachments({
           })
           .catch(() => {})
       }
-
-      if (imgFiles.length) {
-        try {
-          toast?.success?.(t?.('forum_files_uploaded'))
-        } catch {}
-      }
     } catch (err) {
       console.error(err)
-      try {
-        finishCancelledPipeline()
-      } catch {}
-      try {
-        toast?.error?.(t?.('forum_files_upload_failed'))
-      } catch {}
+      try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
     } finally {
       if (e?.target) e.target.value = ''
       try {
@@ -364,22 +249,21 @@ export default function useForumComposerAttachments({
       } catch {}
     }
   }, [
-    beginMediaPipeline,
-    endMediaPipeline,
-    forumVideoMaxSeconds,
-    finishCancelledPipeline,
+    composerMediaKind,
     formatI18nMessage,
-    moderateImageFiles,
+    forumVideoMaxSeconds,
+    pendingImageDraftsRef,
     pendingImgs,
+    pendingImgsRef,
     pendingVideo,
     pendingVideoBlobMetaRef,
     pendingVideoInfoRef,
     readVideoDurationSecFn,
-    reasonKey,
     restoreComposerScroll,
     saveComposerScroll,
     setMediaPct,
     setMediaPhase,
+    setOverlayImageIndex,
     setOverlayMediaKind,
     setOverlayMediaUrl,
     setPendingImgs,
@@ -388,13 +272,8 @@ export default function useForumComposerAttachments({
     setVideoProgress,
     setVideoState,
     showVideoLimitOverlay,
-    startSoftProgress,
-    stopMediaProg,
     t,
     toast,
-    toastI18n,
-    viewerId,
-    composerMediaKind,
   ])
 
   return {

@@ -1,9 +1,17 @@
 import uploadR2MediaFile from './uploadR2MediaFile'
 import { mapVideoPrepareProgress, mapVideoUploadProgress } from '../../../../../lib/videoPipelineProgress'
+import { FORUM_IMAGE_MAX_BYTES } from '../../../shared/constants/media'
 
 export async function resolveComposerMediaPayload({
   pendingVideo,
   pendingAudio,
+  pendingImgs = [],
+  pendingImageDraftsRef,
+  moderateImageFiles,
+  toastI18n,
+  reasonKey,
+  setPendingImgs,
+  startSoftProgress,
   beginMediaPipeline,
   mediaCancelRef,
   pendingVideoRef,
@@ -28,23 +36,31 @@ export async function resolveComposerMediaPayload({
   let videoMetaToSend = null
   const fail = (msg) => {
     try { onFail?.(msg) } catch {}
-    return { failed: true, videoUrlToSend: '', audioUrlToSend: '', videoMetaToSend: null }
+    return { failed: true, imageUrlsToSend: [], videoUrlToSend: '', audioUrlToSend: '', videoMetaToSend: null }
   }
   const isMediaCancelled = (signal) => {
     try { return !!(signal?.aborted || mediaCancelRef?.current) } catch { return !!signal?.aborted }
   }
-  const cancelFail = (signal) => {
+  const resetFailedPipeline = () => {
     try { stopMediaProg?.() } catch {}
     try { endMediaPipeline?.() } catch {}
     try { setMediaPhase?.('idle') } catch {}
     try { setMediaPct?.(0) } catch {}
     try { setVideoProgress?.(0) } catch {}
+  }
+  const cancelFail = () => {
+    resetFailedPipeline()
     return fail()
   }
 
-  // - если есть локальные blob-медиа (камера/голос) — показываем реальный пайплайн (Uploading > Sending)
-  // - фазу "Sending" поднимем уже прямо перед pushOp (см. ниже), чтобы не убивать прогресс аплоада
+  // Local draft media stays preview-only until the user presses Send.
+  // The real progress pipeline starts here, then moderation/upload run before the optimistic post mutation.
+  const pendingImageUrls = (Array.isArray(pendingImgs) ? pendingImgs : [])
+    .map((url) => String(url || '').trim())
+    .filter(Boolean)
+  const localImageUrls = pendingImageUrls.filter((url) => /^blob:/i.test(url))
   const hasLocalBlobMedia =
+    localImageUrls.length > 0 ||
     (pendingVideo && /^blob:/.test(pendingVideo)) ||
     (pendingAudio && /^blob:/.test(pendingAudio))
 
@@ -52,7 +68,7 @@ export async function resolveComposerMediaPayload({
   if (hasLocalBlobMedia) {
     const ac = (() => {
       try {
-        return beginMediaPipeline?.('Processing')
+        return beginMediaPipeline?.(localImageUrls.length ? 'Moderating' : 'Processing')
       } catch {
         return null
       }
@@ -60,7 +76,134 @@ export async function resolveComposerMediaPayload({
     signal = ac?.signal
   }
 
-  // 0) VIDEO: every local camera/trim/blob path goes through the shared client gateway before signing R2.
+  // 0) IMAGES: preserve local carousel order, moderate only after Send, then upload optimized server images.
+  let imageUrlsToSend = [...pendingImageUrls]
+  if (localImageUrls.length) {
+    const localImageSet = new Set(localImageUrls)
+    const removeLocalImageDrafts = () => {
+      try {
+        setPendingImgs?.((previous) => (Array.isArray(previous) ? previous : [])
+          .filter((url) => !localImageSet.has(String(url || ''))))
+      } catch {}
+    }
+
+    const draftMap = pendingImageDraftsRef?.current
+    const uploadPairs = localImageUrls.map((draftId) => ({
+      draftId,
+      draft: draftMap?.get?.(draftId) || null,
+    }))
+    const files = uploadPairs.map(({ draft }) => draft?.file).filter(Boolean)
+
+    if (files.length !== uploadPairs.length) {
+      try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+
+    const totalImageBytes = files.reduce((sum, file) => sum + Math.max(0, Number(file?.size || 0)), 0)
+    if (totalImageBytes > FORUM_IMAGE_MAX_BYTES) {
+      try { toast?.err?.(t?.('forum_image_too_big')) } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+
+    let moderation = null
+    try {
+      if (typeof moderateImageFiles !== 'function') throw new Error('image_moderation_unavailable')
+      moderation = await moderateImageFiles(files, { signal })
+    } catch (error) {
+      removeLocalImageDrafts()
+      if (error?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail()
+      try { console.error('[moderation] image check failed', error) } catch {}
+      try { toastI18n?.('err', 'forum_moderation_error') } catch {}
+      try { toastI18n?.('info', 'forum_moderation_try_again') } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+
+    if (moderation?.decision === 'block') {
+      removeLocalImageDrafts()
+      try { toastI18n?.('warn', 'forum_image_blocked') } catch {}
+      try { toastI18n?.('info', reasonKey?.(moderation?.reason)) } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+    if (moderation?.decision === 'review') {
+      try { console.warn('[moderation] image review -> allow (balanced)', moderation?.reason, moderation?.raw) } catch {}
+    }
+    if (isMediaCancelled(signal)) return cancelFail()
+
+    try { stopMediaProg?.() } catch {}
+    try { setMediaPhase?.('Uploading') } catch {}
+    try { setMediaPct?.((value) => Math.max(20, Number(value || 0))) } catch {}
+    try { startSoftProgress?.(72, 200, 88) } catch {}
+
+    const form = new FormData()
+    uploadPairs.forEach(({ draftId, draft }) => {
+      const file = draft.file
+      form.append('files', file, String(file?.name || draft?.filename || 'forum-image'))
+      form.append('draftIds', draftId)
+    })
+
+    let response = null
+    let payload = { urls: [], errors: [], items: [] }
+    try {
+      response = await fetch('/api/forum/upload', {
+        method: 'POST',
+        body: form,
+        cache: 'no-store',
+        signal,
+        headers: { 'x-forum-user-id': String(viewerId || '') },
+      })
+      payload = await response.json().catch(() => ({ urls: [], errors: ['upload_failed'], items: [] }))
+    } catch (error) {
+      removeLocalImageDrafts()
+      if (error?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail()
+      try { console.error('image_upload_failed', error) } catch {}
+      try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+
+    const errors = Array.isArray(payload?.errors) ? payload.errors : []
+    const hasTooLargeError = errors.some((error) => String(error || '').toLowerCase().startsWith('too_large'))
+    if (!response?.ok || hasTooLargeError) {
+      removeLocalImageDrafts()
+      if (response?.status === 413 || hasTooLargeError) {
+        try { toast?.err?.(t?.('forum_image_too_big')) } catch {}
+      } else {
+        try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+      }
+      resetFailedPipeline()
+      return fail()
+    }
+
+    const mappedByDraftId = new Map()
+    const responseItems = Array.isArray(payload?.items) ? payload.items : []
+    responseItems.forEach((item) => {
+      const draftId = String(item?.draftId || '')
+      const url = String(item?.url || '')
+      if (draftId && url) mappedByDraftId.set(draftId, url)
+    })
+    if (!mappedByDraftId.size) {
+      const urls = Array.isArray(payload?.urls) ? payload.urls : []
+      localImageUrls.forEach((draftId, index) => {
+        if (urls[index]) mappedByDraftId.set(draftId, String(urls[index]))
+      })
+    }
+
+    const missingDraft = localImageUrls.find((draftId) => !mappedByDraftId.get(draftId))
+    if (missingDraft) {
+      removeLocalImageDrafts()
+      try { toast?.error?.(t?.('forum_files_upload_failed')) } catch {}
+      resetFailedPipeline()
+      return fail()
+    }
+
+    imageUrlsToSend = pendingImageUrls.map((url) => mappedByDraftId.get(url) || url)
+  }
+
+  // 0a) VIDEO: every local camera/trim/blob path goes through the shared client gateway before signing R2.
   let videoUrlToSend = ''
   const pendingVideoCurrent = String(pendingVideoRef.current || pendingVideo || '')
   if (pendingVideoCurrent) {
@@ -111,7 +254,7 @@ export async function resolveComposerMediaPayload({
           }
         } catch {}
 
-        if (isMediaCancelled(signal)) return cancelFail(signal)
+        if (isMediaCancelled(signal)) return cancelFail()
         const resolvedMime = mime || String(sourceContentType || '').split(';')[0].trim().toLowerCase()
         const ext = resolvedMime.includes('mp4') ? 'mp4' : (resolvedMime.includes('quicktime') ? 'mov' : 'webm')
         const sourceName = sourceFilename || `${srcMeta || 'composer-video'}.${ext}`
@@ -151,7 +294,7 @@ export async function resolveComposerMediaPayload({
             } catch {}
           },
         })
-        if (isMediaCancelled(signal)) return cancelFail(signal)
+        if (isMediaCancelled(signal)) return cancelFail()
         videoUrlToSend = String(result?.url || '')
         if (!videoUrlToSend) throw new Error('no_url')
 
@@ -198,7 +341,7 @@ export async function resolveComposerMediaPayload({
         } catch {}
       }
     } catch (error) {
-      if (error?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail(signal)
+      if (error?.name === 'AbortError' || isMediaCancelled(signal)) return cancelFail()
       if (error?.code === 'VIDEO_TOO_LONG') {
         try {
           showVideoLimitOverlay?.({
@@ -272,6 +415,7 @@ export async function resolveComposerMediaPayload({
 
   return {
     failed: false,
+    imageUrlsToSend,
     videoUrlToSend,
     audioUrlToSend,
     videoMetaToSend,

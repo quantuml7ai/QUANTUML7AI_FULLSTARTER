@@ -4203,6 +4203,200 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
   cursor: pointer;
 }
 
+
+/* composer image carousel: local draft preview + send-time moderation/upload */
+.forumComposer .composerImagePreviewRow{
+  width:100% !important;
+  max-width:none !important;
+  align-self:stretch;
+  margin:8px 0 0 !important;
+}
+.forumComposer .composerImageCarousel{
+  position:relative;
+  width:100%;
+  height:min(var(--mb-video-h, 620px), 620px);
+  min-height:min(var(--mb-video-h, 620px), 620px);
+  max-height:min(var(--mb-video-h, 620px), 620px);
+  overflow:hidden;
+  isolation:isolate;
+  border-radius:16px;
+  border:1px solid rgba(119,197,255,.2);
+  background:#000 !important;
+  box-shadow:
+    0 16px 36px rgba(0,0,0,.42),
+    inset 0 0 0 1px rgba(255,255,255,.035);
+  touch-action:pan-y;
+}
+.forumComposer .composerImageCarousel::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.38), transparent 14%, transparent 86%, rgba(0,0,0,.38)),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent 18%, transparent 80%, rgba(0,0,0,.24));
+}
+.forumComposer .composerImageCarouselTrack{
+  display:flex;
+  width:100%;
+  height:100%;
+  transition:transform 280ms cubic-bezier(.2,.78,.2,1);
+  will-change:transform;
+}
+.forumComposer .composerImageCarouselSlide{
+  position:relative;
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000 !important;
+}
+.forumComposer .composerImageCarouselImage{
+  object-fit:contain !important;
+  background:#000 !important;
+}
+.forumComposer .composerImageControl,
+.forumComposer .composerImageNav{
+  appearance:none;
+  -webkit-appearance:none;
+  position:absolute;
+  padding:0 !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.forumComposer .attachPreviewRow .composerImageControl{
+  z-index:10;
+  width:42px;
+  height:42px;
+  top:12px;
+  border-radius:13px;
+  background:linear-gradient(145deg, rgba(7,15,28,.94), rgba(10,24,42,.82)) !important;
+  border:1px solid rgba(255,255,255,.24) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 22px rgba(79,173,255,.18), inset 0 0 0 1px rgba(255,255,255,.05) !important;
+  color:#eaf7ff;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  transition:transform 160ms ease, filter 160ms ease, border-color 160ms ease;
+}
+.forumComposer .attachPreviewRow .composerImageControl:hover{
+  transform:translateY(-1px) scale(1.04);
+  filter:brightness(1.12);
+  border-color:rgba(118,211,255,.52) !important;
+}
+.forumComposer .attachPreviewRow .composerImageControl:active{
+  transform:scale(.96);
+}
+.forumComposer .composerImageControl--expand{ left:12px; }
+.forumComposer .attachPreviewRow .composerImageControl--trash{
+  right:12px;
+  color:#ff6b82;
+  border-color:rgba(255,98,124,.54) !important;
+  background:linear-gradient(145deg, rgba(54,5,17,.92), rgba(9,12,22,.84)) !important;
+  box-shadow:0 10px 24px rgba(0,0,0,.38), 0 0 22px rgba(255,67,102,.2), inset 0 0 0 1px rgba(255,255,255,.05) !important;
+}
+.forumComposer .attachPreviewRow .composerImageNav{
+  z-index:7;
+  top:50%;
+  width:46px;
+  height:46px;
+  min-width:46px;
+  border-radius:999px;
+  transform:translateY(-50%);
+  border:1px solid rgba(154,218,255,.34) !important;
+  background:linear-gradient(145deg, rgba(4,11,22,.92), rgba(13,34,55,.78)) !important;
+  box-shadow:0 12px 26px rgba(0,0,0,.42), 0 0 22px rgba(75,174,255,.2), inset 0 0 0 1px rgba(255,255,255,.06) !important;
+  color:#f5fbff;
+  transition:transform 160ms ease, filter 160ms ease, border-color 160ms ease;
+}
+.forumComposer .attachPreviewRow .composerImageNav:hover{
+  transform:translateY(-50%) scale(1.08);
+  filter:brightness(1.14);
+  border-color:rgba(133,221,255,.62) !important;
+}
+.forumComposer .attachPreviewRow .composerImageNav:active{
+  transform:translateY(-50%) scale(.94);
+}
+.forumComposer .composerImageNav--prev{ left:14px; }
+.forumComposer .composerImageNav--next{ right:14px; }
+.forumComposer .composerImageNavGlyph{
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:100%;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:inherit;
+}
+.forumComposer .composerImageNavGlyph::after{
+  content:'';
+  position:absolute;
+  inset:-5px;
+  border-radius:inherit;
+  border:1px solid rgba(95,199,255,.32);
+  opacity:0;
+  animation:composerImageArrowPulse 2.2s ease-out infinite;
+  pointer-events:none;
+}
+.forumComposer .composerImageNavGlyph svg{
+  display:block;
+  margin:0;
+  filter:drop-shadow(0 0 7px rgba(112,211,255,.48));
+}
+@keyframes composerImageArrowPulse{
+  0%,38%{ transform:scale(.82); opacity:0; }
+  52%{ opacity:.72; }
+  100%{ transform:scale(1.28); opacity:0; }
+}
+.forumComposer .composerImageCounter{
+  position:absolute;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  z-index:8;
+  padding:6px 11px;
+  border-radius:999px;
+  border:1px solid rgba(255,222,120,.34);
+  background:rgba(2,8,17,.78);
+  color:#fff0b4;
+  font:800 11px/1 ui-monospace,monospace;
+  letter-spacing:.08em;
+  box-shadow:0 0 20px rgba(255,207,80,.12);
+  pointer-events:none;
+}
+@media (max-width:640px){
+  .forumComposer .composerImageCarousel{
+    border-radius:13px;
+  }
+  .forumComposer .attachPreviewRow .composerImageControl{
+    width:38px;
+    height:38px;
+    top:10px;
+    border-radius:12px;
+  }
+  .forumComposer .composerImageControl--expand{ left:10px; }
+  .forumComposer .attachPreviewRow .composerImageControl--trash{ right:10px; }
+  .forumComposer .attachPreviewRow .composerImageNav{
+    width:42px;
+    height:42px;
+    min-width:42px;
+  }
+  .forumComposer .composerImageNav--prev{ left:10px; }
+  .forumComposer .composerImageNav--next{ right:10px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .forumComposer .composerImageCarouselTrack{ transition:none; }
+  .forumComposer .composerImageNavGlyph::after{ animation:none; }
+}
+
 /* === Q COIN (РёРЅР»Р°Р№РЅ + РјРѕРґР°Р»РєР°) === */
 .qcoinRow{
   display:inline-flex; align-items:center; gap:10px; margin-left:10px;

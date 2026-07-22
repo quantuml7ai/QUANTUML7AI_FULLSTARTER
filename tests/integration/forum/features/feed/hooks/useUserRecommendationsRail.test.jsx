@@ -917,6 +917,7 @@ describe('useForumComposerAttachments', () => {
         setPendingImgs: vi.fn(),
         setOverlayMediaKind: vi.fn(),
         setOverlayMediaUrl: vi.fn(),
+        setOverlayImageIndex: vi.fn(),
         setVideoState: vi.fn(),
         setVideoOpen: vi.fn(),
         viewerId: 'viewer-1',
@@ -988,54 +989,46 @@ describe('useForumComposerAttachments', () => {
     expect(result.current.fileInputAccept).not.toContain('video/mp4')
   })
 
-  it('caps image attachments at ten and warns when the picked batch exceeds the remaining slots', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({ urls: Array.from({ length: 2 }, (_, index) => `/uploads/${index + 1}.webp`) }),
-    })
+  it('caps image drafts at ten and keeps selection preview-only until Send', async () => {
+    const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
+    vi.stubGlobal('URL', class TestURL extends URL {
+      static createObjectURL(file) { return `blob:${file.name}` }
+      static revokeObjectURL() {}
+    })
 
     const warn = vi.fn()
-    const success = vi.fn()
     const setPendingImgs = vi.fn()
-    const moderateImageFiles = vi.fn(async (files) => ({
-      decision: 'allow',
-      files,
-    }))
+    const pendingImageDraftsRef = { current: new Map() }
+    const beginMediaPipeline = vi.fn(() => ({ signal: undefined }))
+    const moderateImageFiles = vi.fn()
 
     const { result } = renderHook(() =>
       useForumComposerAttachments({
         mediaLocked: false,
         composerMediaKind: 'image',
         pendingImgs: Array.from({ length: 8 }, (_, index) => `/existing/${index + 1}.webp`),
+        pendingImgsRef: { current: Array.from({ length: 8 }, (_, index) => `/existing/${index + 1}.webp`) },
+        pendingImageDraftsRef,
         saveComposerScroll: vi.fn(),
         restoreComposerScroll: vi.fn(),
-        beginMediaPipeline: vi.fn(() => ({ signal: undefined })),
-        endMediaPipeline: vi.fn(),
-        toast: { info: vi.fn(), error: vi.fn(), warn, success },
+        beginMediaPipeline,
+        toast: { info: vi.fn(), error: vi.fn(), warn, success: vi.fn() },
         t: (key) => key === 'forum_image_limit_notice'
           ? 'limit:{limit};kept:{kept}'
           : key,
         moderateImageFiles,
-        toastI18n: vi.fn(),
-        reasonKey: vi.fn(),
-        stopMediaProg: vi.fn(),
         setMediaPhase: vi.fn(),
         setMediaPct: vi.fn(),
-        startSoftProgress: vi.fn(),
         setPendingImgs,
         setOverlayMediaKind: vi.fn(),
         setOverlayMediaUrl: vi.fn(),
+        setOverlayImageIndex: vi.fn(),
         setVideoState: vi.fn(),
         setVideoOpen: vi.fn(),
-        viewerId: 'viewer-1',
         showVideoLimitOverlay: vi.fn(),
         readVideoDurationSecFn: vi.fn(),
         forumVideoMaxSeconds: 30,
-        forumVideoMaxBytes: 1024,
-        forumVideoFaststartTranscodeMaxBytes: 1024,
-        optimizeForumVideoFastStartFn: vi.fn(),
-        emitDiag: vi.fn(),
         setPendingVideo: vi.fn(),
         pendingVideoInfoRef: { current: { source: '', durationSec: Number.NaN } },
         setVideoProgress: vi.fn(),
@@ -1054,10 +1047,17 @@ describe('useForumComposerAttachments', () => {
     })
 
     expect(warn).toHaveBeenCalledWith('limit:10;kept:10')
-    expect(moderateImageFiles).toHaveBeenCalledWith(files.slice(0, 2), { signal: undefined })
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock.mock.calls[0][1].body.getAll('files')).toHaveLength(2)
-    expect(setPendingImgs).toHaveBeenCalled()
-    expect(success).toHaveBeenCalled()
+    expect(setPendingImgs).toHaveBeenCalledTimes(1)
+    const previewUpdater = setPendingImgs.mock.calls[0][0]
+    expect(previewUpdater(Array.from({ length: 8 }, (_, index) => `/existing/${index + 1}.webp`))).toEqual([
+      ...Array.from({ length: 8 }, (_, index) => `/existing/${index + 1}.webp`),
+      'blob:image-1.png',
+      'blob:image-2.png',
+    ])
+    expect(pendingImageDraftsRef.current.get('blob:image-1.png')?.file).toBe(files[0])
+    expect(pendingImageDraftsRef.current.get('blob:image-2.png')?.file).toBe(files[1])
+    expect(beginMediaPipeline).not.toHaveBeenCalled()
+    expect(moderateImageFiles).not.toHaveBeenCalled()
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

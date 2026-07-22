@@ -15,15 +15,15 @@ describe('forum ad discovery surface contracts', () => {
     expect(source).toContain('onClick={activateMediaSurface}')
   })
 
-  test('uses actual native-video play time for the 3s and 30s prompt cadence', () => {
+  test('uses actual native-video play time for the 3s and 45s prompt cadence', () => {
     const source = read('app/forum/ForumAds.js')
     const helper = read('lib/ads/adDiscoveryPrompt.js')
     expect(source).toContain("video.addEventListener('playing', startTicker)")
     expect(source).toContain('watchedMs += Math.min(1000')
     expect(source).toContain('getAdDiscoveryThresholdMs(promptNumber)')
     expect(helper).toContain('AD_DISCOVERY_FIRST_DELAY_MS = 3000')
-    expect(helper).toContain('AD_DISCOVERY_REPEAT_INTERVAL_MS = 30000')
-    expect(helper).toContain('AD_DISCOVERY_VISIBLE_MS = 8000')
+    expect(helper).toContain('AD_DISCOVERY_REPEAT_INTERVAL_MS = 45000')
+    expect(helper).toContain('AD_DISCOVERY_VISIBLE_MS = 10000')
   })
 
   test('forum and global controllers always play and unmute on media-surface activation', () => {

@@ -10,13 +10,13 @@ import {
 } from '../../../lib/ads/adDiscoveryPrompt.js'
 
 describe('ad discovery prompt schedule', () => {
-  test('uses the requested 3s / 30s / 8s cadence', () => {
+  test('uses the requested 3s / 45s / 10s cadence', () => {
     expect(AD_DISCOVERY_FIRST_DELAY_MS).toBe(3000)
-    expect(AD_DISCOVERY_REPEAT_INTERVAL_MS).toBe(30000)
-    expect(AD_DISCOVERY_VISIBLE_MS).toBe(8000)
+    expect(AD_DISCOVERY_REPEAT_INTERVAL_MS).toBe(45000)
+    expect(AD_DISCOVERY_VISIBLE_MS).toBe(10000)
     expect(getAdDiscoveryThresholdMs(0)).toBe(3000)
-    expect(getAdDiscoveryThresholdMs(1)).toBe(33000)
-    expect(getAdDiscoveryThresholdMs(2)).toBe(63000)
+    expect(getAdDiscoveryThresholdMs(1)).toBe(48000)
+    expect(getAdDiscoveryThresholdMs(2)).toBe(93000)
   })
 
   test('ships seven distinct localized prompt key pairs', () => {

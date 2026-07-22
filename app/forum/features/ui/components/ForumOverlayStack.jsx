@@ -30,6 +30,10 @@ export default function ForumOverlayStack({
   pendingVideoInfoRef,
   pendingVideoBlobMetaRef,
   overlayMediaKind,
+  pendingImgs,
+  overlayImageIndex,
+  setOverlayImageIndex,
+  removePendingImageAt,
   acceptMediaFromOverlay,
   startVideo,
   stopVideo,
@@ -116,6 +120,10 @@ export default function ForumOverlayStack({
         previewUrl={overlayPreviewUrl}
         previewMirror={overlayPreviewMirror}
         mediaKind={overlayMediaKind}
+        imageUrls={pendingImgs}
+        imageIndex={overlayImageIndex}
+        onImageIndexChange={setOverlayImageIndex}
+        onRemoveImage={removePendingImageAt}
         onAccept={acceptMediaFromOverlay}
         onStart={startVideo}
         onStop={stopVideo}

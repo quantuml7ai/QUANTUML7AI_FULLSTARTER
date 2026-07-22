@@ -93,12 +93,12 @@ export async function sendDmComposerMessage({
     }
   }
 
-  const buildAttachments = ({ audioUrl = '', videoUrl = '', videoMeta = null } = {}) => {
+  const buildAttachments = ({ imageUrls = pendingImgs, audioUrl = '', videoUrl = '', videoMeta = null } = {}) => {
     const au = String(audioUrl || '').trim()
     const vv = String(videoUrl || '').trim()
     const safeVideoMeta = vv ? readVideoMetaForUrl(vv, videoMeta) : null
     return [
-      ...(!dmSupportMode && Array.isArray(pendingImgs) ? pendingImgs : []).map((u) => ({ url: u, type: 'image' })),
+      ...(!dmSupportMode && Array.isArray(imageUrls) ? imageUrls : []).map((u) => ({ url: u, type: 'image' })),
       ...(au ? [{ url: au, type: 'audio' }] : []),
       ...(vv ? [{ url: vv, type: 'video', ...(safeVideoMeta || {}) }] : []),
     ].filter(Boolean)
@@ -192,11 +192,13 @@ export async function sendDmComposerMessage({
   let dmSendOk = false
   let dmBroadcastOk = false
   try {
+    let finalImageUrls = Array.isArray(pendingImgs) ? pendingImgs : []
     let finalAudioUrl = String(audioUrlToSend || '').trim()
     let finalVideoUrl = String(videoUrlToSend || '').trim()
     const needsResolve =
       (typeof resolveMediaPayloadFn === 'function') &&
       (
+        finalImageUrls.some((url) => /^blob:/i.test(String(url || ''))) ||
         (/^blob:/i.test(pendingAudioUrl) && !finalAudioUrl) ||
         (/^blob:/i.test(pendingVideoUrl) && !finalVideoUrl)
       )
@@ -207,9 +209,11 @@ export async function sendDmComposerMessage({
         removeOptimisticMessage()
         return fail()
       }
+      finalImageUrls = Array.isArray(media?.imageUrlsToSend) ? media.imageUrlsToSend : finalImageUrls
       finalAudioUrl = String(media?.audioUrlToSend || finalAudioUrl || '').trim()
       finalVideoUrl = String(media?.videoUrlToSend || finalVideoUrl || '').trim()
       attachments = buildAttachments({
+        imageUrls: finalImageUrls,
         audioUrl: finalAudioUrl,
         videoUrl: finalVideoUrl,
         videoMeta: media?.videoMetaToSend || null,

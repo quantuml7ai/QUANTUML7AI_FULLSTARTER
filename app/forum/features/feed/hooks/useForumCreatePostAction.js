@@ -20,8 +20,12 @@ export default function useForumCreatePostAction({
   pendingVideo,
   pendingAudio,
   pendingImgs,
+  pendingImageDraftsRef,
   pendingSticker,
   beginMediaPipeline,
+  moderateImageFiles,
+  reasonKey,
+  startSoftProgress,
   mediaCancelRef,
   pendingVideoRef,
   pendingVideoInfoRef,
@@ -149,6 +153,13 @@ export default function useForumCreatePostAction({
         resolveMediaPayloadFn: () => resolveComposerMediaPayload({
           pendingVideo,
           pendingAudio,
+          pendingImgs,
+          pendingImageDraftsRef,
+          moderateImageFiles,
+          toastI18n,
+          reasonKey,
+          setPendingImgs,
+          startSoftProgress,
           beginMediaPipeline,
           mediaCancelRef,
           pendingVideoRef,
@@ -218,6 +229,13 @@ export default function useForumCreatePostAction({
     const media = await resolveComposerMediaPayload({
       pendingVideo,
       pendingAudio,
+      pendingImgs,
+      pendingImageDraftsRef,
+      moderateImageFiles,
+      toastI18n,
+      reasonKey,
+      setPendingImgs,
+      startSoftProgress,
       beginMediaPipeline,
       mediaCancelRef,
       pendingVideoRef,
@@ -245,7 +263,7 @@ export default function useForumCreatePostAction({
     })
     if (media.failed) return false
 
-    const { videoUrlToSend, audioUrlToSend } = media
+    const { imageUrlsToSend, videoUrlToSend, audioUrlToSend } = media
 
     // 1) собираем текст
     const plain = String(text || '').trim().slice(0, textLimit)
@@ -256,7 +274,7 @@ export default function useForumCreatePostAction({
     const body = [
       plain,
       stickerTagLine,
-      ...pendingImgs,
+      ...imageUrlsToSend,
       ...(audioUrlToSend ? [audioUrlToSend] : []),
       ...(videoUrlToSend ? [videoUrlToSend] : []),
     ].filter(Boolean).join('\n')

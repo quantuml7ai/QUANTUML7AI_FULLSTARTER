@@ -50,20 +50,31 @@ export async function POST(req) {
       )
     }
 
+    const draftIds = form.getAll('draftIds').map((value) => String(value || ''))
     const urls = []
     const errors = []
+    const items = []
 
-    for (const f of files) {
+    for (let index = 0; index < files.length; index += 1) {
+      const f = files[index]
+      const draftId = draftIds[index] || String(index)
       try {
         const origName = (f.name || 'file').trim().replace(/\s+/g, '_')
         const okType = ALLOWED_RE.test(origName) || ALLOWED_MIME.test(f.type || '')
-        if (!okType) { errors.push(`bad_type:${origName}`); continue }
+        if (!okType) {
+          const error = `bad_type:${origName}`
+          errors.push(error)
+          items.push({ draftId, index, url: null, error })
+          continue
+        }
 
         const input = Buffer.from(await f.arrayBuffer())
 
         // 🚫 проверка размера
         if (input.length > MAX_FILE_SIZE_BYTES) {
-          errors.push(`too_large:${origName}`)
+          const error = `too_large:${origName}`
+          errors.push(error)
+          items.push({ draftId, index, url: null, error })
           continue
         }
 
@@ -100,16 +111,18 @@ export async function POST(req) {
         })
 
         urls.push(url)
+        items.push({ draftId, index, url, error: null })
       } catch (e) {
         console.error('upload_item_failed', e)
         errors.push('upload_item_failed')
+        items.push({ draftId, index, url: null, error: 'upload_item_failed' })
       }
     }
 
     const failedTooLarge = errors.some((error) => String(error || '').startsWith('too_large'))
     const status = urls.length ? 200 : (failedTooLarge ? 413 : (errors.length ? 422 : 200))
     return NextResponse.json(
-      { urls, errors, limitBytes: MAX_TOTAL_SIZE_BYTES },
+      { urls, errors, items, limitBytes: MAX_TOTAL_SIZE_BYTES },
       { status, headers: { 'cache-control': 'no-store' } },
     )
   } catch (e) {

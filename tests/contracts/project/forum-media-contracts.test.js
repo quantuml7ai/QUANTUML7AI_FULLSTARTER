@@ -352,4 +352,14 @@ describe('forum media contracts', () => {
     expect(adsSrc).not.toContain('body.dataset.forumMediaMuted =')
     expect(adsSrc).not.toContain('body.dataset.forumMediaSoundUnlocked =')
   })
+
+  test('keeps short video uploads eligible through duration fallback without a minimum-duration gate', () => {
+    const source = fs.readFileSync(path.join(process.cwd(), 'lib/forumClientVideoOptimizer.js'), 'utf8')
+    expect(source).toContain('readForumVideoDurationFromBrowser')
+    expect(source).toContain('duration = await readForumVideoDurationFromBrowser(file)')
+    expect(source).toContain('const durationSeconds = await readDuration(input, videoTrack, file)')
+    expect(source).not.toMatch(/durationSeconds\s*<\s*30/)
+    expect(source).not.toMatch(/durationSeconds\s*<=\s*30/)
+  })
+
 })

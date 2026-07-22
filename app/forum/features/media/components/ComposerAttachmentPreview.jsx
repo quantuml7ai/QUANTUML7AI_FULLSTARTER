@@ -6,9 +6,40 @@ import { NativeSafeVideoPlayer } from '../utils/mediaLifecycleRuntime'
 
 const ICON_REMOVE = '\u2716'
 
+function clampIndex(index, total) {
+  if (!total) return 0
+  return Math.max(0, Math.min(total - 1, Number(index || 0)))
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden>
+      <path d="M8 7V5.8A1.8 1.8 0 0 1 9.8 4h4.4A1.8 1.8 0 0 1 16 5.8V7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M5.5 7h13M7.2 7l.7 12h8.2l.7-12M10 10.2v5.7M14 10.2v5.7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ExpandIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" aria-hidden>
+      <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ArrowIcon({ next = false }) {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden>
+      <path d={next ? 'M9.5 6.5 15 12l-5.5 5.5' : 'M14.5 6.5 9 12l5.5 5.5'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function ComposerAttachmentPreview({
   pendingImgs = [],
-  setPendingImgs,
+  onOpenImageFullscreen,
+  onRemoveImage,
   pendingVideo,
   pendingVideoMirror = false,
   pendingAudio,
@@ -22,6 +53,46 @@ export default function ComposerAttachmentPreview({
   const [videoReady, setVideoReady] = React.useState(false)
   const [videoPoster, setVideoPoster] = React.useState('')
   const [previewTouchWebKit, setPreviewTouchWebKit] = React.useState(false)
+  const [activeImageIndex, setActiveImageIndex] = React.useState(0)
+  const swipeStartRef = React.useRef(null)
+  const swipeDeltaRef = React.useRef(0)
+  const hasManyImages = pendingImgs.length > 1
+
+  React.useEffect(() => {
+    setActiveImageIndex((previous) => clampIndex(previous, pendingImgs.length))
+  }, [pendingImgs.length])
+
+  const goToImage = React.useCallback((nextIndex) => {
+    setActiveImageIndex((previous) => {
+      const safePrevious = clampIndex(previous, pendingImgs.length)
+      const resolved = typeof nextIndex === 'function' ? nextIndex(safePrevious) : nextIndex
+      return clampIndex(resolved, pendingImgs.length)
+    })
+  }, [pendingImgs.length])
+
+  const handleImageTouchStart = React.useCallback((event) => {
+    if (event.target?.closest?.('[data-composer-image-control="true"]')) return
+    const touch = event.touches?.[0]
+    if (!touch) return
+    swipeStartRef.current = Number(touch.clientX || 0)
+    swipeDeltaRef.current = 0
+  }, [])
+
+  const handleImageTouchMove = React.useCallback((event) => {
+    const touch = event.touches?.[0]
+    if (!touch || swipeStartRef.current == null) return
+    swipeDeltaRef.current = Number(touch.clientX || 0) - Number(swipeStartRef.current || 0)
+  }, [])
+
+  const handleImageTouchEnd = React.useCallback(() => {
+    if (swipeStartRef.current == null) return
+    const deltaX = Number(swipeDeltaRef.current || 0)
+    swipeStartRef.current = null
+    swipeDeltaRef.current = 0
+    if (Math.abs(deltaX) < 42) return
+    if (deltaX < 0) goToImage((previous) => previous + 1)
+    else goToImage((previous) => previous - 1)
+  }, [goToImage])
 
   React.useEffect(() => {
     try {
@@ -52,9 +123,7 @@ export default function ComposerAttachmentPreview({
       ;['loadedmetadata', 'loadeddata', 'canplay', 'seeked', 'timeupdate'].forEach((eventName) => {
         probe.removeEventListener(eventName, onProbeSignal)
       })
-      try {
-        probe.pause()
-      } catch {}
+      try { probe.pause() } catch {}
       try {
         probe.removeAttribute('src')
         probe.load()
@@ -90,9 +159,7 @@ export default function ComposerAttachmentPreview({
       try {
         const duration = Number(probe.duration || 0)
         const target = Number.isFinite(duration) && duration > 0 ? Math.min(0.08, Math.max(0.01, duration / 20)) : 0.05
-        if (Math.abs(Number(probe.currentTime || 0) - target) > 0.005) {
-          probe.currentTime = target
-        }
+        if (Math.abs(Number(probe.currentTime || 0) - target) > 0.005) probe.currentTime = target
       } catch {}
     }
 
@@ -133,31 +200,105 @@ export default function ComposerAttachmentPreview({
   return (
     <>
       {pendingImgs.length > 0 && (
-        <div className="attachPreviewRow mt-2" style={{ maxWidth: 'min(50%, 320px)' }}>
-          {pendingImgs.map((url, index) => (
+        <div className="attachPreviewRow composerImagePreviewRow mt-2">
+          <div
+            className="composerImageCarousel"
+            data-count={pendingImgs.length}
+            onTouchStart={handleImageTouchStart}
+            onTouchMove={handleImageTouchMove}
+            onTouchEnd={handleImageTouchEnd}
+          >
+            <div
+              className="composerImageCarouselTrack"
+              style={{ transform: `translate3d(-${activeImageIndex * 100}%, 0, 0)` }}
+            >
+              {pendingImgs.map((url, index) => (
+                <figure className="composerImageCarouselSlide" key={`${url}-${index}`}>
+                  <Image
+                    src={url}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 100vw, 720px"
+                    unoptimized
+                    priority={index === activeImageIndex}
+                    className="composerImageCarouselImage"
+                  />
+                </figure>
+              ))}
+            </div>
+
             <button
-              key={`${url}-${index}`}
               type="button"
-              className="relative group shrink-0"
-              title={t?.('forum_remove_attachment')}
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                setPendingImgs?.((prev) => prev.filter((_, idx) => idx !== index))
+              className="composerImageControl composerImageControl--expand"
+              data-composer-image-control="true"
+              onPointerDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
+              title={t?.('forum_open_fullscreen')}
+              aria-label={t?.('forum_open_fullscreen')}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onOpenImageFullscreen?.(activeImageIndex)
               }}
             >
-              <Image
-                src={url}
-                alt=""
-                loading="lazy"
-                unoptimized
-                width={600}
-                height={600}
-                className="h-8 w-auto max-w-[96px] rounded-md ring-1 ring-white/10"
-              />
-              <span className="absolute -top-1 -right-1 hidden group-hover:inline-flex items-center justify-center text-[10px] leading-none px-1 rounded bg-black/70">{ICON_REMOVE}</span>
+              <ExpandIcon />
             </button>
-          ))}
+
+            <button
+              type="button"
+              className="composerImageControl composerImageControl--trash"
+              data-composer-image-control="true"
+              onPointerDown={(event) => event.stopPropagation()}
+              onTouchStart={(event) => event.stopPropagation()}
+              title={t?.('forum_remove_attachment') || t?.('forum_remove')}
+              aria-label={t?.('forum_remove_attachment') || t?.('forum_remove')}
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onRemoveImage?.(activeImageIndex)
+              }}
+            >
+              <TrashIcon />
+            </button>
+
+            {hasManyImages && (
+              <>
+                <button
+                  type="button"
+                  className="composerImageNav composerImageNav--prev"
+                  data-composer-image-control="true"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onTouchStart={(event) => event.stopPropagation()}
+                  aria-label={`${activeImageIndex + 1}/${pendingImgs.length}`}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    goToImage((previous) => previous - 1)
+                  }}
+                >
+                  <span className="composerImageNavGlyph"><ArrowIcon /></span>
+                </button>
+                <button
+                  type="button"
+                  className="composerImageNav composerImageNav--next"
+                  data-composer-image-control="true"
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onTouchStart={(event) => event.stopPropagation()}
+                  aria-label={`${activeImageIndex + 1}/${pendingImgs.length}`}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    goToImage((previous) => previous + 1)
+                  }}
+                >
+                  <span className="composerImageNavGlyph"><ArrowIcon next /></span>
+                </button>
+                <div className="composerImageCounter" aria-live="polite">
+                  {activeImageIndex + 1}/{pendingImgs.length}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -184,115 +325,29 @@ export default function ComposerAttachmentPreview({
               disablePictureInPicture
               frontCameraMirror={pendingVideoMirror}
               mirrorVideo={pendingVideoMirror}
-              style={{
-                width: '100%',
-                maxHeight: 620,
-                background: 'transparent',
-                position: 'relative',
-                zIndex: 1,
-              }}
-              videoStyle={{
-                width: '100%',
-                height: 'auto',
-                maxHeight: 620,
-                display: 'block',
-                objectFit: 'contain',
-                background: 'transparent',
-              }}
+              style={{ width: '100%', maxHeight: 620, background: 'transparent', position: 'relative', zIndex: 1 }}
+              videoStyle={{ width: '100%', height: 'auto', maxHeight: 620, display: 'block', objectFit: 'contain', background: 'transparent' }}
               onLoadedData={() => setVideoReady(true)}
               onCanPlay={() => setVideoReady(true)}
               onLoadedMetadata={(e) => {
                 const node = e.currentTarget
-                try {
-                  if (node.readyState < 2 && Number(node.currentTime || 0) === 0) node.currentTime = 0.001
-                } catch {}
+                try { if (node.readyState < 2 && Number(node.currentTime || 0) === 0) node.currentTime = 0.001 } catch {}
               }}
             />
 
             {!videoReady && !videoPoster && (
-              <div
-                aria-hidden
-                style={{
-                  position: 'absolute',
-                  inset: 0,
-                  zIndex: 2,
-                  pointerEvents: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'linear-gradient(135deg, rgba(8,20,42,.78), rgba(7,10,22,.9))',
-                  color: 'rgba(180,230,255,.9)',
-                }}
-              >
-                <span
-                  style={{
-                    width: 42,
-                    height: 42,
-                    borderRadius: '50%',
-                    border: '1px solid rgba(120,220,255,.35)',
-                    boxShadow: '0 0 24px rgba(70,190,255,.24)',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden>
-                    <path d="M8 5v14l11-7L8 5Z" fill="currentColor" />
-                  </svg>
+              <div aria-hidden style={{ position: 'absolute', inset: 0, zIndex: 2, pointerEvents: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(8,20,42,.78), rgba(7,10,22,.9))', color: 'rgba(180,230,255,.9)' }}>
+                <span style={{ width: 42, height: 42, borderRadius: '50%', border: '1px solid rgba(120,220,255,.35)', boxShadow: '0 0 24px rgba(70,190,255,.24)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden><path d="M8 5v14l11-7L8 5Z" fill="currentColor" /></svg>
                 </span>
               </div>
             )}
 
-            <button
-              type="button"
-              title={t?.('forum_open_fullscreen')}
-              onClick={() => {
-                try { onOpenVideoFullscreen?.() } catch {}
-              }}
-              style={{
-                position: 'absolute',
-                right: 8,
-                top: previewControlTop,
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,.18)',
-                background: 'rgba(0,0,0,.55)',
-                color: '#fff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 3,
-              }}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden>
-                <path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <button type="button" title={t?.('forum_open_fullscreen')} onClick={() => { try { onOpenVideoFullscreen?.() } catch {} }} style={{ position: 'absolute', right: 8, top: previewControlTop, width: 34, height: 34, borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'rgba(0,0,0,.55)', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
+              <ExpandIcon />
             </button>
 
-            <button
-              type="button"
-              title={t?.('forum_remove')}
-              onClick={() => {
-                try { onRemoveVideo?.() } catch {}
-              }}
-              style={{
-                fontSize: '20px',
-                position: 'absolute',
-                top: previewRemoveTop,
-                left: 5,
-                width: 54,
-                height: 54,
-                borderRadius: 10,
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                background: 'rgba(0, 0, 0, 0.52)',
-                color: '#ff0000ff',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                zIndex: 3,
-              }}
-            >
+            <button type="button" title={t?.('forum_remove')} onClick={() => { try { onRemoveVideo?.() } catch {} }} style={{ fontSize: '20px', position: 'absolute', top: previewRemoveTop, left: 5, width: 54, height: 54, borderRadius: 10, border: '1px solid rgba(255, 255, 255, 0.4)', background: 'rgba(0, 0, 0, 0.52)', color: '#ff0000ff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', zIndex: 3 }}>
               {ICON_REMOVE}
             </button>
           </div>
