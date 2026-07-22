@@ -1785,6 +1785,7 @@ export function AdCard({
 <div
   ref={mergeRefs(localRootRef, rootRef)}
   className="item forum-ad-card"
+  dir="ltr"
   data-slot-kind={slotKind}
   data-ads="1"
   data-stable-shell="1"
@@ -1796,6 +1797,7 @@ export function AdCard({
 >
 <style jsx>{`
   .forum-ad-card {
+    direction: ltr !important;
     width: 100%;
     min-height: var(--ad-slot-h-m);
     height: var(--ad-slot-h-m);
@@ -1810,6 +1812,7 @@ export function AdCard({
   }
   @media (min-width: 640px) {
     .forum-ad-card {
+      direction: ltr !important;
       min-height: var(--ad-slot-h-t);
       height: var(--ad-slot-h-t);
       max-height: var(--ad-slot-h-t);
@@ -1817,6 +1820,7 @@ export function AdCard({
   }
   @media (min-width: 1024px) {
     .forum-ad-card {
+      direction: ltr !important;
       min-height: var(--ad-slot-h-d);
       height: var(--ad-slot-h-d);
       max-height: var(--ad-slot-h-d);
