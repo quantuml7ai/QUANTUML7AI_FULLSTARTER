@@ -1,0 +1,26 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.quantuml7ai.app",
+      "sha256_cert_fingerprints": [
+        "3D:7B:28:37:71:93:E6:06:0B:7E:9A:BF:74:4D:AA:F6:8D:02:9B:7C:7C:DA:6F:AF:3D:91:C7:43:2E:FD:A4:42"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.quantuml7ai.app.debug",
+      "sha256_cert_fingerprints": [
+        "13:E6:62:C2:12:38:D1:C8:BD:12:CF:03:7C:89:85:8A:EE:E6:14:E2:57:3C:0C:EB:3E:79:A4:29:54:EF:F1:5E"
+      ]
+    }
+  }
+]

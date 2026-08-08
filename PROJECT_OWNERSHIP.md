@@ -1,0 +1,431 @@
+# PROJECT_OWNERSHIP.md
+
+> Обязательное правило сопровождения:
+> Если меняется граница ответственности каталогов, появляются новые домены, переносятся модули между зонами или меняются entry points, этот файл обязан быть обновлен.
+> Рекомендуемый способ обновления: `node tools/generate-project-ownership.js`.
+
+Сгенерировано автоматически: 2026-08-07T06:36:47.427Z
+
+## Общий Принцип
+
+- `app/` владеет страницами, layout-слоем и серверными route handlers.
+- `app/api/` владеет backend/API-контуром.
+- `components/` владеет truly shared UI вне одного домена.
+- `lib/` владеет общей инфраструктурой и серверно-клиентскими библиотеками.
+- `app/forum/` владеет форумом, DM, media, qcoin, quests и их feature-oriented слоями.
+- `public/` владеет статическими ассетами.
+- `tools/` и `audit/` владеют аудитом, диагностикой и техобслуживанием.
+
+## App Ownership
+
+### about
+
+- Зона: `app/about`
+- Назначение: Контентный раздел about.
+- Точки входа: `app/about/layout.js`, `app/about/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### academy
+
+- Зона: `app/academy`
+- Назначение: Академия, экзамены и образовательный UI.
+- Точки входа: `app/academy/layout.js`, `app/academy/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### ads
+
+- Зона: `app/ads`
+- Назначение: Рекламный контур, рекламные страницы и связанный UI.
+- Точки входа: `app/ads/layout.js`, `app/ads/page.jsx`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### components
+
+- Зона: `app/components`
+- Назначение: Локальные app-level компоненты.
+- Точки входа: нет явных root-entry файлов
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### contact
+
+- Зона: `app/contact`
+- Назначение: Контентный раздел contact.
+- Точки входа: `app/contact/layout.js`, `app/contact/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### exchange
+
+- Зона: `app/exchange`
+- Назначение: Exchange-раздел и связанный интерфейс обмена.
+- Точки входа: `app/exchange/layout.js`, `app/exchange/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### forum
+
+- Зона: `app/forum`
+- Назначение: Форум, мессенджер, темы, посты, медиа, профиль, VIP, QCoin, quests и связанный экранный runtime.
+- Точки входа: `app/forum/layout.js`, `app/forum/loading.js`, `app/forum/page.js`
+- Связанные зоны: `app/forum/features`, `app/forum/shared`, `app/api/forum`, `app/api/dm`, `components`, `lib`, `public`
+
+### game
+
+- Зона: `app/game`
+- Назначение: Игровой раздел и его route-layer.
+- Точки входа: `app/game/layout.js`, `app/game/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### privacy
+
+- Зона: `app/privacy`
+- Назначение: Контентный раздел privacy.
+- Точки входа: `app/privacy/layout.js`, `app/privacy/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### subscribe
+
+- Зона: `app/subscribe`
+- Назначение: Подписочный/лендинговый контур.
+- Точки входа: `app/subscribe/layout.js`, `app/subscribe/page.js`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+### tma
+
+- Зона: `app/tma`
+- Назначение: TMA/Telegram Mini App страницы.
+- Точки входа: `app/tma/auto/layout.js`, `app/tma/auto/page.jsx`
+- Связанные зоны: `components`, `lib`, `public`, `app/api`
+
+## API Ownership
+
+### API: _diag
+
+- Зона: `app/api/_diag`
+- Назначение: API-домен _diag.
+- Точки входа: `app/api/_diag/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: academy
+
+- Зона: `app/api/academy`
+- Назначение: API академии.
+- Точки входа: `app/api/academy/exam/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: ads
+
+- Зона: `app/api/ads`
+- Назначение: API рекламы.
+- Точки входа: `app/api/ads/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: aiquota
+
+- Зона: `app/api/aiquota`
+- Назначение: API-домен aiquota.
+- Точки входа: `app/api/aiquota/usage/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: app-shell
+
+- Зона: `app/api/app-shell`
+- Назначение: API-домен app-shell.
+- Точки входа: `app/api/app-shell/config/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: battlecoin
+
+- Зона: `app/api/battlecoin`
+- Назначение: API-домен battlecoin.
+- Точки входа: `app/api/battlecoin/chat/events/route.js`, `app/api/battlecoin/chat/messages/route.js`, `app/api/battlecoin/chat/reaction/route.js`, `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: brain
+
+- Зона: `app/api/brain`
+- Назначение: API-домен brain.
+- Точки входа: `app/api/brain/analyze/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: coins
+
+- Зона: `app/api/coins`
+- Назначение: API-домен coins.
+- Точки входа: `app/api/coins/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: contact
+
+- Зона: `app/api/contact`
+- Назначение: API-домен contact.
+- Точки входа: `app/api/contact/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: crypto-news
+
+- Зона: `app/api/crypto-news`
+- Назначение: API-домен crypto-news.
+- Точки входа: `app/api/crypto-news/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: debug
+
+- Зона: `app/api/debug`
+- Назначение: API-домен debug.
+- Точки входа: `app/api/debug/ads/grant/route.js`, `app/api/debug/env/route.js`, `app/api/debug/forum-diag/route.js`, `app/api/debug/invoices/route.js`, `app/api/debug/redis/info/route.js`, `app/api/debug/redis/route.js`, `app/api/debug/vip/grant/route.js`, `app/api/debug/vip/migrate/route.js`, `app/api/debug/vip/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: deep-translate
+
+- Зона: `app/api/deep-translate`
+- Назначение: API-домен deep-translate.
+- Точки входа: `app/api/deep-translate/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: dm
+
+- Зона: `app/api/dm`
+- Назначение: Серверный контур личных сообщений: dialogs, thread, send, delete, seen, block.
+- Точки входа: `app/api/dm/block/route.js`, `app/api/dm/delete/route.js`, `app/api/dm/dialogs/route.js`, `app/api/dm/seen/route.js`, `app/api/dm/send/route.js`, `app/api/dm/support-card-translate/route.js`, `app/api/dm/support-entry/route.js`, `app/api/dm/support-feedback/route.js`, `app/api/dm/support-state/route.js`, `app/api/dm/support-worker/route.js`
+- Связанные зоны: `app/forum/features/dm`, `app/forum`, `app/api/profile`, `lib`
+
+### API: forum
+
+- Зона: `app/api/forum`
+- Назначение: Серверный контур форума: snapshot, mutate, report, moderation, uploads, subs, vip, stream.
+- Точки входа: `app/api/forum/admin/banUser/route.js`, `app/api/forum/admin/deletePost/route.js`, `app/api/forum/admin/deleteTopic/route.js`, `app/api/forum/admin/unbanUser/route.js`, `app/api/forum/admin/verify/route.js`, `app/api/forum/blobUploadUrl/route.js`, `app/api/forum/events/stream/route.js`, `app/api/forum/feed/page/route.js`, `app/api/forum/inbox/replies/page/route.js`, `app/api/forum/media-feed/page/route.js`
+- Связанные зоны: `app/forum`, `lib`, `public`, `app/api/profile`
+
+### API: geo
+
+- Зона: `app/api/geo`
+- Назначение: API-домен geo.
+- Точки входа: `app/api/geo/session-touch/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: market
+
+- Зона: `app/api/market`
+- Назначение: API-домен market.
+- Точки входа: `app/api/market/summary/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: metamarket
+
+- Зона: `app/api/metamarket`
+- Назначение: API-домен metamarket.
+- Точки входа: `app/api/metamarket/buy/route.js`, `app/api/metamarket/collection/route.js`, `app/api/metamarket/gift/route.js`, `app/api/metamarket/my-collection/route.js`, `app/api/metamarket/owners/route.js`, `app/api/metamarket/quote/route.js`, `app/api/metamarket/sell/route.js`, `app/api/metamarket/state/route.js`, `app/api/metamarket/token-history/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: metastudio
+
+- Зона: `app/api/metastudio`
+- Назначение: API-домен metastudio.
+- Точки входа: `app/api/metastudio/register/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: pay
+
+- Зона: `app/api/pay`
+- Назначение: Платежный backend и webhook-и.
+- Точки входа: `app/api/pay/create/route.js`, `app/api/pay/webhook/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: payments
+
+- Зона: `app/api/payments`
+- Назначение: Платежный backend и webhook-и.
+- Точки входа: `app/api/payments/demo/complete/route.js`, `app/api/payments/now/create/route.js`, `app/api/payments/now/webhook/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: profile
+
+- Зона: `app/api/profile`
+- Назначение: Профиль, about, nick, avatar и batch-профили.
+- Точки входа: `app/api/profile/batch/route.js`, `app/api/profile/check-nick/route.js`, `app/api/profile/delete-account/route.js`, `app/api/profile/get-about/route.js`, `app/api/profile/get-profile/route.js`, `app/api/profile/save-nick/route.js`, `app/api/profile/set-about/route.js`, `app/api/profile/upload-avatar/route.js`, `app/api/profile/user-popover/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: push
+
+- Зона: `app/api/push`
+- Назначение: API-домен push.
+- Точки входа: `app/api/push/config/route.js`, `app/api/push/events/route.js`, `app/api/push/native/link/route.js`, `app/api/push/native/register/route.js`, `app/api/push/native/status/route.js`, `app/api/push/native/unlink/route.js`, `app/api/push/subscribe/route.js`, `app/api/push/sync/route.js`, `app/api/push/unsubscribe/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: qcoin
+
+- Зона: `app/api/qcoin`
+- Назначение: QCoin backend: balance, heartbeat, drop.
+- Точки входа: `app/api/qcoin/drop/route.js`, `app/api/qcoin/get/route.js`, `app/api/qcoin/heartbeat/route.js`, `app/api/qcoin/topup/cancel/route.js`, `app/api/qcoin/topup/create/route.js`, `app/api/qcoin/topup/webhook/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: quest
+
+- Зона: `app/api/quest`
+- Назначение: Серверный контур квестов.
+- Точки входа: `app/api/quest/env/route.js`, `app/api/quest/progress/route.js`, `app/api/quest/status/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: quotes
+
+- Зона: `app/api/quotes`
+- Назначение: API-домен quotes.
+- Точки входа: `app/api/quotes/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: referral
+
+- Зона: `app/api/referral`
+- Назначение: API-домен referral.
+- Точки входа: `app/api/referral/hit/route.js`, `app/api/referral/link/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: subscription
+
+- Зона: `app/api/subscription`
+- Назначение: API-домен subscription.
+- Точки входа: `app/api/subscription/status/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: telegram
+
+- Зона: `app/api/telegram`
+- Назначение: Интеграция Telegram/TMA.
+- Точки входа: `app/api/telegram/link/confirm/route.js`, `app/api/telegram/link/resolve/route.js`, `app/api/telegram/link/start/route.js`, `app/api/telegram/link/status/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: tma
+
+- Зона: `app/api/tma`
+- Назначение: Интеграция Telegram/TMA.
+- Точки входа: `app/api/tma/auto/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+### API: wallet-session
+
+- Зона: `app/api/wallet-session`
+- Назначение: API-домен wallet-session.
+- Точки входа: `app/api/wallet-session/route.js`
+- Связанные зоны: `app`, `components`, `lib`
+
+## Forum Ownership
+
+### Forum Root
+
+- Зона: `app/forum`
+- Назначение: Корневой composition, layout, styles и orchestration всего форума.
+- Точки входа: `app/forum/Forum.jsx`, `app/forum/ForumRoot.jsx`, `app/forum/ForumHeaderPanel.jsx`, `app/forum/layout.js`, `app/forum/page.js`
+- Связанные зоны: `app/forum/features`, `app/forum/shared`, `app/api/forum`, `app/api/dm`, `lib`, `public`
+- Примечания: Это главная интеграционная зона между UI, данными, API и shared-слоем форума.
+
+### Forum feature: diagnostics
+
+- Зона: `app/forum/features/diagnostics`
+- Назначение: Perf/diag hooks и вспомогательные debug-механизмы.
+- Точки входа: `app/forum/features/diagnostics/hooks/useForumDiagnostics.js`, `app/forum/features/diagnostics/utils/emitPolicy.js`
+- Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
+
+### Forum feature: dm
+
+- Зона: `app/forum/features/dm`
+- Назначение: Quantum Messenger, диалоги, треды, cache, delete/block/seen и DM UI.
+- Точки входа: `app/forum/features/dm/components/DmDialogRow.jsx`, `app/forum/features/dm/components/DmDialogsPane.jsx`, `app/forum/features/dm/components/DmMediaRenderer.jsx`, `app/forum/features/dm/components/DmMessagesPane.jsx`, `app/forum/features/dm/components/DmThreadAlerts.jsx`, `app/forum/features/dm/components/DmThreadHeader.jsx`, `app/forum/features/dm/components/DmThreadLoadMore.jsx`, `app/forum/features/dm/components/DmThreadMessageRow.jsx`, `app/forum/features/dm/components/DmVoicePlayer.jsx`, `app/forum/features/dm/components/InboxPane.jsx`
+- Связанные зоны: `app/api/dm`, `app/api/profile`, `app/forum/features/profile`, `app/forum/shared`
+
+### Forum feature: feed
+
+- Зона: `app/forum/features/feed`
+- Назначение: Лента, темы, посты, replies, сортировки, composer и data runtime ленты.
+- Точки входа: `app/forum/features/feed/components/CreateTopicCard.jsx`, `app/forum/features/feed/components/ForumPostCard.jsx`, `app/forum/features/feed/components/LoadMoreSentinel.jsx`, `app/forum/features/feed/components/PostActionBar.jsx`, `app/forum/features/feed/components/PostBodyContent.jsx`, `app/forum/features/feed/components/PostCardBridge.jsx`, `app/forum/features/feed/components/PostFxLayer.jsx`, `app/forum/features/feed/components/PostHeaderMeta.jsx`, `app/forum/features/feed/components/PostMediaStack.jsx`, `app/forum/features/feed/components/PostOwnerMenu.jsx`
+- Связанные зоны: `app/api/forum`, `app/forum/features/media`, `app/forum/features/profile`, `app/forum/shared`
+
+### Forum feature: geo
+
+- Зона: `app/forum/features/geo`
+- Назначение: Фича geo внутри форума.
+- Точки входа: `app/forum/features/geo/GeoSessionTouchClient.jsx`
+- Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
+
+### Forum feature: media
+
+- Зона: `app/forum/features/media`
+- Назначение: Видео, аудио, embeds, lifecycle плееров, preview и trim/upload runtime.
+- Точки входа: `app/forum/features/media/components/ComposerAttachmentPreview.jsx`, `app/forum/features/media/components/ExternalVideoPlayer.jsx`, `app/forum/features/media/components/LivePreview.jsx`, `app/forum/features/media/components/qcast/QCastIcons.jsx`, `app/forum/features/media/components/QCastPlayer.jsx`, `app/forum/features/media/components/VideoFeedPane.jsx`, `app/forum/features/media/components/VideoLimitOverlay.jsx`, `app/forum/features/media/components/VideoMedia.jsx`, `app/forum/features/media/components/VideoOverlay.jsx`, `app/forum/features/media/components/VideoTrimPopover.jsx`
+- Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
+
+### Forum feature: moderation
+
+- Зона: `app/forum/features/moderation`
+- Назначение: Жалобы, admin actions, media lock и moderation UI/logic.
+- Точки входа: `app/forum/features/moderation/components/AdminPopover.jsx`, `app/forum/features/moderation/components/ReportPopover.jsx`, `app/forum/features/moderation/hooks/useAdminActions.js`, `app/forum/features/moderation/hooks/useAdminFlag.js`, `app/forum/features/moderation/hooks/useForumModerationRuntime.js`, `app/forum/features/moderation/hooks/useForumModerationUi.js`, `app/forum/features/moderation/hooks/useMediaModeration.js`, `app/forum/features/moderation/hooks/useReportController.js`, `app/forum/features/moderation/utils/http.js`
+- Связанные зоны: `app/api/forum/report`, `app/api/forum/admin`, `app/forum/features/media`, `app/forum/shared`
+
+### Forum feature: profile
+
+- Зона: `app/forum/features/profile`
+- Назначение: Профиль, avatar, about, VIP, popovers и profile sync.
+- Точки входа: `app/forum/features/profile/components/AboutRail.jsx`, `app/forum/features/profile/components/AvatarEmoji.jsx`, `app/forum/features/profile/components/ForumVipControl.jsx`, `app/forum/features/profile/components/ProfilePopover.jsx`, `app/forum/features/profile/components/UserInfoPopover.jsx`, `app/forum/features/profile/components/VipFlipBadge.jsx`, `app/forum/features/profile/components/VipPopover.jsx`, `app/forum/features/profile/constants/vipAssets.js`, `app/forum/features/profile/hooks/useAboutEditor.js`, `app/forum/features/profile/hooks/useForumProfileSocialRuntime.js`
+- Связанные зоны: `app/api/profile`, `app/forum/features/qcoin`, `app/forum/features/subscriptions`, `app/forum/shared`
+
+### Forum feature: qcoin
+
+- Зона: `app/forum/features/qcoin`
+- Назначение: QCoin UI в форуме и клиентская логика баланса.
+- Точки входа: `app/forum/features/qcoin/components/QCoinInline.jsx`, `app/forum/features/qcoin/components/QCoinWithdrawPopover.jsx`, `app/forum/features/qcoin/hooks/useQCoinLive.js`, `app/forum/features/qcoin/utils/account.js`, `app/forum/features/qcoin/utils/formatQCoinBalance.js`, `app/forum/features/qcoin/utils/paymentWindow.js`
+- Связанные зоны: `app/api/qcoin`, `app/forum/features/profile`, `app/forum/shared`
+
+### Forum feature: quests
+
+- Зона: `app/forum/features/quests`
+- Назначение: Квесты, claim-flow, quest runtime и UI.
+- Точки входа: `app/forum/features/quests/components/QuestClaimOverlay.jsx`, `app/forum/features/quests/components/QuestHub.jsx`, `app/forum/features/quests/components/QuestPane.jsx`, `app/forum/features/quests/hooks/useForumQuestConfig.js`, `app/forum/features/quests/hooks/useForumQuestProgress.js`, `app/forum/features/quests/hooks/useForumQuestRuntime.js`, `app/forum/features/quests/hooks/useQuestClaimAction.js`, `app/forum/features/quests/hooks/useQuestStorageState.js`, `app/forum/features/quests/hooks/useQuestViewActions.js`, `app/forum/features/quests/utils/progress.js`
+- Связанные зоны: `app/api/quest`, `app/forum/features/qcoin`, `app/forum/shared`
+
+### Forum feature: subscriptions
+
+- Зона: `app/forum/features/subscriptions`
+- Назначение: Подписки и social graph inside forum.
+- Точки входа: `app/forum/features/subscriptions/components/FollowersCounterInline.jsx`, `app/forum/features/subscriptions/components/SubscriptionsPopover.jsx`, `app/forum/features/subscriptions/hooks/useStarredAuthorsState.js`, `app/forum/features/subscriptions/utils/starred.js`
+- Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
+
+### Forum feature: ui
+
+- Зона: `app/forum/features/ui`
+- Назначение: Общие UI-узлы форума, prop bundles и shell runtime-хуки.
+- Точки входа: `app/forum/features/ui/components/ComposeDock.jsx`, `app/forum/features/ui/components/ComposerActionRail.jsx`, `app/forum/features/ui/components/ComposerCore.jsx`, `app/forum/features/ui/components/ComposerEmojiPanel.jsx`, `app/forum/features/ui/components/ComposerEmojiPreview.jsx`, `app/forum/features/ui/components/ComposerFabButton.jsx`, `app/forum/features/ui/components/ComposerFileInput.jsx`, `app/forum/features/ui/components/ComposerMediaProgressBar.jsx`, `app/forum/features/ui/components/ComposerStatusMeta.jsx`, `app/forum/features/ui/components/ComposerTextInput.jsx`
+- Связанные зоны: `app/forum/shared`, `app/api/forum`, `app/forum`
+
+## Shared Layers
+
+### Global Components
+
+- Зона: `components`
+- Назначение: Переиспользуемые UI-компоненты и провайдеры верхнего уровня вне одного домена.
+- Точки входа: `components/AndroidAppPrompt.jsx`, `components/AndroidChromiumVideoCanvas.jsx`, `components/AndroidNotificationBadgeSync.jsx`, `components/AuthNavClient.jsx`, `components/BgAudio.js`, `components/ForumBootSplash.jsx`, `components/ForumShellGate.jsx`, `components/HeroAvatar.js`, `components/HeroSection.js`, `components/i18n-dicts/ar.js`, `components/i18n-dicts/en.js`, `components/i18n-dicts/es.js`
+- Связанные зоны: `app`, `app/forum`, `lib`, `public`
+- Примечания: Сюда входят i18n, wallet-хабы, top bar, визуальные FX и общие клиентские виджеты.
+
+### Infrastructure Libraries
+
+- Зона: `lib`
+- Назначение: Глобальные библиотеки проекта: metadata, geo, subscriptions, forum-share, trim, redis, tma и бизнес-хелперы.
+- Точки входа: `lib/ads/adDiscoveryPrompt.js`, `lib/adsCore.js`, `lib/adsGeoTargetingFlow.js`, `lib/adsLandingPackageState.js`, `lib/authActionGateClient.js`, `lib/brain.js`, `lib/databroker.js`, `lib/deepTranslateService.js`, `lib/exchange/aiEntitlementState.js`, `lib/exchange/aiQuotaIdentity.js`, `lib/fcm.js`, `lib/forumClientVideoOptimizer.js`, `lib/forumShareManager.js`, `lib/forumVideoTrim.js`, `lib/geo/countries.js`, `lib/geo/regions.js`, `lib/indicators.js`, `lib/metadataCache.js`, `lib/nativePush.js`, `lib/notificationCenter.js`, `lib/ql7-support/adminReportComposer.js`, `lib/ql7-support/adsSupportReadAdapterV9.js`, `lib/ql7-support/adultLanguagePolicy.js`, `lib/ql7-support/broadcast.js`, `lib/ql7-support/cards.js`, `lib/ql7-support/cardSchemaV2.js`, `lib/ql7-support/cardSchemaV3.js`, `lib/ql7-support/cardSchemaV4.js`, `lib/ql7-support/caseEngine.js`, `lib/ql7-support/choiceContractV11.js`, `lib/ql7-support/clarificationBudget.js`, `lib/ql7-support/cognitiveMemoryV11.js`, `lib/ql7-support/config/behaviorManifest.js`, `lib/ql7-support/config/capabilitySnapshot.js`, `lib/ql7-support/config/featureFlag.js`, `lib/ql7-support/contracts/supportCard.js`, `lib/ql7-support/conversation/ledger.js`, `lib/ql7-support/conversationBreadthCorpusV11.js`, `lib/ql7-support/conversationIntelligence.js`, `lib/ql7-support/conversationLexiconV7.js`, `lib/ql7-support/conversationStateV7.js`, `lib/ql7-support/data/adapterReceipt.js`, `lib/ql7-support/data/factProjection.js`, `lib/ql7-support/data/simulationFixtures.js`, `lib/ql7-support/diagnosticFailure.js`, `lib/ql7-support/diagnosticPresentation.js`, `lib/ql7-support/diagnosticRegistry.js`, `lib/ql7-support/diagnostics.js`, `lib/ql7-support/dialogueMemory.js`, `lib/ql7-support/ecosystemCatalog.js`, `lib/ql7-support/ecosystemRating.js`, `lib/ql7-support/emailOutboxWorker.js`, `lib/ql7-support/emotionalPresentationV11.js`, `lib/ql7-support/entryGreetingLexiconV11.js`, `lib/ql7-support/eventNotificationCatalog.js`, `lib/ql7-support/events.js`, `lib/ql7-support/evidencePolicyV11_6.js`, `lib/ql7-support/featureFlag.js`, `lib/ql7-support/greetingCoordinatorV8.js`, `lib/ql7-support/humanConversationCorpusV11.js`, `lib/ql7-support/identityGraphV8.js`, `lib/ql7-support/identityResolver.js`, `lib/ql7-support/inputNormalizationV11_6.js`, `lib/ql7-support/inputPolicy.js`, `lib/ql7-support/intentHypothesisEngine.js`, `lib/ql7-support/internal/text.js`, `lib/ql7-support/knowledge/domainKnowledge.js`, `lib/ql7-support/knowledge/domainKnowledge.native.js`, `lib/ql7-support/knowledge/domainKnowledge.provider.js`, `lib/ql7-support/knowledge/domainRegistry.js`, `lib/ql7-support/knowledgeRegistry.js`, `lib/ql7-support/language/humanResponsePacks.provider.js`, `lib/ql7-support/language/humanVariationBanks.js`, `lib/ql7-support/language/locales.js`, `lib/ql7-support/language/nativeBanks.js`, `lib/ql7-support/language/normalizeInput.js`, `lib/ql7-support/language/responseLocalePolicy.js`, `lib/ql7-support/language/safetyLexicon.native.js`, `lib/ql7-support/language/safetyLexicon.provider.js`, `lib/ql7-support/language/semanticBanks.js`, `lib/ql7-support/languageOrchestrator.js`, `lib/ql7-support/learning/governancePolicy.js`, `lib/ql7-support/learning/incidentCandidate.js`, `lib/ql7-support/learningControlPlaneV11.js`, `lib/ql7-support/learningGovernanceV8.js`, `lib/ql7-support/learningPipeline.js`, `lib/ql7-support/limitsV11.js`, `lib/ql7-support/localDictionaryContext.js`, `lib/ql7-support/mediaEvidence.js`, `lib/ql7-support/metricRegistryV9.js`, `lib/ql7-support/microIntentCatalogV11_6.js`, `lib/ql7-support/naturalLanguageRealizer.js`, `lib/ql7-support/operator/buildCase.js`, `lib/ql7-support/operator/smtpRendererRu.js`, `lib/ql7-support/personalityEngineV11.js`, `lib/ql7-support/premiumResponsePlannerV11_6.js`, `lib/ql7-support/premiumSimulationCatalogV11_6.js`, `lib/ql7-support/presentation/badgePolicy.js`, `lib/ql7-support/presentation/buildSupportSurface.js`, `lib/ql7-support/presentation/legacyCardReader.js`, `lib/ql7-support/presentation/registry.js`, `lib/ql7-support/presentation/svgRegistry.js`, `lib/ql7-support/presentation/tableRegistry.js`, `lib/ql7-support/presentationV8.js`, `lib/ql7-support/providerLocalizationV8.js`, `lib/ql7-support/reportPolicyRegistry.js`, `lib/ql7-support/response/buildContentPlan.js`, `lib/ql7-support/response/critiqueResponse.js`, `lib/ql7-support/response/realizeNatural.js`, `lib/ql7-support/responsePlan.js`, `lib/ql7-support/runtime/executeTurn.js`, `lib/ql7-support/runtime/productionTurn.js`, `lib/ql7-support/runtimeCapabilityRegistryV11.js`, `lib/ql7-support/runtimeStateMachine.js`, `lib/ql7-support/safety/evaluateTurn.js`, `lib/ql7-support/safety/insultAssessment.js`, `lib/ql7-support/safety/insultStateMachine.js`, `lib/ql7-support/safety/obfuscationMatcher.js`, `lib/ql7-support/scenarioContractsV7.js`, `lib/ql7-support/scheduler.js`, `lib/ql7-support/semanticBadgeRegistryV11_6.js`, `lib/ql7-support/semanticNuanceV11.js`, `lib/ql7-support/semanticRouter.js`, `lib/ql7-support/semantics/analyzeTurn.js`, `lib/ql7-support/semantics/emotionAssessment.js`, `lib/ql7-support/semantics/routeCalibration.js`, `lib/ql7-support/semanticSurfaceV9.js`, `lib/ql7-support/server.js`, `lib/ql7-support/simulation/corpora/conversationBreadthV14.js`, `lib/ql7-support/simulation/corpora/knowledge32V14.js`, `lib/ql7-support/simulation/corpora/legacyIntelligenceV14.js`, `lib/ql7-support/simulation/corpora/safetyBoundaryV14.js`, `lib/ql7-support/simulation/executeScenario.js`, `lib/ql7-support/simulation/identityAudit.js`, `lib/ql7-support/simulation/independentOracle.js`, `lib/ql7-support/simulation/liveRead.js`, `lib/ql7-support/simulation/mutationEngine.js`, `lib/ql7-support/simulation/productionParityHarness.js`, `lib/ql7-support/simulation/reportWriter.js`, `lib/ql7-support/simulation/scenarioCatalog.js`, `lib/ql7-support/simulationEvaluatorV11.js`, `lib/ql7-support/simulationGeneratorV11.js`, `lib/ql7-support/simulationOntologyV11.js`, `lib/ql7-support/socialConversationV11.js`, `lib/ql7-support/sourceRegistry.js`, `lib/ql7-support/speechEngine.js`, `lib/ql7-support/supportDeepTranslateService.js`, `lib/ql7-support/systemActor.js`, `lib/ql7-support/templates.js`, `lib/ql7-support/topicActionRegistryV9.js`, `lib/ql7-support/topicSwitchArbiterV9.js`, `lib/ql7-support/toxicityEngine.js`, `lib/ql7-support/turnSemanticFrameV9.js`, `lib/ql7-support/v12/adaptiveResponseVariationV12.js`, `lib/ql7-support/v12/adminReportRuV12.js`, `lib/ql7-support/v12/choiceDiversityV12.js`, `lib/ql7-support/v12/conversationLedgerV12.js`, `lib/ql7-support/v12/factualSimulationV12.js`, `lib/ql7-support/v12/idlePolicyV12.js`, `lib/ql7-support/v12/independentReferenceOracleV12.js`, `lib/ql7-support/v12/index.js`, `lib/ql7-support/v12/languageDialectRouterV12.js`, `lib/ql7-support/v12/premiumCardLayoutV12.js`, `lib/ql7-support/v12/responseCriticV12.js`, `lib/ql7-support/v12/responsePlannerV12.js`, `lib/ql7-support/v12/safeLearningCalibrationV12.js`, `lib/ql7-support/v12/safetyEscalationLedgerV12.js`, `lib/ql7-support/v12/semanticBattleExpansionV12.js`, `lib/ql7-support/v12/semanticOntologyV12.js`, `lib/ql7-support/v12/sessionIdentityContextV12.js`, `lib/ql7-support/v12/structuredLocalizationV12.js`, `lib/ql7-support/v12/temporalContextV12.js`, `lib/ql7-support/v12/visualAcceptanceV12.js`, `lib/ql7-support/v13/adapterReceiptV13.js`, `lib/ql7-support/v13/analyzeTurnV13.js`, `lib/ql7-support/v13/conversationLedgerV13.js`, `lib/ql7-support/v13/humanRealizerV13.js`, `lib/ql7-support/v13/independentReferenceOracleV13.js`, `lib/ql7-support/v13/index.js`, `lib/ql7-support/v13/presentationRegistryV13.js`, `lib/ql7-support/v13/responseContentPlanV13.js`, `lib/ql7-support/v13/responseCriticV13.js`, `lib/ql7-support/v13/routeCalibrationV13.js`, `lib/ql7-support/v13/runtimeV13.js`, `lib/ql7-support/v13/simulationFixturesV13.js`, `lib/ql7-support/v13/supportSurfaceV13.js`, `lib/ql7-support/v13/textV13.js`, `lib/ql7-support/vipResolverV8.js`, `lib/redis.js`, `lib/safeWin.js`, `lib/seo/siteIndex.js`, `lib/seo/siteOrigin.js`, `lib/seo/structuredData.js`, `lib/storage/mediaKeys.js`, `lib/storage/r2.js`, `lib/subscriptions.js`, `lib/supportEmailTransport.js`, `lib/tma.js`, `lib/videoPipelineProgress.js`, `lib/walletSessionClient.js`, `lib/webPush.js`
+- Связанные зоны: `app`, `app/api`, `components`, `app/forum`
+- Примечания: Это не UI-слой; здесь должна жить инфраструктура и общая прикладная логика.
+
+## Static Assets Ownership
+
+## Tooling And Audit Ownership
+
+### Audit Artifacts
+
+- Зона: `audit`
+- Назначение: JSON-артефакты проверок, фаз миграции и технических отчетов.
+- Точки входа: `audit/forum-final-created-files-check.json`, `audit/forum-final-ownership-map.json`, `audit/forum-final-residual-monolith.json`, `audit/forum-functional-parity.report.json`, `audit/forum-phase-00-architecture.json`, `audit/forum-phase-01-shared.json`, `audit/forum-phase-02-ui-primitives.json`, `audit/forum-phase-03-feed.json`, `audit/forum-phase-04-media.json`, `audit/forum-phase-05-dm.json`, `audit/forum-phase-06-profile-social-qcoin.json`, `audit/forum-phase-07-quests-moderation-diagnostics.json`
+- Связанные зоны: `tools`, `app/forum`, `app/api`, `manual verification`
+
+### Tools
+
+- Зона: `tools`
+- Назначение: Локальные генераторы и аудит-скрипты проекта.
+- Точки входа: `tools/analyze-forum-diag.js`, `tools/analyze-forum-media-har.js`, `tools/analyze-heapsnapshot.js`, `tools/audit-account-sync.js`, `tools/audit-ad-runtime.js`, `tools/audit-adaptive-actions.js`, `tools/audit-adaptive-core.js`, `tools/audit-auth-bus.js`, `tools/audit-auth-cascade.js`, `tools/audit-console-noise.js`, `tools/audit-diagnostics-boundaries.js`, `tools/audit-effects.js`, `tools/audit-feature-flag-safety.js`, `tools/audit-forensic-mode-bounds.js`, `tools/audit-forum-deps.js`, `tools/audit-forum-functional-parity.ps1`, `tools/audit-forum-media-churn.js`, `tools/audit-forum-runtime-stability.mjs`, `tools/audit-forum-scroll-runtime.js`, `tools/audit-forum-startup.js`, `tools/audit-forum-view-report.js`, `tools/audit-full-forum.js`, `tools/audit-heavy.js`, `tools/audit-iframe-restore.js`, `tools/audit-layout-stability.js`, `tools/audit-media-budget.js`, `tools/audit-media-ownership.js`, `tools/audit-media.js`, `tools/audit-mobile-profile-budget.js`, `tools/audit-mode-contract.js`, `tools/audit-player-ownership.js`, `tools/audit-post-video-lifecycle.js`, `tools/audit-preload-waste.js`, `tools/audit-prod-lite-discipline.js`, `tools/audit-project-docs.js`, `tools/audit-provider-baseline.js`, `tools/audit-route-budgets.js`, `tools/audit-route-priority-policies.js`, `tools/audit-route-teardown.js`, `tools/audit-runtime-hotspots.js`, `tools/audit-runtime-mode-resolution.js`, `tools/audit-runtime-passports.js`, `tools/audit-same-src-thrash.js`, `tools/compare-baselines.js`, `tools/generate-project-dependencies.js`, `tools/generate-project-docs.js`, `tools/generate-project-ownership.js`, `tools/generate-project-risks.js`, `tools/generate-project-routes.js`, `tools/generate-project-tree.js`, `tools/ingest/normalizeHar.js`, `tools/ingest/normalizeHeap.js`, `tools/inventory-forum-runtime-lifecycle.mjs`, `tools/project-docs-shared.js`, `tools/prove-forum-navigation-contracts.mjs`, `tools/prove-forum-windowing-height-index.mjs`, `tools/ql7-faststart-browser-smoke-v68.mjs`, `tools/ql7-faststart-local-v68-check.mjs`, `tools/ql7-ffmpeg-assets-check-v68.mjs`, `tools/ql7-har-media-churn.mjs`, `tools/ql7-install-local-ffmpeg-v68.mjs`, `tools/ql7-media-owner-audit.mjs`, `tools/ql7-media-pressure-watch.mjs`, `tools/ql7-media-rootfix-v57-check.mjs`, `tools/ql7-media-rootfix-v57-smoke.mjs`, `tools/ql7-mp4-atom-audit.mjs`, `tools/run-governance-group.mjs`, `tools/run-scenario-telemetry.mjs`, `tools/run-verification-audits.mjs`, `tools/runtime-governance-baseline.mjs`, `tools/runtime-governance.js`, `tools/smoke-wallet-session.mjs`, `tools/split-i18n-dicts.mjs`, `tools/test-codex.mjs`, `tools/verify-docs-workflow.mjs`, `tools/verify-environment.mjs`
+- Связанные зоны: `audit`, `app`, `app/forum`, `app/api`, `components`, `lib`

@@ -1,0 +1,25 @@
+{
+  "root": true,
+  "extends": [
+    "next/core-web-vitals"
+  ],
+  "rules": {},
+  "overrides": [
+    {
+      "files": [
+        "app/ads/home.js",
+        "app/forum/ForumAds.js",
+        "app/forum/features/profile/components/AvatarEmoji.jsx",
+        "components/AuthNavClient.jsx",
+        "components/NotRobot.jsx"
+      ],
+      "rules": {
+        "@next/next/no-img-element": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "public/vendor/ffmpeg/**",
+    "public/workers/814.ffmpeg.js"
+  ]
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">量子连接不可用</string>
+    <string name="offline_body">请检查网络，然后在不丢失 shell 会话的情况下返回 Quantum L7 AI。</string>
+    <string name="retry">重试</string>
+    <string name="blocked_url">此链接将在 Quantum L7 AI 安全外壳之外打开。</string>
+    <string name="maintenance_title">Quantum L7 AI 正处于服务模式</string>
+    <string name="maintenance_body">移动 shell 已连接，但平台正在临时准备更安全的状态。</string>
+    <string name="force_update_title">需要更新</string>
+    <string name="force_update_body">此 Android shell 构建版本对于当前 Quantum L7 AI runtime 来说过旧。</string>
+</resources>

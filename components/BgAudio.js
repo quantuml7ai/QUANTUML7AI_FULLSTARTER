@@ -1,0 +1,596 @@
+'use client'
+
+import Image from 'next/image'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+const MEDIA_MUTED_EVENT = 'forum:media-mute'
+
+function readForumMediaSoundDocument() {
+  try {
+    const mutedFromWindow = (() => {
+      try {
+        if (typeof window.__FORUM_MEDIA_MUTED__ === 'boolean') {
+          return window.__FORUM_MEDIA_MUTED__
+        }
+
+        if (typeof window.__SITE_MEDIA_MUTED__ === 'boolean') {
+          return window.__SITE_MEDIA_MUTED__
+        }
+      } catch {}
+
+      return null
+    })()
+
+    const userSetFromWindow = (() => {
+      try {
+        return (
+          window.__FORUM_MEDIA_SOUND_USER_SET__ === true ||
+          window.__SITE_MEDIA_SOUND_USER_SET__ === true
+        )
+      } catch {
+        return false
+      }
+    })()
+
+    const root = document?.documentElement
+    const body = document?.body
+
+    const rawMuted =
+      mutedFromWindow ??
+      root?.dataset?.forumMediaMuted ??
+      root?.dataset?.mediaMuted ??
+      body?.dataset?.forumMediaMuted ??
+      body?.dataset?.mediaMuted ??
+      null
+
+    const rawUserSet =
+      userSetFromWindow ||
+      root?.dataset?.forumMediaSoundUserSet === '1' ||
+      body?.dataset?.forumMediaSoundUserSet === '1'
+
+    const val = rawMuted == null ? '' : String(rawMuted).trim().toLowerCase()
+
+    const muted =
+      val === '1' || val === 'true' || val === 'yes' || val === 'muted'
+        ? true
+        : val === '0' ||
+            val === 'false' ||
+            val === 'no' ||
+            val === 'unmuted'
+          ? false
+          : null
+
+    return {
+      muted,
+      userSet: Boolean(rawUserSet),
+    }
+  } catch {
+    return {
+      muted: null,
+      userSet: false,
+    }
+  }
+}
+
+function isAudibleMediaElement(el) {
+  if (!el) return false
+
+  const tag = String(el.tagName || '').toLowerCase()
+
+  if (tag !== 'audio' && tag !== 'video') {
+    return false
+  }
+
+  try {
+    if (el.muted) return false
+  } catch {}
+
+  try {
+    if (typeof el.volume === 'number' && el.volume <= 0) {
+      return false
+    }
+  } catch {}
+
+  return true
+}
+
+function findAudibleMediaInNode(node) {
+  if (!node) return null
+
+  if (isAudibleMediaElement(node)) {
+    return node
+  }
+
+  try {
+    if (typeof node.querySelectorAll === 'function') {
+      const list = node.querySelectorAll('audio,video')
+
+      for (const el of list) {
+        if (isAudibleMediaElement(el)) {
+          return el
+        }
+      }
+    }
+  } catch {}
+
+  return null
+}
+
+function eventMeansAudibleOtherMedia(detail) {
+  const d = detail || {}
+
+  if (d.source === 'bg-audio') {
+    return false
+  }
+
+  if (typeof d.audible === 'boolean') {
+    return d.audible
+  }
+
+  if (typeof d.muted === 'boolean') {
+    return !d.muted
+  }
+
+  const audibleEl = findAudibleMediaInNode(d.element)
+
+  return Boolean(audibleEl)
+}
+
+export default function BgAudio({
+  src = '/audio/cosmic.mp3',
+  defaultVolume = 0.35,
+  className = '',
+}) {
+  const audioRef = useRef(null)
+  const volRef = useRef(defaultVolume)
+
+  /*
+    Становится true только после реально успешного audio.play().
+
+    Обычная попытка автозапуска, заблокированная браузером,
+    не считается первым запуском.
+  */
+  const hasEverPlayedRef = useRef(false)
+
+  const [vol, setVol] = useState(defaultVolume)
+  const [playing, setPlaying] = useState(false)
+  const [locked, setLocked] = useState(true)
+
+  /*
+    Живёт только в памяти текущего экземпляра компонента.
+
+    Ничего не записывается в localStorage, sessionStorage,
+    cookies, dataset или глобальный звуковой документ.
+
+    После полной перезагрузки страницы снова становится false.
+  */
+  const [hiddenBySoundDocument, setHiddenBySoundDocument] =
+    useState(false)
+
+  useEffect(() => {
+    volRef.current = vol
+
+    const a = audioRef.current
+
+    if (!a) return
+
+    try {
+      a.volume = vol
+    } catch {}
+  }, [vol])
+
+  const emitBgAudioPlay = useCallback((el) => {
+    try {
+      window.dispatchEvent(
+        new CustomEvent('site-media-play', {
+          detail: {
+            source: 'bg-audio',
+            element: el,
+            audible: true,
+            muted: false,
+          },
+        }),
+      )
+    } catch {}
+  }, [])
+
+  const stopPlayback = useCallback((resetToStart = true) => {
+    const a = audioRef.current
+
+    if (!a) return
+
+    try {
+      a.pause()
+    } catch {}
+
+    if (resetToStart) {
+      try {
+        a.currentTime = 0
+      } catch {}
+    }
+
+    setPlaying(false)
+  }, [])
+
+  /*
+    Этот контур вызывается только из логики глобального
+    звукового документа.
+
+    Ручной toggle эту функцию не вызывает, поэтому ручное
+    выключение BG Audio не скрывает кнопку.
+  */
+  const muteBecauseForumMediaChoice = useCallback(() => {
+    const a = audioRef.current
+
+    if (!a) return
+
+    try {
+      a.pause()
+    } catch {}
+
+    try {
+      a.muted = true
+    } catch {}
+
+    try {
+      a.currentTime = 0
+    } catch {}
+
+    setPlaying(false)
+    setLocked(false)
+
+    /*
+      Кнопка скрывается только после того, как BG Audio
+      хотя бы один раз действительно начал играть.
+
+      Состояние никогда не возвращается в false внутри
+      текущей страницы, поэтому кнопка останется скрытой
+      до полной перезагрузки.
+    */
+    if (hasEverPlayedRef.current) {
+      setHiddenBySoundDocument(true)
+    }
+  }, [])
+
+  const playWithSound = useCallback(async () => {
+    const a = audioRef.current
+
+    if (!a) return false
+
+    const forumSound = readForumMediaSoundDocument()
+
+    if (forumSound.userSet) {
+      muteBecauseForumMediaChoice()
+      return false
+    }
+
+    try {
+      const duration = Number(a.duration)
+
+      if (
+        a.ended ||
+        (Number.isFinite(duration) &&
+          duration > 0 &&
+          a.currentTime >= duration)
+      ) {
+        try {
+          a.currentTime = 0
+        } catch {}
+      }
+
+      a.loop = false
+      a.muted = false
+      a.playsInline = true
+
+      try {
+        a.volume = volRef.current
+      } catch {}
+
+      await a.play()
+
+      /*
+        Фиксируем только реальный успешный запуск.
+
+        При rejected Promise из-за autoplay policy
+        выполнение сюда не попадёт.
+      */
+      hasEverPlayedRef.current = true
+
+      setPlaying(true)
+      setLocked(false)
+      emitBgAudioPlay(a)
+
+      return true
+    } catch {
+      return false
+    }
+  }, [emitBgAudioPlay, muteBecauseForumMediaChoice])
+
+  /* =========================
+     1) АВТОСТАРТ ПРИ МОНТАЖЕ
+     - пробуем со звуком
+     - если браузер блокирует, ждём первый жест
+  ========================= */
+  useEffect(() => {
+    const a = audioRef.current
+
+    if (!a) return
+
+    let cancelled = false
+
+    ;(async () => {
+      const ok = await playWithSound()
+
+      if (cancelled) return
+
+      if (!ok) {
+        try {
+          a.pause()
+        } catch {}
+
+        try {
+          a.currentTime = 0
+        } catch {}
+
+        try {
+          a.muted = false
+        } catch {}
+
+        setPlaying(false)
+        setLocked(true)
+      }
+    })()
+
+    return () => {
+      cancelled = true
+
+      try {
+        a.pause()
+      } catch {}
+    }
+  }, [src, playWithSound])
+
+  /* =========================
+     2) РАЗБЛОКИРОВКА ПО ПЕРВОМУ ЖЕСТУ
+  ========================= */
+  useEffect(() => {
+    const a = audioRef.current
+
+    if (!a || !locked) {
+      return () => {}
+    }
+
+    let detached = false
+    const captureOptions = {
+      passive: true,
+      capture: true,
+    }
+
+    const detach = () => {
+      if (detached) return
+
+      detached = true
+
+      window.removeEventListener(
+        'pointerdown',
+        onGesture,
+        captureOptions,
+      )
+      window.removeEventListener('click', onGesture, captureOptions)
+      window.removeEventListener('keydown', onGesture, captureOptions)
+      window.removeEventListener(
+        'touchstart',
+        onGesture,
+        captureOptions,
+      )
+    }
+
+    const enableSound = async () => {
+      const ok = await playWithSound()
+
+      if (ok) {
+        detach()
+      }
+    }
+
+    function onGesture(e) {
+      const target = e?.target
+
+      if (target && typeof target.closest === 'function') {
+        if (target.closest('.audio-toggle')) {
+          return
+        }
+      }
+
+      void enableSound()
+    }
+
+    window.addEventListener('pointerdown', onGesture, captureOptions)
+    window.addEventListener('click', onGesture, captureOptions)
+    window.addEventListener('keydown', onGesture, captureOptions)
+    window.addEventListener('touchstart', onGesture, captureOptions)
+
+    return () => {
+      detach()
+    }
+  }, [locked, playWithSound])
+
+  /* =========================
+     3) ЕДИНЫЙ ДОКУМЕНТ ЗВУКА ФОРУМА
+     - BGAudio только читает состояние
+     - сам ничего не пишет
+     - после пользовательского выбора media sound сразу тушится
+     - после первого успешного запуска скрывает только кнопку
+  ========================= */
+  useEffect(() => {
+    const syncFromForumSoundDocument = () => {
+      const state = readForumMediaSoundDocument()
+
+      if (!state.userSet) return
+
+      muteBecauseForumMediaChoice()
+    }
+
+    syncFromForumSoundDocument()
+
+    const onForumMuted = () => {
+      setTimeout(syncFromForumSoundDocument, 0)
+    }
+
+    window.addEventListener(MEDIA_MUTED_EVENT, onForumMuted)
+    window.addEventListener('storage', onForumMuted)
+
+    return () => {
+      window.removeEventListener(MEDIA_MUTED_EVENT, onForumMuted)
+      window.removeEventListener('storage', onForumMuted)
+    }
+  }, [muteBecauseForumMediaChoice])
+
+  /* =========================
+     4) КООРДИНАЦИЯ АУДИО
+     - стопаемся только от реально слышимого
+       чужого audio/video
+     - сама эта остановка кнопку не скрывает
+  ========================= */
+  useEffect(() => {
+    const a = audioRef.current
+
+    if (!a) return
+
+    const hardStopBecauseOtherAudioStarted = () => {
+      if (a.paused) return
+
+      stopPlayback(true)
+    }
+
+    const onMediaPlay = (e) => {
+      const d = e?.detail || {}
+
+      if (!eventMeansAudibleOtherMedia(d)) return
+
+      hardStopBecauseOtherAudioStarted()
+    }
+
+    const onAnyPlay = (e) => {
+      const target = e.target
+
+      if (target === a) return
+      if (!isAudibleMediaElement(target)) return
+
+      hardStopBecauseOtherAudioStarted()
+    }
+
+    window.addEventListener('site-media-play', onMediaPlay)
+    document.addEventListener('play', onAnyPlay, true)
+
+    return () => {
+      window.removeEventListener('site-media-play', onMediaPlay)
+      document.removeEventListener('play', onAnyPlay, true)
+    }
+  }, [stopPlayback])
+
+  /* =========================
+     5) КНОПКА ВКЛ / ВЫКЛ
+     - OFF => play with sound
+     - ON  => hard stop
+     - ручное выключение кнопку не скрывает
+  ========================= */
+  const toggle = useCallback(
+    async (e) => {
+      e?.preventDefault?.()
+      e?.stopPropagation?.()
+
+      const a = audioRef.current
+
+      if (!a) return
+
+      if (playing && !a.paused) {
+        stopPlayback(true)
+        return
+      }
+
+      await playWithSound()
+    },
+    [playing, playWithSound, stopPlayback],
+  )
+
+  /* =========================
+     6) КОЛЁСИКО — ГРОМКОСТЬ
+  ========================= */
+  const onWheelVolume = useCallback(
+    (e) => {
+      const delta = e.deltaY > 0 ? -0.05 : 0.05
+      const nextVolume = Math.max(
+        0,
+        Math.min(1, +(vol + delta).toFixed(2)),
+      )
+
+      setVol(nextVolume)
+    },
+    [vol],
+  )
+
+  const isOn =
+    playing && !locked && !audioRef.current?.muted
+
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="metadata"
+        playsInline
+        loop={false}
+        aria-hidden="true"
+        onEnded={() => {
+          try {
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0
+            }
+          } catch {}
+
+          setPlaying(false)
+          setLocked(false)
+        }}
+      />
+
+      {!hiddenBySoundDocument && (
+        <button
+          className={`audio-toggle ${
+            isOn ? 'on' : 'off'
+          } ${className}`}
+          onClick={toggle}
+          onWheel={onWheelVolume}
+          type="button"
+          title={
+            isOn
+              ? `Sound on • ${Math.round(
+                  vol * 100,
+                )}% (wheel to change)`
+              : locked
+                ? 'Enable sound'
+                : 'Play background audio'
+          }
+          aria-label="Toggle background audio"
+        >
+          <span
+            className="audio-toggle__visual"
+            aria-hidden="true"
+          >
+            <Image
+              className="audio-toggle__gif"
+              src="/audio/bgaudio.gif"
+              alt=""
+              width={34}
+              height={34}
+              unoptimized
+              draggable={false}
+            />
+
+            <span className="audio-toggle__slash" />
+          </span>
+        </button>
+      )}
+    </>
+  )
+}

@@ -1,0 +1,215 @@
+'use client'
+
+import React from 'react'
+import DmDeletePopover from './DmDeletePopover'
+import VideoOverlay from '../../media/components/VideoOverlay'
+import VideoLimitOverlay from '../../media/components/VideoLimitOverlay'
+import VideoTrimPopover from '../../media/components/VideoTrimPopover'
+import ReportPopover from '../../moderation/components/ReportPopover'
+import SharePopover from '../../../SharePopover'
+import UserInfoPopover from '../../profile/components/UserInfoPopover'
+import QuestClaimOverlay from '../../quests/components/QuestClaimOverlay'
+import SubscriptionsPopover from '../../subscriptions/components/SubscriptionsPopover'
+
+export default function ForumOverlayStack({
+  dmDeletePopover,
+  dmDeleteText,
+  dmDeleteCheckboxLabel,
+  dmDeleteForAll,
+  setDmDeleteForAll,
+  dmDeletePending,
+  closeDmDeletePopover,
+  confirmDmDelete,
+  t,
+  videoOpen,
+  videoState,
+  videoElapsed,
+  videoStreamRef,
+  overlayMediaUrl,
+  pendingVideo,
+  pendingVideoInfoRef,
+  pendingVideoBlobMetaRef,
+  overlayMediaKind,
+  pendingImgs,
+  overlayImageIndex,
+  setOverlayImageIndex,
+  removePendingImageAt,
+  acceptMediaFromOverlay,
+  startVideo,
+  stopVideo,
+  resetOrCloseOverlay,
+  videoLimitOverlay,
+  videoLimitCopy,
+  forumVideoMaxSeconds,
+  closeVideoLimitOverlay,
+  videoTrimPopover,
+  videoTrimCopy,
+  setVideoTrimStartSec,
+  closeVideoTrimPopover,
+  applyVideoTrimPopover,
+  reportUI,
+  closeReportPopover,
+  handleReportSelect,
+  reportBusy,
+  reportPopoverRef,
+  uiDir,
+  shareUI,
+  closeSharePopover,
+  toast,
+  subscriptionsUI,
+  closeSubscriptionsPopover,
+  openSubscriptionsPopover,
+  handleUserInfoToggle,
+  userInfoAnchorRef,
+  userInfoOpen,
+  closeUserInfoPopover,
+  userInfoUid,
+  userInfoPreview,
+  onOpenUserPosts,
+  onOpenUserTopics,
+  rich,
+  formatCount,
+  claimFx,
+  closeQuestClaimOverlay,
+  confirmQuestClaim,
+}) {
+  const overlayPreviewUrl = overlayMediaUrl || pendingVideo
+  const overlayPreviewMirror = React.useMemo(() => {
+    if (overlayMediaKind === 'image') return false
+    const src = String(overlayPreviewUrl || '').trim()
+    let meta = null
+    try {
+      meta = src ? pendingVideoBlobMetaRef?.current?.get?.(src) || null : null
+    } catch {}
+    try {
+      if (!meta) meta = pendingVideoInfoRef?.current || null
+    } catch {}
+    const facingMode = String(meta?.cameraFacingMode || meta?.facingMode || '').toLowerCase()
+    return !!(meta?.frontCameraMirror || meta?.mirrorVideo || facingMode === 'user' || facingMode === 'front')
+  }, [overlayMediaKind, overlayPreviewUrl, pendingVideoBlobMetaRef, pendingVideoInfoRef])
+
+  return (
+    <>
+      <DmDeletePopover
+        open={!!dmDeletePopover}
+        rect={dmDeletePopover?.rect}
+        title=""
+        text={dmDeleteText}
+        checkboxLabel={dmDeleteCheckboxLabel}
+        checked={dmDeleteForAll}
+        onChecked={setDmDeleteForAll}
+        pending={dmDeletePending}
+        onCancel={closeDmDeletePopover}
+        onConfirm={confirmDmDelete}
+        cancelLabel={t('dm_delete_cancel') || t('forum_cancel')}
+        confirmLabel={t('dm_delete_confirm') || t('forum_delete')}
+      />
+      <VideoOverlay
+        open={videoOpen}
+        state={
+          !videoOpen
+            ? 'hidden'
+            : (videoState === 'recording'
+                ? 'recording'
+                : (videoState === 'preview'
+                    ? 'preview'
+                    : (videoState === 'processing' ? 'processing' : 'live')))
+        }
+        elapsed={videoElapsed}
+        streamRef={videoStreamRef}
+        previewUrl={overlayPreviewUrl}
+        previewMirror={overlayPreviewMirror}
+        mediaKind={overlayMediaKind}
+        imageUrls={pendingImgs}
+        imageIndex={overlayImageIndex}
+        onImageIndexChange={setOverlayImageIndex}
+        onRemoveImage={removePendingImageAt}
+        onAccept={acceptMediaFromOverlay}
+        onStart={startVideo}
+        onStop={stopVideo}
+        onResetConfirm={resetOrCloseOverlay}
+        t={t}
+      />
+      <VideoLimitOverlay
+        open={!!videoLimitOverlay?.open}
+        copy={videoLimitCopy}
+        maxSec={forumVideoMaxSeconds}
+        durationSec={videoLimitOverlay?.durationSec}
+        reason={videoLimitOverlay?.reason}
+        onClose={closeVideoLimitOverlay}
+      />
+      <VideoTrimPopover
+        open={!!videoTrimPopover?.open}
+        copy={videoTrimCopy}
+        t={t}
+        sourceBlob={videoTrimPopover?.blob}
+        durationSec={videoTrimPopover?.durationSec}
+        maxSec={forumVideoMaxSeconds}
+        startSec={videoTrimPopover?.startSec}
+        processing={!!videoTrimPopover?.processing}
+        processPct={videoTrimPopover?.processPct}
+        errorCode={videoTrimPopover?.errorCode}
+        onStartChange={setVideoTrimStartSec}
+        onCancel={closeVideoTrimPopover}
+        onTrim={applyVideoTrimPopover}
+      />
+      <ReportPopover
+        open={reportUI.open}
+        anchorRect={reportUI.anchorRect}
+        onClose={closeReportPopover}
+        onSelect={handleReportSelect}
+        t={t}
+        busy={reportBusy}
+        popoverRef={reportPopoverRef}
+        dir={uiDir}
+      />
+      <SharePopover
+        open={shareUI.open}
+        post={shareUI.post}
+        onClose={closeSharePopover}
+        t={t}
+        toast={toast}
+      />
+      <SubscriptionsPopover
+        open={!!subscriptionsUI?.open}
+        userId={subscriptionsUI?.userId}
+        initialMode={subscriptionsUI?.initialMode}
+        onClose={closeSubscriptionsPopover}
+        onOpenUserInfo={handleUserInfoToggle}
+        t={t}
+        formatCountFn={formatCount}
+      />
+      <UserInfoPopover
+        anchorRef={userInfoAnchorRef}
+        open={userInfoOpen}
+        onClose={closeUserInfoPopover}
+        rawUserId={userInfoUid}
+        userPreview={userInfoPreview}
+        t={t}
+        renderRich={rich}
+        formatCountFn={formatCount}
+        onOpenUserPosts={(payload) => {
+          closeSubscriptionsPopover?.()
+          onOpenUserPosts?.(payload)
+        }}
+        onOpenUserTopics={(payload) => {
+          closeSubscriptionsPopover?.()
+          onOpenUserTopics?.(payload)
+        }}
+        onOpenSubscriptions={openSubscriptionsPopover}
+        onOpenDirectMessage={() => {
+          closeSubscriptionsPopover?.()
+        }}
+        onOpenGiftFlow={() => {
+          closeSubscriptionsPopover?.()
+        }}
+      />
+      <QuestClaimOverlay
+        claimFx={claimFx}
+        t={t}
+        onClose={closeQuestClaimOverlay}
+        onClaim={confirmQuestClaim}
+      />
+    </>
+  )
+}

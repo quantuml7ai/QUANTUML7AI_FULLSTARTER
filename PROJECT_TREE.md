@@ -1,0 +1,1637 @@
+# PROJECT_TREE.md
+
+> Обязательное правило сопровождения:
+> Любое изменение структуры проекта обязательно должно сопровождаться обновлением этого файла.
+> Это включает: добавление файлов, удаление файлов, переименование, перенос между папками и изменение назначения файла.
+> Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
+> Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
+
+Сгенерировано автоматически: 2026-08-07T06:36:48.706Z
+Файлов в реестре: 1167
+
+## Исключенные каталоги
+- `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
+- `.next/` — генерируемые артефакты Next.js сборки.
+- `node_modules/` — внешние зависимости менеджера пакетов, не авторский код репозитория.
+- `scripts/` — локальные migration/audit/smoke/image утилиты; не production runtime и не часть коммитимого дерева после V15.
+- `.ql7-backups/`, `.ql7-local-archive/`, `.ql7-tmp/`, `.ql7-patch-backups/`, `reports/`, `account-deletion-reports/`, `migration-reports/`, `mongo-migration-reports/` и корневые `QL7_SUPPORT_PLANETARY_AI_V5_*` — локальные patch/report/evidence артефакты.
+
+## Охват
+
+Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.
+Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.
+
+- `.eslintrc.json` — 1 файлов
+- `.gitignore` — 1 файлов
+- `.npmrc` — 1 файлов
+- `Обязательная директива.md` — 1 файлов
+- `Сверка Ω Из ТЗ.md` — 1 файлов
+- `AGENTS.md` — 1 файлов
+- `app` — 486 файлов
+- `components` — 50 файлов
+- `config` — 1 файлов
+- `docs` — 23 файлов
+- `GEO_DETECT_WORLD_FEED_PREMIUM_IMPLEMENTATION_AUDIT_RU.md` — 1 файлов
+- `geo.md` — 1 файлов
+- `jsconfig.json` — 1 файлов
+- `laboratory Comands.md` — 1 файлов
+- `lib` — 240 файлов
+- `middleware.js` — 1 файлов
+- `mobile` — 71 файлов
+- `next-env.d.ts` — 1 файлов
+- `next.config.mjs` — 1 файлов
+- `package.json` — 1 файлов
+- `pnpm-lock.yaml` — 1 файлов
+- `pnpm-workspace.yaml` — 1 файлов
+- `PROJECT_DEPENDENCIES.md` — 1 файлов
+- `PROJECT_OWNERSHIP.md` — 1 файлов
+- `PROJECT_RISKS.md` — 1 файлов
+- `PROJECT_ROUTES.md` — 1 файлов
+- `PROJECT_TREE.md` — 1 файлов
+- `QL7_COMBAT_PS1_PATCH_STANDARD_SUPPLEMENT.md` — 1 файлов
+- `QL7_DATA_ROUTES_STORAGE_README_RU.md` — 1 файлов
+- `QL7_DATABASE_ARCHITECTURE_RU.md` — 1 файлов
+- `QL7_FORUM_PREMIUM_GEO_SERVER_SURFACES_TZ_DRAFT_V3_RU.md` — 1 файлов
+- `QL7_REDIS_MONGO_PREMIUM_CLOSEOUT_AUDIT_RU.md` — 1 файлов
+- `QL7_SUPPORT_ARCHITECTURE_RU.md` — 1 файлов
+- `QL7_SUPPORT_MASTER_TZ_REV5_MANDATORY_SUPPLEMENT_RU.md` — 1 файлов
+- `QL7-SUPPORT-BROADCAST-CLEANUP-BY-EXACT-TEXT-WINDOWS-PS51-V2-CJMMAND.md` — 1 файлов
+- `QL7-SUPPORT-BROADCAST-CLEANUP-BY-EXACT-TEXT-WINDOWS-PS51-V2.ps1` — 1 файлов
+- `QUANTUM_L7_AI_QL7_SUPPORT_MASTER_TZ_FINAL_REV5_FULL_RU.md` — 1 файлов
+- `README.md` — 1 файлов
+- `src` — 32 файлов
+- `tests` — 150 файлов
+- `TEXT_QL7_SUPPORT_ARHITECTURA_RU.md` — 1 файлов
+- `tools` — 78 файлов
+- `tsconfig.json` — 1 файлов
+- `vitest.config.mjs` — 1 файлов
+- `WQUANTUM_CHRONOGY.md` — 1 файлов
+
+## Дерево проекта
+
+- app/ — Основной каталог Next.js App Router: страницы, layout и API.
+  - about/ — Страница/ресурсы раздела About.
+    - layout.js — Next.js layout для сегмента /about. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /about. Связи: импортирует app/ads.js, components/TopBar.js, components/i18n.js.
+  - academy/ — Страницы и блоки академии.
+    - AcademyExamBlock.js — JS-файл Academy Exam Block сегмента academy. Связи: импортирует components/i18n.js; используется в app/academy/page.js.
+    - layout.js — Next.js layout для сегмента /academy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /academy. Связи: импортирует app/academy/AcademyExamBlock.js, app/ads.js, components/TopBar.js.
+  - ads/ — Страницы и модули рекламного раздела.
+    - AdsGeoTargetingPortal.jsx — JSX-файл Ads Geo Targeting Portal сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, components/i18n.js, lib/adsGeoTargetingFlow.js; используется в app/ads/home.js.
+    - GeoTargetingPicker.jsx — JSX-файл Geo Targeting Picker сегмента ads. Связи: импортирует components/i18n.js, lib/geo/countries.js, lib/geo/regions.js; используется в app/ads/AdsGeoTargetingPortal.jsx.
+    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/AdsGeoTargetingPortal.jsx, forum/features/media/services/uploadR2MediaFile.js, components/MediaPipelineProgress.jsx; используется в app/ads/page.jsx.
+    - layout.js — Next.js layout для сегмента /ads. Связи: импортирует lib/metadataCache.js.
+    - page.jsx — JSX-файл page сегмента ads. Связи: импортирует app/ads/home.js, components/TopBar.js, components/i18n.js.
+  - api/ — Серверные API-маршруты и их внутренние хелперы.
+    - _diag/ — Служебная диагностика API.
+      - route.js — API-route _diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - academy/ — Каталог academy.
+      - exam/ — Каталог exam.
+        - route.js — API-route academy/exam для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/identity/ql7IdentityContract.cjs, lib/mongo/academy-primary.cjs.
+    - ads/ — Каталог ads.
+      - route.js — API-route ads для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+    - aiquota/ — Каталог aiquota.
+      - usage/ — Каталог usage.
+        - route.js — API-route aiquota/usage для серверной логики Next.js. Связи: импортирует lib/exchange/aiQuotaIdentity.js.
+    - app-shell/ — Каталог app-shell.
+      - config/ — Каталог config.
+        - route.js — API-route app-shell/config для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - battlecoin/ — Каталог battlecoin.
+      - chat/ — Каталог chat.
+        - events/ — Каталог events.
+          - route.js — API-route battlecoin/chat/events для серверной логики Next.js. Связи: импортирует lib/battlecoin/battle-chat-events.cjs.
+        - messages/ — Каталог messages.
+          - route.js — API-route battlecoin/chat/messages для серверной логики Next.js. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs.
+        - reaction/ — Каталог reaction.
+          - route.js — API-route battlecoin/chat/reaction для серверной логики Next.js. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs.
+      - order/ — Каталог order.
+        - route.js — API-route battlecoin/order для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+      - state/ — Каталог state.
+        - route.js — API-route battlecoin/state для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+    - brain/ — Каталог brain.
+      - analyze/ — Каталог analyze.
+        - route.js — API-route brain/analyze для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - coins/ — Каталог coins.
+      - route.js — API-route coins для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - contact/ — Каталог contact.
+      - route.js — API-route contact для серверной логики Next.js. Связи: импортирует lib/supportEmailTransport.js.
+    - crypto-news/ — Каталог crypto-news.
+      - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - debug/ — Каталог debug.
+      - ads/ — Каталог ads.
+        - grant/ — Каталог grant.
+          - route.js — API-route debug/ads/grant для серверной логики Next.js. Связи: импортирует lib/adsCore.js.
+      - env/ — Каталог env.
+        - route.js — API-route debug/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-diag/ — Каталог forum-diag.
+        - route.js — API-route debug/forum-diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - invoices/ — Каталог invoices.
+        - route.js — API-route debug/invoices для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - redis/ — Каталог redis.
+        - info/ — Каталог info.
+          - route.js — API-route debug/redis/info для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - route.js — API-route debug/redis для серверной логики Next.js. Связи: импортирует lib/redis.js.
+      - vip/ — Каталог vip.
+        - grant/ — Каталог grant.
+          - route.js — API-route debug/vip/grant для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/subscriptions.js.
+        - migrate/ — Каталог migrate.
+          - route.js — API-route debug/vip/migrate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - route.js — API-route debug/vip для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - deep-translate/ — Каталог deep-translate.
+      - route.js — API-route deep-translate для серверной логики Next.js. Связи: импортирует lib/deepTranslateService.js.
+    - dm/ — Серверный контур личных сообщений.
+      - block/ — Каталог block.
+        - route.js — API-route dm/block для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - delete/ — Каталог delete.
+        - route.js — API-route dm/delete для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - dialogs/ — Каталог dialogs.
+        - route.js — API-route dm/dialogs для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs, lib/ql7-support/config/featureFlag.js.
+      - seen/ — Каталог seen.
+        - route.js — API-route dm/seen для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - send/ — Каталог send.
+        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/client.cjs; используется в tests/integration/ql7-support-scenarios.test.js.
+      - support-card-translate/ — Каталог support-card-translate.
+        - route.js — API-route dm/support-card-translate для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js.
+      - support-entry/ — Каталог support-entry.
+        - route.js — API-route dm/support-entry для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/featureFlag.js, lib/ql7-support/identityResolver.js.
+      - support-feedback/ — Каталог support-feedback.
+        - route.js — API-route dm/support-feedback для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/ql7-support/cognitiveMemoryV11.js.
+      - support-state/ — Каталог support-state.
+        - route.js — API-route dm/support-state для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/featureFlag.js, lib/ql7-support/identityResolver.js.
+      - support-worker/ — Каталог support-worker.
+        - route.js — API-route dm/support-worker для серверной логики Next.js. Связи: импортирует lib/ql7-support/featureFlag.js, lib/ql7-support/scheduler.js.
+      - thread/ — Каталог thread.
+        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/mongo/dm-primary.cjs.
+      - unblock/ — Каталог unblock.
+        - route.js — API-route dm/unblock для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - _db.js — Внутренний db для API-сегмента dm. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs; используется в app/api/dm/block/route.js, app/api/dm/delete/route.js, app/api/dm/seen/route.js.
+      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js, lib/ql7-support/systemActor.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - forum/ — Серверный контур форума: снапшоты, мутации, модерация, upload.
+      - admin/ — Каталог admin.
+        - banUser/ — Каталог banUser.
+          - route.js — API-route forum/admin/banUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deletePost/ — Каталог deletePost.
+          - route.js — API-route forum/admin/deletePost для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deleteTopic/ — Каталог deleteTopic.
+          - route.js — API-route forum/admin/deleteTopic для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - unbanUser/ — Каталог unbanUser.
+          - route.js — API-route forum/admin/unbanUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - verify/ — Каталог verify.
+          - route.js — API-route forum/admin/verify для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - blobUploadUrl/ — Каталог blobUploadUrl.
+        - route.js — API-route forum/blobUploadUrl для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, forum/shared/constants/media.js.
+      - events/ — Каталог events.
+        - stream/ — Каталог stream.
+          - route.js — API-route forum/events/stream для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js.
+      - feed/ — Каталог feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - inbox/ — Каталог inbox.
+        - replies/ — Каталог replies.
+          - page/ — Каталог page.
+            - route.js — API-route forum/inbox/replies/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - media-feed/ — Каталог media-feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/media-feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - mediaLock/ — Каталог mediaLock.
+        - route.js — API-route forum/mediaLock для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - moderate/ — Каталог moderate.
+        - route.js — API-route forum/moderate для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - mutate/ — Каталог mutate.
+        - route.js — API-route forum/mutate для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - own/ — Каталог own.
+        - route.js — API-route forum/own для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/forum-primary.cjs.
+      - post-by-id/ — Каталог post-by-id.
+        - route.js — API-route forum/post-by-id для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-chain/ — Каталог post-chain.
+        - route.js — API-route forum/post-chain для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-locate/ — Каталог post-locate.
+        - route.js — API-route forum/post-locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-meta/ — Каталог post-meta.
+        - route.js — API-route forum/post-meta для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - recommendations/ — Каталог recommendations.
+        - users/ — Каталог users.
+          - route.js — API-route forum/recommendations/users для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/integration/api/forum/recommendations-users.route.test.js.
+      - report/ — Каталог report.
+        - route.js — API-route forum/report для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - rev/ — Каталог rev.
+        - route.js — API-route forum/rev для серверной логики Next.js. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - search/ — Каталог search.
+        - page/ — Каталог page.
+          - route.js — API-route forum/search/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - snapshot/ — Каталог snapshot.
+        - route.js — API-route forum/snapshot для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - subs/ — Каталог subs.
+        - count/ — Каталог count.
+          - route.js — API-route forum/subs/count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - list/ — Каталог list.
+          - route.js — API-route forum/subs/list для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - my-count/ — Каталог my-count.
+          - route.js — API-route forum/subs/my-count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - people/ — Каталог people.
+          - route.js — API-route forum/subs/people для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/forum/subs-people.route.test.js.
+        - rebuild-followers/ — Каталог rebuild-followers.
+          - route.js — API-route forum/subs/rebuild-followers для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - toggle/ — Каталог toggle.
+          - route.js — API-route forum/subs/toggle для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - thread/ — Каталог thread.
+        - locate/ — Каталог locate.
+          - route.js — API-route forum/thread/locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+        - page/ — Каталог page.
+          - route.js — API-route forum/thread/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - topics/ — Каталог topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - upload/ — Каталог upload.
+        - route.js — API-route forum/upload для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, forum/shared/constants/media.js, lib/storage/mediaKeys.js.
+      - uploadAudio/ — Каталог uploadAudio.
+        - route.js — API-route forum/uploadAudio для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, lib/storage/mediaKeys.js.
+      - uploadVideo/ — Каталог uploadVideo.
+        - route.js — API-route forum/uploadVideo для серверной логики Next.js. Связи: импортирует forum/shared/constants/media.js, lib/storage/mediaKeys.js, lib/storage/r2.js.
+      - user-posts/ — Каталог user-posts.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-posts/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - user-search/ — Каталог user-search.
+        - rebuild/ — Каталог rebuild.
+          - route.js — API-route forum/user-search/rebuild для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/profile-primary.cjs.
+      - user-topics/ — Каталог user-topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - vip/ — Каталог vip.
+        - batch/ — Каталог batch.
+          - route.js — API-route forum/vip/batch для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+      - wa-preview/ — Каталог wa-preview.
+        - route.js — API-route forum/wa-preview для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - _bus.js — Внутренний bus для API-сегмента forum. Связи: используется в app/api/forum/events/stream/route.js, app/api/forum/mutate/route.js.
+      - _db.js — Внутренний db для API-сегмента forum. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/forum-primary.cjs; используется в app/api/forum/admin/banUser/route.js, app/api/forum/admin/deletePost/route.js, app/api/forum/admin/deleteTopic/route.js.
+      - _utils.js — Внутренний utils для API-сегмента forum. Связи: используется в app/api/academy/exam/route.js, app/api/forum/_db.js, app/api/forum/admin/banUser/route.js.
+    - geo/ — Каталог geo.
+      - session-touch/ — Каталог session-touch.
+        - route.js — API-route geo/session-touch для серверной логики Next.js. Связи: импортирует lib/forum/public-sanitize.cjs, lib/geo/request-geo.cjs, lib/identity/geo-identity.cjs.
+    - market/ — Каталог market.
+      - summary/ — Каталог summary.
+        - route.js — API-route market/summary для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - metamarket/ — Каталог metamarket.
+      - buy/ — Каталог buy.
+        - route.js — API-route metamarket/buy для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - collection/ — Каталог collection.
+        - route.js — API-route metamarket/collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - gift/ — Каталог gift.
+        - route.js — API-route metamarket/gift для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - my-collection/ — Каталог my-collection.
+        - route.js — API-route metamarket/my-collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - owners/ — Каталог owners.
+        - route.js — API-route metamarket/owners для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - quote/ — Каталог quote.
+        - route.js — API-route metamarket/quote для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - sell/ — Каталог sell.
+        - route.js — API-route metamarket/sell для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - state/ — Каталог state.
+        - route.js — API-route metamarket/state для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - token-history/ — Каталог token-history.
+        - route.js — API-route metamarket/token-history для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - _catalog.js — Внутренний catalog для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js; используется в app/api/metamarket/_db.js, app/api/metamarket/_transactions.js, app/api/metamarket/collection/route.js.
+      - _db.js — Внутренний db для API-сегмента metamarket. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_ledger.js, app/api/metamarket/_locks.js, app/api/metamarket/_transactions.js.
+      - _format.js — Внутренний format для API-сегмента metamarket. Связи: используется в app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_identity.js.
+      - _identity.js — Внутренний identity для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, app/api/profile/_identity.js; используется в app/api/metamarket/_transactions.js, app/api/metamarket/buy/route.js, app/api/metamarket/collection/route.js.
+      - _ledger.js — Внутренний ledger для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js; используется в app/api/metamarket/_transactions.js.
+      - _locks.js — Внутренний locks для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_transactions.js.
+      - _transactions.js — Внутренний transactions для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/buy/route.js, app/api/metamarket/gift/route.js, app/api/metamarket/quote/route.js.
+    - metastudio/ — Каталог metastudio.
+      - register/ — Каталог register.
+        - route.js — API-route metastudio/register для серверной логики Next.js. Связи: импортирует lib/mongo/metastudio-primary.cjs.
+    - pay/ — Каталог pay.
+      - create/ — Каталог create.
+        - route.js — API-route pay/create для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/mongo/payments-primary.cjs, lib/mongo/profile-primary.cjs.
+      - webhook/ — Каталог webhook.
+        - route.js — API-route pay/webhook для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/mongo/payments-primary.cjs, lib/subscriptions.js.
+    - payments/ — Каталог payments.
+      - demo/ — Каталог demo.
+        - complete/ — Каталог complete.
+          - route.js — API-route payments/demo/complete для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - now/ — Каталог now.
+        - create/ — Каталог create.
+          - route.js — API-route payments/now/create для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route payments/now/webhook для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - profile/ — Серверные маршруты профиля, ника и аватара.
+      - batch/ — Каталог batch.
+        - route.js — API-route profile/batch для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - check-nick/ — Каталог check-nick.
+        - route.js — API-route profile/check-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - delete-account/ — Каталог delete-account.
+        - route.js — API-route profile/delete-account для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/account-deletion-primary.cjs.
+      - get-about/ — Каталог get-about.
+        - route.js — API-route profile/get-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - get-profile/ — Каталог get-profile.
+        - route.js — API-route profile/get-profile для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - save-nick/ — Каталог save-nick.
+        - route.js — API-route profile/save-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - set-about/ — Каталог set-about.
+        - route.js — API-route profile/set-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - upload-avatar/ — Каталог upload-avatar.
+        - route.js — API-route profile/upload-avatar для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - user-popover/ — Каталог user-popover.
+        - route.js — API-route profile/user-popover для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/profile/user-popover.route.test.js.
+      - _identity.js — Внутренний identity для API-сегмента profile. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs; используется в app/api/dm/_utils.js, app/api/forum/_db.js, app/api/forum/blobUploadUrl/route.js.
+    - push/ — Каталог push.
+      - config/ — Каталог config.
+        - route.js — API-route push/config для серверной логики Next.js. Связи: импортирует lib/webPush.js.
+      - events/ — Каталог events.
+        - route.js — API-route push/events для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - native/ — Каталог native.
+        - link/ — Каталог link.
+          - route.js — API-route push/native/link для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - register/ — Каталог register.
+          - route.js — API-route push/native/register для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+        - status/ — Каталог status.
+          - route.js — API-route push/native/status для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - unlink/ — Каталог unlink.
+          - route.js — API-route push/native/unlink для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+      - subscribe/ — Каталог subscribe.
+        - route.js — API-route push/subscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - sync/ — Каталог sync.
+        - route.js — API-route push/sync для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - unsubscribe/ — Каталог unsubscribe.
+        - route.js — API-route push/unsubscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+    - qcoin/ — Серверные маршруты QCoin.
+      - drop/ — Каталог drop.
+        - route.js — API-route qcoin/drop для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - get/ — Каталог get.
+        - route.js — API-route qcoin/get для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - heartbeat/ — Каталог heartbeat.
+        - route.js — API-route qcoin/heartbeat для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - topup/ — Каталог topup.
+        - cancel/ — Каталог cancel.
+          - route.js — API-route qcoin/topup/cancel для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - create/ — Каталог create.
+          - route.js — API-route qcoin/topup/create для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route qcoin/topup/webhook для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs, lib/ql7-support/events.js.
+    - quest/ — Серверные маршруты квестов.
+      - env/ — Каталог env.
+        - route.js — API-route quest/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - progress/ — Каталог progress.
+        - route.js — API-route quest/progress для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs, lib/mongo/quest-primary.cjs.
+      - status/ — Каталог status.
+        - route.js — API-route quest/status для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/quest-primary.cjs.
+    - quotes/ — Каталог quotes.
+      - route.js — API-route quotes для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - referral/ — Каталог referral.
+      - hit/ — Каталог hit.
+        - route.js — API-route referral/hit для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/ql7IdentityContract.cjs.
+      - link/ — Каталог link.
+        - route.js — API-route referral/link для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/ql7IdentityContract.cjs.
+    - subscription/ — Каталог subscription.
+      - status/ — Каталог status.
+        - route.js — API-route subscription/status для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - telegram/ — Каталог telegram.
+      - link/ — Каталог link.
+        - confirm/ — Каталог confirm.
+          - route.js — API-route telegram/link/confirm для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js.
+        - resolve/ — Каталог resolve.
+          - route.js — API-route telegram/link/resolve для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
+        - start/ — Каталог start.
+          - route.js — API-route telegram/link/start для серверной логики Next.js. Связи: импортирует lib/redis.js.
+        - status/ — Каталог status.
+          - route.js — API-route telegram/link/status для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js, lib/subscriptions.js.
+    - tma/ — Каталог tma.
+      - auto/ — Каталог auto.
+        - route.js — API-route tma/auto для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
+    - wallet-session/ — Каталог wallet-session.
+      - route.js — API-route wallet-session для серверной логики Next.js. Связи: импортирует lib/ql7-support/events.js; используется в tests/contracts/project/api-route-contracts.test.js.
+  - components/ — Локальные компоненты верхнего уровня внутри app.
+    - CryptoNewsLens.jsx — JSX-файл Crypto News Lens сегмента components. Связи: импортирует components/i18n.js; используется в app/page.js.
+  - contact/ — Страница контактов.
+    - layout.js — Next.js layout для сегмента /contact. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /contact. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - exchange/ — Страницы/виджеты exchange-раздела.
+    - ai-box/ — Каталог ai-box.
+      - AIWorkbench.jsx — JSX-файл AIWorkbench сегмента exchange/ai-box. Связи: импортирует components/i18n.js, lib/exchange/aiEntitlementState.js; используется в app/exchange/page.js.
+      - useAIEntitlement.js — JS-файл use AIEntitlement сегмента exchange/ai-box. Связи: импортирует lib/exchange/aiEntitlementState.js; используется в app/exchange/page.js.
+    - battle-chat/ — Каталог battle-chat.
+      - BattleChat.jsx — JSX-файл Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx; используется в app/exchange/BattleCoin.jsx.
+      - BattleChat.module.css — CSS-файл Battle Chat.module сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatClient.js — JS-файл battle Chat Client сегмента exchange/battle-chat. Связи: импортирует lib/walletSessionClient.js; используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/useBattleChat.js.
+      - BattleChatComposer.jsx — JSX-файл Battle Chat Composer сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatClient.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - battleChatFormatters.js — JS-файл battle Chat Formatters сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatIdentity.js — JS-файл battle Chat Identity сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - BattleChatMessageRow.jsx — JSX-файл Battle Chat Message Row сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatFormatters.js, app/exchange/battle-chat/battleChatIdentity.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - useBattleChat.js — JS-файл use Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/battleChatClient.js, lib/authActionGateClient.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+    - BattleCoin.jsx — JSX-файл Battle Coin сегмента exchange. Связи: импортирует app/exchange/battle-chat/BattleChat.jsx, components/QuantumWalletLaunchIcon.jsx, components/i18n.js; используется в app/exchange/page.js.
+    - layout.js — Next.js layout для сегмента /exchange. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /exchange. Связи: импортирует app/ads.js, app/exchange/BattleCoin.jsx, app/exchange/ai-box/AIWorkbench.jsx.
+  - forum/ — Домен форума и мессенджера.
+    - events/ — Клиентские event-хелперы форума.
+      - bus.js — JS-файл bus домена форума. Связи: используется в forum/features/feed/utils/postEvents.js.
+    - features/ — Feature-oriented слой форума.
+      - diagnostics/ — Подсистема диагностики и perf-наблюдения.
+        - hooks/ — Каталог слоя хуки внутри feature diagnostics.
+          - useForumDiagnostics.js — Хук use Forum Diagnostics домена диагностики. Связи: импортирует forum/features/diagnostics/utils/emitPolicy.js; используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature diagnostics.
+          - emitPolicy.js — Утилита emit Policy домена диагностики. Связи: используется в forum/features/diagnostics/hooks/useForumDiagnostics.js.
+      - dm/ — Подсистема Quantum Messenger / DM.
+        - components/ — Каталог слоя компоненты внутри feature dm.
+          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
+          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmMediaRenderer.jsx — UI-компонент Dm Media Renderer домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportCard.js.
+          - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
+          - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadLoadMore.jsx — UI-компонент Dm Thread Load More домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMediaRenderer.jsx, forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/components/Ql7SupportCard.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
+          - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: импортирует forum/shared/utils/counts.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - Ql7SemanticBadge.js — UI-компонент Ql7 Semantic Badge домена DM/мессенджера. Связи: импортирует lib/ql7-support/presentation/svgRegistry.js; используется в forum/features/dm/components/Ql7SupportCard.js, forum/features/dm/components/Ql7SupportMessageSurface.jsx, tests/component/ql7-support/semantic-badges-v11-6.test.jsx.
+          - Ql7SupportCard.js — UI-компонент Ql7 Support Card домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMediaRenderer.jsx, forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportChoiceCard.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportMessageSurface.jsx, tests/component/ql7-support/adult-card-v2.test.js.
+          - Ql7SupportChoiceCard.js — UI-компонент Ql7 Support Choice Card домена DM/мессенджера. Связи: импортирует forum/features/dm/services/supportAuthClient.js, lib/ql7-support/limitsV11.js, lib/ql7-support/systemActor.js; используется в forum/features/dm/components/Ql7SupportCard.js, tests/component/ql7-support-v14-surface.component.test.jsx.
+          - Ql7SupportComposerRuntimePanel.jsx — UI-компонент Ql7 Support Composer Runtime Panel домена DM/мессенджера. Связи: используется в forum/features/ui/components/ComposerActionRail.jsx.
+          - Ql7SupportMessageSurface.jsx — UI-компонент Ql7 Support Message Surface домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportCard.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, tests/component/ql7-support-v14-surface.component.test.jsx.
+          - Ql7SupportOperator.jsx — UI-компонент Ql7 Support Operator домена DM/мессенджера. Связи: импортирует forum/shared/utils/classnames.js, lib/ql7-support/ecosystemCatalog.js; используется в forum/features/dm/components/DmMessagesPane.jsx, tests/component/ql7-support-v14-surface.component.test.jsx.
+          - Ql7SupportPopover.jsx — UI-компонент Ql7 Support Popover домена DM/мессенджера. Связи: импортирует lib/ql7-support/systemActor.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature dm.
+          - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmDeleteCopy.js — Хук use Dm Delete Copy домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmLoadLifecycle.js — Хук use Dm Load Lifecycle домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmLocalCache.js — Хук use Dm Local Cache домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmOpenEvents.js — Хук use Dm Open Events домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmRepliesSeen.js — Хук use Dm Replies Seen домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmSeenObservers.js — Хук use Dm Seen Observers домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmStorageMaps.js — Хук use Dm Storage Maps домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/deletedMap.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmThreadAutoScroll.js — Хук use Dm Thread Auto Scroll домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmUnreadState.js — Хук use Dm Unread State домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmVipBatchProbe.js — Хук use Dm Vip Batch Probe домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useForumDmRuntime.js — Хук use Forum Dm Runtime домена DM/мессенджера. Связи: импортирует forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLoadLifecycle.js, forum/features/dm/hooks/useDmLocalCache.js; используется в forum/ForumRoot.jsx.
+          - useInboxRepliesModel.js — Хук use Inbox Replies Model домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useOpenInboxGlobalAction.js — Хук use Open Inbox Global Action домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/openInboxGlobal.js, lib/authActionGateClient.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature dm.
+          - sendDmComposerMessage.js — Сервис send Dm Composer Message домена DM/мессенджера. Связи: импортирует forum/features/dm/services/supportAuthClient.js, forum/features/dm/utils/dmLoaders.js, lib/ql7-support/ecosystemCatalog.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+          - supportAuthClient.js — Сервис support Auth Client домена DM/мессенджера. Связи: импортирует lib/ql7-support/featureFlag.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportCard.js.
+        - utils/ — Каталог слоя утилиты внутри feature dm.
+          - alignInboxStartUnderTabs.js — Утилита align Inbox Start Under Tabs домена DM/мессенджера. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - deletedMap.js — Утилита deleted Map домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useDmStorageMaps.js.
+          - dmLoaders.js — Утилита dm Loaders домена DM/мессенджера. Связи: импортирует forum/features/dm/services/supportAuthClient.js; используется в forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLocalCache.js, forum/features/dm/hooks/useForumDmRuntime.js.
+          - dmLoaders.js.dm-delete-cross-device-v1.20260611-014845.bak — Утилита dm Loaders.js.dm delete cross device v1.20260611 014845 домена DM/мессенджера. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - mediaParsing.js — Утилита media Parsing домена DM/мессенджера. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+          - openInboxGlobal.js — Утилита open Inbox Global домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useOpenInboxGlobalAction.js.
+      - feed/ — Подсистема ленты, тем, постов и композера.
+        - components/ — Каталог слоя компоненты внутри feature feed.
+          - CreateTopicCard.jsx — UI-компонент Create Topic Card домена ленты/тем/постов. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumPostCard.jsx — UI-компонент Forum Post Card домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/PostActionBar.jsx, forum/features/feed/components/PostBodyContent.jsx, forum/features/feed/components/PostFxLayer.jsx; используется в forum/features/feed/components/PostCardBridge.jsx.
+          - LoadMoreSentinel.jsx — UI-компонент Load More Sentinel домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx, tests/component/forum/runtime-stability-sentinel.component.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+          - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/feed/utils/cardMemo.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/ForumRoot.jsx.
+          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: импортирует forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/utils/externalVideoBridge.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
+          - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumRoot.jsx.
+          - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
+          - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+        - constants/ — Каталог слоя константы внутри feature feed.
+          - deeplink.js — Константа deeplink домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js.
+        - docs/ — Каталог слоя документация внутри feature feed.
+          - phase-03-feed.md — Документ phase 03 feed домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature feed.
+          - useForumCreatePostAction.js — Хук use Forum Create Post Action домена ленты/тем/постов. Связи: импортирует forum/features/dm/services/sendDmComposerMessage.js, forum/features/media/services/resolveComposerMediaPayload.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumCreateTopicAction.js — Хук use Forum Create Topic Action домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumDataRuntime.js — Хук use Forum Data Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumMutationQueue.js, forum/features/feed/hooks/useForumSseBridge.js, forum/features/feed/hooks/useForumSyncLoop.js; используется в forum/ForumRoot.jsx.
+          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useForumFeedRuntime.js — Хук use Forum Feed Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useThreadOpenNavigation.js, forum/features/feed/hooks/useThreadPostsModel.js; используется в forum/ForumRoot.jsx.
+          - useForumHomeAction.js — Хук use Forum Home Action домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumMutationActions.js — Хук use Forum Mutation Actions домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useForumMutationQueue.js — Хук use Forum Mutation Queue домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumNavigationActions.js — Хук use Forum Navigation Actions домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/alignInboxStartUnderTabs.js, forum/features/feed/utils/navOrchestrator.js, forum/features/feed/utils/navState.js; используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumNavigationRuntime.js — Хук use Forum Navigation Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumHomeAction.js, forum/features/feed/hooks/useForumNavigationActions.js, forum/features/feed/hooks/useNavStateSnapshot.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumSseBridge.js — Хук use Forum Sse Bridge домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumSyncLoop.js — Хук use Forum Sync Loop домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumViewTracking.js — Хук use Forum View Tracking домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useNavStateSnapshot.js — Хук use Nav State Snapshot домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
+          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/dm/hooks/useForumDmRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useUserRecommendationsRail.js — Хук use User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/ForumRoot.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+        - services/ — Каталог слоя сервисы внутри feature feed.
+          - rateLimiter.js — Сервис rate Limiter домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature feed.
+          - cardMemo.js — Утилита card Memo домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostCardBridge.jsx, forum/features/feed/components/TopicItem.jsx, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - interleaveRecommendationRails.js — Утилита interleave Recommendation Rails домена ленты/тем/постов. Связи: используется в forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/features/feed/utils/interleaveRecommendationRails.test.js.
+          - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/ForumRoot.jsx.
+          - navState.js — Утилита nav State домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+          - postEvents.js — Утилита post Events домена ленты/тем/постов. Связи: импортирует forum/events/bus.js; используется в forum/ForumRoot.jsx.
+          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - postMerge.js — Утилита post Merge домена ленты/тем/постов. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js, forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumSyncLoop.js.
+          - signatures.js — Утилита signatures домена ленты/тем/постов. Связи: используется в forum/features/feed/utils/snapshotTransforms.js.
+          - snapshotTransforms.js — Утилита snapshot Transforms домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/signatures.js; используется в forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumMutationQueue.js, tests/unit/forum/snapshotTransforms.test.js.
+      - geo/ — Каталог geo.
+        - GeoSessionTouchClient.jsx — Модуль Geo Session Touch Client домена geo. Связи: используется в forum/ForumRoot.jsx.
+      - media/ — Подсистема медиа, плееров и preview.
+        - components/ — Каталог слоя компоненты внутри feature media.
+          - qcast/ — Каталог qcast внутри feature media.
+            - QCastIcons.jsx — UI-компонент QCast Icons домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - ComposerAttachmentPreview.jsx — UI-компонент Composer Attachment Preview домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ExternalVideoPlayer.jsx — UI-компонент External Video Player домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/feed/components/PostMediaStack.jsx.
+          - LivePreview.jsx — UI-компонент Live Preview домена медиа. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+          - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/hooks/useHtmlFlag.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature media.
+          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumClientVideoOptimizer.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/telegramMiniAppSwipeLock.js; используется в forum/ForumRoot.jsx.
+          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js, forum/services/forumApi.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
+          - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature media.
+          - resolveComposerMediaPayload.js — Сервис resolve Composer Media Payload домена медиа. Связи: импортирует forum/features/media/services/uploadR2MediaFile.js, forum/shared/constants/media.js, lib/videoPipelineProgress.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - uploadR2MediaFile.js — Сервис upload R2 Media File домена медиа. Связи: импортирует lib/forumClientVideoOptimizer.js; используется в app/ads/home.js, forum/features/media/services/resolveComposerMediaPayload.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature media.
+          - externalVideoBridge.js — Утилита external Video Bridge домена медиа. Связи: используется в forum/features/feed/components/PostMediaStack.jsx, forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/hooks/useForumMediaCoordinator.js.
+          - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
+          - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
+          - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
+          - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - telegramMiniAppSwipeLock.js — Утилита telegram Mini App Swipe Lock домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js.
+          - urlParsing.js — Утилита url Parsing домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - videoControls.js — Утилита video Controls домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - videoCopy.js — Утилита video Copy домена медиа. Связи: импортирует forum/shared/utils/forumLocale.js; используется в forum/ForumRoot.jsx.
+          - videoFeedActions.js — Утилита video Feed Actions домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedActions.js.
+          - videoFeedBuilder.js — Утилита video Feed Builder домена медиа. Связи: импортирует forum/features/media/utils/videoFeedPosts.js, forum/features/media/utils/videoFeedRandom.js; используется в forum/features/media/hooks/useVideoFeedState.js, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - videoFeedPosts.js — Утилита video Feed Posts домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedRandom.js — Утилита video Feed Random домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedSalt.js — Утилита video Feed Salt домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedState.js.
+          - videoFeedScroll.js — Утилита video Feed Scroll домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+      - moderation/ — Подсистема жалоб, модерации и admin UI.
+        - components/ — Каталог слоя компоненты внутри feature moderation.
+          - AdminPopover.jsx — UI-компонент Admin Popover домена модерации. Связи: импортирует forum/services/forumApi.js.
+          - ReportPopover.jsx — UI-компонент Report Popover домена модерации. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature moderation.
+          - useAdminActions.js — Хук use Admin Actions домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useAdminFlag.js — Хук use Admin Flag домена модерации. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useForumModerationRuntime.js — Хук use Forum Moderation Runtime домена модерации. Связи: импортирует forum/features/moderation/hooks/useAdminActions.js, forum/features/moderation/hooks/useAdminFlag.js, forum/features/moderation/hooks/useForumModerationUi.js; используется в forum/ForumRoot.jsx.
+          - useForumModerationUi.js — Хук use Forum Moderation Ui домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useMediaModeration.js — Хук use Media Moderation домена модерации. Связи: импортирует forum/features/moderation/utils/http.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useReportController.js — Хук use Report Controller домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature moderation.
+          - http.js — Утилита http домена модерации. Связи: используется в forum/features/moderation/hooks/useMediaModeration.js.
+      - profile/ — Подсистема профиля, about, VIP и popover.
+        - components/ — Каталог слоя компоненты внутри feature profile.
+          - AboutRail.jsx — UI-компонент About Rail домена профиля/VIP. Связи: импортирует forum/features/profile/utils/aboutText.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js, lib/ql7-support/systemActor.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - ForumVipControl.jsx — UI-компонент Forum Vip Control домена профиля/VIP. Связи: импортирует forum/features/profile/components/VipPopover.jsx, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx — UI-компонент Profile Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/account.js, forum/features/subscriptions/components/FollowersCounterInline.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx.avatar-click-v3.20260611-004401.bak — UI-компонент Profile Popover.jsx.avatar click v3.20260611 004401 домена профиля/VIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - UserInfoPopover.jsx — UI-компонент User Info Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/subscriptions/components/FollowersCounterInline.jsx, forum/shared/api/translate.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VipFlipBadge.jsx — UI-компонент Vip Flip Badge домена профиля/VIP. Связи: импортирует forum/shared/utils/classnames.js, components/i18n.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - VipPopover.jsx — UI-компонент Vip Popover домена профиля/VIP. Связи: используется в forum/features/profile/components/ForumVipControl.jsx.
+        - constants/ — Каталог слоя константы внутри feature profile.
+          - vipAssets.js — Константа vip Assets домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature profile.
+          - useAboutEditor.js — Хук use About Editor домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useForumProfileSocialRuntime.js — Хук use Forum Profile Social Runtime домена профиля/VIP. Связи: импортирует forum/features/profile/hooks/useAboutEditor.js, forum/features/profile/hooks/useVipPayAction.js, forum/features/profile/hooks/useVipSubscriptionState.js; используется в forum/ForumRoot.jsx.
+          - useForumProfileSync.js — Хук use Forum Profile Sync домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useEvent.js, forum/shared/storage/localStorage.js; используется в forum/ForumRoot.jsx.
+          - useVipFlag.js — Хук use Vip Flag домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/profile/utils/vip.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/ForumPostCard.jsx.
+          - useVipPayAction.js — Хук use Vip Pay Action домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/paymentWindow.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useVipSubscriptionState.js — Хук use Vip Subscription State домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature profile.
+          - aboutText.js — Утилита about Text домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/AboutRail.jsx.
+          - avatar.js — Утилита avatar домена профиля/VIP. Связи: используется в forum/features/profile/components/AvatarEmoji.jsx.
+          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js, lib/ql7-support/systemActor.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
+      - qcoin/ — Подсистема QCoin в форуме.
+        - components/ — Каталог слоя компоненты внутри feature qcoin.
+          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature qcoin.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature qcoin.
+          - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
+          - formatQCoinBalance.js — Утилита format QCoin Balance домена QCoin. Связи: используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+          - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js, components/QuantumWallet.jsx.
+      - quests/ — Подсистема квестов форума.
+        - components/ — Каталог слоя компоненты внутри feature quests.
+          - QuestClaimOverlay.jsx — UI-компонент Quest Claim Overlay домена квестов. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - QuestHub.jsx — UI-компонент Quest Hub домена квестов. Связи: импортирует forum/features/quests/utils/progress.js, forum/shared/utils/classnames.js; используется в forum/features/quests/components/QuestPane.jsx.
+          - QuestPane.jsx — UI-компонент Quest Pane домена квестов. Связи: импортирует forum/features/quests/components/QuestHub.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature quests.
+          - useForumQuestConfig.js — Хук use Forum Quest Config домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestProgress.js — Хук use Forum Quest Progress домена квестов. Связи: импортирует forum/features/quests/hooks/useQuestStorageState.js, forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestRuntime.js — Хук use Forum Quest Runtime домена квестов. Связи: импортирует forum/features/quests/hooks/useForumQuestConfig.js, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestClaimAction.js.
+          - useQuestClaimAction.js — Хук use Quest Claim Action домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useQuestStorageState.js — Хук use Quest Storage State домена квестов. Связи: импортирует forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestProgress.js.
+          - useQuestViewActions.js — Хук use Quest View Actions домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature quests.
+          - progress.js — Утилита progress домена квестов. Связи: используется в forum/features/quests/components/QuestHub.jsx, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestStorageState.js.
+      - subscriptions/ — Подсистема подписок/соцграфа.
+        - components/ — Каталог слоя компоненты внутри feature subscriptions.
+          - FollowersCounterInline.jsx — UI-компонент Followers Counter Inline домена подписок. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/profile/components/UserInfoPopover.jsx.
+          - SubscriptionsPopover.jsx — UI-компонент Subscriptions Popover домена подписок. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/services/forumApi.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature subscriptions.
+          - useStarredAuthorsState.js — Хук use Starred Authors State домена подписок. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature subscriptions.
+          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/feed/hooks/useTopicDiscoveryModel.js, forum/features/subscriptions/hooks/useStarredAuthorsState.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+      - ui/ — Общие UI-узлы и проп-бандлы форума.
+        - components/ — Каталог слоя компоненты внутри feature ui.
+          - ComposeDock.jsx — UI-компонент Compose Dock домена форумного UI. Связи: импортирует forum/features/ui/components/ComposerCore.jsx, forum/features/ui/components/ComposerFabButton.jsx, forum/features/ui/components/ComposerStatusMeta.jsx; используется в forum/ForumLayout.jsx.
+          - ComposerActionRail.jsx — UI-компонент Composer Action Rail домена форумного UI. Связи: импортирует forum/features/dm/components/Ql7SupportComposerRuntimePanel.jsx, lib/ql7-support/inputPolicy.js; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerCore.jsx — UI-компонент Composer Core домена форумного UI. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/ui/components/ComposerActionRail.jsx; используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerEmojiPanel.jsx — UI-компонент Composer Emoji Panel домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerEmojiPreview.jsx — UI-компонент Composer Emoji Preview домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ComposerFabButton.jsx — UI-компонент Composer Fab Button домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerFileInput.jsx — UI-компонент Composer File Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ComposerMediaProgressBar.jsx — UI-компонент Composer Media Progress Bar домена форумного UI. Связи: импортирует components/MediaPipelineProgress.jsx; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerStatusMeta.jsx — UI-компонент Composer Status Meta домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerTextInput.jsx — UI-компонент Composer Text Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ConfirmDeleteOverlay.jsx — UI-компонент Confirm Delete Overlay домена форумного UI. Связи: импортирует components/i18n.js; используется в forum/features/feed/components/PostOwnerMenu.jsx, forum/features/feed/components/TopicItem.jsx.
+          - DmDeletePopover.jsx — UI-компонент Dm Delete Popover домена форумного UI. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - ForumActionNavIcon.jsx — UI-компонент Forum Action Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+          - ForumActionRow.jsx — UI-компонент Forum Action Row домена форумного UI. Связи: импортирует forum/features/ui/components/ForumActionNavIcon.jsx, forum/features/ui/components/VideoFeedNavIcon.jsx, forum/shared/utils/counts.js; используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumAdSlot.jsx — UI-компонент Forum Ad Slot домена форумного UI. Связи: импортирует forum/ForumAds.js; используется в forum/ForumRoot.jsx.
+          - ForumControlNavIcon.jsx — UI-компонент Forum Control Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumSearchSortControls.jsx.
+          - ForumOverlayStack.jsx — UI-компонент Forum Overlay Stack домена форумного UI. Связи: импортирует forum/SharePopover.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoOverlay.jsx; используется в forum/ForumLayout.jsx.
+          - ForumSearchSortControls.jsx — UI-компонент Forum Search Sort Controls домена форумного UI. Связи: импортирует forum/features/media/utils/mediaLinks.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - HeadChevronIcon.jsx — UI-компонент Head Chevron Icon домена форумного UI. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - MainForumActionCluster.jsx — UI-компонент Main Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/TopicsSection.jsx.
+          - StarButton.jsx — UI-компонент Star Button домена форумного UI. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - ThreadForumActionCluster.jsx — UI-компонент Thread Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - VideoFeedNavIcon.jsx — UI-компонент Video Feed Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+        - constants/ — Каталог слоя константы внутри feature ui.
+          - emojiCatalog.js — Константа emoji Catalog домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - inviteButton.js — Константа invite Button домена форумного UI. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature ui.
+          - useComposerActionHandlers.js — Хук use Composer Action Handlers домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerEmojiState.js — Хук use Composer Emoji State домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerScrollMemory.js — Хук use Composer Scroll Memory домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useComposerUiLifecycle.js — Хук use Composer Ui Lifecycle домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useForumAdSlots.js — Хук use Forum Ad Slots домена форумного UI. Связи: импортирует forum/features/ui/utils/adsSlots.js; используется в forum/features/ui/hooks/useForumAdsRuntime.js.
+          - useForumAdsRuntime.js — Хук use Forum Ads Runtime домена форумного UI. Связи: импортирует forum/ForumAds.js, forum/features/ui/hooks/useForumAdSlots.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumComposerRuntime.js — Хук use Forum Composer Runtime домена форумного UI. Связи: импортирует forum/features/media/hooks/useMediaPipelineController.js, forum/features/media/hooks/useVoiceRecorder.js, forum/features/ui/hooks/useComposerScrollMemory.js; используется в forum/ForumRoot.jsx.
+          - useForumComposerSubmitRuntime.js — Хук use Forum Composer Submit Runtime домена форумного UI. Связи: импортирует forum/features/feed/hooks/useForumCreatePostAction.js, forum/features/feed/hooks/useForumCreateTopicAction.js, forum/features/feed/hooks/useForumViewTracking.js; используется в forum/ForumRoot.jsx.
+          - useForumEditMode.js — Хук use Forum Edit Mode домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumGlobalPopovers.js — Хук use Forum Global Popovers домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumHeadCollapse.js — Хук use Forum Head Collapse домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumPopoverModeController.js — Хук use Forum Popover Mode Controller домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumScreenFlowsRuntime.js — Хук use Forum Screen Flows Runtime домена форумного UI. Связи: импортирует forum/features/dm/hooks/useDmDeleteCopy.js, forum/features/dm/hooks/useDmOpenEvents.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js; используется в forum/ForumRoot.jsx.
+          - useForumSessionShell.js — Хук use Forum Session Shell домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumViewState.js — Хук use Forum View State домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useScrollResizeCompensation.js — Хук use Scroll Resize Compensation домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature ui.
+          - propBundles/ — Каталог propBundles внутри feature ui.
+            - buildActionClusterProps.js — Утилита build Action Cluster Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildComposerCoreProps.js — Утилита build Composer Core Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildForumHeaderPanelProps.js — Утилита build Forum Header Panel Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildInboxPaneProps.js — Утилита build Inbox Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildSearchSortControlsProps.js — Утилита build Search Sort Controls Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildThreadRepliesPaneProps.js — Утилита build Thread Replies Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildTopicsSwitchProps.js — Утилита build Topics Switch Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+          - adsSlots.js — Утилита ads Slots домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumAdSlots.js.
+          - buildForumLayoutProps.js — Утилита build Forum Layout Props домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - buildForumRootPropBundles.js — Утилита build Forum Root Prop Bundles домена форумного UI. Связи: импортирует forum/features/ui/utils/propBundles/buildActionClusterProps.js, forum/features/ui/utils/propBundles/buildComposerCoreProps.js, forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js; используется в forum/ForumRoot.jsx.
+    - p/ — Каталог p.
+      - [postId]/ — Каталог [postId].
+        - route.js — JS-файл route домена форума. Связи: импортирует app/api/forum/_db.js, lib/mongo/forum-primary.cjs.
+    - services/ — Каталог services.
+      - forumApi.js — JS-файл forum Api домена форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedActions.js, forum/features/moderation/components/AdminPopover.jsx.
+    - shared/ — Shared-слой форума: общие хуки, utils, storage, config.
+      - api/ — Каталог shared-слоя форума: api.
+        - http.js — Shared API-хелпер http форума. Связи: используется в forum/shared/api/translate.js.
+        - translate.js — Shared API-хелпер translate форума. Связи: импортирует forum/shared/api/http.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/hooks/usePostTranslation.js, forum/features/profile/components/UserInfoPopover.jsx.
+      - components/ — Каталог shared-слоя форума: components.
+        - ForumNickText.jsx — Shared UI-компонент Forum Nick Text форума. Связи: импортирует forum/shared/hooks/useForumNickBadgeFit.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - HydrateText.jsx — Shared UI-компонент Hydrate Text форума. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostActionBar.jsx.
+      - config/ — Каталог shared-слоя форума: config.
+        - runtime.js — Shared конфиг runtime форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/shared/config/runtime.test.js.
+      - constants/ — Каталог shared-слоя форума: constants.
+        - media.js — Shared константа media форума. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadVideo/route.js.
+      - docs/ — Каталог shared-слоя форума: docs.
+        - phase-01-shared-foundation.md — Shared документ phase 01 shared foundation форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - hooks/ — Каталог shared-слоя форума: hooks.
+        - useEvent.js — Shared хук use Event форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - useForumNavBridge.js — Shared хук use Forum Nav Bridge форума. Связи: импортирует forum/shared/hooks/useEvent.js; используется в forum/ForumRoot.jsx.
+        - useForumNickBadgeFit.js — Shared хук use Forum Nick Badge Fit форума. Связи: используется в forum/shared/components/ForumNickText.jsx.
+        - useForumToast.js — Shared хук use Forum Toast форума. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumRoot.jsx.
+        - useForumWindowing.js — Shared хук use Forum Windowing форума. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+      - storage/ — Каталог shared-слоя форума: storage.
+        - localStorage.js — Shared storage-обертка local Storage форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/profile/hooks/useForumProfileSync.js.
+      - telemetry/ — Каталог shared-слоя форума: telemetry.
+        - diag.js — Shared телеметрия diag форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - utils/ — Каталог shared-слоя форума: utils.
+        - browser.js — Shared утилита browser форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/moderation/hooks/useAdminFlag.js.
+        - classnames.js — Shared утилита classnames форума. Связи: используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - counts.js — Shared утилита counts форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/InboxTabsHeader.jsx, forum/features/feed/components/PostActionBar.jsx.
+        - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - forumHeightIndex.mjs — Shared утилита forum Height Index форума. Связи: используется в forum/shared/hooks/useForumWindowing.js, tests/unit/forum/windowing-height-index.test.js, tools/prove-forum-windowing-height-index.mjs.
+        - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
+        - forumWindowingPresets.js — Shared утилита forum Windowing Presets форума. Связи: используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js.
+        - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
+        - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx, app/game/page.js.
+        - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
+        - time.js — Shared утилита time форума. Связи: используется в forum/ForumRoot.jsx.
+    - styles/ — Стили форума и их сборка.
+      - modules/ — Модульные фрагменты стилевого слоя форума.
+        - composerStyles.js — Модуль стилевой сборки форума: composer Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - dmStyles.js — Модуль стилевой сборки форума: dm Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - foundationStyles.js — Модуль стилевой сборки форума: foundation Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fxStyles.js — Модуль стилевой сборки форума: fx Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - layoutStyles.js — Модуль стилевой сборки форума: layout Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - profileStyles.js — Модуль стилевой сборки форума: profile Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - qcoinStyles.js — Модуль стилевой сборки форума: qcoin Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ql7SupportGlobalStyles.js — Модуль стилевой сборки форума: ql7 Support Global Styles. Связи: используется в forum/ForumLayout.jsx.
+        - questStyles.js — Модуль стилевой сборки форума: quest Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ForumFxStyles.jsx — Файл стилевого слоя форума: Forum Fx Styles. Связи: используется в forum/ForumLayout.jsx.
+      - ForumStyles.jsx — Файл стилевого слоя форума: Forum Styles. Связи: используется в forum/ForumLayout.jsx.
+    - error.js — JS-файл error домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - Forum.jsx — Тонкий entry-point экрана форума. Связи: импортирует forum/ForumRoot.jsx; используется в forum/page.js.
+    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx, components/i18n.js, lib/ads/adDiscoveryPrompt.js; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
+    - ForumHeaderPanel.jsx — Компоновщик шапки форума с контролами, профилем, QCoin и VIP. Связи: импортирует forum/features/profile/components/AboutRail.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/ForumVipControl.jsx; используется в forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx.
+    - ForumLayout.jsx — Layout-обвязка форума. Связи: импортирует forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx, forum/features/ui/components/ComposeDock.jsx; используется в forum/ForumRoot.jsx.
+    - ForumProviders.jsx — Провайдеры и контекстная сборка форума. Связи: используется в forum/ForumRoot.jsx.
+    - ForumRoot.jsx — Корневой composition-root форума и мессенджера. Связи: импортирует forum/ForumAds.js, forum/ForumLayout.jsx, forum/ForumProviders.jsx; используется в forum/Forum.jsx.
+    - layout.js — JS-файл layout домена форума. Связи: импортирует lib/metadataCache.js.
+    - loading.js — JS-файл loading домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/ForumBootSplash.jsx, components/TopBar.js.
+    - SharePopover.jsx — JSX-файл Share Popover домена форума. Связи: импортирует lib/forumShareManager.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+  - game/ — Страницы/компоненты игрового раздела.
+    - layout.js — Next.js layout для сегмента /game. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /game. Связи: импортирует app/ads.js, forum/shared/utils/openAuth.js, components/TopBar.js.
+  - privacy/ — Страница privacy/policy.
+    - layout.js — Next.js layout для сегмента /privacy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /privacy. Связи: импортирует components/TopBar.js, components/i18n.js.
+  - subscribe/ — Страницы подписки/лендинга.
+    - layout.js — Next.js layout для сегмента /subscribe. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /subscribe. Связи: импортирует app/subscribe/subscribe.client.jsx.
+    - subscribe.client.jsx — JSX-файл subscribe.client сегмента subscribe. Связи: импортирует app/ads.js, components/TopBar.js, components/i18n.js; используется в app/subscribe/page.js.
+  - tma/ — Telegram Mini App связанные страницы.
+    - auto/ — Авто-страницы TMA.
+      - layout.js — Next.js layout для сегмента /tma/auto. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - page.jsx — JSX-файл page сегмента tma/auto. Связи: импортирует components/i18n.js.
+  - ads.js — JS-файл ads сегмента app. Связи: импортирует forum/ForumAds.js; используется в app/about/page.js, app/academy/page.js, app/exchange/page.js.
+  - globals.css — CSS-файл globals сегмента app. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/AndroidAppPrompt.jsx, components/AndroidNotificationBadgeSync.jsx.
+  - page.js — Next.js страница маршрута /. Связи: импортирует app/ads.js, app/components/CryptoNewsLens.jsx, components/TopBar.js.
+  - providers.jsx — JSX-файл providers сегмента app. Связи: импортирует components/WalletRuntimeBridge.jsx; используется в app/layout.js.
+  - robots.js — JS-файл robots сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в tests/contracts/project/seo-indexing-contracts.test.js.
+  - sitemap.js — JS-файл sitemap сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в tests/contracts/project/seo-indexing-contracts.test.js.
+- components/ — Общие React-компоненты всего проекта.
+  - i18n-dicts/ — Каталог i18n-dicts.
+    - ar.js — Общий React-компонент ar, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - en.js — Общий React-компонент en, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - es.js — Общий React-компонент es, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - manifest.js — Общий React-компонент manifest, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/siteIndex.js, tests/contracts/project/ads-geo-targeting-portal-contracts.test.js.
+    - ru.js — Общий React-компонент ru, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - tr.js — Общий React-компонент tr, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - uk.js — Общий React-компонент uk, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - zh.js — Общий React-компонент zh, используемый вне одного домена. Связи: используется в components/i18n.js, lib/ql7-support/localDictionaryContext.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+  - metamarket/ — Каталог metamarket.
+    - metaMarketFormat.js — Общий React-компонент meta Market Format, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+    - metaMarketI18n.js — Общий React-компонент meta Market I18n, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - AndroidAppPrompt.jsx — Общий React-компонент Android App Prompt, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
+  - AndroidChromiumVideoCanvas.jsx — Общий React-компонент Android Chromium Video Canvas, используемый вне одного домена. Связи: используется в forum/ForumAds.js, forum/features/media/components/VideoMedia.jsx, components/ForumBootSplash.jsx.
+  - AndroidNotificationBadgeSync.jsx — Общий React-компонент Android Notification Badge Sync, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/notificationCenter.js; используется в app/layout.js.
+  - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/walletSessionClient.js; используется в components/TopBar.js.
+  - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: используется в app/layout.js.
+  - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/page.js.
+  - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
+  - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
+  - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
+  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - i18n.source.js — Общий React-компонент i18n.source, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - InviteFriendHost.jsx — Общий React-компонент Invite Friend Host, используемый вне одного домена. Связи: импортирует components/InviteFriendProvider.jsx; используется в app/layout.js.
+  - InviteFriendPopup.jsx — Общий React-компонент Invite Friend Popup, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/InviteFriendProvider.jsx.
+  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx; используется в components/InviteFriendHost.jsx.
+  - LanguageSwitcher.js — Общий React-компонент Language Switcher, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
+  - MediaPipelineProgress.jsx — Общий React-компонент Media Pipeline Progress, используемый вне одного домена. Связи: используется в app/ads/home.js, forum/features/ui/components/ComposerMediaProgressBar.jsx.
+  - MetaMarket.jsx — Общий React-компонент Meta Market, используемый вне одного домена. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, components/MetaMarketCatalog.js; используется в components/MetaMarketHost.jsx.
+  - MetaMarketCatalog.js — Общий React-компонент Meta Market Catalog, используемый вне одного домена. Связи: используется в app/api/metamarket/_catalog.js, components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+  - MetaMarketHost.jsx — Общий React-компонент Meta Market Host, используемый вне одного домена. Связи: импортирует components/MetaMarket.jsx; используется в app/layout.js.
+  - MetaMarketIcons.jsx — Общий React-компонент Meta Market Icons, используемый вне одного домена. Связи: используется в forum/features/profile/components/UserInfoPopover.jsx, forum/features/ui/components/ForumSearchSortControls.jsx, components/MetaMarket.jsx.
+  - MetaMarketTitle.jsx — Общий React-компонент Meta Market Title, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/NotRobotHost.jsx.
+  - NotRobotHost.jsx — Общий React-компонент Not Robot Host, используемый вне одного домена. Связи: импортирует components/NotRobot.jsx; используется в app/layout.js.
+  - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
+  - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
+  - Ql7SupportRuntimeBridge.jsx — Общий React-компонент Ql7 Support Runtime Bridge, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/authActionGateClient.js, lib/ql7-support/systemActor.js; используется в app/layout.js.
+  - QuantumWallet.jsx — Общий React-компонент Quantum Wallet, используемый вне одного домена. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/features/qcoin/utils/paymentWindow.js; используется в components/QuantumWalletHost.jsx.
+  - QuantumWalletHost.jsx — Общий React-компонент Quantum Wallet Host, используемый вне одного домена. Связи: импортирует components/QuantumWallet.jsx, lib/authActionGateClient.js; используется в app/layout.js.
+  - QuantumWalletLaunchIcon.jsx — Общий React-компонент Quantum Wallet Launch Icon, используемый вне одного домена. Связи: используется в app/exchange/BattleCoin.jsx, forum/features/ui/components/ForumSearchSortControls.jsx.
+  - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
+  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/about/page.js, app/academy/page.js, app/ads/page.jsx.
+  - UnlimitModal.client.jsx — Общий React-компонент Unlimit Modal.client, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletEVM.js — Общий React-компонент Wallet EVM, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletRuntimeBridge.jsx — Общий React-компонент Wallet Runtime Bridge, используемый вне одного домена. Связи: импортирует lib/walletSessionClient.js; используется в app/providers.jsx.
+  - WalletsHub.js — Общий React-компонент Wallets Hub, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletSOL.js — Общий React-компонент Wallet SOL, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTON.js — Общий React-компонент Wallet TON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTRON.js — Общий React-компонент Wallet TRON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - Web3Provider.js — Общий React-компонент Web3 Provider, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- config/ — Каталог config.
+  - runtime-governance.json — JSON-файл runtime governance. Связи: используется в src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js, src/shared/runtime/identity/runtimeTypes.js.
+- docs/ — Каталог docs.
+  - exchange/ — Каталог exchange.
+    - BATTLE_CHAT_CONTOUR_CONTRACT.md — Markdown-документ BATTLE CHAT CONTOUR CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - forum/ — Каталог forum.
+    - QL7_FORUM_GEO_CURSOR_COUNTER_CONTRACT.md — Markdown-документ QL7 FORUM GEO CURSOR COUNTER CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_SUPPORT_DM_CONTRACT.md — Markdown-документ QL7 SUPPORT DM CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mongo/ — Каталог mongo.
+    - ads-metamarket-synthetic-write-proof-v55.md — Markdown-документ ads metamarket synthetic write proof v55. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-canary-v53.md — Markdown-документ qcoin ledger canary v53. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-v52.md — Markdown-документ qcoin ledger v52. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_PREMIUM_CLOSEOUT_V65.md — Markdown-документ QL7 MONGO PREMIUM CLOSEOUT V65. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_TZ_FINAL_CLOSEOUT_V60.md — Markdown-документ QL7 MONGO TZ FINAL CLOSEOUT V60. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-codex-rules.md — Markdown-документ mobile codex rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-monorepo-workflow.md — Markdown-документ mobile monorepo workflow. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-payment-compliance.md — Markdown-документ mobile payment compliance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-release.md — Markdown-документ mobile release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-shell-v3.md — Markdown-документ mobile shell v3. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-store-review.md — Markdown-документ mobile store review. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-test-matrix.md — Markdown-документ mobile test matrix. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_COSMIC_V11_SPEC_COVERAGE.md — Markdown-документ QL7 SUPPORT COSMIC V11 SPEC COVERAGE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_COSMIC_V11.md — Markdown-документ QL7 SUPPORT COSMIC V11. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_V11_INTELLIGENCE_MIGRATION_DISPOSITION_RU.md — Markdown-документ QL7 SUPPORT V11 INTELLIGENCE MIGRATION DISPOSITION RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ql7-support-planetary-ai-v5.md — Markdown-документ ql7 support planetary ai v5. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ql7-support-v5-compliance-audit.md — Markdown-документ ql7 support v5 compliance audit. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - seo-indexing-governance.md — Markdown-документ seo indexing governance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - stage0-engineering-report.md — Markdown-документ stage0 engineering report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - verification-pipeline.md — Markdown-документ verification pipeline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- lib/ — Общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.
+  - ads/ — Каталог ads.
+    - adDiscoveryPrompt.js — Общая библиотека/утилита ad Discovery Prompt инфраструктурного слоя. Связи: используется в forum/ForumAds.js, tests/unit/ads/adDiscoveryPrompt.test.js.
+  - auth/ — Каталог auth.
+    - battlecoin-chat-auth.cjs — Общая библиотека/утилита battlecoin chat auth инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs, lib/tma.js; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, tests/unit/mongo/battlecoin-chat-primary.test.js.
+  - battlecoin/ — Каталог battlecoin.
+    - battle-chat-events.cjs — Общая библиотека/утилита battle chat events инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs; используется в app/api/battlecoin/chat/events/route.js, app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js.
+    - battle-chat-public-identity.cjs — Общая библиотека/утилита battle chat public identity инфраструктурного слоя. Связи: используется в lib/mongo/battlecoin-chat-primary.cjs.
+    - battle-chat-validation.cjs — Общая библиотека/утилита battle chat validation инфраструктурного слоя. Связи: используется в lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs, tests/unit/battlecoin/battle-chat-validation.test.js.
+  - exchange/ — Каталог exchange.
+    - aiEntitlementState.js — Общая библиотека/утилита ai Entitlement State инфраструктурного слоя. Связи: используется в app/exchange/ai-box/AIWorkbench.jsx, app/exchange/ai-box/useAIEntitlement.js, tests/integration/exchange/AIWorkbench.test.jsx.
+    - aiQuotaIdentity.js — Общая библиотека/утилита ai Quota Identity инфраструктурного слоя. Связи: используется в app/api/aiquota/usage/route.js, tests/unit/exchange/aiQuotaIdentity.test.js.
+  - forum/ — Каталог forum.
+    - forum-index-maintenance.cjs — Общая библиотека/утилита forum index maintenance инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в app/api/forum/mutate/route.js, lib/forum/forum-projection-rebuild.cjs.
+    - forum-projection-rebuild.cjs — Общая библиотека/утилита forum projection rebuild инфраструктурного слоя. Связи: импортирует lib/forum/forum-index-maintenance.cjs, lib/mongo/client.cjs, lib/mongo/forum-indexes-primary.cjs.
+    - forum-server-complete-reader.cjs — Общая библиотека/утилита forum server complete reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/inbox/replies/page/route.js, app/api/forum/post-by-id/route.js, app/api/forum/post-chain/route.js.
+    - forum-server-page-reader.cjs — Общая библиотека/утилита forum server page reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/feed/page/route.js, app/api/forum/media-feed/page/route.js, tests/unit/forum/serverPageReaderGeo.test.js.
+    - public-sanitize.cjs — Общая библиотека/утилита public sanitize инфраструктурного слоя. Связи: используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - ql7-forum-architecture.cjs — Общая библиотека/утилита ql7 forum architecture инфраструктурного слоя. Связи: используется в lib/forum/forum-index-maintenance.cjs, lib/geo/geo-rings.cjs, lib/geo/request-geo.cjs.
+    - signed-cursor.cjs — Общая библиотека/утилита signed cursor инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+  - geo/ — Каталог geo.
+    - city-labels.cjs — Общая библиотека/утилита city labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - countries.js — Общая библиотека/утилита countries инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - country-labels.cjs — Общая библиотека/утилита country labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - geo-rings.cjs — Общая библиотека/утилита geo rings инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/request-geo.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - regions.js — Общая библиотека/утилита regions инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - request-geo.cjs — Общая библиотека/утилита request geo инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/city-labels.cjs, lib/geo/country-labels.cjs; используется в app/api/forum/mutate/route.js, app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs.
+  - identity/ — Каталог identity.
+    - geo-identity.cjs — Общая библиотека/утилита geo identity инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs; используется в app/api/geo/session-touch/route.js.
+    - ql7IdentityContract.cjs — Общая библиотека/утилита ql7 Identity Contract инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs; используется в app/api/academy/exam/route.js, app/api/profile/_identity.js, app/api/referral/hit/route.js.
+  - mongo/ — Каталог mongo.
+    - academy-primary.cjs — Общая библиотека/утилита academy primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/academy/exam/route.js.
+    - account-deletion-primary.cjs — Общая библиотека/утилита account deletion primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/forum-primary.cjs; используется в app/api/profile/delete-account/route.js.
+    - ads-primary.cjs — Общая библиотека/утилита ads primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/adsCore.js, tests/unit/mongo/ads-primary.test.js.
+    - battlecoin-chat-primary.cjs — Общая библиотека/утилита battlecoin chat primary инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-public-identity.cjs, lib/battlecoin/battle-chat-validation.cjs, lib/mongo/client.cjs; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, tests/unit/mongo/battlecoin-chat-primary.test.js.
+    - battlecoin-primary.cjs — Общая библиотека/утилита battlecoin primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/qcoin-primary.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js.
+    - client.cjs — Общая библиотека/утилита client инфраструктурного слоя. Связи: импортирует lib/mongo/permanent-policy.cjs; используется в app/api/dm/send/route.js, app/api/dm/support-card-translate/route.js, app/api/dm/support-entry/route.js.
+    - dm-primary.cjs — Общая библиотека/утилита dm primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/dm-read-domain-codec.cjs; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - dm-read-domain-codec.cjs — Общая библиотека/утилита dm read domain codec инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/mongo/dm-primary.cjs.
+    - forum-indexes-primary.cjs — Общая библиотека/утилита forum indexes primary инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в lib/forum/forum-projection-rebuild.cjs, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - forum-primary.cjs — Общая библиотека/утилита forum primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/forum/_db.js, app/api/forum/mutate/route.js, app/api/forum/own/route.js.
+    - metamarket-primary.cjs — Общая библиотека/утилита metamarket primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/qcoin-primary.cjs; используется в app/api/metamarket/_db.js, tests/unit/mongo/metamarket-primary.test.js.
+    - metastudio-primary.cjs — Общая библиотека/утилита metastudio primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/metastudio/register/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - payments-primary.cjs — Общая библиотека/утилита payments primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/pay/create/route.js, app/api/pay/webhook/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - permanent-policy.cjs — Общая библиотека/утилита permanent policy инфраструктурного слоя. Связи: используется в lib/mongo/client.cjs.
+    - profile-geo-primary.cjs — Общая библиотека/утилита profile geo primary инфраструктурного слоя. Связи: импортирует lib/geo/request-geo.cjs, lib/mongo/client.cjs; используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - profile-primary.cjs — Общая библиотека/утилита profile primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/debug/vip/grant/route.js, app/api/forum/_db.js, app/api/forum/recommendations/users/route.js.
+    - push-primary.cjs — Общая библиотека/утилита push primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/webPush.js, tests/unit/mongo/push-primary.test.js.
+    - qcoin-primary.cjs — Общая библиотека/утилита qcoin primary инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/client.cjs, lib/mongo/profile-primary.cjs; используется в app/api/academy/exam/route.js, app/api/profile/user-popover/route.js, app/api/qcoin/drop/route.js.
+    - quest-primary.cjs — Общая библиотека/утилита quest primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/quest/progress/route.js, app/api/quest/status/route.js, tests/unit/mongo/quest-primary.test.js.
+    - referral-primary.cjs — Общая библиотека/утилита referral primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/referral/hit/route.js, app/api/referral/link/route.js, tests/unit/mongo/referral-primary.test.js.
+    - subscriptions-primary.cjs — Общая библиотека/утилита subscriptions primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/mongo/battlecoin-chat-primary.cjs, lib/subscriptions.js, tests/unit/mongo/subscriptions-primary.test.js.
+  - ql7-support/ — Каталог ql7-support.
+    - config/ — Каталог config.
+      - behaviorManifest.js — Общая библиотека/утилита behavior Manifest инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/config/capabilitySnapshot.js, lib/ql7-support/entryGreetingLexiconV11.js, lib/ql7-support/language/humanVariationBanks.js.
+      - capabilitySnapshot.js — Общая библиотека/утилита capability Snapshot инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/config/featureFlag.js.
+      - featureFlag.js — Общая библиотека/утилита feature Flag инфраструктурного слоя. Связи: используется в app/api/dm/dialogs/route.js, app/api/dm/support-card-translate/route.js, app/api/dm/thread/route.js.
+    - contracts/ — Каталог contracts.
+      - supportCard.js — Общая библиотека/утилита support Card инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchemaV2.js, lib/ql7-support/cardSchemaV3.js, lib/ql7-support/cardSchemaV4.js; используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/cards.js, lib/ql7-support/greetingCoordinatorV8.js.
+    - conversation/ — Каталог conversation.
+      - ledger.js — Общая библиотека/утилита ledger инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/v13/conversationLedgerV13.js, lib/ql7-support/v13/index.js.
+    - data/ — Каталог data.
+      - adapterReceipt.js — Общая библиотека/утилита adapter Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/data/simulationFixtures.js, lib/ql7-support/response/buildContentPlan.js, lib/ql7-support/response/critiqueResponse.js.
+      - factProjection.js — Общая библиотека/утилита fact Projection инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - simulationFixtures.js — Общая библиотека/утилита simulation Fixtures инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v13/simulationFixturesV13.js.
+    - internal/ — Каталог internal.
+      - text.js — Общая библиотека/утилита text инфраструктурного слоя. Связи: используется в lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/conversation/ledger.js, lib/ql7-support/data/adapterReceipt.js.
+    - knowledge/ — Каталог knowledge.
+      - domainKnowledge.js — Общая библиотека/утилита domain Knowledge инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainKnowledge.native.js, lib/ql7-support/knowledge/domainKnowledge.provider.js; используется в lib/ql7-support/knowledgeRegistry.js.
+      - domainKnowledge.native.js — Общая библиотека/утилита domain Knowledge.native инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/domainKnowledge.js.
+      - domainKnowledge.provider.js — Общая библиотека/утилита domain Knowledge.provider инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/domainKnowledge.js.
+      - domainRegistry.js — Общая библиотека/утилита domain Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/topicActionRegistryV9.js; используется в lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/simulation/corpora/knowledge32V14.js, lib/ql7-support/simulation/scenarioCatalog.js.
+    - language/ — Каталог language.
+      - humanResponsePacks.provider.js — Общая библиотека/утилита human Response Packs.provider инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/realizeNatural.js.
+      - humanVariationBanks.js — Общая библиотека/утилита human Variation Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/entryGreetingLexiconV11.js, lib/ql7-support/response/realizeNatural.js, tests/contracts/ql7-support-v14-regulation.contract.test.js.
+      - locales.js — Общая библиотека/утилита locales инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/language/normalizeInput.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - nativeBanks.js — Общая библиотека/утилита native Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/inputPolicy.js, lib/ql7-support/presentation/badgePolicy.js, lib/ql7-support/presentation/buildSupportSurface.js.
+      - normalizeInput.js — Общая библиотека/утилита normalize Input инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales.js, lib/ql7-support/language/semanticBanks.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/v14-final-runtime.test.js.
+      - responseLocalePolicy.js — Общая библиотека/утилита response Locale Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js.
+      - safetyLexicon.native.js — Общая библиотека/утилита safety Lexicon.native инфраструктурного слоя. Связи: используется в lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - safetyLexicon.provider.js — Общая библиотека/утилита safety Lexicon.provider инфраструктурного слоя. Связи: используется в lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - semanticBanks.js — Общая библиотека/утилита semantic Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/language/normalizeInput.js, lib/ql7-support/safety/evaluateTurn.js, lib/ql7-support/semantics/analyzeTurn.js.
+    - learning/ — Каталог learning.
+      - governancePolicy.js — Общая библиотека/утилита governance Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/learningPipeline.js.
+      - incidentCandidate.js — Общая библиотека/утилита incident Candidate инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js.
+    - operator/ — Каталог operator.
+      - buildCase.js — Общая библиотека/утилита build Case инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/server.js, lib/ql7-support/simulation/identityAudit.js.
+      - smtpRendererRu.js — Общая библиотека/утилита smtp Renderer Ru инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/identityAudit.js, lib/supportEmailTransport.js, tests/unit/ql7-support/v14-final-runtime.test.js.
+    - presentation/ — Каталог presentation.
+      - badgePolicy.js — Общая библиотека/утилита badge Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/language/nativeBanks.js; используется в lib/ql7-support/presentation/buildSupportSurface.js.
+      - buildSupportSurface.js — Общая библиотека/утилита build Support Surface инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/nativeBanks.js, lib/ql7-support/presentation/badgePolicy.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/server.js, lib/ql7-support/v13/index.js.
+      - legacyCardReader.js — Общая библиотека/утилита legacy Card Reader инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/supportCard.js.
+      - registry.js — Общая библиотека/утилита registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/v13/presentationRegistryV13.js, tests/unit/ql7-support/v14-final-runtime.test.js.
+      - svgRegistry.js — Общая библиотека/утилита svg Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в forum/features/dm/components/Ql7SemanticBadge.js, lib/ql7-support/presentation/buildSupportSurface.js, tests/component/ql7-support/semantic-badges-v11-6.test.jsx.
+      - tableRegistry.js — Общая библиотека/утилита table Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/nativeBanks.js; используется в lib/ql7-support/presentation/buildSupportSurface.js.
+    - response/ — Каталог response.
+      - buildContentPlan.js — Общая библиотека/утилита build Content Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/v13/index.js, lib/ql7-support/v13/responseContentPlanV13.js.
+      - critiqueResponse.js — Общая библиотека/утилита critique Response инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/simulation/independentOracle.js, lib/ql7-support/v12/responseCriticV12.js.
+      - realizeNatural.js — Общая библиотека/утилита realize Natural инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/knowledgeRegistry.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/v13/humanRealizerV13.js, lib/ql7-support/v13/index.js.
+    - runtime/ — Каталог runtime.
+      - executeTurn.js — Общая библиотека/утилита execute Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/config/featureFlag.js, lib/ql7-support/conversation/ledger.js; используется в lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/productionParityHarness.js, lib/ql7-support/v12/factualSimulationV12.js.
+      - productionTurn.js — Общая библиотека/утилита production Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/responseLocalePolicy.js, lib/ql7-support/runtime/executeTurn.js; используется в lib/ql7-support/server.js, lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/simulation/liveRead.js.
+    - safety/ — Каталог safety.
+      - evaluateTurn.js — Общая библиотека/утилита evaluate Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/safety/insultAssessment.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - insultAssessment.js — Общая библиотека/утилита insult Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/safety/obfuscationMatcher.js; используется в lib/ql7-support/safety/evaluateTurn.js.
+      - insultStateMachine.js — Общая библиотека/утилита insult State Machine инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/safety/evaluateTurn.js.
+      - obfuscationMatcher.js — Общая библиотека/утилита obfuscation Matcher инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/safetyLexicon.native.js, lib/ql7-support/language/safetyLexicon.provider.js; используется в lib/ql7-support/safety/insultAssessment.js.
+    - semantics/ — Каталог semantics.
+      - analyzeTurn.js — Общая библиотека/утилита analyze Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/language/locales.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/v13/analyzeTurnV13.js, lib/ql7-support/v13/index.js.
+      - emotionAssessment.js — Общая библиотека/утилита emotion Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - routeCalibration.js — Общая библиотека/утилита route Calibration инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/server.js, lib/ql7-support/v13/routeCalibrationV13.js, tests/unit/ql7-support/v14-final-runtime.test.js.
+    - simulation/ — Каталог simulation.
+      - corpora/ — Каталог corpora.
+        - conversationBreadthV14.js — Общая библиотека/утилита conversation Breadth V14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - knowledge32V14.js — Общая библиотека/утилита knowledge32 V14 инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/simulation/scenarioCatalog.js, tests/contracts/ql7-support-v14-regulation.contract.test.js, tests/contracts/ql7-support-v14.contract.test.js.
+        - legacyIntelligenceV14.js — Общая библиотека/утилита legacy Intelligence V14 инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversationBreadthCorpusV11.js, lib/ql7-support/humanConversationCorpusV11.js.
+        - safetyBoundaryV14.js — Общая библиотека/утилита safety Boundary V14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - executeScenario.js — Общая библиотека/утилита execute Scenario инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/independentOracle.js; используется в tests/integration/ql7-support-v14-evidence.integration.test.js, tests/integration/ql7-support-v14-runtime.integration.test.js.
+      - identityAudit.js — Общая библиотека/утилита identity Audit инфраструктурного слоя. Связи: импортирует lib/ql7-support/operator/buildCase.js, lib/ql7-support/operator/smtpRendererRu.js, lib/ql7-support/simulation/liveRead.js.
+      - independentOracle.js — Общая библиотека/утилита independent Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/critiqueResponse.js; используется в lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/v12/independentReferenceOracleV12.js, lib/ql7-support/v13/independentReferenceOracleV13.js.
+      - liveRead.js — Общая библиотека/утилита live Read инфраструктурного слоя. Связи: импортирует lib/ql7-support/adsSupportReadAdapterV9.js, lib/ql7-support/ecosystemRating.js, lib/ql7-support/identityGraphV8.js; используется в lib/ql7-support/simulation/identityAudit.js, tests/unit/ql7-support/v14-final-runtime.test.js.
+      - mutationEngine.js — Общая библиотека/утилита mutation Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/simulation/corpora/knowledge32V14.js, lib/ql7-support/simulation/scenarioCatalog.js, tests/contracts/ql7-support-v14-regulation.contract.test.js.
+      - productionParityHarness.js — Общая библиотека/утилита production Parity Harness инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js; используется в lib/ql7-support/simulation/identityAudit.js, tests/integration/ql7-support-v14-runtime.integration.test.js.
+      - reportWriter.js — Общая библиотека/утилита report Writer инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - scenarioCatalog.js — Общая библиотека/утилита scenario Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainRegistry.js; используется в tests/contracts/ql7-support-v14-regulation.contract.test.js, tests/integration/ql7-support-v14-evidence.integration.test.js.
+    - v12/ — Каталог v12.
+      - adaptiveResponseVariationV12.js — Общая библиотека/утилита adaptive Response Variation V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulationOntologyV11.js, lib/ql7-support/v13/textV13.js; используется в lib/ql7-support/v12/index.js, lib/ql7-support/v12/semanticOntologyV12.js.
+      - adminReportRuV12.js — Общая библиотека/утилита admin Report Ru V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/index.js.
+      - choiceDiversityV12.js — Общая библиотека/утилита choice Diversity V12 инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportChoiceCard.js, lib/ql7-support/v12/index.js.
+      - conversationLedgerV12.js — Общая библиотека/утилита conversation Ledger V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/v13/conversationLedgerV13.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - factualSimulationV12.js — Общая библиотека/утилита factual Simulation V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/caseEngine.js, lib/ql7-support/data/simulationFixtures.js, lib/ql7-support/inputPolicy.js; используется в lib/ql7-support/v12/index.js.
+      - idlePolicyV12.js — Общая библиотека/утилита idle Policy V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/index.js.
+      - independentReferenceOracleV12.js — Общая библиотека/утилита independent Reference Oracle V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/independentOracle.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js, tests/unit/ql7-support/v12-factual-simulation.test.js.
+      - index.js — Общая библиотека/утилита index инфраструктурного слоя. Связи: импортирует lib/ql7-support/v12/adaptiveResponseVariationV12.js, lib/ql7-support/v12/adminReportRuV12.js, lib/ql7-support/v12/choiceDiversityV12.js; используется в tests/unit/ql7-support/v12-factual-simulation.test.js.
+      - languageDialectRouterV12.js — Общая библиотека/утилита language Dialect Router V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/languageOrchestrator.js, lib/ql7-support/simulationOntologyV11.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - premiumCardLayoutV12.js — Общая библиотека/утилита premium Card Layout V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchemaV3.js, lib/ql7-support/cardSchemaV4.js, lib/ql7-support/cards.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - responseCriticV12.js — Общая библиотека/утилита response Critic V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/response/critiqueResponse.js; используется в lib/ql7-support/v12/index.js.
+      - responsePlannerV12.js — Общая библиотека/утилита response Planner V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/executeTurn.js; используется в lib/ql7-support/v12/index.js.
+      - safeLearningCalibrationV12.js — Общая библиотека/утилита safe Learning Calibration V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js; используется в lib/ql7-support/v12/index.js, lib/ql7-support/v12/semanticOntologyV12.js.
+      - safetyEscalationLedgerV12.js — Общая библиотека/утилита safety Escalation Ledger V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - semanticBattleExpansionV12.js — Общая библиотека/утилита semantic Battle Expansion V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulationOntologyV11.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js, lib/ql7-support/v12/semanticOntologyV12.js.
+      - semanticOntologyV12.js — Общая библиотека/утилита semantic Ontology V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/microIntentCatalogV11_6.js, lib/ql7-support/simulationOntologyV11.js, lib/ql7-support/v12/adaptiveResponseVariationV12.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - sessionIdentityContextV12.js — Общая библиотека/утилита session Identity Context V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - structuredLocalizationV12.js — Общая библиотека/утилита structured Localization V12 инфраструктурного слоя. Связи: импортирует lib/ql7-support/languageOrchestrator.js, lib/ql7-support/providerLocalizationV8.js; используется в lib/ql7-support/v12/factualSimulationV12.js, lib/ql7-support/v12/index.js.
+      - temporalContextV12.js — Общая библиотека/утилита temporal Context V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/entryGreetingLexiconV11.js, lib/ql7-support/v12/index.js.
+      - visualAcceptanceV12.js — Общая библиотека/утилита visual Acceptance V12 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/index.js.
+    - v13/ — Каталог v13.
+      - adapterReceiptV13.js — Общая библиотека/утилита adapter Receipt V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js.
+      - analyzeTurnV13.js — Общая библиотека/утилита analyze Turn V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/analyzeTurn.js.
+      - conversationLedgerV13.js — Общая библиотека/утилита conversation Ledger V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/ledger.js; используется в lib/ql7-support/v12/conversationLedgerV12.js.
+      - humanRealizerV13.js — Общая библиотека/утилита human Realizer V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/response/realizeNatural.js.
+      - independentReferenceOracleV13.js — Общая библиотека/утилита independent Reference Oracle V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/independentOracle.js.
+      - index.js — Общая библиотека/утилита index инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/ledger.js, lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/presentation/buildSupportSurface.js.
+      - presentationRegistryV13.js — Общая библиотека/утилита presentation Registry V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/presentation/registry.js.
+      - responseContentPlanV13.js — Общая библиотека/утилита response Content Plan V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/response/buildContentPlan.js.
+      - responseCriticV13.js — Общая библиотека/утилита response Critic V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/response/critiqueResponse.js.
+      - routeCalibrationV13.js — Общая библиотека/утилита route Calibration V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/routeCalibration.js.
+      - runtimeV13.js — Общая библиотека/утилита runtime V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/executeTurn.js.
+      - simulationFixturesV13.js — Общая библиотека/утилита simulation Fixtures V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/simulationFixtures.js.
+      - supportSurfaceV13.js — Общая библиотека/утилита support Surface V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/presentation/buildSupportSurface.js.
+      - textV13.js — Общая библиотека/утилита text V13 инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/v12/adaptiveResponseVariationV12.js.
+    - adminReportComposer.js — Общая библиотека/утилита admin Report Composer инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js; используется в lib/supportEmailTransport.js, tests/integration/ql7-support/admin-dm-email-v11-4.test.js, tests/integration/ql7-support/adult-pipeline-v6.test.js.
+    - adsSupportReadAdapterV9.js — Общая библиотека/утилита ads Support Read Adapter V9 инфраструктурного слоя. Связи: импортирует lib/adsCore.js; используется в lib/ql7-support/diagnostics.js, lib/ql7-support/simulation/liveRead.js, tests/integration/ql7-support/ads-same-source-v11-5.test.js.
+    - adultLanguagePolicy.js — Общая библиотека/утилита adult Language Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/limitsV11.js; используется в lib/ql7-support/adminReportComposer.js, lib/ql7-support/cardSchemaV2.js, lib/ql7-support/diagnosticPresentation.js.
+    - broadcast.js — Общая библиотека/утилита broadcast инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js; используется в app/api/dm/send/route.js, tests/integration/ql7-support-scenarios.test.js.
+    - cards.js — Общая библиотека/утилита cards инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/supportCard.js; используется в lib/ql7-support/events.js, lib/ql7-support/v12/premiumCardLayoutV12.js, tests/component/ql7-support/adult-card-v2.test.js.
+    - cardSchemaV2.js — Общая библиотека/утилита card Schema V2 инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js; используется в lib/ql7-support/cardSchemaV3.js, lib/ql7-support/contracts/supportCard.js.
+    - cardSchemaV3.js — Общая библиотека/утилита card Schema V3 инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchemaV2.js, lib/ql7-support/evidencePolicyV11_6.js, lib/ql7-support/metricRegistryV9.js; используется в lib/ql7-support/cardSchemaV4.js, lib/ql7-support/contracts/supportCard.js, lib/ql7-support/v12/premiumCardLayoutV12.js.
+    - cardSchemaV4.js — Общая библиотека/утилита card Schema V4 инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchemaV3.js, lib/ql7-support/metricRegistryV9.js, lib/ql7-support/semanticBadgeRegistryV11_6.js; используется в lib/ql7-support/contracts/supportCard.js, lib/ql7-support/v12/premiumCardLayoutV12.js, tests/component/ql7-support/semantic-badges-v11-6.test.jsx.
+    - caseEngine.js — Общая библиотека/утилита case Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/responsePlan.js, lib/ql7-support/speechEngine.js; используется в lib/ql7-support/events.js, lib/ql7-support/server.js, lib/ql7-support/v12/factualSimulationV12.js.
+    - choiceContractV11.js — Общая библиотека/утилита choice Contract V11 инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в app/api/dm/send/route.js, lib/ql7-support/server.js, tests/contracts/project/ql7-support-cosmic-v11-contracts.test.js.
+    - clarificationBudget.js — Общая библиотека/утилита clarification Budget инфраструктурного слоя. Связи: используется в lib/ql7-support/naturalLanguageRealizer.js.
+    - cognitiveMemoryV11.js — Общая библиотека/утилита cognitive Memory V11 инфраструктурного слоя. Связи: импортирует lib/ql7-support/limitsV11.js; используется в app/api/dm/support-feedback/route.js, lib/ql7-support/server.js, tests/contracts/project/ql7-support-cosmic-v11-contracts.test.js.
+    - conversationBreadthCorpusV11.js — Общая библиотека/утилита conversation Breadth Corpus V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/corpora/legacyIntelligenceV14.js, tests/unit/ql7-support/semantic-breadth-v11-4.test.js.
+    - conversationIntelligence.js — Общая библиотека/утилита conversation Intelligence инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/unit/ql7-support/intelligence-calibration-v29.test.js, tests/unit/ql7-support/premium-cognitive-v9.test.js.
+    - conversationLexiconV7.js — Общая библиотека/утилита conversation Lexicon V7 инфраструктурного слоя. Связи: используется в lib/ql7-support/naturalLanguageRealizer.js, tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - conversationStateV7.js — Общая библиотека/утилита conversation State V7 инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - diagnosticFailure.js — Общая библиотека/утилита diagnostic Failure инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/integration/ql7-support/final-runtime-v7.test.js, tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - diagnosticPresentation.js — Общая библиотека/утилита diagnostic Presentation инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/evidencePolicyV11_6.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/adult-pipeline-v6.test.js, tests/integration/ql7-support/premium-evidence-v11-6.test.js.
+    - diagnosticRegistry.js — Общая библиотека/утилита diagnostic Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/diagnostics.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/sourceRegistry.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - diagnostics.js — Общая библиотека/утилита diagnostics инфраструктурного слоя. Связи: импортирует lib/ql7-support/adsSupportReadAdapterV9.js, lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/server.js, tests/contracts/project/ql7-support-contracts.test.js.
+    - dialogueMemory.js — Общая библиотека/утилита dialogue Memory инфраструктурного слоя. Связи: используется в lib/ql7-support/responsePlan.js, lib/ql7-support/server.js, tests/unit/ql7-support/premium-ai-v5.test.js.
+    - ecosystemCatalog.js — Общая библиотека/утилита ecosystem Catalog инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportOperator.jsx, forum/features/dm/hooks/useForumDmRuntime.js, forum/features/dm/services/sendDmComposerMessage.js.
+    - ecosystemRating.js — Общая библиотека/утилита ecosystem Rating инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, lib/ql7-support/simulation/liveRead.js, tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - emailOutboxWorker.js — Общая библиотека/утилита email Outbox Worker инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/featureFlag.js, lib/supportEmailTransport.js; используется в lib/ql7-support/scheduler.js, lib/ql7-support/server.js, tests/integration/ql7-support-scenarios.test.js.
+    - emotionalPresentationV11.js — Общая библиотека/утилита emotional Presentation V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/v12/premiumCardLayoutV12.js, tests/unit/ql7-support/semantic-breadth-v11-4.test.js.
+    - entryGreetingLexiconV11.js — Общая библиотека/утилита entry Greeting Lexicon V11 инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/humanVariationBanks.js, lib/ql7-support/v12/temporalContextV12.js; используется в forum/ForumRoot.jsx, lib/ql7-support/greetingCoordinatorV8.js, tests/unit/ql7-support/human-conversation-v11-5.test.js.
+    - eventNotificationCatalog.js — Общая библиотека/утилита event Notification Catalog инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - events.js — Общая библиотека/утилита events инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/cards.js, lib/ql7-support/caseEngine.js; используется в app/api/forum/report/route.js, app/api/qcoin/topup/webhook/route.js, app/api/wallet-session/route.js.
+    - evidencePolicyV11_6.js — Общая библиотека/утилита evidence Policy V11 6 инфраструктурного слоя. Связи: используется в lib/ql7-support/cardSchemaV3.js, lib/ql7-support/diagnosticPresentation.js, tests/integration/ql7-support/premium-evidence-v11-6.test.js.
+    - featureFlag.js — Общая библиотека/утилита feature Flag инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/featureFlag.js; используется в app/api/dm/block/route.js, app/api/dm/send/route.js, app/api/dm/support-entry/route.js.
+    - greetingCoordinatorV8.js — Общая библиотека/утилита greeting Coordinator V8 инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/supportCard.js, lib/ql7-support/entryGreetingLexiconV11.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/premium-cognitive-v8.test.js.
+    - humanConversationCorpusV11.js — Общая библиотека/утилита human Conversation Corpus V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/corpora/legacyIntelligenceV14.js, tests/unit/ql7-support/human-conversation-v11-5.test.js.
+    - identityGraphV8.js — Общая библиотека/утилита identity Graph V8 инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs; используется в lib/ql7-support/simulation/liveRead.js, lib/ql7-support/vipResolverV8.js.
+    - identityResolver.js — Общая библиотека/утилита identity Resolver инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/tma.js; используется в app/api/dm/send/route.js, app/api/dm/support-card-translate/route.js, app/api/dm/support-entry/route.js.
+    - inputNormalizationV11_6.js — Общая библиотека/утилита input Normalization V11 6 инфраструктурного слоя. Связи: используется в lib/ql7-support/microIntentCatalogV11_6.js.
+    - inputPolicy.js — Общая библиотека/утилита input Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/nativeBanks.js; используется в app/api/dm/send/route.js, forum/features/dm/hooks/useForumDmRuntime.js, forum/features/dm/services/sendDmComposerMessage.js.
+    - intentHypothesisEngine.js — Общая библиотека/утилита intent Hypothesis Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/microIntentCatalogV11_6.js, lib/ql7-support/semanticNuanceV11.js; используется в lib/ql7-support/semanticRouter.js, tests/unit/ql7-support/premium-human-intelligence-v11-6.test.js, tests/unit/ql7-support/v12-factual-simulation.test.js.
+    - knowledgeRegistry.js — Общая библиотека/утилита knowledge Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledge/domainKnowledge.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/naturalLanguageRealizer.js, lib/ql7-support/response/realizeNatural.js, lib/ql7-support/speechEngine.js.
+    - languageOrchestrator.js — Общая библиотека/утилита language Orchestrator инфраструктурного слоя. Связи: используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/providerLocalizationV8.js, lib/ql7-support/server.js.
+    - learningControlPlaneV11.js — Общая библиотека/утилита learning Control Plane V11 инфраструктурного слоя. Связи: используется в tests/contracts/project/ql7-support-cosmic-v11-contracts.test.js, tests/unit/ql7-support/cosmic-intelligence-v11.test.js.
+    - learningGovernanceV8.js — Общая библиотека/утилита learning Governance V8 инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js.
+    - learningPipeline.js — Общая библиотека/утилита learning Pipeline инфраструктурного слоя. Связи: импортирует lib/ql7-support/learning/governancePolicy.js; используется в app/api/dm/support-feedback/route.js, lib/ql7-support/server.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - limitsV11.js — Общая библиотека/утилита limits V11 инфраструктурного слоя. Связи: используется в app/api/dm/send/route.js, app/api/dm/support-feedback/route.js, forum/features/dm/components/Ql7SupportChoiceCard.js.
+    - localDictionaryContext.js — Общая библиотека/утилита local Dictionary Context инфраструктурного слоя. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в lib/ql7-support/knowledgeRegistry.js, tests/unit/ql7-support/premium-cognitive-v9.test.js.
+    - mediaEvidence.js — Общая библиотека/утилита media Evidence инфраструктурного слоя. Связи: используется в app/api/forum/report/route.js, tests/unit/ql7-support/intelligence-calibration-v29.test.js.
+    - metricRegistryV9.js — Общая библиотека/утилита metric Registry V9 инфраструктурного слоя. Связи: используется в lib/ql7-support/cardSchemaV3.js, lib/ql7-support/cardSchemaV4.js, lib/ql7-support/diagnosticPresentation.js.
+    - microIntentCatalogV11_6.js — Общая библиотека/утилита micro Intent Catalog V11 6 инфраструктурного слоя. Связи: импортирует lib/ql7-support/inputNormalizationV11_6.js; используется в lib/ql7-support/intentHypothesisEngine.js, lib/ql7-support/premiumSimulationCatalogV11_6.js, lib/ql7-support/v12/semanticOntologyV12.js.
+    - naturalLanguageRealizer.js — Общая библиотека/утилита natural Language Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/clarificationBudget.js, lib/ql7-support/conversationLexiconV7.js; используется в lib/ql7-support/responsePlan.js, tests/unit/ql7-support/premium-cognitive-v9.test.js.
+    - personalityEngineV11.js — Общая библиотека/утилита personality Engine V11 инфраструктурного слоя. Связи: используется в app/api/dm/support-feedback/route.js, lib/ql7-support/responsePlan.js, lib/ql7-support/server.js.
+    - premiumResponsePlannerV11_6.js — Общая библиотека/утилита premium Response Planner V11 6 инфраструктурного слоя. Связи: используется в lib/ql7-support/naturalLanguageRealizer.js, tests/unit/ql7-support/premium-human-intelligence-v11-6.test.js.
+    - premiumSimulationCatalogV11_6.js — Общая библиотека/утилита premium Simulation Catalog V11 6 инфраструктурного слоя. Связи: импортирует lib/ql7-support/microIntentCatalogV11_6.js.
+    - presentationV8.js — Общая библиотека/утилита presentation V8 инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchemaV3.js, lib/ql7-support/diagnosticPresentation.js.
+    - providerLocalizationV8.js — Общая библиотека/утилита provider Localization V8 инфраструктурного слоя. Связи: импортирует lib/ql7-support/languageOrchestrator.js, lib/ql7-support/presentationV8.js; используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/server.js, lib/ql7-support/v12/structuredLocalizationV12.js.
+    - reportPolicyRegistry.js — Общая библиотека/утилита report Policy Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/events.js, tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - responsePlan.js — Общая библиотека/утилита response Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/dialogueMemory.js, lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/caseEngine.js, tests/integration/ql7-support/adult-pipeline-v6.test.js, tests/integration/ql7-support/cosmic-v11-pipeline.test.js.
+    - runtimeCapabilityRegistryV11.js — Общая библиотека/утилита runtime Capability Registry V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/integration/ql7-support/cosmic-v11-pipeline.test.js, tests/unit/ql7-support/cosmic-intelligence-v11.test.js.
+    - runtimeStateMachine.js — Общая библиотека/утилита runtime State Machine инфраструктурного слоя. Связи: импортирует lib/ql7-support/inputPolicy.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/final-runtime-v7.test.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - scenarioContractsV7.js — Общая библиотека/утилита scenario Contracts V7 инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/final-intelligence-v7.test.js.
+    - scheduler.js — Общая библиотека/утилита scheduler инфраструктурного слоя. Связи: импортирует lib/adsCore.js, lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js; используется в app/api/dm/support-worker/route.js, tests/integration/ql7-support-scenarios.test.js.
+    - semanticBadgeRegistryV11_6.js — Общая библиотека/утилита semantic Badge Registry V11 6 инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchemaV3.js, lib/ql7-support/cardSchemaV4.js.
+    - semanticNuanceV11.js — Общая библиотека/утилита semantic Nuance V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/intentHypothesisEngine.js, lib/ql7-support/semanticRouter.js.
+    - semanticRouter.js — Общая библиотека/утилита semantic Router инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/intentHypothesisEngine.js, lib/ql7-support/semanticNuanceV11.js; используется в lib/ql7-support/server.js, lib/ql7-support/v12/factualSimulationV12.js, tests/integration/ql7-support/adult-pipeline-v6.test.js.
+    - semanticSurfaceV9.js — Общая библиотека/утилита semantic Surface V9 инфраструктурного слоя. Связи: используется в lib/ql7-support/naturalLanguageRealizer.js, lib/ql7-support/responsePlan.js, tests/contracts/project/ql7-support-contracts.test.js.
+    - server.js — Общая библиотека/утилита server инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/dm-primary.cjs, lib/ql7-support/caseEngine.js; используется в app/api/dm/send/route.js, app/api/dm/support-entry/route.js, app/api/dm/support-state/route.js.
+    - simulationEvaluatorV11.js — Общая библиотека/утилита simulation Evaluator V11 инфраструктурного слоя. Связи: импортирует lib/ql7-support/limitsV11.js; используется в tests/unit/ql7-support/cosmic-intelligence-v11.test.js.
+    - simulationGeneratorV11.js — Общая библиотека/утилита simulation Generator V11 инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/limitsV11.js, lib/ql7-support/simulationOntologyV11.js; используется в lib/ql7-support/v12/factualSimulationV12.js, tests/unit/ql7-support/cosmic-intelligence-v11.test.js.
+    - simulationOntologyV11.js — Общая библиотека/утилита simulation Ontology V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/simulationGeneratorV11.js, lib/ql7-support/v12/adaptiveResponseVariationV12.js, lib/ql7-support/v12/factualSimulationV12.js.
+    - socialConversationV11.js — Общая библиотека/утилита social Conversation V11 инфраструктурного слоя. Связи: используется в lib/ql7-support/intentHypothesisEngine.js, lib/ql7-support/naturalLanguageRealizer.js.
+    - sourceRegistry.js — Общая библиотека/утилита source Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/diagnosticRegistry.js, tests/unit/ql7-support/premium-ai-v5.test.js, tests/unit/ql7-support/runtime-completion-v18.test.js.
+    - speechEngine.js — Общая библиотека/утилита speech Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/knowledgeRegistry.js; используется в lib/ql7-support/caseEngine.js.
+    - supportDeepTranslateService.js — Общая библиотека/утилита support Deep Translate Service инфраструктурного слоя. Связи: используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/server.js, tests/unit/ql7-support/runtime-completion-v18.test.js.
+    - systemActor.js — Общая библиотека/утилита system Actor инфраструктурного слоя. Связи: используется в app/api/dm/_utils.js, app/api/dm/block/route.js, app/api/dm/dialogs/route.js.
+    - templates.js — Общая библиотека/утилита templates инфраструктурного слоя. Связи: используется в lib/ql7-support/events.js, lib/ql7-support/server.js, tests/contracts/project/ql7-support-contracts.test.js.
+    - topicActionRegistryV9.js — Общая библиотека/утилита topic Action Registry V9 инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/ecosystemCatalog.js; используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchemaV4.js, lib/ql7-support/knowledge/domainRegistry.js.
+    - topicSwitchArbiterV9.js — Общая библиотека/утилита topic Switch Arbiter V9 инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/semanticRouter.js, tests/unit/ql7-support/premium-cognitive-v9.test.js.
+    - toxicityEngine.js — Общая библиотека/утилита toxicity Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/semanticBanks.js; используется в lib/ql7-support/server.js, lib/ql7-support/v12/factualSimulationV12.js, tests/unit/ql7-support/human-conversation-v11-5.test.js.
+    - turnSemanticFrameV9.js — Общая библиотека/утилита turn Semantic Frame V9 инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в app/api/dm/send/route.js, lib/ql7-support/semanticRouter.js, tests/unit/ql7-support/cosmic-intelligence-v11.test.js.
+    - vipResolverV8.js — Общая библиотека/утилита vip Resolver V8 инфраструктурного слоя. Связи: импортирует lib/ql7-support/identityGraphV8.js, lib/subscriptions.js; используется в lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/simulation/liveRead.js, tests/integration/ql7-support/premium-cognitive-v8.test.js.
+  - security/ — Каталог security.
+    - ql7-server-secret.cjs — Общая библиотека/утилита ql7 server secret инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/forum/signed-cursor.cjs, lib/ql7-support/choiceContractV11.js.
+  - seo/ — Каталог seo.
+    - siteIndex.js — Общая библиотека/утилита site Index инфраструктурного слоя. Связи: импортирует components/i18n-dicts/manifest.js; используется в app/robots.js, app/sitemap.js, lib/seo/structuredData.js.
+    - siteOrigin.js — Общая библиотека/утилита site Origin инфраструктурного слоя. Связи: используется в app/robots.js, app/sitemap.js, lib/metadataCache.js.
+    - structuredData.js — Общая библиотека/утилита structured Data инфраструктурного слоя. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в app/layout.js, tests/contracts/project/seo-indexing-contracts.test.js.
+  - storage/ — Каталог storage.
+    - mediaKeys.js — Общая библиотека/утилита media Keys инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
+    - r2.js — Общая библиотека/утилита r2 инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
+  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: импортирует lib/mongo/ads-primary.cjs, lib/mongo/profile-primary.cjs, lib/ql7-support/events.js; используется в app/api/ads/route.js, app/api/debug/ads/grant/route.js, app/api/pay/create/route.js.
+  - adsGeoTargetingFlow.js — Общая библиотека/утилита ads Geo Targeting Flow инфраструктурного слоя. Связи: используется в app/ads/AdsGeoTargetingPortal.jsx, app/ads/home.js, tests/unit/ads/adsGeoTargetingFlow.test.js.
+  - adsLandingPackageState.js — Общая библиотека/утилита ads Landing Package State инфраструктурного слоя. Связи: используется в app/ads/page.jsx, tests/unit/ads/adsLandingPackageState.test.js.
+  - authActionGateClient.js — Общая библиотека/утилита auth Action Gate Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/useBattleChat.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js, forum/features/ui/components/ForumActionRow.jsx.
+  - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js, app/exchange/page.js.
+  - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/brain/analyze/route.js, app/api/market/summary/route.js.
+  - deepTranslateService.js — Общая библиотека/утилита deep Translate Service инфраструктурного слоя. Связи: используется в app/api/deep-translate/route.js, tests/unit/ql7-support/runtime-completion-v18.test.js.
+  - fcm.js — Общая библиотека/утилита fcm инфраструктурного слоя. Связи: используется в lib/nativePush.js.
+  - forumClientVideoOptimizer.js — Общая библиотека/утилита forum Client Video Optimizer инфраструктурного слоя. Связи: используется в forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/services/uploadR2MediaFile.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+  - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/SharePopover.jsx.
+  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/utils/mediaRuntime.js.
+  - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js; используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
+  - nativePush.js — Общая библиотека/утилита native Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/fcm.js, lib/notificationCenter.js; используется в app/api/push/native/link/route.js, app/api/push/native/register/route.js, app/api/push/native/status/route.js.
+  - notificationCenter.js — Общая библиотека/утилита notification Center инфраструктурного слоя. Связи: используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, components/AndroidNotificationBadgeSync.jsx.
+  - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/debug/redis/route.js, app/api/telegram/link/confirm/route.js, app/api/telegram/link/start/route.js.
+  - safeWin.js — Общая библиотека/утилита safe Win инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/mongo/subscriptions-primary.cjs, lib/ql7-support/events.js; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/debug/vip/grant/route.js.
+  - supportEmailTransport.js — Общая библиотека/утилита support Email Transport инфраструктурного слоя. Связи: импортирует lib/ql7-support/adminReportComposer.js, lib/ql7-support/operator/smtpRendererRu.js; используется в app/api/contact/route.js, lib/ql7-support/emailOutboxWorker.js, lib/ql7-support/server.js.
+  - tma.js — Общая библиотека/утилита tma инфраструктурного слоя. Связи: используется в lib/auth/battlecoin-chat-auth.cjs, lib/ql7-support/identityResolver.js.
+  - videoPipelineProgress.js — Общая библиотека/утилита video Pipeline Progress инфраструктурного слоя. Связи: используется в app/ads/home.js, forum/features/media/services/resolveComposerMediaPayload.js, tests/unit/forum/videoPipelineProgress.test.js.
+  - walletSessionClient.js — Общая библиотека/утилита wallet Session Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/battleChatClient.js, forum/features/profile/components/ProfilePopover.jsx, app/game/page.js.
+  - webPush.js — Общая библиотека/утилита web Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/push-primary.cjs, lib/nativePush.js; используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, app/api/dm/send/route.js.
+- mobile/ — Каталог mobile.
+  - android/ — Каталог android.
+    - app/ — Каталог app.
+      - src/ — Каталог src.
+        - main/ — Каталог main.
+          - java/ — Каталог java.
+            - com/ — Каталог com.
+              - quantuml7ai/ — Каталог quantuml7ai.
+                - app/ — Каталог app.
+                  - AppShellConfig.kt — .kt-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - AuthReturnActivity.kt — .kt-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - MainActivity.kt — .kt-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativeBridge.kt — .kt-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativePushRegistrar.kt — .kt-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumFirebaseMessagingService.kt — .kt-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumLauncherActivity.kt — .kt-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumNotificationService.kt — .kt-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - res/ — Каталог res.
+            - drawable/ — Каталог drawable.
+              - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+              - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-hdpi/ — Каталог mipmap-hdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-mdpi/ — Каталог mipmap-mdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xhdpi/ — Каталог mipmap-xhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxhdpi/ — Каталог mipmap-xxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxxhdpi/ — Каталог mipmap-xxxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values/ — Каталог values.
+              - colors.xml — .xml-файл colors. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - styles.xml — .xml-файл styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ar/ — Каталог values-ar.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-es/ — Каталог values-es.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ru/ — Каталог values-ru.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-tr/ — Каталог values-tr.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-uk/ — Каталог values-uk.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-zh-rCN/ — Каталог values-zh-rCN.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - xml/ — Каталог xml.
+              - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - proguard-rules.pro — .pro-файл proguard rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle/ — Каталог gradle.
+      - wrapper/ — Каталог wrapper.
+        - gradle-wrapper.jar — .jar-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - gradle-wrapper.properties — .properties-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - tools/ — Каталог tools.
+      - android-doctor.ps1 — .ps1-файл android doctor. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-debug-apk.ps1 — .ps1-файл build debug apk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-release.ps1 — .ps1-файл build release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - install-ldplayer.ps1 — .ps1-файл install ldplayer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - print-signing-fingerprints.ps1 — .ps1-файл print signing fingerprints. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_ACCEPTANCE_CHECKLIST.md — Markdown-документ ANDROID ACCEPTANCE CHECKLIST. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_APP_LINKS.md — Markdown-документ ANDROID APP LINKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_MEDIA_PERMISSIONS.md — Markdown-документ ANDROID MEDIA PERMISSIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NATIVE_BRIDGE.md — Markdown-документ ANDROID NATIVE BRIDGE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NOTIFICATIONS.md — Markdown-документ ANDROID NOTIFICATIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_OBSERVABILITY.md — Markdown-документ ANDROID OBSERVABILITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE_DECISIONS.md — Markdown-документ ANDROID RELEASE DECISIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE.md — Markdown-документ ANDROID RELEASE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_REMOTE_CONFIG.md — Markdown-документ ANDROID REMOTE CONFIG. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_SECURITY.md — Markdown-документ ANDROID SECURITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_STORE_METADATA.md — Markdown-документ ANDROID STORE METADATA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_TEST_MATRIX.md — Markdown-документ ANDROID TEST MATRIX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_WALLET_PAYMENT.md — Markdown-документ ANDROID WALLET PAYMENT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - GRADLE_WRAPPER.md — Markdown-документ GRADLE WRAPPER. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle.properties — .properties-файл gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew — Служебный-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew.bat — .bat-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - keystore.properties — .properties-файл keystore. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - keystore.properties.example — .example-файл keystore.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - LDPLAYER_TESTING.md — Markdown-документ LDPLAYER TESTING. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - local.properties — .properties-файл local. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - local.properties.example — .example-файл local.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - settings.gradle.kts — .kts-файл settings.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ios/ — Каталог ios.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- src/ — Каталог src.
+  - shared/ — Каталог shared.
+    - runtime/ — Каталог runtime.
+      - adaptive/ — Каталог adaptive.
+        - deviceProfileResolver.js — JS-файл device Profile Resolver. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - effectDegradation.js — JS-файл effect Degradation. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - productionAdaptiveCore.js — JS-файл production Adaptive Core. Связи: импортирует src/shared/runtime/adaptive/deviceProfileResolver.js, src/shared/runtime/adaptive/effectDegradation.js, src/shared/runtime/adaptive/runtimePriority.js.
+        - runtimePriority.js — JS-файл runtime Priority. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+      - budgets/ — Каталог budgets.
+        - budgetEngine.js — JS-файл budget Engine. Связи: импортирует src/shared/runtime/budgets/budgetViolations.js, src/shared/runtime/budgets/ownerArbitration.js, src/shared/runtime/budgets/promotionJournal.js; используется в tests/contracts/forum/ads-shared-budget.contract.test.js, tests/contracts/forum/iframe-singleton-mobile.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - budgetViolations.js — JS-файл budget Violations. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - ownerArbitration.js — JS-файл owner Arbitration. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - promotionJournal.js — JS-файл promotion Journal. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - routeCapabilities.js — JS-файл route Capabilities. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js; используется в tests/contracts/root/runtime-startup-budget.contract.test.js, tests/contracts/route/widget-locality.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - routeProfileResolver.js — JS-файл route Profile Resolver. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/forum/player-budget-profiles.contract.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - routeProfiles.js — JS-файл route Profiles. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/decorative/autoplay-budget.contract.test.js, tests/contracts/forum/ads-shared-budget.contract.test.js.
+      - diff/ — Каталог diff.
+        - diffEngine.js — JS-файл diff Engine. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+        - diffReportFormatter.js — JS-файл diff Report Formatter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forensics/ — Каталог forensics.
+        - forensicMode.js — JS-файл forensic Mode. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - identity/ — Каталог identity.
+        - runtimeDebugStore.js — JS-файл runtime Debug Store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - runtimeInspector.js — JS-файл runtime Inspector. Связи: импортирует src/shared/runtime/passports/runtimePassport.js.
+        - runtimeRegistry.js — JS-файл runtime Registry. Связи: импортирует src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/identity/runtimeTypes.js; используется в tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeStates.js — JS-файл runtime States. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js; используется в src/shared/runtime/identity/runtimeRegistry.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeTypes.js — JS-файл runtime Types. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/identity/runtimeRegistry.js, src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/passports/runtimePassport.js.
+      - mode/ — Каталог mode.
+        - runtimeFlags.js — JS-файл runtime Flags. Связи: импортирует src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeResolver.js.
+        - runtimeMode.js — JS-файл runtime Mode. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeDebug.js; используется в src/shared/runtime/modes/runtimeModes.js, src/shared/runtime/passports/runtimePassport.js.
+        - runtimeModeClient.js — JS-файл runtime Mode Client. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeDebug.js — JS-файл runtime Mode Debug. Связи: используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/modes/runtimeModeGuards.js.
+        - runtimeModeResolver.js — JS-файл runtime Mode Resolver. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModeServer.js — JS-файл runtime Mode Server. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeTypes.js — JS-файл runtime Mode Types. Связи: используется в src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeGuards.js.
+      - modes/ — Каталог modes.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModes.js — JS-файл runtime Modes. Связи: импортирует src/shared/runtime/mode/runtimeMode.js.
+      - passports/ — Каталог passports.
+        - runtimePassport.js — JS-файл runtime Passport. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js, src/shared/runtime/mode/runtimeMode.js; используется в src/shared/runtime/identity/runtimeInspector.js, tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimePassportPanel.jsx — JSX-файл runtime Passport Panel. Связи: используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx.
+        - runtimePassportSerializer.js — JS-файл runtime Passport Serializer. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+- tests/ — Каталог tests.
+  - component/ — Каталог component.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - components/ — Каталог components.
+            - UserRecommendationCard.test.jsx — JSX-файл User Recommendation Card.test. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, tests/fixtures/forum/recommendations.js.
+            - UserRecommendationsRail.test.jsx — JSX-файл User Recommendations Rail.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+      - runtime-stability-sentinel.component.test.jsx — JSX-файл runtime stability sentinel.component.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx.
+    - ql7-support/ — Каталог ql7-support.
+      - adult-card-v2.test.js — JS-файл adult card v2.test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cards.js.
+      - cosmic-v11-actions.test.js — JS-файл cosmic v11 actions.test. Связи: импортирует lib/ql7-support/cards.js.
+      - emotional-choice-v11-4.test.jsx — JSX-файл emotional choice v11 4.test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchemaV3.js.
+      - final-card-media-v7.test.js — JS-файл final card media v7.test. Связи: импортирует lib/ql7-support/cards.js.
+      - operator-quantum-messenger-sticky-stack.test.jsx — JSX-файл operator quantum messenger sticky stack.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-card.test.js — JS-файл premium card.test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cards.js.
+      - premium-presentation-v8.test.js — JS-файл premium presentation v8.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - semantic-badges-v11-6.test.jsx — JSX-файл semantic badges v11 6.test. Связи: импортирует forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchemaV4.js.
+    - runtime/ — Каталог runtime.
+      - runtimeComponentSurfaces.test.jsx — JSX-файл runtime Component Surfaces.test. Связи: импортирует src/shared/runtime/passports/runtimePassportPanel.jsx, tests/support/runtimeGovernance.js.
+    - ql7-support-v14-surface.component.test.jsx — JSX-файл ql7 support v14 surface.component.test. Связи: импортирует forum/features/dm/components/Ql7SupportChoiceCard.js, forum/features/dm/components/Ql7SupportMessageSurface.jsx, forum/features/dm/components/Ql7SupportOperator.jsx.
+  - contracts/ — Каталог contracts.
+    - decorative/ — Каталог decorative.
+      - autoplay-budget.contract.test.js — JS-файл autoplay budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - forum/ — Каталог forum.
+      - ads-shared-budget.contract.test.js — JS-файл ads shared budget.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - forum-media-lifecycle.contract.test.js — JS-файл forum media lifecycle.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-navigation-protected.contract.test.js — JS-файл forum navigation protected.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-runtime-stability.contract.test.js — JS-файл forum runtime stability.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-sentinel-consumers.contract.test.js — JS-файл forum sentinel consumers.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-windowing-consumers.contract.test.js — JS-файл forum windowing consumers.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - iframe-singleton-mobile.contract.test.js — JS-файл iframe singleton mobile.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - media-budget-owner.contract.test.js — JS-файл media budget owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - native-video-cold-offscreen.contract.test.js — JS-файл native video cold offscreen.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+      - player-budget-profiles.contract.test.js — JS-файл player budget profiles.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, tests/support/runtimeGovernance.js.
+      - qcast-shared-mute-owner.contract.test.js — JS-файл qcast shared mute owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - same-src-thrash-guard.contract.test.js — JS-файл same src thrash guard.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - metamarket/ — Каталог metamarket.
+      - metamarket-contracts.test.js — JS-файл metamarket contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - mobile/ — Каталог mobile.
+      - android-shell-contracts.test.js — JS-файл android shell contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - project/ — Каталог project.
+      - ads-geo-targeting-portal-contracts.test.js — JS-файл ads geo targeting portal contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+      - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует app/api/wallet-session/route.js, tests/support/projectSurface.js.
+      - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - battlecoin-chat-contracts.test.js — JS-файл battlecoin chat contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - exchange-ai-box-contracts.test.js — JS-файл exchange ai box contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+      - forum-ad-discovery-contracts.test.js — JS-файл forum ad discovery contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-client-video-optimizer-contracts.test.js — JS-файл forum client video optimizer contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - no-mojibake-contract.test.js — JS-файл no mojibake contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-888-v8-final-contracts.test.js — JS-файл ql7 support 888 v8 final contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-adult-god-mode-v6-contracts.test.js — JS-файл ql7 support adult god mode v6 contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-contracts.test.js — JS-файл ql7 support contracts.test. Связи: импортирует lib/ql7-support/cards.js, lib/ql7-support/caseEngine.js, lib/ql7-support/diagnostics.js.
+      - ql7-support-cosmic-v11-contracts.test.js — JS-файл ql7 support cosmic v11 contracts.test. Связи: импортирует lib/ql7-support/cards.js, lib/ql7-support/choiceContractV11.js, lib/ql7-support/cognitiveMemoryV11.js.
+      - ql7-support-final-v7-contracts.test.js — JS-файл ql7 support final v7 contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-governance-contracts.test.js — JS-файл ql7 support governance contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-premium-cognitive-v8-contracts.test.js — JS-файл ql7 support premium cognitive v8 contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-premium-v5-contracts.test.js — JS-файл ql7 support premium v5 contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-runtime-completion-v18-contracts.test.js — JS-файл ql7 support runtime completion v18 contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - runtime-governance-contracts.test.js — JS-файл runtime governance contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - seo-indexing-contracts.test.js — JS-файл seo indexing contracts.test. Связи: импортирует app/robots.js, app/sitemap.js, components/i18n-dicts/manifest.js.
+      - video-pipeline-progress-contracts.test.js — JS-файл video pipeline progress contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - root/ — Каталог root.
+      - auth-bus-budget.contract.test.js — JS-файл auth bus budget.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-mode.contract.test.js — JS-файл runtime mode.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-startup-budget.contract.test.js — JS-файл runtime startup budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+      - wallet-intent-only.contract.test.js — JS-файл wallet intent only.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - route/ — Каталог route.
+      - widget-locality.contract.test.js — JS-файл widget locality.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+    - ql7-support-v13-parity.contract.test.js — JS-файл ql7 support v13 parity.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-v14-regulation.contract.test.js — JS-файл ql7 support v14 regulation.contract.test. Связи: импортирует lib/ql7-support/language/humanVariationBanks.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/simulation/corpora/knowledge32V14.js.
+    - ql7-support-v14-svg-quality.contract.test.js — JS-файл ql7 support v14 svg quality.contract.test. Связи: импортирует lib/ql7-support/presentation/svgRegistry.js.
+    - ql7-support-v14.contract.test.js — JS-файл ql7 support v14.contract.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/humanVariationBanks.js, lib/ql7-support/language/semanticBanks.js.
+  - fixtures/ — Каталог fixtures.
+    - forum/ — Каталог forum.
+      - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+  - integration/ — Каталог integration.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - recommendations-users.route.test.js — JS-файл recommendations users.route.test. Связи: импортирует app/api/forum/recommendations/users/route.js.
+    - exchange/ — Каталог exchange.
+      - AIWorkbench.test.jsx — JSX-файл AIWorkbench.test. Связи: импортирует lib/exchange/aiEntitlementState.js.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - hooks/ — Каталог hooks.
+            - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+      - media/ — Каталог media.
+        - clientVideoOptimizerPaperclip.test.jsx — JSX-файл client Video Optimizer Paperclip.test. Связи: импортирует forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/hooks/useMediaPipelineController.js.
+        - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - videoUploadGateway.test.js — JS-файл video Upload Gateway.test. Связи: импортирует forum/features/media/services/uploadR2MediaFile.js, lib/forumClientVideoOptimizer.js.
+      - runtime-stability.integration.test.js — JS-файл runtime stability.integration.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support/ — Каталог ql7-support.
+      - admin-dm-email-v11-4.test.js — JS-файл admin dm email v11 4.test. Связи: импортирует lib/ql7-support/adminReportComposer.js.
+      - ads-same-source-v11-5.test.js — JS-файл ads same source v11 5.test. Связи: импортирует lib/ql7-support/adsSupportReadAdapterV9.js.
+      - adult-pipeline-v6.test.js — JS-файл adult pipeline v6.test. Связи: импортирует lib/ql7-support/adminReportComposer.js, lib/ql7-support/cards.js, lib/ql7-support/diagnosticPresentation.js.
+      - cosmic-v11-pipeline.test.js — JS-файл cosmic v11 pipeline.test. Связи: импортирует lib/ql7-support/caseEngine.js, lib/ql7-support/limitsV11.js, lib/ql7-support/responsePlan.js.
+      - final-runtime-v7.test.js — JS-файл final runtime v7.test. Связи: импортирует lib/ql7-support/adminReportComposer.js, lib/ql7-support/diagnosticFailure.js, lib/ql7-support/runtimeStateMachine.js.
+      - premium-cognitive-v8.test.js — JS-файл premium cognitive v8.test. Связи: импортирует lib/ql7-support/greetingCoordinatorV8.js, lib/ql7-support/vipResolverV8.js.
+      - premium-evidence-v11-6.test.js — JS-файл premium evidence v11 6.test. Связи: импортирует lib/ql7-support/diagnosticPresentation.js, lib/ql7-support/evidencePolicyV11_6.js.
+      - premium-pipeline.test.js — JS-файл premium pipeline.test. Связи: импортирует lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/learningPipeline.js, lib/ql7-support/runtimeStateMachine.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.integration.test.js — JS-файл runtime Governance.integration.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeCapabilities.js, src/shared/runtime/budgets/routeProfiles.js.
+    - ql7-support-scenarios.test.js — JS-файл ql7 support scenarios.test. Связи: импортирует app/api/dm/send/route.js, lib/adsCore.js, lib/mongo/client.cjs.
+    - ql7-support-v14-evidence.integration.test.js — JS-файл ql7 support v14 evidence.integration.test. Связи: импортирует lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/simulation/scenarioCatalog.js.
+    - ql7-support-v14-runtime.integration.test.js — JS-файл ql7 support v14 runtime.integration.test. Связи: импортирует lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/simulation/productionParityHarness.js.
+  - mocks/ — Каталог mocks.
+    - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - smoke/ — Каталог smoke.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - media/ — Каталог media.
+          - components/ — Каталог components.
+            - VideoFeedPane.test.jsx — JSX-файл Video Feed Pane.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - ql7-support/ — Каталог ql7-support.
+      - adult-god-mode-surface.test.js — JS-файл adult god mode surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - final-surface-v7.test.js — JS-файл final surface v7.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-cognitive-v8-surface.test.js — JS-файл premium cognitive v8 surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-surface.test.js — JS-файл premium surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.smoke.test.js — JS-файл runtime Governance.smoke.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - ql7-support-v14-runtime.smoke.test.js — JS-файл ql7 support v14 runtime.smoke.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/runtime/executeTurn.js.
+  - support/ — Каталог support.
+    - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/metamarket/metamarket-contracts.test.js, tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js.
+    - runtimeGovernance.js — JS-файл runtime Governance. Связи: импортирует tests/support/projectSurface.js; используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx, tests/contracts/forum/media-budget-owner.contract.test.js, tests/contracts/forum/player-budget-profiles.contract.test.js.
+    - setup-dom.js — JS-файл setup dom. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - unit/ — Каталог unit.
+    - ads/ — Каталог ads.
+      - adDiscoveryPrompt.test.js — JS-файл ad Discovery Prompt.test. Связи: импортирует lib/ads/adDiscoveryPrompt.js.
+      - adsGeoTargetingFlow.test.js — JS-файл ads Geo Targeting Flow.test. Связи: импортирует lib/adsGeoTargetingFlow.js.
+      - adsLandingPackageState.test.js — JS-файл ads Landing Package State.test. Связи: импортирует lib/adsLandingPackageState.js.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - subs-people.route.test.js — JS-файл subs people.route.test. Связи: импортирует app/api/forum/subs/people/route.js, forum/features/subscriptions/utils/starred.js.
+      - profile/ — Каталог profile.
+        - user-popover.route.test.js — JS-файл user popover.route.test. Связи: импортирует app/api/profile/user-popover/route.js.
+    - battlecoin/ — Каталог battlecoin.
+      - battle-chat-validation.test.js — JS-файл battle chat validation.test. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs.
+    - exchange/ — Каталог exchange.
+      - aiEntitlementState.test.js — JS-файл ai Entitlement State.test. Связи: импортирует lib/exchange/aiEntitlementState.js.
+      - aiQuotaIdentity.test.js — JS-файл ai Quota Identity.test. Связи: импортирует lib/exchange/aiQuotaIdentity.js.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - dm/ — Каталог dm.
+          - utils/ — Каталог utils.
+            - dmLoaders.test.js — JS-файл dm Loaders.test. Связи: импортирует forum/features/dm/utils/dmLoaders.js.
+          - dm-send-scroll-stability.test.js — JS-файл dm send scroll stability.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - feed/ — Каталог feed.
+          - utils/ — Каталог utils.
+            - cardMemo.test.js — JS-файл card Memo.test. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js.
+            - interleaveRecommendationRails.test.js — JS-файл interleave Recommendation Rails.test. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js.
+        - media/ — Каталог media.
+          - utils/ — Каталог utils.
+            - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
+      - media/ — Каталог media.
+        - mediaStatePolicy.test.js — JS-файл media State Policy.test. Связи: импортирует forum/features/media/utils/mediaStatePolicy.js.
+      - shared/ — Каталог shared.
+        - config/ — Каталог config.
+          - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
+        - utils/ — Каталог utils.
+          - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+      - bounded-runtime-caches.test.js — JS-файл bounded runtime caches.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - clientVideoOptimizer.test.js — JS-файл client Video Optimizer.test. Связи: импортирует lib/forumClientVideoOptimizer.js.
+      - load-more-sentinel-state.test.js — JS-файл load more sentinel state.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx.
+      - nick-fit-registry.test.js — JS-файл nick fit registry.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - serverCompleteReaderUserPosts.test.js — JS-файл server Complete Reader User Posts.test. Связи: импортирует lib/forum/forum-server-complete-reader.cjs.
+      - serverPageReaderGeo.test.js — JS-файл server Page Reader Geo.test. Связи: импортирует lib/forum/forum-server-page-reader.cjs, lib/forum/ql7-forum-architecture.cjs, lib/geo/geo-rings.cjs.
+      - snapshotTransforms.test.js — JS-файл snapshot Transforms.test. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js.
+      - videoPipelineProgress.test.js — JS-файл video Pipeline Progress.test. Связи: импортирует lib/videoPipelineProgress.js.
+      - windowing-height-index.test.js — JS-файл windowing height index.test. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs.
+      - windowing-registry.test.js — JS-файл windowing registry.test. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+    - i18n/ — Каталог i18n.
+      - i18nDictionaries.test.js — JS-файл i18n Dictionaries.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - metamarket/ — Каталог metamarket.
+      - catalog.test.js — JS-файл catalog.test. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js, components/metamarket/metaMarketFormat.js.
+    - mongo/ — Каталог mongo.
+      - ads-primary.test.js — JS-файл ads primary.test. Связи: импортирует lib/mongo/ads-primary.cjs.
+      - battlecoin-chat-primary.test.js — JS-файл battlecoin chat primary.test. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/mongo/battlecoin-chat-primary.cjs, lib/mongo/profile-primary.cjs.
+      - battlecoin-primary.test.js — JS-файл battlecoin primary.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - dm-primary.test.js — JS-файл dm primary.test. Связи: импортирует app/api/dm/_db.js, lib/mongo/dm-primary.cjs.
+      - forum-primary.test.js — JS-файл forum primary.test. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - metamarket-primary.test.js — JS-файл metamarket primary.test. Связи: импортирует lib/mongo/metamarket-primary.cjs, lib/mongo/qcoin-primary.cjs.
+      - payments-metastudio-primary.test.js — JS-файл payments metastudio primary.test. Связи: импортирует lib/mongo/metastudio-primary.cjs, lib/mongo/payments-primary.cjs.
+      - profile-primary.test.js — JS-файл profile primary.test. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs.
+      - push-primary.test.js — JS-файл push primary.test. Связи: импортирует lib/mongo/push-primary.cjs.
+      - qcoin-primary.test.js — JS-файл qcoin primary.test. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+      - quest-primary.test.js — JS-файл quest primary.test. Связи: импортирует lib/mongo/quest-primary.cjs.
+      - referral-primary.test.js — JS-файл referral primary.test. Связи: импортирует lib/mongo/referral-primary.cjs.
+      - subscriptions-primary.test.js — JS-файл subscriptions primary.test. Связи: импортирует lib/mongo/subscriptions-primary.cjs.
+    - ql7-support/ — Каталог ql7-support.
+      - adult-intelligence-v6.test.js — JS-файл adult intelligence v6.test. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js, lib/ql7-support/cards.js, lib/ql7-support/knowledgeRegistry.js.
+      - contact-email-aggregation.test.js — JS-файл contact email aggregation.test. Связи: импортирует lib/supportEmailTransport.js.
+      - cosmic-intelligence-v11.test.js — JS-файл cosmic intelligence v11.test. Связи: импортирует lib/ql7-support/cards.js, lib/ql7-support/caseEngine.js, lib/ql7-support/choiceContractV11.js.
+      - final-intelligence-v7.test.js — JS-файл final intelligence v7.test. Связи: импортирует lib/ql7-support/conversationLexiconV7.js, lib/ql7-support/conversationStateV7.js, lib/ql7-support/diagnosticFailure.js.
+      - human-conversation-v11-5.test.js — JS-файл human conversation v11 5.test. Связи: импортирует lib/ql7-support/caseEngine.js, lib/ql7-support/entryGreetingLexiconV11.js, lib/ql7-support/humanConversationCorpusV11.js.
+      - identity-resolver.test.js — JS-файл identity resolver.test. Связи: импортирует lib/ql7-support/identityResolver.js.
+      - intelligence-calibration-v29.test.js — JS-файл intelligence calibration v29.test. Связи: импортирует lib/ql7-support/cards.js, lib/ql7-support/conversationIntelligence.js, lib/ql7-support/languageOrchestrator.js.
+      - premium-ai-v5.test.js — JS-файл premium ai v5.test. Связи: импортирует lib/ql7-support/cards.js, lib/ql7-support/dialogueMemory.js, lib/ql7-support/ecosystemCatalog.js.
+      - premium-cognitive-v8.test.js — JS-файл premium cognitive v8.test. Связи: импортирует lib/ql7-support/cardSchemaV3.js, lib/ql7-support/languageOrchestrator.js, lib/ql7-support/presentationV8.js.
+      - premium-cognitive-v9.test.js — JS-файл premium cognitive v9.test. Связи: импортирует forum/features/dm/utils/dmLoaders.js, lib/ql7-support/cardSchemaV4.js, lib/ql7-support/conversationIntelligence.js.
+      - premium-human-intelligence-v11-6.test.js — JS-файл premium human intelligence v11 6.test. Связи: импортирует lib/ql7-support/conversationIntelligence.js, lib/ql7-support/evidencePolicyV11_6.js, lib/ql7-support/intentHypothesisEngine.js.
+      - provider-localization-v8.test.js — JS-файл provider localization v8.test. Связи: импортирует lib/ql7-support/presentationV8.js, lib/ql7-support/providerLocalizationV8.js.
+      - runtime-completion-v18.test.js — JS-файл runtime completion v18.test. Связи: импортирует forum/features/dm/services/supportAuthClient.js, lib/deepTranslateService.js, lib/ql7-support/ecosystemCatalog.js.
+      - semantic-breadth-v11-4.test.js — JS-файл semantic breadth v11 4.test. Связи: импортирует lib/ql7-support/cardSchemaV3.js, lib/ql7-support/caseEngine.js, lib/ql7-support/conversationBreadthCorpusV11.js.
+      - v12-factual-simulation.test.js — JS-файл v12 factual simulation.test. Связи: импортирует lib/ql7-support/diagnosticPresentation.js, lib/ql7-support/inputPolicy.js, lib/ql7-support/intentHypothesisEngine.js.
+      - v13-human-first-runtime.test.js — JS-файл v13 human first runtime.test. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/runtime/executeTurn.js.
+      - v14-final-runtime.test.js — JS-файл v14 final runtime.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.test.js — JS-файл runtime Governance.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js.
+    - notification-center.test.js — JS-файл notification center.test. Связи: импортирует lib/notificationCenter.js.
+- tools/ — Локальные скрипты аудита, генерации и техобслуживания.
+  - ingest/ — Подкаталог инструментов: ingest.
+    - harCaptureProtocol.md — Локальный скрипт/инструмент har Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - heapCaptureProtocol.md — Локальный скрипт/инструмент heap Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHar.js — Локальный скрипт/инструмент normalize Har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHeap.js — Локальный скрипт/инструмент normalize Heap для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-adaptive-actions.js — Локальный скрипт/инструмент audit adaptive actions для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-adaptive-core.js — Локальный скрипт/инструмент audit adaptive core для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-cascade.js — Локальный скрипт/инструмент audit auth cascade для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-console-noise.js — Локальный скрипт/инструмент audit console noise для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-diagnostics-boundaries.js — Локальный скрипт/инструмент audit diagnostics boundaries для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-feature-flag-safety.js — Локальный скрипт/инструмент audit feature flag safety для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forensic-mode-bounds.js — Локальный скрипт/инструмент audit forensic mode bounds для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-media-churn.js — Локальный скрипт/инструмент audit forum media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-runtime-stability.mjs — Локальный скрипт/инструмент audit forum runtime stability для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-scroll-runtime.js — Локальный скрипт/инструмент audit forum scroll runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-iframe-restore.js — Локальный скрипт/инструмент audit iframe restore для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-layout-stability.js — Локальный скрипт/инструмент audit layout stability для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-post-video-lifecycle.js — Локальный скрипт/инструмент audit post video lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - audit-provider-baseline.js — Локальный скрипт/инструмент audit provider baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-budgets.js — Локальный скрипт/инструмент audit route budgets для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-priority-policies.js — Локальный скрипт/инструмент audit route priority policies для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-teardown.js — Локальный скрипт/инструмент audit route teardown для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-runtime-mode-resolution.js — Локальный скрипт/инструмент audit runtime mode resolution для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-passports.js — Локальный скрипт/инструмент audit runtime passports для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-same-src-thrash.js — Локальный скрипт/инструмент audit same src thrash для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - compare-baselines.js — Локальный скрипт/инструмент compare baselines для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - generate-project-dependencies.js — Локальный скрипт/инструмент generate project dependencies для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-docs.js — Локальный скрипт/инструмент generate project docs для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-ownership.js — Локальный скрипт/инструмент generate project ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-risks.js — Локальный скрипт/инструмент generate project risks для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-routes.js — Локальный скрипт/инструмент generate project routes для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - inventory-forum-runtime-lifecycle.mjs — Локальный скрипт/инструмент inventory forum runtime lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
+  - prove-forum-navigation-contracts.mjs — Локальный скрипт/инструмент prove forum navigation contracts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - prove-forum-windowing-height-index.mjs — Локальный скрипт/инструмент prove forum windowing height index для аудита или техобслуживания. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs.
+  - ql7-faststart-browser-smoke-v68.mjs — Локальный скрипт/инструмент ql7 faststart browser smoke v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-faststart-local-v68-check.mjs — Локальный скрипт/инструмент ql7 faststart local v68 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-ffmpeg-assets-check-v68.mjs — Локальный скрипт/инструмент ql7 ffmpeg assets check v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-har-media-churn.mjs — Локальный скрипт/инструмент ql7 har media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-install-local-ffmpeg-v68.mjs — Локальный скрипт/инструмент ql7 install local ffmpeg v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-owner-audit.mjs — Локальный скрипт/инструмент ql7 media owner audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-pressure-watch.mjs — Локальный скрипт/инструмент ql7 media pressure watch для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-check.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-smoke.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 smoke для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-mp4-atom-audit.mjs — Локальный скрипт/инструмент ql7 mp4 atom audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-governance-group.mjs — Локальный скрипт/инструмент run governance group для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-scenario-telemetry.mjs — Локальный скрипт/инструмент run scenario telemetry для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - run-verification-audits.mjs — Локальный скрипт/инструмент run verification audits для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - runtime-governance-baseline.mjs — Локальный скрипт/инструмент runtime governance baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - runtime-governance.js — Локальный скрипт/инструмент runtime governance для аудита или техобслуживания. Связи: используется в tools/audit-adaptive-actions.js, tools/audit-adaptive-core.js, tools/audit-auth-cascade.js.
+  - smoke-wallet-session.mjs — Локальный скрипт/инструмент smoke wallet session для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - split-i18n-dicts.mjs — Локальный скрипт/инструмент split i18n dicts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - verify-docs-workflow.mjs — Локальный скрипт/инструмент verify docs workflow для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-environment.mjs — Локальный скрипт/инструмент verify environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+- .eslintrc.json — Конфигурация ESLint для всего проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .npmrc — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- Обязательная директива.md — Markdown-документ Обязательная директива. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- Сверка Ω Из ТЗ.md — Markdown-документ Сверка Ω Из ТЗ. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- GEO_DETECT_WORLD_FEED_PREMIUM_IMPLEMENTATION_AUDIT_RU.md — Markdown-документ GEO DETECT WORLD FEED PREMIUM IMPLEMENTATION AUDIT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- geo.md — Markdown-документ geo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- laboratory Comands.md — Markdown-документ laboratory Comands. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- middleware.js — JS-файл middleware. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-lock.yaml — Lockfile pnpm с зафиксированными версиями зависимостей. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-workspace.yaml — Конфиг workspace для pnpm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_DEPENDENCIES.md — Markdown-документ PROJECT DEPENDENCIES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_OWNERSHIP.md — Markdown-документ PROJECT OWNERSHIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_COMBAT_PS1_PATCH_STANDARD_SUPPLEMENT.md — Markdown-документ QL7 COMBAT PS1 PATCH STANDARD SUPPLEMENT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_DATA_ROUTES_STORAGE_README_RU.md — Markdown-документ QL7 DATA ROUTES STORAGE README RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_DATABASE_ARCHITECTURE_RU.md — Markdown-документ QL7 DATABASE ARCHITECTURE RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_FORUM_PREMIUM_GEO_SERVER_SURFACES_TZ_DRAFT_V3_RU.md — Markdown-документ QL7 FORUM PREMIUM GEO SERVER SURFACES TZ DRAFT V3 RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_REDIS_MONGO_PREMIUM_CLOSEOUT_AUDIT_RU.md — Markdown-документ QL7 REDIS MONGO PREMIUM CLOSEOUT AUDIT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_SUPPORT_ARCHITECTURE_RU.md — Markdown-документ QL7 SUPPORT ARCHITECTURE RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7_SUPPORT_MASTER_TZ_REV5_MANDATORY_SUPPLEMENT_RU.md — Markdown-документ QL7 SUPPORT MASTER TZ REV5 MANDATORY SUPPLEMENT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7-SUPPORT-BROADCAST-CLEANUP-BY-EXACT-TEXT-WINDOWS-PS51-V2-CJMMAND.md — Markdown-документ QL7 SUPPORT BROADCAST CLEANUP BY EXACT TEXT WINDOWS PS51 V2 CJMMAND. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QL7-SUPPORT-BROADCAST-CLEANUP-BY-EXACT-TEXT-WINDOWS-PS51-V2.ps1 — .ps1-файл QL7 SUPPORT BROADCAST CLEANUP BY EXACT TEXT WINDOWS PS51 V2. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- QUANTUM_L7_AI_QL7_SUPPORT_MASTER_TZ_FINAL_REV5_FULL_RU.md — Markdown-документ QUANTUM L7 AI QL7 SUPPORT MASTER TZ FINAL REV5 FULL RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- TEXT_QL7_SUPPORT_ARHITECTURA_RU.md — Markdown-документ TEXT QL7 SUPPORT ARHITECTURA RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- WQUANTUM_CHRONOGY.md — Markdown-документ WQUANTUM CHRONOGY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

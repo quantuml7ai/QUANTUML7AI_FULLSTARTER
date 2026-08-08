@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">Kuantum bağlantısı kullanılamıyor</string>
+    <string name="offline_body">Bağlantıyı kontrol edin ve tekrar deneyin.</string>
+    <string name="retry">Tekrar dene</string>
+    <string name="blocked_url">Bu bağlantı güvenli Quantum L7 AI kabuğunun dışında açılır.</string>
+    <string name="maintenance_title">Quantum L7 AI servis modunda</string>
+    <string name="maintenance_body">Mobil shell bağlı, ancak platform geçici olarak daha güvenli bir durum hazırlıyor.</string>
+    <string name="force_update_title">Güncelleme gerekli</string>
+    <string name="force_update_body">Bu Android shell derlemesi mevcut Quantum L7 AI runtime için çok eski.</string>
+</resources>
