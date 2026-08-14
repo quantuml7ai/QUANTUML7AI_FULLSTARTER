@@ -1,0 +1,4 @@
+import { describe, expect, it } from 'vitest'
+import { executeQl7SupportScenario } from '../../lib/ql7-support/simulation/executeScenario.js'
+import { buildQl7SupportScenario } from '../../lib/ql7-support/simulation/scenarioCatalog.js'
+describe('QL7 V14 full evidence',()=>{it('contains actual surface, state, policy and replay-compatible data',()=>{const scenario=buildQl7SupportScenario(0,{profile:'gold',seed:'contract'});const row=executeQl7SupportScenario(scenario);expect(row.result.internalProvenance.resolvedExecutorPath).toBe('lib/ql7-support/runtime/executeTurn.js');expect(row.result.stateEvents.some(e=>e.state==='answer_ready'&&e.finalMessageId&&e.rawStates.includes('answer_committed'))).toBe(true);expect(row.evidence.surface.primarySvg.assetId).toBeTruthy();expect(row.evidence.composerPolicy).toBeTruthy();expect(row.oracle).toBeTruthy()})})

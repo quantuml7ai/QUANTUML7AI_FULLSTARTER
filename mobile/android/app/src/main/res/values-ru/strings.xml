@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">Квантовое соединение недоступно</string>
+    <string name="offline_body">Проверьте сеть и вернитесь в Quantum L7 AI без потери shell-сессии.</string>
+    <string name="retry">Повторить</string>
+    <string name="blocked_url">Эта ссылка открывается вне защищённой оболочки Quantum L7 AI.</string>
+    <string name="maintenance_title">Quantum L7 AI в сервисном режиме</string>
+    <string name="maintenance_body">Мобильная оболочка подключена, но платформа временно готовит более безопасное состояние.</string>
+    <string name="force_update_title">Требуется обновление</string>
+    <string name="force_update_body">Эта сборка Android shell слишком старая для текущего runtime Quantum L7 AI.</string>
+</resources>
+

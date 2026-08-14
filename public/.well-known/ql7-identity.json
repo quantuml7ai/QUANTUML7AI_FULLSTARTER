@@ -1,0 +1,102 @@
+{
+  "schema": "ql7-public-identity/v1",
+  "canonicalName": "Quantum L7 AI",
+  "alternateNames": [
+    "QL7 AI",
+    "Quantum L7 AI Ecosystem"
+  ],
+  "canonicalOrigin": "https://www.quantuml7ai.com",
+  "organizationId": "https://www.quantuml7ai.com/#organization",
+  "identityVersion": "2026-08-14-v3",
+  "reviewedAt": "2026-08-14",
+  "xDefault": "https://www.quantuml7ai.com/en/trust-and-identity",
+  "localizedIdentity": {
+    "en": {
+      "url": "https://www.quantuml7ai.com/en/trust-and-identity",
+      "title": "Official Identity, Trust & Safety | Quantum L7 AI",
+      "description": "Canonical identity, trust and safety statement for Quantum L7 AI, with verified official channels, multilingual canonical routes, machine-readable identity and clear non-affiliation boundaries.",
+      "languageName": "en"
+    },
+    "ru": {
+      "url": "https://www.quantuml7ai.com/ru/trust-and-identity",
+      "title": "Официальная идентичность, доверие и безопасность | Quantum L7 AI",
+      "description": "Каноническая декларация идентичности, доверия и безопасности Quantum L7 AI: официальные каналы, многоязычные canonical-маршруты, машиночитаемая идентичность и границы аффилированности.",
+      "languageName": "ru"
+    },
+    "uk": {
+      "url": "https://www.quantuml7ai.com/uk/trust-and-identity",
+      "title": "Офіційна ідентичність, довіра та безпека | Quantum L7 AI",
+      "description": "Канонічна декларація ідентичності, довіри та безпеки Quantum L7 AI: офіційні канали, багатомовні canonical-маршрути, машиночитана ідентичність і межі афілійованості.",
+      "languageName": "uk"
+    },
+    "es": {
+      "url": "https://www.quantuml7ai.com/es/trust-and-identity",
+      "title": "Identidad oficial, confianza y seguridad | Quantum L7 AI",
+      "description": "Declaración canónica de identidad, confianza y seguridad de Quantum L7 AI: canales oficiales, rutas canonical multilingües, identidad legible por máquinas y límites de afiliación.",
+      "languageName": "es"
+    },
+    "tr": {
+      "url": "https://www.quantuml7ai.com/tr/trust-and-identity",
+      "title": "Resmî Kimlik, Güven ve Güvenlik | Quantum L7 AI",
+      "description": "Quantum L7 AI için kanonik kimlik, güven ve güvenlik bildirimi: resmî kanallar, çok dilli canonical yolları, makinece okunabilir kimlik ve bağlılık sınırları.",
+      "languageName": "tr"
+    },
+    "ar": {
+      "url": "https://www.quantuml7ai.com/ar/trust-and-identity",
+      "title": "الهوية الرسمية والثقة والأمان | Quantum L7 AI",
+      "description": "بيان الهوية والثقة والأمان المرجعي لـ Quantum L7 AI: القنوات الرسمية والمسارات canonical متعددة اللغات والهوية المقروءة آلياً وحدود الانتساب.",
+      "languageName": "ar"
+    },
+    "zh": {
+      "url": "https://www.quantuml7ai.com/zh/trust-and-identity",
+      "title": "官方身份、信任与安全 | Quantum L7 AI",
+      "description": "Quantum L7 AI 权威身份、信任与安全声明：官方渠道、多语言 canonical 路径、机器可读身份以及明确的关联边界。",
+      "languageName": "zh"
+    }
+  },
+  "officialChannels": [
+    {
+      "id": "website",
+      "url": "https://www.quantuml7ai.com/"
+    },
+    {
+      "id": "x",
+      "url": "https://x.com/QL7Company"
+    },
+    {
+      "id": "instagram",
+      "url": "https://www.instagram.com/quantuml7ai/"
+    },
+    {
+      "id": "tiktok",
+      "url": "https://www.tiktok.com/@ql7ai"
+    },
+    {
+      "id": "youtube",
+      "url": "https://www.youtube.com/channel/UCXby6llW_TokAUGoOebFXhg"
+    },
+    {
+      "id": "telegram-channel",
+      "url": "https://t.me/l7universe"
+    },
+    {
+      "id": "telegram-bot",
+      "url": "https://t.me/l7ai_bot"
+    }
+  ],
+  "organizationSameAs": [
+    "https://x.com/QL7Company",
+    "https://www.instagram.com/quantuml7ai/",
+    "https://www.tiktok.com/@ql7ai",
+    "https://www.youtube.com/channel/UCXby6llW_TokAUGoOebFXhg",
+    "https://t.me/l7universe"
+  ],
+  "machineSurfaces": {
+    "manifest": "https://www.quantuml7ai.com/.well-known/ql7-identity.json",
+    "llms": "https://www.quantuml7ai.com/llms.txt",
+    "sitemap": "https://www.quantuml7ai.com/sitemap.xml",
+    "robots": "https://www.quantuml7ai.com/robots.txt"
+  },
+  "disambiguationRule": "Name similarity, visual similarity, advertising language or a similar handle does not prove affiliation with Quantum L7 AI. Verify the canonical origin and the exact official-channel registry.",
+  "authorityRule": "Canonical Trust & Identity HTML is the primary public statement. Machine-readable surfaces are supplementary discovery aids and may not invent legal status, ownership, affiliation, financial promises or product availability."
+}

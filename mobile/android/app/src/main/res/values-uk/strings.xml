@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">Немає інтернету</string>
+    <string name="offline_body">Перевірте мережу й поверніться до Quantum L7 AI без втрати shell-сесії.</string>
+    <string name="retry">Повторити</string>
+    <string name="blocked_url">Це посилання відкривається поза захищеною оболонкою Quantum L7 AI.</string>
+    <string name="maintenance_title">Quantum L7 AI у сервісному режимі</string>
+    <string name="maintenance_body">Мобільна оболонка підключена, але платформа тимчасово готує безпечніший стан.</string>
+    <string name="force_update_title">Потрібне оновлення</string>
+    <string name="force_update_body">Ця збірка Android shell занадто стара для поточного runtime Quantum L7 AI.</string>
+</resources>
