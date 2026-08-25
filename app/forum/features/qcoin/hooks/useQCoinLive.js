@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { resolveForumUserId } from '../utils/account'
 
 const INC_PER_SEC = 1 / (365 * 24 * 60 * 60)
@@ -57,8 +57,12 @@ export default function useQCoinLive(userKey, isVip){
   const lastPresencePushRef = React.useRef(0);
 
   const markUi = React.useCallback(function(){
-    lastUiRef.current = Date.now();
-    becameActiveRef.current = true;
+    const now = Date.now();
+    const previous = Number(lastUiRef.current || 0);
+    const wasInactive = !previous || (now - previous) >= PRESENCE_ACTIVE_WINDOW_MS;
+
+    lastUiRef.current = now;
+    if (wasInactive) becameActiveRef.current = true;
   }, []);
   // Считаем открытие страницы «активностью», чтобы тикер сразу начал тикать
   React.useEffect(function(){
