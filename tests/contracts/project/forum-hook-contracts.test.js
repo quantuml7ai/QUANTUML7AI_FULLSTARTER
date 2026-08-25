@@ -405,6 +405,35 @@ describe('Forum hook contracts', () => {
     }
   })
 
+
+  it('keeps QCoin presence realtime while coalescing heartbeat ledger evidence into five-minute buckets', () => {
+    const qcoinHook = readRepoFile('app/forum/features/qcoin/hooks/useQCoinLive.js')
+    const qcoinHeartbeatRoute = readRepoFile('app/api/qcoin/heartbeat/route.js')
+    const qcoinPrimary = readRepoFile('lib/mongo/qcoin-primary.cjs')
+
+    expect(qcoinHook).toContain('PRESENCE_ACTIVE_WINDOW_MS = 60 * 1000')
+    expect(qcoinHook).toContain('PRESENCE_ACTIVE_KEEPALIVE_MS = 45 * 1000')
+    expect(qcoinHook).toContain('PRESENCE_IDLE_KEEPALIVE_MS = 65 * 1000')
+    expect(qcoinHook).toContain('const wasInactive = !previous || (now - previous) >= PRESENCE_ACTIVE_WINDOW_MS')
+    expect(qcoinHook).toContain('if (wasInactive) becameActiveRef.current = true')
+    expect(qcoinHook).toContain("fetch('/api/qcoin/heartbeat'")
+
+    expect(qcoinHeartbeatRoute).toContain('await redis.set(aliveKey(uid, cid), 1, { px: 60_000 })')
+    expect(qcoinHeartbeatRoute).toContain('qcoinPrimary.heartbeat({')
+    expect(qcoinHeartbeatRoute).toContain('qcoinPrimary.markPresenceOffline')
+
+    expect(qcoinPrimary).toContain('QCOIN_HEARTBEAT_LEDGER_BUCKET_MS = 5 * 60 * 1000')
+    expect(qcoinPrimary).toContain('function accumulateHeartbeatLedgerPending')
+    expect(qcoinPrimary).toContain('async function flushHeartbeatLedgerBucket')
+    expect(qcoinPrimary).toContain('heartbeatLedgerSegmentId')
+    expect(qcoinPrimary).toContain("eventKind: 'qcoin_heartbeat_reward'")
+    expect(qcoinPrimary).toContain("idempotencyKey: aggregateId")
+    expect(qcoinPrimary).toContain('previousWithinGrace')
+    expect(qcoinPrimary).toContain('explicitlyOffline')
+    expect(qcoinPrimary).toContain('deltaMs <= GRACE_MS')
+    expect(qcoinPrimary).toContain('idempotencyKey,')
+  })
+
   it('keeps open DM dialogs newest-first without bottom autoscroll grabs', () => {
     const dmThreadPane = readRepoFile('app/forum/features/dm/components/DmMessagesPane.jsx')
     const dmLoadMore = readRepoFile('app/forum/features/dm/components/DmThreadLoadMore.jsx')
@@ -598,8 +627,8 @@ describe('Forum hook contracts', () => {
     expect(composerPreviewSource).not.toContain('enableVideoControlsOnTap')
     expect(composerPreviewSource).toContain('previewTouchWebKit')
     expect(composerPreviewSource).toContain('previewControlTop')
-    expect(dmRowSource).toContain("import { NativeSafeVideoPlayer } from '../../media/utils/mediaLifecycleRuntime'")
-    expect(dmRowSource).toContain("import DmVoicePlayer from './DmVoicePlayer'")
+    expect(dmRowSource).toContain("import { NativeSafeVideoPlayer } from '../../media/utils/mediaLifecycleRuntime.js'")
+    expect(dmRowSource).toContain("import DmVoicePlayer from './DmVoicePlayer.jsx'")
     expect(dmRowSource).toContain('<DmMediaRenderer')
     expect(dmRowSource).toContain('VideoPlayer={NativeSafeVideoPlayer}')
     expect(dmRowSource).toContain('VoicePlayer={DmVoicePlayer}')
