@@ -53,6 +53,12 @@ function createMemoryCollection() {
   return {
     rows,
     async createIndex() { return 'ok' },
+    async insertOne(doc = {}) {
+      const id = String(doc._id || `auto:${rows.size + 1}`)
+      if (rows.has(id)) { const error = new Error('duplicate key'); error.code = 11000; throw error }
+      rows.set(id, { ...doc, _id: doc._id || id })
+      return { acknowledged: true, insertedId: id }
+    },
     async updateOne(filter, update, options = {}) {
       assertMongoUpdateShape(update)
       let doc = Array.from(rows.values()).find((row) => matches(row, filter))
@@ -367,6 +373,191 @@ describe('qcoin Mongo primary repository', () => {
     expect(result.state.seconds).toBe(6)
     expect(result.state.carryMs).toBe(0)
     expect(result.state.balance).toBeGreaterThan(1)
+  })
+
+
+  test('aggregates heartbeat ledger rows into five-minute buckets and flushes the partial bucket on offline', async () => {
+    const bucketMs = qcoinPrimary.constants.QCOIN_HEARTBEAT_LEDGER_BUCKET_MS
+    const t0 = 2 * bucketMs
+    const rate = qcoinPrimary.constants.INC_PER_SEC
+
+    await qcoinPrimary.writeState('alice', {
+      startedAt: t0,
+      lastActiveAt: t0,
+      lastConfirmAt: t0,
+      presenceOfflineAt: 0,
+      carryMs: 0,
+      seconds: 0,
+      balance: 1,
+      paused: false,
+    })
+
+    for (const offset of [45_000, 90_000, 135_000, 180_000, 225_000, 270_000]) {
+      const result = await qcoinPrimary.heartbeat({
+        uid: 'alice',
+        now: t0 + offset,
+        active: true,
+        anyClientAlive: true,
+        isVip: false,
+      })
+      expect(result.addedSeconds).toBe(45)
+    }
+
+    expect(memoryDb.collection('qcoin_ledger').rows.size).toBe(0)
+
+    const pending = await qcoinPrimary.readAccount('alice')
+    expect(pending).toMatchObject({
+      heartbeatLedgerBucketAt: t0,
+      heartbeatLedgerPendingSeconds: 270,
+      heartbeatLedgerPendingCount: 6,
+    })
+    expect(pending.balance).toBeCloseTo(1 + (270 * rate), 12)
+
+    const nextBucket = await qcoinPrimary.heartbeat({
+      uid: 'alice',
+      now: t0 + bucketMs + 15_000,
+      active: true,
+      anyClientAlive: true,
+      isVip: false,
+    })
+
+    expect(nextBucket.addedSeconds).toBe(45)
+    expect(memoryDb.collection('qcoin_ledger').rows.size).toBe(1)
+
+    const firstBucket = Array.from(memoryDb.collection('qcoin_ledger').rows.values())[0]
+    expect(firstBucket).toMatchObject({
+      eventKind: 'qcoin_heartbeat_reward',
+      meta: {
+        aggregated: true,
+        bucketMs,
+        bucketStartedAt: t0,
+        heartbeatCount: 6,
+        addedSeconds: 270,
+        vipMode: 'standard',
+      },
+    })
+    expect(firstBucket.amountQcoin).toBeCloseTo(270 * rate, 12)
+
+    await qcoinPrimary.markPresenceOffline({
+      uid: 'alice',
+      now: t0 + bucketMs + 16_000,
+    })
+
+    const rows = Array.from(memoryDb.collection('qcoin_ledger').rows.values())
+    expect(rows).toHaveLength(2)
+    expect(rows.reduce((sum, row) => sum + Number(row.amountQcoin || 0), 0))
+      .toBeCloseTo((270 + 45) * rate, 12)
+
+    const afterOffline = await qcoinPrimary.readAccount('alice')
+    expect(afterOffline.presenceOfflineAt).toBe(t0 + bucketMs + 16_000)
+    expect(afterOffline.heartbeatLedgerPendingCount).toBe(0)
+    expect(afterOffline.balance).toBeCloseTo(1 + ((270 + 45) * rate), 12)
+  })
+
+  test('does not back-credit an explicit offline gap or a stale gap longer than the grace window', async () => {
+    await qcoinPrimary.writeState('offline-user', {
+      startedAt: 1_000,
+      lastActiveAt: 2_000,
+      lastConfirmAt: 2_000,
+      presenceOfflineAt: 3_000,
+      carryMs: 500,
+      seconds: 5,
+      balance: 2,
+      paused: false,
+    })
+
+    const explicitOffline = await qcoinPrimary.heartbeat({
+      uid: 'offline-user',
+      now: 100_000,
+      active: true,
+      anyClientAlive: true,
+    })
+
+    expect(explicitOffline).toMatchObject({
+      addedSeconds: 0,
+      addedBalance: 0,
+      accrualGapAllowed: false,
+      explicitlyOffline: true,
+    })
+    expect(explicitOffline.state.balance).toBe(2)
+    expect(explicitOffline.state.carryMs).toBe(0)
+
+    await qcoinPrimary.writeState('stale-user', {
+      startedAt: 1_000,
+      lastActiveAt: 2_000,
+      lastConfirmAt: 2_000,
+      presenceOfflineAt: 0,
+      carryMs: 500,
+      seconds: 5,
+      balance: 3,
+      paused: false,
+    })
+
+    const staleNow = 2_000 + qcoinPrimary.constants.GRACE_MS + 5_000
+    const stale = await qcoinPrimary.heartbeat({
+      uid: 'stale-user',
+      now: staleNow,
+      active: true,
+      anyClientAlive: true,
+    })
+
+    expect(stale).toMatchObject({
+      addedSeconds: 0,
+      addedBalance: 0,
+      accrualGapAllowed: false,
+      explicitlyOffline: false,
+    })
+    expect(stale.state.balance).toBe(3)
+    expect(stale.state.carryMs).toBe(0)
+  })
+
+  test('flushes a pending heartbeat aggregate before another QCoin economic mutation without changing that mutation ledger contract', async () => {
+    const bucketMs = qcoinPrimary.constants.QCOIN_HEARTBEAT_LEDGER_BUCKET_MS
+    const t0 = 4 * bucketMs
+
+    await qcoinPrimary.writeState('alice', {
+      startedAt: t0,
+      lastActiveAt: t0,
+      lastConfirmAt: t0,
+      presenceOfflineAt: 0,
+      carryMs: 0,
+      seconds: 0,
+      balance: 10,
+      paused: false,
+    })
+
+    await qcoinPrimary.heartbeat({
+      uid: 'alice',
+      now: t0 + 45_000,
+      active: true,
+      anyClientAlive: true,
+    })
+    expect(memoryDb.collection('qcoin_ledger').rows.size).toBe(0)
+
+    const credited = await qcoinPrimary.incrementBalance({
+      uid: 'alice',
+      amount: 1,
+      eventKind: 'drop',
+      idempotencyKey: 'drop:after-heartbeat-bucket',
+    })
+
+    expect(credited.balance).toBeGreaterThan(11)
+    const rowsAfterCredit = Array.from(memoryDb.collection('qcoin_ledger').rows.values())
+    expect(rowsAfterCredit).toHaveLength(2)
+    expect(rowsAfterCredit.filter((row) => row.eventKind === 'qcoin_heartbeat_reward')).toHaveLength(1)
+    expect(rowsAfterCredit.filter((row) => row.eventKind === 'drop')).toHaveLength(1)
+
+    await qcoinPrimary.heartbeat({
+      uid: 'alice',
+      now: t0 + 90_000,
+      active: true,
+      anyClientAlive: true,
+    })
+    await qcoinPrimary.markPresenceOffline({ uid: 'alice', now: t0 + 91_000 })
+
+    const finalRows = Array.from(memoryDb.collection('qcoin_ledger').rows.values())
+    expect(finalRows.filter((row) => row.eventKind === 'qcoin_heartbeat_reward')).toHaveLength(2)
+    expect(finalRows.filter((row) => row.eventKind === 'drop')).toHaveLength(1)
   })
 
   test('stores topup invoices, lookup indexes, payment claims, and events in Mongo', async () => {
