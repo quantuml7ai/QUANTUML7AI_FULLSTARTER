@@ -43,6 +43,36 @@ describe('forum client video gateway V4 contracts', () => {
     expect(src).toContain('sourceUploadedForTranscoding: false')
   })
 
+  test('copy-remuxes an otherwise canonical MP4 before any lossy optimizer fallback', () => {
+    const src = read('lib/forumClientVideoOptimizer.js')
+
+    expect(src).toContain(
+      "import { optimizeForumVideoFastStart } from './forumVideoTrim'"
+    )
+
+    expect(src).toContain(
+      'Object.values(canonicalChecksExceptFastStart).every(Boolean)'
+    )
+
+    expect(src).toContain(
+      "source: 'canonical-remux-copy'"
+    )
+
+    expect(src).toContain(
+      "profileId: 'source-compatible-remux'"
+    )
+
+    expect(src).toContain(
+      "bypassReason: 'canonical-remux-copy'"
+    )
+
+    expectBefore(
+      src,
+      'await optimizeForumVideoFastStart(file',
+      'await optimizeForumVideoOnDevice(sourceFile',
+    )
+  })
+
   test('places fail-closed preparation before every presigned URL request', () => {
     const src = read('app/forum/features/media/services/uploadR2MediaFile.js')
 
