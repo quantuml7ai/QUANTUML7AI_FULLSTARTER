@@ -6,7 +6,7 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-09-05T12:24:47.973Z
+Сгенерировано автоматически: 2026-09-05T14:07:04.625Z
 Файлов в реестре: 3413
 
 ## Исключенные каталоги
@@ -952,12 +952,12 @@
       - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
       - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
     - badgeLexicon.js — Общая библиотека/утилита badge Lexicon инфраструктурного слоя. Связи: используется в components/composer-safety/ComposerSafetyBadge.jsx, tests/unit/composer-safety/composer.test.js.
-    - clientModerationBank.js — Общая библиотека/утилита client Moderation Bank инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js.
+    - clientModerationBank.js — Общая библиотека/утилита client Moderation Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/safetyLexicon.multilingual.js, lib/ql7-support/language/safetyLexicon.native.js; используется в lib/composer-safety/clientPreview.js.
     - clientPreview.js — Общая библиотека/утилита client Preview инфраструктурного слоя. Связи: импортирует lib/composer-safety/clientModerationBank.js, lib/composer-safety/localeRiskConcepts.client.js, lib/composer-safety/localeSemanticHints.client.js; используется в forum/features/ui/hooks/useComposerSafetyPreview.js, lib/composer-safety/previewWorker.js, tests/contracts/ql7-support-architecture-closure.contract.test.js.
     - decisionReceipt.cjs — Общая библиотека/утилита decision Receipt инфраструктурного слоя. Связи: используется в lib/composer-safety/serverGate.cjs.
     - dropReceipt.cjs — Общая библиотека/утилита drop Receipt инфраструктурного слоя. Связи: используется в lib/composer-safety/serverGate.cjs.
-    - localeRiskConcepts.cjs — Общая библиотека/утилита locale Risk Concepts инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, tests/unit/composer-safety/composer.test.js, tests/unit/ql7-support/max-combat.test.js.
-    - localeRiskConcepts.client.js — Общая библиотека/утилита locale Risk Concepts.client инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js, tests/unit/ql7-support/max-combat.test.js.
+    - localeRiskConcepts.cjs — Общая библиотека/утилита locale Risk Concepts инфраструктурного слоя. Связи: используется в lib/composer-safety/localeRiskConcepts.client.js, lib/composer-safety/semanticAnalyzer.cjs, tests/unit/composer-safety/composer.test.js.
+    - localeRiskConcepts.client.js — Общая библиотека/утилита locale Risk Concepts.client инфраструктурного слоя. Связи: импортирует lib/composer-safety/localeRiskConcepts.cjs; используется в lib/composer-safety/clientPreview.js, tests/unit/ql7-support/max-combat.test.js.
     - localeSemanticHints.cjs — Общая библиотека/утилита locale Semantic Hints инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/safety/sharedSemanticEvidence.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js.
     - localeSemanticHints.client.js — Общая библиотека/утилита locale Semantic Hints.client инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js, tests/unit/ql7-support/max-combat.test.js.
     - messagePolicy.cjs — Общая библиотека/утилита message Policy инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, lib/composer-safety/serverGate.cjs.
@@ -1478,8 +1478,8 @@
       - responseLocalePolicy.js — Общая библиотека/утилита response Locale Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/locales.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js, tests/contracts/ql7-support-architecture-closure.contract.test.js.
       - reviewedSeedRegistry.js — Общая библиотека/утилита reviewed Seed Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/materialDataLoader.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/language/languageVariantBank.js, lib/ql7-support/language/semanticConceptBank.js.
       - robustConceptMatcher.js — Общая библиотека/утилита robust Concept Matcher инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/lexicalUniverseRegistry.js; используется в lib/ql7-support/safety/crisisAssessment.js, tests/unit/ql7-support/premium-cognitive.test.js.
-      - safetyLexicon.multilingual.js — Общая библиотека/утилита safety Lexicon.multilingual инфраструктурного слоя. Связи: используется в lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js, tests/unit/composer-safety/composer.test.js.
-      - safetyLexicon.native.js — Общая библиотека/утилита safety Lexicon.native инфраструктурного слоя. Связи: используется в lib/ql7-support/language/lexicalUniverseRegistry.js, lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - safetyLexicon.multilingual.js — Общая библиотека/утилита safety Lexicon.multilingual инфраструктурного слоя. Связи: используется в lib/composer-safety/clientModerationBank.js, lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - safetyLexicon.native.js — Общая библиотека/утилита safety Lexicon.native инфраструктурного слоя. Связи: используется в lib/composer-safety/clientModerationBank.js, lib/ql7-support/language/lexicalUniverseRegistry.js, lib/ql7-support/safety/obfuscationMatcher.js.
       - semanticBanks.js — Общая библиотека/утилита semantic Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/mutationLattice.js, lib/ql7-support/language/semanticConceptBank.js; используется в lib/ql7-support/language/normalizeInput.js, lib/ql7-support/safety/evaluateTurn.js, lib/ql7-support/semantics/analyzeTurn.js.
       - semanticConceptBank.js — Общая библиотека/утилита semantic Concept Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/humanConversationBank.js, lib/ql7-support/knowledge/humanTopicOntology.js, lib/ql7-support/language/reviewedSeedRegistry.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/simulation/languageSeedDiversityOracle.js.
       - sourceEvidenceLexicon.js — Общая библиотека/утилита source Evidence Lexicon инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/language/compositionalGrammar.js.

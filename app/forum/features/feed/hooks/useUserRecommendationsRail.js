@@ -396,15 +396,21 @@ export default function useUserRecommendationsRail({
     }, 0)
   }, [state.batchOrder, state.batchesById, state.slotAssignments])
 
-  // Buffered batches are supply, not merely prefetch decoration. Right after a
-  // response lands React may not have run assign_slots yet, so desiredMissingCount
-  // can still include slots that an already-buffered batch can satisfy. Starting a
-  // second GET in that render races auth/context transitions and wastes a cursor
-  // page. Compute actual unsatisfied demand before touching the network.
+  // desiredRailSlotKeys already contains the visible rails plus the configured
+  // look-ahead. Buffered batches are supply for that demand, not decoration.
+  // Counting prefetchRailsAhead again here made the bootstrap GET hydrate up to
+  // seven 15-user rails before the first visible rail could render.
   const requiredAdditionalBatchCount = Math.max(
     0,
-    desiredMissingCount + prefetchRailsAhead - unusedBufferedBatchCount,
+    desiredMissingCount - unusedBufferedBatchCount,
   )
+
+  const hasAssignedBatch = useMemo(() => {
+    return Object.values(state.slotAssignments || {}).some((batchId) => {
+      const normalizedBatchId = normalizeId(batchId)
+      return !!normalizedBatchId && !!state.batchesById?.[normalizedBatchId]
+    })
+  }, [state.batchesById, state.slotAssignments])
 
   const requestSignature = useMemo(() => {
     return [
@@ -436,16 +442,21 @@ export default function useUserRecommendationsRail({
     if (state.prefetchInFlight) return
     if (requiredAdditionalBatchCount <= 0) return
     if (state.lastRequestSignature === requestSignature) return
+    // Let assign_slots publish the first buffered batch before starting the
+    // background look-ahead request. This keeps a very fast response from
+    // replacing the bootstrap buffer before users can see it.
+    if (state.batchOrder.length && unusedBufferedBatchCount > 0 && !hasAssignedBatch) return
 
     const currentGenerationId = generationRef.current
     const requestViewerKey = normalizeId(viewerId || 'guest')
     const controller = new AbortController()
     try { requestAbortRef.current?.abort() } catch {}
     requestAbortRef.current = controller
-    const requestBatchCount = Math.max(
-      batchesPerRequest,
-      requiredAdditionalBatchCount,
-    )
+    // First paint must wait for one 15-user rail, not for every prefetched rail.
+    // Once that rail is assigned, the existing buffered prefetch policy resumes.
+    const requestBatchCount = state.batchOrder.length === 0
+      ? 1
+      : Math.max(batchesPerRequest, requiredAdditionalBatchCount)
 
     dispatch({ type: 'request_start', requestSignature })
 
@@ -572,6 +583,7 @@ export default function useUserRecommendationsRail({
     desiredRailSlotKeys,
     enabled,
     feedSort,
+    hasAssignedBatch,
     prefetchRailsAhead,
     recommendationFeedContextKey,
     state.activeRotationKey,
@@ -582,6 +594,7 @@ export default function useUserRecommendationsRail({
     state.prefetchInFlight,
     requiredAdditionalBatchCount,
     desiredMissingCount,
+    unusedBufferedBatchCount,
     videoFeedOpen,
     viewerId,
     emitDiag,

@@ -107,6 +107,8 @@ const verify = read('scripts/forum-recommendations/verify-top500-mongo.mjs')
     expect(hook).toContain('state.activeFeedContextKey === recommendationFeedContextKey')
     expect(hook).toContain('followersCount < 1')
     expect(hook).toContain('responseViewerCanonicalId')
+    expect(hook).toContain('desiredMissingCount - unusedBufferedBatchCount')
+    expect(hook).toMatch(/const requestBatchCount = state\.batchOrder\.length === 0\s*\? 1\s*:\s*Math\.max/)
     expect(route).toContain('viewerCanonicalId: viewerId')
   })
 

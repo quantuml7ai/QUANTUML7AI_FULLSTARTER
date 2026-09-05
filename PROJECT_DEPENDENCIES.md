@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-09-05T12:24:45.141Z
+Сгенерировано автоматически: 2026-09-05T14:07:02.200Z
 Исходных файлов в анализе: 1946
-Локальных зависимостей: 3114
+Локальных зависимостей: 3117
 
 ## Охват
 
@@ -160,7 +160,7 @@
 - `root` -> `lib/ql7-support` — 332 локальных импортов
 - `root` -> `components` — 69 локальных импортов
 - `api/dm` -> `lib/ql7-support` — 64 локальных импортов
-- `lib/composer-safety` -> `lib/composer-safety` — 53 локальных импортов
+- `lib/composer-safety` -> `lib/composer-safety` — 54 локальных импортов
 - `api/forum` -> `api/forum` — 51 локальных импортов
 - `forum/dm` -> `forum/dm` — 50 локальных импортов
 - `api/metamarket` -> `api/metamarket` — 45 локальных импортов
@@ -721,8 +721,8 @@
 
 ### lib/composer-safety
 
-- `lib/composer-safety` — 53
-- `lib/ql7-support` — 4
+- `lib/composer-safety` — 54
+- `lib/ql7-support` — 6
 - `lib/mongo` — 3
 - `lib/account-restrictions` — 1
 
