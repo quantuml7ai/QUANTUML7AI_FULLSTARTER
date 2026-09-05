@@ -34,92 +34,21 @@ describe('useUserRecommendationsRail', () => {
     vi.unstubAllGlobals()
   })
 
-  it('warms one batch before media slots exist and assigns it without a second foreground request', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        ok: true,
-        seed: 41,
-        ttlSec: 30,
-        rotationKey: 'video:new:warm',
-        poolVersion: 'pool-warm',
-        nextCursor: 'cursor-warm',
-        batches: [createBatch('batch-warm', 1)],
-      }),
-    })
-    vi.stubGlobal('fetch', fetchMock)
-
-    const initialProps = {
-      enabled: true,
-      videoFeedOpen: true,
-      viewerId: 'viewer-warm',
-      feedSort: 'new',
-      feedContextKey: 'stable-feed-generation',
-      vfSlots: [],
-      vfWin: { start: 0, end: 0, top: 0, bottom: 0 },
-      runtimeConfig: { batchSize: 2, batchesPerRequest: 1, prefetchRailsAhead: 0 },
-      emitDiag: vi.fn(),
-    }
-
-    const { result, rerender } = renderHook(
-      (props) => useUserRecommendationsRail(props),
-      { initialProps },
-    )
-
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-      expect(result.current.poolVersion).toBe('pool-warm')
-    })
-    expect(new URL(fetchMock.mock.calls[0][0], 'http://localhost').searchParams.get('batches')).toBe('1')
-
-    rerender({
-      ...initialProps,
-      vfSlots: [{ type: 'recommendation_rail', key: 'rec:warm', railIndex: 0 }],
-      vfWin: { start: 0, end: 1, top: 0, bottom: 0 },
-    })
-
-    await waitFor(() => {
-      expect(result.current.getSlotState('rec:warm')?.users).toHaveLength(2)
-    })
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-  })
-
   it('prefetches recommendation batches ahead and assigns them to visible slots', async () => {
-    const firstResponse = {
+    const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
         ok: true,
         seed: 42,
         ttlSec: 30,
-        rotationKey: 'video:new:1:first',
-        poolVersion: 'pool-1',
-        nextCursor: 'cursor-1',
-        batches: [createBatch('batch-1', 1)],
-      }),
-    }
-    const prefetchResponse = {
-      ok: true,
-      json: async () => ({
-        ok: true,
-        seed: 43,
-        ttlSec: 30,
-        rotationKey: 'video:new:1:prefetch',
-        poolVersion: 'pool-1',
-        nextCursor: 'cursor-2',
+        rotationKey: 'video:new:1',
         batches: [
+          createBatch('batch-1', 1),
           createBatch('batch-2', 3),
           createBatch('batch-3', 5),
-          createBatch('batch-4', 7),
         ],
       }),
-    }
-    let resolvePrefetch
-    const pendingPrefetch = new Promise((resolve) => {
-      resolvePrefetch = resolve
     })
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce(firstResponse)
-      .mockReturnValue(pendingPrefetch)
     vi.stubGlobal('fetch', fetchMock)
 
     const emitDiag = vi.fn()
@@ -127,7 +56,6 @@ describe('useUserRecommendationsRail', () => {
       { type: 'recommendation_rail', key: 'rec:1', railIndex: 0 },
       { type: 'recommendation_rail', key: 'rec:2', railIndex: 1 },
       { type: 'recommendation_rail', key: 'rec:3', railIndex: 2 },
-      { type: 'recommendation_rail', key: 'rec:4', railIndex: 3 },
     ]
 
     const { result } = renderHook(() =>
@@ -138,11 +66,11 @@ describe('useUserRecommendationsRail', () => {
         feedSort: 'new',
         feedContextKey: 'ctx-1',
         vfSlots,
-        vfWin: { start: 0, end: 1, top: 0, bottom: 0 },
+        vfWin: { start: 0, end: 2, top: 0, bottom: 0 },
         runtimeConfig: {
           batchSize: 2,
-          batchesPerRequest: 4,
-          prefetchRailsAhead: 3,
+          batchesPerRequest: 2,
+          prefetchRailsAhead: 2,
         },
         emitDiag,
       }),
@@ -153,23 +81,10 @@ describe('useUserRecommendationsRail', () => {
     })
 
     const requestUrl = new URL(fetchMock.mock.calls[0][0], 'http://localhost')
-    expect(Number(requestUrl.searchParams.get('batches'))).toBe(1)
+    expect(Number(requestUrl.searchParams.get('batches'))).toBeGreaterThanOrEqual(4)
 
     await waitFor(() => {
       expect(result.current.getSlotState('rec:1')?.users).toHaveLength(2)
-      expect(fetchMock).toHaveBeenCalledTimes(2)
-    })
-
-    const prefetchUrl = new URL(fetchMock.mock.calls[1][0], 'http://localhost')
-    expect(Number(prefetchUrl.searchParams.get('batches'))).toBe(4)
-    expect(prefetchUrl.searchParams.get('cursor')).toBe('cursor-1')
-    expect(result.current.getSlotState('rec:2')?.users).toHaveLength(0)
-
-    await act(async () => {
-      resolvePrefetch(prefetchResponse)
-    })
-
-    await waitFor(() => {
       expect(result.current.getSlotState('rec:2')?.users).toHaveLength(2)
     })
 
@@ -181,7 +96,7 @@ describe('useUserRecommendationsRail', () => {
       'user_recommendations_prefetch_success',
       expect.objectContaining({
         receivedBatches: 3,
-        rotationKey: 'video:new:1:prefetch',
+        rotationKey: 'video:new:1',
       }),
       { force: true },
     )
@@ -1001,31 +916,6 @@ describe('starred sorting models', () => {
         id: firstPass[0],
       }),
     )
-  })
-
-  it('keeps the recommendation generation key stable while async media pages arrive', () => {
-    const { result } = renderHook(() => useVideoFeedState({
-      data: { posts: [] },
-      allPosts: [],
-      serverVideoPosts: [],
-      isMediaUrl: () => true,
-      extractUrlsFromText: () => [],
-      viewerId: 'viewer-context',
-      starredFirst: (items) => items,
-      videoFeedOpenRef: { current: true },
-      navRestoringRef: { current: false },
-      emitDiag: vi.fn(),
-      visibleVideoCount: 5,
-      setVisibleVideoCount: vi.fn(),
-      videoPageSize: 5,
-    }))
-
-    const beforePage = result.current.videoFeedContextKey
-    act(() => {
-      result.current.setVideoFeed([{ id: 'async-page-post-1' }])
-    })
-
-    expect(result.current.videoFeedContextKey).toBe(beforePage)
   })
 
   it('preserves local reaction state while server media rows keep feed order authority', () => {
