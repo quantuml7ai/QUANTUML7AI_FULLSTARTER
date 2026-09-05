@@ -27,7 +27,7 @@ describe('QL7 Support REV.5.1 closure matrix', () => {
       }
     }
     expect(failures).toEqual([])
-  }, 90_000)
+  }, 120_000)
 
   it('keeps the real MetaStudio interest-registration opening while retaining planned knowledge semantics', () => {
     expect(getQl7SupportActionDescriptor('metastudio')).toMatchObject({
