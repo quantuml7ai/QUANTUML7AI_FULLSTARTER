@@ -40,6 +40,7 @@ export default function ComposerCore({
   composerBusy,
   dmMode,
   dmSupportMode,
+  replyTo,
   ql7SupportUi,
   onSendClick,
   setText,
@@ -68,7 +69,7 @@ export default function ComposerCore({
   meUid,
 }) {
   const composerSafetyLocale = typeof document !== 'undefined' ? (document.documentElement?.lang || 'en') : 'en'
-  const composerSafetyPreview = useComposerSafetyPreview(text, { enabled: !dmSupportMode, locale: composerSafetyLocale, targeted: dmMode && !dmSupportMode, surface: dmMode ? 'dm' : 'forum' })
+  const composerSafetyPreview = useComposerSafetyPreview(text, { enabled: !dmSupportMode, locale: composerSafetyLocale, targeted: Boolean((dmMode && !dmSupportMode) || replyTo), surface: dmMode ? 'dm' : 'forum' })
 
   const pendingVideoMirror = React.useMemo(() => {
     const src = String(pendingVideo || '').trim()

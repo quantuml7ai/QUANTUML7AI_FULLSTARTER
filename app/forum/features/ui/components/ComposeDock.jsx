@@ -27,7 +27,7 @@ export default function ComposeDock({
           t={t}
           resolveNickForDisplay={resolveNickForDisplay}
         />
-        <ComposerCore {...composerCoreProps} />
+        <ComposerCore {...composerCoreProps} replyTo={replyTo} />
       </div>
       {composerFabVisible ? (
         <ComposerFabButton

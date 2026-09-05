@@ -12,11 +12,128 @@ function memoryDb(){const cols=new Map;const collection=n=>{if(!cols.has(n))cols
 function setup(){const ledger=ledgerMod.createComposerWarningLedger({database:memoryDb()}),outbox={async listPending(){return []},createDeliveryBinding(){return {delivery:{},documentFields:{}}},async prepare(){return {ok:true}},async confirmDeliveryFromStorage(){return {delivered:true}},async markCompleted(){},async markFailed(){},async markCancelled(){}};return {ledger,gate:gateMod.createComposerServerGate({warningLedger:ledger,policyOutboxService:outbox,quarantineLookup:async()=>({state:'NONE'})})}}
 describe('composer message policy v2',()=>{it('allows first four orange then drops fifth without restricting user',async()=>{const {gate,ledger}=setup(),now=Date.parse('2026-08-23T00:00:00Z');for(let i=0;i<4;i++){const g=await gate.evaluateComposerSubmit({actorAccountId:'u',surface:'forum',text:'ты идиот',targeted:true,clientMutationId:`x${i}`,locale:'ru',now:now+i});expect(g).toMatchObject({allowed:true,decision:'ALLOW_WITH_ORANGE_WARNING',userRestricted:false});await ledger.commitPublishedOrangeWarning({accountId:'u',classId:g.classId,surface:'forum',contentHash:g.receipt.contentHash,decisionId:g.receipt.decisionId,now:now+i})}const fifth=await gate.evaluateComposerSubmit({actorAccountId:'u',surface:'forum',text:'ты идиот',targeted:true,clientMutationId:'x5',locale:'ru',now:now+5});expect(fifth).toMatchObject({allowed:false,persist:false,decision:'DROP_ORANGE_THRESHOLD',clearSubmittedDraft:true,userRestricted:false})});it('drops red immediately and does not create a timed lock',async()=>{const {gate}=setup();const red=await gate.evaluateComposerSubmit({actorAccountId:'r',surface:'battle_chat',text:'я тебя убью',targeted:true,clientMutationId:'r1',locale:'ru'});expect(red).toMatchObject({allowed:false,persist:false,decision:'DROP_RED',userRestricted:false})});it('keeps deterministic account quarantine separate',async()=>{const {ledger}=setup(),outbox={async listPending(){return []},createDeliveryBinding(){return {}},async prepare(){},async confirmDeliveryFromStorage(){return {delivered:true}},async markCompleted(){},async markFailed(){},async markCancelled(){}};const gate=gateMod.createComposerServerGate({warningLedger:ledger,policyOutboxService:outbox,quarantineLookup:async()=>({state:'ACTIVE',quarantine:{active:true,expiresAt:'2026-08-24T00:00:00Z',reasonCode:'deterministic_compromise'}})});const r=await gate.evaluateComposerSubmit({actorAccountId:'q',surface:'forum',text:'hello'});expect(r).toMatchObject({allowed:false,error:'account_quarantined',status:423})})})
 
+describe('composer authoritative natural-intent gate',()=>{
+  it('drops newly calibrated severe intent on forum and Battle Chat while allowing defensive cyber context',async()=>{
+    const {gate}=setup()
+    const severe=[
+      {surface:'battle_chat',targeted:true,text:'Я тебя прикончу'},
+      {surface:'forum',targeted:false,text:'Давай спалим ему машину'},
+      {surface:'forum',targeted:false,text:'Давайте устроим массовые беспорядки'},
+      {surface:'forum',targeted:false,text:'Украдём базу пользователей и положим их сервер'},
+      {surface:'forum',targeted:false,text:'Заложим взрывчатку в здании'},
+    ]
+    for(const [index,sample] of severe.entries()){
+      const result=await gate.evaluateComposerSubmit({actorAccountId:`risk-${index}`,clientMutationId:`risk-${index}`,locale:'ru',...sample})
+      expect(result, sample.text).toMatchObject({allowed:false,persist:false,decision:'DROP_RED',clearSubmittedDraft:true,userRestricted:false})
+    }
+    const safe=await gate.evaluateComposerSubmit({actorAccountId:'defense',surface:'forum',targeted:false,text:'Как защитить сервер от DDoS-атаки',clientMutationId:'defense-1',locale:'ru'})
+    expect(safe).toMatchObject({allowed:true,persist:true,decision:'ALLOW',userRestricted:false})
+  })
+})
+
 const SAFE_CLASSES = new Set(['clean_respectful', 'neutral', 'quoted_or_reported_harm', 'news_historical_educational_context', 'victim_report', 'counter_speech'])
 const RED_CLASSES = new Set(['credible_personal_threat', 'violence_incitement', 'terrorism_praise_or_instruction', 'terrorism_operational_intent', 'murder_or_mass_harm_intent', 'war_or_riot_incitement', 'property_destruction_incitement', 'dangerous_operational_intent', 'sexual_violence_operational_intent'])
 const SAFETY_LEXICONS = { ...QL7_SUPPORT_NATIVE_SAFETY_LEXICON, ...QL7_SUPPORT_MULTILINGUAL_SAFETY_LEXICON }
+const INDEPENDENT_NATURAL_RISK_CASES = Object.freeze({
+  en:{personal:'I will end you',property:'Let us set fire to his car',war:'Start a war',cyber:'Take their server offline'},
+  ru:{personal:'Я тебя прикончу',property:'Давай спалим ему машину',war:'Начнём войну',cyber:'Положим их сервер'},
+  uk:{personal:'Я вб’ю тебе',property:'Давай сьогодні спалимо його машину',war:'Почнімо війну',cyber:'Зламаємо їхній сервер'},
+  es:{personal:'Te voy a matar',property:'Vamos a quemar su coche',war:'Empecemos una guerra',cyber:'Vamos a tumbar su servidor'},
+  tr:{personal:'Seni öldüreceğim',property:'Arabasını yakalım',war:'Savaş başlatalım',cyber:'Sunucularını çökertelim'},
+  ar:{personal:'سأقتلك',property:'نحرق سيارته',war:'سنبدأ حربا',cyber:'لنخترق خادمهم'},
+  zh:{personal:'我会杀了你',property:'烧掉他的车',war:'发动一场战争',cyber:'黑掉他们的服务器'},
+  he:{personal:'אני אהרוג אותך',property:'נשרוף לו את המכונית',war:'נתחיל מלחמה',cyber:'נפרוץ לשרת שלהם'},
+  de:{personal:'Ich werde dich töten',property:'Sein Auto anzünden',war:'Einen Krieg anfangen',cyber:'Ihren Server lahmlegen'},
+  fr:{personal:'Je vais te tuer',property:'Brûlons sa voiture',war:'Déclenchons une guerre',cyber:'Piratons leur serveur'},
+  it:{personal:'Ti ucciderò',property:'Bruciamo la sua macchina',war:'Iniziamo una guerra',cyber:'Mandiamo giù il loro server'},
+  pt:{personal:'Eu vou te matar',property:'Vamos incendiar o carro',war:'Vamos começar uma guerra',cyber:'Derrubar o servidor deles'},
+  pl:{personal:'Zabiję cię',property:'Spalmy jego samochód',war:'Zacznijmy wojnę',cyber:'Zhakujmy ich serwer'},
+  nl:{personal:'Ik zal je vermoorden',property:'Zijn auto in brand steken',war:'Een oorlog beginnen',cyber:'Hun server platleggen'},
+  sv:{personal:'Jag ska döda dig',property:'Bränna hans bil',war:'Starta ett krig',cyber:'Slå ut deras server'},
+  no:{personal:'Jeg skal drepe deg',property:'Brenne bilen hans',war:'Starte en krig',cyber:'Ta ned serveren deres'},
+  da:{personal:'Jeg vil dræbe dig',property:'Brænde hans bil',war:'Starte en krig',cyber:'Lægge deres server ned'},
+  fi:{personal:'Tapan sinut',property:'Poltetaan hänen autonsa',war:'Aloitetaan sota',cyber:'Hakkeroidaan heidän palvelimensa'},
+  cs:{personal:'Zabiju tě',property:'Zapalme mu auto',war:'Začněme válku',cyber:'Hackněme jejich server'},
+  sk:{personal:'Zabijem ťa',property:'Zapáľme mu auto',war:'Začnime vojnu',cyber:'Hacknime ich server'},
+  hu:{personal:'Megöllek',property:'Gyújtsuk fel az autóját',war:'Kezdjünk háborút',cyber:'Törjük fel a szerverüket'},
+  ro:{personal:'Te voi ucide',property:'Să-i incendiem mașina',war:'Începem un război',cyber:'Să le spargem serverul'},
+  bg:{personal:'Ще те убия',property:'Нека запалим колата му',war:'Нека започнем война',cyber:'Нека хакнем сървъра им'},
+  sr:{personal:'Ubiću te',property:'Zapalimo mu auto',war:'Počnimo rat',cyber:'Hakujmo njihov server'},
+  hr:{personal:'Ubit ću te',property:'Zapalimo mu auto',war:'Započnimo rat',cyber:'Hakirajmo njihov poslužitelj'},
+  sl:{personal:'Ubil te bom',property:'Zažgimo mu avto',war:'Začnimo vojno',cyber:'Vdremo v njihov strežnik'},
+  el:{personal:'Θα σε σκοτώσω',property:'Ας κάψουμε το αυτοκίνητό του',war:'Ας ξεκινήσουμε πόλεμο',cyber:'Ας χακάρουμε τον διακομιστή τους'},
+  ka:{personal:'მოგკლავ',property:'მოდი მისი მანქანა დავწვათ',war:'მოდი ომი დავიწყოთ',cyber:'მათი სერვერი გავტეხოთ'},
+  az:{personal:'Səni öldürəcəyəm',property:'Onun maşınını yandıraq',war:'Müharibə başlayaq',cyber:'Onların serverini sındıraq'},
+  kk:{personal:'Мен сені өлтіремін',property:'Оның көлігін өртейік',war:'Соғыс бастайық',cyber:'Олардың серверін бұзайық'},
+  ja:{personal:'お前を殺す',property:'あいつの車を燃やそう',war:'戦争を始めよう',cyber:'彼らのサーバーをハッキングしよう'},
+  ko:{personal:'너를 죽이겠다',property:'그의 차를 불태우자',war:'전쟁을 시작하자',cyber:'그들의 서버를 해킹하자'},
+})
 
 describe('composer semantic context calibration', () => {
+  it('blocks independently authored personal, property, war and cyber intent across all 32 locales', () => {
+    expect(Object.keys(INDEPENDENT_NATURAL_RISK_CASES)).toHaveLength(32)
+    for (const [locale, cases] of Object.entries(INDEPENDENT_NATURAL_RISK_CASES)) {
+      for (const [kind, text] of Object.entries(cases)) {
+        const targeted = kind === 'personal'
+        const server = semanticAnalyzerMod.analyzeComposerSemantics(text, { locale, targeted }).classId
+        const client = classifyComposerPreview(text, { locale, targeted }).classId
+        expect(RED_CLASSES.has(server), `${locale}:${kind}:server:${server}:${text}`).toBe(true)
+        expect(RED_CLASSES.has(client), `${locale}:${kind}:client:${client}:${text}`).toBe(true)
+      }
+    }
+  }, 120_000)
+
+  it('resists long-context, quote and repeated-letter laundering without blocking defensive context', () => {
+    const longThreat = `Новости дня. ${'Нейтральный обзор событий и мнений. '.repeat(14)} Давай спалим ему машину.`
+    const dangerous = [
+      longThreat,
+      '«Я тебя убью», но завтра мы это реально сделаем',
+      'Я тебя ууубббьььююю',
+      'Давайте устроим теракт',
+      'Заложим взрывчатку в здании',
+      'Как собрать бомбу для нападения',
+      'Соберите всех и пойдём бить этих людей',
+      'Украдём базу пользователей и положим их сервер',
+      'Давайте защитим сервер, а потом украдём базу пользователей',
+    ]
+    for (const text of dangerous) {
+      expect(RED_CLASSES.has(semanticAnalyzerMod.analyzeComposerSemantics(text, { locale:'ru', targeted:true }).classId), `server:${text}`).toBe(true)
+      expect(RED_CLASSES.has(classifyComposerPreview(text, { locale:'ru', targeted:true }).classId), `client:${text}`).toBe(true)
+    }
+
+    const defensive = [
+      'Как защитить сервер от DDoS-атаки',
+      'Команда безопасности расследует попытку взлома',
+      'В статье анализируется история войны',
+      'В фильме взорвалась машина',
+      'Как предотвратить теракт и защитить людей',
+      'How to protect users from phishing attacks',
+    ]
+    for (const text of defensive) {
+      expect(SAFE_CLASSES.has(semanticAnalyzerMod.analyzeComposerSemantics(text, { locale:'ru', targeted:false }).classId), `server:${text}`).toBe(true)
+      expect(SAFE_CLASSES.has(classifyComposerPreview(text, { locale:'ru', targeted:false }).classId), `client:${text}`).toBe(true)
+    }
+  }, 120_000)
+
+  it('warns on contextual harassment and degrading abuse', () => {
+    for (const text of ['Ты жалкое ничтожество', 'Никто тебя не любит, исчезни навсегда', 'Каждый день будем унижать тебя']) {
+      expect(composerPreviewBadgeFromClass(semanticAnalyzerMod.analyzeComposerSemantics(text, { locale:'ru', targeted:true }).classId)?.tone, `server:${text}`).toBe('orange')
+      expect(composerPreviewBadgeFromClass(classifyComposerPreview(text, { locale:'ru', targeted:true }).classId)?.tone, `client:${text}`).toBe('orange')
+    }
+  })
+
+  it('warns on direct and symbol-obfuscated insults in all 32 composer locales', () => {
+    for (const locale of Object.keys(INDEPENDENT_NATURAL_RISK_CASES)) {
+      const insult = SAFETY_LEXICONS[locale].insults[0]
+      for (const text of [insult, Array.from(insult).join('@')]) {
+        const serverClass = semanticAnalyzerMod.analyzeComposerSemantics(text, { locale, targeted:true }).classId
+        const clientClass = classifyComposerPreview(text, { locale, targeted:true }).classId
+        expect(composerPreviewBadgeFromClass(serverClass)?.tone, `${locale}:server:${serverClass}:${text}`).toBe('orange')
+        expect(composerPreviewBadgeFromClass(clientClass)?.tone, `${locale}:client:${clientClass}:${text}`).toBe('orange')
+      }
+    }
+  }, 120_000)
+
   it('separates direct and obfuscated threats from quoted, reported and counter-speech context in all 32 locales', () => {
     const hints = semanticHintsMod.QL7_COMPOSER_LOCALE_SEMANTIC_HINTS
     const risks = riskConceptsMod.QL7_COMPOSER_LOCALE_RISK_CONCEPTS
@@ -30,6 +147,7 @@ describe('composer semantic context calibration', () => {
       }
       const direct = `${hints[locale].first[0]} ${risks[locale].commitment[0]} ${risks[locale].kill[0]}`
       const obfuscated = `${hints[locale].first[0]} ${risks[locale].commitment[0]} ${Array.from(risks[locale].kill[0]).join('·')}`
+      const quoteContinuation = `«${risks[locale].kill[0]}» ${hints[locale].temporal[0]} ${risks[locale].commitment[0]}`
       const contextual = [
         `${SAFETY_LEXICONS[locale].quotes[0]}: «${direct}»`,
         `${SAFETY_LEXICONS[locale].quotes[0]}: ${risks[locale].kill[0]}`,
@@ -42,6 +160,8 @@ describe('composer semantic context calibration', () => {
         expect(RED_CLASSES.has(semanticAnalyzerMod.analyzeComposerSemantics(text, { locale, targeted: true }).classId), `${locale}:server:${text}`).toBe(true)
         expect(RED_CLASSES.has(classifyComposerPreview(text, { locale, targeted: true }).classId), `${locale}:client:${text}`).toBe(true)
       }
+      expect(RED_CLASSES.has(semanticAnalyzerMod.analyzeComposerSemantics(quoteContinuation, { locale, targeted:true }).classId), `${locale}:server:quote-continuation`).toBe(true)
+      expect(RED_CLASSES.has(classifyComposerPreview(quoteContinuation, { locale, targeted:true }).classId), `${locale}:client:quote-continuation`).toBe(true)
       for (const text of contextual) {
         expect(SAFE_CLASSES.has(semanticAnalyzerMod.analyzeComposerSemantics(text, { locale, targeted: true }).classId), `${locale}:server:${text}`).toBe(true)
         expect(SAFE_CLASSES.has(classifyComposerPreview(text, { locale, targeted: true }).classId), `${locale}:client:${text}`).toBe(true)
