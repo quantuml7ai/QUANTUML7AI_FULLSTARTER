@@ -34,6 +34,56 @@ describe('useUserRecommendationsRail', () => {
     vi.unstubAllGlobals()
   })
 
+  it('warms one batch before media slots exist and assigns it without a second foreground request', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        seed: 41,
+        ttlSec: 30,
+        rotationKey: 'video:new:warm',
+        poolVersion: 'pool-warm',
+        nextCursor: 'cursor-warm',
+        batches: [createBatch('batch-warm', 1)],
+      }),
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const initialProps = {
+      enabled: true,
+      videoFeedOpen: true,
+      viewerId: 'viewer-warm',
+      feedSort: 'new',
+      feedContextKey: 'stable-feed-generation',
+      vfSlots: [],
+      vfWin: { start: 0, end: 0, top: 0, bottom: 0 },
+      runtimeConfig: { batchSize: 2, batchesPerRequest: 1, prefetchRailsAhead: 0 },
+      emitDiag: vi.fn(),
+    }
+
+    const { result, rerender } = renderHook(
+      (props) => useUserRecommendationsRail(props),
+      { initialProps },
+    )
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(result.current.poolVersion).toBe('pool-warm')
+    })
+    expect(new URL(fetchMock.mock.calls[0][0], 'http://localhost').searchParams.get('batches')).toBe('1')
+
+    rerender({
+      ...initialProps,
+      vfSlots: [{ type: 'recommendation_rail', key: 'rec:warm', railIndex: 0 }],
+      vfWin: { start: 0, end: 1, top: 0, bottom: 0 },
+    })
+
+    await waitFor(() => {
+      expect(result.current.getSlotState('rec:warm')?.users).toHaveLength(2)
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
   it('prefetches recommendation batches ahead and assigns them to visible slots', async () => {
     const firstResponse = {
       ok: true,
@@ -951,6 +1001,31 @@ describe('starred sorting models', () => {
         id: firstPass[0],
       }),
     )
+  })
+
+  it('keeps the recommendation generation key stable while async media pages arrive', () => {
+    const { result } = renderHook(() => useVideoFeedState({
+      data: { posts: [] },
+      allPosts: [],
+      serverVideoPosts: [],
+      isMediaUrl: () => true,
+      extractUrlsFromText: () => [],
+      viewerId: 'viewer-context',
+      starredFirst: (items) => items,
+      videoFeedOpenRef: { current: true },
+      navRestoringRef: { current: false },
+      emitDiag: vi.fn(),
+      visibleVideoCount: 5,
+      setVisibleVideoCount: vi.fn(),
+      videoPageSize: 5,
+    }))
+
+    const beforePage = result.current.videoFeedContextKey
+    act(() => {
+      result.current.setVideoFeed([{ id: 'async-page-post-1' }])
+    })
+
+    expect(result.current.videoFeedContextKey).toBe(beforePage)
   })
 
   it('preserves local reaction state while server media rows keep feed order authority', () => {

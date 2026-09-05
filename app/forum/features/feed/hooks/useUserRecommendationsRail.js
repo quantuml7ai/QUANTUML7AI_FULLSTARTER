@@ -405,6 +405,19 @@ export default function useUserRecommendationsRail({
     desiredMissingCount - unusedBufferedBatchCount,
   )
 
+  // Start one bounded batch as soon as the video feed opens. At that moment the
+  // media page (and therefore its first recommendation slot) may not exist yet;
+  // the batch remains buffered and is assigned immediately when the slot lands.
+  const bootstrapPreloadNeeded = !!(
+    enabled &&
+    videoFeedOpen &&
+    state.activeFeedContextKey === recommendationFeedContextKey &&
+    state.batchOrder.length === 0
+  )
+  const requestDemandCount = desiredRailSlotKeys.length
+    ? requiredAdditionalBatchCount
+    : (bootstrapPreloadNeeded ? 1 : 0)
+
   const hasAssignedBatch = useMemo(() => {
     return Object.values(state.slotAssignments || {}).some((batchId) => {
       const normalizedBatchId = normalizeId(batchId)
@@ -416,7 +429,7 @@ export default function useUserRecommendationsRail({
     return [
       recommendationFeedContextKey,
       normalizeId(feedSort || 'random') || 'random',
-      desiredRailSlotKeys.join(','),
+      desiredRailSlotKeys.join(',') || 'bootstrap',
       String(batchSize),
       String(batchesPerRequest),
       String(prefetchRailsAhead),
@@ -438,9 +451,8 @@ export default function useUserRecommendationsRail({
     if (!enabled) return
     if (!cursorStorageReady) return
     if (!videoFeedOpen) return
-    if (!desiredRailSlotKeys.length) return
     if (state.prefetchInFlight) return
-    if (requiredAdditionalBatchCount <= 0) return
+    if (requestDemandCount <= 0) return
     if (state.lastRequestSignature === requestSignature) return
     // Let assign_slots publish the first buffered batch before starting the
     // background look-ahead request. This keeps a very fast response from
@@ -456,13 +468,14 @@ export default function useUserRecommendationsRail({
     // Once that rail is assigned, the existing buffered prefetch policy resumes.
     const requestBatchCount = state.batchOrder.length === 0
       ? 1
-      : Math.max(batchesPerRequest, requiredAdditionalBatchCount)
+      : Math.max(batchesPerRequest, requestDemandCount)
 
     dispatch({ type: 'request_start', requestSignature })
 
     try {
       emitDiag?.('user_recommendations_prefetch_start', {
         desiredRailCount: desiredRailSlotKeys.length,
+        bootstrapPreload: !desiredRailSlotKeys.length,
         missingRailCount: desiredMissingCount,
         requestBatchCount,
         contextKey: recommendationFeedContextKey,
@@ -593,6 +606,7 @@ export default function useUserRecommendationsRail({
     state.lastRequestSignature,
     state.prefetchInFlight,
     requiredAdditionalBatchCount,
+    requestDemandCount,
     desiredMissingCount,
     unusedBufferedBatchCount,
     videoFeedOpen,
