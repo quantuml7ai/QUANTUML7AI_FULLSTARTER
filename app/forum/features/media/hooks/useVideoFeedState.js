@@ -32,16 +32,6 @@ function keyOfVideoFeedItem(item) {
   return ''
 }
 
-function buildVideoFeedContextSignature(list) {
-  const keys = (Array.isArray(list) ? list : [])
-    .map((item) => keyOfVideoFeedItem(item))
-    .filter((key) => !!String(key || '').trim())
-
-  const head = keys.slice(0, 5).join(',')
-  const tail = keys.slice(-5).join(',')
-  return `${keys.length}|${head}|${tail}`
-}
-
 function normalizeReactionState(value) {
   const raw = String(value || '').trim().toLowerCase()
   return raw === 'like' || raw === 'dislike' ? raw : null
@@ -234,11 +224,9 @@ export default function useVideoFeedState({
       String(videoFeedEntryToken || 0),
       String(videoFeedPageSalt || ''),
       String(videoFeedUserSortLocked ? '1' : '0'),
-      buildVideoFeedContextSignature(videoFeed),
     ].join('|')
   }, [
     feedSort,
-    videoFeed,
     videoFeedEntryToken,
     videoFeedPageSalt,
     videoFeedUserSortLocked,

@@ -32,22 +32,135 @@ function createBatch(batchId, startIndex) {
 describe('useUserRecommendationsRail', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    window.sessionStorage.clear()
+    window.localStorage.clear()
   })
 
-  it('prefetches recommendation batches ahead and assigns them to visible slots', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => ({
+  it('primes one rail before any slot exists and refills the future reserve without blocking it', async () => {
+    let resolveReserve
+    const reserveResponse = new Promise((resolve) => {
+      resolveReserve = resolve
+    })
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
         ok: true,
+        json: async () => ({
+          ok: true,
+          viewerCanonicalId: 'viewer-canonical',
+          seed: 41,
+          ttlSec: 30,
+          rotationKey: 'video:new:prime',
+          poolVersion: 'pool-prime',
+          nextCursor: 'cursor-prime',
+          batches: [createBatch('batch-prime', 1)],
+        }),
+      })
+      .mockImplementationOnce(() => reserveResponse)
+    vi.stubGlobal('fetch', fetchMock)
+
+    const initialProps = {
+      enabled: true,
+      videoFeedOpen: true,
+      viewerId: 'viewer-1',
+      feedSort: 'new',
+      feedContextKey: 'ctx-prime-before-slot',
+      vfSlots: [],
+      vfWin: { start: 0, end: 0, top: 0, bottom: 0 },
+      runtimeConfig: {
+        batchSize: 2,
+        batchesPerRequest: 4,
+        prefetchRailsAhead: 3,
+      },
+      emitDiag: vi.fn(),
+    }
+
+    const { result, rerender } = renderHook(
+      (props) => useUserRecommendationsRail(props),
+      { initialProps },
+    )
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(result.current.poolVersion).toBe('pool-prime')
+      expect(result.current.nextCursor).toBe('cursor-prime')
+      expect(result.current.prefetchInFlight).toBe(true)
+    })
+
+    const primeUrl = new URL(fetchMock.mock.calls[0][0], 'http://localhost')
+    const reserveUrl = new URL(fetchMock.mock.calls[1][0], 'http://localhost')
+    expect(primeUrl.searchParams.get('batches')).toBe('1')
+    expect(reserveUrl.searchParams.get('batches')).toBe('3')
+    expect(reserveUrl.searchParams.get('cursor')).toBe('cursor-prime')
+
+    rerender({
+      ...initialProps,
+      vfSlots: [{ type: 'recommendation_rail', key: 'rec:prime', railIndex: 0 }],
+      vfWin: { start: 0, end: 1, top: 0, bottom: 0 },
+    })
+
+    await waitFor(() => {
+      expect(result.current.getSlotState('rec:prime')?.users).toHaveLength(2)
+    })
+    expect(result.current.getSlotState('rec:prime')?.batchId).toBe('batch-prime')
+    expect(result.current.prefetchInFlight).toBe(true)
+
+    await act(async () => {
+      resolveReserve({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          viewerCanonicalId: 'viewer-canonical',
+          seed: 42,
+          ttlSec: 30,
+          rotationKey: 'video:new:reserve',
+          poolVersion: 'pool-prime',
+          nextCursor: 'cursor-reserve',
+          batches: [
+            createBatch('batch-reserve-1', 3),
+            createBatch('batch-reserve-2', 5),
+            createBatch('batch-reserve-3', 7),
+          ],
+        }),
+      })
+    })
+
+    await waitFor(() => {
+      expect(result.current.prefetchInFlight).toBe(false)
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('uses prefetchRailsAhead as an unassigned reserve and carries the cursor into refill', async () => {
+    const payloads = [
+      {
+        ok: true,
+        viewerCanonicalId: 'viewer-canonical',
         seed: 42,
         ttlSec: 30,
-        rotationKey: 'video:new:1',
+        rotationKey: 'video:new:prime',
+        poolVersion: 'pool-prefetch',
+        nextCursor: 'cursor-after-prime',
+        batches: [createBatch('batch-1', 1)],
+      },
+      {
+        ok: true,
+        viewerCanonicalId: 'viewer-canonical',
+        seed: 43,
+        ttlSec: 30,
+        rotationKey: 'video:new:refill',
+        poolVersion: 'pool-prefetch',
+        nextCursor: 'cursor-after-refill',
         batches: [
-          createBatch('batch-1', 1),
           createBatch('batch-2', 3),
           createBatch('batch-3', 5),
         ],
-      }),
+      },
+    ]
+    let responseIndex = 0
+    const fetchMock = vi.fn().mockImplementation(async () => {
+      const payload = payloads[Math.min(responseIndex, payloads.length - 1)]
+      responseIndex += 1
+      return { ok: true, json: async () => payload }
     })
     vi.stubGlobal('fetch', fetchMock)
 
@@ -66,10 +179,12 @@ describe('useUserRecommendationsRail', () => {
         feedSort: 'new',
         feedContextKey: 'ctx-1',
         vfSlots,
-        vfWin: { start: 0, end: 2, top: 0, bottom: 0 },
+        // Only rec:1 belongs to the current window. rec:2/rec:3 are future
+        // slots and must be represented by the unassigned reserve instead.
+        vfWin: { start: 0, end: 1, top: 0, bottom: 0 },
         runtimeConfig: {
           batchSize: 2,
-          batchesPerRequest: 2,
+          batchesPerRequest: 4,
           prefetchRailsAhead: 2,
         },
         emitDiag,
@@ -77,27 +192,24 @@ describe('useUserRecommendationsRail', () => {
     )
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-    })
-
-    const requestUrl = new URL(fetchMock.mock.calls[0][0], 'http://localhost')
-    expect(Number(requestUrl.searchParams.get('batches'))).toBeGreaterThanOrEqual(4)
-
-    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(2)
       expect(result.current.getSlotState('rec:1')?.users).toHaveLength(2)
-      expect(result.current.getSlotState('rec:2')?.users).toHaveLength(2)
+      expect(result.current.prefetchInFlight).toBe(false)
     })
 
-    expect(result.current.getSlotState('rec:1')?.batchId).not.toBe(
-      result.current.getSlotState('rec:2')?.batchId,
-    )
+    const primeUrl = new URL(fetchMock.mock.calls[0][0], 'http://localhost')
+    const refillUrl = new URL(fetchMock.mock.calls[1][0], 'http://localhost')
+    expect(primeUrl.searchParams.get('batches')).toBe('1')
+    expect(refillUrl.searchParams.get('batches')).toBe('2')
+    expect(refillUrl.searchParams.get('cursor')).toBe('cursor-after-prime')
+
+    expect(result.current.getSlotState('rec:1')?.batchId).toBe('batch-1')
+    expect(result.current.getSlotState('rec:2')?.users || []).toEqual([])
+    expect(result.current.getSlotState('rec:3')?.users || []).toEqual([])
     expect(window.localStorage.getItem('profile:batch-1-user-1')).toContain('batch-1 User 1')
     expect(emitDiag).toHaveBeenCalledWith(
       'user_recommendations_prefetch_success',
-      expect.objectContaining({
-        receivedBatches: 3,
-        rotationKey: 'video:new:1',
-      }),
+      expect.objectContaining({ receivedBatches: 2, rotationKey: 'video:new:refill' }),
       { force: true },
     )
   })
@@ -841,6 +953,61 @@ describe('starred sorting models', () => {
       'topic-high-views',
       'topic-low-ranked-first',
     ])
+  })
+
+  it('keeps the recommendation context key stable when a server video page append only grows the feed', () => {
+    const createProps = (serverVideoPosts) => ({
+      data: { posts: [] },
+      allPosts: [],
+      serverVideoPosts,
+      isMediaUrl: (value) => String(value || '').includes('.mp4'),
+      extractUrlsFromText: (value) => String(value || '').match(/https?:\/\/\S+/g) || [],
+      viewerId: 'viewer-1',
+      starredFirst: (items) => items,
+      videoFeedOpenRef: { current: false },
+      navRestoringRef: { current: false },
+      emitDiag: vi.fn(),
+      visibleVideoCount: 5,
+      setVisibleVideoCount: vi.fn(),
+      videoPageSize: 5,
+    })
+    const firstPage = [
+      { id: 'media-1', userId: 'author-1', topicId: 'topic-1', ts: 100, text: 'https://cdn.test/1.mp4' },
+      { id: 'media-2', userId: 'author-2', topicId: 'topic-1', ts: 200, text: 'https://cdn.test/2.mp4' },
+    ]
+
+    const { result, rerender } = renderHook(
+      (props) => useVideoFeedState(props),
+      { initialProps: createProps(firstPage) },
+    )
+
+    act(() => {
+      result.current.setVideoFeedOpen(true)
+      result.current.setVideoFeedPageSalt('recommendation-stable-salt')
+      result.current.setVideoFeedEntryToken(7)
+    })
+    act(() => {
+      result.current.buildAndSetVideoFeed()
+    })
+
+    const beforeAppend = result.current.videoFeedContextKey
+    expect(result.current.videoFeed).toHaveLength(2)
+
+    rerender(createProps([
+      ...firstPage,
+      { id: 'media-3', userId: 'author-3', topicId: 'topic-1', ts: 300, text: 'https://cdn.test/3.mp4' },
+    ]))
+    act(() => {
+      result.current.buildAndSetVideoFeed()
+    })
+
+    expect(result.current.videoFeed).toHaveLength(3)
+    expect(result.current.videoFeedContextKey).toBe(beforeAppend)
+
+    act(() => {
+      result.current.setVideoFeedPageSalt('recommendation-next-session')
+    })
+    expect(result.current.videoFeedContextKey).not.toBe(beforeAppend)
   })
 
   it('does not reorder the video feed when star mode becomes active', () => {

@@ -438,7 +438,11 @@ describe('forum recommendation Top-500 policy', () => {
         throw new Error(`unexpected_collection:${name}`)
       },
     }
-    pool.__setTestCanonicalResolver(async (raw) => ({ canonicalAccountId: raw, aliasSet: [raw], conflictWarnings: [] }))
+    const identityPhases = []
+    pool.__setTestCanonicalResolver(async (raw, phase) => {
+      identityPhases.push(phase)
+      return { canonicalAccountId: raw, aliasSet: [raw], conflictWarnings: [] }
+    })
     pool.__setTestProfileReader(async (id) => ({ nickname: `Live-${id}`, icon: `/live-${id}.png` }))
     try {
       const cards = await pool.hydrateCards(db, [
@@ -447,7 +451,56 @@ describe('forum recommendation Top-500 policy', () => {
       ])
       expect(cards).toHaveLength(1)
       expect(cards[0]).toMatchObject({ canonicalAccountId: 'a', nickname: 'Live-a', avatar: '/live-a.png', followersCount: 1 })
+      expect(identityPhases).toEqual(['identity-seed-authority', 'identity-seed-authority'])
     } finally {
+      pool.__setTestCanonicalResolver(null)
+      pool.__setTestProfileReader(null)
+    }
+  })
+
+  it('resolves raw request identity once and excludes the canonical viewer before delivery', async () => {
+    const materialized = validDoc([
+      { canonicalAccountId: 'viewer-canonical', metrics: { followers: 1 } },
+      { canonicalAccountId: 'author-a', metrics: { followers: 1 } },
+    ])
+    const base = dbForBuild({
+      followers: [{ _id: 'followers:author-a', members: ['follower-a'] }],
+    })
+    const db = {
+      collection(name) {
+        if (name === pool.COLLECTION) return { async findOne() { return materialized } }
+        return base.collection(name)
+      },
+    }
+    const identityCalls = []
+    pool.__setTestDb(db)
+    pool.__setTestCanonicalResolver(async (raw, phase) => {
+      identityCalls.push({ raw, phase })
+      const canonicalAccountId = raw === 'viewer-alias'
+        ? 'viewer-canonical'
+        : raw === 'exclude-alias'
+          ? 'exclude-canonical'
+          : raw
+      return { canonicalAccountId, aliasSet: [raw, canonicalAccountId], conflictWarnings: [] }
+    })
+    pool.__setTestProfileReader(async (id) => ({ nickname: `Live-${id}`, icon: `/live-${id}.png` }))
+    try {
+      const page = await pool.getPage({
+        viewerId: 'viewer-alias',
+        excludeIds: ['exclude-alias'],
+        batchSize: 1,
+        batchCount: 1,
+        feedMode: 'video',
+        sort: 'new',
+      })
+
+      expect(page.batches).toHaveLength(1)
+      expect(page.batches[0].users[0]).toMatchObject({ canonicalAccountId: 'author-a' })
+      expect(identityCalls.map((call) => call.phase)).not.toContain('request-canonical')
+      expect(identityCalls.map((call) => call.phase)).not.toContain('delivery-canonical')
+      expect(identityCalls.map((call) => call.phase).every((phase) => phase === 'identity-seed-authority')).toBe(true)
+    } finally {
+      pool.__setTestDb(null)
       pool.__setTestCanonicalResolver(null)
       pool.__setTestProfileReader(null)
     }

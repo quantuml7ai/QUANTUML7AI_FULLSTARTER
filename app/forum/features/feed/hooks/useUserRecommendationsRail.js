@@ -327,7 +327,7 @@ export default function useUserRecommendationsRail({
 
     if (!visibleRailSlotKeys.length) {
       return railSlots
-        .slice(0, Math.max(1, prefetchRailsAhead + 1))
+        .slice(0, 1)
         .map((slot) => slot.slotKey)
     }
 
@@ -339,9 +339,9 @@ export default function useUserRecommendationsRail({
     const safeEnd = lastVisibleIndex >= 0 ? lastVisibleIndex : safeStart
 
     return railSlots
-      .slice(safeStart, safeEnd + prefetchRailsAhead + 1)
+      .slice(safeStart, safeEnd + 1)
       .map((slot) => slot.slotKey)
-  }, [prefetchRailsAhead, railSlots, videoFeedOpen, visibleRailSlotKeys])
+  }, [railSlots, videoFeedOpen, visibleRailSlotKeys])
 
   useEffect(() => {
     const viewerKey = normalizeId(viewerId || 'guest')
@@ -396,15 +396,24 @@ export default function useUserRecommendationsRail({
     }, 0)
   }, [state.batchOrder, state.batchesById, state.slotAssignments])
 
-  // Buffered batches are supply, not merely prefetch decoration. Right after a
-  // response lands React may not have run assign_slots yet, so desiredMissingCount
-  // can still include slots that an already-buffered batch can satisfy. Starting a
-  // second GET in that render races auth/context transitions and wastes a cursor
-  // page. Compute actual unsatisfied demand before touching the network.
+  // Keep `desiredRailSlotKeys` limited to slots that already belong to the current
+  // render window. `prefetchRailsAhead` is a separate *unassigned* reserve for
+  // future slots that do not exist yet because video windowing has not exposed
+  // enough posts. This prevents the old double-count while still keeping later
+  // recommendation rails ready before the user reaches them.
+  //
+  // Right after a response lands React may not have run assign_slots yet, so an
+  // unused buffered batch can satisfy one of the desired slots. Count it once as
+  // supply before scheduling another cursor page. Before the first rail slot exists,
+  // however, the prime batch is already earmarked for that latent rail and must not
+  // be counted as part of the future unassigned reserve.
+  const latentFirstRailBatchCount = railSlots.length === 0 && unusedBufferedBatchCount > 0 ? 1 : 0
+  const futureReserveBatchCount = Math.max(0, unusedBufferedBatchCount - latentFirstRailBatchCount)
   const requiredAdditionalBatchCount = Math.max(
     0,
-    desiredMissingCount + prefetchRailsAhead - unusedBufferedBatchCount,
+    desiredMissingCount + prefetchRailsAhead - futureReserveBatchCount,
   )
+  const initialPrimeNeeded = state.batchOrder.length === 0 && !normalizeId(state.activeRotationKey)
 
   const requestSignature = useMemo(() => {
     return [
@@ -414,6 +423,9 @@ export default function useUserRecommendationsRail({
       String(batchSize),
       String(batchesPerRequest),
       String(prefetchRailsAhead),
+      initialPrimeNeeded ? 'prime' : 'refill',
+      String(requiredAdditionalBatchCount),
+      normalizeId(state.nextCursor),
       normalizeId(state.activeRotationKey),
       normalizeId(state.activePoolVersion),
     ].join('|')
@@ -424,6 +436,9 @@ export default function useUserRecommendationsRail({
     batchSize,
     batchesPerRequest,
     prefetchRailsAhead,
+    initialPrimeNeeded,
+    requiredAdditionalBatchCount,
+    state.nextCursor,
     state.activeRotationKey,
     state.activePoolVersion,
   ])
@@ -432,9 +447,12 @@ export default function useUserRecommendationsRail({
     if (!enabled) return
     if (!cursorStorageReady) return
     if (!videoFeedOpen) return
-    if (!desiredRailSlotKeys.length) return
+    // Prime one rail as soon as media-feed mode opens, before windowing has
+    // produced the first recommendation slot. After that first response, keep
+    // `prefetchRailsAhead` as a background reserve even when future rail slots do
+    // not exist yet. The first rail never waits for the reserve refill.
     if (state.prefetchInFlight) return
-    if (requiredAdditionalBatchCount <= 0) return
+    if (!initialPrimeNeeded && requiredAdditionalBatchCount <= 0) return
     if (state.lastRequestSignature === requestSignature) return
 
     const currentGenerationId = generationRef.current
@@ -442,10 +460,9 @@ export default function useUserRecommendationsRail({
     const controller = new AbortController()
     try { requestAbortRef.current?.abort() } catch {}
     requestAbortRef.current = controller
-    const requestBatchCount = Math.max(
-      batchesPerRequest,
-      requiredAdditionalBatchCount,
-    )
+    const requestBatchCount = initialPrimeNeeded
+      ? 1
+      : Math.max(1, Math.min(batchesPerRequest, requiredAdditionalBatchCount))
 
     dispatch({ type: 'request_start', requestSignature })
 
@@ -504,10 +521,8 @@ export default function useUserRecommendationsRail({
         })
 
         const prevState = stateRef.current
-        const hasAssignedSlots = Object.keys(prevState.slotAssignments || {}).length > 0
         const replaceBuffer =
           !prevState.batchOrder.length ||
-          !hasAssignedSlots ||
           prevState.activeFeedContextKey !== recommendationFeedContextKey
 
         const poolVersion = normalizeId(payload?.poolVersion)
@@ -572,6 +587,7 @@ export default function useUserRecommendationsRail({
     desiredRailSlotKeys,
     enabled,
     feedSort,
+    initialPrimeNeeded,
     prefetchRailsAhead,
     recommendationFeedContextKey,
     state.activeRotationKey,
