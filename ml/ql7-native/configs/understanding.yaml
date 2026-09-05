@@ -1,0 +1,11 @@
+architecture: multilingual_gqa_transformer
+vocab_size: 81920
+hidden_size: 1536
+layers: 24
+heads: 24
+kv_heads: 8
+intermediate_size: 4096
+max_seq_len: 8192
+open_set: true
+heads_enabled: [embedding,intent,topic,entity,coreference,negation,quotation,discourse,emotion,safety,ood,locale]
+activation_checkpointing: true

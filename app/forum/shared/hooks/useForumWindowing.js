@@ -1,0 +1,1567 @@
+'use client'
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { registerForumWindowingTarget } from '../utils/forumWindowingRegistry'
+import {
+  buildForumHeightPrefix,
+  buildForumWindowFromPrefix,
+  findForumWindowEndExclusive,
+  findForumWindowStartIndex,
+} from '../utils/forumHeightIndex.mjs'
+
+const DEFAULT_WINDOW_STICKY_MS = 780
+const DEFAULT_LAYOUT_JITTER_PX = 32
+const DEFAULT_SCROLL_SETTLE_MS = 420
+const DEFAULT_HEIGHT_DELTA_IGNORE_PX = 2
+const DEFAULT_ANCHOR_DELTA_IGNORE_PX = 3
+const DEFAULT_ANCHOR_DELTA_MAX_PX = 640
+const DEFAULT_ANCHOR_FLUSH_MS = 140
+const DEFAULT_ANCHOR_ACTIVE_RETRY_MS = 120
+const DEFAULT_REVEAL_HOLD_MS = 1800
+const DEFAULT_MIN_SCROLLABLE_HEIGHT = 120
+const DEFAULT_FALLBACK_MAX_RENDER = 8
+const DEFAULT_FALLBACK_OVERSCAN_PX = 960
+const DOWNWARD_UNMOUNT_GRACE_PX = 900
+const UPWARD_UNMOUNT_GRACE_PX = 400
+const DOWNWARD_BEHIND_VIEWPORT_HOLD_ITEMS = 3
+const UPWARD_AHEAD_VIEWPORT_HOLD_ITEMS = 3
+const ANCHOR_USER_SCROLL_SUPPRESSION_MS = 2600
+const STABLE_MEDIA_SHELL_SELECTOR = [
+  '[data-stable-shell="1"]',
+  '[data-windowing-keepalive="media"]',
+  '[data-forum-windowing-stable="1"]',
+  '[data-ads="1"]',
+  '.forum-ad-card',
+  '.forum-ad-media-slot',
+  '.mediaBox[data-kind="video"]',
+  '.mediaBox[data-kind="iframe"]',
+  'video[data-forum-video="post"]',
+  'iframe[data-forum-media]',
+  '[data-forum-embed-kind]',
+].join(', ')
+
+function defaultIsBrowser() {
+  return typeof window !== 'undefined'
+}
+
+function getNow() {
+  try {
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+      return performance.now()
+    }
+  } catch {}
+  return Date.now()
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
+
+function readAnchorDeltaLimit(fallback = DEFAULT_ANCHOR_DELTA_MAX_PX) {
+  try {
+    const vh = Number(window?.innerHeight || 0)
+    if (vh > 0) {
+      return Math.max(
+        Number(fallback || DEFAULT_ANCHOR_DELTA_MAX_PX),
+        Math.min(900, Math.round(vh * 0.65)),
+      )
+    }
+  } catch {}
+
+  return Number(fallback || DEFAULT_ANCHOR_DELTA_MAX_PX)
+}
+
+function normalizeKey(raw, fallback = '') {
+  const normalized = String(raw ?? fallback).trim()
+  return normalized || String(fallback || '')
+}
+
+function readCssPx(value) {
+  const parsed = Number.parseFloat(String(value || ''))
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function readItemLayoutFootprint(node) {
+  const rectHeight = Number(node?.getBoundingClientRect?.()?.height || 0)
+  const offsetHeight = Number(node?.offsetHeight || 0)
+  let marginHeight = 0
+  let rowGap = 0
+
+  try {
+    const style = window.getComputedStyle?.(node)
+    marginHeight = readCssPx(style?.marginBlockStart || style?.marginTop) +
+      readCssPx(style?.marginBlockEnd || style?.marginBottom)
+
+    const parentStyle = window.getComputedStyle?.(node?.parentElement)
+    const display = String(parentStyle?.display || '').toLowerCase()
+    const flexDirection = String(parentStyle?.flexDirection || '').toLowerCase()
+    const hasVerticalGap = display.includes('grid') ||
+      (display.includes('flex') && flexDirection.startsWith('column'))
+    if (hasVerticalGap) rowGap = Math.max(0, readCssPx(parentStyle?.rowGap))
+  } catch {}
+
+  return {
+    height: Math.max(rectHeight, offsetHeight) + marginHeight,
+    rowGap,
+  }
+}
+
+function resolveNumericConfig(valueOrFn, fallback, payload) {
+  const defaultValue = Number(fallback || 0) || 0
+  try {
+    if (typeof valueOrFn === 'function') {
+      const next = Number(valueOrFn(payload))
+      return Number.isFinite(next) ? next : defaultValue
+    }
+    const next = Number(valueOrFn)
+    return Number.isFinite(next) ? next : defaultValue
+  } catch {
+    return defaultValue
+  }
+}
+
+function readDefaultLayoutKey(isBrowserFn) {
+  try {
+    if (!isBrowserFn?.()) return 'tablet'
+    const w = Number(window?.innerWidth || 0)
+    if (w >= 1024) return 'desktop'
+    if (w >= 640) return 'tablet'
+    return 'mobile'
+  } catch {
+    return 'tablet'
+  }
+}
+
+function hasStableMediaShell(node) {
+  try {
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    return !!node.matches?.(STABLE_MEDIA_SHELL_SELECTOR)
+  } catch {
+    return false
+  }
+}
+
+function containsStableMediaShell(node) {
+  try {
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    if (hasStableMediaShell(node)) return true
+    return !!node.querySelector?.(STABLE_MEDIA_SHELL_SELECTOR)
+  } catch {
+    return false
+  }
+}
+
+function readMediaKeepaliveHoldMs() {
+  try {
+    const coarse = !!window?.matchMedia?.('(pointer: coarse)')?.matches
+    const mobile = Number(window?.innerWidth || 0) < 720
+    return coarse || mobile ? 4800 : 3600
+  } catch {
+    return 3600
+  }
+}
+
+function isNearViewportNode(node, marginPx = 1200) {
+  try {
+    if (typeof Element === 'undefined' || !(node instanceof Element)) return false
+    const rect = node.getBoundingClientRect?.()
+    const viewportH = Number(window?.innerHeight || document?.documentElement?.clientHeight || 0) || 0
+    if (!rect || viewportH <= 0) return false
+    return Number(rect.bottom || 0) >= -marginPx && Number(rect.top || 0) <= viewportH + marginPx
+  } catch {
+    return false
+  }
+}
+
+function readRecentScrollAgeMs() {
+  try {
+    const now = Date.now()
+    const last = Math.max(
+      Number(window?.__forumUserScrollTs || 0),
+      Number(window?.__forumProgrammaticScrollTs || 0),
+    )
+    return last > 0 ? now - last : Number.POSITIVE_INFINITY
+  } catch {
+    return Number.POSITIVE_INFINITY
+  }
+}
+
+const forumWindowingDiagRegistry = new Map()
+
+function updateForumWindowingDiag(listId, patch) {
+  if (typeof window === 'undefined' || process.env.NODE_ENV === 'production') return
+  const key = normalizeKey(listId, 'anonymous')
+  const prev = forumWindowingDiagRegistry.get(key) || {
+    items: 0,
+    rendered: 0,
+    indexRebuilds: 0,
+    rangeSearches: 0,
+    legacyMismatches: 0,
+  }
+  forumWindowingDiagRegistry.set(key, { ...prev, ...patch })
+  if (typeof window.__forumWindowingState !== 'function') {
+    window.__forumWindowingState = () => {
+      const lists = {}
+      let items = 0
+      let rendered = 0
+      let indexRebuilds = 0
+      let rangeSearches = 0
+      let legacyMismatches = 0
+      forumWindowingDiagRegistry.forEach((value, registryKey) => {
+        lists[registryKey] = { ...value }
+        items += Number(value?.items || 0)
+        rendered += Number(value?.rendered || 0)
+        indexRebuilds += Number(value?.indexRebuilds || 0)
+        rangeSearches += Number(value?.rangeSearches || 0)
+        legacyMismatches += Number(value?.legacyMismatches || 0)
+      })
+      return { items, rendered, indexRebuilds, rangeSearches, legacyMismatches, lists }
+    }
+  }
+}
+
+export default function useForumWindowing({
+  active = true,
+  items = [],
+  getItemKey,
+  getItemDomId,
+  estimateItemHeight,
+  maxRender = DEFAULT_FALLBACK_MAX_RENDER,
+  overscanPx = DEFAULT_FALLBACK_OVERSCAN_PX,
+  getScrollEl,
+  getLayoutKey,
+  isBrowserFn = defaultIsBrowser,
+  hardResetRef = null,
+  listId = '',
+  emitDiag = null,
+  diagPrefix = '',
+  windowStickyMs = DEFAULT_WINDOW_STICKY_MS,
+  layoutJitterPx = DEFAULT_LAYOUT_JITTER_PX,
+  scrollSettleMs = DEFAULT_SCROLL_SETTLE_MS,
+  heightDeltaIgnorePx = DEFAULT_HEIGHT_DELTA_IGNORE_PX,
+  anchorDeltaIgnorePx = DEFAULT_ANCHOR_DELTA_IGNORE_PX,
+  anchorDeltaMaxPx = DEFAULT_ANCHOR_DELTA_MAX_PX,
+  anchorFlushMs = DEFAULT_ANCHOR_FLUSH_MS,
+  anchorActiveRetryMs = DEFAULT_ANCHOR_ACTIVE_RETRY_MS,
+  revealHoldMs = DEFAULT_REVEAL_HOLD_MS,
+  minScrollableClientHeight = DEFAULT_MIN_SCROLLABLE_HEIGHT,
+  scrollToTopOnHardReset = true,
+  mediaKeepaliveEnabled = true,
+}) {
+  const heightsRef = useRef(new Map())
+  const itemRowGapRef = useRef(0)
+  const measuredNodesRef = useRef(new Map())
+  const rosRef = useRef(new Map())
+  const rafRef = useRef(0)
+  const hardResetScheduleRef = useRef({ rafA: 0, rafB: 0, timeoutId: 0 })
+  const scrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
+  const scrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
+  const pendingAnchorDeltaRef = useRef(0)
+  const pendingHeightsRef = useRef(new Map())
+  const stableShrinkRef = useRef(new Map())
+  const mediaKeepaliveRef = useRef(new Map())
+  const anchorFlushTimerRef = useRef(0)
+  const winMetaRef = useRef({ ts: 0, start: 0, end: 0 })
+  const winRef = useRef({ start: 0, end: 0, top: 0, bottom: 0 })
+  const layoutKeyRef = useRef('unknown')
+  const targetLockRef = useRef({ key: '', until: 0, windowSize: 0 })
+  const heightIndexRef = useRef({
+    keys: [],
+    values: [],
+    prefix: [0],
+    totalHeight: 0,
+    dirty: true,
+    rebuilds: 0,
+    rangeSearches: 0,
+    legacyChecks: 0,
+    legacyMismatches: 0,
+  })
+
+  const emitWindowingDiag = useCallback((eventName, payload, options = undefined) => {
+    if (typeof emitDiag !== 'function') return
+    const suffix = String(eventName || '').trim()
+    if (!suffix) return
+    const prefix = String(diagPrefix || '').trim()
+    try {
+      emitDiag(prefix ? `${prefix}_${suffix}` : suffix, payload, options)
+    } catch {}
+  }, [diagPrefix, emitDiag])
+
+  const itemList = useMemo(
+    () => (Array.isArray(items) ? items : []),
+    [items],
+  )
+  const totalItems = itemList.length
+
+  const itemKeys = useMemo(
+    () => itemList.map((item, index) => normalizeKey(getItemKey?.(item, index), `${index}`)),
+    [getItemKey, itemList],
+  )
+
+  const keyToIndex = useMemo(() => {
+    const map = new Map()
+    itemKeys.forEach((key, index) => {
+      if (!key) return
+      map.set(key, index)
+    })
+    return map
+  }, [itemKeys])
+
+  const domIdToKey = useMemo(() => {
+    const map = new Map()
+    if (typeof getItemDomId !== 'function') return map
+    itemList.forEach((item, index) => {
+      const domId = normalizeKey(getItemDomId(item, index), '')
+      if (!domId) return
+      map.set(domId, itemKeys[index] || '')
+    })
+    return map
+  }, [getItemDomId, itemKeys, itemList])
+
+  const itemKeysRef = useRef(itemKeys)
+  const keyToIndexRef = useRef(keyToIndex)
+  const domIdToKeyRef = useRef(domIdToKey)
+
+  useEffect(() => {
+    itemKeysRef.current = itemKeys
+    keyToIndexRef.current = keyToIndex
+    domIdToKeyRef.current = domIdToKey
+    heightIndexRef.current.dirty = true
+  }, [domIdToKey, itemKeys, keyToIndex])
+
+  const resolveMaxRender = useCallback((velocity = 0) => {
+    const raw = resolveNumericConfig(maxRender, DEFAULT_FALLBACK_MAX_RENDER, {
+      velocity,
+      items: itemList,
+      total: totalItems,
+    })
+    return Math.max(1, Math.round(raw || DEFAULT_FALLBACK_MAX_RENDER))
+  }, [itemList, maxRender, totalItems])
+
+  const resolveOverscanPx = useCallback((velocity = 0) => {
+    const raw = resolveNumericConfig(overscanPx, DEFAULT_FALLBACK_OVERSCAN_PX, {
+      velocity,
+      items: itemList,
+      total: totalItems,
+    })
+    return Math.max(80, Math.round(raw || DEFAULT_FALLBACK_OVERSCAN_PX))
+  }, [itemList, overscanPx, totalItems])
+
+  const estimateHeightAtIndex = useCallback((index) => {
+    const item = itemList[index]
+    const raw = resolveNumericConfig(estimateItemHeight, DEFAULT_FALLBACK_OVERSCAN_PX / 2, {
+      index,
+      item,
+      items: itemList,
+      total: totalItems,
+    })
+    return Math.max(40, Math.round(raw || 40))
+  }, [estimateItemHeight, itemList, totalItems])
+
+  const getHeightAtIndex = useCallback((index) => {
+    const key = itemKeysRef.current[index]
+    const rowGap = Math.max(0, Number(itemRowGapRef.current || 0))
+    if (key) {
+      const measured = Number(heightsRef.current.get(key) || 0)
+      if (Number.isFinite(measured) && measured > 1) return measured + rowGap
+    }
+    return estimateHeightAtIndex(index) + rowGap
+  }, [estimateHeightAtIndex])
+
+  const markHeightIndexDirty = useCallback(() => {
+    heightIndexRef.current.dirty = true
+  }, [])
+
+  const rebuildHeightIndexIfNeeded = useCallback(() => {
+    const state = heightIndexRef.current
+    const keys = itemKeysRef.current
+    const total = keys.length
+    if (!state.dirty && state.keys.length === total) return state
+
+    const values = new Array(total)
+    for (let index = 0; index < total; index += 1) {
+      values[index] = getHeightAtIndex(index)
+    }
+    const prefix = buildForumHeightPrefix(values)
+    state.keys = keys.slice()
+    state.values = values
+    state.prefix = prefix
+    state.totalHeight = Number(prefix[total] || 0)
+    state.dirty = false
+    state.rebuilds += 1
+    updateForumWindowingDiag(listId, {
+      items: total,
+      rendered: Math.max(0, Number(winRef.current?.end || 0) - Number(winRef.current?.start || 0)),
+      indexRebuilds: state.rebuilds,
+      rangeSearches: state.rangeSearches,
+      legacyMismatches: state.legacyMismatches,
+    })
+    return state
+  }, [getHeightAtIndex, listId])
+
+  useEffect(() => {
+    markHeightIndexDirty()
+  }, [estimateHeightAtIndex, markHeightIndexDirty])
+
+  const buildInitialWindow = useCallback((total) => {
+    const initialEnd = Math.min(resolveMaxRender(0), Math.max(0, Number(total || 0)))
+    return { start: 0, end: initialEnd, top: 0, bottom: 0 }
+  }, [resolveMaxRender])
+
+  const [win, setWin] = useState(() => buildInitialWindow(totalItems))
+
+  useEffect(() => {
+    winRef.current = win
+  }, [win])
+
+  const readScrollEl = useCallback(() => {
+    try {
+      return getScrollEl?.() || document.querySelector('[data-forum-scroll="1"]') || null
+    } catch {}
+    return null
+  }, [getScrollEl])
+
+  const hasInnerScrollable = useCallback((el) => {
+    try {
+      if (!el) return false
+      const clientH = Number(el.clientHeight || 0)
+      const scrollH = Number(el.scrollHeight || 0)
+      if (clientH < minScrollableClientHeight) return false
+      return scrollH > (clientH + 1)
+    } catch {
+      return false
+    }
+  }, [minScrollableClientHeight])
+
+  const readViewportState = useCallback(() => {
+    const winTop = Number(
+      window.pageYOffset ||
+      document.documentElement?.scrollTop ||
+      document.body?.scrollTop ||
+      0,
+    )
+    const winH = Number(window.innerHeight || 0) || 0
+
+    try {
+      const el = readScrollEl()
+      if (hasInnerScrollable(el)) {
+        return {
+          st: Number(el.scrollTop || 0),
+          vh: Number(el.clientHeight || 0) || winH,
+          mode: 'inner',
+        }
+      }
+    } catch {}
+
+    return { st: winTop, vh: winH, mode: 'window' }
+  }, [hasInnerScrollable, readScrollEl])
+
+  const readListRelativeViewportTop = useCallback((viewportState, prefix) => {
+    const rawTop = Number(viewportState?.st || 0)
+    try {
+      const useInner = viewportState?.mode === 'inner'
+      const scrollEl = useInner ? readScrollEl() : null
+      const hostTop = useInner
+        ? Number(scrollEl?.getBoundingClientRect?.()?.top || 0)
+        : 0
+      const viewportHeight = Number(viewportState?.vh || window.innerHeight || 0)
+      let best = null
+
+      measuredNodesRef.current.forEach((node, key) => {
+        if (!node?.isConnected) return
+        const index = Number(keyToIndexRef.current.get(key))
+        if (!Number.isFinite(index) || index < 0) return
+        const itemOffset = Number(prefix?.[index] || 0)
+        if (!Number.isFinite(itemOffset)) return
+
+        const rect = node.getBoundingClientRect?.()
+        if (!rect) return
+        const distance = Number(rect.bottom || 0) >= hostTop && Number(rect.top || 0) <= hostTop + viewportHeight
+          ? 0
+          : Math.min(
+              Math.abs(Number(rect.bottom || 0) - hostTop),
+              Math.abs(Number(rect.top || 0) - (hostTop + viewportHeight)),
+            )
+        if (best && best.distance <= distance) return
+
+        let marginStart = 0
+        try {
+          const style = window.getComputedStyle?.(node)
+          marginStart = readCssPx(style?.marginBlockStart || style?.marginTop)
+        } catch {}
+
+        const itemFlowTop = rawTop + (Number(rect.top || 0) - hostTop) - marginStart
+        best = {
+          distance,
+          listOrigin: itemFlowTop - itemOffset,
+        }
+      })
+
+      if (!best || !Number.isFinite(best.listOrigin)) return rawTop
+      return rawTop - best.listOrigin
+    } catch {
+      return rawTop
+    }
+  }, [readScrollEl])
+
+  const isScrollActiveNow = useCallback(() => {
+    try {
+      const now = Date.now()
+      if (Number(scrollActivityRef.current?.activeUntil || 0) > now) return true
+      const velocity = Math.abs(Number(scrollStateRef.current?.velocity || 0))
+      return velocity > 0.06
+    } catch {
+      return false
+    }
+  }, [])
+
+  const scheduleRecalc = useCallback(() => {
+    if (rafRef.current) return
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0
+      try {
+        if (!active) return
+        const total = itemKeysRef.current.length || 0
+        if (!total) {
+          const current = winRef.current || { start: 0, end: 0, top: 0, bottom: 0 }
+          const emptyWindowUnchanged =
+            Number(current.start || 0) === 0 &&
+            Number(current.end || 0) === 0 &&
+            Number(current.top || 0) === 0 &&
+            Number(current.bottom || 0) === 0
+
+          updateForumWindowingDiag(listId, {
+            items: 0,
+            rendered: 0,
+            indexRebuilds: Number(heightIndexRef.current?.rebuilds || 0),
+            rangeSearches: Number(heightIndexRef.current?.rangeSearches || 0),
+            legacyMismatches: Number(heightIndexRef.current?.legacyMismatches || 0),
+          })
+
+          if (emptyWindowUnchanged) return
+
+          const nextEmpty = { start: 0, end: 0, top: 0, bottom: 0 }
+          winRef.current = nextEmpty
+          setWin(nextEmpty)
+          return
+        }
+
+        const vp = readViewportState()
+        const vh = Number(vp?.vh || 0) || Number(window.innerHeight || 0) || 800
+        const velocity = Math.abs(Number(scrollStateRef.current?.velocity || 0))
+        const direction = Number(scrollStateRef.current?.direction || 0)
+        const nextOverscanPx = resolveOverscanPx(velocity)
+        const downwardUnmountGracePx = direction > 0 ? DOWNWARD_UNMOUNT_GRACE_PX : 0
+        const upwardUnmountGracePx = direction < 0 ? UPWARD_UNMOUNT_GRACE_PX : 0
+        const heightIndex = rebuildHeightIndexIfNeeded()
+        const prefix = heightIndex.prefix
+        const st = readListRelativeViewportTop(vp, prefix)
+        const fromY = Math.max(0, st - nextOverscanPx - downwardUnmountGracePx)
+        const toY = Math.max(0, st + vh) + nextOverscanPx + upwardUnmountGracePx
+        const viewportFromY = Math.max(0, st)
+        const viewportToY = Math.max(0, st + vh)
+
+        const visibleStart = findForumWindowStartIndex(prefix, viewportFromY, total)
+        const visibleEnd = findForumWindowEndExclusive(prefix, viewportToY, total, visibleStart)
+        heightIndex.rangeSearches += 2
+        const protectedVisibleStart = Math.max(
+          0,
+          visibleStart - (direction > 0 ? DOWNWARD_BEHIND_VIEWPORT_HOLD_ITEMS : 1),
+        )
+        const protectedVisibleEnd = Math.min(
+          total,
+          visibleEnd + (direction < 0 ? UPWARD_AHEAD_VIEWPORT_HOLD_ITEMS : 1),
+        )
+
+        let start = findForumWindowStartIndex(prefix, fromY, total)
+        let end = findForumWindowEndExclusive(prefix, toY, total, start)
+        heightIndex.rangeSearches += 2
+
+        if (process.env.NODE_ENV !== 'production' && heightIndex.legacyChecks < 32) {
+          let legacyStart = 0
+          let legacyAcc = 0
+          while (legacyStart < total && (legacyAcc + heightIndex.values[legacyStart]) < fromY) {
+            legacyAcc += heightIndex.values[legacyStart]
+            legacyStart += 1
+          }
+          let legacyEnd = legacyStart
+          let legacyAcc2 = legacyAcc
+          while (legacyEnd < total && legacyAcc2 < toY) {
+            legacyAcc2 += heightIndex.values[legacyEnd]
+            legacyEnd += 1
+          }
+          heightIndex.legacyChecks += 1
+          if (legacyStart !== start || legacyEnd !== end) {
+            heightIndex.legacyMismatches += 1
+            emitWindowingDiag('windowing_height_index_mismatch', {
+              legacyStart,
+              legacyEnd,
+              start,
+              end,
+              fromY: Math.round(fromY),
+              toY: Math.round(toY),
+              total,
+            }, { force: true })
+            start = legacyStart
+            end = legacyEnd
+          }
+        }
+
+        const nextMaxRender = resolveMaxRender(velocity)
+        const visibleCount = Math.max(1, protectedVisibleEnd - protectedVisibleStart)
+        const runwayItems = direction < 0 ? 3 : 2
+        const graceItems = direction !== 0 ? 2 : 0
+        const minViewportSafeWindowSize = clamp(
+          Math.max(nextMaxRender + graceItems, visibleCount + runwayItems + graceItems),
+          1,
+          total,
+        )
+
+        if ((end - start) > nextMaxRender) {
+          const windowSize = minViewportSafeWindowSize
+
+          if (direction < 0) {
+            // При обратном скролле hard-cap не должен отрезать карточки,
+            // которые реально находятся в viewport.
+            start = Math.max(0, Math.min(start, protectedVisibleStart))
+            end = Math.min(total, start + windowSize)
+            if (end < protectedVisibleEnd) {
+              end = Math.min(total, protectedVisibleEnd)
+              start = Math.max(0, end - windowSize)
+            }
+          } else if (direction > 0) {
+            // При прямом скролле сначала сохраняем viewport, потом режем
+            // только безопасный верхний хвост.
+            end = Math.min(total, Math.max(end, protectedVisibleEnd))
+            start = Math.max(0, end - windowSize)
+            if (start > protectedVisibleStart) {
+              start = Math.max(0, protectedVisibleStart)
+              end = Math.min(total, start + windowSize)
+            }
+          } else {
+            const mid = Math.floor((protectedVisibleStart + protectedVisibleEnd) / 2)
+            const half = Math.floor(windowSize / 2)
+            start = clamp(mid - half, 0, Math.max(0, total - windowSize))
+            end = Math.min(total, start + windowSize)
+            if (start > protectedVisibleStart) {
+              start = Math.max(0, protectedVisibleStart)
+              end = Math.min(total, start + windowSize)
+            }
+            if (end < protectedVisibleEnd) {
+              end = Math.min(total, protectedVisibleEnd)
+              start = Math.max(0, end - windowSize)
+            }
+          }
+        }
+
+        const lock = targetLockRef.current
+        if (lock?.key && Number(lock.until || 0) > Date.now()) {
+          const targetIndex = Number(keyToIndexRef.current.get(lock.key))
+          if (Number.isFinite(targetIndex) && targetIndex >= 0 && targetIndex < total) {
+            const targetWindowSize = clamp(
+              Number(lock.windowSize || nextMaxRender || 1),
+              1,
+              total,
+            )
+            if (targetIndex < start || targetIndex >= end) {
+              start = clamp(
+                targetIndex - Math.floor(targetWindowSize / 2),
+                0,
+                Math.max(0, total - targetWindowSize),
+              )
+              end = Math.min(total, start + targetWindowSize)
+            }
+          }
+        } else if (lock?.key) {
+          targetLockRef.current = { key: '', until: 0, windowSize: 0 }
+        }
+
+        setWin((prev) => {
+          let nextStart = start
+          let nextEnd = end
+          const now = Date.now()
+          const scrollActiveNow =
+            Number(scrollActivityRef.current?.activeUntil || 0) > now ||
+            Math.abs(Number(scrollStateRef.current?.velocity || 0)) > 0.06
+
+          if (scrollActiveNow && !targetLockRef.current?.key && total > 0) {
+            const holdBehindItems = direction > 0 ? 2 : 1
+            const holdAheadItems = direction < 0 ? 2 : 1
+            const previousCoversActiveViewport =
+              prev.start <= Math.max(0, protectedVisibleStart - holdBehindItems) &&
+              prev.end >= Math.min(total, protectedVisibleEnd + holdAheadItems)
+            const maxHeldWindowSize = clamp(
+              Math.max(minViewportSafeWindowSize + 4, nextMaxRender + 4),
+              minViewportSafeWindowSize,
+              total,
+            )
+
+            if (previousCoversActiveViewport && (prev.end - prev.start) <= maxHeldWindowSize) {
+              return prev
+            }
+          }
+
+          const shrinkOnly =
+            nextStart >= prev.start &&
+            nextEnd <= prev.end &&
+            (nextStart > prev.start || nextEnd < prev.end)
+
+          if (shrinkOnly) {
+            if (scrollActiveNow && !targetLockRef.current?.key) {
+              return prev
+            }
+
+            const recentWindowChange = (now - Number(winMetaRef.current?.ts || 0)) < windowStickyMs
+            const stickyItems = velocity > 1.2 ? 2 : 1
+            const stickyMaxRender = Math.max(
+              nextMaxRender + stickyItems,
+              minViewportSafeWindowSize,
+            )
+            const leadingTrim = Math.max(0, nextStart - prev.start)
+            const trailingTrim = Math.max(0, prev.end - nextEnd)
+            const smallShrink = leadingTrim <= stickyItems && trailingTrim <= stickyItems
+
+            if (recentWindowChange || smallShrink) {
+              nextStart = prev.start
+              nextEnd = prev.end
+            } else if (direction > 0 && trailingTrim > 0 && leadingTrim <= (stickyItems * 2)) {
+              nextEnd = prev.end
+            } else if (direction < 0 && leadingTrim > 0 && trailingTrim <= (stickyItems * 2)) {
+              nextStart = prev.start
+            }
+
+            if ((nextEnd - nextStart) > stickyMaxRender) {
+              if (direction >= 0 && nextEnd === prev.end) {
+                nextStart = Math.max(prev.start, nextEnd - stickyMaxRender)
+              } else if (direction <= 0 && nextStart === prev.start) {
+                nextEnd = Math.min(prev.end, nextStart + stickyMaxRender)
+              }
+            }
+          }
+
+          try {
+            const now = Date.now()
+            const maxIndexGap = Math.max(8, nextMaxRender * 2)
+            let kept = 0
+            if (mediaKeepaliveEnabled) mediaKeepaliveRef.current.forEach((until, key) => {
+              if (Number(until || 0) <= now) {
+                mediaKeepaliveRef.current.delete(key)
+                return
+              }
+              const index = Number(keyToIndexRef.current.get(key))
+              if (!Number.isFinite(index) || index < 0 || index >= total) return
+              if (index < nextStart && (nextStart - index) <= maxIndexGap) {
+                nextStart = index
+                kept += 1
+                return
+              }
+              if (index >= nextEnd && (index - nextEnd) <= maxIndexGap) {
+                nextEnd = Math.min(total, index + 1)
+                kept += 1
+              }
+            })
+            if (kept > 0) {
+              emitWindowingDiag('windowing_media_keepalive', {
+                kept,
+                start: nextStart,
+                end: nextEnd,
+              })
+            }
+          } catch {}
+
+          if (total > 0) {
+            if (nextStart > protectedVisibleStart) nextStart = protectedVisibleStart
+            if (nextEnd < protectedVisibleEnd) nextEnd = protectedVisibleEnd
+            if (nextEnd <= nextStart) {
+              const repairedStart = clamp(prev.start, 0, Math.max(0, total - 1))
+              nextStart = repairedStart
+              nextEnd = clamp(Math.max(prev.end, repairedStart + 1), repairedStart + 1, total)
+              emitWindowingDiag('windowing_window_repair', {
+                start: nextStart,
+                end: nextEnd,
+                visibleStart: protectedVisibleStart,
+                visibleEnd: protectedVisibleEnd,
+              })
+            }
+          }
+
+          const indexedWindow = buildForumWindowFromPrefix(prefix, nextStart, nextEnd, total)
+          const rowGap = Math.max(0, Number(itemRowGapRef.current || 0))
+          const next = {
+            ...indexedWindow,
+            top: indexedWindow.top > 0 ? Math.max(0, indexedWindow.top - rowGap) : 0,
+            bottom: indexedWindow.bottom > 0 ? Math.max(0, indexedWindow.bottom - rowGap) : 0,
+          }
+          if (
+            prev.start === next.start &&
+            prev.end === next.end &&
+            prev.top === next.top &&
+            prev.bottom === next.bottom
+          ) {
+            return prev
+          }
+
+          winMetaRef.current = { ts: Date.now(), start: next.start, end: next.end }
+          winRef.current = next
+          updateForumWindowingDiag(listId, {
+            items: total,
+            rendered: Math.max(0, next.end - next.start),
+            indexRebuilds: heightIndex.rebuilds,
+            rangeSearches: heightIndex.rangeSearches,
+            legacyMismatches: heightIndex.legacyMismatches,
+          })
+          return next
+        })
+      } catch {}
+    })
+  }, [
+    active,
+    emitWindowingDiag,
+    listId,
+    mediaKeepaliveEnabled,
+    readListRelativeViewportTop,
+    readViewportState,
+    rebuildHeightIndexIfNeeded,
+    resolveMaxRender,
+    resolveOverscanPx,
+    windowStickyMs,
+  ])
+
+  const applyAnchoredScrollDelta = useCallback((delta, reason = 'height_delta') => {
+    const raw = Number(delta || 0)
+    if (!Number.isFinite(raw) || Math.abs(raw) < anchorDeltaIgnorePx) return
+
+    // Normal feed scrolling is anchored by the browser. Manual scrollTop
+    // correction is reserved for explicit reveal/deeplink locks; otherwise it
+    // creates the one-frame reverse-scroll blink visible on touch inertia.
+    if (!targetLockRef.current?.key) {
+      emitWindowingDiag('anchor_adjust_skip_native_anchor', {
+        reason,
+        delta: Math.round(raw),
+      })
+      return
+    }
+
+    const anchorLimit = readAnchorDeltaLimit(anchorDeltaMaxPx)
+    const safeDelta = clamp(raw, -anchorLimit, anchorLimit)
+
+    if (Math.abs(raw) > anchorLimit) {
+      emitWindowingDiag('anchor_large_delta_drop', {
+        reason,
+        delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
+        anchorLimit,
+        mode: 'clamped',
+      })
+      emitWindowingDiag('anchor_large_delta_clamped', {
+        reason,
+        delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
+        anchorLimit,
+      })
+    }
+
+    const recentScrollAge = readRecentScrollAgeMs()
+    if (!targetLockRef.current?.key && recentScrollAge < ANCHOR_USER_SCROLL_SUPPRESSION_MS) {
+      emitWindowingDiag('anchor_adjust_drop_recent_scroll', {
+        reason,
+        delta: Math.round(raw),
+        appliedDelta: 0,
+        recentScrollAge: Math.round(recentScrollAge),
+      })
+      return
+    }
+
+    if (isScrollActiveNow()) {
+      pendingAnchorDeltaRef.current += safeDelta
+      emitWindowingDiag('anchor_adjust_deferred_active_scroll', {
+        reason,
+        delta: Math.round(raw),
+        appliedDelta: Math.round(safeDelta),
+        applied: 0,
+      })
+      return
+    }
+
+    let applied = 0
+
+    try {
+      const el = readScrollEl()
+      const now = Date.now()
+
+      if (hasInnerScrollable(el)) {
+        const before = Number(el.scrollTop || 0)
+        const maxScroll = Math.max(
+          0,
+          Number(el.scrollHeight || 0) - Number(el.clientHeight || 0),
+        )
+        const next = clamp(before + safeDelta, 0, maxScroll || before + safeDelta)
+
+        el.scrollTop = next
+        applied = Number(el.scrollTop || 0) - before
+      } else if (typeof window !== 'undefined') {
+        const doc = document.documentElement
+        const body = document.body
+        const before = Number(window.scrollY || window.pageYOffset || 0)
+        const maxScroll = Math.max(
+          0,
+          Math.max(
+            Number(doc?.scrollHeight || 0),
+            Number(body?.scrollHeight || 0),
+          ) - Number(window.innerHeight || 0),
+        )
+        const next = clamp(before + safeDelta, 0, maxScroll || before + safeDelta)
+
+        window.__forumProgrammaticScrollTs = now
+        window.scrollTo(0, next)
+        applied = next - before
+      }
+    } catch {}
+
+    emitWindowingDiag('anchor_adjust_apply', {
+      reason,
+      delta: Math.round(raw),
+      appliedDelta: Math.round(safeDelta),
+      applied: Math.round(applied),
+    })
+  }, [
+    anchorDeltaIgnorePx,
+    anchorDeltaMaxPx,
+    emitWindowingDiag,
+    hasInnerScrollable,
+    isScrollActiveNow,
+    readScrollEl,
+  ])
+
+  const applyPendingMeasuredHeights = useCallback((reason = 'flush') => {
+    let applied = 0
+    let deferredAnchorDelta = 0
+    try {
+      pendingHeightsRef.current.forEach((height, key) => {
+        const nextHeight = Number(height || 0)
+        if (!key || !Number.isFinite(nextHeight) || nextHeight <= 1) return
+
+        const prevHeight = Number(heightsRef.current.get(key) || 0)
+        heightsRef.current.set(key, nextHeight)
+        applied += 1
+
+        if (Number.isFinite(prevHeight) && prevHeight > 0) {
+          const index = keyToIndexRef.current.get(key)
+          const delta = nextHeight - prevHeight
+          if (
+            delta !== 0 &&
+            Number.isFinite(index) &&
+            index < Number(winRef.current?.start || 0)
+          ) {
+            deferredAnchorDelta += delta
+          }
+        }
+      })
+      pendingHeightsRef.current.clear()
+      if (applied > 0) markHeightIndexDirty()
+
+      if (Math.abs(deferredAnchorDelta) >= anchorDeltaIgnorePx) {
+        const recentScrollAge = readRecentScrollAgeMs()
+        if (!targetLockRef.current?.key && recentScrollAge < ANCHOR_USER_SCROLL_SUPPRESSION_MS) {
+          emitWindowingDiag('media_height_deferred_anchor_drop_recent_scroll', {
+            reason,
+            deferredAnchorDelta: Math.round(deferredAnchorDelta),
+            recentScrollAge: Math.round(recentScrollAge),
+          })
+        } else if (targetLockRef.current?.key) {
+          pendingAnchorDeltaRef.current += deferredAnchorDelta
+        } else {
+          emitWindowingDiag('media_height_deferred_anchor_skip_native_anchor', {
+            reason,
+            deferredAnchorDelta: Math.round(deferredAnchorDelta),
+          })
+        }
+      }
+
+      if (applied > 0) {
+        emitWindowingDiag('media_height_deferred_apply', {
+          reason,
+          applied,
+          deferredAnchorDelta: Math.round(deferredAnchorDelta),
+        })
+      }
+    } catch {}
+    return applied
+  }, [anchorDeltaIgnorePx, emitWindowingDiag, markHeightIndexDirty])
+
+  const scheduleAnchorFlush = useCallback((delay = anchorFlushMs) => {
+    try {
+      if (anchorFlushTimerRef.current) {
+        clearTimeout(anchorFlushTimerRef.current)
+        anchorFlushTimerRef.current = 0
+      }
+
+      const flush = () => {
+        anchorFlushTimerRef.current = 0
+
+        if (isScrollActiveNow()) {
+          anchorFlushTimerRef.current = setTimeout(flush, anchorActiveRetryMs)
+          return
+        }
+
+        const recentScrollAge = readRecentScrollAgeMs()
+        if (!targetLockRef.current?.key && recentScrollAge < ANCHOR_USER_SCROLL_SUPPRESSION_MS) {
+          const waitMs = Math.max(120, ANCHOR_USER_SCROLL_SUPPRESSION_MS - recentScrollAge)
+          anchorFlushTimerRef.current = setTimeout(flush, waitMs)
+          return
+        }
+
+        applyPendingMeasuredHeights('scroll_settled')
+
+        const pending = Number(pendingAnchorDeltaRef.current || 0)
+        pendingAnchorDeltaRef.current = 0
+
+        if (Math.abs(pending) >= anchorDeltaIgnorePx) {
+          applyAnchoredScrollDelta(pending, 'deferred_height_above_window')
+        }
+
+        scheduleRecalc()
+      }
+
+      anchorFlushTimerRef.current = setTimeout(flush, Math.max(16, Number(delay || 0)))
+    } catch {}
+  }, [
+    anchorActiveRetryMs,
+    anchorDeltaIgnorePx,
+    anchorFlushMs,
+    applyAnchoredScrollDelta,
+    applyPendingMeasuredHeights,
+    isScrollActiveNow,
+    scheduleRecalc,
+  ])
+
+  const ensureItemRenderedByKey = useCallback((rawKey, options = null) => {
+    const key = normalizeKey(rawKey, '')
+    if (!key) return false
+    const targetIndex = keyToIndexRef.current.get(key)
+    if (!Number.isFinite(targetIndex)) return false
+
+    const nextWindowSize = clamp(
+      Math.round(
+        resolveNumericConfig(
+          options?.windowSize,
+          resolveMaxRender(Math.abs(Number(scrollStateRef.current?.velocity || 0))),
+          { key, index: targetIndex },
+        ),
+      ),
+      1,
+      Math.max(1, itemKeysRef.current.length || 1),
+    )
+
+    targetLockRef.current = {
+      key,
+      until: Date.now() + Math.max(180, Number(options?.holdMs || revealHoldMs) || revealHoldMs),
+      windowSize: nextWindowSize,
+    }
+
+    scheduleRecalc()
+    return true
+  }, [revealHoldMs, resolveMaxRender, scheduleRecalc])
+
+  const ensureItemRenderedByDomId = useCallback((rawDomId, options = null) => {
+    const domId = normalizeKey(rawDomId, '')
+    if (!domId) return false
+    const key = domIdToKeyRef.current.get(domId)
+    if (!key) return false
+    return ensureItemRenderedByKey(key, options)
+  }, [ensureItemRenderedByKey])
+
+  const measureRef = useCallback((rawKey) => (node) => {
+    const key = normalizeKey(rawKey, '')
+    if (!key) return
+    try {
+      if (!node) {
+        measuredNodesRef.current.delete(key)
+        const ro = rosRef.current.get(key)
+        if (ro) {
+          try { ro.disconnect() } catch {}
+        }
+        rosRef.current.delete(key)
+        pendingHeightsRef.current.delete(key)
+        stableShrinkRef.current.delete(key)
+        return
+      }
+
+      measuredNodesRef.current.set(key, node)
+
+      const update = () => {
+        try {
+          const index = keyToIndexRef.current.get(key)
+          if (!Number.isFinite(index)) return
+
+          const footprint = readItemLayoutFootprint(node)
+          const h = Number(footprint.height || 0)
+          if (!Number.isFinite(h) || h <= 1) return
+
+          const previousRowGap = Number(itemRowGapRef.current || 0)
+          const nextRowGap = Math.max(0, Number(footprint.rowGap || 0))
+          const rowGapChanged = Math.abs(previousRowGap - nextRowGap) >= 0.5
+          if (rowGapChanged) {
+            itemRowGapRef.current = nextRowGap
+            markHeightIndexDirty()
+          }
+
+          const nextHeight = h
+          const prev = Number(heightsRef.current.get(key) || 0)
+          const stableMediaShell = hasStableMediaShell(node)
+          const cardContainsStableMediaShell = !stableMediaShell && containsStableMediaShell(node)
+          const mediaSensitiveCard = stableMediaShell || cardContainsStableMediaShell
+          if (mediaKeepaliveEnabled && mediaSensitiveCard) {
+            const keepaliveMargin = Math.max(960, Math.round((window?.innerHeight || 0) * 1.35))
+            if (isNearViewportNode(node, keepaliveMargin)) {
+              const until = Date.now() + readMediaKeepaliveHoldMs()
+              const prevUntil = Number(mediaKeepaliveRef.current.get(key) || 0)
+              if (until > prevUntil) mediaKeepaliveRef.current.set(key, until)
+            }
+          }
+          const measuredDelta = Number.isFinite(prev) && prev > 0
+            ? Math.abs(prev - nextHeight)
+            : 0
+
+          if (
+            mediaSensitiveCard &&
+            Number.isFinite(prev) &&
+            prev > 0 &&
+            nextHeight < prev &&
+            (prev - nextHeight) >= Math.max(48, layoutJitterPx)
+          ) {
+            const now = Date.now()
+            const prevShrink = stableShrinkRef.current.get(key)
+            const sameShrink =
+              prevShrink &&
+              Math.abs(Number(prevShrink.height || 0) - nextHeight) < heightDeltaIgnorePx
+            const firstSeenTs = sameShrink ? Number(prevShrink.firstSeenTs || now) : now
+            stableShrinkRef.current.set(key, { height: nextHeight, firstSeenTs })
+
+            const recentScroll = readRecentScrollAgeMs() < Math.max(520, scrollSettleMs * 2)
+            const stableForMs = now - firstSeenTs
+            const mayApplyShrink = !recentScroll && stableForMs >= Math.max(520, scrollSettleMs)
+
+            if (!mayApplyShrink) {
+              pendingHeightsRef.current.set(key, nextHeight)
+              emitWindowingDiag('stable_media_height_shrink_deferred', {
+                key,
+                prev: Math.round(prev),
+                next: nextHeight,
+                recentScroll,
+              })
+              scheduleAnchorFlush(scrollSettleMs)
+              return
+            }
+          } else {
+            stableShrinkRef.current.delete(key)
+          }
+
+          if (Number.isFinite(prev) && prev > 0 && Math.abs(prev - nextHeight) < heightDeltaIgnorePx) {
+            pendingHeightsRef.current.delete(key)
+            if (rowGapChanged) scheduleRecalc()
+            return
+          }
+
+          const shouldDeferMeasuredHeightDuringScroll =
+            stableMediaShell ||
+            (
+              cardContainsStableMediaShell &&
+              measuredDelta >= Math.max(96, layoutJitterPx * 2)
+            )
+
+          if (
+            Number.isFinite(prev) &&
+            prev > 0 &&
+            isScrollActiveNow() &&
+            shouldDeferMeasuredHeightDuringScroll
+          ) {
+            pendingHeightsRef.current.set(key, nextHeight)
+            emitWindowingDiag('media_height_deferred_during_scroll', {
+              key,
+              prev: Math.round(prev),
+              next: nextHeight,
+              stableMediaShell,
+              cardContainsStableMediaShell,
+            })
+            scheduleAnchorFlush(scrollSettleMs)
+            return
+          }
+
+          if (Number.isFinite(prev) && prev > 0) {
+            const delta = nextHeight - prev
+            const isAboveWindow = index < Number(winRef.current?.start || 0)
+
+            if (delta !== 0 && isAboveWindow) {
+              const recentScrollAge = readRecentScrollAgeMs()
+              if (!targetLockRef.current?.key && recentScrollAge < ANCHOR_USER_SCROLL_SUPPRESSION_MS) {
+                pendingHeightsRef.current.set(key, nextHeight)
+                emitWindowingDiag('height_above_window_deferred_recent_scroll', {
+                  key,
+                  delta: Math.round(delta),
+                  recentScrollAge: Math.round(recentScrollAge),
+                })
+                scheduleAnchorFlush(ANCHOR_USER_SCROLL_SUPPRESSION_MS)
+                return
+              }
+            }
+          }
+
+          pendingHeightsRef.current.delete(key)
+          heightsRef.current.set(key, nextHeight)
+          markHeightIndexDirty()
+
+          if (Number.isFinite(prev) && prev > 0) {
+            const delta = nextHeight - prev
+            const isAboveWindow = index < Number(winRef.current?.start || 0)
+
+            if (delta !== 0 && isAboveWindow) {
+              if (isScrollActiveNow()) {
+                if (targetLockRef.current?.key) {
+                  pendingAnchorDeltaRef.current += delta
+                  scheduleAnchorFlush()
+                } else {
+                  emitWindowingDiag('height_above_window_active_skip_native_anchor', {
+                    key,
+                    delta: Math.round(delta),
+                  })
+                }
+              } else if (targetLockRef.current?.key) {
+                applyAnchoredScrollDelta(delta, 'height_above_window')
+              } else {
+                emitWindowingDiag('height_above_window_skip_native_anchor', {
+                  key,
+                  delta: Math.round(delta),
+                })
+              }
+            }
+          }
+
+          if (isScrollActiveNow()) {
+            scheduleAnchorFlush(scrollSettleMs)
+            return
+          }
+
+          scheduleRecalc()
+        } catch {}
+      }
+
+      update()
+
+      if (!rosRef.current.get(key) && typeof ResizeObserver !== 'undefined') {
+        const ro = new ResizeObserver(() => update())
+        ro.observe(node)
+        rosRef.current.set(key, ro)
+      }
+    } catch {}
+  }, [
+    applyAnchoredScrollDelta,
+    emitWindowingDiag,
+    heightDeltaIgnorePx,
+    isScrollActiveNow,
+    layoutJitterPx,
+    mediaKeepaliveEnabled,
+    markHeightIndexDirty,
+    scheduleAnchorFlush,
+    scheduleRecalc,
+    scrollSettleMs,
+  ])
+
+  useEffect(() => {
+    const activeKeys = new Set(itemKeys)
+    let removedHeight = false
+
+    heightsRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) {
+        heightsRef.current.delete(key)
+        removedHeight = true
+      }
+    })
+
+    pendingHeightsRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) pendingHeightsRef.current.delete(key)
+    })
+
+    stableShrinkRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) stableShrinkRef.current.delete(key)
+    })
+
+    mediaKeepaliveRef.current.forEach((_, key) => {
+      if (!activeKeys.has(key)) mediaKeepaliveRef.current.delete(key)
+    })
+
+    rosRef.current.forEach((ro, key) => {
+      if (activeKeys.has(key)) return
+      try { ro.disconnect() } catch {}
+      rosRef.current.delete(key)
+    })
+
+    if (targetLockRef.current?.key && !activeKeys.has(targetLockRef.current.key)) {
+      targetLockRef.current = { key: '', until: 0, windowSize: 0 }
+    }
+
+    if (removedHeight) markHeightIndexDirty()
+    scheduleRecalc()
+  }, [itemKeys, markHeightIndexDirty, scheduleRecalc])
+
+  useEffect(() => {
+    if (!active) return undefined
+    if (!isBrowserFn()) return undefined
+
+    layoutKeyRef.current = normalizeKey(getLayoutKey?.(), readDefaultLayoutKey(isBrowserFn))
+    const scrollActivity = scrollActivityRef.current
+    const pendingHeights = pendingHeightsRef.current
+    const stableShrinks = stableShrinkRef.current
+    const onScroll = () => {
+      try {
+        const vp = readViewportState()
+        const now = getNow()
+        const top = Number(vp?.st || 0)
+        const prev = scrollStateRef.current
+        const dt = Math.max(1, now - Number(prev?.ts || 0))
+        const signedDy = top - Number(prev?.top || 0)
+        const dy = Math.abs(signedDy)
+        const velocity = dt > 220 ? 0 : (dy / dt)
+        const direction = dy < 2 ? Number(prev?.direction || 0) : (signedDy > 0 ? 1 : -1)
+
+        scrollStateRef.current = { top, ts: now, velocity, direction }
+
+        scrollActivity.activeUntil = Date.now() + scrollSettleMs
+        if (scrollActivity.settleTimer) {
+          try { clearTimeout(scrollActivity.settleTimer) } catch {}
+          scrollActivity.settleTimer = 0
+        }
+
+        scrollActivity.settleTimer = setTimeout(() => {
+          scrollActivity.settleTimer = 0
+          scheduleRecalc()
+        }, scrollSettleMs)
+      } catch {}
+
+      scheduleRecalc()
+    }
+
+    const onResize = () => {
+      try {
+        const prevLayoutKey = layoutKeyRef.current
+        const nextLayoutKey = normalizeKey(getLayoutKey?.(), readDefaultLayoutKey(isBrowserFn))
+        if (prevLayoutKey !== nextLayoutKey) {
+          layoutKeyRef.current = nextLayoutKey
+          try { heightsRef.current.clear() } catch {}
+          try { pendingHeights.clear() } catch {}
+          try { stableShrinks.clear() } catch {}
+          markHeightIndexDirty()
+          emitWindowingDiag('breakpoint_reset', {
+            prevBp: prevLayoutKey,
+            nextBp: nextLayoutKey,
+            items: totalItems,
+          })
+        }
+        scheduleRecalc()
+      } catch {}
+    }
+
+    const passiveOpts = { passive: true }
+    const scrollTargets = new Set([window])
+    try {
+      const scrollEl = readScrollEl()
+      if (scrollEl?.addEventListener) scrollTargets.add(scrollEl)
+    } catch {}
+
+    scrollTargets.forEach((target) => {
+      try { target.addEventListener('scroll', onScroll, passiveOpts) } catch {}
+    })
+    window.addEventListener('resize', onResize, passiveOpts)
+
+    try {
+      window.visualViewport?.addEventListener?.('resize', onResize, passiveOpts)
+    } catch {}
+
+    onScroll()
+
+    return () => {
+      scrollTargets.forEach((target) => {
+        try { target.removeEventListener('scroll', onScroll) } catch {}
+      })
+      window.removeEventListener('resize', onResize)
+
+      try {
+        window.visualViewport?.removeEventListener?.('resize', onResize)
+      } catch {}
+
+      if (rafRef.current) {
+        try { cancelAnimationFrame(rafRef.current) } catch {}
+        rafRef.current = 0
+      }
+
+      if (scrollActivity.settleTimer) {
+        try { clearTimeout(scrollActivity.settleTimer) } catch {}
+        scrollActivity.settleTimer = 0
+      }
+
+      if (anchorFlushTimerRef.current) {
+        try { clearTimeout(anchorFlushTimerRef.current) } catch {}
+        anchorFlushTimerRef.current = 0
+      }
+
+      pendingAnchorDeltaRef.current = 0
+      try { pendingHeights.clear() } catch {}
+      try { stableShrinks.clear() } catch {}
+      scrollActivity.activeUntil = 0
+      scrollStateRef.current = { top: 0, ts: 0, velocity: 0, direction: 0 }
+    }
+  }, [
+    active,
+    emitWindowingDiag,
+    getLayoutKey,
+    isBrowserFn,
+    markHeightIndexDirty,
+    readScrollEl,
+    readViewportState,
+    scheduleRecalc,
+    scrollSettleMs,
+    totalItems,
+  ])
+
+  useEffect(() => {
+    if (!hardResetRef || typeof hardResetRef !== 'object') return undefined
+
+    const cancelHardResetSchedule = () => {
+      const scheduled = hardResetScheduleRef.current
+      if (scheduled.rafA) {
+        try { cancelAnimationFrame(scheduled.rafA) } catch {}
+        scheduled.rafA = 0
+      }
+      if (scheduled.rafB) {
+        try { cancelAnimationFrame(scheduled.rafB) } catch {}
+        scheduled.rafB = 0
+      }
+      if (scheduled.timeoutId) {
+        try { clearTimeout(scheduled.timeoutId) } catch {}
+        scheduled.timeoutId = 0
+      }
+    }
+
+    hardResetRef.current = () => {
+      emitWindowingDiag('hard_reset', {
+        source: 'hardResetRef',
+        items: itemKeysRef.current.length || 0,
+      }, { force: true })
+
+      try { heightsRef.current.clear() } catch {}
+      try { pendingHeightsRef.current.clear() } catch {}
+      try { stableShrinkRef.current.clear() } catch {}
+      markHeightIndexDirty()
+      try { pendingAnchorDeltaRef.current = 0 } catch {}
+      try {
+        if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
+        anchorFlushTimerRef.current = 0
+      } catch {}
+      targetLockRef.current = { key: '', until: 0, windowSize: 0 }
+
+      const initial = buildInitialWindow(itemKeysRef.current.length || 0)
+      winMetaRef.current = { ts: Date.now(), start: initial.start, end: initial.end }
+      winRef.current = initial
+      setWin(initial)
+
+      try {
+        if (scrollToTopOnHardReset) {
+          const el = readScrollEl()
+          if (hasInnerScrollable(el)) el.scrollTop = 0
+          else window.scrollTo(0, 0)
+        }
+      } catch {}
+
+      try {
+        cancelHardResetSchedule()
+        hardResetScheduleRef.current.rafA = requestAnimationFrame(() => {
+          hardResetScheduleRef.current.rafB = requestAnimationFrame(() => {
+            try { scheduleRecalc() } catch {}
+          })
+        })
+      } catch {
+        try {
+          cancelHardResetSchedule()
+          hardResetScheduleRef.current.timeoutId = setTimeout(() => {
+            try { scheduleRecalc() } catch {}
+          }, 0)
+        } catch {}
+      }
+    }
+
+    return () => {
+      cancelHardResetSchedule()
+      try { hardResetRef.current = null } catch {}
+    }
+  }, [
+    buildInitialWindow,
+    emitWindowingDiag,
+    hardResetRef,
+    hasInnerScrollable,
+    markHeightIndexDirty,
+    readScrollEl,
+    scheduleRecalc,
+    scrollToTopOnHardReset,
+  ])
+
+  useEffect(() => {
+    if (!active) return undefined
+    const registryKey = normalizeKey(listId, '')
+    if (!registryKey) return undefined
+
+    return registerForumWindowingTarget(registryKey, {
+      revealKey: (key, options) => ensureItemRenderedByKey(key, options),
+      revealDomId: (domId, options) => ensureItemRenderedByDomId(domId, options),
+    })
+  }, [active, ensureItemRenderedByDomId, ensureItemRenderedByKey, listId])
+
+  useEffect(() => {
+    const ros = rosRef.current
+    const pendingHeights = pendingHeightsRef.current
+    const stableShrinks = stableShrinkRef.current
+    const mediaKeepalive = mediaKeepaliveRef.current
+    return () => {
+      try {
+        ros.forEach((ro) => {
+          try { ro.disconnect() } catch {}
+        })
+        ros.clear()
+      } catch {}
+      try {
+        if (anchorFlushTimerRef.current) clearTimeout(anchorFlushTimerRef.current)
+        anchorFlushTimerRef.current = 0
+        pendingAnchorDeltaRef.current = 0
+        pendingHeights.clear()
+        stableShrinks.clear()
+        mediaKeepalive.clear()
+        heightIndexRef.current = {
+          keys: [],
+          values: [],
+          prefix: [0],
+          totalHeight: 0,
+          dirty: true,
+          rebuilds: 0,
+          rangeSearches: 0,
+          legacyChecks: 0,
+          legacyMismatches: 0,
+        }
+        if (process.env.NODE_ENV !== 'production') {
+          forumWindowingDiagRegistry.delete(normalizeKey(listId, 'anonymous'))
+        }
+      } catch {}
+    }
+  }, [listId])
+
+  const visibleItems = useMemo(
+    () => itemList.slice(win.start, win.end),
+    [itemList, win.end, win.start],
+  )
+
+  return {
+    win,
+    visibleItems,
+    measureRef,
+    ensureItemRenderedByKey,
+    ensureItemRenderedByDomId,
+  }
+}

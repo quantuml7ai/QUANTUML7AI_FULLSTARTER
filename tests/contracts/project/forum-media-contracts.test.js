@@ -1,0 +1,462 @@
+import fs from 'node:fs'
+import path from 'node:path'
+import { describe, expect, test } from 'vitest'
+
+const root = process.cwd()
+
+function read(rel) {
+  return fs.readFileSync(path.join(root, rel), 'utf8')
+}
+
+describe('forum media contracts', () => {
+  test('layout keeps early diag master-gated and not forumPath auto-started', () => {
+    const src = read('app/layout.js')
+    expect(src).toContain('NEXT_PUBLIC_FORUM_EARLY_DIAG_ENABLED')
+    expect(src).not.toContain('var forumPath = /^\\\\/forum')
+    expect(src).not.toContain('traceEnabled = !!(forumPath')
+  })
+
+  test('media lifecycle preserves the shared sound choice on iOS/WebKit reloads', () => {
+    const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    expect(src).toContain('function __isIOSWebKitMediaRuntime()')
+    expect(src).toContain('if (__isIOSWebKitMediaRuntime()) {')
+    expect(src).toContain('const persistedMuted = readMutedPrefFromStorage()')
+    expect(src).toContain("const initialMuted = typeof persistedMuted === 'boolean' ? persistedMuted : true")
+    expect(src).toContain('writeMutedPrefToDocument(initialMuted, false)')
+    expect(src).toContain("if (typeof persistedMuted !== 'boolean') writeMutedPrefToStorage(initialMuted)")
+  })
+
+  test('camera recording opens the video preview before slow duration probing', () => {
+    const src = read('app/forum/features/media/hooks/useVideoCaptureController.js')
+    const blobIdx = src.indexOf('const blob = new Blob(videoChunksRef.current')
+    const urlIdx = src.indexOf('const url = URL.createObjectURL(blob)', blobIdx)
+    const previewIdx = src.indexOf("setVideoState('preview')", urlIdx)
+    const probeIdx = src.indexOf('recordedDurationSec = await readVideoDurationSecFn(blob)', blobIdx)
+
+    expect(blobIdx).toBeGreaterThanOrEqual(0)
+    expect(urlIdx).toBeGreaterThan(blobIdx)
+    expect(previewIdx).toBeGreaterThan(urlIdx)
+    expect(probeIdx).toBeGreaterThan(previewIdx)
+    expect(src).toContain('duration probing continues in the background')
+  })
+
+  test('camera recorder keeps iOS/WebKit on a single safe blob and starts timing from MediaRecorder', () => {
+    const src = read('app/forum/features/media/hooks/useVideoCaptureController.js')
+
+    expect(src).toContain('function isAppleMobileRecorderRuntime()')
+    expect(src).toContain('function selectVideoRecorderMimeType()')
+    expect(src).toContain('function getRecorderTimesliceMs()')
+    expect(src).toContain('if (isAppleMobileRecorderRuntime()) return 0')
+    expect(src).toContain('mediaRecorder.__ql7SkipRequestDataOnStop = recorderTimesliceMs <= 0')
+    expect(src).toContain('if (!rec.__ql7SkipRequestDataOnStop) rec.requestData?.()')
+    expect(src).toContain("mediaRecorder.onstart = () => startRecordingClock('recorder_onstart')")
+    expect(src).toContain('if (recorderTimesliceMs > 0) mediaRecorder.start(recorderTimesliceMs)')
+    expect(src).toContain('else mediaRecorder.start()')
+    expect(src).not.toContain('mediaRecorder.start(250)')
+  })
+
+  test('camera live preview does not rebind and replay the stream every animation frame', () => {
+    const src = read('app/forum/features/media/components/LivePreview.jsx')
+
+    expect(src).toContain('window.setInterval')
+    expect(src).toContain('if (el.srcObject !== s)')
+    expect(src).toContain('if (next !== boundStream) bindStream()')
+    expect(src).not.toContain('requestAnimationFrame(bindStream)')
+  })
+
+  test('camera overlay allows pre-record torch and hides the recorder badge after stop', () => {
+    const src = read('app/forum/features/media/components/VideoOverlay.jsx')
+
+    expect(src).toContain("if (appleTorchRisk && st === 'recording') return")
+    expect(src).toContain("{(st === 'live' || (st === 'recording' && !appleTorchRisk)) && (")
+    expect(src).toContain("{st === 'recording' && (")
+    expect(src).toContain('<div className="voTimer isRec"')
+    expect(src).not.toContain("voTimer ${st === 'recording' ? 'isRec' : 'isIdle'}")
+  })
+
+  test('qcast toggle does not use its own local mute storage', () => {
+    const src = read('app/forum/features/media/components/QCastPlayer.jsx')
+    expect(src).not.toContain('forum:qcastMuted')
+    expect(src).toContain('writeMuted(!!audio.muted)')
+    expect(src).toContain('__persistMuteUntil')
+    expect(src).toContain('crossOrigin="anonymous"')
+  })
+
+  test('iOS/WebKit audible autoplay rejection promotes forum and site ads to shared mute', () => {
+    const coordinator = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    const siteAds = read('app/ads.js')
+    const forumAdSlot = read('app/forum/features/ui/components/ForumAdSlot.jsx')
+
+    expect(coordinator).toContain("String(err?.name || '') === 'NotAllowedError'")
+    expect(coordinator).toContain('setMutedPref(true, fallbackSource)')
+    expect(coordinator).toContain("'ios-webkit-autoplay-fallback'")
+    expect(coordinator).toContain("'forum-ads-autoplay-fallback'")
+    expect(coordinator).toContain("source === 'forum-ad-surface-activate' ||")
+    expect(coordinator).toContain("source === 'forum-ad-slot-toggle' ||")
+    expect(coordinator).toContain("source === 'site-ads-autoplay-fallback' ||")
+    expect(coordinator).toContain("source === 'site-ads-surface-activate' ||")
+    expect(coordinator).toContain("source === 'site-ads-toggle';")
+
+    expect(siteAds).toContain('function isIOSWebKitRuntime()')
+    expect(siteAds).toContain("normalizedSource === 'site-ads-surface-activate' ||")
+    expect(siteAds).toContain("String(err?.name || '') === 'NotAllowedError'")
+    expect(siteAds).toContain("'site-ads-autoplay-fallback'")
+    expect(siteAds).toContain('syncMutedPrefEverywhere(')
+    expect(siteAds).toContain('const next = normalizeSiteMuted(detail.muted);')
+    expect(siteAds).toContain('writeMutedPrefToStorage(next);')
+    expect(siteAds).not.toContain("const next = syncMutedPrefEverywhere(detail.muted, playerIdRef.current, 'site-ads-sync');")
+
+    expect(forumAdSlot).toContain("source: 'forum-ad-surface-activate'")
+    expect(forumAdSlot).toContain("source: 'forum-ad-slot-toggle'")
+  })
+
+  test('media coordinator removes legacy query ownership toggles and qcast local mute storage', () => {
+    const src = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    expect(src).not.toContain("qs.get('legacyWarmSweep')")
+    expect(src).not.toContain("qs.get('legacyIframePrewarm')")
+    expect(src).not.toContain('forum:qcastMuted')
+    expect(src).toContain('const isAuthoritativeMuteSource =')
+    expect(src).toContain("source === 'media_element' ||")
+    expect(src).toContain("source === 'external' ||")
+    expect(src).toContain("source === 'forum-splash' ||")
+    expect(src).toContain("setMutedPref(!!el.muted, 'video')")
+  })
+
+  test('post video restore path delegates native network starts and keeps connected nodes on soft unload', () => {
+    const src = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    expect(src).toContain('function isManagedForumVideoKind(el)')
+    expect(src).toContain("return kind === 'post' || kind === 'ad'")
+    expect(src).toContain('const isPostFeedVideo = isManagedForumVideoKind(el)')
+    expect(src).toContain('const postPrewarmRunway =')
+    expect(src).toContain('const shouldKeepResidentPostVideo =')
+    expect(src).toContain('const shouldSoftUnload =')
+    expect(src).toContain('(!isPostFeedVideo && !canHardUnload) ||')
+    expect(src).toContain('const keepWarmFetchOnSoftUnload =')
+    expect(src).toContain('if (shouldSoftUnload) {')
+    expect(src).toContain('Native post-video network starts are owned by the coordinator load gate.')
+    expect(src).toContain('if (!isPostFeedVideo && !isLoading && canRestoreLoad()) el.load?.()')
+    expect(src).not.toContain('__isVideoNearViewport(el, 900)')
+  })
+
+  test('boot splash publishes an active gate marker for forum media policy', () => {
+    const src = read('components/ForumBootSplash.jsx')
+    expect(src).toContain('__forumBootSplashActive')
+    expect(src).toContain("forum-boot-splash")
+  })
+test('boot splash falls back to muted autoplay and unlocks sound directly from a user click', () => {
+  const src = read('components/ForumBootSplash.jsx')
+
+  expect(src).toContain(
+    'const userSoundGestureRef = useRef(false)'
+  )
+
+  expect(src).toContain(
+    'if (userSoundGestureRef.current) return'
+  )
+
+  const start = src.indexOf(
+    'const unlockSplashSound = useCallback(() => {'
+  )
+
+  const end = src.indexOf(
+    'useEffect(() => {',
+    start
+  )
+
+  expect(start).toBeGreaterThanOrEqual(0)
+  expect(end).toBeGreaterThan(start)
+
+  const unlock = src.slice(start, end)
+
+  expect(unlock).toContain(
+    'userSoundGestureRef.current = true'
+  )
+
+  expect(unlock).toContain(
+    'el.muted = false'
+  )
+
+  expect(unlock).toContain(
+    'el.defaultMuted = false'
+  )
+
+  expect(unlock).toContain(
+    "el.removeAttribute('muted')"
+  )
+
+  expect(unlock).toContain(
+    'const p = el.play?.()'
+  )
+
+  expect(unlock).toContain(
+    'userSoundGestureRef.current = false'
+  )
+
+  expect(unlock).toContain(
+    'el.muted = true'
+  )
+
+expect(src).toMatch(
+  /window\.addEventListener\(\s*['"]click['"]\s*,\s*unlockFromClick\s*,\s*\{\s*capture:\s*true\s*\}\s*\)/
+)
+
+expect(src).toMatch(
+  /window\.removeEventListener\(\s*['"]click['"]\s*,\s*unlockFromClick\s*,\s*\{\s*capture:\s*true\s*\}\s*\)/
+)
+
+  expect(src).toContain('function isIOSWebKitSplashRuntime()')
+  expect(src).toContain("String(err?.name || '') === 'NotAllowedError'")
+  expect(src).toContain('if (userSoundGestureRef.current) return')
+  expect(src).toContain('el.hidden = true')
+  expect(src).toContain("el.removeAttribute('src')")
+  expect(src).toContain('delete el.dataset.ql7SplashSrcAttached')
+  expect(src).toContain('finish(true)')
+  expect(src).toContain('const finish = useCallback((immediate = false) => {')
+  expect(src).toContain('if (immediate === true) {')
+})
+  test('post media embeds expose stable owner metadata for coordinator policy', () => {
+    const src = read('app/forum/features/feed/components/PostMediaStack.jsx')
+    const cardSrc = read('app/forum/features/feed/components/ForumPostCard.jsx')
+    expect(src).toContain('data-owner-id=')
+    expect(src).toContain('data-forum-embed-kind=')
+    expect(src).toContain('data-lifecycle-state=')
+    expect(src).toContain('data-stable-shell="1"')
+    expect(cardSrc).toContain('const hasNativeVideo = videoLines.length > 0')
+    expect(cardSrc).toContain('data-forum-native-video-card={hasNativeVideo ?')
+  })
+ 
+  test('post cards keep the shared post body frame shell for card and inline text content', () => {
+    const cardSrc = read('app/forum/features/feed/components/ForumPostCard.jsx')
+    const bodySrc = read('app/forum/features/feed/components/PostBodyContent.jsx')
+    expect(cardSrc).toContain('data-forum-post-card="1"')
+    expect(cardSrc).toContain('<div className="postBodyFrame">')
+    expect(bodySrc).toContain('className="postBodyContent text-[15px] leading-relaxed postBody whitespace-pre-wrap break-words"')
+    expect(bodySrc).not.toContain('className="postTextFrame"')
+  })
+
+  test('forum styles keep the shared post body frame treatment and video-feed root hooks', () => {
+    const src = read('app/forum/styles/ForumStyles.jsx')
+    expect(src).toContain('.postBodyFrame{')
+    expect(src).toContain('.postBodyFrame .postImages,')
+    expect(src).toContain('.postBodyFrame .postVideo,')
+    expect(src).toContain('.postBodyFrame .postAudio{')
+    expect(src).toContain('html[data-video-feed="1"] .head.head--collapsed{')
+    expect(src).toContain('html[data-video-feed="1"] .forum_root .body{ padding-top:0; }')
+  })
+
+  test('coordinator and ads keep existing fetches instead of reloading empty shells', () => {
+    const coordinatorSrc = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    const adsSrc = read('app/forum/ForumAds.js')
+    const adSlotSrc = read('app/forum/features/ui/components/ForumAdSlot.jsx')
+    expect(coordinatorSrc).toContain('const isHtmlMediaLoadingOrBuffered = (el) => {')
+    expect(coordinatorSrc).toContain("trace('load_kick_hold_existing_fetch', media, {")
+    expect(coordinatorSrc).toContain('const allowNearViewportRestore =')
+    expect(coordinatorSrc).toContain('const keepWarm = highPriorityReason || allowNearViewportRestore;')
+    expect(adsSrc).toContain("const AD_NATIVE_VIDEO_PRELOAD_IDLE = 'metadata';")
+    expect(adsSrc).toContain('deferNativeSrc = false')
+    expect(adsSrc).toContain('deferExternalSrc = false')
+    expect(adsSrc).toContain('src={deferNativeSrc ? undefined : media.src}')
+    expect(adsSrc).toContain('data-src={media.src}')
+    expect(adsSrc).toContain('data-ad-media-src={media.src}')
+    expect(adsSrc).toContain('preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}')
+    expect(adsSrc).toContain('freezeForMount = false')
+    expect(adsSrc).toContain('if (freezeForMount) return undefined;')
+    expect(adsSrc).toContain('freezeMediaForMount = false')
+    expect(adsSrc).toContain('freezeForMount: freezeMediaForMount')
+    expect(adsSrc).toContain('data-windowing-keepalive="media"')
+    expect(adsSrc).toContain('data-forum-windowing-stable="1"')
+    expect(adSlotSrc).toContain('<AdCard')
+    expect(adSlotSrc).toContain('frozenAdUrlRef')
+    expect(adSlotSrc).toContain('const mountedAdUrl = frozenAdUrlRef.current.url || incomingUrl')
+    expect(adSlotSrc).toContain('deferNativeSrc')
+    expect(adSlotSrc).toContain('deferExternalSrc')
+    expect(adSlotSrc).toContain('freezeMediaForMount')
+    expect(adSlotSrc).toContain("'data-forum-video': 'ad'")
+    expect(adSlotSrc).toContain('data-ad-media-src={mediaSrc}')
+  })
+
+  test('ads video upload uses the shared fail-closed gateway before blob storage', () => {
+    const src = read('app/ads/home.js')
+    const gateway = read('app/forum/features/media/services/uploadR2MediaFile.js')
+
+    expect(src).toContain("import uploadR2MediaFile from '../forum/features/media/services/uploadR2MediaFile'")
+    expect(src).toContain('const res = await uploadR2MediaFile({')
+    expect(src).toContain("kind: 'ads_video'")
+    expect(src).toContain("mode: 'video-required'")
+    expect(src).toContain("source: 'ads_creative'")
+    expect(src).not.toContain('optimizeForumVideoFastStart')
+    expect(src).not.toContain('FORUM_VIDEO_FASTSTART_TRANSCODE_MAX_BYTES')
+
+    const prepareIndex = gateway.indexOf('await prepareForumVideoForUpload({')
+    const signIndex = gateway.indexOf("fetch('/api/forum/blobUploadUrl'")
+    expect(prepareIndex).toBeGreaterThanOrEqual(0)
+    expect(signIndex).toBeGreaterThan(prepareIndex)
+  })
+
+  test('video feed windowing routes through the shared forum windowing core with reveal safety', () => {
+    const videoSrc = read('app/forum/features/media/hooks/useVideoFeedWindowing.js')
+    const coreSrc = read('app/forum/shared/hooks/useForumWindowing.js')
+    const focusSrc = read('app/forum/features/feed/utils/postFocus.js')
+    expect(videoSrc).toContain('useForumWindowing')
+    expect(videoSrc).toContain("diagPrefix: 'video_feed'")
+    expect(videoSrc).toContain("listId: 'forum:video-feed'")
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX = 1480')
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX_MOBILE = 1260')
+    expect(videoSrc).toContain('const VF_OVERSCAN_PX_TABLET = 1360')
+    expect(coreSrc).toContain('targetLockRef')
+    expect(coreSrc).toContain("emitWindowingDiag('anchor_adjust_deferred_active_scroll'")
+    expect(coreSrc).toContain("emitWindowingDiag('anchor_adjust_skip_native_anchor'")
+    expect(coreSrc).toContain("emitWindowingDiag('height_above_window_active_skip_native_anchor'")
+    expect(coreSrc).toContain('const stickyItems = velocity > 1.2 ? 2 : 1')
+    expect(coreSrc).toContain('function hasStableMediaShell(node)')
+    expect(coreSrc).toContain('STABLE_MEDIA_SHELL_SELECTOR')
+    expect(coreSrc).toContain("emitWindowingDiag('stable_media_height_shrink_deferred'")
+    expect(coreSrc).toContain("emitWindowingDiag('media_height_deferred_during_scroll'")
+    expect(coreSrc).toContain("applyPendingMeasuredHeights('scroll_settled')")
+    expect(coreSrc).toContain('registerForumWindowingTarget')
+    expect(coreSrc).toContain('const scrollTargets = new Set([window])')
+    expect(coreSrc).not.toContain("doc.addEventListener('scroll'")
+    expect(coreSrc).not.toContain("document.addEventListener('scroll', onScroll")
+    expect(coreSrc).not.toContain("visualViewport?.addEventListener?.('scroll'")
+    expect(focusSrc).toContain('revealForumWindowedDomId')
+  })
+
+  test('interleaved forum feed slots keep stable item keys by content id', () => {
+    const src = read('app/forum/ForumAds.js')
+    expect(src).toContain('const resolveItemKey = (item, index) => {')
+    expect(src).toContain("return { type: 'item', item, key: `item:${itemKey}` };")
+    expect(src).not.toContain("key: `i:${i}`")
+  })
+
+  test('forum ad heights use one shared windowing contract for real slots and placeholders', () => {
+    const presetsSrc = read('app/forum/shared/utils/forumWindowingPresets.js')
+    const forumStylesSrc = read('app/forum/styles/ForumStyles.jsx')
+    const foundationSrc = read('app/forum/styles/modules/foundationStyles.js')
+    const adsSrc = read('app/forum/ForumAds.js')
+    const adSlotSrc = read('app/forum/features/ui/components/ForumAdSlot.jsx')
+    expect(presetsSrc).toContain('mobile: 520')
+    expect(presetsSrc).toContain('tablet: 620')
+    expect(presetsSrc).toContain('desktop: 650')
+    expect(forumStylesSrc).toContain('--mb-ad-h-mobile: 520px;')
+    expect(forumStylesSrc).toContain('--mb-ad-h-tablet: 620px;')
+    expect(forumStylesSrc).toContain('--mb-ad-h-desktop: 650px;')
+    expect(foundationSrc).toContain('--mb-ad-h-mobile: 520px;')
+    expect(foundationSrc).toContain('--mb-ad-h-tablet: 620px;')
+    expect(foundationSrc).toContain('--mb-ad-h-desktop: 650px;')
+    expect(adsSrc).toContain('mobile: 520')
+    expect(adsSrc).toContain('tablet: 620')
+    expect(adsSrc).toContain('desktop: 650')
+    expect(adsSrc).toContain('data-stable-shell="1"')
+    expect(adsSrc).toContain('height: var(--ad-slot-h-m);')
+    expect(adsSrc).toContain('.forum-ad-card .forum-ad-media-slot[data-layout="fixed"]')
+    expect(adSlotSrc).toContain('data-stable-shell="1"')
+    expect(adSlotSrc).toContain("height: 'var(--mb-ad-h)'")
+  })
+
+  test('forum ads are interleaved into public post-card branches but not private dm messages', () => {
+    const publishedSrc = read('app/forum/features/feed/components/PublishedPostsPane.jsx')
+    const userPostsSrc = read('app/forum/features/feed/components/UserPostsPane.jsx')
+    const inboxSrc = read('app/forum/features/dm/components/InboxPane.jsx')
+    const dmMessagesSrc = read('app/forum/features/dm/components/DmMessagesPane.jsx')
+    const slotsSrc = read('app/forum/features/ui/utils/adsSlots.js')
+    const presetsSrc = read('app/forum/shared/utils/forumWindowingPresets.js')
+
+    expect(publishedSrc).toContain("debugAdsSlots(\n        'published'")
+    expect(publishedSrc).toContain("slotKind=\"published\"")
+    expect(userPostsSrc).toContain("debugAdsSlots(\n        'profile'")
+    expect(userPostsSrc).toContain("slotKind=\"profile\"")
+    expect(inboxSrc).toContain('adEvery={adEvery}')
+    expect(inboxSrc).toContain('ForumAdSlot={ForumAdSlot}')
+    expect(dmMessagesSrc).not.toContain('ForumAdSlot')
+    expect(dmMessagesSrc).not.toContain('interleaveAds')
+    expect(slotsSrc).toContain('const stableSlotKey =')
+    expect(slotsSrc).toContain('sess.bySlot.has(stableSlotKey)')
+    expect(slotsSrc).toContain('if (sess.bySlot.size > 640)')
+    expect(presetsSrc).toContain('mobile: 1900')
+    expect(presetsSrc).toContain('tablet: 2000')
+    expect(presetsSrc).toContain('desktop: 2100')
+  })
+
+  test('native videos keep loop playback without ended-hold refetch traps', () => {
+    const coordinatorSrc = read('app/forum/features/media/hooks/useForumMediaCoordinator.js')
+    const videoMediaSrc = read('app/forum/features/media/components/VideoMedia.jsx')
+    const adsSrc = read('app/forum/ForumAds.js')
+    expect(coordinatorSrc).not.toContain('play_skip_native_ended_hold')
+    expect(coordinatorSrc).toContain('el.loop = true')
+    expect(videoMediaSrc).toContain('loop={isPostVideo ? true : loop}')
+    expect(videoMediaSrc).not.toContain("el.dataset.__endedHold = '1'")
+    expect(adsSrc).toContain('preload={AD_NATIVE_VIDEO_PRELOAD_IDLE}')
+    expect(adsSrc).toMatch(/\n\s+loop\s*\n\s+\{\.\.\.restVideoAttrs\}/)
+    expect(adsSrc).not.toContain("if (reason === 'focus_retry') return false")
+  })
+
+  test('native video surfaces use bounded compositor layers and avoid hover geometry shifts', () => {
+    const stylesSrc = read('app/forum/styles/ForumStyles.jsx')
+    const adsSrc = read('app/forum/ForumAds.js')
+    const splashSrc = read('components/ForumBootSplash.jsx')
+
+    expect(stylesSrc).toContain('.item[data-forum-native-video-card="1"]:hover')
+    expect(stylesSrc).toContain('contain:layout;')
+    expect(stylesSrc).toContain('transform:none;')
+    expect(stylesSrc).toContain('will-change:auto;')
+    expect(adsSrc).toContain('data-forum-native-video-card={media.kind === \'video\' ?')
+    expect(adsSrc).toContain('.forum-ad-fit[data-ad-media-kind="video"]')
+    expect(adsSrc).toContain('transform: none;')
+    expect(adsSrc).toContain("el.dataset.forumNativeCompositor = '1'")
+    expect(adsSrc).toContain('.forum-ad-card[data-forum-native-compositor="1"]')
+    expect(adsSrc).toContain('rootMargin: \'240px 0px 240px 0px\'')
+    expect(splashSrc).toContain('left: ${FORUM_SPLASH_OFFSET_X};')
+    expect(splashSrc).toContain('opacity: calc(${FORUM_SPLASH_VIDEO_OPACITY} * .9999);')
+    expect(splashSrc).toContain('transform: translate3d(0, 0, 0);')
+  })
+
+  test('Android Chromium native videos use the shared canvas surface fallback', () => {
+    const fallbackSrc = read('components/AndroidChromiumVideoCanvas.jsx')
+    const videoMediaSrc = read('app/forum/features/media/components/VideoMedia.jsx')
+    const adsSrc = read('app/forum/ForumAds.js')
+    const splashSrc = read('components/ForumBootSplash.jsx')
+
+    expect(fallbackSrc).toContain('function isAndroidChromium()')
+    expect(fallbackSrc).toContain('video.requestVideoFrameCallback')
+    expect(fallbackSrc).toContain('context.drawImage(video')
+    expect(fallbackSrc).toContain("video.dataset.androidChromiumCanvasReady = '1'")
+    expect(fallbackSrc).toContain("video.style.setProperty('visibility', 'hidden', 'important')")
+    expect(fallbackSrc).toContain('if (!firstFrameDrawn && typeof video.requestVideoFrameCallback')
+    expect(fallbackSrc).toContain("rootMargin: '240px 0px 240px 0px'")
+    expect(videoMediaSrc).toContain('<AndroidChromiumVideoCanvas videoRef={ref} fit="contain" />')
+    expect(adsSrc).toContain('<AndroidChromiumVideoCanvas videoRef={localVideoRef} fit="contain" />')
+    expect(splashSrc).toContain('<AndroidChromiumVideoCanvas videoRef={videoRef} fit={FORUM_SPLASH_OBJECT_FIT} />')
+  })
+
+  test('faststart worker defragments fragmented MP4 instead of preserving moof ranges', () => {
+    const workerSrc = read('public/workers/forum-trim-worker.js')
+    const trimSrc = read('lib/forumVideoTrim.js')
+    expect(workerSrc).toContain('function auditMp4Atoms(bytesLike)')
+    expect(workerSrc).toContain('out.fragmented = out.moofCount > 0')
+    expect(workerSrc).toContain('out.flatFaststart = out.faststart && !out.fragmented && out.moofCount === 0')
+    expect(workerSrc).toContain('if (!outputAudit.flatFaststart)')
+    expect(workerSrc).toContain('"worker_local_flat_faststart_remux_defragment_copy"')
+    expect(trimSrc).toContain('pipeline: String(msg.pipeline || "worker_local_flat_faststart_remux_copy")')
+    expect(trimSrc).toContain('flatFaststart: true')
+    expect(trimSrc).toContain('pipeline,')
+  })
+
+  test('mute document sync does not write hydration-sensitive body dataset flags', () => {
+    const runtimeSrc = read('app/forum/features/media/utils/mediaLifecycleRuntime.js')
+    const adsSrc = read('app/forum/ForumAds.js')
+    expect(runtimeSrc).not.toContain('body.dataset.forumMediaMuted =')
+    expect(runtimeSrc).not.toContain('body.dataset.forumMediaSoundUnlocked =')
+    expect(adsSrc).not.toContain('body.dataset.forumMediaMuted =')
+    expect(adsSrc).not.toContain('body.dataset.forumMediaSoundUnlocked =')
+  })
+
+  test('keeps short video uploads eligible through duration fallback without a minimum-duration gate', () => {
+    const source = fs.readFileSync(path.join(process.cwd(), 'lib/forumClientVideoOptimizer.js'), 'utf8')
+    expect(source).toContain('readForumVideoDurationFromBrowser')
+    expect(source).toContain('duration = await readForumVideoDurationFromBrowser(file)')
+    expect(source).toContain('const durationSeconds = await readDuration(input, videoTrack, file)')
+    expect(source).not.toMatch(/durationSeconds\s*<\s*30/)
+    expect(source).not.toMatch(/durationSeconds\s*<=\s*30/)
+  })
+
+})

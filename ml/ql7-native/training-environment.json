@@ -1,0 +1,26 @@
+{
+  "schema": "ql7.native.training-environment",
+  "schemaVersion": 1,
+  "reference": {
+    "python": "3.12.10",
+    "torch": "2.12.1",
+    "torchBuild": "cu132",
+    "numpy": "2.5.2",
+    "pytest": "9.1.1"
+  },
+  "supported": {
+    "python": ">=3.11,<3.14",
+    "platforms": [
+      "win_amd64",
+      "linux_x86_64"
+    ],
+    "distributedOwner": "torch_fsdp",
+    "cudaReference": "13.2"
+  },
+  "provisioning": {
+    "torchIndex": "https://download.pytorch.org/whl/cu132",
+    "offlineWheelBundleAllowed": true,
+    "externalModelWeightsForbidden": true
+  },
+  "claimBoundary": "Environment manifest pins infrastructure packages; it does not embed or download third-party model weights."
+}

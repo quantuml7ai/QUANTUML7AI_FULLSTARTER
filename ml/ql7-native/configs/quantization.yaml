@@ -1,0 +1,6 @@
+schema: ql7.native.quantization
+schema_version: 1
+allowed_after_full_accuracy_parity: true
+artifact_hash_required: true
+same_frozen_acceptance_required: true
+severe_safety_read_policy_degradation_forbidden: true

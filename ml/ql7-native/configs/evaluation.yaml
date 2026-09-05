@@ -1,0 +1,7 @@
+schema: ql7.native.evaluation
+schema_version: 1
+locale_count: 32
+families: [semantic, ood, safety, retrieval, knowledge, naturalness, composer_parity, memory, presentation, security, delivery]
+independent_acceptance_oracle: true
+train_acceptance_leakage_forbidden: true
+native_human_review_required_for_empirical_promotion: true

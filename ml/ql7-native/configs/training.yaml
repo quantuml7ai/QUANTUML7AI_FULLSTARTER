@@ -1,0 +1,17 @@
+bf16: true
+distributed: fsdp
+optimizer: adamw
+weight_decay: 0.1
+grad_clip: 1.0
+gradient_accumulation_steps: 8
+scheduler: cosine
+warmup_steps: 2000
+min_lr_ratio: 0.1
+checkpoint_every_steps: 1000
+checkpoint_on_exception: true
+lineage_required: true
+near_duplicate_split_isolation: true
+holdout_family_isolation: true
+no_unknown_license_truth: true
+no_private_chat_without_consent: true
+stages: [tokenizer,understanding_pretrain,generator_pretrain,domain_pretrain,multitask,sft,preference,safety,critic,calibration,quantization]

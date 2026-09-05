@@ -1,0 +1,4005 @@
+# PROJECT_TREE.md
+
+> Обязательное правило сопровождения:
+> Любое изменение структуры проекта обязательно должно сопровождаться обновлением этого файла.
+> Это включает: добавление файлов, удаление файлов, переименование, перенос между папками и изменение назначения файла.
+> Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
+> Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
+
+Сгенерировано автоматически: 2026-09-05T12:24:47.973Z
+Файлов в реестре: 3413
+
+## Исключенные каталоги
+- `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
+- `.next/` — генерируемые артефакты Next.js сборки.
+- `node_modules/` — внешние зависимости менеджера пакетов, не авторский код репозитория.
+- `scripts/` — локальные migration/audit/smoke/image утилиты; не production runtime и не часть коммитимого дерева после V15.
+- `.ql7-backups/`, `.ql7-local-archive/`, `.ql7-tmp/`, `.ql7-patch-backups/`, `reports/`, `account-deletion-reports/`, `migration-reports/`, `mongo-migration-reports/` и корневые `QL7_SUPPORT_PLANETARY_AI_V5_*` — локальные patch/report/evidence артефакты.
+
+## Охват
+
+Этот файл описывает весь авторский репозиторий проекта, а не только форумный домен.
+Включены все прикладные страницы, layouts, API-маршруты, клиентские компоненты, серверные и инфраструктурные модули, public-ассеты, audit-артефакты и корневые конфиги.
+
+- `.env.local.example` — 1 файлов
+- `.eslintrc.json` — 1 файлов
+- `.gitignore` — 1 файлов
+- `.npmrc` — 1 файлов
+- `AGENTS.md` — 1 файлов
+- `app` — 487 файлов
+- `components` — 61 файлов
+- `config` — 1 файлов
+- `docs` — 24 файлов
+- `jsconfig.json` — 1 файлов
+- `lib` — 989 файлов
+- `middleware.js` — 1 файлов
+- `ml` — 88 файлов
+- `mobile` — 69 файлов
+- `models` — 6 файлов
+- `next-env.d.ts` — 1 файлов
+- `next.config.mjs` — 1 файлов
+- `package.json` — 1 файлов
+- `pnpm-lock.yaml` — 1 файлов
+- `pnpm-workspace.yaml` — 1 файлов
+- `PROJECT_DEPENDENCIES.md` — 1 файлов
+- `PROJECT_OWNERSHIP.md` — 1 файлов
+- `PROJECT_RISKS.md` — 1 файлов
+- `PROJECT_ROUTES.md` — 1 файлов
+- `PROJECT_TREE.md` — 1 файлов
+- `public` — 1285 файлов
+- `README.md` — 1 файлов
+- `services` — 10 файлов
+- `src` — 32 файлов
+- `tests` — 243 файлов
+- `tools` — 98 файлов
+- `tsconfig.json` — 1 файлов
+- `vitest.config.mjs` — 1 файлов
+
+## Дерево проекта
+
+- app/ — Основной каталог Next.js App Router: страницы, layout и API.
+  - [lang]/ — Каталог [lang].
+    - trust-and-identity/ — Каталог trust-and-identity.
+      - page.js — Next.js страница маршрута /[lang]/trust-and-identity. Связи: импортирует components/trust/TrustIdentityArticle.jsx, lib/seo/trustIdentityContent.js, lib/seo/trustIdentityMetadata.js.
+  - about/ — Страница/ресурсы раздела About.
+    - layout.js — Next.js layout для сегмента /about. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /about. Связи: импортирует app/ads.js, components/TopBar.js, components/i18n.js.
+  - academy/ — Страницы и блоки академии.
+    - AcademyExamBlock.js — JS-файл Academy Exam Block сегмента academy. Связи: импортирует components/i18n.js, lib/paymentMethodClient.js; используется в app/academy/page.js.
+    - layout.js — Next.js layout для сегмента /academy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /academy. Связи: импортирует app/academy/AcademyExamBlock.js, app/ads.js, components/TopBar.js.
+  - ads/ — Страницы и модули рекламного раздела.
+    - AdsGeoTargetingPortal.jsx — JSX-файл Ads Geo Targeting Portal сегмента ads. Связи: импортирует app/ads/GeoTargetingPicker.jsx, components/i18n.js, lib/adsGeoTargetingFlow.js; используется в app/ads/home.js.
+    - GeoTargetingPicker.jsx — JSX-файл Geo Targeting Picker сегмента ads. Связи: импортирует components/i18n.js, lib/geo/countries.js, lib/geo/regions.js; используется в app/ads/AdsGeoTargetingPortal.jsx.
+    - home.js — JS-файл home сегмента ads. Связи: импортирует app/ads/AdsGeoTargetingPortal.jsx, forum/features/media/services/uploadR2MediaFile.js, forum/features/media/utils/moderationPrep.js; используется в app/ads/page.jsx.
+    - layout.js — Next.js layout для сегмента /ads. Связи: импортирует lib/metadataCache.js.
+    - page.jsx — JSX-файл page сегмента ads. Связи: импортирует app/ads/home.js, components/TopBar.js, components/i18n.js.
+  - api/ — Серверные API-маршруты и их внутренние хелперы.
+    - _diag/ — Служебная диагностика API.
+      - route.js — API-route _diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - academy/ — Каталог academy.
+      - exam/ — Каталог exam.
+        - route.js — API-route academy/exam для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/economic-integrity/productionRoute.cjs, lib/identity/ql7IdentityContract.cjs.
+    - account-restrictions/ — Каталог account-restrictions.
+      - status/ — Каталог status.
+        - route.js — API-route account-restrictions/status для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/account-restrictions/quarantineService.cjs.
+    - ads/ — Каталог ads.
+      - route.js — API-route ads для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/adsCore.js, lib/forum/video-precommit-moderation-receipt.cjs.
+    - aiquota/ — Каталог aiquota.
+      - usage/ — Каталог usage.
+        - route.js — API-route aiquota/usage для серверной логики Next.js. Связи: импортирует lib/exchange/aiQuotaIdentity.js, lib/identity/ql7IdentityContract.cjs.
+    - app-shell/ — Каталог app-shell.
+      - config/ — Каталог config.
+        - route.js — API-route app-shell/config для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - battlecoin/ — Каталог battlecoin.
+      - chat/ — Каталог chat.
+        - events/ — Каталог events.
+          - route.js — API-route battlecoin/chat/events для серверной логики Next.js. Связи: импортирует lib/battlecoin/battle-chat-events.cjs.
+        - messages/ — Каталог messages.
+          - route.js — API-route battlecoin/chat/messages для серверной логики Next.js. Связи: импортирует lib/account-restrictions/businessActionGuard.cjs, lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs.
+        - reaction/ — Каталог reaction.
+          - route.js — API-route battlecoin/chat/reaction для серверной логики Next.js. Связи: импортирует lib/account-restrictions/businessActionGuard.cjs, lib/auth/battlecoin-chat-auth.cjs, lib/battlecoin/battle-chat-events.cjs.
+      - order/ — Каталог order.
+        - route.js — API-route battlecoin/order для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+      - state/ — Каталог state.
+        - route.js — API-route battlecoin/state для серверной логики Next.js. Связи: импортирует lib/mongo/battlecoin-primary.cjs, lib/subscriptions.js.
+    - brain/ — Каталог brain.
+      - analyze/ — Каталог analyze.
+        - route.js — API-route brain/analyze для серверной логики Next.js. Связи: импортирует lib/exchange/aiBoxAnalysisService.js.
+    - coins/ — Каталог coins.
+      - route.js — API-route coins для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - composer-safety/ — Каталог composer-safety.
+      - preview/ — Каталог preview.
+        - route.js — API-route composer-safety/preview для серверной логики Next.js. Связи: импортирует lib/composer-safety/policy.cjs, lib/composer-safety/surfaceRegistry.cjs.
+    - contact/ — Каталог contact.
+      - route.js — API-route contact для серверной логики Next.js. Связи: импортирует lib/supportEmailTransport.js.
+    - crypto-news/ — Каталог crypto-news.
+      - route.js — API-route crypto-news для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - debug/ — Каталог debug.
+      - forum-diag/ — Каталог forum-diag.
+        - route.js — API-route debug/forum-diag для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - deep-translate/ — Каталог deep-translate.
+      - route.js — API-route deep-translate для серверной логики Next.js. Связи: импортирует lib/deepTranslateService.js.
+    - dm/ — Серверный контур личных сообщений.
+      - block/ — Каталог block.
+        - route.js — API-route dm/block для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - delete/ — Каталог delete.
+        - route.js — API-route dm/delete для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - dialogs/ — Каталог dialogs.
+        - route.js — API-route dm/dialogs для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs, lib/ql7-support/config/featureFlag.js.
+      - seen/ — Каталог seen.
+        - route.js — API-route dm/seen для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - send/ — Каталог send.
+        - route.js — API-route dm/send для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/account-restrictions/businessActionGuard.cjs.
+      - support-broadcast/ — Каталог support-broadcast.
+        - route.js — API-route dm/support-broadcast для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/broadcast.js, lib/ql7-support/config/featureFlag.js.
+      - support-card-translate/ — Каталог support-card-translate.
+        - route.js — API-route dm/support-card-translate для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/ql7-support/cardSchema.js.
+      - support-entry/ — Каталог support-entry.
+        - route.js — API-route dm/support-entry для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js, lib/ql7-support/conversation/temporalContext.js.
+      - support-feedback/ — Каталог support-feedback.
+        - route.js — API-route dm/support-feedback для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/ql7-support/cognitiveMemory.js.
+      - support-learning-consent/ — Каталог support-learning-consent.
+        - route.js — API-route dm/support-learning-consent для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js, lib/ql7-support/http/idempotencyStore.js.
+      - support-state/ — Каталог support-state.
+        - route.js — API-route dm/support-state для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js, lib/ql7-support/identityResolver.js.
+      - support-worker/ — Каталог support-worker.
+        - route.js — API-route dm/support-worker для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js, lib/ql7-support/http/serviceRequestGuard.js.
+      - thread/ — Каталог thread.
+        - route.js — API-route dm/thread для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/mongo/client.cjs, lib/mongo/dm-primary.cjs.
+      - unblock/ — Каталог unblock.
+        - route.js — API-route dm/unblock для серверной логики Next.js. Связи: импортирует app/api/dm/_db.js, app/api/dm/_utils.js, lib/mongo/dm-primary.cjs.
+      - _db.js — Внутренний db для API-сегмента dm. Связи: импортирует app/api/dm/_utils.js, lib/mongo/dm-primary.cjs, lib/storage/r2.js; используется в app/api/dm/block/route.js, app/api/dm/delete/route.js, app/api/dm/seen/route.js.
+      - _utils.js — Внутренний utils для API-сегмента dm. Связи: импортирует app/api/profile/_identity.js, lib/ql7-support/systemActor.js; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - forum/ — Серверный контур форума: снапшоты, мутации, модерация, upload.
+      - admin/ — Каталог admin.
+        - banUser/ — Каталог banUser.
+          - route.js — API-route forum/admin/banUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deletePost/ — Каталог deletePost.
+          - route.js — API-route forum/admin/deletePost для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - deleteTopic/ — Каталог deleteTopic.
+          - route.js — API-route forum/admin/deleteTopic для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - unbanUser/ — Каталог unbanUser.
+          - route.js — API-route forum/admin/unbanUser для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - verify/ — Каталог verify.
+          - route.js — API-route forum/admin/verify для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js.
+      - blobUploadUrl/ — Каталог blobUploadUrl.
+        - route.js — API-route forum/blobUploadUrl для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, forum/shared/constants/media.js.
+      - events/ — Каталог events.
+        - stream/ — Каталог stream.
+          - route.js — API-route forum/events/stream для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js.
+      - feed/ — Каталог feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - inbox/ — Каталог inbox.
+        - replies/ — Каталог replies.
+          - page/ — Каталог page.
+            - route.js — API-route forum/inbox/replies/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - media-feed/ — Каталог media-feed.
+        - page/ — Каталог page.
+          - route.js — API-route forum/media-feed/page для серверной логики Next.js. Связи: импортирует lib/forum/forum-server-page-reader.cjs.
+      - mediaLock/ — Каталог mediaLock.
+        - route.js — API-route forum/mediaLock для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+      - moderate/ — Каталог moderate.
+        - route.js — API-route forum/moderate для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/profile/_identity.js.
+      - mutate/ — Каталог mutate.
+        - route.js — API-route forum/mutate для серверной логики Next.js. Связи: импортирует app/api/forum/_bus.js, app/api/forum/_db.js, app/api/forum/_utils.js.
+      - own/ — Каталог own.
+        - route.js — API-route forum/own для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/forum-primary.cjs.
+      - post-by-id/ — Каталог post-by-id.
+        - route.js — API-route forum/post-by-id для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-chain/ — Каталог post-chain.
+        - route.js — API-route forum/post-chain для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-locate/ — Каталог post-locate.
+        - route.js — API-route forum/post-locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - post-meta/ — Каталог post-meta.
+        - route.js — API-route forum/post-meta для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - recommendations/ — Каталог recommendations.
+        - users/ — Каталог users.
+          - route.js — API-route forum/recommendations/users для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/forum/forum-user-recommendation-pool.cjs; используется в tests/integration/api/forum/recommendations-users.route.test.js.
+      - report/ — Каталог report.
+        - route.js — API-route forum/report для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - rev/ — Каталог rev.
+        - route.js — API-route forum/rev для серверной логики Next.js. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - search/ — Каталог search.
+        - page/ — Каталог page.
+          - route.js — API-route forum/search/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - snapshot/ — Каталог snapshot.
+        - route.js — API-route forum/snapshot для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - subs/ — Каталог subs.
+        - count/ — Каталог count.
+          - route.js — API-route forum/subs/count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - list/ — Каталог list.
+          - route.js — API-route forum/subs/list для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - my-count/ — Каталог my-count.
+          - route.js — API-route forum/subs/my-count для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+        - people/ — Каталог people.
+          - route.js — API-route forum/subs/people для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/forum/subs-people.route.test.js.
+        - rebuild-followers/ — Каталог rebuild-followers.
+          - route.js — API-route forum/subs/rebuild-followers для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js.
+        - toggle/ — Каталог toggle.
+          - route.js — API-route forum/subs/toggle для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js.
+      - thread/ — Каталог thread.
+        - locate/ — Каталог locate.
+          - route.js — API-route forum/thread/locate для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+        - page/ — Каталог page.
+          - route.js — API-route forum/thread/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - topics/ — Каталог topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - upload/ — Каталог upload.
+        - route.js — API-route forum/upload для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, forum/shared/constants/media.js.
+      - uploadAudio/ — Каталог uploadAudio.
+        - route.js — API-route forum/uploadAudio для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, lib/account-restrictions/businessActionGuard.cjs.
+      - uploadVideo/ — Каталог uploadVideo.
+        - route.js — API-route forum/uploadVideo для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/profile/_identity.js, forum/shared/constants/media.js.
+      - user-posts/ — Каталог user-posts.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-posts/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - user-search/ — Каталог user-search.
+        - rebuild/ — Каталог rebuild.
+          - route.js — API-route forum/user-search/rebuild для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/profile-primary.cjs.
+      - user-topics/ — Каталог user-topics.
+        - page/ — Каталог page.
+          - route.js — API-route forum/user-topics/page для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/forum/forum-server-complete-reader.cjs.
+      - vip/ — Каталог vip.
+        - batch/ — Каталог batch.
+          - route.js — API-route forum/vip/batch для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+      - wa-preview/ — Каталог wa-preview.
+        - route.js — API-route forum/wa-preview для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - _bus.js — Внутренний bus для API-сегмента forum. Связи: используется в app/api/forum/events/stream/route.js, app/api/forum/moderate/route.js, app/api/forum/mutate/route.js.
+      - _db.js — Внутренний db для API-сегмента forum. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/canonical-user-id.cjs; используется в app/api/forum/admin/banUser/route.js, app/api/forum/admin/deletePost/route.js, app/api/forum/admin/deleteTopic/route.js.
+      - _utils.js — Внутренний utils для API-сегмента forum. Связи: используется в app/api/academy/exam/route.js, app/api/forum/_db.js, app/api/forum/admin/banUser/route.js.
+    - geo/ — Каталог geo.
+      - session-touch/ — Каталог session-touch.
+        - route.js — API-route geo/session-touch для серверной логики Next.js. Связи: импортирует lib/forum/public-sanitize.cjs, lib/geo/request-geo.cjs, lib/identity/geo-identity.cjs.
+    - market/ — Каталог market.
+      - summary/ — Каталог summary.
+        - route.js — API-route market/summary для серверной логики Next.js. Связи: импортирует lib/brain.js, lib/databroker.js.
+    - metamarket/ — Каталог metamarket.
+      - buy/ — Каталог buy.
+        - route.js — API-route metamarket/buy для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - collection/ — Каталог collection.
+        - route.js — API-route metamarket/collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - gift/ — Каталог gift.
+        - route.js — API-route metamarket/gift для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - my-collection/ — Каталог my-collection.
+        - route.js — API-route metamarket/my-collection для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - owners/ — Каталог owners.
+        - route.js — API-route metamarket/owners для серверной логики Next.js. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js.
+      - quote/ — Каталог quote.
+        - route.js — API-route metamarket/quote для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - sell/ — Каталог sell.
+        - route.js — API-route metamarket/sell для серверной логики Next.js. Связи: импортирует app/api/metamarket/_format.js, app/api/metamarket/_identity.js, app/api/metamarket/_transactions.js.
+      - state/ — Каталог state.
+        - route.js — API-route metamarket/state для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - token-history/ — Каталог token-history.
+        - route.js — API-route metamarket/token-history для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_db.js.
+      - _catalog.js — Внутренний catalog для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js; используется в app/api/metamarket/_db.js, app/api/metamarket/_transactions.js, app/api/metamarket/collection/route.js.
+      - _db.js — Внутренний db для API-сегмента metamarket. Связи: импортирует app/api/forum/_db.js, app/api/metamarket/_catalog.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_ledger.js, app/api/metamarket/_locks.js, app/api/metamarket/_transactions.js.
+      - _format.js — Внутренний format для API-сегмента metamarket. Связи: используется в app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_identity.js.
+      - _identity.js — Внутренний identity для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_format.js, lib/identity/ql7IdentityContract.cjs; используется в app/api/metamarket/_transactions.js, app/api/metamarket/buy/route.js, app/api/metamarket/collection/route.js.
+      - _ledger.js — Внутренний ledger для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js; используется в app/api/metamarket/_transactions.js.
+      - _locks.js — Внутренний locks для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/_transactions.js.
+      - _transactions.js — Внутренний transactions для API-сегмента metamarket. Связи: импортирует app/api/metamarket/_catalog.js, app/api/metamarket/_db.js, app/api/metamarket/_format.js; используется в app/api/metamarket/buy/route.js, app/api/metamarket/gift/route.js, app/api/metamarket/quote/route.js.
+    - metastudio/ — Каталог metastudio.
+      - register/ — Каталог register.
+        - route.js — API-route metastudio/register для серверной логики Next.js. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/metastudio-primary.cjs, lib/mongo/profile-primary.cjs.
+    - pay/ — Каталог pay.
+      - create/ — Каталог create.
+        - route.js — API-route pay/create для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/mongo/payments-primary.cjs, lib/mongo/profile-primary.cjs.
+      - qcoin-purchase/ — Каталог qcoin-purchase.
+        - route.js — API-route pay/qcoin-purchase для серверной логики Next.js. Связи: импортирует lib/mongo/client.cjs, lib/qcoinEntitlementPurchase.js, lib/ql7-support/identityResolver.js.
+      - webhook/ — Каталог webhook.
+        - route.js — API-route pay/webhook для серверной логики Next.js. Связи: импортирует lib/adsCore.js, lib/economic-integrity/productionRoute.cjs, lib/identity/canonical-user-id.cjs.
+    - payments/ — Каталог payments.
+      - demo/ — Каталог demo.
+        - complete/ — Каталог complete.
+          - route.js — API-route payments/demo/complete для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - now/ — Каталог now.
+        - create/ — Каталог create.
+          - route.js — API-route payments/now/create для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route payments/now/webhook для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - profile/ — Серверные маршруты профиля, ника и аватара.
+      - batch/ — Каталог batch.
+        - route.js — API-route profile/batch для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - check-nick/ — Каталог check-nick.
+        - route.js — API-route profile/check-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - delete-account/ — Каталог delete-account.
+        - route.js — API-route profile/delete-account для серверной логики Next.js. Связи: импортирует app/api/profile/_identity.js, lib/mongo/account-deletion-primary.cjs; используется в tests/contracts/project/api-route-contracts.test.js.
+      - get-about/ — Каталог get-about.
+        - route.js — API-route profile/get-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - get-profile/ — Каталог get-profile.
+        - route.js — API-route profile/get-profile для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - save-nick/ — Каталог save-nick.
+        - route.js — API-route profile/save-nick для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - set-about/ — Каталог set-about.
+        - route.js — API-route profile/set-about для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/mongo/profile-primary.cjs.
+      - upload-avatar/ — Каталог upload-avatar.
+        - route.js — API-route profile/upload-avatar для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - user-popover/ — Каталог user-popover.
+        - route.js — API-route profile/user-popover для серверной логики Next.js. Связи: импортирует app/api/forum/_db.js, app/api/forum/_utils.js, app/api/profile/_identity.js; используется в tests/unit/api/profile/user-popover.route.test.js.
+      - _identity.js — Внутренний identity для API-сегмента profile. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs; используется в app/api/account-restrictions/status/route.js, app/api/ads/route.js, app/api/dm/_utils.js.
+    - push/ — Каталог push.
+      - config/ — Каталог config.
+        - route.js — API-route push/config для серверной логики Next.js. Связи: импортирует lib/webPush.js.
+      - events/ — Каталог events.
+        - route.js — API-route push/events для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - native/ — Каталог native.
+        - link/ — Каталог link.
+          - route.js — API-route push/native/link для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - register/ — Каталог register.
+          - route.js — API-route push/native/register для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+        - status/ — Каталог status.
+          - route.js — API-route push/native/status для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/nativePush.js.
+        - unlink/ — Каталог unlink.
+          - route.js — API-route push/native/unlink для серверной логики Next.js. Связи: импортирует lib/nativePush.js.
+      - subscribe/ — Каталог subscribe.
+        - route.js — API-route push/subscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - sync/ — Каталог sync.
+        - route.js — API-route push/sync для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+      - unsubscribe/ — Каталог unsubscribe.
+        - route.js — API-route push/unsubscribe для серверной логики Next.js. Связи: импортирует app/api/dm/_utils.js, lib/webPush.js.
+    - qcoin/ — Серверные маршруты QCoin.
+      - drop/ — Каталог drop.
+        - route.js — API-route qcoin/drop для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/economic-integrity/productionRoute.cjs, lib/mongo/qcoin-primary.cjs.
+      - get/ — Каталог get.
+        - route.js — API-route qcoin/get для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - heartbeat/ — Каталог heartbeat.
+        - route.js — API-route qcoin/heartbeat для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/qcoin-primary.cjs.
+      - topup/ — Каталог topup.
+        - cancel/ — Каталог cancel.
+          - route.js — API-route qcoin/topup/cancel для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - create/ — Каталог create.
+          - route.js — API-route qcoin/topup/create для серверной логики Next.js. Связи: импортирует lib/mongo/qcoin-primary.cjs.
+        - webhook/ — Каталог webhook.
+          - route.js — API-route qcoin/topup/webhook для серверной логики Next.js. Связи: импортирует lib/economic-integrity/productionRoute.cjs, lib/mongo/qcoin-primary.cjs, lib/ql7-support/events.js.
+    - quest/ — Серверные маршруты квестов.
+      - env/ — Каталог env.
+        - route.js — API-route quest/env для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - progress/ — Каталог progress.
+        - route.js — API-route quest/progress для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/economic-integrity/productionRoute.cjs, lib/mongo/qcoin-primary.cjs.
+      - status/ — Каталог status.
+        - route.js — API-route quest/status для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, lib/mongo/quest-primary.cjs.
+    - quotes/ — Каталог quotes.
+      - route.js — API-route quotes для серверной логики Next.js. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - referral/ — Каталог referral.
+      - hit/ — Каталог hit.
+        - route.js — API-route referral/hit для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/economic-integrity/productionRoute.cjs.
+      - link/ — Каталог link.
+        - route.js — API-route referral/link для серверной логики Next.js. Связи: импортирует app/api/forum/_utils.js, app/api/profile/_identity.js, lib/identity/ql7IdentityContract.cjs.
+    - subscription/ — Каталог subscription.
+      - status/ — Каталог status.
+        - route.js — API-route subscription/status для серверной логики Next.js. Связи: импортирует lib/subscriptions.js.
+    - telegram/ — Каталог telegram.
+      - link/ — Каталог link.
+        - confirm/ — Каталог confirm.
+          - route.js — API-route telegram/link/confirm для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js.
+        - resolve/ — Каталог resolve.
+          - route.js — API-route telegram/link/resolve для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs.
+        - start/ — Каталог start.
+          - route.js — API-route telegram/link/start для серверной логики Next.js. Связи: импортирует lib/identity/canonical-user-id.cjs; используется в tests/contracts/project/api-route-contracts.test.js.
+        - status/ — Каталог status.
+          - route.js — API-route telegram/link/status для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs, lib/redis.js, lib/subscriptions.js.
+    - tma/ — Каталог tma.
+      - auto/ — Каталог auto.
+        - route.js — API-route tma/auto для серверной логики Next.js. Связи: импортирует lib/mongo/profile-primary.cjs; используется в tests/unit/mongo/profile-primary.test.js.
+    - wallet-session/ — Каталог wallet-session.
+      - route.js — API-route wallet-session для серверной логики Next.js. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/ql7-support/events.js; используется в tests/contracts/project/api-route-contracts.test.js.
+  - components/ — Локальные компоненты верхнего уровня внутри app.
+    - CryptoNewsLens.jsx — JSX-файл Crypto News Lens сегмента components. Связи: импортирует components/i18n.js, lib/visual-runtime/visualActivityRegistry.js; используется в app/page.js.
+  - contact/ — Страница контактов.
+    - layout.js — Next.js layout для сегмента /contact. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /contact. Связи: импортирует components/trust/TrustIdentityArticle.module.css, lib/seo/trustIdentityContent.js, lib/seo/trustIdentityRoutes.js.
+  - exchange/ — Страницы/виджеты exchange-раздела.
+    - ai-box/ — Каталог ai-box.
+      - AIWorkbench.jsx — JSX-файл AIWorkbench сегмента exchange/ai-box. Связи: импортирует components/i18n.js, components/visual-runtime/ViewportAnimatedImage.jsx, lib/exchange/aiEntitlementState.js; используется в app/exchange/page.js.
+      - useAIEntitlement.js — JS-файл use AIEntitlement сегмента exchange/ai-box. Связи: импортирует lib/exchange/aiEntitlementState.js; используется в app/exchange/page.js.
+    - battle-chat/ — Каталог battle-chat.
+      - BattleChat.jsx — JSX-файл Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx; используется в app/exchange/BattleCoin.jsx.
+      - BattleChat.module.css — CSS-файл Battle Chat.module сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatClient.js — JS-файл battle Chat Client сегмента exchange/battle-chat. Связи: импортирует lib/walletSessionClient.js; используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatComposer.jsx, app/exchange/battle-chat/useBattleChat.js.
+      - BattleChatComposer.jsx — JSX-файл Battle Chat Composer сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatClient.js, forum/features/ui/hooks/useComposerSafetyPreview.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - battleChatFormatters.js — JS-файл battle Chat Formatters сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChat.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - battleChatIdentity.js — JS-файл battle Chat Identity сегмента exchange/battle-chat. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx.
+      - BattleChatMessageRow.jsx — JSX-файл Battle Chat Message Row сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/BattleChat.module.css, app/exchange/battle-chat/battleChatFormatters.js, app/exchange/battle-chat/battleChatIdentity.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+      - useBattleChat.js — JS-файл use Battle Chat сегмента exchange/battle-chat. Связи: импортирует app/exchange/battle-chat/battleChatClient.js, lib/authActionGateClient.js; используется в app/exchange/battle-chat/BattleChat.jsx.
+    - BattleCoin.jsx — JSX-файл Battle Coin сегмента exchange. Связи: импортирует app/exchange/battle-chat/BattleChat.jsx, components/QuantumWalletLaunchIcon.jsx, components/i18n.js; используется в app/exchange/page.js.
+    - layout.js — Next.js layout для сегмента /exchange. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /exchange. Связи: импортирует app/ads.js, app/exchange/BattleCoin.jsx, app/exchange/ai-box/AIWorkbench.jsx.
+  - forum/ — Домен форума и мессенджера.
+    - events/ — Клиентские event-хелперы форума.
+      - bus.js — JS-файл bus домена форума. Связи: используется в forum/features/feed/utils/postEvents.js.
+    - features/ — Feature-oriented слой форума.
+      - diagnostics/ — Подсистема диагностики и perf-наблюдения.
+        - hooks/ — Каталог слоя хуки внутри feature diagnostics.
+          - useForumDiagnostics.js — Хук use Forum Diagnostics домена диагностики. Связи: импортирует forum/features/diagnostics/utils/emitPolicy.js; используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature diagnostics.
+          - emitPolicy.js — Утилита emit Policy домена диагностики. Связи: используется в forum/features/diagnostics/hooks/useForumDiagnostics.js.
+      - dm/ — Подсистема Quantum Messenger / DM.
+        - components/ — Каталог слоя компоненты внутри feature dm.
+          - DmDialogRow.jsx — UI-компонент Dm Dialog Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/dm/utils/mediaParsing.js, forum/features/profile/components/AvatarEmoji.jsx; используется в forum/features/dm/components/DmDialogsPane.jsx.
+          - DmDialogsPane.jsx — UI-компонент Dm Dialogs Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/utils/dmLoaders.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmMediaRenderer.jsx — UI-компонент Dm Media Renderer домена DM/мессенджера. Связи: импортирует components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportCard.js.
+          - DmMessagesPane.jsx — UI-компонент Dm Messages Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmThreadAlerts.jsx, forum/features/dm/components/DmThreadHeader.jsx; используется в forum/features/dm/components/InboxPane.jsx.
+          - DmThreadAlerts.jsx — UI-компонент Dm Thread Alerts домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadHeader.jsx — UI-компонент Dm Thread Header домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SupportPopover.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadLoadMore.jsx — UI-компонент Dm Thread Load More домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmThreadMessageRow.jsx — UI-компонент Dm Thread Message Row домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMediaRenderer.jsx, forum/features/dm/components/DmVoicePlayer.jsx, forum/features/dm/components/Ql7SupportCard.js; используется в forum/features/dm/components/DmMessagesPane.jsx.
+          - DmVoicePlayer.jsx — UI-компонент Dm Voice Player домена DM/мессенджера. Связи: используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/ui/components/ComposerCore.jsx.
+          - InboxPane.jsx — UI-компонент Inbox Pane домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx, forum/features/dm/components/InboxTabsHeader.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - InboxRepliesPane.jsx — UI-компонент Inbox Replies Pane домена DM/мессенджера. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - InboxTabsHeader.jsx — UI-компонент Inbox Tabs Header домена DM/мессенджера. Связи: импортирует forum/shared/utils/counts.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - Ql7SemanticBadge.js — UI-компонент Ql7 Semantic Badge домена DM/мессенджера. Связи: импортирует lib/ql7-support/presentation/svgRegistry.js; используется в forum/features/dm/components/Ql7SupportCard.js, forum/features/dm/components/Ql7SupportMessageSurface.jsx, tests/component/ql7-support/semantic-badges-test.jsx.
+          - Ql7SupportCard.js — UI-компонент Ql7 Support Card домена DM/мессенджера. Связи: импортирует forum/features/dm/components/DmMediaRenderer.jsx, forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportChoiceCard.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportMessageSurface.jsx, tests/component/ql7-support/adult-card-test.js.
+          - Ql7SupportChoiceCard.js — UI-компонент Ql7 Support Choice Card домена DM/мессенджера. Связи: импортирует forum/features/dm/services/supportAuthClient.js, lib/ql7-support/limits.js, lib/ql7-support/response/choiceDiversity.js; используется в forum/features/dm/components/Ql7SupportCard.js, tests/component/ql7-support-surface.component.test.jsx.
+          - Ql7SupportComposerRuntimePanel.jsx — UI-компонент Ql7 Support Composer Runtime Panel домена DM/мессенджера. Связи: используется в forum/features/ui/components/ComposerActionRail.jsx.
+          - Ql7SupportMessageSurface.jsx — UI-компонент Ql7 Support Message Surface домена DM/мессенджера. Связи: импортирует forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportCard.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, tests/component/ql7-support-surface.component.test.jsx.
+          - Ql7SupportOperator.jsx — UI-компонент Ql7 Support Operator домена DM/мессенджера. Связи: импортирует forum/shared/utils/classnames.js, lib/ql7-support/ecosystemCatalog.js; используется в forum/features/dm/components/DmMessagesPane.jsx, tests/component/ql7-support-surface.component.test.jsx.
+          - Ql7SupportPopover.jsx — UI-компонент Ql7 Support Popover домена DM/мессенджера. Связи: импортирует lib/ql7-support/systemActor.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature dm.
+          - useDmDeleteController.js — Хук use Dm Delete Controller домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmDeleteCopy.js — Хук use Dm Delete Copy домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmLoadLifecycle.js — Хук use Dm Load Lifecycle домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmLocalCache.js — Хук use Dm Local Cache домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/dmLoaders.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmOpenEvents.js — Хук use Dm Open Events домена DM/мессенджера. Связи: используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useDmRepliesSeen.js — Хук use Dm Replies Seen домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmSeenObservers.js — Хук use Dm Seen Observers домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmStorageMaps.js — Хук use Dm Storage Maps домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/deletedMap.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmThreadAutoScroll.js — Хук use Dm Thread Auto Scroll домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmUnreadState.js — Хук use Dm Unread State домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useDmVipBatchProbe.js — Хук use Dm Vip Batch Probe домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useForumDmRuntime.js — Хук use Forum Dm Runtime домена DM/мессенджера. Связи: импортирует forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLoadLifecycle.js, forum/features/dm/hooks/useDmLocalCache.js; используется в forum/ForumRoot.jsx.
+          - useInboxRepliesModel.js — Хук use Inbox Replies Model домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+          - useOpenInboxGlobalAction.js — Хук use Open Inbox Global Action домена DM/мессенджера. Связи: импортирует forum/features/dm/utils/openInboxGlobal.js, lib/authActionGateClient.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature dm.
+          - ql7SupportRuntimeStateReducer.js — Сервис ql7 Support Runtime State Reducer домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js, forum/features/dm/services/sendDmComposerMessage.js.
+          - sendDmComposerMessage.js — Сервис send Dm Composer Message домена DM/мессенджера. Связи: импортирует forum/features/dm/services/ql7SupportRuntimeStateReducer.js, forum/features/dm/services/supportAuthClient.js, forum/features/dm/utils/dmLoaders.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js.
+          - supportAuthClient.js — Сервис support Auth Client домена DM/мессенджера. Связи: импортирует lib/ql7-support/config/featureFlag.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/dm/components/Ql7SupportCard.js.
+        - utils/ — Каталог слоя утилиты внутри feature dm.
+          - alignInboxStartUnderTabs.js — Утилита align Inbox Start Under Tabs домена DM/мессенджера. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - deletedMap.js — Утилита deleted Map домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useDmStorageMaps.js.
+          - dmLoaders.js — Утилита dm Loaders домена DM/мессенджера. Связи: импортирует forum/features/dm/services/supportAuthClient.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/hooks/useDmDeleteController.js, forum/features/dm/hooks/useDmLocalCache.js.
+          - mediaParsing.js — Утилита media Parsing домена DM/мессенджера. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+          - openInboxGlobal.js — Утилита open Inbox Global домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useOpenInboxGlobalAction.js.
+          - threadOwnership.js — Утилита thread Ownership домена DM/мессенджера. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js.
+      - feed/ — Подсистема ленты, тем, постов и композера.
+        - components/ — Каталог слоя компоненты внутри feature feed.
+          - CreateTopicCard.jsx — UI-компонент Create Topic Card домена ленты/тем/постов. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumPostCard.jsx — UI-компонент Forum Post Card домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/PostActionBar.jsx, forum/features/feed/components/PostBodyContent.jsx, forum/features/feed/components/PostFxLayer.jsx; используется в forum/features/feed/components/PostCardBridge.jsx.
+          - LoadMoreSentinel.jsx — UI-компонент Load More Sentinel домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx, tests/component/forum/runtime-stability-sentinel.component.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+          - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/feed/utils/cardMemo.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/ForumRoot.jsx.
+          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: импортирует forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/utils/externalVideoBridge.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostTranslateToggle.jsx — UI-компонент Post Translate Toggle домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PublishedPostsPane.jsx — UI-компонент Published Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/dm/components/InboxPane.jsx.
+          - ThreadRepliesPane.jsx — UI-компонент Thread Replies Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - ThreadSection.jsx — UI-компонент Thread Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/ThreadRepliesPane.jsx, forum/features/feed/components/ThreadTitle.jsx; используется в forum/ForumLayout.jsx.
+          - ThreadTitle.jsx — UI-компонент Thread Title домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ThreadSection.jsx.
+          - TopicItem.jsx — UI-компонент Topic Item домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumRoot.jsx.
+          - TopicsOrPanelsSwitch.jsx — UI-компонент Topics Or Panels Switch домена ленты/тем/постов. Связи: импортирует forum/features/dm/components/InboxPane.jsx, forum/features/feed/components/TopicsPane.jsx, forum/features/feed/components/UserPostsPane.jsx; используется в forum/features/feed/components/TopicsSection.jsx.
+          - TopicsPane.jsx — UI-компонент Topics Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
+          - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
+          - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+        - constants/ — Каталог слоя константы внутри feature feed.
+          - deeplink.js — Константа deeplink домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js.
+        - docs/ — Каталог слоя документация внутри feature feed.
+          - phase-03-feed.md — Документ phase 03 feed домена ленты/тем/постов. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hooks/ — Каталог слоя хуки внутри feature feed.
+          - useForumCreatePostAction.js — Хук use Forum Create Post Action домена ленты/тем/постов. Связи: импортирует forum/features/dm/services/sendDmComposerMessage.js, forum/features/media/services/resolveComposerMediaPayload.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumCreateTopicAction.js — Хук use Forum Create Topic Action домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useForumDataRuntime.js — Хук use Forum Data Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumMutationQueue.js, forum/features/feed/hooks/useForumSseBridge.js, forum/features/feed/hooks/useForumSyncLoop.js; используется в forum/ForumRoot.jsx.
+          - useForumDeepLinkFlow.js — Хук use Forum Deep Link Flow домена ленты/тем/постов. Связи: импортирует forum/features/feed/constants/deeplink.js, forum/shared/hooks/useEvent.js, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useForumFeedRuntime.js — Хук use Forum Feed Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useThreadOpenNavigation.js, forum/features/feed/hooks/useThreadPostsModel.js; используется в forum/ForumRoot.jsx.
+          - useForumHomeAction.js — Хук use Forum Home Action домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumMutationActions.js — Хук use Forum Mutation Actions домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useForumMutationQueue.js — Хук use Forum Mutation Queue домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumNavigationActions.js — Хук use Forum Navigation Actions домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/alignInboxStartUnderTabs.js, forum/features/feed/utils/navOrchestrator.js, forum/features/feed/utils/navState.js; используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - useForumNavigationRuntime.js — Хук use Forum Navigation Runtime домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/useForumHomeAction.js, forum/features/feed/hooks/useForumNavigationActions.js, forum/features/feed/hooks/useNavStateSnapshot.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumSseBridge.js — Хук use Forum Sse Bridge домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumSyncLoop.js — Хук use Forum Sync Loop домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/feed/hooks/useForumDataRuntime.js.
+          - useForumViewTracking.js — Хук use Forum View Tracking домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useNavStateSnapshot.js — Хук use Nav State Snapshot домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
+          - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
+          - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
+          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js; используется в forum/features/dm/hooks/useForumDmRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+          - useUserRecommendationsRail.js — Хук use User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/ForumRoot.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+        - services/ — Каталог слоя сервисы внутри feature feed.
+          - rateLimiter.js — Сервис rate Limiter домена ленты/тем/постов. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature feed.
+          - cardMemo.js — Утилита card Memo домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostCardBridge.jsx, forum/features/feed/components/TopicItem.jsx, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - interleaveRecommendationRails.js — Утилита interleave Recommendation Rails домена ленты/тем/постов. Связи: используется в forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/features/feed/utils/interleaveRecommendationRails.test.js.
+          - navOrchestrator.js — Утилита nav Orchestrator домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - navScroll.js — Утилита nav Scroll домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/ForumRoot.jsx.
+          - navState.js — Утилита nav State домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationActions.js.
+          - openThreadFromPost.js — Утилита open Thread From Post домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+          - postEvents.js — Утилита post Events домена ленты/тем/постов. Связи: импортирует forum/events/bus.js; используется в forum/ForumRoot.jsx.
+          - postFocus.js — Утилита post Focus домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
+          - postMerge.js — Утилита post Merge домена ленты/тем/постов. Связи: используется в forum/features/dm/hooks/useForumDmRuntime.js, forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumSyncLoop.js.
+          - signatures.js — Утилита signatures домена ленты/тем/постов. Связи: используется в forum/features/feed/utils/snapshotTransforms.js.
+          - snapshotTransforms.js — Утилита snapshot Transforms домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/signatures.js; используется в forum/features/feed/hooks/useForumDataRuntime.js, forum/features/feed/hooks/useForumMutationQueue.js, tests/unit/forum/forum-post-change-delta.test.js.
+      - geo/ — Каталог geo.
+        - GeoSessionTouchClient.jsx — Модуль Geo Session Touch Client домена geo. Связи: используется в forum/ForumRoot.jsx.
+      - media/ — Подсистема медиа, плееров и preview.
+        - components/ — Каталог слоя компоненты внутри feature media.
+          - qcast/ — Каталог qcast внутри feature media.
+            - QCastIcons.jsx — UI-компонент QCast Icons домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - ComposerAttachmentPreview.jsx — UI-компонент Composer Attachment Preview домена медиа. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js, lib/nativeVideoPoster.js; используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ExternalVideoPlayer.jsx — UI-компонент External Video Player домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/features/feed/components/PostMediaStack.jsx.
+          - LivePreview.jsx — UI-компонент Live Preview домена медиа. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+          - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+          - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/hooks/useHtmlFlag.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
+          - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature media.
+          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumClientVideoOptimizer.js, lib/videoPipelineProgress.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/telegramMiniAppSwipeLock.js; используется в forum/ForumRoot.jsx.
+          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/hooks/useVideoFeedActions.js, forum/features/media/hooks/useVideoFeedLifecycle.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js, forum/services/forumApi.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
+          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
+          - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+        - services/ — Каталог слоя сервисы внутри feature media.
+          - moderatePreparedVideoForUpload.js — Сервис moderate Prepared Video For Upload домена медиа. Связи: импортирует forum/features/media/utils/moderationPrep.js, forum/features/moderation/utils/http.js; используется в forum/features/media/services/uploadR2MediaFile.js, tests/integration/forum/media/videoUploadGateway.test.js.
+          - resolveComposerMediaPayload.js — Сервис resolve Composer Media Payload домена медиа. Связи: импортирует forum/features/media/services/uploadR2MediaFile.js, forum/shared/constants/media.js, lib/nativeVideoPoster.js; используется в forum/features/feed/hooks/useForumCreatePostAction.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - uploadR2MediaFile.js — Сервис upload R2 Media File домена медиа. Связи: импортирует forum/features/media/services/moderatePreparedVideoForUpload.js, lib/forumClientVideoOptimizer.js, lib/nativeVideoPoster.js; используется в app/ads/home.js, forum/features/media/services/resolveComposerMediaPayload.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature media.
+          - externalVideoBridge.js — Утилита external Video Bridge домена медиа. Связи: используется в forum/features/feed/components/PostMediaStack.jsx, forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/hooks/useForumMediaCoordinator.js.
+          - formatMediaTime.js — Утилита format Media Time домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - frontCameraMirror.js — Утилита front Camera Mirror домена медиа. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - mediaLifecycleRuntime.js — Утилита media Lifecycle Runtime домена медиа. Связи: импортирует forum/features/media/components/QCastPlayer.jsx, forum/features/media/components/VideoMedia.jsx, forum/features/media/utils/videoControls.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx.
+          - mediaLinks.js — Утилита media Links домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/media/utils/mediaUrlPipeline.js, forum/features/ui/components/ForumSearchSortControls.jsx.
+          - mediaRuntime.js — Утилита media Runtime домена медиа. Связи: импортирует forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/hooks/useVideoTrimController.js.
+          - mediaStatePolicy.js — Утилита media State Policy домена медиа. Связи: используется в tests/unit/forum/media/mediaStatePolicy.test.js.
+          - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
+          - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx, forum/features/media/services/moderatePreparedVideoForUpload.js.
+          - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
+          - telegramMiniAppSwipeLock.js — Утилита telegram Mini App Swipe Lock домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js.
+          - urlParsing.js — Утилита url Parsing домена медиа. Связи: используется в forum/ForumRoot.jsx.
+          - videoControls.js — Утилита video Controls домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - videoCopy.js — Утилита video Copy домена медиа. Связи: импортирует forum/shared/utils/forumLocale.js; используется в forum/ForumRoot.jsx.
+          - videoFeedActions.js — Утилита video Feed Actions домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedActions.js.
+          - videoFeedBuilder.js — Утилита video Feed Builder домена медиа. Связи: импортирует forum/features/media/utils/videoFeedPosts.js, forum/features/media/utils/videoFeedRandom.js; используется в forum/features/media/hooks/useVideoFeedState.js, tests/unit/forum/features/feed/utils/cardMemo.test.js.
+          - videoFeedPosts.js — Утилита video Feed Posts домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedRandom.js — Утилита video Feed Random домена медиа. Связи: используется в forum/features/media/utils/videoFeedBuilder.js.
+          - videoFeedSalt.js — Утилита video Feed Salt домена медиа. Связи: используется в forum/features/media/hooks/useVideoFeedState.js.
+          - videoFeedScroll.js — Утилита video Feed Scroll домена медиа. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+      - moderation/ — Подсистема жалоб, модерации и admin UI.
+        - components/ — Каталог слоя компоненты внутри feature moderation.
+          - AdminPopover.jsx — UI-компонент Admin Popover домена модерации. Связи: импортирует forum/services/forumApi.js.
+          - ReportPopover.jsx — UI-компонент Report Popover домена модерации. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature moderation.
+          - useAdminActions.js — Хук use Admin Actions домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useAdminFlag.js — Хук use Admin Flag домена модерации. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useForumModerationRuntime.js — Хук use Forum Moderation Runtime домена модерации. Связи: импортирует forum/features/moderation/hooks/useAdminActions.js, forum/features/moderation/hooks/useAdminFlag.js, forum/features/moderation/hooks/useForumModerationUi.js; используется в forum/ForumRoot.jsx.
+          - useForumModerationUi.js — Хук use Forum Moderation Ui домена модерации. Связи: используется в app/ads/home.js, forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useMediaModeration.js — Хук use Media Moderation домена модерации. Связи: импортирует forum/features/moderation/utils/http.js; используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+          - useReportController.js — Хук use Report Controller домена модерации. Связи: используется в forum/features/moderation/hooks/useForumModerationRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature moderation.
+          - http.js — Утилита http домена модерации. Связи: используется в app/ads/home.js, forum/features/media/services/moderatePreparedVideoForUpload.js, forum/features/moderation/hooks/useMediaModeration.js.
+      - profile/ — Подсистема профиля, about, VIP и popover.
+        - components/ — Каталог слоя компоненты внутри feature profile.
+          - AboutRail.jsx — UI-компонент About Rail домена профиля/VIP. Связи: импортирует forum/features/profile/utils/aboutText.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - AvatarEmoji.jsx — UI-компонент Avatar Emoji домена профиля/VIP. Связи: импортирует forum/features/profile/utils/avatar.js, forum/features/profile/utils/profileCache.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - ForumVipControl.jsx — UI-компонент Forum Vip Control домена профиля/VIP. Связи: импортирует forum/features/profile/components/VipPopover.jsx, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - ProfilePopover.jsx — UI-компонент Profile Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/account.js, forum/features/subscriptions/components/FollowersCounterInline.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - UserInfoPopover.jsx — UI-компонент User Info Popover домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/subscriptions/components/FollowersCounterInline.jsx, forum/shared/api/translate.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - VipFlipBadge.jsx — UI-компонент Vip Flip Badge домена профиля/VIP. Связи: импортирует forum/shared/utils/classnames.js, components/i18n.js; используется в app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - VipPopover.jsx — UI-компонент Vip Popover домена профиля/VIP. Связи: используется в forum/features/profile/components/ForumVipControl.jsx.
+        - constants/ — Каталог слоя константы внутри feature profile.
+          - vipAssets.js — Константа vip Assets домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature profile.
+          - useAboutEditor.js — Хук use About Editor домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useForumProfileSocialRuntime.js — Хук use Forum Profile Social Runtime домена профиля/VIP. Связи: импортирует forum/features/profile/hooks/useAboutEditor.js, forum/features/profile/hooks/useVipPayAction.js, forum/features/profile/hooks/useVipSubscriptionState.js; используется в forum/ForumRoot.jsx.
+          - useForumProfileSync.js — Хук use Forum Profile Sync домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useEvent.js, forum/shared/storage/localStorage.js; используется в forum/ForumRoot.jsx.
+          - useVipFlag.js — Хук use Vip Flag домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/profile/utils/vip.js; используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/dm/components/DmThreadMessageRow.jsx.
+          - useVipPayAction.js — Хук use Vip Pay Action домена профиля/VIP. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/features/qcoin/utils/paymentWindow.js, lib/paymentMethodClient.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+          - useVipSubscriptionState.js — Хук use Vip Subscription State домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature profile.
+          - aboutText.js — Утилита about Text домена профиля/VIP. Связи: используется в forum/ForumRoot.jsx, forum/features/profile/components/AboutRail.jsx.
+          - avatar.js — Утилита avatar домена профиля/VIP. Связи: используется в forum/features/profile/components/AvatarEmoji.jsx.
+          - profileCache.js — Утилита profile Cache домена профиля/VIP. Связи: импортирует forum/shared/utils/browser.js, lib/ql7-support/systemActor.js; используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+          - vip.js — Утилита vip домена профиля/VIP. Связи: используется в forum/features/profile/hooks/useVipFlag.js.
+      - qcoin/ — Подсистема QCoin в форуме.
+        - components/ — Каталог слоя компоненты внутри feature qcoin.
+          - QCoinInline.jsx — UI-компонент QCoin Inline домена QCoin. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - QCoinWithdrawPopover.jsx — UI-компонент QCoin Withdraw Popover домена QCoin. Связи: импортирует components/visual-runtime/ViewportAnimatedImage.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature qcoin.
+          - useQCoinLive.js — Хук use QCoin Live домена QCoin. Связи: импортирует forum/features/qcoin/utils/account.js; используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature qcoin.
+          - account.js — Утилита account домена QCoin. Связи: используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/qcoin/hooks/useQCoinLive.js.
+          - formatQCoinBalance.js — Утилита format QCoin Balance домена QCoin. Связи: используется в forum/features/qcoin/components/QCoinInline.jsx, components/QuantumWallet.jsx.
+          - paymentWindow.js — Утилита payment Window домена QCoin. Связи: используется в forum/features/profile/hooks/useVipPayAction.js, components/QuantumWallet.jsx.
+      - quests/ — Подсистема квестов форума.
+        - components/ — Каталог слоя компоненты внутри feature quests.
+          - QuestClaimOverlay.jsx — UI-компонент Quest Claim Overlay домена квестов. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - QuestHub.jsx — UI-компонент Quest Hub домена квестов. Связи: импортирует forum/features/quests/utils/progress.js, forum/shared/utils/classnames.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/features/quests/components/QuestPane.jsx.
+          - QuestPane.jsx — UI-компонент Quest Pane домена квестов. Связи: импортирует forum/features/quests/components/QuestHub.jsx; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature quests.
+          - useForumQuestConfig.js — Хук use Forum Quest Config домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestProgress.js — Хук use Forum Quest Progress домена квестов. Связи: импортирует forum/features/quests/hooks/useQuestStorageState.js, forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useForumQuestRuntime.js — Хук use Forum Quest Runtime домена квестов. Связи: импортирует forum/features/quests/hooks/useForumQuestConfig.js, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestClaimAction.js.
+          - useQuestClaimAction.js — Хук use Quest Claim Action домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+          - useQuestStorageState.js — Хук use Quest Storage State домена квестов. Связи: импортирует forum/features/quests/utils/progress.js; используется в forum/features/quests/hooks/useForumQuestProgress.js.
+          - useQuestViewActions.js — Хук use Quest View Actions домена квестов. Связи: используется в forum/features/quests/hooks/useForumQuestRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature quests.
+          - progress.js — Утилита progress домена квестов. Связи: используется в forum/features/quests/components/QuestHub.jsx, forum/features/quests/hooks/useForumQuestProgress.js, forum/features/quests/hooks/useQuestStorageState.js.
+      - subscriptions/ — Подсистема подписок/соцграфа.
+        - components/ — Каталог слоя компоненты внутри feature subscriptions.
+          - FollowersCounterInline.jsx — UI-компонент Followers Counter Inline домена подписок. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/profile/components/ProfilePopover.jsx, forum/features/profile/components/UserInfoPopover.jsx.
+          - SubscriptionsPopover.jsx — UI-компонент Subscriptions Popover домена подписок. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/services/forumApi.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature subscriptions.
+          - useStarredAuthorsState.js — Хук use Starred Authors State домена подписок. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
+        - utils/ — Каталог слоя утилиты внутри feature subscriptions.
+          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/feed/hooks/useTopicDiscoveryModel.js, forum/features/subscriptions/hooks/useStarredAuthorsState.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+      - ui/ — Общие UI-узлы и проп-бандлы форума.
+        - components/ — Каталог слоя компоненты внутри feature ui.
+          - ComposeDock.jsx — UI-компонент Compose Dock домена форумного UI. Связи: импортирует forum/features/ui/components/ComposerCore.jsx, forum/features/ui/components/ComposerFabButton.jsx, forum/features/ui/components/ComposerStatusMeta.jsx; используется в forum/ForumLayout.jsx.
+          - ComposerActionRail.jsx — UI-компонент Composer Action Rail домена форумного UI. Связи: импортирует forum/features/dm/components/Ql7SupportComposerRuntimePanel.jsx, lib/ql7-support/inputPolicy.js; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerCore.jsx — UI-компонент Composer Core домена форумного UI. Связи: импортирует forum/features/dm/components/DmVoicePlayer.jsx, forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/ui/components/ComposerActionRail.jsx; используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerEmojiPanel.jsx — UI-компонент Composer Emoji Panel домена форумного UI. Связи: импортирует components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerEmojiPreview.jsx — UI-компонент Composer Emoji Preview домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ComposerFabButton.jsx — UI-компонент Composer Fab Button домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerFileInput.jsx — UI-компонент Composer File Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - ComposerMediaProgressBar.jsx — UI-компонент Composer Media Progress Bar домена форумного UI. Связи: импортирует components/MediaPipelineProgress.jsx; используется в forum/features/ui/components/ComposerCore.jsx.
+          - ComposerStatusMeta.jsx — UI-компонент Composer Status Meta домена форумного UI. Связи: используется в forum/features/ui/components/ComposeDock.jsx.
+          - ComposerTextInput.jsx — UI-компонент Composer Text Input домена форумного UI. Связи: используется в forum/features/ui/components/ComposerCore.jsx.
+          - ConfirmDeleteOverlay.jsx — UI-компонент Confirm Delete Overlay домена форумного UI. Связи: импортирует components/i18n.js; используется в forum/features/feed/components/PostOwnerMenu.jsx, forum/features/feed/components/TopicItem.jsx.
+          - DmDeletePopover.jsx — UI-компонент Dm Delete Popover домена форумного UI. Связи: используется в forum/features/ui/components/ForumOverlayStack.jsx.
+          - ForumActionNavIcon.jsx — UI-компонент Forum Action Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+          - ForumActionRow.jsx — UI-компонент Forum Action Row домена форумного UI. Связи: импортирует forum/features/ui/components/ForumActionNavIcon.jsx, forum/features/ui/components/VideoFeedNavIcon.jsx, forum/shared/utils/counts.js; используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+          - ForumAdSlot.jsx — UI-компонент Forum Ad Slot домена форумного UI. Связи: импортирует forum/ForumAds.js; используется в forum/ForumRoot.jsx.
+          - ForumControlNavIcon.jsx — UI-компонент Forum Control Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumSearchSortControls.jsx.
+          - ForumOverlayStack.jsx — UI-компонент Forum Overlay Stack домена форумного UI. Связи: импортирует forum/SharePopover.jsx, forum/features/media/components/VideoLimitOverlay.jsx, forum/features/media/components/VideoOverlay.jsx; используется в forum/ForumLayout.jsx.
+          - ForumSearchSortControls.jsx — UI-компонент Forum Search Sort Controls домена форумного UI. Связи: импортирует forum/features/media/utils/mediaLinks.js, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx; используется в forum/ForumHeaderPanel.jsx.
+          - HeadChevronIcon.jsx — UI-компонент Head Chevron Icon домена форумного UI. Связи: импортирует forum/shared/utils/classnames.js; используется в forum/ForumHeaderPanel.jsx.
+          - MainForumActionCluster.jsx — UI-компонент Main Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/TopicsSection.jsx.
+          - StarButton.jsx — UI-компонент Star Button домена форумного UI. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx, forum/features/feed/components/PostHeaderMeta.jsx.
+          - ThreadForumActionCluster.jsx — UI-компонент Thread Forum Action Cluster домена форумного UI. Связи: импортирует forum/features/feed/components/CreateTopicCard.jsx, forum/features/ui/components/ForumActionRow.jsx, forum/features/ui/constants/inviteButton.js; используется в forum/features/feed/components/ThreadSection.jsx.
+          - VideoFeedNavIcon.jsx — UI-компонент Video Feed Nav Icon домена форумного UI. Связи: используется в forum/features/ui/components/ForumActionRow.jsx.
+        - constants/ — Каталог слоя константы внутри feature ui.
+          - emojiCatalog.js — Константа emoji Catalog домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - inviteButton.js — Константа invite Button домена форумного UI. Связи: используется в forum/features/ui/components/MainForumActionCluster.jsx, forum/features/ui/components/ThreadForumActionCluster.jsx.
+        - hooks/ — Каталог слоя хуки внутри feature ui.
+          - useComposerActionHandlers.js — Хук use Composer Action Handlers домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerEmojiState.js — Хук use Composer Emoji State домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
+          - useComposerSafetyPreview.js — Хук use Composer Safety Preview домена форумного UI. Связи: импортирует lib/composer-safety/clientPreview.js; используется в app/exchange/battle-chat/BattleChatComposer.jsx, forum/features/ui/components/ComposerCore.jsx.
+          - useComposerScrollMemory.js — Хук use Composer Scroll Memory домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useComposerUiLifecycle.js — Хук use Composer Ui Lifecycle домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
+          - useForumAdSlots.js — Хук use Forum Ad Slots домена форумного UI. Связи: импортирует forum/features/ui/utils/adsSlots.js; используется в forum/features/ui/hooks/useForumAdsRuntime.js.
+          - useForumAdsRuntime.js — Хук use Forum Ads Runtime домена форумного UI. Связи: импортирует forum/ForumAds.js, forum/features/ui/hooks/useForumAdSlots.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
+          - useForumComposerRuntime.js — Хук use Forum Composer Runtime домена форумного UI. Связи: импортирует forum/features/media/hooks/useMediaPipelineController.js, forum/features/media/hooks/useVoiceRecorder.js, forum/features/ui/hooks/useComposerScrollMemory.js; используется в forum/ForumRoot.jsx.
+          - useForumComposerSubmitRuntime.js — Хук use Forum Composer Submit Runtime домена форумного UI. Связи: импортирует forum/features/feed/hooks/useForumCreatePostAction.js, forum/features/feed/hooks/useForumCreateTopicAction.js, forum/features/feed/hooks/useForumViewTracking.js; используется в forum/ForumRoot.jsx.
+          - useForumEditMode.js — Хук use Forum Edit Mode домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumGlobalPopovers.js — Хук use Forum Global Popovers домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumHeadCollapse.js — Хук use Forum Head Collapse домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumPopoverModeController.js — Хук use Forum Popover Mode Controller домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumScreenFlowsRuntime.js — Хук use Forum Screen Flows Runtime домена форумного UI. Связи: импортирует forum/features/dm/hooks/useDmDeleteCopy.js, forum/features/dm/hooks/useDmOpenEvents.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js; используется в forum/ForumRoot.jsx.
+          - useForumSessionShell.js — Хук use Forum Session Shell домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useForumViewState.js — Хук use Forum View State домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - useScrollResizeCompensation.js — Хук use Scroll Resize Compensation домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+        - utils/ — Каталог слоя утилиты внутри feature ui.
+          - propBundles/ — Каталог propBundles внутри feature ui.
+            - buildActionClusterProps.js — Утилита build Action Cluster Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildComposerCoreProps.js — Утилита build Composer Core Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildForumHeaderPanelProps.js — Утилита build Forum Header Panel Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildInboxPaneProps.js — Утилита build Inbox Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildSearchSortControlsProps.js — Утилита build Search Sort Controls Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildThreadRepliesPaneProps.js — Утилита build Thread Replies Pane Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+            - buildTopicsSwitchProps.js — Утилита build Topics Switch Props домена форумного UI. Связи: используется в forum/features/ui/utils/buildForumRootPropBundles.js.
+          - adsSlots.js — Утилита ads Slots домена форумного UI. Связи: используется в forum/features/ui/hooks/useForumAdSlots.js.
+          - buildForumLayoutProps.js — Утилита build Forum Layout Props домена форумного UI. Связи: используется в forum/ForumRoot.jsx.
+          - buildForumRootPropBundles.js — Утилита build Forum Root Prop Bundles домена форумного UI. Связи: импортирует forum/features/ui/utils/propBundles/buildActionClusterProps.js, forum/features/ui/utils/propBundles/buildComposerCoreProps.js, forum/features/ui/utils/propBundles/buildForumHeaderPanelProps.js; используется в forum/ForumRoot.jsx.
+    - p/ — Каталог p.
+      - [postId]/ — Каталог [postId].
+        - route.js — JS-файл route домена форума. Связи: импортирует app/api/forum/_db.js, lib/mongo/forum-primary.cjs.
+    - services/ — Каталог services.
+      - forumApi.js — JS-файл forum Api домена форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedActions.js, forum/features/moderation/components/AdminPopover.jsx.
+    - shared/ — Shared-слой форума: общие хуки, utils, storage, config.
+      - api/ — Каталог shared-слоя форума: api.
+        - http.js — Shared API-хелпер http форума. Связи: используется в forum/shared/api/translate.js.
+        - translate.js — Shared API-хелпер translate форума. Связи: импортирует forum/shared/api/http.js; используется в forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/hooks/usePostTranslation.js, forum/features/profile/components/UserInfoPopover.jsx.
+      - components/ — Каталог shared-слоя форума: components.
+        - ForumNickText.jsx — Shared UI-компонент Forum Nick Text форума. Связи: импортирует forum/shared/hooks/useForumNickBadgeFit.js; используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - HydrateText.jsx — Shared UI-компонент Hydrate Text форума. Связи: используется в forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostActionBar.jsx.
+      - config/ — Каталог shared-слоя форума: config.
+        - runtime.js — Shared конфиг runtime форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/ForumRoot.jsx, forum/features/media/hooks/useVideoFeedWindowing.js, tests/unit/forum/shared/config/runtime.test.js.
+      - constants/ — Каталог shared-слоя форума: constants.
+        - media.js — Shared константа media форума. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadVideo/route.js.
+      - docs/ — Каталог shared-слоя форума: docs.
+        - phase-01-shared-foundation.md — Shared документ phase 01 shared foundation форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - hooks/ — Каталог shared-слоя форума: hooks.
+        - useEvent.js — Shared хук use Event форума. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/useForumFeedRuntime.js, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - useForumNavBridge.js — Shared хук use Forum Nav Bridge форума. Связи: импортирует forum/shared/hooks/useEvent.js; используется в forum/ForumRoot.jsx.
+        - useForumNickBadgeFit.js — Shared хук use Forum Nick Badge Fit форума. Связи: используется в forum/shared/components/ForumNickText.jsx, tests/component/forum/runtime-stability-sentinel.component.test.jsx.
+        - useForumToast.js — Shared хук use Forum Toast форума. Связи: импортирует forum/shared/utils/classnames.js; используется в app/ads/home.js, forum/ForumRoot.jsx.
+        - useForumWindowing.js — Shared хук use Forum Windowing форума. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - useHtmlFlag.js — Shared хук use Html Flag форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoOverlay.jsx, forum/features/media/hooks/useForumVideoFeedRuntime.js.
+        - usePageLock.js — Shared хук use Page Lock форума. Связи: используется в forum/features/media/components/VideoOverlay.jsx.
+      - storage/ — Каталог shared-слоя форума: storage.
+        - localStorage.js — Shared storage-обертка local Storage форума. Связи: импортирует forum/shared/utils/browser.js; используется в forum/features/profile/hooks/useForumProfileSync.js.
+      - telemetry/ — Каталог shared-слоя форума: telemetry.
+        - diag.js — Shared телеметрия diag форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - utils/ — Каталог shared-слоя форума: utils.
+        - browser.js — Shared утилита browser форума. Связи: используется в forum/ForumRoot.jsx, forum/features/media/hooks/useForumMediaCoordinator.js, forum/features/moderation/hooks/useAdminFlag.js.
+        - classnames.js — Shared утилита classnames форума. Связи: используется в forum/ForumHeaderPanel.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - counts.js — Shared утилита counts форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/InboxTabsHeader.jsx, forum/features/feed/components/PostActionBar.jsx.
+        - formatters.js — Shared утилита formatters форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmDialogRow.jsx, forum/features/dm/components/DmThreadHeader.jsx.
+        - forumHeightIndex.mjs — Shared утилита forum Height Index форума. Связи: используется в forum/shared/hooks/useForumWindowing.js, tests/unit/forum/windowing-height-index.test.js, tools/prove-forum-windowing-height-index.mjs.
+        - forumLocale.js — Shared утилита forum Locale форума. Связи: используется в forum/features/media/utils/videoCopy.js.
+        - forumWindowingPresets.js — Shared утилита forum Windowing Presets форума. Связи: используется в forum/features/dm/components/DmDialogsPane.jsx, forum/features/dm/components/DmMessagesPane.jsx, forum/features/dm/components/InboxRepliesPane.jsx.
+        - forumWindowingRegistry.js — Shared утилита forum Windowing Registry форума. Связи: используется в forum/ForumRoot.jsx, forum/features/feed/hooks/useForumDeepLinkFlow.js, forum/features/feed/hooks/usePostParentReplyNav.js.
+        - linkDetection.js — Shared утилита link Detection форума. Связи: используется в forum/ForumRoot.jsx.
+        - openAuth.js — Shared утилита open Auth форума. Связи: используется в forum/ForumRoot.jsx, app/game/page.js.
+        - richText.js — Shared утилита rich Text форума. Связи: используется в forum/ForumRoot.jsx, forum/features/dm/components/DmThreadMessageRow.jsx, forum/features/feed/components/PostCardBridge.jsx.
+        - time.js — Shared утилита time форума. Связи: используется в forum/ForumRoot.jsx.
+    - styles/ — Стили форума и их сборка.
+      - modules/ — Модульные фрагменты стилевого слоя форума.
+        - composerStyles.js — Модуль стилевой сборки форума: composer Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - dmStyles.js — Модуль стилевой сборки форума: dm Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - foundationStyles.js — Модуль стилевой сборки форума: foundation Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fxStyles.js — Модуль стилевой сборки форума: fx Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - layoutStyles.js — Модуль стилевой сборки форума: layout Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - profileStyles.js — Модуль стилевой сборки форума: profile Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - qcoinStyles.js — Модуль стилевой сборки форума: qcoin Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ql7SupportGlobalStyles.js — Модуль стилевой сборки форума: ql7 Support Global Styles. Связи: используется в forum/ForumLayout.jsx.
+        - questStyles.js — Модуль стилевой сборки форума: quest Styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ForumFxStyles.jsx — Файл стилевого слоя форума: Forum Fx Styles. Связи: используется в forum/ForumLayout.jsx.
+      - ForumStyles.jsx — Файл стилевого слоя форума: Forum Styles. Связи: используется в forum/ForumLayout.jsx.
+    - error.js — JS-файл error домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - Forum.jsx — Тонкий entry-point экрана форума. Связи: импортирует forum/ForumRoot.jsx; используется в forum/page.js.
+    - ForumAds.js — Форумная интеграция рекламных/промо-блоков. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx, components/i18n.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в app/ads.js, forum/ForumRoot.jsx, forum/features/ui/components/ForumAdSlot.jsx.
+    - ForumHeaderPanel.jsx — Компоновщик шапки форума с контролами, профилем, QCoin и VIP. Связи: импортирует forum/features/profile/components/AboutRail.jsx, forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/ForumVipControl.jsx; используется в forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx.
+    - ForumLayout.jsx — Layout-обвязка форума. Связи: импортирует forum/features/feed/components/ThreadSection.jsx, forum/features/feed/components/TopicsSection.jsx, forum/features/ui/components/ComposeDock.jsx; используется в forum/ForumRoot.jsx.
+    - ForumProviders.jsx — Провайдеры и контекстная сборка форума. Связи: используется в forum/ForumRoot.jsx.
+    - ForumRoot.jsx — Корневой composition-root форума и мессенджера. Связи: импортирует forum/ForumAds.js, forum/ForumLayout.jsx, forum/ForumProviders.jsx; используется в forum/Forum.jsx.
+    - layout.js — JS-файл layout домена форума. Связи: импортирует lib/metadataCache.js.
+    - loading.js — JS-файл loading домена форума. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - page.js — JS-файл page домена форума. Связи: импортирует forum/Forum.jsx, components/ForumBootSplash.jsx, components/TopBar.js.
+    - SharePopover.jsx — JSX-файл Share Popover домена форума. Связи: импортирует lib/forumShareManager.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
+  - game/ — Страницы/компоненты игрового раздела.
+    - layout.js — Next.js layout для сегмента /game. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /game. Связи: импортирует app/ads.js, forum/shared/utils/openAuth.js, components/TopBar.js.
+  - privacy/ — Страница privacy/policy.
+    - layout.js — Next.js layout для сегмента /privacy. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /privacy. Связи: импортирует components/TopBar.js, components/i18n.js.
+  - subscribe/ — Страницы подписки/лендинга.
+    - layout.js — Next.js layout для сегмента /subscribe. Связи: импортирует lib/metadataCache.js.
+    - page.js — Next.js страница маршрута /subscribe. Связи: импортирует app/subscribe/subscribe.client.jsx.
+    - subscribe.client.jsx — JSX-файл subscribe.client сегмента subscribe. Связи: импортирует app/ads.js, components/QuantumWalletLaunchIcon.jsx, components/TopBar.js; используется в app/subscribe/page.js.
+  - tma/ — Telegram Mini App связанные страницы.
+    - auto/ — Авто-страницы TMA.
+      - layout.js — Next.js layout для сегмента /tma/auto. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - page.jsx — JSX-файл page сегмента tma/auto. Связи: импортирует components/i18n.js, components/visual-runtime/ViewportAnimatedImage.jsx.
+  - trust-and-identity/ — Каталог trust-and-identity.
+    - route.js — JS-файл route сегмента trust-and-identity. Связи: импортирует lib/seo/trustIdentityRoutes.js.
+  - ads.js — JS-файл ads сегмента app. Связи: импортирует forum/ForumAds.js; используется в app/about/page.js, app/academy/page.js, app/exchange/page.js.
+  - globals.css — CSS-файл globals сегмента app. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - layout.js — Next.js layout для сегмента /. Связи: импортирует app/providers.jsx, components/AndroidAppPrompt.jsx, components/AndroidNotificationBadgeSync.jsx.
+  - page.js — Next.js страница маршрута /. Связи: импортирует app/ads.js, app/components/CryptoNewsLens.jsx, components/QuantumWalletLaunchIcon.jsx.
+  - providers.jsx — JSX-файл providers сегмента app. Связи: импортирует components/WalletRuntimeBridge.jsx; используется в app/layout.js.
+  - robots.js — JS-файл robots сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в tests/contracts/project/seo-indexing-contracts.test.js, tests/contracts/project/trust-identity-seo-contracts.test.js.
+  - sitemap.js — JS-файл sitemap сегмента app. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js, lib/seo/trustIdentityRoutes.js; используется в tests/contracts/project/seo-indexing-contracts.test.js, tests/contracts/project/trust-identity-seo-contracts.test.js, tools/ql7-trust-identity-check-final-baseline-v3.mjs.
+- components/ — Общие React-компоненты всего проекта.
+  - composer-safety/ — Каталог composer-safety.
+    - ComposerSafetyBadge.jsx — Общий React-компонент Composer Safety Badge, используемый вне одного домена. Связи: импортирует lib/composer-safety/badgeLexicon.js; используется в app/exchange/battle-chat/BattleChatComposer.jsx, forum/features/ui/components/ComposerCore.jsx, tests/component/ql7-support/semantic-badges-test.jsx.
+  - i18n-dicts/ — Каталог i18n-dicts.
+    - ar.js — Общий React-компонент ar, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - en.js — Общий React-компонент en, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - es.js — Общий React-компонент es, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - manifest.js — Общий React-компонент manifest, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/siteIndex.js, tests/contracts/project/ads-geo-targeting-portal-contracts.test.js.
+    - ru.js — Общий React-компонент ru, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - tr.js — Общий React-компонент tr, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - uk.js — Общий React-компонент uk, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+    - zh.js — Общий React-компонент zh, используемый вне одного домена. Связи: используется в components/i18n.js, lib/seo/trustIdentityContent.js, tests/contracts/metamarket/metamarket-contracts.test.js.
+  - metamarket/ — Каталог metamarket.
+    - metaMarketFormat.js — Общий React-компонент meta Market Format, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+    - metaMarketI18n.js — Общий React-компонент meta Market I18n, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - seo/ — Каталог seo.
+    - QuantumOrganizationJsonLd.jsx — Общий React-компонент Quantum Organization Json Ld, используемый вне одного домена. Связи: импортирует lib/seo/trustIdentityStructuredData.js; используется в app/layout.js.
+    - RootLocaleRuntime.jsx — Общий React-компонент Root Locale Runtime, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js, tests/component/seo/root-locale-authority-r13.test.js, tools/ql7-trust-identity-check-final-baseline-v3.mjs.
+  - trust/ — Каталог trust.
+    - TrustIdentityAboutTeaser.jsx — Общий React-компонент Trust Identity About Teaser, используемый вне одного домена. Связи: импортирует components/trust/TrustIdentityArticle.module.css, lib/seo/trustIdentityRoutes.js; используется в app/about/page.js.
+    - TrustIdentityArticle.jsx — Общий React-компонент Trust Identity Article, используемый вне одного домена. Связи: импортирует components/trust/TrustIdentityArticle.module.css, components/trust/TrustIdentityLanguageSwitcher.jsx, lib/brand/officialChannels.js; используется в app/[lang]/trust-and-identity/page.js, tests/smoke/seo/trust-identity-pages.test.jsx.
+    - TrustIdentityArticle.module.css — Общий React-компонент Trust Identity Article.module, используемый вне одного домена. Связи: используется в app/contact/page.js, components/trust/TrustIdentityAboutTeaser.jsx, components/trust/TrustIdentityArticle.jsx.
+    - TrustIdentityLanguageSwitcher.jsx — Общий React-компонент Trust Identity Language Switcher, используемый вне одного домена. Связи: импортирует components/trust/TrustIdentityArticle.module.css, lib/seo/trustIdentityRoutes.js; используется в components/trust/TrustIdentityArticle.jsx.
+  - visual-runtime/ — Каталог visual-runtime.
+    - GlobalVisualActivityRuntime.jsx — Общий React-компонент Global Visual Activity Runtime, используемый вне одного домена. Связи: импортирует lib/visual-runtime/animatedAssetRegistry.js, lib/visual-runtime/visualActivityRegistry.js; используется в app/layout.js, tests/component/visual-runtime/generic-scope-hydration.component.test.jsx, tests/component/visual-runtime/viewport-animated-image.component.test.jsx.
+    - ViewportAnimatedImage.jsx — Общий React-компонент Viewport Animated Image, используемый вне одного домена. Связи: импортирует lib/visual-runtime/animatedAssetManifest.js, lib/visual-runtime/animatedAssetRegistry.js, lib/visual-runtime/visualActivityRegistry.js; используется в app/exchange/ai-box/AIWorkbench.jsx, forum/ForumAds.js, forum/features/dm/components/DmMediaRenderer.jsx.
+  - AndroidAppPrompt.jsx — Общий React-компонент Android App Prompt, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
+  - AndroidChromiumVideoCanvas.jsx — Общий React-компонент Android Chromium Video Canvas, используемый вне одного домена. Связи: используется в forum/ForumAds.js, forum/features/media/components/VideoMedia.jsx, components/ForumBootSplash.jsx.
+  - AndroidNotificationBadgeSync.jsx — Общий React-компонент Android Notification Badge Sync, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/notificationCenter.js; используется в app/layout.js.
+  - AuthNavClient.jsx — Общий React-компонент Auth Nav Client, используемый вне одного домена. Связи: импортирует components/i18n.js, components/visual-runtime/ViewportAnimatedImage.jsx, lib/walletSessionClient.js; используется в components/TopBar.js.
+  - BgAudio.js — Общий React-компонент Bg Audio, используемый вне одного домена. Связи: импортирует components/visual-runtime/ViewportAnimatedImage.jsx; используется в app/layout.js.
+  - ForumBootSplash.jsx — Общий React-компонент Forum Boot Splash, используемый вне одного домена. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/page.js.
+  - ForumShellGate.jsx — Общий React-компонент Forum Shell Gate, используемый вне одного домена. Связи: используется в app/layout.js.
+  - HeroAvatar.js — Общий React-компонент Hero Avatar, используемый вне одного домена. Связи: используется в app/layout.js, components/HeroSection.js.
+  - HeroSection.js — Общий React-компонент Hero Section, используемый вне одного домена. Связи: импортирует components/HeroAvatar.js.
+  - i18n.js — Общий React-компонент i18n, используемый вне одного домена. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в app/about/page.js, app/academy/AcademyExamBlock.js, app/academy/page.js.
+  - i18n.source.js — Общий React-компонент i18n.source, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - InviteFriendHost.jsx — Общий React-компонент Invite Friend Host, используемый вне одного домена. Связи: импортирует components/InviteFriendProvider.jsx, lib/authActionGateClient.js; используется в app/layout.js.
+  - InviteFriendPopup.jsx — Общий React-компонент Invite Friend Popup, используемый вне одного домена. Связи: импортирует components/i18n.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в components/InviteFriendProvider.jsx.
+  - InviteFriendProvider.jsx — Общий React-компонент Invite Friend Provider, используемый вне одного домена. Связи: импортирует components/InviteFriendPopup.jsx, lib/authActionGateClient.js; используется в components/InviteFriendHost.jsx.
+  - LanguageSwitcher.js — Общий React-компонент Language Switcher, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/TopBar.js.
+  - MediaPipelineProgress.jsx — Общий React-компонент Media Pipeline Progress, используемый вне одного домена. Связи: импортирует lib/visual-runtime/visualActivityRegistry.js; используется в app/ads/home.js, forum/features/ui/components/ComposerMediaProgressBar.jsx.
+  - MetaMarket.jsx — Общий React-компонент Meta Market, используемый вне одного домена. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, components/MetaMarketCatalog.js; используется в components/MetaMarketHost.jsx.
+  - MetaMarketCatalog.js — Общий React-компонент Meta Market Catalog, используемый вне одного домена. Связи: используется в app/api/metamarket/_catalog.js, components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
+  - MetaMarketHost.jsx — Общий React-компонент Meta Market Host, используемый вне одного домена. Связи: импортирует components/MetaMarket.jsx; используется в app/layout.js.
+  - MetaMarketIcons.jsx — Общий React-компонент Meta Market Icons, используемый вне одного домена. Связи: используется в forum/features/profile/components/UserInfoPopover.jsx, forum/features/ui/components/ForumSearchSortControls.jsx, components/MetaMarket.jsx.
+  - MetaMarketTitle.jsx — Общий React-компонент Meta Market Title, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - NotRobot.jsx — Общий React-компонент Not Robot, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в components/NotRobotHost.jsx.
+  - NotRobotHost.jsx — Общий React-компонент Not Robot Host, используемый вне одного домена. Связи: импортирует components/NotRobot.jsx; используется в app/layout.js.
+  - paymentMethodI18n.js — Общий React-компонент payment Method I18n, используемый вне одного домена. Связи: используется в components/PaymentMethodPopoverHost.jsx, tests/unit/payments/qcoin-entitlement-purchase.test.js.
+  - PaymentMethodPopoverHost.jsx — Общий React-компонент Payment Method Popover Host, используемый вне одного домена. Связи: импортирует components/i18n.js, components/paymentMethodI18n.js, lib/paymentMethodClient.js; используется в app/layout.js, tests/component/payment-method-popover.component.test.jsx.
+  - QCoinDropFX.jsx — Общий React-компонент QCoin Drop FX, используемый вне одного домена. Связи: используется в app/layout.js, components/QCoinDropFXGate.jsx.
+  - QCoinDropFXGate.jsx — Общий React-компонент QCoin Drop FXGate, используемый вне одного домена. Связи: импортирует components/QCoinDropFX.jsx.
+  - Ql7SupportRuntimeBridge.jsx — Общий React-компонент Ql7 Support Runtime Bridge, используемый вне одного домена. Связи: импортирует components/i18n.js, lib/account-restrictions/portalLexicon.js, lib/authActionGateClient.js; используется в app/layout.js.
+  - QuantumWallet.jsx — Общий React-компонент Quantum Wallet, используемый вне одного домена. Связи: импортирует forum/features/qcoin/hooks/useQCoinLive.js, forum/features/qcoin/utils/formatQCoinBalance.js, forum/features/qcoin/utils/paymentWindow.js; используется в components/QuantumWalletHost.jsx.
+  - QuantumWalletHost.jsx — Общий React-компонент Quantum Wallet Host, используемый вне одного домена. Связи: импортирует components/QuantumWallet.jsx, lib/authActionGateClient.js; используется в app/layout.js.
+  - QuantumWalletLaunchIcon.jsx — Общий React-компонент Quantum Wallet Launch Icon, используемый вне одного домена. Связи: используется в app/exchange/BattleCoin.jsx, forum/features/ui/components/ForumSearchSortControls.jsx, app/page.js.
+  - ScrollTopPulse.js — Общий React-компонент Scroll Top Pulse, используемый вне одного домена. Связи: используется в app/layout.js.
+  - SnowFX.jsx — Общий React-компонент Snow FX, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - TopBar.js — Общий React-компонент Top Bar, используемый вне одного домена. Связи: импортирует components/AuthNavClient.jsx, components/LanguageSwitcher.js, components/i18n.js; используется в app/about/page.js, app/academy/page.js, app/ads/page.jsx.
+  - UnlimitModal.client.jsx — Общий React-компонент Unlimit Modal.client, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletEVM.js — Общий React-компонент Wallet EVM, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletRuntimeBridge.jsx — Общий React-компонент Wallet Runtime Bridge, используемый вне одного домена. Связи: импортирует lib/walletSessionClient.js; используется в app/providers.jsx.
+  - WalletsHub.js — Общий React-компонент Wallets Hub, используемый вне одного домена. Связи: импортирует components/i18n.js.
+  - WalletSOL.js — Общий React-компонент Wallet SOL, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTON.js — Общий React-компонент Wallet TON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - WalletTRON.js — Общий React-компонент Wallet TRON, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - Web3Provider.js — Общий React-компонент Web3 Provider, используемый вне одного домена. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- config/ — Каталог config.
+  - runtime-governance.json — JSON-файл runtime governance. Связи: используется в src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js, src/shared/runtime/identity/runtimeTypes.js.
+- docs/ — Каталог docs.
+  - exchange/ — Каталог exchange.
+    - BATTLE_CHAT_CONTOUR_CONTRACT.md — Markdown-документ BATTLE CHAT CONTOUR CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - forum/ — Каталог forum.
+    - QL7_FORUM_GEO_CURSOR_COUNTER_CONTRACT.md — Markdown-документ QL7 FORUM GEO CURSOR COUNTER CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_SUPPORT_DM_CONTRACT.md — Markdown-документ QL7 SUPPORT DM CONTRACT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mongo/ — Каталог mongo.
+    - ads-metamarket-synthetic-write-proof-v55.md — Markdown-документ ads metamarket synthetic write proof v55. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-canary-v53.md — Markdown-документ qcoin ledger canary v53. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - qcoin-ledger-v52.md — Markdown-документ qcoin ledger v52. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_PREMIUM_CLOSEOUT_V65.md — Markdown-документ QL7 MONGO PREMIUM CLOSEOUT V65. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - QL7_MONGO_TZ_FINAL_CLOSEOUT_V60.md — Markdown-документ QL7 MONGO TZ FINAL CLOSEOUT V60. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-codex-rules.md — Markdown-документ mobile codex rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-monorepo-workflow.md — Markdown-документ mobile monorepo workflow. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-payment-compliance.md — Markdown-документ mobile payment compliance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-release.md — Markdown-документ mobile release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-shell-v3.md — Markdown-документ mobile shell v3. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-store-review.md — Markdown-документ mobile store review. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - mobile-test-matrix.md — Markdown-документ mobile test matrix. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_COSMIC_V11_SPEC_COVERAGE.md — Markdown-документ QL7 SUPPORT COSMIC V11 SPEC COVERAGE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_COSMIC_V11.md — Markdown-документ QL7 SUPPORT COSMIC V11. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - QL7_SUPPORT_V11_INTELLIGENCE_MIGRATION_DISPOSITION_RU.md — Markdown-документ QL7 SUPPORT V11 INTELLIGENCE MIGRATION DISPOSITION RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ql7-support-planetary-ai-v5.md — Markdown-документ ql7 support planetary ai v5. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ql7-support-v5-compliance-audit.md — Markdown-документ ql7 support v5 compliance audit. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - seo-indexing-governance.md — Markdown-документ seo indexing governance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - stage0-engineering-report.md — Markdown-документ stage0 engineering report. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - trust-identity-governance.md — Markdown-документ trust identity governance. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - verification-pipeline.md — Markdown-документ verification pipeline. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- lib/ — Общие библиотеки, кеши, middleware-хелперы и инфраструктурные утилиты.
+  - account-restrictions/ — Каталог account-restrictions.
+    - businessActionGuard.cjs — Общая библиотека/утилита business Action Guard инфраструктурного слоя. Связи: импортирует lib/account-restrictions/protectedRouteRegistry.cjs, lib/account-restrictions/quarantineService.cjs; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, app/api/dm/send/route.js.
+    - deviceEvidence.cjs — Общая библиотека/утилита device Evidence инфраструктурного слоя. Связи: используется в lib/economic-integrity/productionRoute.cjs, tests/unit/payments/qcoin-entitlement-purchase.test.js.
+    - portalLexicon.js — Общая библиотека/утилита portal Lexicon инфраструктурного слоя. Связи: используется в components/Ql7SupportRuntimeBridge.jsx.
+    - protectedRouteRegistry.cjs — Общая библиотека/утилита protected Route Registry инфраструктурного слоя. Связи: используется в lib/account-restrictions/businessActionGuard.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js, lib/ql7-support/simulation/capabilityRegistry.js.
+    - quarantineRecord.cjs — Общая библиотека/утилита quarantine Record инфраструктурного слоя. Связи: используется в lib/account-restrictions/quarantineService.cjs, tests/unit/account-restrictions/quarantine.test.js.
+    - quarantineService.cjs — Общая библиотека/утилита quarantine Service инфраструктурного слоя. Связи: импортирует lib/account-restrictions/quarantineRecord.cjs, lib/mongo/client.cjs; используется в app/api/account-restrictions/status/route.js, lib/account-restrictions/businessActionGuard.cjs, lib/composer-safety/serverGate.cjs.
+  - ads/ — Каталог ads.
+    - adDiscoveryPrompt.js — Общая библиотека/утилита ad Discovery Prompt инфраструктурного слоя. Связи: используется в forum/ForumAds.js, tests/unit/ads/adDiscoveryPrompt.test.js.
+  - auth/ — Каталог auth.
+    - battlecoin-chat-auth.cjs — Общая библиотека/утилита battlecoin chat auth инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/profile-primary.cjs, lib/tma.js; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, tests/unit/mongo/battlecoin-chat-primary.test.js.
+  - battlecoin/ — Каталог battlecoin.
+    - battle-chat-events.cjs — Общая библиотека/утилита battle chat events инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs; используется в app/api/battlecoin/chat/events/route.js, app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js.
+    - battle-chat-public-identity.cjs — Общая библиотека/утилита battle chat public identity инфраструктурного слоя. Связи: используется в lib/mongo/battlecoin-chat-primary.cjs.
+    - battle-chat-validation.cjs — Общая библиотека/утилита battle chat validation инфраструктурного слоя. Связи: используется в lib/battlecoin/battle-chat-events.cjs, lib/mongo/battlecoin-chat-primary.cjs, tests/unit/battlecoin/battle-chat-validation.test.js.
+  - brand/ — Каталог brand.
+    - officialChannels.js — Общая библиотека/утилита official Channels инфраструктурного слоя. Связи: используется в components/TopBar.js, components/trust/TrustIdentityArticle.jsx, lib/ql7-support/knowledge/officialIdentity.js.
+  - composer-safety/ — Каталог composer-safety.
+    - reviewedMaterial/ — Каталог reviewedMaterial.
+      - ar.json — Общая библиотека/утилита ar инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - az.json — Общая библиотека/утилита az инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - bg.json — Общая библиотека/утилита bg инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - cs.json — Общая библиотека/утилита cs инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - da.json — Общая библиотека/утилита da инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - de.json — Общая библиотека/утилита de инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - el.json — Общая библиотека/утилита el инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - en.json — Общая библиотека/утилита en инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - es.json — Общая библиотека/утилита es инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - fi.json — Общая библиотека/утилита fi инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - fr.json — Общая библиотека/утилита fr инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - he.json — Общая библиотека/утилита he инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - hr.json — Общая библиотека/утилита hr инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - hu.json — Общая библиотека/утилита hu инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - it.json — Общая библиотека/утилита it инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - ja.json — Общая библиотека/утилита ja инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - ka.json — Общая библиотека/утилита ka инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - kk.json — Общая библиотека/утилита kk инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - ko.json — Общая библиотека/утилита ko инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - nl.json — Общая библиотека/утилита nl инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - no.json — Общая библиотека/утилита no инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - pl.json — Общая библиотека/утилита pl инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - pt.json — Общая библиотека/утилита pt инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - ro.json — Общая библиотека/утилита ro инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - ru.json — Общая библиотека/утилита ru инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - sk.json — Общая библиотека/утилита sk инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - sl.json — Общая библиотека/утилита sl инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - sr.json — Общая библиотека/утилита sr инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - sv.json — Общая библиотека/утилита sv инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - tr.json — Общая библиотека/утилита tr инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+      - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: используется в lib/composer-safety/reviewedMaterialRegistry.cjs.
+    - badgeLexicon.js — Общая библиотека/утилита badge Lexicon инфраструктурного слоя. Связи: используется в components/composer-safety/ComposerSafetyBadge.jsx, tests/unit/composer-safety/composer.test.js.
+    - clientModerationBank.js — Общая библиотека/утилита client Moderation Bank инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js.
+    - clientPreview.js — Общая библиотека/утилита client Preview инфраструктурного слоя. Связи: импортирует lib/composer-safety/clientModerationBank.js, lib/composer-safety/localeRiskConcepts.client.js, lib/composer-safety/localeSemanticHints.client.js; используется в forum/features/ui/hooks/useComposerSafetyPreview.js, lib/composer-safety/previewWorker.js, tests/contracts/ql7-support-architecture-closure.contract.test.js.
+    - decisionReceipt.cjs — Общая библиотека/утилита decision Receipt инфраструктурного слоя. Связи: используется в lib/composer-safety/serverGate.cjs.
+    - dropReceipt.cjs — Общая библиотека/утилита drop Receipt инфраструктурного слоя. Связи: используется в lib/composer-safety/serverGate.cjs.
+    - localeRiskConcepts.cjs — Общая библиотека/утилита locale Risk Concepts инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, tests/unit/composer-safety/composer.test.js, tests/unit/ql7-support/max-combat.test.js.
+    - localeRiskConcepts.client.js — Общая библиотека/утилита locale Risk Concepts.client инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js, tests/unit/ql7-support/max-combat.test.js.
+    - localeSemanticHints.cjs — Общая библиотека/утилита locale Semantic Hints инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/safety/sharedSemanticEvidence.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js.
+    - localeSemanticHints.client.js — Общая библиотека/утилита locale Semantic Hints.client инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js, tests/unit/ql7-support/max-combat.test.js.
+    - messagePolicy.cjs — Общая библиотека/утилита message Policy инфраструктурного слоя. Связи: используется в lib/composer-safety/semanticAnalyzer.cjs, lib/composer-safety/serverGate.cjs.
+    - nativeSemanticAdapter.cjs — Общая библиотека/утилита native Semantic Adapter инфраструктурного слоя. Связи: импортирует lib/ql7-support/neural/nativeModelGateway.js; используется в lib/composer-safety/serverGate.cjs.
+    - package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - policy.cjs — Общая библиотека/утилита policy инфраструктурного слоя. Связи: импортирует lib/composer-safety/semanticAnalyzer.cjs; используется в app/api/composer-safety/preview/route.js.
+    - policyOutbox.cjs — Общая библиотека/утилита policy Outbox инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/composer-safety/serverGate.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js.
+    - previewWorker.js — Общая библиотека/утилита preview Worker инфраструктурного слоя. Связи: импортирует lib/composer-safety/clientPreview.js.
+    - reviewedMaterialRegistry.cjs — Общая библиотека/утилита reviewed Material Registry инфраструктурного слоя. Связи: импортирует lib/composer-safety/reviewedMaterial/ar.json, lib/composer-safety/reviewedMaterial/az.json, lib/composer-safety/reviewedMaterial/bg.json; используется в lib/ql7-support/safety/sharedSemanticEvidence.cjs.
+    - safetyConceptOntology.cjs — Общая библиотека/утилита safety Concept Ontology инфраструктурного слоя. Связи: используется в lib/composer-safety/serverModerationExpansion.cjs.
+    - securityCaseService.cjs — Общая библиотека/утилита security Case Service инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/operator/caseAuthority.cjs; используется в lib/ql7-support/simulation/capabilityProductionProbe.js.
+    - semanticAnalyzer.cjs — Общая библиотека/утилита semantic Analyzer инфраструктурного слоя. Связи: импортирует lib/composer-safety/localeRiskConcepts.cjs, lib/composer-safety/localeSemanticHints.cjs, lib/composer-safety/messagePolicy.cjs; используется в lib/composer-safety/policy.cjs, lib/composer-safety/serverGate.cjs, tests/integration/ql7-support-live-prelab.integration.test.js.
+    - semanticTargetFrame.cjs — Общая библиотека/утилита semantic Target Frame инфраструктурного слоя. Связи: используется в lib/composer-safety/clientPreview.js, lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/safety/sharedSemanticEvidence.cjs.
+    - serverGate.cjs — Общая библиотека/утилита server Gate инфраструктурного слоя. Связи: импортирует lib/account-restrictions/quarantineService.cjs, lib/composer-safety/decisionReceipt.cjs, lib/composer-safety/dropReceipt.cjs; используется в app/api/battlecoin/chat/messages/route.js, app/api/dm/send/route.js, app/api/forum/mutate/route.js.
+    - serverModerationBank.cjs — Общая библиотека/утилита server Moderation Bank инфраструктурного слоя. Связи: импортирует lib/composer-safety/serverModerationExpansion.cjs; используется в lib/composer-safety/semanticAnalyzer.cjs.
+    - serverModerationExpansion.cjs — Общая библиотека/утилита server Moderation Expansion инфраструктурного слоя. Связи: импортирует lib/composer-safety/safetyConceptOntology.cjs; используется в lib/composer-safety/serverModerationBank.cjs, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/simulation/bankAuthenticityOracle.js.
+    - sharedLanguageEvidence.cjs — Общая библиотека/утилита shared Language Evidence инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - surfaceRegistry.cjs — Общая библиотека/утилита surface Registry инфраструктурного слоя. Связи: используется в app/api/composer-safety/preview/route.js, lib/composer-safety/serverGate.cjs, lib/ql7-support/simulation/capabilityRegistry.js.
+    - warningLedger.cjs — Общая библиотека/утилита warning Ledger инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/composer-safety/serverGate.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js, tests/unit/composer-safety/composer.test.js.
+  - economic-integrity/ — Каталог economic-integrity.
+    - decisionReceipt.cjs — Общая библиотека/утилита decision Receipt инфраструктурного слоя. Связи: импортирует lib/economic-integrity/operationSchema.cjs, lib/economic-integrity/routeRegistry.cjs; используется в lib/economic-integrity/index.cjs, lib/economic-integrity/writerGuard.cjs, tests/unit/mongo/metamarket-primary.test.js.
+    - evaluateOperation.cjs — Общая библиотека/утилита evaluate Operation инфраструктурного слоя. Связи: импортирует lib/economic-integrity/evidenceResolver.cjs, lib/economic-integrity/routeRegistry.cjs; используется в lib/economic-integrity/index.cjs, tests/unit/economic-integrity/economic-gate.test.js.
+    - evidenceResolver.cjs — Общая библиотека/утилита evidence Resolver инфраструктурного слоя. Связи: импортирует lib/economic-integrity/sourceReceipt.cjs; используется в lib/economic-integrity/evaluateOperation.cjs, tests/unit/economic-integrity/economic-gate.test.js.
+    - gate.cjs — Общая библиотека/утилита gate инфраструктурного слоя. Связи: импортирует lib/economic-integrity/index.cjs, lib/economic-integrity/productionRoute.cjs.
+    - idempotency.cjs — Общая библиотека/утилита idempotency инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/transaction-context.cjs; используется в lib/economic-integrity/index.cjs, lib/mongo/qcoin-primary.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js.
+    - index.cjs — Общая библиотека/утилита index инфраструктурного слоя. Связи: импортирует lib/account-restrictions/quarantineService.cjs, lib/economic-integrity/decisionReceipt.cjs, lib/economic-integrity/evaluateOperation.cjs; используется в lib/economic-integrity/gate.cjs, lib/economic-integrity/privilegedCorrection.cjs, lib/economic-integrity/productionRoute.cjs.
+    - operationSchema.cjs — Общая библиотека/утилита operation Schema инфраструктурного слоя. Связи: используется в lib/economic-integrity/decisionReceipt.cjs, lib/economic-integrity/index.cjs, lib/economic-integrity/productionRoute.cjs.
+    - operatorReport.cjs — Общая библиотека/утилита operator Report инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - privilegedCorrection.cjs — Общая библиотека/утилита privileged Correction инфраструктурного слоя. Связи: импортирует lib/economic-integrity/index.cjs.
+    - productionRoute.cjs — Общая библиотека/утилита production Route инфраструктурного слоя. Связи: импортирует lib/account-restrictions/deviceEvidence.cjs, lib/account-restrictions/quarantineService.cjs, lib/economic-integrity/index.cjs; используется в app/api/academy/exam/route.js, app/api/metamarket/_transactions.js, app/api/pay/webhook/route.js.
+    - quarantinePolicy.cjs — Общая библиотека/утилита quarantine Policy инфраструктурного слоя. Связи: используется в lib/economic-integrity/productionRoute.cjs.
+    - reconciliation.cjs — Общая библиотека/утилита reconciliation инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - reversal.cjs — Общая библиотека/утилита reversal инфраструктурного слоя. Связи: импортирует lib/economic-integrity/index.cjs.
+    - routeRegistry.cjs — Общая библиотека/утилита route Registry инфраструктурного слоя. Связи: используется в lib/economic-integrity/decisionReceipt.cjs, lib/economic-integrity/evaluateOperation.cjs, lib/economic-integrity/index.cjs.
+    - sourceReceipt.cjs — Общая библиотека/утилита source Receipt инфраструктурного слоя. Связи: импортирует lib/economic-integrity/operationSchema.cjs; используется в lib/economic-integrity/evidenceResolver.cjs, lib/economic-integrity/index.cjs, lib/ql7-support/simulation/capabilityProductionProbe.js.
+    - writerGuard.cjs — Общая библиотека/утилита writer Guard инфраструктурного слоя. Связи: импортирует lib/economic-integrity/decisionReceipt.cjs; используется в lib/adsCore.js, lib/mongo/qcoin-primary.cjs, lib/mongo/subscriptions-primary.cjs.
+  - exchange/ — Каталог exchange.
+    - aiBoxAnalysisService.js — Общая библиотека/утилита ai Box Analysis Service инфраструктурного слоя. Связи: импортирует lib/brain.js, lib/databroker.js; используется в app/api/brain/analyze/route.js, lib/ql7-support/data/aiBoxSupportReadAdapter.js, tests/integration/ql7-support-premium-cognitive.integration.test.js.
+    - aiEntitlementState.js — Общая библиотека/утилита ai Entitlement State инфраструктурного слоя. Связи: используется в app/exchange/ai-box/AIWorkbench.jsx, app/exchange/ai-box/useAIEntitlement.js, tests/integration/exchange/AIWorkbench.test.jsx.
+    - aiQuotaIdentity.js — Общая библиотека/утилита ai Quota Identity инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs; используется в app/api/aiquota/usage/route.js, tests/unit/exchange/aiQuotaIdentity.test.js.
+  - forum/ — Каталог forum.
+    - forum-index-maintenance.cjs — Общая библиотека/утилита forum index maintenance инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в app/api/forum/mutate/route.js, lib/forum/forum-projection-rebuild.cjs, tests/unit/forum/forum-index-maintenance-edit.test.js.
+    - forum-projection-rebuild.cjs — Общая библиотека/утилита forum projection rebuild инфраструктурного слоя. Связи: импортирует lib/forum/forum-index-maintenance.cjs, lib/mongo/client.cjs, lib/mongo/forum-indexes-primary.cjs.
+    - forum-server-complete-reader.cjs — Общая библиотека/утилита forum server complete reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/inbox/replies/page/route.js, app/api/forum/post-by-id/route.js, app/api/forum/post-chain/route.js.
+    - forum-server-page-reader.cjs — Общая библиотека/утилита forum server page reader инфраструктурного слоя. Связи: импортирует lib/forum/public-sanitize.cjs, lib/forum/signed-cursor.cjs, lib/geo/geo-rings.cjs; используется в app/api/forum/feed/page/route.js, app/api/forum/media-feed/page/route.js, tests/unit/forum/serverPageReaderGeo.test.js.
+    - forum-user-recommendation-pool.cjs — Общая библиотека/утилита forum user recommendation pool инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs, lib/mongo/client.cjs, lib/mongo/profile-primary.cjs; используется в app/api/forum/recommendations/users/route.js, tests/unit/forum/userRecommendationTop500.test.js.
+    - public-sanitize.cjs — Общая библиотека/утилита public sanitize инфраструктурного слоя. Связи: используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - ql7-forum-architecture.cjs — Общая библиотека/утилита ql7 forum architecture инфраструктурного слоя. Связи: используется в lib/forum/forum-index-maintenance.cjs, lib/geo/geo-rings.cjs, lib/geo/request-geo.cjs.
+    - signed-cursor.cjs — Общая библиотека/утилита signed cursor инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - video-precommit-moderation-receipt.cjs — Общая библиотека/утилита video precommit moderation receipt инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в app/api/ads/route.js, app/api/dm/send/route.js, app/api/forum/blobUploadUrl/route.js.
+  - geo/ — Каталог geo.
+    - city-labels.cjs — Общая библиотека/утилита city labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - countries.js — Общая библиотека/утилита countries инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - country-labels.cjs — Общая библиотека/утилита country labels инфраструктурного слоя. Связи: используется в lib/geo/request-geo.cjs.
+    - geo-rings.cjs — Общая библиотека/утилита geo rings инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/request-geo.cjs; используется в lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - regions.js — Общая библиотека/утилита regions инфраструктурного слоя. Связи: используется в app/ads/GeoTargetingPicker.jsx.
+    - request-geo.cjs — Общая библиотека/утилита request geo инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/geo/city-labels.cjs, lib/geo/country-labels.cjs; используется в app/api/forum/mutate/route.js, app/api/geo/session-touch/route.js, lib/forum/forum-server-complete-reader.cjs.
+  - identity/ — Каталог identity.
+    - canonical-user-id.cjs — Общая библиотека/утилита canonical user id инфраструктурного слоя. Связи: используется в app/api/forum/_db.js, app/api/metastudio/register/route.js, app/api/pay/webhook/route.js.
+    - geo-identity.cjs — Общая библиотека/утилита geo identity инфраструктурного слоя. Связи: импортирует lib/identity/ql7IdentityContract.cjs; используется в app/api/geo/session-touch/route.js.
+    - ql7IdentityContract.cjs — Общая библиотека/утилита ql7 Identity Contract инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/profile-primary.cjs; используется в app/api/academy/exam/route.js, app/api/aiquota/usage/route.js, app/api/metamarket/_identity.js.
+  - migrations/ — Каталог migrations.
+    - forumRulesStorage.js — Общая библиотека/утилита forum Rules Storage инфраструктурного слоя. Связи: используется в forum/page.js.
+  - mongo/ — Каталог mongo.
+    - academy-primary.cjs — Общая библиотека/утилита academy primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/academy/exam/route.js, tests/unit/mongo/academy-primary.test.js.
+    - account-deletion-primary.cjs — Общая библиотека/утилита account deletion primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs, lib/mongo/forum-primary.cjs; используется в app/api/profile/delete-account/route.js, tests/unit/mongo/profile-primary.test.js.
+    - ads-primary.cjs — Общая библиотека/утилита ads primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/transaction-context.cjs; используется в lib/adsCore.js, tests/unit/mongo/ads-primary.test.js.
+    - battlecoin-chat-primary.cjs — Общая библиотека/утилита battlecoin chat primary инфраструктурного слоя. Связи: импортирует lib/battlecoin/battle-chat-public-identity.cjs, lib/battlecoin/battle-chat-validation.cjs, lib/mongo/client.cjs; используется в app/api/battlecoin/chat/messages/route.js, app/api/battlecoin/chat/reaction/route.js, tests/unit/mongo/battlecoin-chat-primary.test.js.
+    - battlecoin-primary.cjs — Общая библиотека/утилита battlecoin primary инфраструктурного слоя. Связи: импортирует lib/economic-integrity/productionRoute.cjs, lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js.
+    - client.cjs — Общая библиотека/утилита client инфраструктурного слоя. Связи: импортирует lib/mongo/permanent-policy.cjs; используется в app/api/dm/send/route.js, app/api/dm/support-broadcast/route.js, app/api/dm/support-card-translate/route.js.
+    - dm-primary.cjs — Общая библиотека/утилита dm primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs, lib/mongo/dm-read-domain-codec.cjs; используется в app/api/dm/_db.js, app/api/dm/block/route.js, app/api/dm/delete/route.js.
+    - dm-read-domain-codec.cjs — Общая библиотека/утилита dm read domain codec инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/mongo/dm-primary.cjs.
+    - forum-indexes-primary.cjs — Общая библиотека/утилита forum indexes primary инфраструктурного слоя. Связи: импортирует lib/forum/ql7-forum-architecture.cjs, lib/mongo/client.cjs; используется в lib/forum/forum-projection-rebuild.cjs, lib/forum/forum-server-complete-reader.cjs, lib/forum/forum-server-page-reader.cjs.
+    - forum-primary.cjs — Общая библиотека/утилита forum primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в app/api/forum/_db.js, app/api/forum/moderate/route.js, app/api/forum/mutate/route.js.
+    - metamarket-primary.cjs — Общая библиотека/утилита metamarket primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/qcoin-primary.cjs, lib/mongo/transaction-context.cjs; используется в app/api/metamarket/_db.js, tests/unit/mongo/metamarket-primary.test.js.
+    - metastudio-primary.cjs — Общая библиотека/утилита metastudio primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в app/api/metastudio/register/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - payments-primary.cjs — Общая библиотека/утилита payments primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/pay/create/route.js, app/api/pay/webhook/route.js, tests/unit/mongo/payments-metastudio-primary.test.js.
+    - permanent-policy.cjs — Общая библиотека/утилита permanent policy инфраструктурного слоя. Связи: используется в lib/mongo/client.cjs.
+    - profile-geo-primary.cjs — Общая библиотека/утилита profile geo primary инфраструктурного слоя. Связи: импортирует lib/geo/request-geo.cjs, lib/mongo/client.cjs; используется в app/api/geo/session-touch/route.js, lib/forum/forum-server-page-reader.cjs, tests/unit/forum/serverPageReaderGeo.test.js.
+    - profile-primary.cjs — Общая библиотека/утилита profile primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в app/api/forum/_db.js, app/api/forum/user-search/rebuild/route.js, app/api/metastudio/register/route.js.
+    - push-primary.cjs — Общая библиотека/утилита push primary инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в lib/webPush.js, tests/unit/mongo/push-primary.test.js.
+    - qcoin-primary.cjs — Общая библиотека/утилита qcoin primary инфраструктурного слоя. Связи: импортирует lib/economic-integrity/idempotency.cjs, lib/economic-integrity/productionRoute.cjs, lib/economic-integrity/writerGuard.cjs; используется в app/api/academy/exam/route.js, app/api/profile/user-popover/route.js, app/api/qcoin/drop/route.js.
+    - quest-primary.cjs — Общая библиотека/утилита quest primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs, lib/mongo/profile-primary.cjs; используется в app/api/quest/progress/route.js, app/api/quest/status/route.js, tests/unit/mongo/quest-primary.test.js.
+    - referral-primary.cjs — Общая библиотека/утилита referral primary инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs, lib/mongo/transaction-context.cjs; используется в app/api/referral/hit/route.js, app/api/referral/link/route.js, tests/unit/mongo/referral-primary.test.js.
+    - subscriptions-primary.cjs — Общая библиотека/утилита subscriptions primary инфраструктурного слоя. Связи: импортирует lib/economic-integrity/writerGuard.cjs, lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в lib/mongo/battlecoin-chat-primary.cjs, lib/subscriptions.js, tests/unit/mongo/subscriptions-primary.test.js.
+    - transaction-context.cjs — Общая библиотека/утилита transaction context инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/metamarket/_transactions.js, lib/economic-integrity/idempotency.cjs, lib/mongo/ads-primary.cjs.
+  - ql7-support/ — Каталог ql7-support.
+    - cards/ — Каталог cards.
+      - cardPresentation.js — Общая библиотека/утилита card Presentation инфраструктурного слоя. Связи: импортирует lib/ql7-support/evidencePolicy.js, lib/ql7-support/metricRegistry.js, lib/ql7-support/presentation.js; используется в lib/ql7-support/cardSchema.js.
+    - cognition/ — Каталог cognition.
+      - beliefState.js — Общая библиотека/утилита belief State инфраструктурного слоя. Связи: используется в lib/ql7-support/cognition/cognitiveTurnState.js.
+      - cognitiveTurnState.js — Общая библиотека/утилита cognitive Turn State инфраструктурного слоя. Связи: импортирует lib/ql7-support/cognition/beliefState.js, lib/ql7-support/cognition/computePolicy.js, lib/ql7-support/cognition/evidenceGraph.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - computePolicy.js — Общая библиотека/утилита compute Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/cognition/cognitiveTurnState.js.
+      - evidenceGraph.js — Общая библиотека/утилита evidence Graph инфраструктурного слоя. Связи: используется в lib/ql7-support/cognition/cognitiveTurnState.js.
+      - planGraph.js — Общая библиотека/утилита plan Graph инфраструктурного слоя. Связи: используется в lib/ql7-support/cognition/cognitiveTurnState.js.
+    - config/ — Каталог config.
+      - behaviorManifest.js — Общая библиотека/утилита behavior Manifest инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/maxCombatRequirementRegistry.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/entryGreetingLexicon.js, lib/ql7-support/eventNotificationCatalog.js, lib/ql7-support/events.js.
+      - directiveRegistry.js — Общая библиотека/утилита directive Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/config/staticDataReadiness.js.
+      - featureFlag.js — Общая библиотека/утилита feature Flag инфраструктурного слоя. Связи: используется в app/api/dm/block/route.js, app/api/dm/dialogs/route.js, app/api/dm/send/route.js.
+      - finalCombatDataFloors.js — Общая библиотека/утилита final Combat Data Floors инфраструктурного слоя. Связи: используется в lib/ql7-support/config/floorCoverageRegistry.js, lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js.
+      - floorCoverageRegistry.js — Общая библиотека/утилита floor Coverage Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/finalCombatDataFloors.js; используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js.
+      - materialReadiness.js — Общая библиотека/утилита material Readiness инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/finalCombatDataFloors.js, lib/ql7-support/config/floorCoverageRegistry.js, lib/ql7-support/config/prelabMaterialLiveRequirements.js; используется в lib/ql7-support/config/staticDataReadiness.js.
+      - maxCombatRequirementRegistry.js — Общая библиотека/утилита max Combat Requirement Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/simulation/labPlanRegistry.js, tests/contracts/ql7-support-code-data-readiness.contract.test.js.
+      - prelabMaterialLiveRequirements.js — Общая библиотека/утилита prelab Material Live Requirements инфраструктурного слоя. Связи: используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, tests/contracts/ql7-support-prelab-material-live.contract.test.js.
+      - staticDataReadiness.js — Общая библиотека/утилита static Data Readiness инфраструктурного слоя. Связи: импортирует lib/composer-safety/serverModerationExpansion.cjs, lib/ql7-support/config/directiveRegistry.js, lib/ql7-support/config/finalCombatDataFloors.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/simulation/fullCodeDataReadinessOracle.js, tests/contracts/ql7-support-code-data-readiness.contract.test.js.
+    - contact/ — Каталог contact.
+      - contactConsent.js — Общая библиотека/утилита contact Consent инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, tests/contracts/ql7-support-smtp-closure.contract.test.js.
+      - contactIntelligence.js — Общая библиотека/утилита contact Intelligence инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/human-intelligence-closure.test.js.
+      - contactPrivacy.js — Общая библиотека/утилита contact Privacy инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/executeTurn.js.
+      - questionnaire.js — Общая библиотека/утилита questionnaire инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/buildContentPlan.js.
+    - contracts/ — Каталог contracts.
+      - finalDeliveryReceipt.js — Общая библиотека/утилита final Delivery Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в app/api/dm/support-feedback/route.js, lib/ql7-support/language/finalDeliveryLocalization.js, lib/ql7-support/runtime/commitRecoveryWorker.js.
+      - supportTurnRequestEnvelope.js — Общая библиотека/утилита support Turn Request Envelope инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/productionTurn.js, tests/unit/ql7-support/request-envelope-test.js.
+    - conversation/ — Каталог conversation.
+      - commitmentTracker.js — Общая библиотека/утилита commitment Tracker инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/conversationMemoryGraph.js.
+      - conversationMemoryGraph.js — Общая библиотека/утилита conversation Memory Graph инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/commitmentTracker.js, lib/ql7-support/conversation/correctionLedger.js, lib/ql7-support/conversation/entityReferenceMemory.js; используется в lib/ql7-support/conversation/memoryCompactor.js, lib/ql7-support/conversation/memoryConflictResolver.js, lib/ql7-support/conversation/memoryStore.js.
+      - correctionLedger.js — Общая библиотека/утилита correction Ledger инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/conversationMemoryGraph.js.
+      - entityReferenceMemory.js — Общая библиотека/утилита entity Reference Memory инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/conversation/conversationMemoryGraph.js.
+      - memoryCompactor.js — Общая библиотека/утилита memory Compactor инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js; используется в lib/ql7-support/conversation/memoryTransaction.js.
+      - memoryConflictResolver.js — Общая библиотека/утилита memory Conflict Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js; используется в lib/ql7-support/conversation/memoryTransaction.js.
+      - memoryPrivacyPolicy.js — Общая библиотека/утилита memory Privacy Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/memoryStore.js.
+      - memoryStore.js — Общая библиотека/утилита memory Store инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/conversation/memoryPrivacyPolicy.js; используется в lib/ql7-support/runtime/deliveryCommitCoordinator.js, lib/ql7-support/server.js.
+      - memoryTransaction.js — Общая библиотека/утилита memory Transaction инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/memoryCompactor.js, lib/ql7-support/conversation/memoryConflictResolver.js; используется в lib/ql7-support/runtime/deliveryCommitCoordinator.js, tests/unit/ql7-support/case-memory-projection.test.js.
+      - rejectedHypothesisLedger.js — Общая библиотека/утилита rejected Hypothesis Ledger инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/conversationMemoryGraph.js.
+      - returnPointResolver.js — Общая библиотека/утилита return Point Resolver инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/transitionClassifier.js.
+      - semanticContext.js — Общая библиотека/утилита semantic Context инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/canonicalContext.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js.
+      - temporalContext.js — Общая библиотека/утилита temporal Context инфраструктурного слоя. Связи: используется в app/api/dm/support-entry/route.js, lib/ql7-support/entryGreetingLexicon.js, lib/ql7-support/runtime/executeTurn.js.
+      - topicFrame.js — Общая библиотека/утилита topic Frame инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/conversation/conversationMemoryGraph.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+      - topicStackPolicy.js — Общая библиотека/утилита topic Stack Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/conversation/conversationMemoryGraph.js.
+      - transitionClassifier.js — Общая библиотека/утилита transition Classifier инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/returnPointResolver.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/canonicalContext.js, lib/ql7-support/runtime/executeTurn.js.
+    - data/ — Каталог data.
+      - adapterReceipt.js — Общая библиотека/утилита adapter Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/readState.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/data/simulationFixtures.js, lib/ql7-support/response/buildContentPlan.js, lib/ql7-support/response/critiqueResponse.js.
+      - aiBoxSupportReadAdapter.js — Общая библиотека/утилита ai Box Support Read Adapter инфраструктурного слоя. Связи: импортирует lib/exchange/aiBoxAnalysisService.js; используется в lib/ql7-support/diagnosticRegistry.js, tests/integration/ql7-support-premium-cognitive.integration.test.js.
+      - factProjection.js — Общая библиотека/утилита fact Projection инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - readAuthorizationPolicy.js — Общая библиотека/утилита read Authorization Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - readPlan.js — Общая библиотека/утилита read Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - readState.js — Общая библиотека/утилита read State инфраструктурного слоя. Связи: используется в lib/ql7-support/data/adapterReceipt.js.
+      - safeProjection.js — Общая библиотека/утилита safe Projection инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - simulationFixtures.js — Общая библиотека/утилита simulation Fixtures инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+    - greeting/ — Каталог greeting.
+      - entrySession.js — Общая библиотека/утилита entry Session инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/unit/ql7-support/integration-regressions.test.js, tests/unit/ql7-support/material-runtime.test.js.
+    - http/ — Каталог http.
+      - entryOperation.js — Общая библиотека/утилита entry Operation инфраструктурного слоя. Связи: используется в app/api/dm/support-entry/route.js.
+      - idempotencyStore.js — Общая библиотека/утилита idempotency Store инфраструктурного слоя. Связи: используется в app/api/dm/send/route.js, app/api/dm/support-broadcast/route.js, app/api/dm/support-card-translate/route.js.
+      - originPolicy.js — Общая библиотека/утилита origin Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/http/requestGuard.js.
+      - rateLimitPolicy.js — Общая библиотека/утилита rate Limit Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/http/requestGuard.js.
+      - requestGuard.js — Общая библиотека/утилита request Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/http/idempotencyStore.js, lib/ql7-support/http/originPolicy.js, lib/ql7-support/http/rateLimitPolicy.js; используется в app/api/dm/send/route.js, app/api/dm/support-broadcast/route.js, app/api/dm/support-card-translate/route.js.
+      - serviceRequestGuard.js — Общая библиотека/утилита service Request Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/http/idempotencyStore.js; используется в app/api/dm/support-worker/route.js.
+    - identity/ — Каталог identity.
+      - sessionContext.js — Общая библиотека/утилита session Context инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/factualSimulation.js.
+    - integration/ — Каталог integration.
+      - productEventBridge.js — Общая библиотека/утилита product Event Bridge инфраструктурного слоя. Связи: импортирует lib/ql7-support/events.js; используется в lib/adsCore.js, lib/qcoinEntitlementPurchase.js, lib/subscriptions.js.
+    - internal/ — Каталог internal.
+      - text.js — Общая библиотека/утилита text инфраструктурного слоя. Связи: используется в lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/contact/contactConsent.js.
+    - knowledge/ — Каталог knowledge.
+      - academy/ — Каталог academy.
+        - academyKnowledgeAdapter.js — Общая библиотека/утилита academy Knowledge Adapter инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js.
+        - academyKnowledgeSnapshot.json — Общая библиотека/утилита academy Knowledge Snapshot инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - general-human/ — Каталог general-human.
+        - shard-00.json — Общая библиотека/утилита shard 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-01.json — Общая библиотека/утилита shard 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-02.json — Общая библиотека/утилита shard 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-03.json — Общая библиотека/утилита shard 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-04.json — Общая библиотека/утилита shard 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-05.json — Общая библиотека/утилита shard 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-06.json — Общая библиотека/утилита shard 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-07.json — Общая библиотека/утилита shard 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-08.json — Общая библиотека/утилита shard 08 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-09.json — Общая библиотека/утилита shard 09 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-10.json — Общая библиотека/утилита shard 10 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-11.json — Общая библиотека/утилита shard 11 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-12.json — Общая библиотека/утилита shard 12 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-13.json — Общая библиотека/утилита shard 13 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-14.json — Общая библиотека/утилита shard 14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-15.json — Общая библиотека/утилита shard 15 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-16.json — Общая библиотека/утилита shard 16 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-17.json — Общая библиотека/утилита shard 17 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-18.json — Общая библиотека/утилита shard 18 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-19.json — Общая библиотека/утилита shard 19 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-20.json — Общая библиотека/утилита shard 20 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-21.json — Общая библиотека/утилита shard 21 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-22.json — Общая библиотека/утилита shard 22 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-23.json — Общая библиотека/утилита shard 23 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-24.json — Общая библиотека/утилита shard 24 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-25.json — Общая библиотека/утилита shard 25 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-26.json — Общая библиотека/утилита shard 26 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-27.json — Общая библиотека/утилита shard 27 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-28.json — Общая библиотека/утилита shard 28 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-29.json — Общая библиотека/утилита shard 29 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-30.json — Общая библиотека/утилита shard 30 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-31.json — Общая библиотека/утилита shard 31 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-00.json — Общая библиотека/утилита source packs 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-01.json — Общая библиотека/утилита source packs 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-02.json — Общая библиотека/утилита source packs 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-03.json — Общая библиотека/утилита source packs 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-04.json — Общая библиотека/утилита source packs 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-05.json — Общая библиотека/утилита source packs 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-06.json — Общая библиотека/утилита source packs 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - source-packs-07.json — Общая библиотека/утилита source packs 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - human-conversation/ — Каталог human-conversation.
+        - shard-00.json — Общая библиотека/утилита shard 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-01.json — Общая библиотека/утилита shard 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-02.json — Общая библиотека/утилита shard 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-03.json — Общая библиотека/утилита shard 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-04.json — Общая библиотека/утилита shard 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-05.json — Общая библиотека/утилита shard 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-06.json — Общая библиотека/утилита shard 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-07.json — Общая библиотека/утилита shard 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-08.json — Общая библиотека/утилита shard 08 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-09.json — Общая библиотека/утилита shard 09 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-10.json — Общая библиотека/утилита shard 10 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-11.json — Общая библиотека/утилита shard 11 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-12.json — Общая библиотека/утилита shard 12 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-13.json — Общая библиотека/утилита shard 13 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-14.json — Общая библиотека/утилита shard 14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - shard-15.json — Общая библиотека/утилита shard 15 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ingestion/ — Каталог ingestion.
+        - claimSchema.js — Общая библиотека/утилита claim Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+        - entitySchema.js — Общая библиотека/утилита entity Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+        - freshnessPolicy.js — Общая библиотека/утилита freshness Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+        - knowledgeSnapshotManifest.js — Общая библиотека/утилита knowledge Snapshot Manifest инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+        - sourceRegistry.js — Общая библиотека/утилита source Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - public-figures/ — Каталог public-figures.
+        - localeAliases/ — Каталог localeAliases.
+          - ar.json — Общая библиотека/утилита ar инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - az.json — Общая библиотека/утилита az инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - bg.json — Общая библиотека/утилита bg инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - cs.json — Общая библиотека/утилита cs инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - da.json — Общая библиотека/утилита da инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - de.json — Общая библиотека/утилита de инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - el.json — Общая библиотека/утилита el инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - en.json — Общая библиотека/утилита en инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - es.json — Общая библиотека/утилита es инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - fi.json — Общая библиотека/утилита fi инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - fr.json — Общая библиотека/утилита fr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - he.json — Общая библиотека/утилита he инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - hr.json — Общая библиотека/утилита hr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - hu.json — Общая библиотека/утилита hu инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - it.json — Общая библиотека/утилита it инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ja.json — Общая библиотека/утилита ja инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ka.json — Общая библиотека/утилита ka инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - kk.json — Общая библиотека/утилита kk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ko.json — Общая библиотека/утилита ko инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - nl.json — Общая библиотека/утилита nl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - no.json — Общая библиотека/утилита no инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - pl.json — Общая библиотека/утилита pl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - pt.json — Общая библиотека/утилита pt инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ro.json — Общая библиотека/утилита ro инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ru.json — Общая библиотека/утилита ru инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sk.json — Общая библиотека/утилита sk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sl.json — Общая библиотека/утилита sl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sr.json — Общая библиотека/утилита sr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sv.json — Общая библиотека/утилита sv инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - tr.json — Общая библиотека/утилита tr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sourceIndex/ — Каталог sourceIndex.
+          - shard-00.json — Общая библиотека/утилита shard 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-01.json — Общая библиотека/утилита shard 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-02.json — Общая библиотека/утилита shard 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-03.json — Общая библиотека/утилита shard 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-04.json — Общая библиотека/утилита shard 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-05.json — Общая библиотека/утилита shard 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-06.json — Общая библиотека/утилита shard 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-07.json — Общая библиотека/утилита shard 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-08.json — Общая библиотека/утилита shard 08 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-09.json — Общая библиотека/утилита shard 09 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-10.json — Общая библиотека/утилита shard 10 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-11.json — Общая библиотека/утилита shard 11 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-12.json — Общая библиотека/утилита shard 12 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-13.json — Общая библиотека/утилита shard 13 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-14.json — Общая библиотека/утилита shard 14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-15.json — Общая библиотека/утилита shard 15 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-16.json — Общая библиотека/утилита shard 16 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-17.json — Общая библиотека/утилита shard 17 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-18.json — Общая библиотека/утилита shard 18 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-19.json — Общая библиотека/утилита shard 19 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-20.json — Общая библиотека/утилита shard 20 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-21.json — Общая библиотека/утилита shard 21 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-22.json — Общая библиотека/утилита shard 22 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-23.json — Общая библиотека/утилита shard 23 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-24.json — Общая библиотека/утилита shard 24 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-25.json — Общая библиотека/утилита shard 25 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-26.json — Общая библиотека/утилита shard 26 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-27.json — Общая библиотека/утилита shard 27 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-28.json — Общая библиотека/утилита shard 28 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-29.json — Общая библиотека/утилита shard 29 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-30.json — Общая библиотека/утилита shard 30 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-31.json — Общая библиотека/утилита shard 31 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - stableFacts/ — Каталог stableFacts.
+          - shard-00.json — Общая библиотека/утилита shard 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-01.json — Общая библиотека/утилита shard 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-02.json — Общая библиотека/утилита shard 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-03.json — Общая библиотека/утилита shard 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-04.json — Общая библиотека/утилита shard 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-05.json — Общая библиотека/утилита shard 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-06.json — Общая библиотека/утилита shard 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-07.json — Общая библиотека/утилита shard 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-08.json — Общая библиотека/утилита shard 08 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-09.json — Общая библиотека/утилита shard 09 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-10.json — Общая библиотека/утилита shard 10 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-11.json — Общая библиотека/утилита shard 11 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-12.json — Общая библиотека/утилита shard 12 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-13.json — Общая библиотека/утилита shard 13 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-14.json — Общая библиотека/утилита shard 14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-15.json — Общая библиотека/утилита shard 15 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-16.json — Общая библиотека/утилита shard 16 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-17.json — Общая библиотека/утилита shard 17 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-18.json — Общая библиотека/утилита shard 18 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-19.json — Общая библиотека/утилита shard 19 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-20.json — Общая библиотека/утилита shard 20 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-21.json — Общая библиотека/утилита shard 21 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-22.json — Общая библиотека/утилита shard 22 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-23.json — Общая библиотека/утилита shard 23 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-24.json — Общая библиотека/утилита shard 24 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-25.json — Общая библиотека/утилита shard 25 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-26.json — Общая библиотека/утилита shard 26 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-27.json — Общая библиотека/утилита shard 27 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-28.json — Общая библиотека/утилита shard 28 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-29.json — Общая библиотека/утилита shard 29 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-30.json — Общая библиотека/утилита shard 30 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-31.json — Общая библиотека/утилита shard 31 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - substantiveFacts/ — Каталог substantiveFacts.
+          - shard-00.json — Общая библиотека/утилита shard 00 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-01.json — Общая библиотека/утилита shard 01 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-02.json — Общая библиотека/утилита shard 02 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-03.json — Общая библиотека/утилита shard 03 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-04.json — Общая библиотека/утилита shard 04 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-05.json — Общая библиотека/утилита shard 05 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-06.json — Общая библиотека/утилита shard 06 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-07.json — Общая библиотека/утилита shard 07 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-08.json — Общая библиотека/утилита shard 08 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-09.json — Общая библиотека/утилита shard 09 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-10.json — Общая библиотека/утилита shard 10 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-11.json — Общая библиотека/утилита shard 11 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-12.json — Общая библиотека/утилита shard 12 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-13.json — Общая библиотека/утилита shard 13 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-14.json — Общая библиотека/утилита shard 14 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-15.json — Общая библиотека/утилита shard 15 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-16.json — Общая библиотека/утилита shard 16 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-17.json — Общая библиотека/утилита shard 17 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-18.json — Общая библиотека/утилита shard 18 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-19.json — Общая библиотека/утилита shard 19 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-20.json — Общая библиотека/утилита shard 20 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-21.json — Общая библиотека/утилита shard 21 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-22.json — Общая библиотека/утилита shard 22 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-23.json — Общая библиотека/утилита shard 23 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-24.json — Общая библиотека/утилита shard 24 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-25.json — Общая библиотека/утилита shard 25 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-26.json — Общая библиотека/утилита shard 26 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-27.json — Общая библиотека/утилита shard 27 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-28.json — Общая библиотека/утилита shard 28 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-29.json — Общая библиотека/утилита shard 29 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-30.json — Общая библиотека/утилита shard 30 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard-31.json — Общая библиотека/утилита shard 31 инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - currentFactFreshnessPolicy.js — Общая библиотека/утилита current Fact Freshness Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - entitySnapshot.js — Общая библиотека/утилита entity Snapshot инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/public-figures/identityCatalog.js, lib/ql7-support/knowledge/public-figures/manifest.js; используется в lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - factSchema.js — Общая библиотека/утилита fact Schema инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/public-figures/privacyBoundary.js, lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - identityCatalog.js — Общая библиотека/утилита identity Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/public-figures/entitySnapshot.js, lib/ql7-support/knowledge/public-figures/publicFigureResolver.js.
+        - manifest.js — Общая библиотека/утилита manifest инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/public-figures/entitySnapshot.js, lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - materialProfiles.js — Общая библиотека/утилита material Profiles инфраструктурного слоя. Связи: используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/knowledge/public-figures/entitySnapshot.js, lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - privacyBoundary.js — Общая библиотека/утилита privacy Boundary инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/public-figures/factSchema.js; используется в lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js.
+        - publicFigureFactResolver.js — Общая библиотека/утилита public Figure Fact Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/public-figures/currentFactFreshnessPolicy.js, lib/ql7-support/knowledge/public-figures/entitySnapshot.js, lib/ql7-support/knowledge/public-figures/factSchema.js; используется в lib/ql7-support/knowledge/publicFigureRegistry.js, tests/integration/ql7-support-public-figures.integration.test.js, tests/unit/ql7-support/public-figure-metadata-boundary.test.js.
+        - publicFigureResolver.js — Общая библиотека/утилита public Figure Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/public-figures/identityCatalog.js; используется в lib/ql7-support/knowledge/publicFigureRegistry.js, tests/integration/ql7-support-public-figures.integration.test.js, tests/unit/ql7-support/public-figure-metadata-boundary.test.js.
+      - retrieval/ — Каталог retrieval.
+        - conflictResolver.js — Общая библиотека/утилита conflict Resolver инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/retrieval/hybridRetriever.js.
+        - evidencePack.js — Общая библиотека/утилита evidence Pack инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/retrieval/hybridRetriever.js.
+        - hybridRetriever.js — Общая библиотека/утилита hybrid Retriever инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/retrieval/conflictResolver.js, lib/ql7-support/knowledge/retrieval/evidencePack.js; используется в lib/ql7-support/knowledge/openHumanKnowledgeRouter.js, lib/ql7-support/runtime/nativeIntelligencePlane.js.
+        - localEmbeddingIndex.js — Общая библиотека/утилита local Embedding Index инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/retrieval/hybridRetriever.js.
+        - neuralReranker.js — Общая библиотека/утилита neural Reranker инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/retrieval/hybridRetriever.js.
+        - sparseIndex.js — Общая библиотека/утилита sparse Index инфраструктурного слоя. Связи: используется в lib/ql7-support/knowledge/retrieval/hybridRetriever.js.
+      - adsReadPolicy.js — Общая библиотека/утилита ads Read Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/adsSupportReadAdapter.js, tests/contracts/ql7-support-full-integration-closure.contract.test.js.
+      - domainKnowledge.js — Общая библиотека/утилита domain Knowledge инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/knowledgeRegistry.js, tests/unit/ql7-support/knowledge-graph-test.js.
+      - domainRegistry.js — Общая библиотека/утилита domain Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/ontology/domains/index.js; используется в lib/ql7-support/knowledge/knowledgeGraph.js, lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/neural/understandingContract.js.
+      - generalHumanKnowledgeCore.js — Общая библиотека/утилита general Human Knowledge Core инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/generalHumanSourceRouteRegistry.js; используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/knowledge/openHumanKnowledgeRouter.js.
+      - generalHumanSourceRouteRegistry.js — Общая библиотека/утилита general Human Source Route Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/humanTopicOntology.js; используется в lib/ql7-support/knowledge/generalHumanKnowledgeCore.js.
+      - generalKnowledgeRegistry.js — Общая библиотека/утилита general Knowledge Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/humanTopicOntology.js, lib/ql7-support/knowledge/knowledgeNodeSchema.js; используется в lib/ql7-support/knowledge/openHumanKnowledgeRouter.js, lib/ql7-support/response/morphosyntacticRealizer.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - humanConversationBank.js — Общая библиотека/утилита human Conversation Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/language/semanticConceptBank.js.
+      - humanTopicOntology.js — Общая библиотека/утилита human Topic Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/generalHumanSourceRouteRegistry.js, lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/language/semanticConceptBank.js.
+      - humorAnecdoteFrameBank.js — Общая библиотека/утилита humor Anecdote Frame Bank инфраструктурного слоя. Связи: используется в lib/ql7-support/response/humorRealizationPlanner.js.
+      - humorLexicalPlan.js — Общая библиотека/утилита humor Lexical Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/language/compositionalGrammar.js.
+      - humorLexiconBank.js — Общая библиотека/утилита humor Lexicon Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/response/humorRealizationPlanner.js, lib/ql7-support/simulation/humorMaterialDiversityOracle.js.
+      - humorMechanismOntology.js — Общая библиотека/утилита humor Mechanism Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/language/humanVariationPrimitives.js, lib/ql7-support/response/morphosyntacticRealizer.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - humorSafetyPolicy.js — Общая библиотека/утилита humor Safety Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/max-combat.test.js.
+      - knowledgeGraph.js — Общая библиотека/утилита knowledge Graph инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - knowledgeNodeSchema.js — Общая библиотека/утилита knowledge Node Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/generalKnowledgeRegistry.js.
+      - officialIdentity.js — Общая библиотека/утилита official Identity инфраструктурного слоя. Связи: импортирует lib/brand/officialChannels.js, lib/seo/trustIdentityContent.js, lib/seo/trustIdentityRoutes.js; используется в lib/ql7-support/knowledgeRegistry.js.
+      - openHumanKnowledgeRouter.js — Общая библиотека/утилита open Human Knowledge Router инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/generalHumanKnowledgeCore.js, lib/ql7-support/knowledge/generalKnowledgeRegistry.js; используется в lib/ql7-support/neural/understandingCoordinator.js, lib/ql7-support/semantics/analyzeTurn.js, lib/ql7-support/simulation/fullCodeDataReadinessOracle.js.
+      - publicFigureCatalog.js — Общая библиотека/утилита public Figure Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/publicFigureKnowledgeGraph.js, lib/ql7-support/knowledge/publicFigureRegistry.js.
+      - publicFigureFactOntology.js — Общая библиотека/утилита public Figure Fact Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/sourceReceipt.js; используется в lib/ql7-support/knowledge/publicFigureSourceResolver.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - publicFigureKnowledgeGraph.js — Общая библиотека/утилита public Figure Knowledge Graph инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/public-figures/materialProfiles.js, lib/ql7-support/knowledge/publicFigureCatalog.js; используется в lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/canonical-matrix-performance.test.js.
+      - publicFigureQuestionClassifier.js — Общая библиотека/утилита public Figure Question Classifier инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - publicFigureRegistry.js — Общая библиотека/утилита public Figure Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js, lib/ql7-support/knowledge/public-figures/publicFigureResolver.js; используется в lib/ql7-support/knowledge/publicFigureKnowledgeGraph.js, tests/contracts/ql7-support-knowledge-contract.test.js, tests/unit/ql7-support/human-intelligence-closure.test.js.
+      - publicFigureSourceResolver.js — Общая библиотека/утилита public Figure Source Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/publicFigureFactOntology.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - religionKnowledgeRegistry.js — Общая библиотека/утилита religion Knowledge Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/sourceReceipt.js; используется в lib/ql7-support/knowledge/generalKnowledgeRegistry.js, tests/contracts/ql7-support-knowledge-contract.test.js.
+      - sourceReceipt.js — Общая библиотека/утилита source Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/knowledge/publicFigureFactOntology.js, lib/ql7-support/knowledge/religionKnowledgeRegistry.js.
+    - language/ — Каталог language.
+      - dialectProfiles/ — Каталог dialectProfiles.
+        - ar.json — Общая библиотека/утилита ar инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - az.json — Общая библиотека/утилита az инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - bg.json — Общая библиотека/утилита bg инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - cs.json — Общая библиотека/утилита cs инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - da.json — Общая библиотека/утилита da инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - de.json — Общая библиотека/утилита de инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - el.json — Общая библиотека/утилита el инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - en.json — Общая библиотека/утилита en инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - es.json — Общая библиотека/утилита es инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fi.json — Общая библиотека/утилита fi инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fr.json — Общая библиотека/утилита fr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - he.json — Общая библиотека/утилита he инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hr.json — Общая библиотека/утилита hr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hu.json — Общая библиотека/утилита hu инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - it.json — Общая библиотека/утилита it инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ja.json — Общая библиотека/утилита ja инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ka.json — Общая библиотека/утилита ka инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - kk.json — Общая библиотека/утилита kk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ko.json — Общая библиотека/утилита ko инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - nl.json — Общая библиотека/утилита nl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - no.json — Общая библиотека/утилита no инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pl.json — Общая библиотека/утилита pl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pt.json — Общая библиотека/утилита pt инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ro.json — Общая библиотека/утилита ro инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ru.json — Общая библиотека/утилита ru инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sk.json — Общая библиотека/утилита sk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sl.json — Общая библиотека/утилита sl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sr.json — Общая библиотека/утилита sr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sv.json — Общая библиотека/утилита sv инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - tr.json — Общая библиотека/утилита tr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - locales/ — Каталог locales.
+        - ar.js — Общая библиотека/утилита ar инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - az.js — Общая библиотека/утилита az инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - bg.js — Общая библиотека/утилита bg инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - cs.js — Общая библиотека/утилита cs инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - da.js — Общая библиотека/утилита da инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - de.js — Общая библиотека/утилита de инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - el.js — Общая библиотека/утилита el инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - en.js — Общая библиотека/утилита en инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - es.js — Общая библиотека/утилита es инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - fi.js — Общая библиотека/утилита fi инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - fr.js — Общая библиотека/утилита fr инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - he.js — Общая библиотека/утилита he инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - hr.js — Общая библиотека/утилита hr инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - hu.js — Общая библиотека/утилита hu инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - it.js — Общая библиотека/утилита it инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - ja.js — Общая библиотека/утилита ja инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - ka.js — Общая библиотека/утилита ka инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - kk.js — Общая библиотека/утилита kk инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - ko.js — Общая библиотека/утилита ko инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - manifest.js — Общая библиотека/утилита manifest инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/ar.js, lib/ql7-support/language/locales/az.js, lib/ql7-support/language/locales/bg.js; используется в lib/ql7-support/knowledge/domainKnowledge.js, lib/ql7-support/knowledge/humorLexicalPlan.js, lib/ql7-support/knowledge/humorLexiconBank.js.
+        - nl.js — Общая библиотека/утилита nl инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - no.js — Общая библиотека/утилита no инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - pl.js — Общая библиотека/утилита pl инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - profileFactory.js — Общая библиотека/утилита profile Factory инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/linguisticPrimitiveSchema.js; используется в lib/ql7-support/language/locales/ar.js, lib/ql7-support/language/locales/az.js, lib/ql7-support/language/locales/bg.js.
+        - pt.js — Общая библиотека/утилита pt инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - ro.js — Общая библиотека/утилита ro инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - ru.js — Общая библиотека/утилита ru инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - sk.js — Общая библиотека/утилита sk инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - sl.js — Общая библиотека/утилита sl инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - sr.js — Общая библиотека/утилита sr инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - sv.js — Общая библиотека/утилита sv инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - tr.js — Общая библиотека/утилита tr инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - uk.js — Общая библиотека/утилита uk инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+        - zh.js — Общая библиотека/утилита zh инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/profileFactory.js; используется в lib/ql7-support/language/locales/manifest.js.
+      - reviewedMaterial/ — Каталог reviewedMaterial.
+        - ar.json — Общая библиотека/утилита ar инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - az.json — Общая библиотека/утилита az инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - bg.json — Общая библиотека/утилита bg инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - cs.json — Общая библиотека/утилита cs инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - da.json — Общая библиотека/утилита da инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - de.json — Общая библиотека/утилита de инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - el.json — Общая библиотека/утилита el инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - en.json — Общая библиотека/утилита en инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - es.json — Общая библиотека/утилита es инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fi.json — Общая библиотека/утилита fi инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fr.json — Общая библиотека/утилита fr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - he.json — Общая библиотека/утилита he инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hr.json — Общая библиотека/утилита hr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hu.json — Общая библиотека/утилита hu инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - it.json — Общая библиотека/утилита it инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ja.json — Общая библиотека/утилита ja инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ka.json — Общая библиотека/утилита ka инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - kk.json — Общая библиотека/утилита kk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ko.json — Общая библиотека/утилита ko инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - nl.json — Общая библиотека/утилита nl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - no.json — Общая библиотека/утилита no инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pl.json — Общая библиотека/утилита pl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pt.json — Общая библиотека/утилита pt инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ro.json — Общая библиотека/утилита ro инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ru.json — Общая библиотека/утилита ru инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sk.json — Общая библиотека/утилита sk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sl.json — Общая библиотека/утилита sl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sr.json — Общая библиотека/утилита sr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sv.json — Общая библиотека/утилита sv инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - tr.json — Общая библиотека/утилита tr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - compositionalGrammar.js — Общая библиотека/утилита compositional Grammar инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/humorLexicalPlan.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/language/humanVariationPrimitives.js, lib/ql7-support/language/localeOperationFrames.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+      - dialectRouter.js — Общая библиотека/утилита dialect Router инфраструктурного слоя. Связи: импортирует lib/ql7-support/languageOrchestrator.js, lib/ql7-support/simulationOntology.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+      - ecosystemLocaleLexicon.js — Общая библиотека/утилита ecosystem Locale Lexicon инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/topicActionRegistry.js, tests/unit/ql7-support/ecosystem-locale-lexicon-test.js.
+      - factPresentationLexicon.js — Общая библиотека/утилита fact Presentation Lexicon инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/linguisticPrimitiveSchema.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, tests/unit/ql7-support/morphology-realizer-test.js.
+      - finalDeliveryLocalization.js — Общая библиотека/утилита final Delivery Localization инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/contracts/finalDeliveryReceipt.js, lib/ql7-support/language/locales.js; используется в lib/ql7-support/server.js, lib/ql7-support/simulation/executeScenario.js, tests/integration/ql7-support-runtime.integration.test.js.
+      - humanResponsePrimitives.multilingual.js — Общая библиотека/утилита human Response Primitives.multilingual инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js.
+      - humanVariationPrimitives.js — Общая библиотека/утилита human Variation Primitives инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/entryGreetingLexicon.js; используется в tests/contracts/ql7-support-contract.test.js, tests/contracts/ql7-support-full-unit-closure.contract.test.js, tests/contracts/ql7-support-regulation.contract.test.js.
+      - languageVariantBank.js — Общая библиотека/утилита language Variant Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js, lib/ql7-support/language/materialDataLoader.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/semantics/analyzeTurn.js, lib/ql7-support/simulation/languageSeedDiversityOracle.js.
+      - lexicalUniverseRegistry.js — Общая библиотека/утилита lexical Universe Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js, lib/ql7-support/language/materialDataLoader.js; используется в lib/ql7-support/language/robustConceptMatcher.js.
+      - linguisticPrimitiveSchema.js — Общая библиотека/утилита linguistic Primitive Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/language/factPresentationLexicon.js, lib/ql7-support/language/localeOperationFrames.js, lib/ql7-support/language/locales/profileFactory.js.
+      - localeOperationFrames.js — Общая библиотека/утилита locale Operation Frames инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/compositionalGrammar.js, lib/ql7-support/language/linguisticPrimitiveSchema.js; используется в tests/unit/ql7-support/human-intelligence-closure.test.js, tests/unit/ql7-support/locale-operation-frames-test.js.
+      - locales.js — Общая библиотека/утилита locales инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js; используется в lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/language/finalDeliveryLocalization.js, lib/ql7-support/language/nativeStructuredLocalization.js.
+      - localizationParity.js — Общая библиотека/утилита localization Parity инфраструктурного слоя. Связи: используется в lib/ql7-support/language/finalDeliveryLocalization.js.
+      - materialDataLoader.js — Общая библиотека/утилита material Data Loader инфраструктурного слоя. Связи: используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/language/languageVariantBank.js, lib/ql7-support/language/lexicalUniverseRegistry.js.
+      - mutationLattice.cjs — Общая библиотека/утилита mutation Lattice инфраструктурного слоя. Связи: используется в lib/ql7-support/language/mutationLattice.js, lib/ql7-support/safety/sharedSemanticEvidence.cjs.
+      - mutationLattice.js — Общая библиотека/утилита mutation Lattice инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/mutationLattice.cjs; используется в lib/ql7-support/language/languageVariantBank.js, lib/ql7-support/language/normalizeInput.js, lib/ql7-support/language/semanticBanks.js.
+      - nativeBanks.js — Общая библиотека/утилита native Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/inputPolicy.js, lib/ql7-support/presentation/badgePolicy.js, lib/ql7-support/presentation/buildSupportSurface.js.
+      - nativeStructuredLocalization.js — Общая библиотека/утилита native Structured Localization инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales.js, lib/ql7-support/languageOrchestrator.js, lib/ql7-support/nativeTranslationService.js; используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/language/finalDeliveryLocalization.js, tests/unit/ql7-support/native-localization-test.js.
+      - normalizeInput.js — Общая библиотека/утилита normalize Input инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales.js, lib/ql7-support/language/mutationLattice.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/final-runtime.test.js, tests/unit/ql7-support/intent-confirmation.test.js.
+      - responseLocalePolicy.js — Общая библиотека/утилита response Locale Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/locales.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js, tests/contracts/ql7-support-architecture-closure.contract.test.js.
+      - reviewedSeedRegistry.js — Общая библиотека/утилита reviewed Seed Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/materialDataLoader.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/language/languageVariantBank.js, lib/ql7-support/language/semanticConceptBank.js.
+      - robustConceptMatcher.js — Общая библиотека/утилита robust Concept Matcher инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/lexicalUniverseRegistry.js; используется в lib/ql7-support/safety/crisisAssessment.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - safetyLexicon.multilingual.js — Общая библиотека/утилита safety Lexicon.multilingual инфраструктурного слоя. Связи: используется в lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js, tests/unit/composer-safety/composer.test.js.
+      - safetyLexicon.native.js — Общая библиотека/утилита safety Lexicon.native инфраструктурного слоя. Связи: используется в lib/ql7-support/language/lexicalUniverseRegistry.js, lib/ql7-support/safety/obfuscationMatcher.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - semanticBanks.js — Общая библиотека/утилита semantic Banks инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/mutationLattice.js, lib/ql7-support/language/semanticConceptBank.js; используется в lib/ql7-support/language/normalizeInput.js, lib/ql7-support/safety/evaluateTurn.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - semanticConceptBank.js — Общая библиотека/утилита semantic Concept Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/humanConversationBank.js, lib/ql7-support/knowledge/humanTopicOntology.js, lib/ql7-support/language/reviewedSeedRegistry.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/simulation/languageSeedDiversityOracle.js.
+      - sourceEvidenceLexicon.js — Общая библиотека/утилита source Evidence Lexicon инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/language/compositionalGrammar.js.
+      - supportSurfaceCopyRegistry.js — Общая библиотека/утилита support Surface Copy Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/presentation/buildSupportSurface.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+    - learning/ — Каталог learning.
+      - ablationEvaluator.js — Общая библиотека/утилита ablation Evaluator инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - approvalReceipt.js — Общая библиотека/утилита approval Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/learningPipeline.js.
+      - calibrationCandidateReceipt.js — Общая библиотека/утилита calibration Candidate Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/learningPipeline.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+      - consentReceipt.js — Общая библиотека/утилита consent Receipt инфраструктурного слоя. Связи: используется в app/api/dm/support-feedback/route.js, app/api/dm/support-learning-consent/route.js.
+      - constraintOptimizer.js — Общая библиотека/утилита constraint Optimizer инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - counterfactualEvaluator.js — Общая библиотека/утилита counterfactual Evaluator инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - datasetDeletion.js — Общая библиотека/утилита dataset Deletion инфраструктурного слоя. Связи: импортирует lib/ql7-support/privacy/dataLineageRegistry.cjs; используется в lib/ql7-support/learningPipeline.js.
+      - driftMonitor.js — Общая библиотека/утилита drift Monitor инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - featureAttribution.js — Общая библиотека/утилита feature Attribution инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - governancePolicy.js — Общая библиотека/утилита governance Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/learningPipeline.js, tests/contracts/ql7-support-contract.test.js.
+      - incidentCandidate.js — Общая библиотека/утилита incident Candidate инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - outcomeCalibrationLedger.js — Общая библиотека/утилита outcome Calibration Ledger инфраструктурного слоя. Связи: используется в app/api/dm/support-feedback/route.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - promotionPolicy.js — Общая библиотека/утилита promotion Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/learningPipeline.js.
+      - safeCalibration.js — Общая библиотека/утилита safe Calibration инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js; используется в lib/ql7-support/ontology/simulationOntology.js.
+      - scientificGovernance.js — Общая библиотека/утилита scientific Governance инфраструктурного слоя. Связи: импортирует lib/ql7-support/learning/ablationEvaluator.js, lib/ql7-support/learning/constraintOptimizer.js, lib/ql7-support/learning/counterfactualEvaluator.js; используется в lib/ql7-support/learningPipeline.js.
+      - weightCalibrationReceipt.js — Общая библиотека/утилита weight Calibration Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+      - weightProposal.js — Общая библиотека/утилита weight Proposal инфраструктурного слоя. Связи: используется в lib/ql7-support/learning/scientificGovernance.js.
+    - neural/ — Каталог neural.
+      - criticContract.js — Общая библиотека/утилита critic Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeCriticAdapter.js.
+      - generationContract.js — Общая библиотека/утилита generation Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeGenerationAdapter.js.
+      - modelManifest.js — Общая библиотека/утилита model Manifest инфраструктурного слоя. Связи: используется в lib/ql7-support/neural/nativeCriticAdapter.js, lib/ql7-support/neural/nativeGenerationAdapter.js, lib/ql7-support/neural/nativeModelGateway.js.
+      - modelReceipt.js — Общая библиотека/утилита model Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeModelGateway.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+      - nativeCriticAdapter.js — Общая библиотека/утилита native Critic Adapter инфраструктурного слоя. Связи: импортирует lib/ql7-support/neural/criticContract.js, lib/ql7-support/neural/modelManifest.js; используется в lib/ql7-support/response/humanNaturalRealizer.js.
+      - nativeGenerationAdapter.js — Общая библиотека/утилита native Generation Adapter инфраструктурного слоя. Связи: импортирует lib/ql7-support/neural/generationContract.js, lib/ql7-support/neural/modelManifest.js; используется в lib/ql7-support/response/humanNaturalRealizer.js.
+      - nativeModelGateway.js — Общая библиотека/утилита native Model Gateway инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/neural/modelManifest.js, lib/ql7-support/neural/modelReceipt.js; используется в lib/composer-safety/nativeSemanticAdapter.cjs, lib/ql7-support/nativeTranslationService.js, lib/ql7-support/neural/understandingCoordinator.js.
+      - normalizationLatticeSchema.js — Общая библиотека/утилита normalization Lattice Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeModelGateway.js.
+      - safetyFrameSchema.js — Общая библиотека/утилита safety Frame Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeModelGateway.js.
+      - semanticFrameSchema.js — Общая библиотека/утилита semantic Frame Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/nativeModelGateway.js.
+      - understandingContract.js — Общая библиотека/утилита understanding Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/neural/understandingCoordinator.js, tests/unit/ql7-support/neural-understanding.test.js.
+      - understandingCoordinator.js — Общая библиотека/утилита understanding Coordinator инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/humanConversationBank.js, lib/ql7-support/knowledge/openHumanKnowledgeRouter.js; используется в lib/ql7-support/runtime/canonicalContext.js, lib/ql7-support/runtime/productionTurn.js, tests/unit/ql7-support/neural-understanding.test.js.
+    - ontology/ — Каталог ontology.
+      - domains/ — Каталог domains.
+        - academy_exam.js — Общая библиотека/утилита academy exam инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - academy.js — Общая библиотека/утилита academy инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - accessibility.js — Общая библиотека/утилита accessibility инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - account_deletion.js — Общая библиотека/утилита account deletion инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - ads_campaigns.js — Общая библиотека/утилита ads campaigns инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - ads_packages.js — Общая библиотека/утилита ads packages инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - auth.js — Общая библиотека/утилита auth инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - battle_chat.js — Общая библиотека/утилита battle chat инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - battlecoin.js — Общая библиотека/утилита battlecoin инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - contact.js — Общая библиотека/утилита contact инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - exchange_ai.js — Общая библиотека/утилита exchange ai инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - exchange.js — Общая библиотека/утилита exchange инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - forum_feed.js — Общая библиотека/утилита forum feed инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - forum_threads.js — Общая библиотека/утилита forum threads инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - futures.js — Общая библиотека/утилита futures инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - gameverse.js — Общая библиотека/утилита gameverse инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - geodetect.js — Общая библиотека/утилита geodetect инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - homepage.js — Общая библиотека/утилита homepage инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - index.js — Общая библиотека/утилита index инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/domains/academy.js, lib/ql7-support/ontology/domains/academy_exam.js, lib/ql7-support/ontology/domains/accessibility.js; используется в lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledge/domainRegistry.js.
+        - investment.js — Общая библиотека/утилита investment инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - localization.js — Общая библиотека/утилита localization инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - media.js — Общая библиотека/утилита media инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - messenger.js — Общая библиотека/утилита messenger инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - metamarket.js — Общая библиотека/утилита metamarket инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - metastudio.js — Общая библиотека/утилита metastudio инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - metaverse.js — Общая библиотека/утилита metaverse инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - moderation.js — Общая библиотека/утилита moderation инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - navigation.js — Общая библиотека/утилита navigation инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - news.js — Общая библиотека/утилита news инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - partnership.js — Общая библиотека/утилита partnership инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - payments.js — Общая библиотека/утилита payments инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - platform.js — Общая библиотека/утилита platform инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - privacy.js — Общая библиотека/утилита privacy инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - profile.js — Общая библиотека/утилита profile инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - push.js — Общая библиотека/утилита push инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - qcoin.js — Общая библиотека/утилита qcoin инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - ql7_blockchain.js — Общая библиотека/утилита ql7 blockchain инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - quantum_family.js — Общая библиотека/утилита quantum family инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - quantum_zigzag.js — Общая библиотека/утилита quantum zigzag инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - quests.js — Общая библиотека/утилита quests инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - roadmap.js — Общая библиотека/утилита roadmap инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - search.js — Общая библиотека/утилита search инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - security.js — Общая библиотека/утилита security инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - system_status.js — Общая библиотека/утилита system status инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - telegram.js — Общая библиотека/утилита telegram инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - vip.js — Общая библиотека/утилита vip инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+        - wallet.js — Общая библиотека/утилита wallet инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/domains/index.js.
+      - actionOntology.js — Общая библиотека/утилита action Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - domainOntology.js — Общая библиотека/утилита domain Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/domains/index.js; используется в lib/ql7-support/ontology/microtopicOntology.js, lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyQuery.js.
+      - edgeSchemas.js — Общая библиотека/утилита edge Schemas инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyValidator.js.
+      - emotionOntology.js — Общая библиотека/утилита emotion Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - entityOntology.js — Общая библиотека/утилита entity Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - intentOntology.js — Общая библиотека/утилита intent Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyQuery.js.
+      - memoryOntology.js — Общая библиотека/утилита memory Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - microtopicOntology.js — Общая библиотека/утилита microtopic Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/domainOntology.js; используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/ontology/ontologyManifest.js.
+      - nodeSchemas.js — Общая библиотека/утилита node Schemas инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyMigration.js, lib/ql7-support/ontology/ontologyValidator.js.
+      - ontologyManifest.js — Общая библиотека/утилита ontology Manifest инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/actionOntology.js, lib/ql7-support/ontology/domainOntology.js, lib/ql7-support/ontology/domains/index.js; используется в lib/ql7-support/response/buildSemanticResponsePlan.js, tests/unit/ql7-support/late-directive-canonical.test.js, tests/unit/ql7-support/scientific-governance.test.js.
+      - ontologyMigration.js — Общая библиотека/утилита ontology Migration инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/nodeSchemas.js.
+      - ontologyQuery.js — Общая библиотека/утилита ontology Query инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/domainOntology.js, lib/ql7-support/ontology/intentOntology.js, lib/ql7-support/ontology/microtopicOntology.js; используется в lib/ql7-support/response/buildSemanticResponsePlan.js.
+      - ontologyValidator.js — Общая библиотека/утилита ontology Validator инфраструктурного слоя. Связи: импортирует lib/ql7-support/ontology/domainOntology.js, lib/ql7-support/ontology/edgeSchemas.js, lib/ql7-support/ontology/microtopicOntology.js; используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - relationConstraints.js — Общая библиотека/утилита relation Constraints инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyValidator.js.
+      - safetyOntology.js — Общая библиотека/утилита safety Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - simulationOntology.js — Общая библиотека/утилита simulation Ontology инфраструктурного слоя. Связи: импортирует lib/ql7-support/learning/safeCalibration.js, lib/ql7-support/microIntentCatalog.js, lib/ql7-support/response/responseLengthPlanner.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+      - sourceClaimOntology.js — Общая библиотека/утилита source Claim Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js.
+      - speechActOntology.js — Общая библиотека/утилита speech Act Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyQuery.js.
+    - operator/ — Каталог operator.
+      - adminReportRu.js — Общая библиотека/утилита admin Report Ru инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - buildCase.js — Общая библиотека/утилита build Case инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemRating.js, lib/ql7-support/internal/text.js, lib/ql7-support/operator/evidenceAggregation.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/server.js, lib/ql7-support/simulation/identityAudit.js.
+      - caseAuthority.cjs — Общая библиотека/утилита case Authority инфраструктурного слоя. Связи: используется в lib/composer-safety/securityCaseService.cjs.
+      - evidenceAggregation.js — Общая библиотека/утилита evidence Aggregation инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/operator/buildCase.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - reportContract.js — Общая библиотека/утилита report Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/operator/buildCase.js, lib/ql7-support/operator/smtpRendererRu.js, tests/contracts/ql7-support-smtp-closure.contract.test.js.
+      - smtpPolicy.js — Общая библиотека/утилита smtp Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/emailOutboxWorker.js, lib/supportEmailTransport.js.
+      - smtpRendererRu.js — Общая библиотека/утилита smtp Renderer Ru инфраструктурного слоя. Связи: импортирует lib/ql7-support/operator/reportContract.js; используется в lib/ql7-support/simulation/identityAudit.js, lib/supportEmailTransport.js, tests/contracts/ql7-support-smtp-closure.contract.test.js.
+    - presentation/ — Каталог presentation.
+      - badgePolicy.js — Общая библиотека/утилита badge Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/language/nativeBanks.js; используется в lib/ql7-support/presentation/buildSupportSurface.js, tests/unit/ql7-support/material-runtime.test.js.
+      - buildSupportSurface.js — Общая библиотека/утилита build Support Surface инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/nativeBanks.js, lib/ql7-support/language/supportSurfaceCopyRegistry.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/server.js.
+      - choiceLocaleLexicon.js — Общая библиотека/утилита choice Locale Lexicon инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js; используется в lib/ql7-support/response/buildContentPlan.js.
+      - entityMentionBudget.js — Общая библиотека/утилита entity Mention Budget инфраструктурного слоя. Связи: используется в lib/ql7-support/presentation/surfaceSemanticDensity.js.
+      - interactionModalityPlanner.js — Общая библиотека/утилита interaction Modality Planner инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - premiumCardLayout.js — Общая библиотека/утилита premium Card Layout инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/emotionalPresentation.js, lib/ql7-support/semanticBadgeRegistry.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+      - propositionPlacement.js — Общая библиотека/утилита proposition Placement инфраструктурного слоя. Связи: используется в lib/ql7-support/presentation/buildSupportSurface.js.
+      - registry.js — Общая библиотека/утилита registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в tests/unit/ql7-support/final-runtime.test.js.
+      - surfaceSemanticDensity.js — Общая библиотека/утилита surface Semantic Density инфраструктурного слоя. Связи: импортирует lib/ql7-support/presentation/entityMentionBudget.js; используется в lib/ql7-support/presentation/buildSupportSurface.js.
+      - svgRegistry.js — Общая библиотека/утилита svg Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в forum/features/dm/components/Ql7SemanticBadge.js, lib/ql7-support/presentation/buildSupportSurface.js, tests/component/ql7-support/semantic-badges-test.jsx.
+      - tableRegistry.js — Общая библиотека/утилита table Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/nativeBanks.js; используется в lib/ql7-support/presentation/buildSupportSurface.js.
+      - visualAcceptance.js — Общая библиотека/утилита visual Acceptance инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - privacy/ — Каталог privacy.
+      - dataLineageRegistry.cjs — Общая библиотека/утилита data Lineage Registry инфраструктурного слоя. Связи: используется в lib/mongo/account-deletion-primary.cjs, lib/ql7-support/learning/datasetDeletion.js.
+    - rating/ — Каталог rating.
+      - evidenceQuality.js — Общая библиотека/утилита evidence Quality инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemRating.js.
+      - factorRegistry.js — Общая библиотека/утилита factor Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemRating.js.
+      - ratingCalibration.js — Общая библиотека/утилита rating Calibration инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemRating.js.
+      - ratingCoverage.js — Общая библиотека/утилита rating Coverage инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemRating.js.
+    - response/ — Каталог response.
+      - answerRelevanceGuard.js — Общая библиотека/утилита answer Relevance Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/finalHumanQualityGate.js, tests/unit/ql7-support/answer-relevance-test.js.
+      - botPhraseRegistry.js — Общая библиотека/утилита bot Phrase Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/finalHumanQualityGate.js, lib/ql7-support/response/humanNaturalRealizer.js.
+      - buildContentPlan.js — Общая библиотека/утилита build Content Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/contact/questionnaire.js, lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/runtime/executeTurn.js, tests/unit/ql7-support/final-code-closure.test.js.
+      - buildSemanticResponsePlan.js — Общая библиотека/утилита build Semantic Response Plan инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/ontology/ontologyQuery.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - choiceDiversity.js — Общая библиотека/утилита choice Diversity инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportChoiceCard.js.
+      - contradictionGuard.js — Общая библиотека/утилита contradiction Guard инфраструктурного слоя. Связи: используется в lib/ql7-support/response/finalHumanQualityGate.js, tests/contracts/ql7-support-knowledge-fallback-provenance.contract.test.js, tests/unit/ql7-support/knowledge-fallback-provenance.test.js.
+      - critiqueResponse.js — Общая библиотека/утилита critique Response инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/finalDeliveryVerifier.js, lib/ql7-support/simulation/independentOracle.js.
+      - discoursePlanner.js — Общая библиотека/утилита discourse Planner инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/discourseStrategyRegistry.js, lib/ql7-support/response/responseBranchRegistry.js; используется в lib/ql7-support/response/humanNaturalRealizer.js, lib/ql7-support/runtime/executeTurn.js, tests/unit/ql7-support/knowledge-fallback-provenance.test.js.
+      - discourseStrategyRegistry.js — Общая библиотека/утилита discourse Strategy Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/response/discoursePlanner.js.
+      - domainIsolationGuard.js — Общая библиотека/утилита domain Isolation Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/finalHumanQualityGate.js, lib/ql7-support/response/humanNaturalRealizer.js.
+      - evaluateNovelty.js — Общая библиотека/утилита evaluate Novelty инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/semanticNoveltyLedger.js; используется в lib/ql7-support/response/finalHumanQualityGate.js.
+      - eventSemanticProjection.js — Общая библиотека/утилита event Semantic Projection инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/eventNotificationCatalog.js, lib/ql7-support/internal/text.js; используется в tests/unit/ql7-support/final-intelligence-test.js.
+      - factualCompletenessGuard.js — Общая библиотека/утилита factual Completeness Guard инфраструктурного слоя. Связи: используется в lib/ql7-support/response/finalHumanQualityGate.js.
+      - finalHumanQualityGate.js — Общая библиотека/утилита final Human Quality Gate инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/answerRelevanceGuard.js, lib/ql7-support/response/botPhraseRegistry.js; используется в lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/finalDeliveryVerifier.js.
+      - generalFactRealizer.js — Общая библиотека/утилита general Fact Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js.
+      - humanNaturalRealizer.js — Общая библиотека/утилита human Natural Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/neural/nativeCriticAdapter.js, lib/ql7-support/neural/nativeGenerationAdapter.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - humorRealizationPlanner.js — Общая библиотека/утилита humor Realization Planner инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/humorAnecdoteFrameBank.js, lib/ql7-support/knowledge/humorLexiconBank.js; используется в lib/ql7-support/config/materialReadiness.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/simulation/humorMaterialDiversityOracle.js.
+      - immutableFactFragmentRegistry.js — Общая библиотека/утилита immutable Fact Fragment Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/response/morphosyntacticRealizer.js.
+      - languagePurityGuard.js — Общая библиотека/утилита language Purity Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/locales/manifest.js; используется в lib/ql7-support/response/finalHumanQualityGate.js, lib/ql7-support/response/humanNaturalRealizer.js, tests/unit/ql7-support/ecosystem-locale-lexicon-test.js.
+      - morphologyRealizer.js — Общая библиотека/утилита morphology Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/response/morphosyntacticRealizer.js; используется в tests/unit/ql7-support/morphology-realizer-test.js.
+      - morphosyntacticRealizer.js — Общая библиотека/утилита morphosyntactic Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/eventNotificationCatalog.js, lib/ql7-support/greetingCoordinator.js; используется в lib/ql7-support/response/humanNaturalRealizer.js, lib/ql7-support/response/morphologyRealizer.js, tests/contracts/ql7-support-full-unit-closure.contract.test.js.
+      - noveltyReservation.js — Общая библиотека/утилита novelty Reservation инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/deliveryCommitCoordinator.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/finalDeliveryVerifier.js.
+      - productKnowledgeRealizer.js — Общая библиотека/утилита product Knowledge Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, tests/unit/ql7-support/pragmatic-context.test.js.
+      - propositionPlanner.js — Общая библиотека/утилита proposition Planner инфраструктурного слоя. Связи: используется в lib/ql7-support/response/morphosyntacticRealizer.js.
+      - publicFigureKnowledgeRealizer.js — Общая библиотека/утилита public Figure Knowledge Realizer инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, tests/unit/ql7-support/public-figure-metadata-boundary.test.js.
+      - referringExpressionPlanner.js — Общая библиотека/утилита referring Expression Planner инфраструктурного слоя. Связи: используется в lib/ql7-support/response/morphosyntacticRealizer.js.
+      - regenerationController.js — Общая библиотека/утилита regeneration Controller инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/executeTurn.js, tests/contracts/ql7-support-full-integration-closure.contract.test.js, tests/contracts/ql7-support-p0-novelty.contract.test.js.
+      - responseBranchRegistry.js — Общая библиотека/утилита response Branch Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/discoursePlanner.js, tests/unit/ql7-support/response-branch-registry-test.js.
+      - responseLengthPlanner.js — Общая библиотека/утилита response Length Planner инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/limits.js; используется в lib/ql7-support/ontology/simulationOntology.js, lib/ql7-support/response/buildSemanticResponsePlan.js, lib/ql7-support/simulation/factualSimulation.js.
+      - semanticNoveltyLedger.js — Общая библиотека/утилита semantic Novelty Ledger инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/evaluateNovelty.js, lib/ql7-support/response/humanNaturalRealizer.js, lib/ql7-support/runtime/executeTurn.js.
+      - styleController.js — Общая библиотека/утилита style Controller инфраструктурного слоя. Связи: используется в lib/ql7-support/response/morphosyntacticRealizer.js.
+      - surfaceRedundancyGuard.js — Общая библиотека/утилита surface Redundancy Guard инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/surfaceRedundancyReceipt.js; используется в lib/ql7-support/presentation/buildSupportSurface.js, lib/ql7-support/response/finalHumanQualityGate.js, tests/contracts/ql7-support-structured-fact-ownership.contract.test.js.
+      - surfaceRedundancyReceipt.js — Общая библиотека/утилита surface Redundancy Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/surfaceRedundancyGuard.js.
+      - userSpecificAnchorGuard.js — Общая библиотека/утилита user Specific Anchor Guard инфраструктурного слоя. Связи: используется в lib/ql7-support/response/finalHumanQualityGate.js, tests/unit/ql7-support/answer-relevance-test.js.
+    - runtime/ — Каталог runtime.
+      - canonicalContext.js — Общая библиотека/утилита canonical Context инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/conversation/semanticContext.js, lib/ql7-support/conversation/transitionClassifier.js; используется в lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/server.js.
+      - caseStoreContract.js — Общая библиотека/утилита case Store Contract инфраструктурного слоя. Связи: используется в lib/ql7-support/events.js, lib/ql7-support/semantics/entityExtractor.js, lib/ql7-support/server.js.
+      - commitRecoveryWorker.js — Общая библиотека/утилита commit Recovery Worker инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/finalDeliveryReceipt.js, lib/ql7-support/internal/text.js, lib/ql7-support/runtime/deliveryCommitCoordinator.js; используется в lib/ql7-support/server.js, tests/contracts/ql7-support-recovery-novelty-lifecycle.contract.test.js, tests/unit/ql7-support/delivery-commit-recovery-test.js.
+      - deliveryCommitCoordinator.js — Общая библиотека/утилита delivery Commit Coordinator инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/finalDeliveryReceipt.js, lib/ql7-support/conversation/memoryStore.js, lib/ql7-support/conversation/memoryTransaction.js; используется в lib/ql7-support/runtime/commitRecoveryWorker.js, lib/ql7-support/server.js, lib/ql7-support/simulation/executeScenario.js.
+      - executeTurn.js — Общая библиотека/утилита execute Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/config/featureFlag.js, lib/ql7-support/config/staticDataReadiness.js; используется в lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/factualSimulation.js, lib/ql7-support/simulation/productionParityHarness.js.
+      - finalDeliveryVerifier.js — Общая библиотека/утилита final Delivery Verifier инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/contracts/finalDeliveryReceipt.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/commitRecoveryWorker.js, lib/ql7-support/runtime/deliveryCommitCoordinator.js, lib/ql7-support/runtime/productionTurn.js.
+      - nativeIntelligencePlane.js — Общая библиотека/утилита native Intelligence Plane инфраструктурного слоя. Связи: импортирует lib/ql7-support/cognition/cognitiveTurnState.js, lib/ql7-support/data/readAuthorizationPolicy.js, lib/ql7-support/data/readPlan.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - productionTurn.js — Общая библиотека/утилита production Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/choiceContract.js, lib/ql7-support/contracts/finalDeliveryReceipt.js; используется в lib/ql7-support/server.js, lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/simulation/liveRead.js.
+      - runtimeStatePublicationReceipt.js — Общая библиотека/утилита runtime State Publication Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js.
+      - runtimeStateReceipt.js — Общая библиотека/утилита runtime State Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/runtimeStateMachine.js, tests/unit/ql7-support/material-runtime.test.js.
+      - stateReceipt.js — Общая библиотека/утилита state Receipt инфраструктурного слоя. Связи: используется в app/api/dm/support-state/route.js.
+      - transportContract.js — Общая библиотека/утилита transport Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/locales.js; используется в lib/ql7-support/server.js.
+      - turnSequencer.js — Общая библиотека/утилита turn Sequencer инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/unit/ql7-support/material-runtime.test.js.
+    - safety/ — Каталог safety.
+      - crisisReviewed/ — Каталог crisisReviewed.
+        - ar.json — Общая библиотека/утилита ar инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - az.json — Общая библиотека/утилита az инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - bg.json — Общая библиотека/утилита bg инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - cs.json — Общая библиотека/утилита cs инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - da.json — Общая библиотека/утилита da инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - de.json — Общая библиотека/утилита de инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - el.json — Общая библиотека/утилита el инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - en.json — Общая библиотека/утилита en инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - es.json — Общая библиотека/утилита es инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fi.json — Общая библиотека/утилита fi инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - fr.json — Общая библиотека/утилита fr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - he.json — Общая библиотека/утилита he инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hr.json — Общая библиотека/утилита hr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - hu.json — Общая библиотека/утилита hu инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - it.json — Общая библиотека/утилита it инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ja.json — Общая библиотека/утилита ja инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ka.json — Общая библиотека/утилита ka инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - kk.json — Общая библиотека/утилита kk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ko.json — Общая библиотека/утилита ko инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - nl.json — Общая библиотека/утилита nl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - no.json — Общая библиотека/утилита no инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pl.json — Общая библиотека/утилита pl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - pt.json — Общая библиотека/утилита pt инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ro.json — Общая библиотека/утилита ro инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - ru.json — Общая библиотека/утилита ru инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sk.json — Общая библиотека/утилита sk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sl.json — Общая библиотека/утилита sl инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sr.json — Общая библиотека/утилита sr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - sv.json — Общая библиотека/утилита sv инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - tr.json — Общая библиотека/утилита tr инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - uk.json — Общая библиотека/утилита uk инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - zh.json — Общая библиотека/утилита zh инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - crisisAssessment.js — Общая библиотека/утилита crisis Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/robustConceptMatcher.js, lib/ql7-support/safety/crisisConceptBank.js; используется в lib/ql7-support/safety/evaluateTurn.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - crisisConceptBank.js — Общая библиотека/утилита crisis Concept Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/safety/crisisAssessment.js, lib/ql7-support/safety/crisisReviewedCueBank.js, tests/contracts/ql7-support-full-unit-closure.contract.test.js.
+      - crisisReviewedCueBank.js — Общая библиотека/утилита crisis Reviewed Cue Bank инфраструктурного слоя. Связи: импортирует lib/ql7-support/safety/crisisConceptBank.js; используется в lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/safety/crisisAssessment.js, lib/ql7-support/simulation/crisisDepthOracle.js.
+      - escalationLedger.js — Общая библиотека/утилита escalation Ledger инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/factualSimulation.js.
+      - evaluateTurn.js — Общая библиотека/утилита evaluate Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/safety/crisisAssessment.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/integration/ql7-support-premium-cognitive.integration.test.js, tests/unit/ql7-support/material-runtime.test.js.
+      - insultAssessment.js — Общая библиотека/утилита insult Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/safety/obfuscationMatcher.js; используется в lib/ql7-support/safety/evaluateTurn.js.
+      - insultStateMachine.js — Общая библиотека/утилита insult State Machine инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/safety/evaluateTurn.js.
+      - obfuscationMatcher.js — Общая библиотека/утилита obfuscation Matcher инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/language/safetyLexicon.multilingual.js, lib/ql7-support/language/safetyLexicon.native.js; используется в lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/safety/insultAssessment.js.
+      - sharedSemanticEvidence.cjs — Общая библиотека/утилита shared Semantic Evidence инфраструктурного слоя. Связи: импортирует lib/composer-safety/localeSemanticHints.cjs, lib/composer-safety/reviewedMaterialRegistry.cjs, lib/composer-safety/semanticTargetFrame.cjs; используется в lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/safety/sharedSemanticEvidence.js, lib/ql7-support/toneAssessment.js.
+      - sharedSemanticEvidence.js — Общая библиотека/утилита shared Semantic Evidence инфраструктурного слоя. Связи: импортирует lib/ql7-support/safety/sharedSemanticEvidence.cjs; используется в lib/ql7-support/safety/evaluateTurn.js, tests/unit/ql7-support/material-runtime.test.js.
+    - security/ — Каталог security.
+      - assetProtectionPolicy.js — Общая библиотека/утилита asset Protection Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - ecosystemAttackAssessment.js — Общая библиотека/утилита ecosystem Attack Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/max-combat.test.js.
+      - illicitAssetRoutePolicy.js — Общая библиотека/утилита illicit Asset Route Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/max-combat.test.js.
+      - securityActionPolicy.js — Общая библиотека/утилита security Action Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - securityEventFrame.js — Общая библиотека/утилита security Event Frame инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - securityEvidenceReceipt.js — Общая библиотека/утилита security Evidence Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - securityLadderProjection.js — Общая библиотека/утилита security Ladder Projection инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - securityReadPlan.js — Общая библиотека/утилита security Read Plan инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+      - securityRiskFusion.js — Общая библиотека/утилита security Risk Fusion инфраструктурного слоя. Связи: используется в lib/ql7-support/runtime/nativeIntelligencePlane.js.
+    - semantics/ — Каталог semantics.
+      - abstentionPolicy.js — Общая библиотека/утилита abstention Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - analyzeTurn.js — Общая библиотека/утилита analyze Turn инфраструктурного слоя. Связи: импортирует lib/ql7-support/contact/contactIntelligence.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/runtime/canonicalContext.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/server.js.
+      - approvedInteractions.js — Общая библиотека/утилита approved Interactions инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/candidateScorer.js.
+      - battleExpansion.js — Общая библиотека/утилита battle Expansion инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulationOntology.js; используется в lib/ql7-support/ontology/simulationOntology.js, lib/ql7-support/simulation/factualSimulation.js.
+      - buildResponseScopeReceipt.js — Общая библиотека/утилита build Response Scope Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/semantics/domainBoundaryGraph.js; используется в lib/ql7-support/runtime/executeTurn.js.
+      - calibratedPosterior.js — Общая библиотека/утилита calibrated Posterior инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/calibratorRegistry.js; используется в lib/ql7-support/semantics/decisionMath.js.
+      - calibratorRegistry.js — Общая библиотека/утилита calibrator Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/calibratedPosterior.js.
+      - candidateScorer.js — Общая библиотека/утилита candidate Scorer инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/approvedInteractions.js; используется в lib/ql7-support/semantics/decisionMath.js.
+      - clarificationRanker.js — Общая библиотека/утилита clarification Ranker инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/semantics/clarificationStrategyRegistry.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - clarificationStrategyRegistry.js — Общая библиотека/утилита clarification Strategy Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, lib/ql7-support/semantics/clarificationRanker.js, tests/contracts/ql7-support-p0-novelty.contract.test.js.
+      - coreferenceResolver.js — Общая библиотека/утилита coreference Resolver инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/analyzeTurn.js, lib/ql7-support/semantics/decisionMath.js.
+      - counterEvidence.js — Общая библиотека/утилита counter Evidence инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - decisionCostMatrix.js — Общая библиотека/утилита decision Cost Matrix инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - decisionMath.js — Общая библиотека/утилита decision Math инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/abstentionPolicy.js, lib/ql7-support/semantics/calibratedPosterior.js, lib/ql7-support/semantics/candidateScorer.js; используется в lib/ql7-support/semantics/analyzeTurn.js, tests/contracts/ql7-support-max-combat.contract.test.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+      - domainBoundaryGraph.js — Общая библиотека/утилита domain Boundary Graph инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/buildResponseScopeReceipt.js, tests/unit/ql7-support/answer-relevance-test.js.
+      - emotionAssessment.js — Общая библиотека/утилита emotion Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - entityExtractor.js — Общая библиотека/утилита entity Extractor инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/caseStoreContract.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - featureVector.js — Общая библиотека/утилита feature Vector инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - intentConfirmationReceipt.js — Общая библиотека/утилита intent Confirmation Receipt инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/neural/understandingCoordinator.js, lib/ql7-support/semantics/analyzeTurn.js, tests/unit/ql7-support/intent-confirmation.test.js.
+      - negationScopeResolver.js — Общая библиотека/утилита negation Scope Resolver инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - pragmaticFrame.js — Общая библиотека/утилита pragmatic Frame инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - quotationContextResolver.js — Общая библиотека/утилита quotation Context Resolver инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/decisionMath.js.
+      - routeCalibration.js — Общая библиотека/утилита route Calibration инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js; используется в tests/unit/ql7-support/final-runtime.test.js.
+      - topicArbitrator.js — Общая библиотека/утилита topic Arbitrator инфраструктурного слоя. Связи: импортирует lib/ql7-support/semantics/topicDecisionReceipt.js; используется в lib/ql7-support/semantics/analyzeTurn.js.
+      - topicDecisionReceipt.js — Общая библиотека/утилита topic Decision Receipt инфраструктурного слоя. Связи: используется в lib/ql7-support/semantics/topicArbitrator.js.
+    - simulation/ — Каталог simulation.
+      - corpora/ — Каталог corpora.
+        - conversationBreadth.js — Общая библиотека/утилита conversation Breadth инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - knowledge32.js — Общая библиотека/утилита knowledge32 инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/simulation/scenarioCatalog.js, tests/contracts/ql7-support-contract.test.js, tests/contracts/ql7-support-regulation.contract.test.js.
+        - safetyBoundary.js — Общая библиотека/утилита safety Boundary инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - lab/ — Каталог lab.
+        - ablationRunner.js — Общая библиотека/утилита ablation Runner инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - calibrationMetrics.js — Общая библиотека/утилита calibration Metrics инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - causalAttribution.js — Общая библиотека/утилита causal Attribution инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - checkpointJournal.js — Общая библиотека/утилита checkpoint Journal инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - counterfactualGenerator.js — Общая библиотека/утилита counterfactual Generator инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - coverageTensor.js — Общая библиотека/утилита coverage Tensor инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - datasetLineage.js — Общая библиотека/утилита dataset Lineage инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - datasetRegistry.js — Общая библиотека/утилита dataset Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - deltaDebugger.js — Общая библиотека/утилита delta Debugger инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - differentialRunner.js — Общая библиотека/утилита differential Runner инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - distributedCoordinator.js — Общая библиотека/утилита distributed Coordinator инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - driftMetrics.js — Общая библиотека/утилита drift Metrics инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - evidenceMerkleTree.js — Общая библиотека/утилита evidence Merkle Tree инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - experimentManifest.js — Общая библиотека/утилита experiment Manifest инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - factorialDesign.js — Общая библиотека/утилита factorial Design инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - failureClusterer.js — Общая библиотека/утилита failure Clusterer инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - humanReviewQueue.js — Общая библиотека/утилита human Review Queue инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - liveProofRegistry.js — Общая библиотека/утилита live Proof Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/simulation/capabilityRegistry.js; используется в lib/ql7-support/simulation/lab/liveProofRunner.js, lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - liveProofRunner.js — Общая библиотека/утилита live Proof Runner инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/simulation/capabilityProductionProbe.js, lib/ql7-support/simulation/lab/liveProofRegistry.js; используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - metamorphicGenerator.js — Общая библиотека/утилита metamorphic Generator инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js, lib/ql7-support/simulation/scientificScenario.js.
+        - multipleTestingCorrection.js — Общая библиотека/утилита multiple Testing Correction инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - mutationInvariantRegistry.js — Общая библиотека/утилита mutation Invariant Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - oracleConsensus.js — Общая библиотека/утилита oracle Consensus инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - oracleProcessClient.js — Общая библиотека/утилита oracle Process Client инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - oracleProcessProtocol.js — Общая библиотека/утилита oracle Process Protocol инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - oracleSandbox.js — Общая библиотека/утилита oracle Sandbox инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - powerAnalysis.js — Общая библиотека/утилита power Analysis инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js, lib/ql7-support/simulation/statisticalAcceptance.js, tests/unit/ql7-support/scientific-governance.test.js.
+        - propertyFuzzer.js — Общая библиотека/утилита property Fuzzer инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - releaseGate.js — Общая библиотека/утилита release Gate инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js, tests/unit/ql7-support/scientific-governance.test.js.
+        - replayPackBuilder.js — Общая библиотека/утилита replay Pack Builder инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - reviewAgreement.js — Общая библиотека/утилита review Agreement инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/lab/statisticalEngine.js; используется в lib/ql7-support/simulation/humanReviewAgreement.js, lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - scenarioGenerator.js — Общая библиотека/утилита scenario Generator инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - scientificLabContract.js — Общая библиотека/утилита scientific Lab Contract инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/lab/ablationRunner.js, lib/ql7-support/simulation/lab/calibrationMetrics.js, lib/ql7-support/simulation/lab/causalAttribution.js; используется в tests/unit/ql7-support/closure-matrix.test.js, tests/unit/ql7-support/scientific-governance.test.js.
+        - shardWriter.js — Общая библиотека/утилита shard Writer инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - splitAllocator.js — Общая библиотека/утилита split Allocator инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js, tests/unit/ql7-support/late-directive-canonical.test.js.
+        - splitLeakageDetector.js — Общая библиотека/утилита split Leakage Detector инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/semanticDuplicateOracle.js; используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+        - statisticalEngine.js — Общая библиотека/утилита statistical Engine инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/reviewAgreement.js, lib/ql7-support/simulation/lab/scientificLabContract.js, lib/ql7-support/simulation/statisticalAcceptance.js.
+        - supportUniverseInventory.js — Общая библиотека/утилита support Universe Inventory инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - workerLease.js — Общая библиотека/утилита worker Lease инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/scientificLabContract.js.
+      - model/ — Каталог model.
+        - knowledgeRetrievalOracle.js — Общая библиотека/утилита knowledge Retrieval Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - modelEvaluationRunner.js — Общая библиотека/утилита model Evaluation Runner инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/model/nativeModelOracleClient.js, lib/ql7-support/simulation/model/semanticHoldoutOracle.js.
+        - modelMutationSuite.js — Общая библиотека/утилита model Mutation Suite инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - nativeLanguageReviewPack.js — Общая библиотека/утилита native Language Review Pack инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - nativeModelOracleClient.js — Общая библиотека/утилита native Model Oracle Client инфраструктурного слоя. Связи: импортирует lib/ql7-support/neural/nativeModelGateway.js; используется в lib/ql7-support/simulation/model/modelEvaluationRunner.js.
+        - publicEntityOracle.js — Общая библиотека/утилита public Entity Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - semanticHoldoutOracle.js — Общая библиотека/утилита semantic Holdout Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/model/modelEvaluationRunner.js.
+      - aiBoxAnalyticsOracle.js — Общая библиотека/утилита ai Box Analytics Oracle инфраструктурного слоя. Связи: используется в tests/integration/ql7-support-premium-cognitive.integration.test.js.
+      - bankAuthenticityOracle.js — Общая библиотека/утилита bank Authenticity Oracle инфраструктурного слоя. Связи: импортирует lib/composer-safety/serverModerationExpansion.cjs, lib/ql7-support/knowledge/generalHumanKnowledgeCore.js, lib/ql7-support/simulation/crisisDepthOracle.js; используется в lib/ql7-support/simulation/fullCodeDataReadinessOracle.js.
+      - branchScenarioCatalog.js — Общая библиотека/утилита branch Scenario Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/simulation/scenarioCatalog.js; используется в lib/ql7-support/simulation/capabilityScenario.js.
+      - capabilityProductionProbe.js — Общая библиотека/утилита capability Production Probe инфраструктурного слоя. Связи: импортирует lib/account-restrictions/businessActionGuard.cjs, lib/account-restrictions/protectedRouteRegistry.cjs, lib/account-restrictions/quarantineService.cjs; используется в lib/ql7-support/simulation/lab/liveProofRunner.js, tests/unit/ql7-support/closure-matrix.test.js.
+      - capabilityRegistry.js — Общая библиотека/утилита capability Registry инфраструктурного слоя. Связи: импортирует lib/account-restrictions/protectedRouteRegistry.cjs, lib/composer-safety/surfaceRegistry.cjs, lib/economic-integrity/routeRegistry.cjs; используется в lib/ql7-support/simulation/lab/liveProofRegistry.js, tests/contracts/ql7-support-architecture-closure.contract.test.js, tests/unit/ql7-support/closure-matrix.test.js.
+      - capabilityScenario.js — Общая библиотека/утилита capability Scenario инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/simulation/branchScenarioCatalog.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - clarificationOracle.js — Общая библиотека/утилита clarification Oracle инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/premium-cognitive.test.js.
+      - composerSafetyOracle.js — Общая библиотека/утилита composer Safety Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - crisisDepthOracle.js — Общая библиотека/утилита crisis Depth Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/safety/crisisReviewedCueBank.js; используется в lib/ql7-support/simulation/bankAuthenticityOracle.js, tests/unit/ql7-support/crisis-depth.test.js.
+      - crisisSafetyOracle.js — Общая библиотека/утилита crisis Safety Oracle инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/premium-cognitive.test.js.
+      - decisionMathOracle.js — Общая библиотека/утилита decision Math Oracle инфраструктурного слоя. Связи: используется в tests/contracts/ql7-support-max-combat.contract.test.js, tests/unit/ql7-support/premium-cognitive.test.js.
+      - DeterministicContractOracle.js — Общая библиотека/утилита Deterministic Contract Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/executeScenario.js.
+      - domainIsolationOracle.js — Общая библиотека/утилита domain Isolation Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - embeddingSimilarityOracle.js — Общая библиотека/утилита embedding Similarity Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/labNoveltyIndex.js.
+      - executeScenario.js — Общая библиотека/утилита execute Scenario инфраструктурного слоя. Связи: импортирует lib/ql7-support/contracts/finalDeliveryReceipt.js, lib/ql7-support/language/finalDeliveryLocalization.js, lib/ql7-support/runtime/deliveryCommitCoordinator.js; используется в tests/integration/ql7-support-evidence.integration.test.js, tests/integration/ql7-support-neural-production-parity.integration.test.js, tests/integration/ql7-support-production-lab-parity.integration.test.js.
+      - factualSimulation.js — Общая библиотека/утилита factual Simulation инфраструктурного слоя. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/conversation/semanticContext.js, lib/ql7-support/data/simulationFixtures.js.
+      - featureParityOracle.js — Общая библиотека/утилита feature Parity Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - fullCodeDataReadinessOracle.js — Общая библиотека/утилита full Code Data Readiness Oracle инфраструктурного слоя. Связи: импортирует lib/composer-safety/serverModerationExpansion.cjs, lib/ql7-support/config/finalCombatDataFloors.js, lib/ql7-support/config/staticDataReadiness.js; используется в tests/unit/ql7-support/full-data-readiness.test.js.
+      - fullCombatDataReadinessOracle.js — Общая библиотека/утилита full Combat Data Readiness Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - greetingCapacityOracle.js — Общая библиотека/утилита greeting Capacity Oracle инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/premium-cognitive.test.js.
+      - humanNaturalnessOracle.js — Общая библиотека/утилита human Naturalness Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - humanReviewAgreement.js — Общая библиотека/утилита human Review Agreement инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/lab/reviewAgreement.js; используется в tests/unit/ql7-support/late-directive-canonical.test.js.
+      - humanReviewSampler.js — Общая библиотека/утилита human Review Sampler инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - humorCapacityOracle.js — Общая библиотека/утилита humor Capacity Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - humorMaterialDiversityOracle.js — Общая библиотека/утилита humor Material Diversity Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/humorLexiconBank.js, lib/ql7-support/response/humorRealizationPlanner.js; используется в tests/unit/ql7-support/humor-32l.test.js.
+      - identityAudit.js — Общая библиотека/утилита identity Audit инфраструктурного слоя. Связи: импортирует lib/ql7-support/operator/buildCase.js, lib/ql7-support/operator/smtpRendererRu.js, lib/ql7-support/simulation/liveRead.js.
+      - independentOracle.js — Общая библиотека/утилита independent Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js, lib/ql7-support/response/critiqueResponse.js, lib/ql7-support/simulation/openHumanTopicOracle.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+      - inMemoryPolicyDb.js — Общая библиотека/утилита in Memory Policy Db инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/capabilityProductionProbe.js.
+      - labCheckpoint.js — Общая библиотека/утилита lab Checkpoint инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - labNoveltyIndex.js — Общая библиотека/утилита lab Novelty Index инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/embeddingSimilarityOracle.js, lib/ql7-support/simulation/semanticDuplicateOracle.js.
+      - labPlanRegistry.js — Общая библиотека/утилита lab Plan Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/maxCombatRequirementRegistry.js, lib/ql7-support/internal/text.js; используется в tests/contracts/ql7-support-architecture-closure.contract.test.js, tests/unit/ql7-support/closure-matrix.test.js.
+      - labRootCause.js — Общая библиотека/утилита lab Root Cause инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - labScenarioLedger.js — Общая библиотека/утилита lab Scenario Ledger инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - languageSeedDiversityOracle.js — Общая библиотека/утилита language Seed Diversity Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/languageVariantBank.js, lib/ql7-support/language/reviewedSeedRegistry.js, lib/ql7-support/language/semanticConceptBank.js; используется в lib/ql7-support/simulation/bankAuthenticityOracle.js, tests/unit/ql7-support/language-depth.test.js.
+      - liveRead.js — Общая библиотека/утилита live Read инфраструктурного слоя. Связи: импортирует lib/ql7-support/adsSupportReadAdapter.js, lib/ql7-support/ecosystemRating.js, lib/ql7-support/identityGraph.js; используется в lib/ql7-support/simulation/identityAudit.js, tests/unit/ql7-support/final-runtime.test.js.
+      - localePurityOracle.js — Общая библиотека/утилита locale Purity Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - materialityOracle.js — Общая библиотека/утилита materiality Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/fullCodeDataReadinessOracle.js, tests/unit/ql7-support/material-runtime.test.js.
+      - microtopicDialogue.js — Общая библиотека/утилита microtopic Dialogue инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/simulation/scenarioCatalog.js.
+      - mutationEngine.js — Общая библиотека/утилита mutation Engine инфраструктурного слоя. Связи: импортирует lib/ql7-support/internal/text.js; используется в lib/ql7-support/simulation/corpora/knowledge32.js, lib/ql7-support/simulation/scenarioCatalog.js, tests/contracts/ql7-support-regulation.contract.test.js.
+      - openHumanTopicOracle.js — Общая библиотека/утилита open Human Topic Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/independentOracle.js.
+      - operatorEvidenceOracle.js — Общая библиотека/утилита operator Evidence Oracle инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/premium-cognitive.test.js.
+      - outcomeCalibrationOracle.js — Общая библиотека/утилита outcome Calibration Oracle инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/premium-cognitive.test.js.
+      - productionParityHarness.js — Общая библиотека/утилита production Parity Harness инфраструктурного слоя. Связи: импортирует lib/ql7-support/runtime/deliveryCommitCoordinator.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/runtime/productionTurn.js; используется в lib/ql7-support/simulation/identityAudit.js, tests/integration/ql7-support-runtime.integration.test.js.
+      - publicFigureCoverageOracle.js — Общая библиотека/утилита public Figure Coverage Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - publicFigureRichnessOracle.js — Общая библиотека/утилита public Figure Richness Oracle инфраструктурного слоя. Связи: импортирует lib/ql7-support/knowledge/public-figures/materialProfiles.js; используется в lib/ql7-support/simulation/bankAuthenticityOracle.js, tests/unit/ql7-support/public-figure-richness.test.js.
+      - releaseEvidenceManifest.js — Общая библиотека/утилита release Evidence Manifest инфраструктурного слоя. Связи: используется в tools/verify-ql7-rev51-release.mjs.
+      - reportWriter.js — Общая библиотека/утилита report Writer инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - scenarioCatalog.js — Общая библиотека/утилита scenario Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/internal/text.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/simulation/branchScenarioCatalog.js, lib/ql7-support/simulation/capabilityScenario.js, lib/ql7-support/simulation/microtopicDialogue.js.
+      - scientificScenario.js — Общая библиотека/утилита scientific Scenario инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/ontology/domainOntology.js, lib/ql7-support/simulation/lab/metamorphicGenerator.js.
+      - semanticDuplicateOracle.js — Общая библиотека/утилита semantic Duplicate Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/lab/splitLeakageDetector.js, lib/ql7-support/simulation/labNoveltyIndex.js.
+      - statisticalAcceptance.js — Общая библиотека/утилита statistical Acceptance инфраструктурного слоя. Связи: импортирует lib/ql7-support/simulation/lab/powerAnalysis.js, lib/ql7-support/simulation/lab/statisticalEngine.js; используется в tests/unit/ql7-support/late-directive-canonical.test.js.
+      - surfaceRedundancyOracle.js — Общая библиотека/утилита surface Redundancy Oracle инфраструктурного слоя. Связи: используется в lib/ql7-support/simulation/independentOracle.js, tests/unit/ql7-support/max-combat.test.js.
+      - topicMemoryOracle.js — Общая библиотека/утилита topic Memory Oracle инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - telemetry/ — Каталог telemetry.
+      - canonicalTelemetry.js — Общая библиотека/утилита canonical Telemetry инфраструктурного слоя. Связи: импортирует lib/ql7-support/cognitiveMemory.js, lib/ql7-support/learningGovernance.js, lib/ql7-support/personalityEngine.js; используется в lib/ql7-support/server.js.
+    - adminReportComposer.js — Общая библиотека/утилита admin Report Composer инфраструктурного слоя. Связи: импортирует lib/ql7-support/adultLanguagePolicy.js; используется в lib/supportEmailTransport.js, tests/integration/ql7-support/admin-dm-email-test.js, tests/integration/ql7-support/final-runtime-test.js.
+    - adsSupportReadAdapter.js — Общая библиотека/утилита ads Support Read Adapter инфраструктурного слоя. Связи: импортирует lib/adsCore.js, lib/ql7-support/knowledge/adsReadPolicy.js; используется в lib/ql7-support/diagnostics.js, lib/ql7-support/simulation/liveRead.js, tests/integration/ql7-support/ads-same-source-test.js.
+    - adultLanguagePolicy.js — Общая библиотека/утилита adult Language Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/limits.js; используется в lib/ql7-support/adminReportComposer.js, lib/ql7-support/learning/safeCalibration.js.
+    - broadcast.js — Общая библиотека/утилита broadcast инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/client.cjs, lib/ql7-support/config/featureFlag.js; используется в app/api/dm/send/route.js, app/api/dm/support-broadcast/route.js.
+    - cardSchema.js — Общая библиотека/утилита card Schema инфраструктурного слоя. Связи: импортирует lib/ql7-support/cards/cardPresentation.js, lib/ql7-support/metricRegistry.js, lib/ql7-support/semanticBadgeRegistry.js; используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/language/finalDeliveryLocalization.js, lib/ql7-support/presentation/premiumCardLayout.js.
+    - choiceContract.js — Общая библиотека/утилита choice Contract инфраструктурного слоя. Связи: импортирует lib/security/ql7-server-secret.cjs; используется в app/api/dm/send/route.js, lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/server.js.
+    - cognitiveMemory.js — Общая библиотека/утилита cognitive Memory инфраструктурного слоя. Связи: импортирует lib/ql7-support/limits.js; используется в app/api/dm/support-feedback/route.js, lib/ql7-support/telemetry/canonicalTelemetry.js, tests/contracts/project/ql7-support-cosmic-contracts.test.js.
+    - conversationState.js — Общая библиотека/утилита conversation State инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/final-intelligence-test.js.
+    - diagnosticFailure.js — Общая библиотека/утилита diagnostic Failure инфраструктурного слоя. Связи: используется в lib/ql7-support/server.js, tests/integration/ql7-support/final-runtime-test.js, tests/unit/ql7-support/final-intelligence-test.js.
+    - diagnosticPresentation.js — Общая библиотека/утилита diagnostic Presentation инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/evidencePolicy.js, lib/ql7-support/internal/text.js; используется в tests/integration/ql7-support/premium-evidence-test.js.
+    - diagnosticRegistry.js — Общая библиотека/утилита diagnostic Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/data/aiBoxSupportReadAdapter.js, lib/ql7-support/diagnostics.js, lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - diagnostics.js — Общая библиотека/утилита diagnostics инфраструктурного слоя. Связи: импортирует lib/ql7-support/adsSupportReadAdapter.js, lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/server.js.
+    - ecosystemCatalog.js — Общая библиотека/утилита ecosystem Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/ecosystemLocaleLexicon.js, lib/ql7-support/ontology/domains/index.js, lib/ql7-support/readOnlySourceManifest.js; используется в forum/features/dm/components/Ql7SupportOperator.jsx, forum/features/dm/hooks/useForumDmRuntime.js, forum/features/dm/services/sendDmComposerMessage.js.
+    - ecosystemRating.js — Общая библиотека/утилита ecosystem Rating инфраструктурного слоя. Связи: импортирует lib/ql7-support/rating/evidenceQuality.js, lib/ql7-support/rating/factorRegistry.js, lib/ql7-support/rating/ratingCalibration.js; используется в lib/ql7-support/operator/buildCase.js, lib/ql7-support/server.js, lib/ql7-support/simulation/liveRead.js.
+    - emailOutboxWorker.js — Общая библиотека/утилита email Outbox Worker инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/featureFlag.js, lib/ql7-support/operator/smtpPolicy.js, lib/supportEmailTransport.js; используется в lib/ql7-support/scheduler.js, lib/ql7-support/server.js.
+    - emotionalPresentation.js — Общая библиотека/утилита emotional Presentation инфраструктурного слоя. Связи: используется в lib/ql7-support/presentation/premiumCardLayout.js.
+    - entryGreetingLexicon.js — Общая библиотека/утилита entry Greeting Lexicon инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/conversation/temporalContext.js; используется в forum/ForumRoot.jsx, lib/ql7-support/greetingCoordinator.js, lib/ql7-support/language/humanVariationPrimitives.js.
+    - eventNotificationCatalog.js — Общая библиотека/утилита event Notification Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js; используется в lib/ql7-support/events.js, lib/ql7-support/response/eventSemanticProjection.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+    - events.js — Общая библиотека/утилита events инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/config/featureFlag.js; используется в app/api/forum/report/route.js, app/api/qcoin/topup/webhook/route.js, app/api/wallet-session/route.js.
+    - evidencePolicy.js — Общая библиотека/утилита evidence Policy инфраструктурного слоя. Связи: используется в lib/ql7-support/cards/cardPresentation.js, lib/ql7-support/diagnosticPresentation.js, tests/integration/ql7-support/premium-evidence-test.js.
+    - greetingCoordinator.js — Общая библиотека/утилита greeting Coordinator инфраструктурного слоя. Связи: импортирует lib/ql7-support/entryGreetingLexicon.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, tests/integration/ql7-support/premium-cognitive-test.js.
+    - identityGraph.js — Общая библиотека/утилита identity Graph инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs; используется в lib/ql7-support/simulation/liveRead.js, lib/ql7-support/vipResolver.js.
+    - identityResolver.js — Общая библиотека/утилита identity Resolver инфраструктурного слоя. Связи: импортирует lib/mongo/profile-primary.cjs, lib/tma.js; используется в app/api/dm/send/route.js, app/api/dm/support-broadcast/route.js, app/api/dm/support-card-translate/route.js.
+    - inputNormalization.js — Общая библиотека/утилита input Normalization инфраструктурного слоя. Связи: используется в lib/ql7-support/microIntentCatalog.js.
+    - inputPolicy.js — Общая библиотека/утилита input Policy инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/nativeBanks.js; используется в app/api/dm/send/route.js, forum/features/dm/hooks/useForumDmRuntime.js, forum/features/dm/services/sendDmComposerMessage.js.
+    - knowledgeRegistry.js — Общая библиотека/утилита knowledge Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledge/domainKnowledge.js, lib/ql7-support/knowledge/domainRegistry.js; используется в lib/ql7-support/response/morphosyntacticRealizer.js, tests/unit/ql7-support/knowledge-graph-test.js, tests/unit/ql7-support/officialIdentityKnowledge.test.js.
+    - languageOrchestrator.js — Общая библиотека/утилита language Orchestrator инфраструктурного слоя. Связи: используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/language/dialectRouter.js, lib/ql7-support/language/finalDeliveryLocalization.js.
+    - learningControlPlane.js — Общая библиотека/утилита learning Control Plane инфраструктурного слоя. Связи: используется в tests/contracts/project/ql7-support-cosmic-contracts.test.js.
+    - learningGovernance.js — Общая библиотека/утилита learning Governance инфраструктурного слоя. Связи: используется в lib/ql7-support/telemetry/canonicalTelemetry.js.
+    - learningPipeline.js — Общая библиотека/утилита learning Pipeline инфраструктурного слоя. Связи: импортирует lib/ql7-support/learning/approvalReceipt.js, lib/ql7-support/learning/calibrationCandidateReceipt.js, lib/ql7-support/learning/datasetDeletion.js; используется в app/api/dm/support-feedback/route.js, lib/ql7-support/server.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - limits.js — Общая библиотека/утилита limits инфраструктурного слоя. Связи: используется в app/api/dm/send/route.js, app/api/dm/support-feedback/route.js, forum/features/dm/components/Ql7SupportChoiceCard.js.
+    - mediaEvidence.js — Общая библиотека/утилита media Evidence инфраструктурного слоя. Связи: используется в app/api/forum/report/route.js.
+    - metricRegistry.js — Общая библиотека/утилита metric Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/cardSchema.js, lib/ql7-support/cards/cardPresentation.js, lib/ql7-support/diagnosticPresentation.js.
+    - microIntentCatalog.js — Общая библиотека/утилита micro Intent Catalog инфраструктурного слоя. Связи: импортирует lib/ql7-support/inputNormalization.js; используется в lib/ql7-support/ontology/simulationOntology.js.
+    - nativeTranslationService.js — Общая библиотека/утилита native Translation Service инфраструктурного слоя. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/neural/nativeModelGateway.js; используется в app/api/dm/support-card-translate/route.js, lib/ql7-support/language/finalDeliveryLocalization.js, lib/ql7-support/language/nativeStructuredLocalization.js.
+    - package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - personalityEngine.js — Общая библиотека/утилита personality Engine инфраструктурного слоя. Связи: используется в app/api/dm/support-feedback/route.js, lib/ql7-support/server.js, lib/ql7-support/telemetry/canonicalTelemetry.js.
+    - presentation.js — Общая библиотека/утилита presentation инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cards/cardPresentation.js.
+    - readOnlySourceManifest.js — Общая библиотека/утилита read Only Source Manifest инфраструктурного слоя. Связи: используется в lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/sourceRegistry.js, tests/unit/ql7-support/read-source-authority.test.js.
+    - reportPolicyRegistry.js — Общая библиотека/утилита report Policy Registry инфраструктурного слоя. Связи: используется в lib/ql7-support/events.js, tests/unit/ql7-support/final-intelligence-test.js.
+    - runtimeCapabilityRegistry.js — Общая библиотека/утилита runtime Capability Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в lib/ql7-support/telemetry/canonicalTelemetry.js.
+    - runtimeStateMachine.js — Общая библиотека/утилита runtime State Machine инфраструктурного слоя. Связи: импортирует lib/ql7-support/inputPolicy.js, lib/ql7-support/runtime/runtimeStateReceipt.js; используется в lib/ql7-support/server.js, tests/integration/ql7-support/final-runtime-test.js, tests/integration/ql7-support/premium-pipeline.test.js.
+    - scenarioContracts.js — Общая библиотека/утилита scenario Contracts инфраструктурного слоя. Связи: используется в tests/unit/ql7-support/final-intelligence-test.js.
+    - scheduler.js — Общая библиотека/утилита scheduler инфраструктурного слоя. Связи: импортирует lib/adsCore.js, lib/identity/canonical-user-id.cjs, lib/mongo/client.cjs; используется в app/api/dm/support-worker/route.js.
+    - semanticBadgeRegistry.js — Общая библиотека/утилита semantic Badge Registry инфраструктурного слоя. Связи: используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js, lib/ql7-support/cards/cardPresentation.js.
+    - server.js — Общая библиотека/утилита server инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs, lib/mongo/dm-primary.cjs, lib/ql7-support/cardSchema.js; используется в app/api/dm/send/route.js, app/api/dm/support-entry/route.js, app/api/dm/support-state/route.js.
+    - simulationGenerator.js — Общая библиотека/утилита simulation Generator инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/limits.js, lib/ql7-support/simulationOntology.js; используется в lib/ql7-support/simulation/factualSimulation.js.
+    - simulationOntology.js — Общая библиотека/утилита simulation Ontology инфраструктурного слоя. Связи: используется в lib/ql7-support/language/dialectRouter.js, lib/ql7-support/ontology/simulationOntology.js, lib/ql7-support/semantics/battleExpansion.js.
+    - sourceRegistry.js — Общая библиотека/утилита source Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledge/domainRegistry.js, lib/ql7-support/readOnlySourceManifest.js; используется в lib/ql7-support/diagnosticRegistry.js, tests/contracts/ql7-support-architecture-closure.contract.test.js, tests/unit/ql7-support/closure-matrix.test.js.
+    - systemActor.js — Общая библиотека/утилита system Actor инфраструктурного слоя. Связи: используется в app/api/dm/_utils.js, app/api/dm/block/route.js, app/api/dm/dialogs/route.js.
+    - toneAssessment.js — Общая библиотека/утилита tone Assessment инфраструктурного слоя. Связи: импортирует lib/ql7-support/language/semanticBanks.js, lib/ql7-support/safety/sharedSemanticEvidence.cjs; используется в lib/ql7-support/server.js, lib/ql7-support/simulation/factualSimulation.js, tests/unit/ql7-support/final-runtime.test.js.
+    - topicActionRegistry.js — Общая библиотека/утилита topic Action Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/language/ecosystemLocaleLexicon.js, lib/ql7-support/language/locales.js; используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js, lib/ql7-support/knowledge/domainRegistry.js.
+    - turnSemanticFrame.js — Общая библиотека/утилита turn Semantic Frame инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в app/api/dm/send/route.js.
+    - vipResolver.js — Общая библиотека/утилита vip Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/identityGraph.js, lib/subscriptions.js; используется в lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/simulation/liveRead.js, tests/integration/ql7-support/premium-cognitive-test.js.
+  - security/ — Каталог security.
+    - ql7-server-secret.cjs — Общая библиотека/утилита ql7 server secret инфраструктурного слоя. Связи: импортирует lib/mongo/client.cjs; используется в app/api/dm/support-state/route.js, lib/forum/signed-cursor.cjs, lib/forum/video-precommit-moderation-receipt.cjs.
+  - seo/ — Каталог seo.
+    - siteIndex.js — Общая библиотека/утилита site Index инфраструктурного слоя. Связи: импортирует components/i18n-dicts/manifest.js, lib/seo/trustIdentityRoutes.js; используется в app/robots.js, app/sitemap.js, lib/seo/structuredData.js.
+    - siteOrigin.js — Общая библиотека/утилита site Origin инфраструктурного слоя. Связи: используется в app/robots.js, app/sitemap.js, lib/metadataCache.js.
+    - structuredData.js — Общая библиотека/утилита structured Data инфраструктурного слоя. Связи: импортирует lib/seo/siteIndex.js, lib/seo/siteOrigin.js; используется в app/layout.js, tests/contracts/project/seo-indexing-contracts.test.js.
+    - trustIdentityContent.js — Общая библиотека/утилита trust Identity Content инфраструктурного слоя. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js; используется в app/[lang]/trust-and-identity/page.js, app/contact/page.js, lib/ql7-support/knowledge/officialIdentity.js.
+    - trustIdentityMachineIdentity.js — Общая библиотека/утилита trust Identity Machine Identity инфраструктурного слоя. Связи: импортирует lib/brand/officialChannels.js, lib/seo/siteOrigin.js, lib/seo/trustIdentityContent.js; используется в tools/generate-trust-identity-machine-surfaces.mjs.
+    - trustIdentityMetadata.js — Общая библиотека/утилита trust Identity Metadata инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js, lib/seo/trustIdentityContent.js, lib/seo/trustIdentityRoutes.js; используется в app/[lang]/trust-and-identity/page.js, tests/contracts/project/trust-identity-seo-contracts.test.js, tools/ql7-trust-identity-check-final-baseline-v3.mjs.
+    - trustIdentityRoutes.js — Общая библиотека/утилита trust Identity Routes инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js; используется в app/[lang]/trust-and-identity/page.js, app/contact/page.js, app/sitemap.js.
+    - trustIdentityStructuredData.js — Общая библиотека/утилита trust Identity Structured Data инфраструктурного слоя. Связи: импортирует lib/brand/officialChannels.js, lib/seo/siteOrigin.js, lib/seo/trustIdentityContent.js; используется в app/[lang]/trust-and-identity/page.js, components/seo/QuantumOrganizationJsonLd.jsx, tests/contracts/project/trust-identity-seo-contracts.test.js.
+  - storage/ — Каталог storage.
+    - mediaKeys.js — Общая библиотека/утилита media Keys инфраструктурного слоя. Связи: используется в app/api/forum/blobUploadUrl/route.js, app/api/forum/upload/route.js, app/api/forum/uploadAudio/route.js.
+    - r2.js — Общая библиотека/утилита r2 инфраструктурного слоя. Связи: используется в app/api/ads/route.js, app/api/dm/_db.js, app/api/dm/send/route.js.
+  - visual-runtime/ — Каталог visual-runtime.
+    - animatedAssetManifest.js — Общая библиотека/утилита animated Asset Manifest инфраструктурного слоя. Связи: используется в components/visual-runtime/ViewportAnimatedImage.jsx, tests/integration/visual-runtime/global-visual-activity.integration.test.js.
+    - animatedAssetRegistry.js — Общая библиотека/утилита animated Asset Registry инфраструктурного слоя. Связи: используется в components/visual-runtime/GlobalVisualActivityRuntime.jsx, components/visual-runtime/ViewportAnimatedImage.jsx, tests/component/visual-runtime/viewport-animated-image.component.test.jsx.
+    - visualActivityRegistry.js — Общая библиотека/утилита visual Activity Registry инфраструктурного слоя. Связи: используется в app/components/CryptoNewsLens.jsx, app/exchange/ai-box/AIWorkbench.jsx, components/MediaPipelineProgress.jsx.
+  - adsCore.js — Общая библиотека/утилита ads Core инфраструктурного слоя. Связи: импортирует lib/economic-integrity/writerGuard.cjs, lib/identity/canonical-user-id.cjs, lib/mongo/ads-primary.cjs; используется в app/api/ads/route.js, app/api/forum/moderate/route.js, app/api/pay/create/route.js.
+  - adsGeoTargetingFlow.js — Общая библиотека/утилита ads Geo Targeting Flow инфраструктурного слоя. Связи: используется в app/ads/AdsGeoTargetingPortal.jsx, app/ads/home.js, tests/unit/ads/adsGeoTargetingFlow.test.js.
+  - adsLandingPackageState.js — Общая библиотека/утилита ads Landing Package State инфраструктурного слоя. Связи: используется в app/ads/page.jsx, tests/unit/ads/adsLandingPackageState.test.js.
+  - authActionGateClient.js — Общая библиотека/утилита auth Action Gate Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/useBattleChat.js, forum/features/dm/hooks/useOpenInboxGlobalAction.js, forum/features/profile/components/UserInfoPopover.jsx.
+  - brain.js — Общая библиотека/утилита brain инфраструктурного слоя. Связи: используется в app/api/market/summary/route.js, app/exchange/page.js, lib/exchange/aiBoxAnalysisService.js.
+  - databroker.js — Общая библиотека/утилита databroker инфраструктурного слоя. Связи: используется в app/api/market/summary/route.js, lib/exchange/aiBoxAnalysisService.js.
+  - deepTranslateService.js — Общая библиотека/утилита deep Translate Service инфраструктурного слоя. Связи: используется в app/api/deep-translate/route.js.
+  - fcm.js — Общая библиотека/утилита fcm инфраструктурного слоя. Связи: используется в lib/nativePush.js.
+  - forumClientVideoOpfs.js — Общая библиотека/утилита forum Client Video Opfs инфраструктурного слоя. Связи: импортирует lib/forumClientVideoRuntime.js; используется в lib/forumClientVideoOptimizerWorker.js, tests/unit/forum/clientVideoOpfs.test.js.
+  - forumClientVideoOptimizer.js — Общая библиотека/утилита forum Client Video Optimizer инфраструктурного слоя. Связи: импортирует lib/forumClientVideoRuntime.js, lib/forumClientVideoWorkerBridge.js, lib/ql7HevcFallbackDecoder.js; используется в app/ads/home.js, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/services/uploadR2MediaFile.js.
+  - forumClientVideoOptimizerWorker.js — Общая библиотека/утилита forum Client Video Optimizer Worker инфраструктурного слоя. Связи: импортирует lib/forumClientVideoOpfs.js, lib/forumClientVideoRuntime.js, lib/forumClientVideoWorkerProtocol.js.
+  - forumClientVideoRuntime.js — Общая библиотека/утилита forum Client Video Runtime инфраструктурного слоя. Связи: используется в lib/forumClientVideoOpfs.js, lib/forumClientVideoOptimizer.js, lib/forumClientVideoOptimizerWorker.js.
+  - forumClientVideoWorkerBridge.js — Общая библиотека/утилита forum Client Video Worker Bridge инфраструктурного слоя. Связи: импортирует lib/forumClientVideoRuntime.js, lib/forumClientVideoWorkerProtocol.js; используется в lib/forumClientVideoOptimizer.js.
+  - forumClientVideoWorkerProtocol.js — Общая библиотека/утилита forum Client Video Worker Protocol инфраструктурного слоя. Связи: используется в lib/forumClientVideoOptimizerWorker.js, lib/forumClientVideoWorkerBridge.js.
+  - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/SharePopover.jsx.
+  - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/utils/mediaRuntime.js.
+  - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js; используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
+  - nativePush.js — Общая библиотека/утилита native Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/fcm.js, lib/notificationCenter.js; используется в app/api/push/native/link/route.js, app/api/push/native/register/route.js, app/api/push/native/status/route.js.
+  - nativeVideoPoster.js — Общая библиотека/утилита native Video Poster инфраструктурного слоя. Связи: используется в app/ads/home.js, forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/media/components/VideoOverlay.jsx.
+  - notificationCenter.js — Общая библиотека/утилита notification Center инфраструктурного слоя. Связи: используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, app/api/forum/moderate/route.js.
+  - paymentMethodClient.js — Общая библиотека/утилита payment Method Client инфраструктурного слоя. Связи: используется в app/academy/AcademyExamBlock.js, app/ads/page.jsx, app/exchange/BattleCoin.jsx.
+  - qcoinEntitlementPurchase.js — Общая библиотека/утилита qcoin Entitlement Purchase инфраструктурного слоя. Связи: импортирует lib/adsCore.js, lib/economic-integrity/productionRoute.cjs, lib/mongo/client.cjs; используется в app/api/pay/qcoin-purchase/route.js, tests/unit/payments/qcoin-entitlement-purchase.test.js.
+  - ql7HevcDecoderWorker.js — Общая библиотека/утилита ql7 Hevc Decoder Worker инфраструктурного слоя. Связи: импортирует lib/ql7HevcFallbackPrimitives.js.
+  - ql7HevcFallbackDecoder.js — Общая библиотека/утилита ql7 Hevc Fallback Decoder инфраструктурного слоя. Связи: импортирует lib/ql7HevcFallbackPrimitives.js, lib/ql7HevcPresentationReorder.js; используется в lib/forumClientVideoOptimizer.js, lib/forumClientVideoOptimizerWorker.js.
+  - ql7HevcFallbackPrimitives.js — Общая библиотека/утилита ql7 Hevc Fallback Primitives инфраструктурного слоя. Связи: используется в lib/ql7HevcDecoderWorker.js, lib/ql7HevcFallbackDecoder.js, tests/unit/ql7HevcFallbackPrimitives.test.js.
+  - ql7HevcPresentationReorder.js — Общая библиотека/утилита ql7 Hevc Presentation Reorder инфраструктурного слоя. Связи: используется в lib/ql7HevcFallbackDecoder.js, tests/unit/ql7HevcPresentationReorder.test.js.
+  - redis.js — Общая библиотека/утилита redis инфраструктурного слоя. Связи: используется в app/api/telegram/link/confirm/route.js, app/api/telegram/link/status/route.js.
+  - safeWin.js — Общая библиотека/утилита safe Win инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - subscriptions.js — Общая библиотека/утилита subscriptions инфраструктурного слоя. Связи: импортирует lib/identity/canonical-user-id.cjs, lib/mongo/profile-primary.cjs, lib/mongo/subscriptions-primary.cjs; используется в app/api/battlecoin/order/route.js, app/api/battlecoin/state/route.js, app/api/forum/vip/batch/route.js.
+  - supportEmailTransport.js — Общая библиотека/утилита support Email Transport инфраструктурного слоя. Связи: импортирует lib/ql7-support/adminReportComposer.js, lib/ql7-support/operator/smtpPolicy.js, lib/ql7-support/operator/smtpRendererRu.js; используется в app/api/contact/route.js, lib/ql7-support/emailOutboxWorker.js, lib/ql7-support/server.js.
+  - tma.js — Общая библиотека/утилита tma инфраструктурного слоя. Связи: используется в lib/auth/battlecoin-chat-auth.cjs, lib/ql7-support/identityResolver.js.
+  - videoPipelineProgress.js — Общая библиотека/утилита video Pipeline Progress инфраструктурного слоя. Связи: используется в app/ads/home.js, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/services/resolveComposerMediaPayload.js.
+  - walletSessionClient.js — Общая библиотека/утилита wallet Session Client инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/battleChatClient.js, forum/features/profile/components/ProfilePopover.jsx, app/game/page.js.
+  - webPush.js — Общая библиотека/утилита web Push инфраструктурного слоя. Связи: импортирует app/api/profile/_identity.js, lib/mongo/push-primary.cjs, lib/nativePush.js; используется в app/api/dm/delete/route.js, app/api/dm/seen/route.js, app/api/dm/send/route.js.
+- ml/ — Каталог ml.
+  - ql7-native/ — Каталог ql7-native.
+    - configs/ — Каталог configs.
+      - architecture.production.json — JSON-файл architecture.production. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - calibration.yaml — YAML-файл calibration. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - critic.yaml — YAML-файл critic. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - data.yaml — YAML-файл data. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - evaluation.yaml — YAML-файл evaluation. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - generator.yaml — YAML-файл generator. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - quantization.yaml — YAML-файл quantization. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - release.yaml — YAML-файл release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - safety.yaml — YAML-файл safety. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - tokenizer.yaml — YAML-файл tokenizer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - training.yaml — YAML-файл training. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - understanding.yaml — YAML-файл understanding. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - src/ — Каталог src.
+      - ql7_native/ — Каталог ql7_native.
+        - data/ — Каталог data.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - catalog.py — .py-файл catalog. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - contamination.py — .py-файл contamination. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dedupe.py — .py-файл dedupe. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - license_policy.py — .py-файл license policy. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lineage.py — .py-файл lineage. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - pii_redaction.py — .py-файл pii redaction. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sampling.py — .py-файл sampling. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - shard_manifest.py — .py-файл shard manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - splitter.py — .py-файл splitter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - streaming.py — .py-файл streaming. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - eval/ — Каталог eval.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - calibration.py — .py-файл calibration. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - knowledge.py — .py-файл knowledge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - metrics.py — .py-файл metrics. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - naturalness.py — .py-файл naturalness. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - ood.py — .py-файл ood. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - parity.py — .py-файл parity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - release_gate.py — .py-файл release gate. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - retrieval.py — .py-файл retrieval. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - safety.py — .py-файл safety. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - tokenizer.py — .py-файл tokenizer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - models/ — Каталог models.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - common.py — .py-файл common. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - critic.py — .py-файл critic. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - generator.py — .py-файл generator. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - normalizer.py — .py-файл normalizer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - understanding.py — .py-файл understanding. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - objectives/ — Каталог objectives.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - causal_lm.py — .py-файл causal lm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - contrastive.py — .py-файл contrastive. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - critic.py — .py-файл critic. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - dpo.py — .py-файл dpo. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - multitask.py — .py-файл multitask. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - safety.py — .py-файл safety. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - release/ — Каталог release.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - architecture.py — .py-файл architecture. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - build_manifest.py — .py-файл build manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - export.py — .py-файл export. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - lineage_receipt.py — .py-файл lineage receipt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - promote.py — .py-файл promote. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - rollback.py — .py-файл rollback. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sign.py — .py-файл sign. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - validate.py — .py-файл validate. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - tokenizer/ — Каталог tokenizer.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - codec.py — .py-файл codec. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - train.py — .py-файл train. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - training/ — Каталог training.
+          - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - calibrate.py — .py-файл calibrate. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - core.py — .py-файл core. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - critic.py — .py-файл critic. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - domain_pretrain.py — .py-файл domain pretrain. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - environment.py — .py-файл environment. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - multitask.py — .py-файл multitask. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - orchestrator.py — .py-файл orchestrator. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - preference.py — .py-файл preference. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - pretrain.py — .py-файл pretrain. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - quantize.py — .py-файл quantize. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - safety.py — .py-файл safety. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - sft.py — .py-файл sft. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - __init__.py — .py-файл init. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7_native.egg-info/ — Каталог ql7_native.egg-info.
+        - dependency_links.txt — .txt-файл dependency links. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - PKG-INFO — Служебный-файл PKG INFO. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - SOURCES.txt — .txt-файл SOURCES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - top_level.txt — .txt-файл top level. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - tests/ — Каталог tests.
+      - data_lineage/ — Каталог data_lineage.
+        - test_lineage.py — .py-файл test lineage. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - export/ — Каталог export.
+        - test_release.py — .py-файл test release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - objectives/ — Каталог objectives.
+        - test_objectives.py — .py-файл test objectives. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - release/ — Каталог release.
+        - test_architecture_manifest.py — .py-файл test architecture manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - tokenizer/ — Каталог tokenizer.
+        - test_bpe_codec.py — .py-файл test bpe codec. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - test_tokenizer_contract.py — .py-файл test tokenizer contract. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - training/ — Каталог training.
+        - test_checkpoint_resume.py — .py-файл test checkpoint resume. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - test_orchestrator.py — .py-файл test orchestrator. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - pyproject.toml — .toml-файл pyproject. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - requirements-training-reference.txt — .txt-файл requirements training reference. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - training-environment.json — JSON-файл training environment. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- mobile/ — Каталог mobile.
+  - android/ — Каталог android.
+    - app/ — Каталог app.
+      - src/ — Каталог src.
+        - main/ — Каталог main.
+          - java/ — Каталог java.
+            - com/ — Каталог com.
+              - quantuml7ai/ — Каталог quantuml7ai.
+                - app/ — Каталог app.
+                  - AppShellConfig.kt — .kt-файл App Shell Config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - AuthReturnActivity.kt — .kt-файл Auth Return Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - MainActivity.kt — .kt-файл Main Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativeBridge.kt — .kt-файл Native Bridge. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - NativePushRegistrar.kt — .kt-файл Native Push Registrar. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumFirebaseMessagingService.kt — .kt-файл Quantum Firebase Messaging Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumLauncherActivity.kt — .kt-файл Quantum Launcher Activity. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+                  - QuantumNotificationService.kt — .kt-файл Quantum Notification Service. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - res/ — Каталог res.
+            - drawable/ — Каталог drawable.
+              - ic_launcher_foreground_image.png — PNG-ассет ic launcher foreground image. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_notification.xml — .xml-файл ic notification. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-anydpi-v26/ — Каталог mipmap-anydpi-v26.
+              - ic_launcher_round.xml — .xml-файл ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.xml — .xml-файл ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-hdpi/ — Каталог mipmap-hdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-mdpi/ — Каталог mipmap-mdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xhdpi/ — Каталог mipmap-xhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxhdpi/ — Каталог mipmap-xxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - mipmap-xxxhdpi/ — Каталог mipmap-xxxhdpi.
+              - ic_launcher_round.png — PNG-ассет ic launcher round. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - ic_launcher.png — PNG-ассет ic launcher. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values/ — Каталог values.
+              - colors.xml — .xml-файл colors. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - styles.xml — .xml-файл styles. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ar/ — Каталог values-ar.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-es/ — Каталог values-es.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-ru/ — Каталог values-ru.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-tr/ — Каталог values-tr.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-uk/ — Каталог values-uk.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - values-zh-rCN/ — Каталог values-zh-rCN.
+              - strings.xml — .xml-файл strings. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+            - xml/ — Каталог xml.
+              - data_extraction_rules.xml — .xml-файл data extraction rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - file_paths.xml — .xml-файл file paths. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+              - network_security_config.xml — .xml-файл network security config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+          - AndroidManifest.xml — .xml-файл Android Manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - proguard-rules.pro — .pro-файл proguard rules. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle/ — Каталог gradle.
+      - wrapper/ — Каталог wrapper.
+        - gradle-wrapper.jar — .jar-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - gradle-wrapper.properties — .properties-файл gradle wrapper. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - tools/ — Каталог tools.
+      - android-doctor.ps1 — .ps1-файл android doctor. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-debug-apk.ps1 — .ps1-файл build debug apk. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - build-release.ps1 — .ps1-файл build release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - install-ldplayer.ps1 — .ps1-файл install ldplayer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - print-signing-fingerprints.ps1 — .ps1-файл print signing fingerprints. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_ACCEPTANCE_CHECKLIST.md — Markdown-документ ANDROID ACCEPTANCE CHECKLIST. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_APP_LINKS.md — Markdown-документ ANDROID APP LINKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_MEDIA_PERMISSIONS.md — Markdown-документ ANDROID MEDIA PERMISSIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NATIVE_BRIDGE.md — Markdown-документ ANDROID NATIVE BRIDGE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_NOTIFICATIONS.md — Markdown-документ ANDROID NOTIFICATIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_OBSERVABILITY.md — Markdown-документ ANDROID OBSERVABILITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE_DECISIONS.md — Markdown-документ ANDROID RELEASE DECISIONS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_RELEASE.md — Markdown-документ ANDROID RELEASE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_REMOTE_CONFIG.md — Markdown-документ ANDROID REMOTE CONFIG. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_SECURITY.md — Markdown-документ ANDROID SECURITY. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_STORE_METADATA.md — Markdown-документ ANDROID STORE METADATA. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_TEST_MATRIX.md — Markdown-документ ANDROID TEST MATRIX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ANDROID_WALLET_PAYMENT.md — Markdown-документ ANDROID WALLET PAYMENT. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - build.gradle.kts — .kts-файл build.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - GRADLE_WRAPPER.md — Markdown-документ GRADLE WRAPPER. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradle.properties — .properties-файл gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew — Служебный-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - gradlew.bat — .bat-файл gradlew. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - keystore.properties.example — .example-файл keystore.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - LDPLAYER_TESTING.md — Markdown-документ LDPLAYER TESTING. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - local.properties.example — .example-файл local.properties. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - settings.gradle.kts — .kts-файл settings.gradle. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - ios/ — Каталог ios.
+    - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- models/ — Каталог models.
+  - ql7-native/ — Каталог ql7-native.
+    - critic/ — Каталог critic.
+      - bootstrap.json — JSON-файл bootstrap. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - generator/ — Каталог generator.
+      - bootstrap.json — JSON-файл bootstrap. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - normalizer/ — Каталог normalizer.
+      - bootstrap.json — JSON-файл bootstrap. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - tokenizer/ — Каталог tokenizer.
+      - tokenizer.json — JSON-файл tokenizer. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - understanding/ — Каталог understanding.
+      - bootstrap.json — JSON-файл bootstrap. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - active-manifest.json — JSON-файл active manifest. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- public/ — Статические ассеты, доступные по публичным URL.
+  - __ql7_visual_posters/ — Подкаталог статических ассетов public/__ql7_visual_posters.
+    - ai/ — Подкаталог статических ассетов public/ai.
+      - ai.gif.webp — WEBP-ассет из public/__ql7_visual_posters/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - audio/ — Подкаталог статических ассетов public/audio.
+      - bgaudio.gif.webp — WEBP-ассет из public/__ql7_visual_posters/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - click/ — Подкаталог статических ассетов public/click.
+      - authorization.gif.webp — WEBP-ассет из public/__ql7_visual_posters/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - quest.gif.webp — WEBP-ассет из public/__ql7_visual_posters/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - telegram.gif.webp — WEBP-ассет из public/__ql7_visual_posters/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - friends/ — Подкаталог статических ассетов public/friends.
+      - invitation.gif.webp — WEBP-ассет из public/__ql7_visual_posters/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game/ — Подкаталог статических ассетов public/game.
+      - game.gif.webp — WEBP-ассет из public/__ql7_visual_posters/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - Quest/ — Подкаталог статических ассетов public/Quest.
+      - q2.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q3.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q4.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q5.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q6.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q7.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q8.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q9.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - q10.gif.webp — WEBP-ассет из public/__ql7_visual_posters/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - vip/ — Подкаталог статических ассетов public/vip.
+      - avatars/ — Подкаталог статических ассетов public/avatars.
+        - a1.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a2.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a3.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a4.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a5.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a6.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a7.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a8.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a9.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a10.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a11.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a12.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a13.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a14.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a15.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a16.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a17.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a18.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a19.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a20.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a21.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a22.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a23.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a24.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a25.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a26.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a27.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a28.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a29.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a30.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a31.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a32.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a33.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a34.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a35.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a36.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a37.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a38.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a39.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a40.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a41.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a42.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a43.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a44.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a45.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a46.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a47.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a48.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a49.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a50.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a51.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a52.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a53.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a54.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a55.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a56.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a57.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a58.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a59.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a60.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a61.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a62.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a63.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a64.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a65.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a66.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a67.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a68.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a69.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a70.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a71.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a72.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a73.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a74.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a75.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a76.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a77.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a78.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a79.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a80.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a81.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a82.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a83.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a84.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a85.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a86.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a87.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a88.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a89.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a90.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a91.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a92.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a93.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a94.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a95.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a96.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a97.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a98.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a99.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a100.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a101.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a102.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a103.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a104.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a105.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a106.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a107.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a108.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a109.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a110.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a111.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a112.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a113.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a114.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a115.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a116.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a117.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a118.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a119.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a120.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a121.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a122.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a123.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a124.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a125.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a126.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a127.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a128.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a129.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - a130.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - emoji/ — Подкаталог статических ассетов public/emoji.
+        - e1.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e2.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e3.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e4.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e5.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e6.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e7.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e8.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e9.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e10.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e11.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e12.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e13.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e14.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e15.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e16.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e17.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e18.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e19.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e20.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e21.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e22.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e23.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e24.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e25.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e26.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e27.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e28.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e29.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e30.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e31.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e32.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e33.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e34.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e35.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e36.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e37.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e38.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e39.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e40.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e41.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e42.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e43.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e44.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e45.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e46.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e47.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e48.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e49.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e50.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e51.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e53.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e54.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e55.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e56.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e57.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e58.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e59.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e60.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e61.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e62.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e63.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e64.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e65.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e66.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e67.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e68.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e69.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e70.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e71.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e72.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e73.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e74.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e75.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e76.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e77.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e78.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e79.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e80.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e81.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e82.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e83.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e84.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e85.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e86.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e87.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e88.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e89.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e90.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e91.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e92.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e93.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e94.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e95.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e96.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e97.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e98.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e99.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e100.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e101.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e102.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e103.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e104.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e105.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e106.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e107.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e108.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e109.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e110.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e111.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e112.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e113.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e114.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e115.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e116.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e117.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e118.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e119.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e120.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e121.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e122.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e123.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e124.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e125.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e126.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e127.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e128.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e129.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e130.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e131.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e132.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e133.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e134.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e135.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e136.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e137.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e138.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e139.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e140.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e141.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e142.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e143.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e144.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e145.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e146.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e147.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e148.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e149.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+        - e150.gif.webp — WEBP-ассет из public/__ql7_visual_posters/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - manifest.json — JSON-файл из public/__ql7_visual_posters; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - .well-known/ — Подкаталог статических ассетов public/.well-known.
+    - assetlinks.json — JSON-файл из public/.well-known; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-identity.json — JSON-файл из public/.well-known; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - README.md — Корневая документация проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - academy/ — Подкаталог статических ассетов public/academy.
+    - ai_block_15.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_block_16.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ai_meta_block_17.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - chain_block_03.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dao_meta_block_08.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - data_ai_block_14.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01 1.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_01.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - defi_block_02.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - dev_data_block_13.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - gamefi_socialfi_block_11.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_ai_reg_block_19.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_09.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_21.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_22.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_23.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_24.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_25.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_26.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_27.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_28.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_block_29.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_gamefi_block_10.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_mix_block_18.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - nft_reg_ai_block_07.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - rwa_gamefi_mix_block_20.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sec_trade_block_05.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - socialfi_dev_block_12.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - trade_nft_block_06.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web3_sec_block_04.png — PNG-ассет из public/academy; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ads/ — Подкаталог статических ассетов public/ads.
+    - hero-preview.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-forum-global.png — PNG-ассет из public/ads; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ai/ — Подкаталог статических ассетов public/ai.
+    - ai.gif — GIF-ассет из public/ai; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - anonymous/ — Подкаталог статических ассетов public/anonymous.
+    - anonymous.png — PNG-ассет из public/anonymous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - audio/ — Подкаталог статических ассетов public/audio.
+    - bgaudio.gif — GIF-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - cosmic.mp3 — MP3-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - Q-Cast.png — PNG-ассет из public/audio; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - branding/ — Подкаталог статических ассетов public/branding.
+    - about-analytics.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-architecture.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-feed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - about-poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - explain_promo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - qc_room.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-logo-512.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quantum_l7_logo.png — PNG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-hero.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - sub-start.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed_poster.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram_card_tape_fixed.jpg — JPG-ассет из public/branding; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - click/ — Подкаталог статических ассетов public/click.
+    - authorization.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - policy.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - quest.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - support.png — PNG-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.gif — GIF-ассет из public/click; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - coins/ — Подкаталог статических ассетов public/coins.
+    - battlecoin/ — Подкаталог статических ассетов public/battlecoin.
+      - logo.png — PNG-ассет из public/coins/battlecoin; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - friends/ — Подкаталог статических ассетов public/friends.
+    - fb.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ig.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - invitation.gif — GIF-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tg.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - viber.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - wa.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - x.png — PNG-ассет из public/friends; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - fucher/ — Подкаталог статических ассетов public/fucher.
+    - fucher.png — PNG-ассет из public/fucher; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - game/ — Подкаталог статических ассетов public/game.
+    - 1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - apk.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game.gif — GIF-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif1.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif2.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif3.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif4.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif5.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif6.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif7.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif8.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif9.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - glif10.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ios.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - web.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - windows.png — PNG-ассет из public/game; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icons/ — Подкаталог статических ассетов public/icons.
+    - instagram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - telegram.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tiktok.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - twitter.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - youtube.png — PNG-ассет из public/icons; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - isvip/ — Подкаталог статических ассетов public/isvip.
+    - 1.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/isvip; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - leng/ — Подкаталог статических ассетов public/leng.
+    - ar.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - en.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - es.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ru.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - tr.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - uk.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - zh.png — PNG-ассет из public/leng; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - load/ — Подкаталог статических ассетов public/load.
+    - load.mp4 — MP4-ассет из public/load; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - metab/ — Подкаталог статических ассетов public/metab.
+    - about1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - academy1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ads1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - exchange1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - game1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - home1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - subscription1.png — PNG-ассет из public/metab; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - metamarket/ — Подкаталог статических ассетов public/metamarket.
+    - cyber_animals/ — Подкаталог статических ассетов public/cyber_animals.
+      - Aetherion.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AetherScavenger.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaMind.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaPulse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AquaSentinel.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AuroraVix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlastHorn.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlazeClaw.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BlockSnail.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ByteJaw.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataCrane.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataGrizzly.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DataHart.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Donaflex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - EchoByte.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FrostByte.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GravitonPrime.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Heliot.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IronTusker.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Kynex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LumaGiraffe.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MagnoRam.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NanoSpecter.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NanoTitan.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeonGrace.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neraxis.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeuroBlade.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeuroVenom.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NoctSynapse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseRunner.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseShade.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PulseStripe.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QCat.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QDog.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QOwl.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumSloth.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumSteed.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RedCore.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rynex.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SharKiller.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solara.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarDune.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarOx.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SubNet.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tharion.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ThermoSynapse.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Venomatrix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoltBound.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoltPossum.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zyntrix.webp — WEBP-ассет из public/metamarket/cyber_animals; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - heroes/ — Подкаталог статических ассетов public/heroes.
+      - Abyssal.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AegisPrime.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AetherArchitect.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aqualis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Architect.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Arkanis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aureon.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AurionCelestis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BronzeSentinel.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CelestialEnvoy.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronoParasite.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ColeDust.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CorvinShade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dawnfire.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DrakeSolen.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DreamEngine.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elias.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FireTiron.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Frostbane.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gearholt.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GlassWarden.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - HelionVex.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hiveblade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - HollowBotanist.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IceBlaster.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnisMartialis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IndustrialТor.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ironclad.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IronLegionary.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ka’Roth.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - KaelDraven.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Kaelthorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Krythar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - KuroSynth.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LuminDiver.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LyraAetheris.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LyraFrost.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MedievalKnight.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MiraHolt.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NeonVanguard.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nerathis.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nexara.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NoctisVeil.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NyraSolstice.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NyxArkhon.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Obsidian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrinVale.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrionJack.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OrionVexar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Orvian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ravenna.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RaxionBladeclaw.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Renaissance.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RexVorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RhaegorVorn.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RiftLibrarian.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RiftNomad.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RonanKade.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ScapePredator.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SeleneArdent.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SeraphionLux.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SpectralVoid.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stormlord.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sylvarion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Syterix.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thalvion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TireGekoid.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdant.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voidstrider.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xir’Tal.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xylaren.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZenithFlux.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zenrath.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerathion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZerathOmnivar.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerion.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ZyraMoonfang.webp — WEBP-ассет из public/metamarket/heroes; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_keys/ — Подкаталог статических ассетов public/meta_keys.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - On.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantum.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Si.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Vi.webp — WEBP-ассет из public/metamarket/meta_keys; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_resources/ — Подкаталог статических ассетов public/meta_resources.
+      - Aetheris.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aethora.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aethyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Antimatter.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Asteryon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurivon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bioryn.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Biovex.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Capacitor.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chronyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corelith.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crynthar.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovast.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovolt.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystara.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cubeyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dreamyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualith.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Forgeon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Forman.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fusiora.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Galmyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacirion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gold Nugget.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravionis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Helionis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnisCore.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferyte.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IvoryShard.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumetall.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumivra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Magnetron.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mechyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mystarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neuralite.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neuroxis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Noctyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivara.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oraclyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - PlasmaFuel.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Plasmoryn.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Platinyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyronis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantPrime.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Radiyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Runyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Runyxis.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solvra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solyros.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellaris.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terranyx.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Toxarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Umbyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Varyon.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdanix.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Verdyra.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Viridrax.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ViridraxBloom.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voidarion.webp — WEBP-ассет из public/metamarket/meta_resources; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - meta_space/ — Подкаталог статических ассетов public/meta_space.
+      - Abyssarion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AstralRelic.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurionis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Azurion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cataclyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Celestara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Comyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corevian.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Coronae.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CosmicStringX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryflame.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonix.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonys.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryovex.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalMoon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalNebula.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualith.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dyseron.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Eclipsera.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndros.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Emberis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Emberith.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flareon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fractyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacira.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glacirion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GlacirionPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glaciron.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - hardonix.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ignara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - IgnarionPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jovara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminex.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LunaCore.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - MagnetarX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Molthera.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebulaX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Novyra.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oblivara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oceara.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyronyx.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyrragon.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Pyrrion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Satyros.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SingularityX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaris.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaryx.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SupernovaX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TerraPrime.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Therionis.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoidSphereX.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Volcaris.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voltanys.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xylarion.webp — WEBP-ассет из public/metamarket/meta_space; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - miscellaneous/ — Подкаталог статических ассетов public/miscellaneous.
+      - Ammoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Antivirus.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurabloom.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurajack.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Biotree.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blasteron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bouquora.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chronoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cosmaview.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystalis.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cubryon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbear.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbite.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberboots.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbow.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberbunny.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybercatapult.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybercorn.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberflag.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberheart.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberhelm.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberion.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberknees.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberknife.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberlip.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberphones.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberpick.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberskates.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkheart.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - DictaphoneX.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Digitron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dumblox.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flamoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Floranyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Frogaris.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fuelara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gemnyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Globarys.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hexaura.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrocaps.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Imperhat.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Infernogem.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jestmask.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Keyl7.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lionflint.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Liquidra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumicandle.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumisphere.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Metachups.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mycoryx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mystara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neocap.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonlight.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neosneak.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nitrocandy.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Obscyra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Orbistaff.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oxycandy.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Paracyber.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Portalis.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Q‑7X9.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantcup.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rollerion.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rosanyx.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rugbyon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RunestoneX.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Shoptron.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solarcompass.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Spectra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Statum.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steampen.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamra.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamscope.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellara.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stoneaxe.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tennix.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thermoview.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Vinylon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Wrenchon.webp — WEBP-ассет из public/metamarket/miscellaneous; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - real_estate/ — Подкаталог статических ассетов public/real_estate.
+      - AbyssalForge.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aerionis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Alquira.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aqualis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquanex.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquaryn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Arboris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AsteroidResort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aurivon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AxisDawn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - BioSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Brassora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Celestara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronaSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ChronosHall.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cosmyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crownora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalCasino.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - CrystalRanch.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crythara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryvona.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Domyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - EchoVault.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ecosyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndor.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyndra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Elyzoria.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fluxora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fortyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FractalHaven.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - FrozenPort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Fumora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GalacticMall.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GalacticReal.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gearion.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Halcyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydryon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Inferis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Isyrel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - JungleEstate.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Koralyth.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lumivara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lunaris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LuxoraCore.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marivon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marsyn.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Miralis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mirathis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mistora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mycovar.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebulaHotel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebularFoundry.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neonix.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nerithis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nestara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Neythra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Noctyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - OriginTower.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Oxivra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ozyrel.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Phorion.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - QuantumBank.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Redora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - RustcoreDistrict.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Selunaris.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skythrone.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skyvora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarMirage.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - SolarVeil.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stellora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sweetara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sylvara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - TechnoSpace.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thalora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Thryvon.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - uxyra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Velora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VerdantSpire.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - VoidPort.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xelythar.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zenora.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zerathis.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zeylara.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Zeythra.webp — WEBP-ассет из public/metamarket/real_estate; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - technique/ — Подкаталог статических ассетов public/technique.
+      - Abyssor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aerolyth.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aeroryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aetheron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aquaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Aracnix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Armoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Asteryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - AsterynPrime.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Autoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bathoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Battalon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Bitrider.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blastoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Blastoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Chargon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Classoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Corelyth.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryonix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryptoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crysalon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crysalor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cryseron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Crystarion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberis.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cyberon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cybervanix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Cylorix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Darkon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dravion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dravon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Drillgon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dualon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Dumpyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Excaryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Flygon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Galvion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - GirodunePro.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Glidron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Graviton.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Gravyon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hauloryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hoverion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hoveron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Hydrionix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ignaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Irydon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Jetron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - JetronFly.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lavorix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Luminar.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Lunaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Magnoryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Marsyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Mecharis.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Metronyx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Motoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nautyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NautyraSix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Nebryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - NebryonPS.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Portyra.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Quantor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Railtron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Ravager.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Redmaris.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Rovaryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Sailtron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Skyron.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Solaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Starion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stealthoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamaryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamdrill.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Steamor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Stormaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Subryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tankryon.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terradyne.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terramax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Terronix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Titanor.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tourion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Tugoryn.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Velaryx.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Veyronix.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Voltrax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Wartrax.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xerion.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - Xythera.webp — WEBP-ассет из public/metamarket/technique; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - models/ — Подкаталог статических ассетов public/models.
+    - nsfwjs/ — Подкаталог статических ассетов public/nsfwjs.
+      - group1-shard1of1 — Служебный-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - model.json — JSON-файл из public/models/nsfwjs; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoind/ — Подкаталог статических ассетов public/qcoind.
+    - mini.mp4 — MP4-ассет из public/qcoind; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ql7/ — Подкаталог статических ассетов public/ql7.
+    - ql7support.png — PNG-ассет из public/ql7; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - static.png — PNG-ассет из public/ql7; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - video.mp4 — MP4-ассет из public/ql7; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Quest/ — Подкаталог статических ассетов public/Quest.
+    - q1/ — Подкаталог статических ассетов public/q1.
+      - 1.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 2.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 3.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 4.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - 5.png — PNG-ассет из public/Quest/q1; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.mp4 — MP4-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q1.png — PNG-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q2.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q3.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q4.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q5.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q6.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q7.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q8.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q9.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - q10.gif — GIF-ассет из public/Quest; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - robot/ — Подкаталог статических ассетов public/robot.
+    - 1.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 2.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 3.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 4.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 5.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 6.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 7.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 8.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 9.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 10.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 11.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 12.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 13.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 14.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 15.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 16.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 17.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 18.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 19.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 20.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 21.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 22.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - 23.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - image-optimizer-manifest.json — JSON-файл из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - robot.png — PNG-ассет из public/robot; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - snow/ — Подкаталог статических ассетов public/snow.
+    - fx. 1png — . 1png-файл из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - fx.png — PNG-ассет из public/snow; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - vendor/ — Подкаталог статических ассетов public/vendor.
+    - ffmpeg/ — Подкаталог статических ассетов public/ffmpeg.
+      - 814.ffmpeg.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg-core.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg-core.wasm — .wasm-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - ffmpeg.js — JS-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - manifest.json — JSON-файл из public/vendor/ffmpeg; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - ql7-hevc/ — Подкаталог статических ассетов public/ql7-hevc.
+      - hevc-decode.js — JS-файл из public/vendor/ql7-hevc; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - hevc-decode.mjs — ESM-конфиг/модуль из public/vendor/ql7-hevc; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - hevc-decode.wasm — .wasm-файл из public/vendor/ql7-hevc; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - LICENSE.hevcjs.txt — .txt-файл из public/vendor/ql7-hevc; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - manifest.json — JSON-файл из public/vendor/ql7-hevc; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - vip/ — Подкаталог статических ассетов public/vip.
+    - avatars/ — Подкаталог статических ассетов public/avatars.
+      - a1.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a2.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a3.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a4.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a5.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a6.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a7.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a8.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a9.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a10.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a11.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a12.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a13.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a14.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a15.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a16.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a17.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a18.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a19.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a20.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a21.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a22.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a23.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a24.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a25.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a26.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a27.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a28.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a29.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a30.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a31.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a32.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a33.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a34.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a35.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a36.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a37.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a38.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a39.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a40.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a41.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a42.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a43.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a44.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a45.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a46.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a47.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a48.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a49.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a50.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a51.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a52.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a53.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a54.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a55.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a56.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a57.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a58.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a59.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a60.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a61.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a62.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a63.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a64.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a65.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a66.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a67.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a68.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a69.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a70.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a71.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a72.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a73.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a74.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a75.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a76.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a77.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a78.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a79.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a80.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a81.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a82.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a83.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a84.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a85.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a86.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a87.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a88.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a89.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a90.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a91.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a92.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a93.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a94.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a95.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a96.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a97.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a98.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a99.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a100.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a101.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a102.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a103.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a104.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a105.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a106.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a107.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a108.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a109.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a110.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a111.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a112.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a113.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a114.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a115.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a116.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a117.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a118.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a119.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a120.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a121.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a122.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a123.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a124.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a125.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a126.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a127.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a128.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a129.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - a130.gif — GIF-ассет из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/vip/avatars; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - emoji/ — Подкаталог статических ассетов public/emoji.
+      - e1.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e2.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e3.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e4.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e5.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e6.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e7.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e8.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e9.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e10.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e11.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e12.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e13.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e14.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e15.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e16.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e17.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e18.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e19.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e20.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e21.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e22.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e23.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e24.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e25.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e26.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e27.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e28.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e29.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e30.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e31.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e32.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e33.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e34.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e35.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e36.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e37.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e38.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e39.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e40.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e41.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e42.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e43.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e44.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e45.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e46.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e47.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e48.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e49.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e50.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e51.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e53.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e54.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e55.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e56.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e57.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e58.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e59.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e60.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e61.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e62.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e63.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e64.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e65.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e66.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e67.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e68.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e69.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e70.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e71.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e72.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e73.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e74.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e75.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e76.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e77.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e78.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e79.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e80.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e81.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e82.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e83.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e84.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e85.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e86.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e87.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e88.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e89.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e90.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e91.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e92.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e93.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e94.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e95.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e96.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e97.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e98.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e99.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e100.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e101.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e102.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e103.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e104.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e105.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e106.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e107.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e108.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e109.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e110.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e111.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e112.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e113.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e114.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e115.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e116.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e117.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e118.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e119.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e120.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e121.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e122.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e123.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e124.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e125.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e126.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e127.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e128.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e129.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e130.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e131.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e132.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e133.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e134.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e135.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e136.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e137.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e138.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e139.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e140.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e141.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e142.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e143.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e144.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e145.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e146.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e147.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e148.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e149.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - e150.gif — GIF-ассет из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+      - image-optimizer-manifest.json — JSON-файл из public/vip/emoji; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - workers/ — Подкаталог статических ассетов public/workers.
+    - 814.ffmpeg.js — JS-файл из public/workers; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+    - forum-trim-worker.js — JS-файл из public/workers; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - apple-touch-icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - avatar.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - compat.js — JS-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - Exchange.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-16.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-48.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new-64.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - favicon-new.ico — ICO-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - google60edac59d881ff88.html — .html-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-192.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - icon-new.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - llms.txt — .txt-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - qcoin-32.png — PNG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - ql7-notification-sw.js — JS-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - tonconnect-manifest.json — JSON-файл из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+  - upload.jpg — JPG-ассет из public/; статический ассет проекта. Связи: подключается через public URL/стили; прямые модульные импорты обычно не используются.
+- services/ — Каталог services.
+  - ql7-model-runtime/ — Каталог ql7-model-runtime.
+    - tests/ — Каталог tests.
+      - test_contract.py — .py-файл test contract. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - test_loader_release.py — .py-файл test loader release. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - batching.py — .py-файл batching. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - health.py — .py-файл health. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - manifest_loader.py — .py-файл manifest loader. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - model_loader.py — .py-файл model loader. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - receipt.py — .py-файл receipt. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - schemas.py — .py-файл schemas. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - security.py — .py-файл security. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - server.py — .py-файл server. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- src/ — Каталог src.
+  - shared/ — Каталог shared.
+    - runtime/ — Каталог runtime.
+      - adaptive/ — Каталог adaptive.
+        - deviceProfileResolver.js — JS-файл device Profile Resolver. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - effectDegradation.js — JS-файл effect Degradation. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+        - productionAdaptiveCore.js — JS-файл production Adaptive Core. Связи: импортирует src/shared/runtime/adaptive/deviceProfileResolver.js, src/shared/runtime/adaptive/effectDegradation.js, src/shared/runtime/adaptive/runtimePriority.js.
+        - runtimePriority.js — JS-файл runtime Priority. Связи: используется в src/shared/runtime/adaptive/productionAdaptiveCore.js.
+      - budgets/ — Каталог budgets.
+        - budgetEngine.js — JS-файл budget Engine. Связи: импортирует src/shared/runtime/budgets/budgetViolations.js, src/shared/runtime/budgets/ownerArbitration.js, src/shared/runtime/budgets/promotionJournal.js; используется в tests/contracts/forum/ads-shared-budget.contract.test.js, tests/contracts/forum/iframe-singleton-mobile.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - budgetViolations.js — JS-файл budget Violations. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - ownerArbitration.js — JS-файл owner Arbitration. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - promotionJournal.js — JS-файл promotion Journal. Связи: используется в src/shared/runtime/budgets/budgetEngine.js.
+        - routeCapabilities.js — JS-файл route Capabilities. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js; используется в tests/contracts/root/runtime-startup-budget.contract.test.js, tests/contracts/route/widget-locality.contract.test.js, tests/integration/runtime/runtimeGovernance.integration.test.js.
+        - routeProfileResolver.js — JS-файл route Profile Resolver. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/forum/player-budget-profiles.contract.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - routeProfiles.js — JS-файл route Profiles. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/budgets/routeCapabilities.js, tests/contracts/decorative/autoplay-budget.contract.test.js, tests/contracts/forum/ads-shared-budget.contract.test.js.
+      - diff/ — Каталог diff.
+        - diffEngine.js — JS-файл diff Engine. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+        - diffReportFormatter.js — JS-файл diff Report Formatter. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forensics/ — Каталог forensics.
+        - forensicMode.js — JS-файл forensic Mode. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - identity/ — Каталог identity.
+        - runtimeDebugStore.js — JS-файл runtime Debug Store. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - runtimeInspector.js — JS-файл runtime Inspector. Связи: импортирует src/shared/runtime/passports/runtimePassport.js.
+        - runtimeRegistry.js — JS-файл runtime Registry. Связи: импортирует src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/identity/runtimeTypes.js; используется в tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeStates.js — JS-файл runtime States. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js; используется в src/shared/runtime/identity/runtimeRegistry.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimeTypes.js — JS-файл runtime Types. Связи: импортирует config/runtime-governance.json; используется в src/shared/runtime/identity/runtimeRegistry.js, src/shared/runtime/identity/runtimeStates.js, src/shared/runtime/passports/runtimePassport.js.
+      - mode/ — Каталог mode.
+        - runtimeFlags.js — JS-файл runtime Flags. Связи: импортирует src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeResolver.js.
+        - runtimeMode.js — JS-файл runtime Mode. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeDebug.js; используется в src/shared/runtime/modes/runtimeModes.js, src/shared/runtime/passports/runtimePassport.js.
+        - runtimeModeClient.js — JS-файл runtime Mode Client. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeDebug.js — JS-файл runtime Mode Debug. Связи: используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/modes/runtimeModeGuards.js.
+        - runtimeModeResolver.js — JS-файл runtime Mode Resolver. Связи: импортирует src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeModeTypes.js; используется в src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeClient.js, src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModeServer.js — JS-файл runtime Mode Server. Связи: импортирует src/shared/runtime/mode/runtimeModeResolver.js; используется в src/shared/runtime/mode/runtimeMode.js.
+        - runtimeModeTypes.js — JS-файл runtime Mode Types. Связи: используется в src/shared/runtime/mode/runtimeFlags.js, src/shared/runtime/mode/runtimeMode.js, src/shared/runtime/mode/runtimeModeGuards.js.
+      - modes/ — Каталог modes.
+        - runtimeModeGuards.js — JS-файл runtime Mode Guards. Связи: импортирует src/shared/runtime/mode/runtimeModeGuards.js.
+        - runtimeModes.js — JS-файл runtime Modes. Связи: импортирует src/shared/runtime/mode/runtimeMode.js.
+      - passports/ — Каталог passports.
+        - runtimePassport.js — JS-файл runtime Passport. Связи: импортирует src/shared/runtime/identity/runtimeTypes.js, src/shared/runtime/mode/runtimeMode.js; используется в src/shared/runtime/identity/runtimeInspector.js, tests/integration/runtime/runtimeGovernance.integration.test.js, tests/unit/runtime/runtimeGovernance.test.js.
+        - runtimePassportPanel.jsx — JSX-файл runtime Passport Panel. Связи: используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx.
+        - runtimePassportSerializer.js — JS-файл runtime Passport Serializer. Связи: используется в tests/unit/runtime/runtimeGovernance.test.js.
+- tests/ — Каталог tests.
+  - component/ — Каталог component.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - components/ — Каталог components.
+            - UserRecommendationCard.test.jsx — JSX-файл User Recommendation Card.test. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, tests/fixtures/forum/recommendations.js.
+            - UserRecommendationsRail.test.jsx — JSX-файл User Recommendations Rail.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+      - runtime-stability-sentinel.component.test.jsx — JSX-файл runtime stability sentinel.component.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/shared/hooks/useForumNickBadgeFit.js.
+    - ql7-support/ — Каталог ql7-support.
+      - adult-card-test.js — JS-файл adult card test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js.
+      - cosmic-actions.test.js — JS-файл cosmic actions.test. Связи: импортирует lib/ql7-support/cardSchema.js.
+      - emotional-choice-test.jsx — JSX-файл emotional choice test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js.
+      - final-card-media-test.js — JS-файл final card media test. Связи: импортирует lib/ql7-support/cardSchema.js.
+      - operator-quantum-messenger-sticky-stack.test.jsx — JSX-файл operator quantum messenger sticky stack.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-card.test.js — JS-файл premium card.test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js.
+      - premium-presentation-test.js — JS-файл premium presentation test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - semantic-badges-test.jsx — JSX-файл semantic badges test. Связи: импортирует forum/features/dm/components/Ql7SemanticBadge.js, forum/features/dm/components/Ql7SupportCard.js, components/composer-safety/ComposerSafetyBadge.jsx.
+    - runtime/ — Каталог runtime.
+      - runtimeComponentSurfaces.test.jsx — JSX-файл runtime Component Surfaces.test. Связи: импортирует src/shared/runtime/passports/runtimePassportPanel.jsx, tests/support/runtimeGovernance.js.
+    - seo/ — Каталог seo.
+      - root-locale-authority-r13.test.js — JS-файл root locale authority r13.test. Связи: импортирует components/i18n.js, components/seo/RootLocaleRuntime.jsx.
+    - visual-runtime/ — Каталог visual-runtime.
+      - generic-scope-hydration.component.test.jsx — JSX-файл generic scope hydration.component.test. Связи: импортирует components/visual-runtime/GlobalVisualActivityRuntime.jsx, lib/visual-runtime/visualActivityRegistry.js.
+      - viewport-animated-image.component.test.jsx — JSX-файл viewport animated image.component.test. Связи: импортирует components/visual-runtime/GlobalVisualActivityRuntime.jsx, components/visual-runtime/ViewportAnimatedImage.jsx, lib/visual-runtime/animatedAssetRegistry.js.
+    - payment-method-popover.component.test.jsx — JSX-файл payment method popover.component.test. Связи: импортирует components/PaymentMethodPopoverHost.jsx, lib/paymentMethodClient.js.
+    - ql7-support-surface.component.test.jsx — JSX-файл ql7 support surface.component.test. Связи: импортирует forum/features/dm/components/Ql7SupportChoiceCard.js, forum/features/dm/components/Ql7SupportMessageSurface.jsx, forum/features/dm/components/Ql7SupportOperator.jsx.
+  - contracts/ — Каталог contracts.
+    - decorative/ — Каталог decorative.
+      - autoplay-budget.contract.test.js — JS-файл autoplay budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - forum/ — Каталог forum.
+      - ads-shared-budget.contract.test.js — JS-файл ads shared budget.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - forum-media-lifecycle.contract.test.js — JS-файл forum media lifecycle.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-navigation-protected.contract.test.js — JS-файл forum navigation protected.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-runtime-stability.contract.test.js — JS-файл forum runtime stability.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-sentinel-consumers.contract.test.js — JS-файл forum sentinel consumers.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-windowing-consumers.contract.test.js — JS-файл forum windowing consumers.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - iframe-singleton-mobile.contract.test.js — JS-файл iframe singleton mobile.contract.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfiles.js.
+      - media-budget-owner.contract.test.js — JS-файл media budget owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - native-video-cold-offscreen.contract.test.js — JS-файл native video cold offscreen.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+      - player-budget-profiles.contract.test.js — JS-файл player budget profiles.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfileResolver.js, tests/support/runtimeGovernance.js.
+      - qcast-shared-mute-owner.contract.test.js — JS-файл qcast shared mute owner.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - same-src-thrash-guard.contract.test.js — JS-файл same src thrash guard.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - metamarket/ — Каталог metamarket.
+      - metamarket-contracts.test.js — JS-файл metamarket contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - mobile/ — Каталог mobile.
+      - android-shell-contracts.test.js — JS-файл android shell contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - project/ — Каталог project.
+      - ads-geo-targeting-portal-contracts.test.js — JS-файл ads geo targeting portal contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+      - api-route-contracts.test.js — JS-файл api route contracts.test. Связи: импортирует app/api/profile/delete-account/route.js, app/api/telegram/link/start/route.js, app/api/wallet-session/route.js.
+      - app-entry-contracts.test.js — JS-файл app entry contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - battlecoin-chat-contracts.test.js — JS-файл battlecoin chat contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - canonical-human-identity-contract.test.js — JS-файл canonical human identity contract.test. Связи: импортирует lib/identity/canonical-user-id.cjs, tests/support/projectSurface.js.
+      - economic-runtime-hardening-contract.test.js — JS-файл economic runtime hardening contract.test. Связи: импортирует tests/support/projectSurface.js.
+      - exchange-ai-box-contracts.test.js — JS-файл exchange ai box contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+      - exchange-runtime-performance-contracts.test.js — JS-файл exchange runtime performance contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-ad-discovery-contracts.test.js — JS-файл forum ad discovery contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-client-video-optimizer-contracts.test.js — JS-файл forum client video optimizer contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-hook-contracts.test.js — JS-файл forum hook contracts.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-media-lock-canonical.contract.test.js — JS-файл forum media lock canonical.contract.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-post-mutation-convergence.contract.test.js — JS-файл forum post mutation convergence.contract.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-user-recommendations-top500-mongo.contract.test.js — JS-файл forum user recommendations top500 mongo.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - forum-video-postcommit-moderation-contracts.test.js — JS-файл forum video postcommit moderation contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - global-visual-activity-v3.contract.test.js — JS-файл global visual activity v3.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - no-mojibake-contract.test.js — JS-файл no mojibake contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - payment-method-qcoin-contract.test.js — JS-файл payment method qcoin contract.test. Связи: импортирует tests/support/projectSurface.js.
+      - ql7-forum-native-video-light-prewarm-r24.contract.test.js — JS-файл ql7 forum native video light prewarm r24.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-hevc-fallback-contracts.test.js — JS-файл ql7 hevc fallback contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-iphone-avc-streaming-r22.contract.test.js — JS-файл ql7 iphone avc streaming r22.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-native-video-poster-v1.contract.test.js — JS-файл ql7 native video poster v1.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-888-final-contracts.test.js — JS-файл ql7 support 888 final contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-cosmic-contracts.test.js — JS-файл ql7 support cosmic contracts.test. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/choiceContract.js, lib/ql7-support/cognitiveMemory.js.
+      - ql7-support-governance-contracts.test.js — JS-файл ql7 support governance contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-premium-cognitive-contracts.test.js — JS-файл ql7 support premium cognitive contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-premium-contracts.test.js — JS-файл ql7 support premium contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - ql7-support-runtime-completion-contracts.test.js — JS-файл ql7 support runtime completion contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - runtime-governance-contracts.test.js — JS-файл runtime governance contracts.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - seo-indexing-contracts.test.js — JS-файл seo indexing contracts.test. Связи: импортирует app/robots.js, app/sitemap.js, components/i18n-dicts/manifest.js.
+      - trust-identity-seo-contracts.test.js — JS-файл trust identity seo contracts.test. Связи: импортирует app/robots.js, app/sitemap.js, lib/brand/officialChannels.js.
+      - video-pipeline-progress-contracts.test.js — JS-файл video pipeline progress contracts.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - root/ — Каталог root.
+      - auth-bus-budget.contract.test.js — JS-файл auth bus budget.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-mode.contract.test.js — JS-файл runtime mode.contract.test. Связи: импортирует tests/support/runtimeGovernance.js.
+      - runtime-startup-budget.contract.test.js — JS-файл runtime startup budget.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+      - wallet-intent-only.contract.test.js — JS-файл wallet intent only.contract.test. Связи: импортирует src/shared/runtime/budgets/routeProfiles.js.
+    - route/ — Каталог route.
+      - widget-locality.contract.test.js — JS-файл widget locality.contract.test. Связи: импортирует src/shared/runtime/budgets/routeCapabilities.js, tests/support/runtimeGovernance.js.
+    - ql7-support-architecture-closure.contract.test.js — JS-файл ql7 support architecture closure.contract.test. Связи: импортирует lib/composer-safety/clientPreview.js, lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/knowledge/knowledgeGraph.js.
+    - ql7-support-client-bundle-boundary.contract.test.js — JS-файл ql7 support client bundle boundary.contract.test. Связи: импортирует lib/ql7-support/ontology/domainOntology.js, lib/ql7-support/ontology/domains/index.js.
+    - ql7-support-code-data-readiness.contract.test.js — JS-файл ql7 support code data readiness.contract.test. Связи: импортирует lib/ql7-support/config/finalCombatDataFloors.js, lib/ql7-support/config/maxCombatRequirementRegistry.js, lib/ql7-support/config/staticDataReadiness.js.
+    - ql7-support-contract.test.js — JS-файл ql7 support contract.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/humanVariationPrimitives.js, lib/ql7-support/language/semanticBanks.js.
+    - ql7-support-doc-version-coherence.contract.test.js — JS-файл ql7 support doc version coherence.contract.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/semantics/analyzeTurn.js.
+    - ql7-support-focused-evidence-isolation.contract.test.js — JS-файл ql7 support focused evidence isolation.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-full-integration-closure.contract.test.js — JS-файл ql7 support full integration closure.contract.test. Связи: импортирует lib/ql7-support/knowledge/adsReadPolicy.js, lib/ql7-support/response/noveltyReservation.js, lib/ql7-support/response/regenerationController.js.
+    - ql7-support-full-unit-closure.contract.test.js — JS-файл ql7 support full unit closure.contract.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/knowledge/humanTopicOntology.js, lib/ql7-support/language/humanVariationPrimitives.js.
+    - ql7-support-human-topic-specificity.contract.test.js — JS-файл ql7 support human topic specificity.contract.test. Связи: импортирует lib/ql7-support/knowledge/humanTopicOntology.js.
+    - ql7-support-knowledge-contract.test.js — JS-файл ql7 support knowledge contract.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/knowledge/knowledgeGraph.js.
+    - ql7-support-knowledge-fallback-provenance.contract.test.js — JS-файл ql7 support knowledge fallback provenance.contract.test. Связи: импортирует lib/ql7-support/response/contradictionGuard.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+    - ql7-support-max-combat.contract.test.js — JS-файл ql7 support max combat.contract.test. Связи: импортирует lib/ql7-support/config/maxCombatRequirementRegistry.js, lib/ql7-support/knowledge/knowledgeGraph.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+    - ql7-support-p0-novelty.contract.test.js — JS-файл ql7 support p0 novelty.contract.test. Связи: импортирует lib/ql7-support/response/noveltyReservation.js, lib/ql7-support/response/regenerationController.js, lib/ql7-support/semantics/clarificationStrategyRegistry.js.
+    - ql7-support-prelab-material-live.contract.test.js — JS-файл ql7 support prelab material live.contract.test. Связи: импортирует lib/ql7-support/config/finalCombatDataFloors.js, lib/ql7-support/config/prelabMaterialLiveRequirements.js.
+    - ql7-support-recovery-novelty-lifecycle.contract.test.js — JS-файл ql7 support recovery novelty lifecycle.contract.test. Связи: импортирует lib/ql7-support/runtime/commitRecoveryWorker.js.
+    - ql7-support-regulation.contract.test.js — JS-файл ql7 support regulation.contract.test. Связи: импортирует lib/ql7-support/language/humanVariationPrimitives.js, lib/ql7-support/language/semanticBanks.js, lib/ql7-support/simulation/corpora/knowledge32.js.
+    - ql7-support-runtime-scope.contract.test.js — JS-файл ql7 support runtime scope.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-smtp-closure.contract.test.js — JS-файл ql7 support smtp closure.contract.test. Связи: импортирует lib/ql7-support/contact/contactConsent.js, lib/ql7-support/operator/reportContract.js, lib/ql7-support/operator/smtpRendererRu.js.
+    - ql7-support-source-contract-safety.contract.test.js — JS-файл ql7 support source contract safety.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-structured-fact-ownership.contract.test.js — JS-файл ql7 support structured fact ownership.contract.test. Связи: импортирует lib/ql7-support/response/morphosyntacticRealizer.js, lib/ql7-support/response/surfaceRedundancyGuard.js.
+    - ql7-support-svg-quality.contract.test.js — JS-файл ql7 support svg quality.contract.test. Связи: импортирует lib/ql7-support/presentation/svgRegistry.js.
+  - fixtures/ — Каталог fixtures.
+    - forum/ — Каталог forum.
+      - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+  - integration/ — Каталог integration.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - recommendations-users.route.test.js — JS-файл recommendations users.route.test. Связи: импортирует app/api/forum/recommendations/users/route.js.
+    - exchange/ — Каталог exchange.
+      - AIWorkbench.test.jsx — JSX-файл AIWorkbench.test. Связи: импортирует lib/exchange/aiEntitlementState.js.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - feed/ — Каталог feed.
+          - hooks/ — Каталог hooks.
+            - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+      - media/ — Каталог media.
+        - clientVideoOptimizerPaperclip.test.jsx — JSX-файл client Video Optimizer Paperclip.test. Связи: импортирует forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/hooks/useMediaPipelineController.js.
+        - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - videoUploadGateway.test.js — JS-файл video Upload Gateway.test. Связи: импортирует forum/features/media/services/moderatePreparedVideoForUpload.js, forum/features/media/services/uploadR2MediaFile.js, lib/forumClientVideoOptimizer.js.
+      - runtime-stability.integration.test.js — JS-файл runtime stability.integration.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support/ — Каталог ql7-support.
+      - admin-dm-email-test.js — JS-файл admin dm email test. Связи: импортирует lib/ql7-support/adminReportComposer.js.
+      - ads-same-source-test.js — JS-файл ads same source test. Связи: импортирует lib/ql7-support/adsSupportReadAdapter.js.
+      - final-runtime-test.js — JS-файл final runtime test. Связи: импортирует lib/ql7-support/adminReportComposer.js, lib/ql7-support/diagnosticFailure.js, lib/ql7-support/runtimeStateMachine.js.
+      - premium-cognitive-test.js — JS-файл premium cognitive test. Связи: импортирует lib/ql7-support/greetingCoordinator.js, lib/ql7-support/language/humanVariationPrimitives.js, lib/ql7-support/vipResolver.js.
+      - premium-evidence-test.js — JS-файл premium evidence test. Связи: импортирует lib/ql7-support/diagnosticPresentation.js, lib/ql7-support/evidencePolicy.js.
+      - premium-pipeline.test.js — JS-файл premium pipeline.test. Связи: импортирует lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/learningPipeline.js, lib/ql7-support/runtimeStateMachine.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.integration.test.js — JS-файл runtime Governance.integration.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeCapabilities.js, src/shared/runtime/budgets/routeProfiles.js.
+    - visual-runtime/ — Каталог visual-runtime.
+      - global-visual-activity.integration.test.js — JS-файл global visual activity.integration.test. Связи: импортирует lib/storage/mediaKeys.js, lib/visual-runtime/animatedAssetManifest.js.
+    - ql7-support-code-data-readiness.integration.test.js — JS-файл ql7 support code data readiness.integration.test. Связи: импортирует lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/runtime/executeTurn.js.
+    - ql7-support-evidence.integration.test.js — JS-файл ql7 support evidence.integration.test. Связи: импортирует lib/ql7-support/simulation/executeScenario.js, lib/ql7-support/simulation/scenarioCatalog.js.
+    - ql7-support-full-integration-closure.integration.test.js — JS-файл ql7 support full integration closure.integration.test. Связи: импортирует lib/ql7-support/response/noveltyReservation.js.
+    - ql7-support-humor.integration.test.js — JS-файл ql7 support humor.integration.test. Связи: импортирует lib/ql7-support/response/humorRealizationPlanner.js.
+    - ql7-support-knowledge-integration.test.js — JS-файл ql7 support knowledge integration.test. Связи: импортирует lib/ql7-support/knowledge/knowledgeGraph.js, lib/ql7-support/response/morphosyntacticRealizer.js, lib/ql7-support/runtime/productionTurn.js.
+    - ql7-support-live-prelab.integration.test.js — JS-файл ql7 support live prelab.integration.test. Связи: импортирует lib/composer-safety/clientPreview.js, lib/composer-safety/semanticAnalyzer.cjs, lib/ql7-support/semantics/analyzeTurn.js.
+    - ql7-support-neural-production-parity.integration.test.js — JS-файл ql7 support neural production parity.integration.test. Связи: импортирует lib/ql7-support/neural/modelManifest.js, lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/executeScenario.js.
+    - ql7-support-open-human.integration.test.js — JS-файл ql7 support open human.integration.test. Связи: импортирует lib/ql7-support/knowledge/openHumanKnowledgeRouter.js.
+    - ql7-support-operator-smtp.integration.test.js — JS-файл ql7 support operator smtp.integration.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-p0-novelty.integration.test.js — JS-файл ql7 support p0 novelty.integration.test. Связи: импортирует lib/ql7-support/runtime/executeTurn.js.
+    - ql7-support-premium-cognitive.integration.test.js — JS-файл ql7 support premium cognitive.integration.test. Связи: импортирует lib/exchange/aiBoxAnalysisService.js, lib/ql7-support/data/aiBoxSupportReadAdapter.js, lib/ql7-support/safety/evaluateTurn.js.
+    - ql7-support-production-lab-parity.integration.test.js — JS-файл ql7 support production lab parity.integration.test. Связи: импортирует lib/ql7-support/runtime/productionTurn.js, lib/ql7-support/simulation/executeScenario.js.
+    - ql7-support-public-figures.integration.test.js — JS-файл ql7 support public figures.integration.test. Связи: импортирует lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js, lib/ql7-support/knowledge/public-figures/publicFigureResolver.js.
+    - ql7-support-runtime-scope.integration.test.js — JS-файл ql7 support runtime scope.integration.test. Связи: импортирует lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/simulation/executeScenario.js.
+    - ql7-support-runtime.integration.test.js — JS-файл ql7 support runtime.integration.test. Связи: импортирует lib/ql7-support/choiceContract.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/language/finalDeliveryLocalization.js.
+  - mocks/ — Каталог mocks.
+    - .gitkeep — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - smoke/ — Каталог smoke.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - media/ — Каталог media.
+          - components/ — Каталог components.
+            - VideoFeedPane.test.jsx — JSX-файл Video Feed Pane.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
+    - ql7-support/ — Каталог ql7-support.
+      - adult-god-mode-surface.test.js — JS-файл adult god mode surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - final-surface-test.js — JS-файл final surface test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-cognitive-surface.test.js — JS-файл premium cognitive surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - premium-surface.test.js — JS-файл premium surface.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.smoke.test.js — JS-файл runtime Governance.smoke.test. Связи: импортирует tests/support/runtimeGovernance.js.
+    - seo/ — Каталог seo.
+      - trust-identity-pages.test.jsx — JSX-файл trust identity pages.test. Связи: импортирует components/trust/TrustIdentityArticle.jsx, lib/brand/officialChannels.js, lib/seo/trustIdentityContent.js.
+    - ql7-support-browser-state.smoke.test.js — JS-файл ql7 support browser state.smoke.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - ql7-support-runtime.smoke.test.js — JS-файл ql7 support runtime.smoke.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/runtime/executeTurn.js.
+  - support/ — Каталог support.
+    - projectSurface.js — JS-файл project Surface. Связи: используется в tests/contracts/metamarket/metamarket-contracts.test.js, tests/contracts/project/api-route-contracts.test.js, tests/contracts/project/app-entry-contracts.test.js.
+    - runtimeGovernance.js — JS-файл runtime Governance. Связи: импортирует tests/support/projectSurface.js; используется в tests/component/runtime/runtimeComponentSurfaces.test.jsx, tests/contracts/forum/media-budget-owner.contract.test.js, tests/contracts/forum/player-budget-profiles.contract.test.js.
+    - setup-dom.js — JS-файл setup dom. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+  - unit/ — Каталог unit.
+    - account-restrictions/ — Каталог account-restrictions.
+      - quarantine.test.js — JS-файл quarantine.test. Связи: импортирует lib/account-restrictions/quarantineRecord.cjs.
+    - ads/ — Каталог ads.
+      - adDiscoveryPrompt.test.js — JS-файл ad Discovery Prompt.test. Связи: импортирует lib/ads/adDiscoveryPrompt.js.
+      - adsGeoTargetingFlow.test.js — JS-файл ads Geo Targeting Flow.test. Связи: импортирует lib/adsGeoTargetingFlow.js.
+      - adsLandingPackageState.test.js — JS-файл ads Landing Package State.test. Связи: импортирует lib/adsLandingPackageState.js.
+    - api/ — Каталог api.
+      - forum/ — Каталог forum.
+        - subs-people.route.test.js — JS-файл subs people.route.test. Связи: импортирует app/api/forum/subs/people/route.js, forum/features/subscriptions/utils/starred.js.
+      - profile/ — Каталог profile.
+        - user-popover.route.test.js — JS-файл user popover.route.test. Связи: импортирует app/api/profile/user-popover/route.js.
+    - battlecoin/ — Каталог battlecoin.
+      - battle-chat-validation.test.js — JS-файл battle chat validation.test. Связи: импортирует lib/battlecoin/battle-chat-validation.cjs.
+    - brand/ — Каталог brand.
+      - officialChannels.test.js — JS-файл official Channels.test. Связи: импортирует lib/brand/officialChannels.js.
+    - composer-safety/ — Каталог composer-safety.
+      - composer.test.js — JS-файл composer.test. Связи: импортирует lib/composer-safety/badgeLexicon.js, lib/composer-safety/clientPreview.js, lib/composer-safety/localeRiskConcepts.cjs.
+    - economic-integrity/ — Каталог economic-integrity.
+      - economic-gate.test.js — JS-файл economic gate.test. Связи: импортирует lib/economic-integrity/evaluateOperation.cjs, lib/economic-integrity/evidenceResolver.cjs, lib/economic-integrity/index.cjs.
+    - exchange/ — Каталог exchange.
+      - aiEntitlementState.test.js — JS-файл ai Entitlement State.test. Связи: импортирует lib/exchange/aiEntitlementState.js.
+      - aiQuotaIdentity.test.js — JS-файл ai Quota Identity.test. Связи: импортирует lib/exchange/aiQuotaIdentity.js.
+    - forum/ — Каталог forum.
+      - features/ — Каталог features.
+        - dm/ — Каталог dm.
+          - utils/ — Каталог utils.
+            - dmLoaders.test.js — JS-файл dm Loaders.test. Связи: импортирует forum/features/dm/utils/dmLoaders.js.
+          - dm-send-scroll-stability.test.js — JS-файл dm send scroll stability.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+        - feed/ — Каталог feed.
+          - utils/ — Каталог utils.
+            - cardMemo.test.js — JS-файл card Memo.test. Связи: импортирует forum/features/feed/utils/cardMemo.js, forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js.
+            - interleaveRecommendationRails.test.js — JS-файл interleave Recommendation Rails.test. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js.
+        - media/ — Каталог media.
+          - utils/ — Каталог utils.
+            - mediaRuntime.test.js — JS-файл media Runtime.test. Связи: импортирует forum/features/media/utils/mediaRuntime.js.
+      - media/ — Каталог media.
+        - mediaStatePolicy.test.js — JS-файл media State Policy.test. Связи: импортирует forum/features/media/utils/mediaStatePolicy.js.
+      - shared/ — Каталог shared.
+        - config/ — Каталог config.
+          - runtime.test.js — JS-файл runtime.test. Связи: импортирует forum/shared/config/runtime.js.
+        - utils/ — Каталог utils.
+          - counts.test.js — JS-файл counts.test. Связи: импортирует forum/shared/utils/counts.js.
+      - bounded-runtime-caches.test.js — JS-файл bounded runtime caches.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - clientVideoMobileRuntime.test.js — JS-файл client Video Mobile Runtime.test. Связи: импортирует lib/forumClientVideoRuntime.js.
+      - clientVideoOpfs.test.js — JS-файл client Video Opfs.test. Связи: импортирует lib/forumClientVideoOpfs.js.
+      - clientVideoOptimizer.test.js — JS-файл client Video Optimizer.test. Связи: импортирует lib/forumClientVideoOptimizer.js.
+      - forum-index-maintenance-edit.test.js — JS-файл forum index maintenance edit.test. Связи: импортирует lib/forum/forum-index-maintenance.cjs.
+      - forum-post-change-delta.test.js — JS-файл forum post change delta.test. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js.
+      - load-more-sentinel-state.test.js — JS-файл load more sentinel state.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx.
+      - nativeVideoPosterPolicy.test.js — JS-файл native Video Poster Policy.test. Связи: импортирует lib/nativeVideoPoster.js.
+      - nick-fit-registry.test.js — JS-файл nick fit registry.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - serverCompleteReaderUserPosts.test.js — JS-файл server Complete Reader User Posts.test. Связи: импортирует lib/forum/forum-server-complete-reader.cjs.
+      - serverPageReaderGeo.test.js — JS-файл server Page Reader Geo.test. Связи: импортирует lib/forum/forum-server-page-reader.cjs, lib/forum/ql7-forum-architecture.cjs, lib/geo/geo-rings.cjs.
+      - snapshotTransforms.test.js — JS-файл snapshot Transforms.test. Связи: импортирует forum/features/feed/utils/snapshotTransforms.js.
+      - userRecommendationTop500.test.js — JS-файл user Recommendation Top500.test. Связи: импортирует lib/forum/forum-user-recommendation-pool.cjs.
+      - videoPipelineProgress.test.js — JS-файл video Pipeline Progress.test. Связи: импортирует lib/videoPipelineProgress.js.
+      - windowing-height-index.test.js — JS-файл windowing height index.test. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs.
+      - windowing-registry.test.js — JS-файл windowing registry.test. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js.
+    - i18n/ — Каталог i18n.
+      - i18nDictionaries.test.js — JS-файл i18n Dictionaries.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - metamarket/ — Каталог metamarket.
+      - catalog.test.js — JS-файл catalog.test. Связи: импортирует app/api/metamarket/_format.js, components/MetaMarketCatalog.js, components/metamarket/metaMarketFormat.js.
+      - metamarket-atomicity.test.js — JS-файл metamarket atomicity.test. Связи: импортирует app/api/metamarket/_transactions.js.
+    - mongo/ — Каталог mongo.
+      - academy-primary.test.js — JS-файл academy primary.test. Связи: импортирует lib/mongo/academy-primary.cjs.
+      - ads-primary.test.js — JS-файл ads primary.test. Связи: импортирует lib/adsCore.js, lib/mongo/ads-primary.cjs, lib/mongo/profile-primary.cjs.
+      - battlecoin-chat-primary.test.js — JS-файл battlecoin chat primary.test. Связи: импортирует lib/auth/battlecoin-chat-auth.cjs, lib/mongo/battlecoin-chat-primary.cjs, lib/mongo/profile-primary.cjs.
+      - battlecoin-primary.test.js — JS-файл battlecoin primary.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - dm-primary.test.js — JS-файл dm primary.test. Связи: импортирует app/api/dm/_db.js, lib/mongo/dm-primary.cjs.
+      - forum-primary.test.js — JS-файл forum primary.test. Связи: импортирует lib/mongo/forum-primary.cjs.
+      - metamarket-primary.test.js — JS-файл metamarket primary.test. Связи: импортирует lib/economic-integrity/decisionReceipt.cjs, lib/mongo/metamarket-primary.cjs, lib/mongo/qcoin-primary.cjs.
+      - payments-metastudio-primary.test.js — JS-файл payments metastudio primary.test. Связи: импортирует lib/mongo/metastudio-primary.cjs, lib/mongo/payments-primary.cjs.
+      - profile-primary.test.js — JS-файл profile primary.test. Связи: импортирует app/api/tma/auto/route.js, lib/identity/ql7IdentityContract.cjs, lib/mongo/account-deletion-primary.cjs.
+      - push-primary.test.js — JS-файл push primary.test. Связи: импортирует lib/mongo/push-primary.cjs.
+      - qcoin-primary.test.js — JS-файл qcoin primary.test. Связи: импортирует lib/economic-integrity/decisionReceipt.cjs, lib/mongo/qcoin-primary.cjs, lib/mongo/transaction-context.cjs.
+      - quest-primary.test.js — JS-файл quest primary.test. Связи: импортирует lib/mongo/quest-primary.cjs.
+      - referral-primary.test.js — JS-файл referral primary.test. Связи: импортирует lib/mongo/referral-primary.cjs.
+      - subscriptions-primary.test.js — JS-файл subscriptions primary.test. Связи: импортирует lib/mongo/subscriptions-primary.cjs.
+    - payments/ — Каталог payments.
+      - qcoin-entitlement-purchase.test.js — JS-файл qcoin entitlement purchase.test. Связи: импортирует components/paymentMethodI18n.js, lib/account-restrictions/deviceEvidence.cjs, lib/qcoinEntitlementPurchase.js.
+    - ql7-support/ — Каталог ql7-support.
+      - adversarial-language-normalization.test.js — JS-файл adversarial language normalization.test. Связи: импортирует lib/ql7-support/language/semanticBanks.js, lib/ql7-support/safety/sharedSemanticEvidence.cjs.
+      - answer-relevance-test.js — JS-файл answer relevance test. Связи: импортирует lib/ql7-support/response/answerRelevanceGuard.js, lib/ql7-support/response/userSpecificAnchorGuard.js, lib/ql7-support/semantics/domainBoundaryGraph.js.
+      - canonical-matrix-performance.test.js — JS-файл canonical matrix performance.test. Связи: импортирует lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/knowledge/publicFigureKnowledgeGraph.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - case-memory-projection.test.js — JS-файл case memory projection.test. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/conversation/memoryTransaction.js, lib/ql7-support/runtime/caseStoreContract.js.
+      - closure-matrix.test.js — JS-файл closure matrix.test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/entryGreetingLexicon.js, lib/ql7-support/knowledge/domainRegistry.js.
+      - contact-email-aggregation.test.js — JS-файл contact email aggregation.test. Связи: импортирует lib/supportEmailTransport.js.
+      - crisis-depth.test.js — JS-файл crisis depth.test. Связи: импортирует lib/ql7-support/simulation/crisisDepthOracle.js.
+      - delivery-commit-recovery-test.js — JS-файл delivery commit recovery test. Связи: импортирует lib/ql7-support/runtime/commitRecoveryWorker.js, lib/ql7-support/runtime/productionTurn.js.
+      - ecosystem-locale-lexicon-test.js — JS-файл ecosystem locale lexicon test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledge/domainRegistry.js.
+      - final-code-closure.test.js — JS-файл final code closure.test. Связи: импортирует lib/ql7-support/response/buildContentPlan.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/semantics/analyzeTurn.js.
+      - final-intelligence-test.js — JS-файл final intelligence test. Связи: импортирует lib/ql7-support/conversationState.js, lib/ql7-support/diagnosticFailure.js, lib/ql7-support/ecosystemRating.js.
+      - final-runtime.test.js — JS-файл final runtime.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+      - focused-evidence-scope.test.js — JS-файл focused evidence scope.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - full-data-readiness.test.js — JS-файл full data readiness.test. Связи: импортирует lib/ql7-support/config/finalCombatDataFloors.js, lib/ql7-support/config/staticDataReadiness.js, lib/ql7-support/simulation/fullCodeDataReadinessOracle.js.
+      - human-first-runtime.test.js — JS-файл human first runtime.test. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/runtime/executeTurn.js.
+      - human-intelligence-closure.test.js — JS-файл human intelligence closure.test. Связи: импортирует lib/ql7-support/contact/contactIntelligence.js, lib/ql7-support/knowledge/generalKnowledgeRegistry.js, lib/ql7-support/knowledge/humanTopicOntology.js.
+      - human-knowledge-core.test.js — JS-файл human knowledge core.test. Связи: импортирует lib/ql7-support/knowledge/generalHumanKnowledgeCore.js, lib/ql7-support/knowledge/humanConversationBank.js, lib/ql7-support/knowledge/openHumanKnowledgeRouter.js.
+      - human-topic-specificity.test.js — JS-файл human topic specificity.test. Связи: импортирует lib/ql7-support/knowledge/humanTopicOntology.js.
+      - humor-32l.test.js — JS-файл humor 32l.test. Связи: импортирует lib/ql7-support/knowledge/humorLexiconBank.js, lib/ql7-support/simulation/humorMaterialDiversityOracle.js.
+      - identity-resolver.test.js — JS-файл identity resolver.test. Связи: импортирует lib/ql7-support/identityResolver.js.
+      - integration-regressions.test.js — JS-файл integration regressions.test. Связи: импортирует lib/ql7-support/greeting/entrySession.js, lib/ql7-support/http/idempotencyStore.js, lib/ql7-support/knowledge/generalKnowledgeRegistry.js.
+      - intent-confirmation.test.js — JS-файл intent confirmation.test. Связи: импортирует lib/ql7-support/conversation/conversationMemoryGraph.js, lib/ql7-support/language/normalizeInput.js, lib/ql7-support/runtime/executeTurn.js.
+      - knowledge-fallback-provenance.test.js — JS-файл knowledge fallback provenance.test. Связи: импортирует lib/ql7-support/response/contradictionGuard.js, lib/ql7-support/response/discoursePlanner.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+      - knowledge-graph-test.js — JS-файл knowledge graph test. Связи: импортирует lib/ql7-support/cardSchema.js, lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/knowledge/domainKnowledge.js.
+      - language-depth.test.js — JS-файл language depth.test. Связи: импортирует lib/ql7-support/simulation/languageSeedDiversityOracle.js.
+      - late-directive-canonical.test.js — JS-файл late directive canonical.test. Связи: импортирует lib/ql7-support/conversation/topicFrame.js, lib/ql7-support/language/supportSurfaceCopyRegistry.js, lib/ql7-support/learning/calibrationCandidateReceipt.js.
+      - locale-operation-frames-test.js — JS-файл locale operation frames test. Связи: импортирует lib/ql7-support/language/localeOperationFrames.js, lib/ql7-support/language/locales/manifest.js.
+      - locale-profiles-test.js — JS-файл locale profiles test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/locales.js, lib/ql7-support/language/locales/manifest.js.
+      - material-runtime.test.js — JS-файл material runtime.test. Связи: импортирует lib/ql7-support/greeting/entrySession.js, lib/ql7-support/ontology/microtopicOntology.js, lib/ql7-support/presentation/badgePolicy.js.
+      - max-combat.test.js — JS-файл max combat.test. Связи: импортирует lib/composer-safety/clientPreview.js, lib/composer-safety/localeRiskConcepts.cjs, lib/composer-safety/localeRiskConcepts.client.js.
+      - morphology-realizer-test.js — JS-файл morphology realizer test. Связи: импортирует lib/ql7-support/language/factPresentationLexicon.js, lib/ql7-support/response/discoursePlanner.js, lib/ql7-support/response/morphologyRealizer.js.
+      - native-localization-test.js — JS-файл native localization test. Связи: импортирует lib/ql7-support/config/behaviorManifest.js, lib/ql7-support/language/nativeStructuredLocalization.js.
+      - neural-understanding.test.js — JS-файл neural understanding.test. Связи: импортирует lib/ql7-support/neural/understandingContract.js, lib/ql7-support/neural/understandingCoordinator.js.
+      - novelty-delivery-availability-test.js — JS-файл novelty delivery availability test. Связи: импортирует lib/ql7-support/response/noveltyReservation.js, lib/ql7-support/response/regenerationController.js, lib/ql7-support/semantics/clarificationStrategyRegistry.js.
+      - officialIdentityKnowledge.test.js — JS-файл official Identity Knowledge.test. Связи: импортирует lib/brand/officialChannels.js, lib/ql7-support/knowledgeRegistry.js, lib/seo/trustIdentityRoutes.js.
+      - pragmatic-context.test.js — JS-файл pragmatic context.test. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/knowledgeRegistry.js, lib/ql7-support/response/productKnowledgeRealizer.js.
+      - premium-cognitive.test.js — JS-файл premium cognitive.test. Связи: импортирует lib/exchange/aiBoxAnalysisService.js, lib/ql7-support/entryGreetingLexicon.js, lib/ql7-support/language/humanVariationPrimitives.js.
+      - public-figure-metadata-boundary.test.js — JS-файл public figure metadata boundary.test. Связи: импортирует lib/ql7-support/knowledge/public-figures/materialProfiles.js, lib/ql7-support/knowledge/public-figures/publicFigureFactResolver.js, lib/ql7-support/knowledge/public-figures/publicFigureResolver.js.
+      - public-figure-richness.test.js — JS-файл public figure richness.test. Связи: импортирует lib/ql7-support/simulation/publicFigureRichnessOracle.js.
+      - read-source-authority.test.js — JS-файл read source authority.test. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/readOnlySourceManifest.js, lib/ql7-support/sourceRegistry.js.
+      - request-envelope-test.js — JS-файл request envelope test. Связи: импортирует lib/ql7-support/contracts/supportTurnRequestEnvelope.js, lib/ql7-support/runtime/productionTurn.js.
+      - response-branch-registry-test.js — JS-файл response branch registry test. Связи: импортирует lib/ql7-support/response/discoursePlanner.js, lib/ql7-support/response/responseBranchRegistry.js.
+      - runtime-completion-test.js — JS-файл runtime completion test. Связи: импортирует forum/features/dm/services/supportAuthClient.js, lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/languageOrchestrator.js.
+      - runtime-scope-regressions.test.js — JS-файл runtime scope regressions.test. Связи: импортирует lib/ql7-support/knowledge/sourceReceipt.js, lib/ql7-support/runtime/executeTurn.js, lib/ql7-support/safety/evaluateTurn.js.
+      - runtime-state-cas-loop.test.js — JS-файл runtime state cas loop.test. Связи: импортирует lib/ql7-support/runtimeStateMachine.js.
+      - scientific-governance.test.js — JS-файл scientific governance.test. Связи: импортирует lib/ql7-support/ontology/microtopicOntology.js, lib/ql7-support/ontology/ontologyManifest.js, lib/ql7-support/semantics/decisionMath.js.
+      - structured-fact-ownership.test.js — JS-файл structured fact ownership.test. Связи: импортирует lib/ql7-support/data/adapterReceipt.js, lib/ql7-support/response/discoursePlanner.js, lib/ql7-support/response/morphosyntacticRealizer.js.
+      - windows-regressions.test.js — JS-файл windows regressions.test. Связи: импортирует lib/ql7-support/contact/contactIntelligence.js, lib/ql7-support/semantics/analyzeTurn.js.
+    - runtime/ — Каталог runtime.
+      - runtimeGovernance.test.js — JS-файл runtime Governance.test. Связи: импортирует src/shared/runtime/budgets/budgetEngine.js, src/shared/runtime/budgets/routeProfileResolver.js, src/shared/runtime/budgets/routeProfiles.js.
+    - seo/ — Каталог seo.
+      - trustIdentityContent.test.js — JS-файл trust Identity Content.test. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+    - visual-runtime/ — Каталог visual-runtime.
+      - visual-activity-registry.test.js — JS-файл visual activity registry.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+    - notification-center.test.js — JS-файл notification center.test. Связи: импортирует lib/notificationCenter.js.
+    - ql7HevcFallbackPrimitives.test.js — JS-файл ql7 Hevc Fallback Primitives.test. Связи: импортирует lib/ql7HevcFallbackPrimitives.js.
+    - ql7HevcPresentationReorder.test.js — JS-файл ql7 Hevc Presentation Reorder.test. Связи: импортирует lib/ql7HevcPresentationReorder.js.
+- tools/ — Локальные скрипты аудита, генерации и техобслуживания.
+  - ingest/ — Подкаталог инструментов: ingest.
+    - harCaptureProtocol.md — Локальный скрипт/инструмент har Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - heapCaptureProtocol.md — Локальный скрипт/инструмент heap Capture Protocol для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHar.js — Локальный скрипт/инструмент normalize Har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+    - normalizeHeap.js — Локальный скрипт/инструмент normalize Heap для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-canonical-economic-backup.mjs — Локальный скрипт/инструмент analyze canonical economic backup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-diag.js — Локальный скрипт/инструмент analyze forum diag для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-forum-media-har.js — Локальный скрипт/инструмент analyze forum media har для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - analyze-heapsnapshot.js — Локальный скрипт/инструмент analyze heapsnapshot для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - apply-ql7-support-scoped-closure.ps1 — Локальный скрипт/инструмент apply ql7 support scoped closure для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-account-sync.js — Локальный скрипт/инструмент audit account sync для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-ad-runtime.js — Локальный скрипт/инструмент audit ad runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-adaptive-actions.js — Локальный скрипт/инструмент audit adaptive actions для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-adaptive-core.js — Локальный скрипт/инструмент audit adaptive core для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-auth-bus.js — Локальный скрипт/инструмент audit auth bus для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-auth-cascade.js — Локальный скрипт/инструмент audit auth cascade для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-console-noise.js — Локальный скрипт/инструмент audit console noise для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-diagnostics-boundaries.js — Локальный скрипт/инструмент audit diagnostics boundaries для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-effects.js — Локальный скрипт/инструмент audit effects для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-feature-flag-safety.js — Локальный скрипт/инструмент audit feature flag safety для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forensic-mode-bounds.js — Локальный скрипт/инструмент audit forensic mode bounds для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-forum-deps.js — Локальный скрипт/инструмент audit forum deps для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-functional-parity.ps1 — Локальный скрипт/инструмент audit forum functional parity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-media-churn.js — Локальный скрипт/инструмент audit forum media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-runtime-stability.mjs — Локальный скрипт/инструмент audit forum runtime stability для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-scroll-runtime.js — Локальный скрипт/инструмент audit forum scroll runtime для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-global-visual-activity.mjs — Локальный скрипт/инструмент audit global visual activity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-iframe-restore.js — Локальный скрипт/инструмент audit iframe restore для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-layout-stability.js — Локальный скрипт/инструмент audit layout stability для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-media-budget.js — Локальный скрипт/инструмент audit media budget для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media-ownership.js — Локальный скрипт/инструмент audit media ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-media.js — Локальный скрипт/инструмент audit media для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-mobile-profile-budget.js — Локальный скрипт/инструмент audit mobile profile budget для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-mode-contract.js — Локальный скрипт/инструмент audit mode contract для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-player-ownership.js — Локальный скрипт/инструмент audit player ownership для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-post-video-lifecycle.js — Локальный скрипт/инструмент audit post video lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-preload-waste.js — Локальный скрипт/инструмент audit preload waste для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - audit-provider-baseline.js — Локальный скрипт/инструмент audit provider baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-budgets.js — Локальный скрипт/инструмент audit route budgets для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-priority-policies.js — Локальный скрипт/инструмент audit route priority policies для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-route-teardown.js — Локальный скрипт/инструмент audit route teardown для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-hotspots.js — Локальный скрипт/инструмент audit runtime hotspots для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-runtime-mode-resolution.js — Локальный скрипт/инструмент audit runtime mode resolution для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-runtime-passports.js — Локальный скрипт/инструмент audit runtime passports для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-same-src-thrash.js — Локальный скрипт/инструмент audit same src thrash для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - compare-baselines.js — Локальный скрипт/инструмент compare baselines для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - generate-project-dependencies.js — Локальный скрипт/инструмент generate project dependencies для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-docs.js — Локальный скрипт/инструмент generate project docs для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-ownership.js — Локальный скрипт/инструмент generate project ownership для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-risks.js — Локальный скрипт/инструмент generate project risks для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
+  - generate-project-routes.js — Локальный скрипт/инструмент generate project routes для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - generate-trust-identity-machine-surfaces.mjs — Локальный скрипт/инструмент generate trust identity machine surfaces для аудита или техобслуживания. Связи: импортирует lib/seo/trustIdentityMachineIdentity.js.
+  - inventory-forum-runtime-lifecycle.mjs — Локальный скрипт/инструмент inventory forum runtime lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
+  - prove-forum-navigation-contracts.mjs — Локальный скрипт/инструмент prove forum navigation contracts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - prove-forum-windowing-height-index.mjs — Локальный скрипт/инструмент prove forum windowing height index для аудита или техобслуживания. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs.
+  - prove-global-visual-activity.mjs — Локальный скрипт/инструмент prove global visual activity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-faststart-browser-smoke-v68.mjs — Локальный скрипт/инструмент ql7 faststart browser smoke v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-faststart-local-v68-check.mjs — Локальный скрипт/инструмент ql7 faststart local v68 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-ffmpeg-assets-check-v68.mjs — Локальный скрипт/инструмент ql7 ffmpeg assets check v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-finalize-localized-trust-root-html.mjs — Локальный скрипт/инструмент ql7 finalize localized trust root html для аудита или техобслуживания. Связи: используется в tools/ql7-hevc-browser-bundle-check-v9.mjs, tools/ql7-trust-identity-check-final-baseline-v3.mjs.
+  - ql7-forum-native-video-light-prewarm-check-r24-fix2.mjs — Локальный скрипт/инструмент ql7 forum native video light prewarm check r24 fix2 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-forum-user-recommendations-top500-check-final-baseline-v12.mjs — Локальный скрипт/инструмент ql7 forum user recommendations top500 check final baseline v12 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-front-camera-poster-mirror-check-r24-fix2.mjs — Локальный скрипт/инструмент ql7 front camera poster mirror check r24 fix2 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-har-media-churn.mjs — Локальный скрипт/инструмент ql7 har media churn для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-hevc-assets-check-v7.mjs — Локальный скрипт/инструмент ql7 hevc assets check v7 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-hevc-browser-bundle-check-v9.mjs — Локальный скрипт/инструмент ql7 hevc browser bundle check v9 для аудита или техобслуживания. Связи: импортирует tools/ql7-finalize-localized-trust-root-html.mjs.
+  - ql7-install-hevc-wasm-v7.mjs — Локальный скрипт/инструмент ql7 install hevc wasm v7 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-install-local-ffmpeg-v68.mjs — Локальный скрипт/инструмент ql7 install local ffmpeg v68 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-iphone-avc-streaming-check-r22.mjs — Локальный скрипт/инструмент ql7 iphone avc streaming check r22 для аудита или техобслуживания. Связи: импортирует lib/forumClientVideoRuntime.js.
+  - ql7-media-owner-audit.mjs — Локальный скрипт/инструмент ql7 media owner audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-pressure-watch.mjs — Локальный скрипт/инструмент ql7 media pressure watch для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-check.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 check для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-media-rootfix-v57-smoke.mjs — Локальный скрипт/инструмент ql7 media rootfix v57 smoke для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-mp4-atom-audit.mjs — Локальный скрипт/инструмент ql7 mp4 atom audit для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-native-video-poster-check-v1.mjs — Локальный скрипт/инструмент ql7 native video poster check v1 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - ql7-trust-identity-check-final-baseline-v3.mjs — Локальный скрипт/инструмент ql7 trust identity check final baseline v3 для аудита или техобслуживания. Связи: импортирует app/sitemap.js, components/i18n-dicts/ar.js, components/i18n-dicts/en.js.
+  - ql7-trust-identity-source-integrity-final-baseline-v3.mjs — Локальный скрипт/инструмент ql7 trust identity source integrity final baseline v3 для аудита или техобслуживания. Связи: импортирует components/i18n-dicts/ar.js, components/i18n-dicts/en.js, components/i18n-dicts/es.js.
+  - ql7-trust-identity-verify-built-html-final-baseline-v3.mjs — Локальный скрипт/инструмент ql7 trust identity verify built html final baseline v3 для аудита или техобслуживания. Связи: импортирует lib/brand/officialChannels.js, lib/seo/trustIdentityContent.js, lib/seo/trustIdentityRoutes.js.
+  - run-governance-group.mjs — Локальный скрипт/инструмент run governance group для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - run-scenario-telemetry.mjs — Локальный скрипт/инструмент run scenario telemetry для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - run-verification-audits.mjs — Локальный скрипт/инструмент run verification audits для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - runtime-governance-baseline.mjs — Локальный скрипт/инструмент runtime governance baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - runtime-governance.js — Локальный скрипт/инструмент runtime governance для аудита или техобслуживания. Связи: используется в tools/audit-adaptive-actions.js, tools/audit-adaptive-core.js, tools/audit-auth-cascade.js.
+  - smoke-wallet-session.mjs — Локальный скрипт/инструмент smoke wallet session для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - split-i18n-dicts.mjs — Локальный скрипт/инструмент split i18n dicts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - test-codex.mjs — Локальный скрипт/инструмент test codex для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - verify-docs-workflow.mjs — Локальный скрипт/инструмент verify docs workflow для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-economic-environment.mjs — Локальный скрипт/инструмент verify economic environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-environment.mjs — Локальный скрипт/инструмент verify environment для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-global-visual-posters.mjs — Локальный скрипт/инструмент verify global visual posters для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - verify-ql7-rev51-release.mjs — Локальный скрипт/инструмент verify ql7 rev51 release для аудита или техобслуживания. Связи: импортирует lib/ql7-support/simulation/releaseEvidenceManifest.js.
+- .env.local.example — Пример переменных окружения для локального запуска. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .eslintrc.json — Конфигурация ESLint для всего проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .gitignore — Правила исключения файлов из Git. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- .npmrc — Служебный-файл . Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- AGENTS.md — Markdown-документ AGENTS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- jsconfig.json — Алиасы и baseUrl проекта для JS/JSX. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- middleware.js — JS-файл middleware. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next-env.d.ts — Служебный файл Next.js для типовой совместимости среды. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- next.config.mjs — Главная конфигурация Next.js сборки и рантайма. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- package.json — Манифест пакета, npm/pnpm-скрипты и зависимости. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-lock.yaml — Lockfile pnpm с зафиксированными версиями зависимостей. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- pnpm-workspace.yaml — Конфиг workspace для pnpm. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_DEPENDENCIES.md — Markdown-документ PROJECT DEPENDENCIES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_OWNERSHIP.md — Markdown-документ PROJECT OWNERSHIP. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+- vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">La conexión cuántica no está disponible</string>
+    <string name="offline_body">Comprueba la red y vuelve a Quantum L7 AI sin perder la sesión del shell.</string>
+    <string name="retry">Reintentar</string>
+    <string name="blocked_url">Este enlace se abre fuera del shell seguro de Quantum L7 AI.</string>
+    <string name="maintenance_title">Quantum L7 AI está en modo de servicio</string>
+    <string name="maintenance_body">El shell móvil está conectado, pero la plataforma prepara temporalmente un estado más seguro.</string>
+    <string name="force_update_title">Actualización requerida</string>
+    <string name="force_update_body">Esta compilación del Android shell es demasiado antigua para el runtime actual de Quantum L7 AI.</string>
+</resources>
