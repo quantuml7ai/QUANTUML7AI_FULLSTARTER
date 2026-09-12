@@ -64,16 +64,19 @@ describe('Exchange / BattleCoin style-safe live runtime contracts', () => {
     expect(primeBlock).not.toContain("addEventListener('touchmove'")
   })
 
-  test('neutralizes backdrop filters at source without a global universal selector', () => {
+  test('keeps source-level backdrop neutralization and replays only the proven R11 iOS Exchange guard', () => {
     const page = read('app/exchange/page.js')
     const css = read('app/globals.css')
     const marker = 'data-ql7-exchange-ios-flat-compositor-ab'
 
     expect(css).toContain('QL7 GLOBAL BACKDROP FILTER POLICY R13')
+    expect(css).toContain('R18: exact R11 route-scoped compositor guard replay')
     expect(css).not.toContain('QL7 GLOBAL BACKDROP FILTER KILL SWITCH R12 BEGIN')
     expect(css).not.toContain('html:not(#ql7-backdrop-filters-enabled)')
-    expect(css).not.toContain('body *::before')
     expect(css).not.toContain('body *::backdrop')
+    expect(css).toContain(`html[${marker}="1"] body *`)
+    expect(css).toContain(`html[${marker}="1"] body *::before`)
+    expect(css).toContain(`html[${marker}="1"] body *::after`)
 
     const productionFiles = [
       'app/forum/styles/ForumStyles.jsx',
@@ -107,19 +110,6 @@ describe('Exchange / BattleCoin style-safe live runtime contracts', () => {
     expect(effect).not.toContain('preventDefault(')
     expect(effect).not.toContain('touchmove')
     expect(effect).not.toContain('TradingView')
-  })
-  test('dissolves only the iOS Exchange route-sized page-content stacking context', () => {
-    const css = read('app/globals.css')
-    const layout = read('app/layout.js')
-    const marker = 'data-ql7-exchange-ios-flat-compositor-ab'
-
-    expect(css).toContain(`html[${marker}="1"] .page-content`)
-    expect(css).toContain('z-index: auto !important;')
-    expect(css).toContain('.scene{position:fixed;inset:0;width:100%;height:100%;overflow:hidden;z-index:0}')
-    expect(layout.indexOf('<HeroAvatar />')).toBeGreaterThan(-1)
-    expect(layout.indexOf('<div className="page-content">')).toBeGreaterThan(layout.indexOf('<HeroAvatar />'))
-    expect(css).not.toContain(`html[${marker}="1"] .page-content {\n  transform:`)
-    expect(css).not.toContain(`html[${marker}="1"] .page-content {\n  position: fixed`)
   })
   test('uses an opt-in stream for the selected symbol with the legacy REST path intact', () => {
     const battleCoin = read('app/exchange/BattleCoin.jsx')
