@@ -442,7 +442,7 @@ export default function UserRecommendationCard({
         React.createElement(
           'span',
           {
-            className: 'recommendationCardNickBadge',
+            className: 'recommendationCardNickBadge nick-animate',
             style: { fontSize: `${adaptiveNickSize}px` },
           },
           React.createElement(

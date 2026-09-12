@@ -4120,29 +4120,54 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
 
 .nick-animate{
   position: relative;
+  isolation:isolate;
+  overflow:hidden;
 
+  /* Static premium contour: no continuous background-position repaint. */
   background:
     linear-gradient(#0b1220,#0b1220) padding-box,
-    linear-gradient(135deg,#5b9dff,#9b5bff,#ff5bb2,#5b9dff) border-box;
-  background-size: 200% 200%, 300% 300%;
-  animation: nickGradient 6s linear infinite, nickGlow 2.2s ease-in-out infinite;
+    linear-gradient(135deg,#5b9dff 0%,#9b5bff 34%,#ff5bb2 68%,#5b9dff 100%) border-box;
+  background-size:100% 100%,100% 100%;
+  background-position:0 0,0 0;
+  animation:none;
 }
 
-
-@keyframes nickGlow{
-  0%,100%{ box-shadow: 0 0 .5rem rgba(91,157,255,.28), inset 0 0 .35rem rgba(155,91,255,.16) }
-  50%   { box-shadow: 0 0 1.15rem rgba(91,157,255,.55), inset 0 0 .55rem rgba(155,91,255,.28) }
+/* Short compositor-friendly sun glint; the badge geometry never changes. */
+.nick-animate::after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  top:-30%;
+  bottom:-30%;
+  left:-42%;
+  width:28%;
+  pointer-events:none;
+  background:linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,.04) 18%,
+    rgba(190,240,255,.38) 38%,
+    rgba(255,255,255,.88) 50%,
+    rgba(255,225,135,.48) 64%,
+    rgba(255,255,255,.05) 82%,
+    transparent 100%
+  );
+  opacity:0;
+  transform:translate3d(0,0,0) skewX(-18deg);
+  animation:ql7NickSunGlint 7.2s ease-in-out infinite;
 }
 
-
-@keyframes nickGradient{
-  0%   { background-position: 0% 0%, 0% 50% }
-  100%{ background-position: 200% 200%, 300% 50% }
+@keyframes ql7NickSunGlint{
+  0%,68%{ opacity:0; transform:translate3d(0,0,0) skewX(-18deg); }
+  72%{ opacity:.22; }
+  78%{ opacity:.92; }
+  86%{ opacity:.42; }
+  90%,100%{ opacity:0; transform:translate3d(610%,0,0) skewX(-18deg); }
 }
-
 
 @media (prefers-reduced-motion: reduce){
-  .nick-animate{ animation: none }
+  .nick-animate{ animation:none; }
+  .nick-animate::after{ animation:none; opacity:0; transform:none; }
 }
     /* === char counters === */
     .charRow{

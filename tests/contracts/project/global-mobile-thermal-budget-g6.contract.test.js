@@ -91,4 +91,36 @@ describe('G6 global mobile animation budget', () => {
     expect(dmStyles).toContain('.dmRowRailBottom::after{ animation-delay: .95s; }')
   })
 
+  test('keeps nickname badge geometry static and replaces continuous gradient/glow repaint with a sparse sun glint across all nickname surfaces', () => {
+    const styles = read('app/forum/styles/ForumStyles.jsx')
+    const profileStyles = read('app/forum/styles/modules/profileStyles.js')
+    const recommendation = read('app/forum/features/feed/components/UserRecommendationCard.jsx')
+    const battleChatCss = read('app/exchange/battle-chat/BattleChat.module.css')
+    const battleChatRow = read('app/exchange/battle-chat/BattleChatMessageRow.jsx')
+    const metaMarket = read('components/MetaMarket.jsx')
+    const forumHeader = read('app/forum/ForumHeaderPanel.jsx')
+    const subscriptions = read('app/forum/features/subscriptions/components/SubscriptionsPopover.jsx')
+
+    for (const source of [styles, profileStyles]) {
+      expect(source).not.toContain('nickGlow')
+      expect(source).not.toContain('nickGradient')
+      expect(source).toMatch(/\.nick-animate\{[\s\S]*?background-size:100% 100%,100% 100%;[\s\S]*?animation:none;[\s\S]*?\}/)
+      expect(source).toMatch(/\.nick-animate::after\{[\s\S]*?transform:translate3d\(0,0,0\) skewX\(-18deg\);[\s\S]*?animation:ql7NickSunGlint 7\.2s ease-in-out infinite;[\s\S]*?\}/)
+      expect(source).toMatch(/@keyframes ql7NickSunGlint\{[\s\S]*?translate3d\(610%,0,0\)[\s\S]*?\}/)
+      const shineRule = source.match(/\.nick-animate::after\{([\s\S]*?)\}/)?.[1] || ''
+      expect(shineRule).not.toMatch(/filter\s*:|box-shadow\s*:|mix-blend-mode\s*:|will-change\s*:/)
+    }
+
+    expect(recommendation).toContain("className: 'recommendationCardNickBadge nick-animate'")
+    expect(battleChatRow).toContain('styles.nickBadge')
+    expect(battleChatCss).toMatch(/\.nickBadge \{[\s\S]*?position: relative;[\s\S]*?overflow: hidden;[\s\S]*?max-width: min\(280px, 100%\);/)
+    expect(battleChatCss).toMatch(/\.nickBadge::after \{[\s\S]*?animation: battle-chat-nick-sun-glint 7\.2s ease-in-out infinite;[\s\S]*?\}/)
+    const battleShineRule = battleChatCss.match(/\.nickBadge::after \{([\s\S]*?)\}/)?.[1] || ''
+    expect(battleShineRule).not.toMatch(/filter\s*:|box-shadow\s*:|mix-blend-mode\s*:|will-change\s*:/)
+
+    expect((metaMarket.match(/className="nick-badge nick-animate"/g) || []).length).toBe(2)
+    expect(forumHeader).toContain("'nick-badge nick-animate avaNick'")
+    expect(subscriptions).toContain("cls('nick-badge nick-animate')")
+  })
+
 })

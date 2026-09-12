@@ -318,6 +318,9 @@
 }
 
 .nickBadge {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   max-width: min(280px, 100%);
   min-width: 0;
@@ -339,6 +342,45 @@
   transition: filter 0.14s ease, transform 0.14s ease, box-shadow 0.14s ease;
 }
 
+.nickBadge::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: -30%;
+  bottom: -30%;
+  left: -42%;
+  width: 28%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 18%,
+    rgba(190, 240, 255, 0.38) 38%,
+    rgba(255, 255, 255, 0.88) 50%,
+    rgba(255, 225, 135, 0.48) 64%,
+    rgba(255, 255, 255, 0.05) 82%,
+    transparent 100%
+  );
+  opacity: 0;
+  transform: translate3d(0, 0, 0) skewX(-18deg);
+  animation: battle-chat-nick-sun-glint 7.2s ease-in-out infinite;
+}
+
+@keyframes battle-chat-nick-sun-glint {
+  0%, 68% { opacity: 0; transform: translate3d(0, 0, 0) skewX(-18deg); }
+  72% { opacity: 0.22; }
+  78% { opacity: 0.92; }
+  86% { opacity: 0.42; }
+  90%, 100% { opacity: 0; transform: translate3d(610%, 0, 0) skewX(-18deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nickBadge::after {
+    animation: none;
+    opacity: 0;
+    transform: none;
+  }
+}
 .nickBadge:hover,
 .nickBadge:focus-visible {
   filter: brightness(1.12) drop-shadow(0 0 12px rgba(103, 232, 249, 0.26));
