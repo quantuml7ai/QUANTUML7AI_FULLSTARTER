@@ -235,6 +235,36 @@ describe('Exchange / BattleCoin style-safe live runtime contracts', () => {
     expect(workbench).toContain('readEntitlement={readEntitlement}')
   })
 
+  test('quarantines TradingView compositor hosts on physical iOS Exchange without unmounting widgets', () => {
+    const page = read('app/exchange/page.js')
+    const css = read('app/globals.css')
+
+    expect(page).toContain('function Panel({children, className = \'\'})')
+    expect(page).toContain('exchange-tv-panel exchange-tv-ticker-panel')
+    expect(page).toContain('exchange-tv-panel exchange-tv-chart-panel')
+    expect(page).toContain('tvWrap exchange-tv-chart-wrap')
+    expect(page).toContain("script.src='https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js'")
+    expect(page).toContain('const widget = new window.TradingView.widget({')
+    expect(page).toContain('widgetRef.current = widget')
+    expect(page).toContain('widgetRef.current.remove()')
+
+    const marker = 'html[data-ql7-exchange-ios-flat-compositor-ab="1"]'
+    expect(css).toContain(`${marker} .exchange-tv-panel`)
+    expect(css).toContain('overflow: visible !important;')
+    expect(css).toContain('box-shadow: none !important;')
+    expect(css).toContain(`${marker} .exchange-tv-chart-wrap`)
+    expect(css).toContain('height: max(360px, 58svh) !important;')
+    expect(css).not.toContain(`${marker} .exchange-tv-panel iframe`)
+
+    // Diagnostic quarantine must not disable, hide, suspend or lazy-unmount TradingView.
+    const quarantineStart = css.indexOf('R16 iOS Exchange TradingView compositor quarantine')
+    const quarantine = css.slice(quarantineStart)
+    expect(quarantine).not.toContain('display: none')
+    expect(quarantine).not.toContain('visibility: hidden')
+    expect(quarantine).not.toContain('content-visibility')
+    expect(quarantine).not.toContain('pointer-events: none')
+  })
+
   test('does not run the global support restriction React clock when no restriction is active', () => {
     const bridge = read('components/Ql7SupportRuntimeBridge.jsx')
     expect(bridge).toContain('const refreshInterval = window.setInterval(() => {')
