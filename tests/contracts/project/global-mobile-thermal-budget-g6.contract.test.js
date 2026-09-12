@@ -14,6 +14,8 @@ describe('G6 global mobile animation budget', () => {
     expect(registry).toContain("renderManaged ? 'managed-motion' : 'visual'")
     expect(registry).not.toContain('MANAGED_PREPAINT_MARGIN_PROFILES')
     expect(registry).not.toContain('motionPoolKey')
+    expect(registry).toContain('isIOSExchangeMotionContinuityRuntime')
+    expect(registry).toContain("if (isIOSExchangeMotionContinuityRuntime()) return 'running'")
   })
 
   test('publishes only HOT/PAUSED motion state and leaves static paint untouched', () => {

@@ -2,7 +2,11 @@ import React from 'react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { act, render } from '@testing-library/react'
 import useRenderManagedScope from '../../../components/visual-runtime/useRenderManagedScope'
-import { teardownVisualActivityRegistry } from '../../../lib/visual-runtime/visualActivityRegistry'
+import {
+  isIOSExchangeMotionContinuityRuntime,
+  registerVisualScope,
+  teardownVisualActivityRegistry,
+} from '../../../lib/visual-runtime/visualActivityRegistry'
 
 class FakeIntersectionObserver {
   static instances = []
@@ -83,30 +87,60 @@ describe('QL7 render-managed viewport motion ownership', () => {
     view.unmount()
   })
 
-  test('iOS Exchange obeys the same viewport pause policy instead of the old full-running bypass', async () => {
-    vi.stubGlobal('navigator', {
+  test('keeps managed motion hot across iOS Exchange scroll without restoring render-mode ownership', async () => {
+    const iphone = {
       userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_2 like Mac OS X) AppleWebKit/605.1.15 CriOS/152 Mobile/15E148 Safari/604.1',
       platform: 'iPhone',
       maxTouchPoints: 5,
-    })
+    }
+    expect(isIOSExchangeMotionContinuityRuntime(iphone, '/exchange')).toBe(true)
+    expect(isIOSExchangeMotionContinuityRuntime(iphone, '/forum')).toBe(false)
+    expect(isIOSExchangeMotionContinuityRuntime({ userAgent: 'Mozilla/5.0 (Linux; Android 16)' }, '/exchange')).toBe(false)
+
+    vi.stubGlobal('navigator', iphone)
     window.history.replaceState({}, '', '/exchange')
 
     const view = render(<ManagedCard />)
     const node = view.getByTestId('managed-card')
     const motionObserver = FakeIntersectionObserver.instances[0]
 
-    await act(async () => {
-      motionObserver.emit(node, true)
-    })
     expect(node.getAttribute('data-ql7-motion-mode')).toBe('hot')
+    expect(node.hasAttribute('data-ql7-render-mode')).toBe(false)
 
     await act(async () => {
       motionObserver.emit(node, false)
       vi.advanceTimersByTime(100)
     })
-    expect(node.getAttribute('data-ql7-motion-mode')).toBe('paused')
+    expect(node.getAttribute('data-ql7-motion-mode')).toBe('hot')
     expect(node.hasAttribute('data-ql7-render-mode')).toBe(false)
 
     view.unmount()
+  })
+
+  test('keeps generic iOS Exchange scopes running so scroll never triggers subtree animation pause scans', async () => {
+    vi.stubGlobal('navigator', {
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_6_2 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+      platform: 'iPhone',
+      maxTouchPoints: 5,
+    })
+    window.history.replaceState({}, '', '/exchange')
+
+    const node = document.createElement('section')
+    node.dataset.ql7VisualScope = 'card'
+    node.getAnimations = vi.fn(() => [])
+    document.body.appendChild(node)
+    const unregister = registerVisualScope(node, { kind: 'card', publishState: true })
+    const observer = FakeIntersectionObserver.instances[0]
+
+    expect(node.getAttribute('data-ql7-visual-state')).toBe('running')
+    await act(async () => {
+      observer.emit(node, false)
+      vi.advanceTimersByTime(100)
+    })
+    expect(node.getAttribute('data-ql7-visual-state')).toBe('running')
+    expect(node.getAnimations).not.toHaveBeenCalled()
+
+    unregister()
+    node.remove()
   })
 })
