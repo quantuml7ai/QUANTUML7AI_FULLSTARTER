@@ -1,0 +1,4 @@
+# QL7 reference training environment. Torch accelerator wheels are provisioned from the pinned infrastructure index or an offline hash-verified wheel mirror.
+torch==2.12.1
+numpy==2.5.2
+pytest==9.1.1

@@ -1,0 +1,40 @@
+{
+  "schema": "ql7.native-model-release",
+  "schemaVersion": 1,
+  "releaseId": "QL7-NATIVE-BOOTSTRAP-STRUCTURAL-001",
+  "active": true,
+  "promotionStatus": "BOOTSTRAP_STRUCTURAL",
+  "runtimeMode": "in_process_bootstrap",
+  "endpoint": "",
+  "tokenizer": {
+    "artifact": "models/ql7-native/tokenizer/tokenizer.json",
+    "sha256": "ac45d0435b8a69e4ac8684693906b64ff9ce816439c74f04138cb1d57451ebcb"
+  },
+  "normalizer": {
+    "artifact": "models/ql7-native/normalizer/bootstrap.json",
+    "sha256": "448955689a40d020a687415c4e749c09e3aea8f4296d612b19f079b3b05b58b8"
+  },
+  "understanding": {
+    "artifact": "models/ql7-native/understanding/bootstrap.json",
+    "sha256": "cc89523494c4c0e2d674aea15516e33d216fda23cae932334c563e71184fca1e"
+  },
+  "generator": {
+    "artifact": "models/ql7-native/generator/bootstrap.json",
+    "sha256": "1de1d5a78022a6453c5cfa041612330af0ddeb09cbb6e5070252b71a4d837c8d"
+  },
+  "critic": {
+    "artifact": "models/ql7-native/critic/bootstrap.json",
+    "sha256": "93d2f71ba7fcaf9641414e226c715c27b52f850f4824ea12a5693d0a7e9a6d6a"
+  },
+  "localeManifestHash": "bootstrap-structural",
+  "ontologyVersion": "baseline-666",
+  "knowledgeSnapshotHash": "bootstrap-structural",
+  "policyManifestHash": "composer-message-policy-v2",
+  "calibrationArtifactHash": "NOT_CALIBRATED",
+  "trainingLineageHash": "BOOTSTRAP_NO_FOUNDATION_TRAINING",
+  "promotionReceipt": {
+    "status": "NOT_PRODUCTION_PROMOTED",
+    "reason": "bootstrap_structural_only"
+  },
+  "rollbackReleaseId": ""
+}

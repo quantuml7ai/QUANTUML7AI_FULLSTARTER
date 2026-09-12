@@ -1,0 +1,9 @@
+architecture: multilingual_cross_encoder
+vocab_size: 81920
+hidden_size: 1024
+layers: 16
+heads: 16
+kv_heads: 4
+intermediate_size: 2816
+hard_gates: [factuality,privacy,safety,plan_entailment,allowed_action,locale]
+activation_checkpointing: true

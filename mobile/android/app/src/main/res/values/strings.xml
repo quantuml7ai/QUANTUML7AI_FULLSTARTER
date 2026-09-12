@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">Quantum connection is offline</string>
+    <string name="offline_body">Check the network and return to Quantum L7 AI without losing the shell session.</string>
+    <string name="retry">Retry</string>
+    <string name="blocked_url">This link opens outside the secure Quantum L7 AI shell.</string>
+    <string name="maintenance_title">Quantum L7 AI is in service mode</string>
+    <string name="maintenance_body">The mobile shell is connected, but the platform is temporarily preparing a safer state.</string>
+    <string name="force_update_title">Update required</string>
+    <string name="force_update_body">This Android shell build is too old for the current Quantum L7 AI runtime.</string>
+</resources>
+

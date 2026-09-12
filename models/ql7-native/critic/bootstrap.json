@@ -1,0 +1,23 @@
+{
+  "schema": "ql7.native.bootstrap-model",
+  "schemaVersion": 1,
+  "modelRole": "critic",
+  "seed": 734171,
+  "description": "Deterministic QL7-owned structural bootstrap. Not a production language model.",
+  "featureDimension": 256,
+  "hiddenDimension": 64,
+  "transformFamilies": [
+    "unicode_nfkc",
+    "casefold",
+    "leet",
+    "confusable",
+    "zero_width",
+    "translit",
+    "wrong_layout",
+    "split_join",
+    "code_switch",
+    "slang",
+    "dialect"
+  ],
+  "promotionStatus": "BOOTSTRAP_STRUCTURAL"
+}

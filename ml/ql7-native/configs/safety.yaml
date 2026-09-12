@@ -1,0 +1,10 @@
+schema: ql7.native.safety-training
+schema_version: 1
+objectives: [severity, operationality, target_role, victim_report, quotation, negation, counter_speech, ood]
+hard_negative_families: [quote_vs_endorsement, victim_vs_perpetrator, defensive_vs_offensive_cyber, fiction_vs_operational, negated_harm, historical_vs_incitement]
+locale_count: 32
+text_only_punishment_forbidden: true
+security_enforcement_requires_deterministic_receipt: true
+composer_orange_publish_threshold: 4
+composer_orange_drop_from_attempt: 5
+composer_red_drop_first_attempt: true

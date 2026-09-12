@@ -1,0 +1,13 @@
+warning: in the working copy of 'app/forum/features/media/hooks/useForumMediaCoordinator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/contracts/project/ql7-forum-native-video-light-prewarm-r24.contract.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/contracts/project/ql7-native-video-poster-v1.contract.test.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tests/integration/forum/media/coordinator-runtime-contract.test.js', LF will be replaced by CRLF the next time Git touches it
+ app/forum/features/media/components/VideoMedia.jsx | 129 [32m++++++[m[31m-[m
+ .../media/hooks/useForumMediaCoordinator.js        | 379 [32m+++++++++++++++++++++[m
+ app/forum/shared/hooks/useForumWindowing.js        |  17 [32m+[m
+ .../forum-windowing-consumers.contract.test.js     |   3 [32m+[m
+ ...native-video-light-prewarm-r24.contract.test.js |  36 [32m+[m[31m-[m
+ .../ql7-native-video-poster-v1.contract.test.js    |  11 [32m+[m[31m-[m
+ .../media/coordinator-runtime-contract.test.js     |  22 [32m+[m[31m-[m
+ tools/audit-post-video-lifecycle.js                |  23 [32m+[m[31m-[m
+ 8 files changed, 604 insertions(+), 16 deletions(-)

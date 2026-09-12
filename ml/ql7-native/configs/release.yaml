@@ -1,0 +1,9 @@
+schema: ql7.native.release-policy
+schema_version: 1
+required_roles: [tokenizer, normalizer, understanding, generator, critic]
+required_receipts: [training_lineage, calibration, acceptance, no_egress, hash_chain, rollback]
+bootstrap_status: BOOTSTRAP_STRUCTURAL
+production_status: PRODUCTION_PROMOTED
+signed_promotion_required: true
+rollback_release_required: true
+external_model_download_forbidden: true
