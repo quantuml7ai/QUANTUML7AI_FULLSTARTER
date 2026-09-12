@@ -66,25 +66,19 @@ function IconVolume({ muted }) {
   )
 }
 
-function IconGood() {
-  return (
-    <svg className="ql7Glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3.7 14.4 9l5.8.6-4.35 3.9 1.2 5.7L12 16.25 6.95 19.2l1.2-5.7L3.8 9.6 9.6 9 12 3.7Z" fill="currentColor" />
-    </svg>
-  )
-}
-
-function IconBad() {
-  return (
-    <svg className="ql7Glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M12 3.8 20.2 12 12 20.2 3.8 12 12 3.8Z" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M8.6 8.6 15.4 15.4M15.4 8.6 8.6 15.4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
-    </svg>
-  )
-}
-
 function pick(list) {
   return list[Math.floor(Math.random() * list.length)]
+}
+
+function pickDifferent(list, current) {
+  if (!Array.isArray(list) || list.length === 0) return current || ''
+  if (list.length === 1) return list[0]
+  let next = pick(list)
+  if (next === current) {
+    const index = list.indexOf(current)
+    next = list[(index >= 0 ? index + 1 : 0) % list.length]
+  }
+  return next
 }
 
 function isIosSafariBrowserRuntime() {
@@ -126,6 +120,8 @@ export default function ExternalVideoPlayer({
   const [mutedState, setMutedState] = React.useState(true)
   const [centerGlyph, setCenterGlyph] = React.useState('play')
   const [fxBursts, setFxBursts] = React.useState([])
+  const [goodEmoji, setGoodEmoji] = React.useState(() => pick(GOOD_EMOJIS))
+  const [badEmoji, setBadEmoji] = React.useState(() => pick(BAD_EMOJIS))
   
   const normalizedKind = String(kind || '').toLowerCase()
   const isExternalProvider = normalizedKind === 'youtube' || normalizedKind === 'tiktok'
@@ -347,6 +343,7 @@ export default function ExternalVideoPlayer({
     try { event?.preventDefault?.(); event?.stopPropagation?.() } catch {}
     armManualIntent()
     revealHud(2300)
+    setGoodEmoji((current) => pickDifferent(GOOD_EMOJIS, current))
     spawnEmojiBurst('good')
   }, [armManualIntent, revealHud, spawnEmojiBurst])
 
@@ -354,6 +351,7 @@ export default function ExternalVideoPlayer({
     try { event?.preventDefault?.(); event?.stopPropagation?.() } catch {}
     armManualIntent()
     revealHud(2300)
+    setBadEmoji((current) => pickDifferent(BAD_EMOJIS, current))
     spawnEmojiBurst('bad')
   }, [armManualIntent, revealHud, spawnEmojiBurst])
 
@@ -545,10 +543,10 @@ onLoad={() => {
 
         <div className={`ql7VideoRail ${hudVisible ? 'isVisible' : ''}`}>
           <button type="button" className="ql7VideoRailBtn ql7VideoRailBtn--good" onPointerDown={stopControlPointer} onClick={onGoodEmoji} aria-label="Good reaction">
-            <IconGood />
+            <span className="ql7VideoRailEmoji" aria-hidden="true">{goodEmoji}</span>
           </button>
           <button type="button" className="ql7VideoRailBtn ql7VideoRailBtn--bad" onPointerDown={stopControlPointer} onClick={onBadEmoji} aria-label="Bad reaction">
-            <IconBad />
+            <span className="ql7VideoRailEmoji" aria-hidden="true">{badEmoji}</span>
           </button>
           <button
             type="button"

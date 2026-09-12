@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest'
 const root = process.cwd()
 
 function read(rel) {
-  return fs.readFileSync(path.join(root, rel), 'utf8')
+  return fs.readFileSync(path.join(root, rel), 'utf8').replace(/\r\n?/g, '\n')
 }
 
 describe('forum media contracts', () => {

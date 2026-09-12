@@ -7,6 +7,21 @@ import { schedulePosterReleaseAfterPresentedFrame } from '../../../../../lib/for
 const GOOD_EMOJIS = ['🔥', '✨', '🚀', '💎', '⚡', '👏', '🤩', '💯', '🫶', '🎉']
 const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '🙃', '😬', '🧊']
 
+function pickEmoji(list) {
+  return list[Math.floor(Math.random() * list.length)]
+}
+
+function pickDifferentEmoji(list, current) {
+  if (!Array.isArray(list) || list.length === 0) return current || ''
+  if (list.length === 1) return list[0]
+  let next = pickEmoji(list)
+  if (next === current) {
+    const index = list.indexOf(current)
+    next = list[(index >= 0 ? index + 1 : 0) % list.length]
+  }
+  return next
+}
+
 function isIosSafariBrowserRuntime() {
   try {
     if (typeof window === 'undefined' || typeof navigator === 'undefined') return false
@@ -736,96 +751,6 @@ export const NativeSafeVideoPlayer = React.forwardRef(function NativeSafeVideoPl
   )
 })
 
-function Ql7IconGood(props) {
-  return (
-    <svg className="ql7Glyph ql7Glyph--good" viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <style>{`
-        .ql7Glyph--good .ring{
-          stroke: currentColor;
-          stroke-width: 1.3;
-          animation: ql7GoodRing 2.1s ease-in-out infinite;
-          transform-box: fill-box;
-          transform-origin: center;
-        }
-        .ql7Glyph--good .core{
-          stroke: currentColor;
-          stroke-width: 1.8;
-          stroke-linecap: round;
-          stroke-linejoin: round;
-          animation: ql7GoodPulse 1.5s ease-in-out infinite;
-        }
-        .ql7Glyph--good .beam{
-          stroke: rgba(130,220,255,.95);
-          stroke-width: 1.8;
-          stroke-linecap: round;
-          animation: ql7GoodBeam 1.9s linear infinite;
-        }
-        @keyframes ql7GoodRing{
-          0%,100%{ opacity:.44; transform: scale(.9); }
-          50%{ opacity:.98; transform: scale(1.04); }
-        }
-        @keyframes ql7GoodPulse{
-          0%,100%{ opacity:.78; transform: scale(.95); }
-          50%{ opacity:1; transform: scale(1.08); }
-        }
-        @keyframes ql7GoodBeam{
-          0%{ opacity:0; transform: translateX(-7px); }
-          28%{ opacity:.95; }
-          100%{ opacity:0; transform: translateX(7px); }
-        }
-      `}</style>
-      <circle className="ring" cx="12" cy="12" r="7.6" />
-      <path className="core" d="M9.1 13.2L12 10.2L14.9 13.2M12 16.1V10.3" />
-      <path className="beam" d="M6.3 7.35H9.2" />
-    </svg>
-  )
-}
-
-function Ql7IconBad(props) {
-  return (
-    <svg className="ql7Glyph ql7Glyph--bad" viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
-      <style>{`
-        .ql7Glyph--bad .hex{
-          stroke: currentColor;
-          stroke-width: 1.3;
-          animation: ql7BadHex 2.05s ease-in-out infinite;
-          transform-box: fill-box;
-          transform-origin: center;
-        }
-        .ql7Glyph--bad .cross{
-          stroke: currentColor;
-          stroke-width: 1.9;
-          stroke-linecap: round;
-          animation: ql7BadCross 1.35s ease-in-out infinite;
-          transform-box: fill-box;
-          transform-origin: center;
-        }
-        .ql7Glyph--bad .spark{
-          fill: rgba(255,136,220,.92);
-          animation: ql7BadSpark 2.05s ease-in-out infinite;
-          transform-origin: center;
-          transform-box: fill-box;
-        }
-        @keyframes ql7BadHex{
-          0%,100%{ opacity:.46; transform: scale(.9); }
-          50%{ opacity:.97; transform: scale(1.03); }
-        }
-        @keyframes ql7BadCross{
-          0%,100%{ opacity:.72; transform: scale(.9) rotate(-6deg); }
-          50%{ opacity:1; transform: scale(1.08) rotate(0deg); }
-        }
-        @keyframes ql7BadSpark{
-          0%,100%{ opacity:.16; transform: scale(.72); }
-          48%{ opacity:.98; transform: scale(1.14); }
-        }
-      `}</style>
-      <path className="hex" d="M8 5.9H16L20 12L16 18.1H8L4 12L8 5.9Z" />
-      <path className="cross" d="M9.2 9.2L14.8 14.8M14.8 9.2L9.2 14.8" />
-      <circle className="spark" cx="17.8" cy="6.7" r="0.78" />
-    </svg>
-  )
-}
-
 export default function VideoMedia({
   src,
   poster: nativeVideoPoster,
@@ -874,6 +799,8 @@ export default function VideoMedia({
   const [isIosSafariBrowser, setIsIosSafariBrowser] = React.useState(false)
   const [centerGlyph, setCenterGlyph] = React.useState('')
   const [fxBursts, setFxBursts] = React.useState([])
+  const [goodEmoji, setGoodEmoji] = React.useState(() => pickEmoji(GOOD_EMOJIS))
+  const [badEmoji, setBadEmoji] = React.useState(() => pickEmoji(BAD_EMOJIS))
   const mutedEvent = String(mutedEventName || 'forum:media-mute')
   const shouldMirrorVideo = !!(frontCameraMirror || mirrorVideo)
 
@@ -2004,6 +1931,7 @@ const onVideoLoaded = React.useCallback(() => {
     try { e?.stopPropagation?.() } catch {}
     armUserIntentLease(2400)
     revealHud(2300)
+    setGoodEmoji((current) => pickDifferentEmoji(GOOD_EMOJIS, current))
     spawnEmojiBurst('good')
   }, [armUserIntentLease, revealHud, spawnEmojiBurst])
 
@@ -2011,6 +1939,7 @@ const onVideoLoaded = React.useCallback(() => {
     try { e?.stopPropagation?.() } catch {}
     armUserIntentLease(2400)
     revealHud(2300)
+    setBadEmoji((current) => pickDifferentEmoji(BAD_EMOJIS, current))
     spawnEmojiBurst('bad')
   }, [armUserIntentLease, revealHud, spawnEmojiBurst])
 
@@ -2166,10 +2095,10 @@ const videoNode = (
 
         <div className={`ql7VideoRail ${hudVisible ? 'isVisible' : ''}`}>
           <button type="button" className="ql7VideoRailBtn ql7VideoRailBtn--good" onClick={onGoodEmoji} aria-label="Good reaction">
-            <Ql7IconGood />
+            <span className="ql7VideoRailEmoji" aria-hidden="true">{goodEmoji}</span>
           </button>
           <button type="button" className="ql7VideoRailBtn ql7VideoRailBtn--bad" onClick={onBadEmoji} aria-label="Bad reaction">
-            <Ql7IconBad />
+            <span className="ql7VideoRailEmoji" aria-hidden="true">{badEmoji}</span>
           </button>
           <button
             type="button"

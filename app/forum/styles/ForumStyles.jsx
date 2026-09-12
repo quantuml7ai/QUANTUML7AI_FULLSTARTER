@@ -556,20 +556,35 @@ export const FORUM_STYLES = `
     }
     .ql7VideoRailBtn--good{
       color:#7be8ff;
-      transform:rotate(45deg);
-    }
-    .ql7VideoRailBtn--good::before{
-      border-radius:13px;
-    }
-    .ql7VideoRailBtn--good > svg{
-      transform:rotate(-45deg);
     }
     .ql7VideoRailBtn--bad{
       color:#f295ff;
     }
+    .ql7VideoRailBtn--good::before,
     .ql7VideoRailBtn--bad::before{
-      clip-path:polygon(25% 2%, 75% 2%, 98% 50%, 75% 98%, 25% 98%, 2% 50%);
-      border-radius:2px;
+      content:none;
+      display:none;
+      animation:none;
+    }
+    .ql7VideoRailEmoji{
+      position:relative;
+      z-index:2;
+      display:grid;
+      place-items:center;
+      width:30.4px;
+      height:30.4px;
+      font-size:30.4px;
+      line-height:1;
+      transform:translateX(-3px);
+      font-family:Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif;
+      user-select:none;
+      pointer-events:none;
+    }
+    .ql7ExternalVideoSurface .ql7VideoRailEmoji{
+      transform:translateX(-8px);
+    }
+    .ql7VideoSurface.mediaBoxItem .ql7VideoRailEmoji{
+      transform:translateX(-7px);
     }
     .ql7VideoRailBtn--sound{
       width:70px;
@@ -587,10 +602,10 @@ export const FORUM_STYLES = `
       filter:drop-shadow(0 0 10px rgba(255,223,152,.65));
     }
     .ql7VideoRailBtn--good:hover{
-      transform:rotate(45deg) translateY(-1px) scale(1.03);
+      transform:translateY(-1px) scale(1.03);
     }
     .ql7VideoRailBtn--good:active{
-      transform:rotate(45deg) scale(.95);
+      transform:scale(.95);
     }
 
     .ql7VideoFxLayer{
@@ -2881,7 +2896,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
       font:inherit;
       appearance:none;
       -webkit-appearance:none;
-      overflow:hidden;
+      overflow:visible;
       transition:transform .14s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
     }
     .subsFamilyRow:hover{
@@ -2906,6 +2921,7 @@ html[data-video-feed="1"] .forum_root .body{ padding-top:0; }
       opacity:.72;
     }
     .subsFamilyAvatar{
+      z-index:3;
       width:48px;
       height:48px;
       border-radius:14px;

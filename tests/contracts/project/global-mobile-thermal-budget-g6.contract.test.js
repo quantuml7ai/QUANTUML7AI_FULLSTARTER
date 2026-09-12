@@ -123,4 +123,39 @@ describe('G6 global mobile animation budget', () => {
     expect(subscriptions).toContain("cls('nick-badge nick-animate')")
   })
 
+
+  test('keeps custom video reaction bursts while replacing continuously animated good/bad glyphs with click-rotated emoji', () => {
+    const external = read('app/forum/features/media/components/ExternalVideoPlayer.jsx')
+    const nativeVideo = read('app/forum/features/media/components/VideoMedia.jsx')
+    const styles = read('app/forum/styles/ForumStyles.jsx')
+
+    for (const source of [external, nativeVideo]) {
+      expect(source).toContain("const GOOD_EMOJIS = ['🔥', '✨', '🚀', '💎', '⚡', '👏', '🤩', '💯', '🫶', '🎉']")
+      expect(source).toContain("const BAD_EMOJIS = ['😶', '🤨', '🙈', '😴', '💤', '🫠', '😵', '🙃', '😬', '🧊']")
+      expect(source).toContain('className="ql7VideoRailEmoji"')
+      expect(source).toContain("spawnEmojiBurst('good')")
+      expect(source).toContain("spawnEmojiBurst('bad')")
+      expect(source).not.toContain('<IconGood />')
+      expect(source).not.toContain('<IconBad />')
+      expect(source).not.toContain('<Ql7IconGood />')
+      expect(source).not.toContain('<Ql7IconBad />')
+    }
+
+    expect(external).toContain('setGoodEmoji((current) => pickDifferent(GOOD_EMOJIS, current))')
+    expect(external).toContain('setBadEmoji((current) => pickDifferent(BAD_EMOJIS, current))')
+    expect(nativeVideo).toContain('setGoodEmoji((current) => pickDifferentEmoji(GOOD_EMOJIS, current))')
+    expect(nativeVideo).toContain('setBadEmoji((current) => pickDifferentEmoji(BAD_EMOJIS, current))')
+    expect(nativeVideo).not.toContain('ql7GoodRing')
+    expect(nativeVideo).not.toContain('ql7BadHex')
+
+    expect(styles).toMatch(/\.ql7VideoRailBtn--good::before,\s*\.ql7VideoRailBtn--bad::before\{[\s\S]*?content:none;[\s\S]*?display:none;[\s\S]*?animation:none;[\s\S]*?\}/)
+    expect(styles).toMatch(/\.ql7VideoRailEmoji\{[\s\S]*?width:30\.4px;[\s\S]*?height:30\.4px;[\s\S]*?font-size:30\.4px;[\s\S]*?transform:translateX\(-3px\);[\s\S]*?\}/)
+    expect(styles).toMatch(/\.ql7ExternalVideoSurface \.ql7VideoRailEmoji\{[\s\S]*?transform:translateX\(-8px\);[\s\S]*?\}/)
+    expect(styles).toMatch(/\.ql7VideoSurface\.mediaBoxItem \.ql7VideoRailEmoji\{[\s\S]*?transform:translateX\(-13px\);[\s\S]*?\}/)
+    expect(styles).not.toMatch(/\.ql7VideoRailBtn--good\{[^}]*rotate\(/)
+    expect(styles).not.toMatch(/\.ql7VideoRailBtn--good \.ql7VideoRailEmoji\{[^}]*rotate\(/)
+    expect(styles).toMatch(/\.ql7VideoRailBtn::before\{[\s\S]*?animation:ql7CenterGlint 2\.4s ease-in-out infinite;[\s\S]*?\}/)
+    expect(styles).toMatch(/\.ql7VideoRailBtn--sound > svg\{[\s\S]*?width:40px;[\s\S]*?height:40px;/)
+  })
+
 })

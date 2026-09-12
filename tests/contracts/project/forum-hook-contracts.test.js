@@ -360,6 +360,15 @@ describe('Forum hook contracts', () => {
     expect(recommendationCard).toContain("React.createElement(AvatarBadgeOverlay, { vipActive: isVip, showInfo: true })")
   })
 
+  it('keeps Quantum Family avatar overlays above the row clipping boundary', () => {
+    const familySource = readRepoFile('app/forum/features/subscriptions/components/SubscriptionsPopover.jsx')
+    const forumStyles = readRepoFile('app/forum/styles/ForumStyles.jsx')
+    expect(familySource).toContain('className="subsFamilyAvatar avaMini ql7AvatarBadgeHost"')
+    expect(familySource).toContain('<AvatarBadgeOverlay vipActive={isVip} showInfo />')
+    expect(forumStyles).toMatch(/\.subsFamilyRow\s*\{[\s\S]*?overflow:visible;/u)
+    expect(forumStyles).toMatch(/\.subsFamilyAvatar\s*\{[\s\S]*?z-index:3;/u)
+  })
+
   it('keeps the forum invite button behind the shared auth continuation gate', () => {
  
     const actionRowSource = readRepoFile('app/forum/features/ui/components/ForumActionRow.jsx')
