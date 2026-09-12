@@ -151,7 +151,7 @@ describe('G6 global mobile animation budget', () => {
     expect(styles).toMatch(/\.ql7VideoRailBtn--good::before,\s*\.ql7VideoRailBtn--bad::before\{[\s\S]*?content:none;[\s\S]*?display:none;[\s\S]*?animation:none;[\s\S]*?\}/)
     expect(styles).toMatch(/\.ql7VideoRailEmoji\{[\s\S]*?width:30\.4px;[\s\S]*?height:30\.4px;[\s\S]*?font-size:30\.4px;[\s\S]*?transform:translateX\(-3px\);[\s\S]*?\}/)
     expect(styles).toMatch(/\.ql7ExternalVideoSurface \.ql7VideoRailEmoji\{[\s\S]*?transform:translateX\(-8px\);[\s\S]*?\}/)
-    expect(styles).toMatch(/\.ql7VideoSurface\.mediaBoxItem \.ql7VideoRailEmoji\{[\s\S]*?transform:translateX\(-13px\);[\s\S]*?\}/)
+    expect(styles).toMatch(/\.ql7VideoSurface\.mediaBoxItem \.ql7VideoRailEmoji\{[\s\S]*?transform:translateX\(-6px\);[\s\S]*?\}/)
     expect(styles).not.toMatch(/\.ql7VideoRailBtn--good\{[^}]*rotate\(/)
     expect(styles).not.toMatch(/\.ql7VideoRailBtn--good \.ql7VideoRailEmoji\{[^}]*rotate\(/)
     expect(styles).toMatch(/\.ql7VideoRailBtn::before\{[\s\S]*?animation:ql7CenterGlint 2\.4s ease-in-out infinite;[\s\S]*?\}/)

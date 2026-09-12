@@ -584,7 +584,7 @@ export const FORUM_STYLES = `
       transform:translateX(-8px);
     }
     .ql7VideoSurface.mediaBoxItem .ql7VideoRailEmoji{
-      transform:translateX(-7px);
+      transform:translateX(-6px);
     }
     .ql7VideoRailBtn--sound{
       width:70px;

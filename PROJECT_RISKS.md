@@ -4,8 +4,8 @@
 > Если меняются критические точки входа, серверные контракты, import-граф или ownership модулей, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-risks.js`.
 
-Сгенерировано автоматически: 2026-09-10T05:22:28.265Z
-Исходных файлов в анализе: 1958
+Сгенерировано автоматически: 2026-09-12T22:48:29.592Z
+Исходных файлов в анализе: 1973
 Route-aware файлов: 162
 
 ## Что Считается Риском
@@ -206,7 +206,7 @@ Route-aware файлов: 162
 - `lib/mongo/qcoin-primary.cjs` — используют 15 локальных модулей
 - `lib/ql7-support/cardSchema.js` — используют 15 локальных модулей
 - `lib/ql7-support/semantics/analyzeTurn.js` — используют 15 локальных модулей
-- `tests/support/projectSurface.js` — используют 14 локальных модулей
+- `tests/support/projectSurface.js` — используют 15 локальных модулей
 
 ## Файлы С Самым Высоким Fan-Out
 
@@ -221,25 +221,25 @@ Route-aware файлов: 162
 - `tests/unit/ql7-support/final-runtime.test.js` — импортирует 28 локальных модулей
 - `app/layout.js` — импортирует 23 локальных модулей
 - `app/api/dm/send/route.js` — импортирует 20 локальных модулей
+- `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 20 локальных модулей
 - `app/forum/features/dm/hooks/useForumDmRuntime.js` — импортирует 20 локальных модулей
 - `lib/ql7-support/simulation/factualSimulation.js` — импортирует 20 локальных модулей
-- `app/forum/features/dm/components/DmThreadMessageRow.jsx` — импортирует 19 локальных модулей
 - `tests/unit/ql7-support/premium-cognitive.test.js` — импортирует 19 локальных модулей
 - `lib/ql7-support/config/staticDataReadiness.js` — импортирует 18 локальных модулей
 - `lib/ql7-support/response/morphosyntacticRealizer.js` — импортирует 18 локальных модулей
 - `lib/ql7-support/runtime/nativeIntelligencePlane.js` — импортирует 18 локальных модулей
 - `tools/ql7-trust-identity-check-final-baseline-v3.mjs` — импортирует 18 локальных модулей
 - `tests/unit/ql7-support/max-combat.test.js` — импортирует 16 локальных модулей
+- `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 15 локальных модулей
 - `lib/ql7-support/simulation/capabilityProductionProbe.js` — импортирует 15 локальных модулей
-- `app/forum/features/feed/components/ForumPostCard.jsx` — импортирует 14 локальных модулей
+- `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 14 локальных модулей
+- `app/forum/features/feed/components/TopicItem.jsx` — импортирует 14 локальных модулей
 - `lib/ql7-support/ontology/ontologyManifest.js` — импортирует 14 локальных модулей
-- `app/api/dm/support-feedback/route.js` — импортирует 13 локальных модулей
-- `app/forum/features/dm/components/DmDialogRow.jsx` — импортирует 13 локальных модулей
 
 ## Зоны С Повышенной Плотностью Связей
 
 - `app/layout.js` — файлов: 1; исходящих связей: 23; плотность: 23
-- `forum/root` — файлов: 14; исходящих связей: 99; плотность: 7.07
+- `forum/root` — файлов: 14; исходящих связей: 100; плотность: 7.14
 - `lib/adsCore.js` — файлов: 1; исходящих связей: 7; плотность: 7
 - `lib/qcoinEntitlementPurchase.js` — файлов: 1; исходящих связей: 7; плотность: 7
 - `api/dm` — файлов: 16; исходящих связей: 108; плотность: 6.75
@@ -255,7 +255,7 @@ Route-aware файлов: 162
 - `lib/subscriptions.js` — файлов: 1; исходящих связей: 4; плотность: 4
 - `lib/webPush.js` — файлов: 1; исходящих связей: 4; плотность: 4
 - `api/metamarket` — файлов: 16; исходящих связей: 57; плотность: 3.56
-- `app/exchange` — файлов: 12; исходящих связей: 36; плотность: 3
+- `app/exchange` — файлов: 12; исходящих связей: 38; плотность: 3.17
 - `lib/seo` — файлов: 8; исходящих связей: 24; плотность: 3
 - `api/battlecoin` — файлов: 5; исходящих связей: 15; плотность: 3
 - `app/game` — файлов: 2; исходящих связей: 6; плотность: 3
@@ -411,6 +411,7 @@ Route-aware файлов: 162
 - `lib/forumClientVideoWorkerBridge.js`
 - `lib/forumClientVideoWorkerProtocol.js`
 - `lib/forumShareManager.js`
+- `lib/forumVideoPosterPresentation.js`
 - `lib/forumVideoTrim.js`
 - `lib/geo/countries.js`
 - `lib/geo/regions.js`

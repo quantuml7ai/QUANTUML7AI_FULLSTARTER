@@ -6,8 +6,8 @@
 > Если меняются связи файла с другими файлами настолько, что комментарий устаревает, комментарий тоже обязан быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-tree.js`.
 
-Сгенерировано автоматически: 2026-09-10T05:22:29.575Z
-Файлов в реестре: 3428
+Сгенерировано автоматически: 2026-09-12T22:48:30.908Z
+Файлов в реестре: 3442
 
 ## Исключенные каталоги
 - `.git/` — служебные внутренние данные Git, не часть прикладного дерева проекта.
@@ -27,11 +27,11 @@
 - `.npmrc` — 1 файлов
 - `AGENTS.md` — 1 файлов
 - `app` — 488 файлов
-- `components` — 64 файлов
+- `components` — 66 файлов
 - `config` — 1 файлов
 - `docs` — 24 файлов
 - `jsconfig.json` — 1 файлов
-- `lib` — 991 файлов
+- `lib` — 993 файлов
 - `lint `` — 1 файлов
 - `middleware.js` — 1 файлов
 - `ml` — 88 файлов
@@ -48,12 +48,11 @@
 - `PROJECT_ROUTES.md` — 1 файлов
 - `PROJECT_TREE.md` — 1 файлов
 - `public` — 1286 файлов
-- `QL7_FORUM_MEMORY_RENDER_TEST_DATA_AUDIT_RU.md` — 1 файлов
 - `README.md` — 1 файлов
 - `services` — 10 файлов
 - `src` — 32 файлов
-- `tests` — 249 файлов
-- `tools` — 98 файлов
+- `tests` — 254 файлов
+- `tools` — 104 файлов
 - `tsconfig.json` — 1 файлов
 - `vitest.config.mjs` — 1 файлов
 
@@ -474,7 +473,7 @@
           - PostActionBar.jsx — UI-компонент Post Action Bar домена ленты/тем/постов. Связи: импортирует forum/shared/components/HydrateText.jsx, forum/shared/utils/counts.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostBodyContent.jsx — UI-компонент Post Body Content домена ленты/тем/постов. Связи: импортирует components/visual-runtime/TypewriterText.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostCardBridge.jsx — UI-компонент Post Card Bridge домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/ForumPostCard.jsx, forum/features/feed/utils/cardMemo.js, forum/features/media/utils/mediaLifecycleRuntime.js; используется в forum/ForumRoot.jsx.
-          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
+          - PostFxLayer.jsx — UI-компонент Post Fx Layer домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx, tests/component/forum/runtime-stability-sentinel.component.test.jsx.
           - PostHeaderMeta.jsx — UI-компонент Post Header Meta домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostMediaStack.jsx — UI-компонент Post Media Stack домена ленты/тем/постов. Связи: импортирует forum/features/media/components/ExternalVideoPlayer.jsx, forum/features/media/utils/externalVideoBridge.js, components/visual-runtime/ViewportAnimatedImage.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
           - PostOwnerMenu.jsx — UI-компонент Post Owner Menu домена ленты/тем/постов. Связи: импортирует forum/features/feed/hooks/usePostOwnerActions.js, forum/features/ui/components/ConfirmDeleteOverlay.jsx; используется в forum/features/feed/components/ForumPostCard.jsx.
@@ -489,7 +488,7 @@
           - TopicsSection.jsx — UI-компонент Topics Section домена ленты/тем/постов. Связи: импортирует forum/ForumHeaderPanel.jsx, forum/features/feed/components/TopicsOrPanelsSwitch.jsx, forum/features/ui/components/MainForumActionCluster.jsx; используется в forum/ForumLayout.jsx.
           - UserPostsPane.jsx — UI-компонент User Posts Pane домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js, forum/shared/hooks/useForumWindowing.js, forum/shared/utils/forumWindowingPresets.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - UserRecommendationCard.jsx — UI-компонент User Recommendation Card домена ленты/тем/постов. Связи: импортирует forum/features/profile/components/AvatarEmoji.jsx, forum/features/profile/components/VipFlipBadge.jsx, forum/shared/components/HydrateText.jsx; используется в forum/features/feed/components/UserRecommendationsRail.jsx, tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx.
-          - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
+          - UserRecommendationsRail.jsx — UI-компонент User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, forum/shared/utils/classnames.js, components/visual-runtime/useRenderManagedScope.js; используется в forum/features/media/components/VideoFeedPane.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
         - constants/ — Каталог слоя константы внутри feature feed.
           - deeplink.js — Константа deeplink домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumDeepLinkFlow.js.
         - docs/ — Каталог слоя документация внутри feature feed.
@@ -510,14 +509,14 @@
           - useForumViewTracking.js — Хук use Forum View Tracking домена ленты/тем/постов. Связи: используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js.
           - useNavStateSnapshot.js — Хук use Nav State Snapshot домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumNavigationRuntime.js.
           - usePostFx.js — Хук use Post Fx домена ленты/тем/постов. Связи: используется в forum/features/feed/components/ForumPostCard.jsx.
-          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - usePostMediaTextModel.js — Хук use Post Media Text Model домена ленты/тем/постов. Связи: импортирует forum/features/dm/utils/mediaParsing.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - usePostOwnerActions.js — Хук use Post Owner Actions домена ленты/тем/постов. Связи: используется в forum/features/feed/components/PostOwnerMenu.jsx.
           - usePostParentReplyNav.js — Хук use Post Parent Reply Nav домена ленты/тем/постов. Связи: импортирует forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/components/ForumPostCard.jsx.
           - usePostTranslation.js — Хук use Post Translation домена ленты/тем/постов. Связи: импортирует forum/shared/api/translate.js; используется в forum/features/feed/components/ForumPostCard.jsx.
-          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/transientProjectionRetention.js; используется в forum/features/dm/hooks/useForumDmRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - usePublishedPostsModel.js — Хук use Published Posts Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/transientProjectionRetention.js; используется в forum/features/dm/hooks/useForumDmRuntime.js.
           - useThreadOpenNavigation.js — Хук use Thread Open Navigation домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/transientProjectionRetention.js, forum/shared/utils/forumWindowingRegistry.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
-          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
-          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useThreadPostsModel.js — Хук use Thread Posts Model домена ленты/тем/постов. Связи: используется в forum/features/feed/hooks/useForumFeedRuntime.js, tests/integration/forum/features/feed/hooks/useThreadPostsModel.branch.test.jsx.
+          - useTopicDiscoveryModel.js — Хук use Topic Discovery Model домена ленты/тем/постов. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/feed/hooks/useForumFeedRuntime.js.
           - useUserPostsBranchModel.js — Хук use User Posts Branch Model домена ленты/тем/постов. Связи: импортирует forum/features/feed/utils/transientProjectionRetention.js; используется в forum/ForumRoot.jsx.
           - useUserRecommendationsRail.js — Хук use User Recommendations Rail домена ленты/тем/постов. Связи: импортирует forum/features/profile/utils/profileCache.js; используется в forum/ForumRoot.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
         - services/ — Каталог слоя сервисы внутри feature feed.
@@ -547,18 +546,18 @@
           - QCastPlayer.jsx — UI-компонент QCast Player домена медиа. Связи: импортирует forum/features/media/components/qcast/QCastIcons.jsx, forum/features/media/utils/formatMediaTime.js, forum/features/media/utils/qcastBars.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
           - VideoFeedPane.jsx — UI-компонент Video Feed Pane домена медиа. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, forum/features/profile/utils/profileCache.js; используется в forum/features/feed/components/TopicsOrPanelsSwitch.jsx.
           - VideoLimitOverlay.jsx — UI-компонент Video Limit Overlay домена медиа. Связи: импортирует forum/shared/constants/media.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
-          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
+          - VideoMedia.jsx — UI-компонент Video Media домена медиа. Связи: импортирует components/AndroidChromiumVideoCanvas.jsx, lib/forumVideoPosterPresentation.js; используется в forum/features/media/utils/mediaLifecycleRuntime.js.
           - VideoOverlay.jsx — UI-компонент Video Overlay домена медиа. Связи: импортирует forum/features/media/components/LivePreview.jsx, forum/features/media/utils/mediaLifecycleRuntime.js, forum/shared/hooks/useHtmlFlag.js; используется в forum/ForumRoot.jsx, forum/features/ui/components/ForumOverlayStack.jsx.
           - VideoTrimPopover.jsx — UI-компонент Video Trim Popover домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js, forum/shared/constants/media.js, lib/forumVideoTrim.js; используется в forum/features/ui/components/ForumOverlayStack.jsx.
         - hooks/ — Каталог слоя хуки внутри feature media.
-          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: импортирует forum/features/media/services/moderatePreparedVideoForUpload.js, forum/shared/constants/media.js, lib/forumClientVideoOptimizer.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
+          - useForumComposerAttachments.js — Хук use Forum Composer Attachments домена медиа. Связи: импортирует forum/features/media/services/moderatePreparedVideoForUpload.js, forum/shared/constants/media.js, lib/forumClientVideoOptimizer.js; используется в forum/features/ui/hooks/useForumComposerSubmitRuntime.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
           - useForumMediaCoordinator.js — Хук use Forum Media Coordinator домена медиа. Связи: импортирует forum/features/media/utils/externalVideoBridge.js, forum/features/media/utils/mediaLifecycleRuntime.js, forum/features/media/utils/mediaStatePolicy.js; используется в forum/ForumRoot.jsx.
-          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/transientProjectionRetention.js, forum/features/media/hooks/useVideoFeedActions.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useForumVideoFeedRuntime.js — Хук use Forum Video Feed Runtime домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/feed/utils/transientProjectionRetention.js, forum/features/media/hooks/useVideoFeedActions.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
           - useMediaPipelineController.js — Хук use Media Pipeline Controller домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js, tests/integration/forum/media/clientVideoOptimizerPaperclip.test.jsx.
           - useVideoCaptureController.js — Хук use Video Capture Controller домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - useVideoFeedActions.js — Хук use Video Feed Actions домена медиа. Связи: импортирует forum/features/media/utils/videoFeedActions.js, forum/services/forumApi.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
           - useVideoFeedLifecycle.js — Хук use Video Feed Lifecycle домена медиа. Связи: используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
-          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - useVideoFeedState.js — Хук use Video Feed State домена медиа. Связи: импортирует forum/features/feed/utils/postMerge.js, forum/features/media/utils/videoFeedBuilder.js, forum/features/media/utils/videoFeedSalt.js; используется в forum/features/media/hooks/useForumVideoFeedRuntime.js.
           - useVideoFeedWindowing.js — Хук use Video Feed Windowing домена медиа. Связи: импортирует forum/features/feed/utils/interleaveRecommendationRails.js, forum/shared/config/runtime.js, forum/shared/hooks/useForumWindowing.js; используется в forum/features/ui/hooks/useForumScreenFlowsRuntime.js.
           - useVideoTrimController.js — Хук use Video Trim Controller домена медиа. Связи: импортирует forum/features/media/utils/mediaRuntime.js; используется в forum/ForumRoot.jsx.
           - useVoiceRecorder.js — Хук use Voice Recorder домена медиа. Связи: используется в forum/features/ui/hooks/useForumComposerRuntime.js.
@@ -577,7 +576,7 @@
           - mediaUrlPipeline.js — Утилита media Url Pipeline домена медиа. Связи: импортирует forum/features/media/utils/mediaLinks.js; используется в forum/ForumRoot.jsx.
           - moderationPrep.js — Утилита moderation Prep домена медиа. Связи: используется в app/ads/home.js, forum/ForumRoot.jsx.
           - qcastBars.js — Утилита qcast Bars домена медиа. Связи: используется в forum/features/media/components/QCastPlayer.jsx.
-          - telegramMiniAppSwipeLock.js — Утилита telegram Mini App Swipe Lock домена медиа. Связи: используется в forum/features/media/hooks/useForumMediaCoordinator.js.
+          - telegramMiniAppSwipeLock.js — Утилита telegram Mini App Swipe Lock домена медиа. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
           - urlParsing.js — Утилита url Parsing домена медиа. Связи: используется в forum/ForumRoot.jsx.
           - videoControls.js — Утилита video Controls домена медиа. Связи: используется в forum/features/media/utils/mediaLifecycleRuntime.js.
           - videoCopy.js — Утилита video Copy домена медиа. Связи: импортирует forum/shared/utils/forumLocale.js; используется в forum/ForumRoot.jsx.
@@ -654,7 +653,7 @@
         - hooks/ — Каталог слоя хуки внутри feature subscriptions.
           - useStarredAuthorsState.js — Хук use Starred Authors State домена подписок. Связи: импортирует forum/features/subscriptions/utils/starred.js; используется в forum/features/profile/hooks/useForumProfileSocialRuntime.js.
         - utils/ — Каталог слоя утилиты внутри feature subscriptions.
-          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/feed/hooks/useTopicDiscoveryModel.js, forum/features/subscriptions/hooks/useStarredAuthorsState.js, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+          - starred.js — Утилита starred домена подписок. Связи: используется в forum/features/feed/hooks/useTopicDiscoveryModel.js, forum/features/subscriptions/hooks/useStarredAuthorsState.js, tests/unit/api/forum/subs-people.route.test.js.
       - ui/ — Общие UI-узлы и проп-бандлы форума.
         - components/ — Каталог слоя компоненты внутри feature ui.
           - ComposeDock.jsx — UI-компонент Compose Dock домена форумного UI. Связи: импортирует forum/features/ui/components/ComposerCore.jsx, forum/features/ui/components/ComposerFabButton.jsx, forum/features/ui/components/ComposerStatusMeta.jsx; используется в forum/ForumLayout.jsx.
@@ -819,6 +818,8 @@
   - metamarket/ — Каталог metamarket.
     - metaMarketFormat.js — Общий React-компонент meta Market Format, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx, tests/unit/metamarket/catalog.test.js.
     - metaMarketI18n.js — Общий React-компонент meta Market I18n, используемый вне одного домена. Связи: используется в components/MetaMarket.jsx.
+  - resource-prewarm/ — Каталог resource-prewarm.
+    - GlobalResourcePrewarmRuntime.jsx — Общий React-компонент Global Resource Prewarm Runtime, используемый вне одного домена. Связи: импортирует lib/resource-prewarm/resourcePrewarmRuntime.js.
   - seo/ — Каталог seo.
     - QuantumOrganizationJsonLd.jsx — Общий React-компонент Quantum Organization Json Ld, используемый вне одного домена. Связи: импортирует lib/seo/trustIdentityStructuredData.js; используется в app/layout.js.
     - RootLocaleRuntime.jsx — Общий React-компонент Root Locale Runtime, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js, tests/component/seo/root-locale-authority-r13.test.js, tools/ql7-trust-identity-check-final-baseline-v3.mjs.
@@ -830,6 +831,7 @@
   - visual-runtime/ — Каталог visual-runtime.
     - GlobalVisualActivityRuntime.jsx — Общий React-компонент Global Visual Activity Runtime, используемый вне одного домена. Связи: импортирует lib/visual-runtime/animatedAssetRegistry.js, lib/visual-runtime/visualActivityRegistry.js; используется в app/layout.js, tests/component/visual-runtime/generic-scope-hydration.component.test.jsx, tests/component/visual-runtime/viewport-animated-image.component.test.jsx.
     - TypewriterText.jsx — Общий React-компонент Typewriter Text, используемый вне одного домена. Связи: импортирует lib/visual-runtime/visualActivityRegistry.js; используется в app/components/CryptoNewsLens.jsx, app/exchange/ai-box/AIWorkbench.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx.
+    - useRenderManagedScope.js — Общий React-компонент use Render Managed Scope, используемый вне одного домена. Связи: импортирует lib/visual-runtime/visualActivityRegistry.js; используется в app/exchange/ai-box/AIWorkbench.jsx, app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/ForumAds.js.
     - ViewportAnimatedImage.jsx — Общий React-компонент Viewport Animated Image, используемый вне одного домена. Связи: импортирует lib/visual-runtime/animatedAssetManifest.js, lib/visual-runtime/animatedAssetRegistry.js, lib/visual-runtime/visualActivityRegistry.js; используется в app/exchange/ai-box/AIWorkbench.jsx, forum/ForumAds.js, forum/features/dm/components/DmMediaRenderer.jsx.
   - AndroidAppPrompt.jsx — Общий React-компонент Android App Prompt, используемый вне одного домена. Связи: импортирует components/i18n.js; используется в app/layout.js.
   - AndroidChromiumVideoCanvas.jsx — Общий React-компонент Android Chromium Video Canvas, используемый вне одного домена. Связи: используется в forum/ForumAds.js, forum/features/media/components/VideoMedia.jsx, components/ForumBootSplash.jsx.
@@ -1908,6 +1910,8 @@
     - topicActionRegistry.js — Общая библиотека/утилита topic Action Registry инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js, lib/ql7-support/language/ecosystemLocaleLexicon.js, lib/ql7-support/language/locales.js; используется в forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js, lib/ql7-support/knowledge/domainRegistry.js.
     - turnSemanticFrame.js — Общая библиотека/утилита turn Semantic Frame инфраструктурного слоя. Связи: импортирует lib/ql7-support/ecosystemCatalog.js; используется в app/api/dm/send/route.js.
     - vipResolver.js — Общая библиотека/утилита vip Resolver инфраструктурного слоя. Связи: импортирует lib/ql7-support/identityGraph.js, lib/subscriptions.js; используется в lib/ql7-support/diagnosticRegistry.js, lib/ql7-support/simulation/liveRead.js, tests/integration/ql7-support/premium-cognitive-test.js.
+  - resource-prewarm/ — Каталог resource-prewarm.
+    - resourcePrewarmRuntime.js — Общая библиотека/утилита resource Prewarm Runtime инфраструктурного слоя. Связи: используется в components/resource-prewarm/GlobalResourcePrewarmRuntime.jsx, tools/probe-global-resource-prewarm.mjs.
   - runtime/ — Каталог runtime.
     - routeTelemetry.js — Общая библиотека/утилита route Telemetry инфраструктурного слоя. Связи: используется в app/api/battlecoin/state/route.js, app/api/forum/feed/page/route.js, app/api/forum/media-feed/page/route.js.
   - security/ — Каталог security.
@@ -1943,6 +1947,7 @@
   - forumClientVideoWorkerBridge.js — Общая библиотека/утилита forum Client Video Worker Bridge инфраструктурного слоя. Связи: импортирует lib/forumClientVideoRuntime.js, lib/forumClientVideoWorkerProtocol.js; используется в lib/forumClientVideoOptimizer.js.
   - forumClientVideoWorkerProtocol.js — Общая библиотека/утилита forum Client Video Worker Protocol инфраструктурного слоя. Связи: используется в lib/forumClientVideoOptimizerWorker.js, lib/forumClientVideoWorkerBridge.js.
   - forumShareManager.js — Общая библиотека/утилита forum Share Manager инфраструктурного слоя. Связи: используется в app/exchange/battle-chat/BattleChatMessageRow.jsx, forum/SharePopover.jsx.
+  - forumVideoPosterPresentation.js — Общая библиотека/утилита forum Video Poster Presentation инфраструктурного слоя. Связи: используется в forum/features/media/components/VideoMedia.jsx, tools/probe-forum-video-poster-presentation.mjs.
   - forumVideoTrim.js — Общая библиотека/утилита forum Video Trim инфраструктурного слоя. Связи: используется в forum/ForumRoot.jsx, forum/features/media/components/VideoTrimPopover.jsx, forum/features/media/utils/mediaRuntime.js.
   - indicators.js — Общая библиотека/утилита indicators инфраструктурного слоя. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
   - metadataCache.js — Общая библиотека/утилита metadata Cache инфраструктурного слоя. Связи: импортирует lib/seo/siteOrigin.js; используется в app/about/layout.js, app/academy/layout.js, app/ads/layout.js.
@@ -3587,7 +3592,7 @@
           - components/ — Каталог components.
             - UserRecommendationCard.test.jsx — JSX-файл User Recommendation Card.test. Связи: импортирует forum/features/feed/components/UserRecommendationCard.jsx, tests/fixtures/forum/recommendations.js.
             - UserRecommendationsRail.test.jsx — JSX-файл User Recommendations Rail.test. Связи: импортирует forum/features/feed/components/UserRecommendationsRail.jsx, tests/fixtures/forum/recommendations.js.
-      - runtime-stability-sentinel.component.test.jsx — JSX-файл runtime stability sentinel.component.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/shared/hooks/useForumNickBadgeFit.js.
+      - runtime-stability-sentinel.component.test.jsx — JSX-файл runtime stability sentinel.component.test. Связи: импортирует forum/features/feed/components/LoadMoreSentinel.jsx, forum/features/feed/components/PostFxLayer.jsx, forum/shared/hooks/useForumNickBadgeFit.js.
     - ql7-support/ — Каталог ql7-support.
       - adult-card-test.js — JS-файл adult card test. Связи: импортирует forum/features/dm/components/Ql7SupportCard.js, lib/ql7-support/cardSchema.js.
       - cosmic-actions.test.js — JS-файл cosmic actions.test. Связи: импортирует lib/ql7-support/cardSchema.js.
@@ -3603,6 +3608,7 @@
       - root-locale-authority-r13.test.js — JS-файл root locale authority r13.test. Связи: импортирует components/i18n.js, components/seo/RootLocaleRuntime.jsx.
     - visual-runtime/ — Каталог visual-runtime.
       - generic-scope-hydration.component.test.jsx — JSX-файл generic scope hydration.component.test. Связи: импортирует components/visual-runtime/GlobalVisualActivityRuntime.jsx, lib/visual-runtime/visualActivityRegistry.js.
+      - render-managed-prepaint.component.test.jsx — JSX-файл render managed prepaint.component.test. Связи: импортирует components/visual-runtime/useRenderManagedScope.js, lib/visual-runtime/visualActivityRegistry.js.
       - viewport-animated-image.component.test.jsx — JSX-файл viewport animated image.component.test. Связи: импортирует components/visual-runtime/GlobalVisualActivityRuntime.jsx, components/visual-runtime/ViewportAnimatedImage.jsx, lib/visual-runtime/animatedAssetRegistry.js.
     - payment-method-popover.component.test.jsx — JSX-файл payment method popover.component.test. Связи: импортирует components/PaymentMethodPopoverHost.jsx, lib/paymentMethodClient.js.
     - ql7-support-surface.component.test.jsx — JSX-файл ql7 support surface.component.test. Связи: импортирует forum/features/dm/components/Ql7SupportChoiceCard.js, forum/features/dm/components/Ql7SupportMessageSurface.jsx, forum/features/dm/components/Ql7SupportOperator.jsx.
@@ -3642,9 +3648,12 @@
       - forum-media-contracts.test.js — JS-файл forum media contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - forum-media-lock-canonical.contract.test.js — JS-файл forum media lock canonical.contract.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-post-mutation-convergence.contract.test.js — JS-файл forum post mutation convergence.contract.test. Связи: импортирует tests/support/projectSurface.js.
+      - forum-thread-canonical-branch.contract.test.js — JS-файл forum thread canonical branch.contract.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-transient-projection-retention.contract.test.js — JS-файл forum transient projection retention.contract.test. Связи: импортирует tests/support/projectSurface.js.
       - forum-user-recommendations-top500-mongo.contract.test.js — JS-файл forum user recommendations top500 mongo.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - forum-video-postcommit-moderation-contracts.test.js — JS-файл forum video postcommit moderation contracts.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - global-mobile-thermal-budget-g6.contract.test.js — JS-файл global mobile thermal budget g6.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
+      - global-resource-prewarm-g3.contract.test.js — JS-файл global resource prewarm g3.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - global-screen-media-lifecycle.contract.test.js — JS-файл global screen media lifecycle.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - global-visual-activity-v3.contract.test.js — JS-файл global visual activity v3.contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
       - no-mojibake-contract.test.js — JS-файл no mojibake contract.test. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
@@ -3693,7 +3702,7 @@
     - ql7-support-svg-quality.contract.test.js — JS-файл ql7 support svg quality.contract.test. Связи: импортирует lib/ql7-support/presentation/svgRegistry.js.
   - fixtures/ — Каталог fixtures.
     - forum/ — Каталог forum.
-      - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/integration/forum/features/feed/hooks/useUserRecommendationsRail.test.jsx.
+      - recommendations.js — JS-файл recommendations. Связи: используется в tests/component/forum/features/feed/components/UserRecommendationCard.test.jsx, tests/component/forum/features/feed/components/UserRecommendationsRail.test.jsx, tests/smoke/forum/features/media/components/VideoFeedPane.test.jsx.
   - integration/ — Каталог integration.
     - api/ — Каталог api.
       - forum/ — Каталог forum.
@@ -3704,7 +3713,8 @@
       - features/ — Каталог features.
         - feed/ — Каталог feed.
           - hooks/ — Каталог hooks.
-            - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/usePostMediaTextModel.js, forum/features/feed/hooks/usePublishedPostsModel.js, forum/features/feed/hooks/useThreadPostsModel.js.
+            - useThreadPostsModel.branch.test.jsx — JSX-файл use Thread Posts Model.branch.test. Связи: импортирует forum/features/feed/hooks/useThreadPostsModel.js.
+            - useUserRecommendationsRail.test.jsx — JSX-файл use User Recommendations Rail.test. Связи: импортирует forum/features/feed/hooks/useUserRecommendationsRail.js.
       - media/ — Каталог media.
         - clientVideoOptimizerPaperclip.test.jsx — JSX-файл client Video Optimizer Paperclip.test. Связи: импортирует forum/features/media/components/ComposerAttachmentPreview.jsx, forum/features/media/hooks/useForumComposerAttachments.js, forum/features/media/hooks/useMediaPipelineController.js.
         - coordinator-runtime-contract.test.js — JS-файл coordinator runtime contract.test. Связи: импортирует forum/features/media/utils/mediaLifecycleRuntime.js.
@@ -3930,6 +3940,8 @@
   - audit-forum-startup.js — Локальный скрипт/инструмент audit forum startup для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-forum-view-report.js — Локальный скрипт/инструмент audit forum view report для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-full-forum.js — Локальный скрипт/инструмент audit full forum для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-global-mobile-thermal-budget-g6.mjs — Локальный скрипт/инструмент audit global mobile thermal budget g6 для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - audit-global-resource-prewarm.mjs — Локальный скрипт/инструмент audit global resource prewarm для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-global-visual-activity.mjs — Локальный скрипт/инструмент audit global visual activity для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-heavy.js — Локальный скрипт/инструмент audit heavy для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-iframe-restore.js — Локальный скрипт/инструмент audit iframe restore для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
@@ -3945,6 +3957,7 @@
   - audit-prod-lite-discipline.js — Локальный скрипт/инструмент audit prod lite discipline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-project-docs.js — Локальный скрипт/инструмент audit project docs для аудита или техобслуживания. Связи: импортирует tools/project-docs-shared.js.
   - audit-provider-baseline.js — Локальный скрипт/инструмент audit provider baseline для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
+  - audit-render-cost-governor.mjs — Локальный скрипт/инструмент audit render cost governor для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - audit-route-budgets.js — Локальный скрипт/инструмент audit route budgets для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-route-priority-policies.js — Локальный скрипт/инструмент audit route priority policies для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
   - audit-route-teardown.js — Локальный скрипт/инструмент audit route teardown для аудита или техобслуживания. Связи: импортирует tools/runtime-governance.js.
@@ -3961,6 +3974,9 @@
   - generate-project-tree.js — Локальный скрипт/инструмент generate project tree для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - generate-trust-identity-machine-surfaces.mjs — Локальный скрипт/инструмент generate trust identity machine surfaces для аудита или техобслуживания. Связи: импортирует lib/seo/trustIdentityMachineIdentity.js.
   - inventory-forum-runtime-lifecycle.mjs — Локальный скрипт/инструмент inventory forum runtime lifecycle для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
+  - probe-forum-video-poster-presentation.mjs — Локальный скрипт/инструмент probe forum video poster presentation для аудита или техобслуживания. Связи: импортирует lib/forumVideoPosterPresentation.js.
+  - probe-global-mobile-thermal-budget-g6.mjs — Локальный скрипт/инструмент probe global mobile thermal budget g6 для аудита или техобслуживания. Связи: импортирует lib/visual-runtime/visualActivityRegistry.js.
+  - probe-global-resource-prewarm.mjs — Локальный скрипт/инструмент probe global resource prewarm для аудита или техобслуживания. Связи: импортирует lib/resource-prewarm/resourcePrewarmRuntime.js.
   - project-docs-shared.js — Локальный скрипт/инструмент project docs shared для аудита или техобслуживания. Связи: используется в tools/audit-project-docs.js, tools/generate-project-dependencies.js, tools/generate-project-risks.js.
   - prove-forum-navigation-contracts.mjs — Локальный скрипт/инструмент prove forum navigation contracts для аудита или техобслуживания. Связи: запускается вручную или из локального audit/workflow.
   - prove-forum-windowing-height-index.mjs — Локальный скрипт/инструмент prove forum windowing height index для аудита или техобслуживания. Связи: импортирует forum/shared/utils/forumHeightIndex.mjs.
@@ -4018,7 +4034,6 @@
 - PROJECT_RISKS.md — Markdown-документ PROJECT RISKS. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_ROUTES.md — Markdown-документ PROJECT ROUTES. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - PROJECT_TREE.md — Markdown-документ PROJECT TREE. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
-- QL7_FORUM_MEMORY_RENDER_TEST_DATA_AUDIT_RU.md — Markdown-документ QL7 FORUM MEMORY RENDER TEST DATA AUDIT RU. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - README.md — Корневая документация проекта. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - tsconfig.json — JSON-файл tsconfig. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.
 - vitest.config.mjs — ESM-конфиг/модуль vitest.config. Связи: явных локальных модульных связей не обнаружено или файл используется инфраструктурой/рантаймом.

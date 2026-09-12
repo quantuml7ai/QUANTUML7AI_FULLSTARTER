@@ -4,9 +4,9 @@
 > Если появляются новые крупные зависимости между доменами, меняются import-графы или переносится ownership между зонами, этот файл должен быть обновлен.
 > Рекомендуемый способ обновления: `node tools/generate-project-dependencies.js`.
 
-Сгенерировано автоматически: 2026-09-10T05:22:26.993Z
-Исходных файлов в анализе: 1958
-Локальных зависимостей: 3151
+Сгенерировано автоматически: 2026-09-12T22:48:28.284Z
+Исходных файлов в анализе: 1973
+Локальных зависимостей: 3162
 
 ## Охват
 
@@ -67,7 +67,7 @@
 - `app/subscribe` — 3 файлов
 - `app/tma` — 2 файлов
 - `app/trust-and-identity` — 1 файлов
-- `components` — 63 файлов
+- `components` — 65 файлов
 - `config` — 1 файлов
 - `forum/diagnostics` — 2 файлов
 - `forum/dm` — 42 файлов
@@ -107,6 +107,7 @@
 - `lib/forumClientVideoWorkerBridge.js` — 1 файлов
 - `lib/forumClientVideoWorkerProtocol.js` — 1 файлов
 - `lib/forumShareManager.js` — 1 файлов
+- `lib/forumVideoPosterPresentation.js` — 1 файлов
 - `lib/forumVideoTrim.js` — 1 файлов
 - `lib/geo` — 6 файлов
 - `lib/identity` — 3 файлов
@@ -125,6 +126,7 @@
 - `lib/ql7HevcFallbackPrimitives.js` — 1 файлов
 - `lib/ql7HevcPresentationReorder.js` — 1 файлов
 - `lib/redis.js` — 1 файлов
+- `lib/resource-prewarm` — 1 файлов
 - `lib/runtime` — 1 файлов
 - `lib/safeWin.js` — 1 файлов
 - `lib/security` — 1 файлов
@@ -151,15 +153,15 @@
 - `public/vendor` — 7 файлов
 - `public/vip` — 2 файлов
 - `public/workers` — 2 файлов
-- `root` — 263 файлов
+- `root` — 268 файлов
 - `src/shared` — 32 файлов
-- `tools` — 94 файлов
+- `tools` — 100 файлов
 
 ## Топ Межзоновых Зависимостей
 
 - `lib/ql7-support` -> `lib/ql7-support` — 919 локальных импортов
 - `root` -> `lib/ql7-support` — 332 локальных импортов
-- `root` -> `components` — 70 локальных импортов
+- `root` -> `components` — 71 локальных импортов
 - `api/dm` -> `lib/ql7-support` — 64 локальных импортов
 - `lib/composer-safety` -> `lib/composer-safety` — 54 локальных импортов
 - `api/forum` -> `api/forum` — 51 локальных импортов
@@ -171,9 +173,9 @@
 - `forum/feed` -> `forum/shared` — 32 локальных импортов
 - `forum/ui` -> `forum/ui` — 32 локальных импортов
 - `src/shared` -> `src/shared` — 31 локальных импортов
-- `forum/media` -> `forum/media` — 30 локальных импортов
 - `root` -> `root` — 30 локальных импортов
 - `tools` -> `tools` — 30 локальных импортов
+- `forum/media` -> `forum/media` — 29 локальных импортов
 - `root` -> `src/shared` — 25 локальных импортов
 - `forum/dm` -> `lib/ql7-support` — 22 локальных импортов
 - `forum/dm` -> `forum/shared` — 21 локальных импортов
@@ -182,15 +184,14 @@
 - `lib/economic-integrity` -> `lib/economic-integrity` — 20 локальных импортов
 - `root` -> `lib/mongo` — 20 локальных импортов
 - `forum/root` -> `forum/ui` — 18 локальных импортов
-- `root` -> `forum/feed` — 18 локальных импортов
 - `api/dm` -> `lib/mongo` — 17 локальных импортов
 - `forum/feed` -> `forum/profile` — 16 локальных импортов
+- `root` -> `forum/feed` — 16 локальных импортов
 - `root` -> `lib/composer-safety` — 16 локальных импортов
 - `tools` -> `components` — 16 локальных импортов
 - `api/dm` -> `api/dm` — 15 локальных импортов
 - `api/forum` -> `api/profile` — 15 локальных импортов
 - `forum/root` -> `forum/shared` — 15 локальных импортов
-- `root` -> `forum/media` — 15 локальных импортов
 - `lib/seo` -> `lib/seo` — 14 локальных импортов
 - `root` -> `lib/seo` — 14 локальных импортов
 - `app/exchange` -> `app/exchange` — 13 локальных импортов
@@ -198,15 +199,16 @@
 - `forum/profile` -> `forum/profile` — 13 локальных импортов
 - `forum/profile` -> `forum/shared` — 13 локальных импортов
 - `forum/root` -> `forum/feed` — 13 локальных импортов
+- `app/exchange` -> `components` — 12 локальных импортов
 - `forum/dm` -> `forum/profile` — 12 локальных импортов
 - `lib/ql7-support` -> `lib/composer-safety` — 12 локальных импортов
+- `root` -> `forum/media` — 12 локальных импортов
 - `forum/root` -> `forum/media` — 11 локальных импортов
 - `lib/forum` -> `lib/mongo` — 11 локальных импортов
 - `lib/mongo` -> `lib/identity` — 11 локальных импортов
 - `tools` -> `lib/seo` — 11 локальных импортов
 - `api/forum` -> `lib/mongo` — 10 локальных импортов
 - `api/profile` -> `lib/mongo` — 10 локальных импортов
-- `app/exchange` -> `components` — 10 локальных импортов
 
 ## Исходящие Зависимости По Зонам
 
@@ -463,7 +465,7 @@
 ### app/exchange
 
 - `app/exchange` — 13
-- `components` — 10
+- `components` — 12
 - `lib/exchange` — 2
 - `lib/paymentMethodClient.js` — 2
 - `app/ads.js` — 1
@@ -536,7 +538,7 @@
 ### components
 
 - `components` — 44
-- `lib/visual-runtime` — 7
+- `lib/visual-runtime` — 8
 - `lib/authActionGateClient.js` — 5
 - `lib/seo` — 4
 - `lib/walletSessionClient.js` — 4
@@ -562,8 +564,8 @@
 - `lib/ql7-support` — 22
 - `forum/shared` — 21
 - `forum/profile` — 12
+- `components` — 4
 - `forum/feed` — 4
-- `components` — 2
 - `forum/ui` — 2
 - `forum/media` — 1
 - `lib/authActionGateClient.js` — 1
@@ -573,9 +575,9 @@
 - `forum/feed` — 48
 - `forum/shared` — 32
 - `forum/profile` — 16
+- `components` — 8
 - `forum/media` — 6
 - `forum/ui` — 6
-- `components` — 4
 - `forum/dm` — 4
 - `forum/root` — 3
 - `forum/quests` — 1
@@ -587,7 +589,7 @@
 
 ### forum/media
 
-- `forum/media` — 30
+- `forum/media` — 29
 - `forum/shared` — 13
 - `forum/feed` — 5
 - `lib/videoPipelineProgress.js` — 3
@@ -597,6 +599,7 @@
 - `forum/moderation` — 1
 - `forum/profile` — 1
 - `forum/root` — 1
+- `lib/forumVideoPosterPresentation.js` — 1
 - `lib/nativeVideoPoster.js` — 1
 
 ### forum/moderation
@@ -636,7 +639,7 @@
 - `forum/feed` — 13
 - `forum/media` — 11
 - `forum/profile` — 9
-- `components` — 7
+- `components` — 8
 - `forum/root` — 6
 - `forum/dm` — 3
 - `forum/styles` — 3
@@ -794,6 +797,10 @@
 
 - Нет локальных исходящих импортов.
 
+### lib/forumVideoPosterPresentation.js
+
+- Нет локальных исходящих импортов.
+
 ### lib/forumVideoTrim.js
 
 - Нет локальных исходящих импортов.
@@ -889,6 +896,10 @@
 - Нет локальных исходящих импортов.
 
 ### lib/redis.js
+
+- Нет локальных исходящих импортов.
+
+### lib/resource-prewarm
 
 - Нет локальных исходящих импортов.
 
@@ -1006,17 +1017,17 @@
 ### root
 
 - `lib/ql7-support` — 332
-- `components` — 70
+- `components` — 71
 - `root` — 30
 - `src/shared` — 25
 - `lib/mongo` — 20
-- `forum/feed` — 18
+- `forum/feed` — 16
 - `lib/composer-safety` — 16
-- `forum/media` — 15
 - `lib/seo` — 14
+- `forum/media` — 12
 - `forum/dm` — 10
 - `lib/economic-integrity` — 7
-- `forum/shared` — 5
+- `forum/shared` — 6
 
 ### src/shared
 
@@ -1032,7 +1043,10 @@
 - `app/sitemap.js` — 1
 - `forum/shared` — 1
 - `lib/forumClientVideoRuntime.js` — 1
+- `lib/forumVideoPosterPresentation.js` — 1
 - `lib/ql7-support` — 1
+- `lib/resource-prewarm` — 1
+- `lib/visual-runtime` — 1
 
 ## Файлы С Высоким Fan-In
 
@@ -1060,7 +1074,7 @@
 - `lib/mongo/qcoin-primary.cjs` — fan-in 15; основные потребители: `app/api/academy/exam/route.js`, `app/api/profile/user-popover/route.js`, `app/api/qcoin/drop/route.js`, `app/api/qcoin/get/route.js`, `app/api/qcoin/heartbeat/route.js`, `app/api/qcoin/topup/cancel/route.js`, `app/api/qcoin/topup/create/route.js`, `app/api/qcoin/topup/webhook/route.js`
 - `lib/ql7-support/cardSchema.js` — fan-in 15; основные потребители: `app/api/dm/support-card-translate/route.js`, `lib/ql7-support/language/finalDeliveryLocalization.js`, `lib/ql7-support/presentation/premiumCardLayout.js`, `lib/ql7-support/runtime/finalDeliveryVerifier.js`, `lib/ql7-support/runtime/productionTurn.js`, `lib/ql7-support/server.js`, `tests/component/ql7-support-surface.component.test.jsx`, `tests/component/ql7-support/adult-card-test.js`
 - `lib/ql7-support/semantics/analyzeTurn.js` — fan-in 15; основные потребители: `lib/ql7-support/runtime/canonicalContext.js`, `lib/ql7-support/runtime/executeTurn.js`, `lib/ql7-support/server.js`, `lib/ql7-support/simulation/factualSimulation.js`, `tests/contracts/ql7-support-doc-version-coherence.contract.test.js`, `tests/integration/ql7-support-live-prelab.integration.test.js`, `tests/unit/ql7-support/canonical-matrix-performance.test.js`, `tests/unit/ql7-support/closure-matrix.test.js`
-- `tests/support/projectSurface.js` — fan-in 14; основные потребители: `tests/contracts/metamarket/metamarket-contracts.test.js`, `tests/contracts/project/api-route-contracts.test.js`, `tests/contracts/project/app-entry-contracts.test.js`, `tests/contracts/project/canonical-human-identity-contract.test.js`, `tests/contracts/project/economic-runtime-hardening-contract.test.js`, `tests/contracts/project/forum-hook-contracts.test.js`, `tests/contracts/project/forum-media-lock-canonical.contract.test.js`, `tests/contracts/project/forum-post-mutation-convergence.contract.test.js`
+- `tests/support/projectSurface.js` — fan-in 15; основные потребители: `tests/contracts/metamarket/metamarket-contracts.test.js`, `tests/contracts/project/api-route-contracts.test.js`, `tests/contracts/project/app-entry-contracts.test.js`, `tests/contracts/project/canonical-human-identity-contract.test.js`, `tests/contracts/project/economic-runtime-hardening-contract.test.js`, `tests/contracts/project/forum-hook-contracts.test.js`, `tests/contracts/project/forum-media-lock-canonical.contract.test.js`, `tests/contracts/project/forum-post-mutation-convergence.contract.test.js`
 - `lib/forum/forum-server-complete-reader.cjs` — fan-in 13; основные потребители: `app/api/forum/inbox/replies/page/route.js`, `app/api/forum/post-by-id/route.js`, `app/api/forum/post-chain/route.js`, `app/api/forum/post-locate/route.js`, `app/api/forum/post-meta/route.js`, `app/api/forum/search/page/route.js`, `app/api/forum/snapshot/route.js`, `app/api/forum/thread/locate/route.js`
 - `lib/ql7-support/language/locales/manifest.js` — fan-in 13; основные потребители: `lib/ql7-support/knowledge/domainKnowledge.js`, `lib/ql7-support/knowledge/humorLexicalPlan.js`, `lib/ql7-support/knowledge/humorLexiconBank.js`, `lib/ql7-support/language/compositionalGrammar.js`, `lib/ql7-support/language/factPresentationLexicon.js`, `lib/ql7-support/language/lexicalUniverseRegistry.js`, `lib/ql7-support/language/localeOperationFrames.js`, `lib/ql7-support/language/supportSurfaceCopyRegistry.js`
 - `lib/subscriptions.js` — fan-in 13; основные потребители: `app/api/battlecoin/order/route.js`, `app/api/battlecoin/state/route.js`, `app/api/forum/vip/batch/route.js`, `app/api/metamarket/_db.js`, `app/api/metamarket/state/route.js`, `app/api/metamarket/token-history/route.js`, `app/api/pay/webhook/route.js`, `app/api/profile/user-popover/route.js`
