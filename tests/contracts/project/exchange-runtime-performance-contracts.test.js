@@ -64,19 +64,43 @@ describe('Exchange / BattleCoin style-safe live runtime contracts', () => {
     expect(primeBlock).not.toContain("addEventListener('touchmove'")
   })
 
-  test('keeps source-level backdrop neutralization and replays only the proven R11 iOS Exchange guard', () => {
+  test('virtualizes the BattleCoin market body without owning native touch or momentum scroll', () => {
+    const battleCoin = read('app/exchange/BattleCoin.jsx')
+
+    expect(battleCoin).toContain('BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS = 64')
+    expect(battleCoin).toContain('BATTLECOIN_MARKET_VIRTUAL_SHIFT_ROWS = 24')
+    expect(battleCoin).toContain('symbols.slice(marketVirtualRange.start, marketVirtualRange.end)')
+    expect(battleCoin).toContain('className="market-virtual-space"')
+    expect(battleCoin).toContain('className="market-virtual-window"')
+    expect(battleCoin).toContain('onScroll={handleMarketScroll}')
+    expect(battleCoin).toContain('overflow-y: auto;')
+    expect(battleCoin).toContain('overflow-anchor: none;')
+    expect(battleCoin).toContain('height: 50px;')
+    expect(battleCoin).toContain('data-market-virtual-count={marketVirtualRange.renderedRows}')
+    expect(battleCoin).toContain('{symbols.map((s) => (')
+    expect(battleCoin).toContain('<option key={s.symbol} value={s.symbol}>')
+
+    const virtualStart = battleCoin.indexOf("// Keep BattleCoin's native overflow scroller")
+    const marketEnd = battleCoin.indexOf('/* ---------- history ---------- */', virtualStart)
+    const virtualMarket = battleCoin.slice(virtualStart, marketEnd)
+    expect(virtualMarket).not.toContain('preventDefault()')
+    expect(virtualMarket).not.toContain("addEventListener('touchmove'")
+    expect(virtualMarket).not.toContain('.scrollTop =')
+    expect(virtualMarket).not.toContain('scrollTo(')
+    expect(virtualMarket).not.toContain('translate3d(')
+    expect(virtualMarket).not.toContain('will-change')
+  })
+
+  test('neutralizes backdrop filters at source without a global universal selector', () => {
     const page = read('app/exchange/page.js')
     const css = read('app/globals.css')
     const marker = 'data-ql7-exchange-ios-flat-compositor-ab'
 
     expect(css).toContain('QL7 GLOBAL BACKDROP FILTER POLICY R13')
-    expect(css).toContain('R18: exact R11 route-scoped compositor guard replay')
     expect(css).not.toContain('QL7 GLOBAL BACKDROP FILTER KILL SWITCH R12 BEGIN')
     expect(css).not.toContain('html:not(#ql7-backdrop-filters-enabled)')
+    expect(css).not.toContain('body *::before')
     expect(css).not.toContain('body *::backdrop')
-    expect(css).toContain(`html[${marker}="1"] body *`)
-    expect(css).toContain(`html[${marker}="1"] body *::before`)
-    expect(css).toContain(`html[${marker}="1"] body *::after`)
 
     const productionFiles = [
       'app/forum/styles/ForumStyles.jsx',

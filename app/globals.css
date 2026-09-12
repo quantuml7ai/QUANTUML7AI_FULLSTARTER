@@ -3799,26 +3799,9 @@ html[data-ql7-document-hidden] [data-ql7-visual-scope] *::after {
 }
 
 /* === QL7 GLOBAL BACKDROP FILTER POLICY R13 ===
-   Backdrop filters stay neutralized at their source declarations across app/components/lib.
-   R18 additionally replays the proven R11 physical-iOS Exchange compositor guard below.
-   Keep it route-scoped and low-specificity: do not restore the R12 global :not(...) policy. */
-
-/* R18: exact R11 route-scoped compositor guard replay.
-   This is intentionally limited to the physical-iOS /exchange lifetime marker. It catches
-   runtime-injected/pseudo backdrop surfaces without the global high-specificity selector that
-   regressed the native BattleCoin guest market scroller in R12. */
-html[data-ql7-exchange-ios-flat-compositor-ab="1"],
-html[data-ql7-exchange-ios-flat-compositor-ab="1"]::before,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"]::after,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body::before,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body::after,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body *,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body *::before,
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] body *::after {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
+   Backdrop filters are neutralized at their source declarations across app/components/lib.
+   Do not add a document-wide universal override here: large universal/pseudo-element selector
+   matching regressed the BattleCoin native market scroller on iOS in R12. */
 
 /* R11 retained only for its second diagnostic axis: remove the ordinary CSS filter from
    the fixed HeroAvatar background on physical iOS /exchange. R13 neutralizes backdrop

@@ -1,7 +1,15 @@
 import React from 'react'
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
-import { BattleCoinLivePriceText, isIOSBrowserRuntime, shouldReprimeGuestMarketScroller } from '../../../app/exchange/BattleCoin.jsx'
+import {
+  BATTLECOIN_MARKET_ROW_STRIDE,
+  BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS,
+  BattleCoinLivePriceText,
+  getBattleCoinMarketVirtualRange,
+  getBattleCoinMarketVirtualStart,
+  isIOSBrowserRuntime,
+  shouldReprimeGuestMarketScroller,
+} from '../../../app/exchange/BattleCoin.jsx'
 import { useBattleChat } from '../../../app/exchange/battle-chat/useBattleChat.js'
 
 vi.mock('next/image', () => ({ default: () => null }))
@@ -84,6 +92,62 @@ test('re-primes only a populated guest iOS market scroller after the first paint
   expect(shouldReprimeGuestMarketScroller({ auth: true, loading: false, symbolCount: 490, navigatorLike: iphone })).toBe(false)
   expect(shouldReprimeGuestMarketScroller({ auth: false, loading: true, symbolCount: 490, navigatorLike: iphone })).toBe(false)
   expect(shouldReprimeGuestMarketScroller({ auth: false, loading: false, symbolCount: 490, navigatorLike: android })).toBe(false)
+})
+
+test('caps a 490-symbol market at 64 live rows while preserving the full native scroll height', () => {
+  const top = getBattleCoinMarketVirtualRange({ symbolCount: 490, startIndex: 0 })
+  const bottom = getBattleCoinMarketVirtualRange({ symbolCount: 490, startIndex: 9999 })
+
+  expect(BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS).toBe(64)
+  expect(BATTLECOIN_MARKET_ROW_STRIDE).toBe(51)
+  expect(top).toEqual({
+    start: 0,
+    end: 64,
+    renderedRows: 64,
+    offsetTop: 0,
+    totalHeight: 490 * 51,
+  })
+  expect(bottom.start).toBe(490 - 64)
+  expect(bottom.end).toBe(490)
+  expect(bottom.renderedRows).toBe(64)
+  expect(bottom.offsetTop).toBe((490 - 64) * 51)
+})
+
+test('shifts the buffered market window in coarse chunks instead of on every scroll tick', () => {
+  const startForRow = (row, currentStart) => getBattleCoinMarketVirtualStart({
+    scrollTop: row * BATTLECOIN_MARKET_ROW_STRIDE,
+    viewportHeight: 220,
+    symbolCount: 490,
+    currentStart,
+  })
+
+  expect(startForRow(46, 0)).toBe(0)
+  expect(startForRow(47, 0)).toBe(24)
+  expect(startForRow(70, 24)).toBe(24)
+  expect(startForRow(71, 24)).toBe(48)
+
+  // Direction reversal stays inside the already-painted back buffer for many rows.
+  expect(startForRow(60, 48)).toBe(48)
+  expect(startForRow(59, 48)).toBe(24)
+
+  // A large jump catches up in one calculation without mutating scrollTop.
+  expect(startForRow(480, 0)).toBe(490 - BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS)
+})
+
+test('renders every market row when the symbol set is smaller than the virtual window', () => {
+  expect(getBattleCoinMarketVirtualRange({ symbolCount: 40, startIndex: 30 })).toEqual({
+    start: 0,
+    end: 40,
+    renderedRows: 40,
+    offsetTop: 0,
+    totalHeight: 40 * BATTLECOIN_MARKET_ROW_STRIDE,
+  })
+  expect(getBattleCoinMarketVirtualStart({
+    scrollTop: 1200,
+    viewportHeight: 220,
+    symbolCount: 40,
+    currentStart: 30,
+  })).toBe(0)
 })
 
 function readPrice() {

@@ -46,6 +46,87 @@ export function shouldReprimeGuestMarketScroller({
   return !auth && !loading && Number(symbolCount) > 0 && isIOSBrowserRuntime(navigatorLike)
 }
 
+// Keep BattleCoin's native overflow scroller, but cap the expensive live DOM inside it.
+// A 64-row buffered window leaves >3k px of already-painted market content while
+// avoiding per-pixel React churn. Window shifts happen in 24-row chunks only after
+// the viewport reaches a 12-row edge guard; 20 rows are retained behind the new
+// viewport anchor so an immediate direction reversal stays inside painted content.
+export const BATTLECOIN_MARKET_ROW_HEIGHT = 50
+export const BATTLECOIN_MARKET_ROW_GAP = 1
+export const BATTLECOIN_MARKET_ROW_STRIDE = BATTLECOIN_MARKET_ROW_HEIGHT + BATTLECOIN_MARKET_ROW_GAP
+export const BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS = 64
+export const BATTLECOIN_MARKET_VIRTUAL_EDGE_ROWS = 12
+export const BATTLECOIN_MARKET_VIRTUAL_OVERSCAN_ROWS = 20
+export const BATTLECOIN_MARKET_VIRTUAL_SHIFT_ROWS = 24
+
+function clampBattleCoinMarketIndex(value, min, max) {
+  return Math.min(max, Math.max(min, Math.floor(Number(value) || 0)))
+}
+
+export function getBattleCoinMarketVirtualStart({
+  scrollTop = 0,
+  viewportHeight = 220,
+  symbolCount = 0,
+  currentStart = 0,
+} = {}) {
+  const count = Math.max(0, Math.floor(Number(symbolCount) || 0))
+  const maxStart = Math.max(0, count - BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS)
+  if (maxStart === 0) return 0
+
+  const start = clampBattleCoinMarketIndex(currentStart, 0, maxStart)
+  const firstVisible = clampBattleCoinMarketIndex(
+    Math.max(0, Number(scrollTop) || 0) / BATTLECOIN_MARKET_ROW_STRIDE,
+    0,
+    Math.max(0, count - 1)
+  )
+  const visibleRows = Math.max(
+    1,
+    Math.ceil(Math.max(1, Number(viewportHeight) || 220) / BATTLECOIN_MARKET_ROW_STRIDE) + 1
+  )
+  const lastVisible = Math.min(count - 1, firstVisible + visibleRows - 1)
+  const end = Math.min(count, start + BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS)
+  const safeStart = start + BATTLECOIN_MARKET_VIRTUAL_EDGE_ROWS
+  const safeEnd = end - BATTLECOIN_MARKET_VIRTUAL_EDGE_ROWS - 1
+
+  if (firstVisible >= safeStart && lastVisible <= safeEnd) return start
+
+  const desiredStart = Math.max(0, firstVisible - BATTLECOIN_MARKET_VIRTUAL_OVERSCAN_ROWS)
+  const chunkStart = Math.floor(desiredStart / BATTLECOIN_MARKET_VIRTUAL_SHIFT_ROWS) * BATTLECOIN_MARKET_VIRTUAL_SHIFT_ROWS
+  let nextStart = clampBattleCoinMarketIndex(chunkStart, 0, maxStart)
+
+  // Large programmatic/jump scrolls can skip more than one chunk. Keep the current
+  // viewport inside the new window even in that case without changing scrollTop.
+  if (lastVisible >= nextStart + BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS) {
+    nextStart = clampBattleCoinMarketIndex(
+      lastVisible - BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS + 1,
+      0,
+      maxStart
+    )
+  }
+  if (firstVisible < nextStart) {
+    nextStart = clampBattleCoinMarketIndex(firstVisible, 0, maxStart)
+  }
+
+  return nextStart
+}
+
+export function getBattleCoinMarketVirtualRange({
+  symbolCount = 0,
+  startIndex = 0,
+} = {}) {
+  const count = Math.max(0, Math.floor(Number(symbolCount) || 0))
+  const maxStart = Math.max(0, count - BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS)
+  const start = clampBattleCoinMarketIndex(startIndex, 0, maxStart)
+  const end = Math.min(count, start + BATTLECOIN_MARKET_VIRTUAL_WINDOW_ROWS)
+  return {
+    start,
+    end,
+    renderedRows: Math.max(0, end - start),
+    offsetTop: start * BATTLECOIN_MARKET_ROW_STRIDE,
+    totalHeight: count * BATTLECOIN_MARKET_ROW_STRIDE,
+  }
+}
+
 
 // ----------------- auth helpers (как в AuthNavClient) -----------------
 function readCookie(name) {
@@ -1329,9 +1410,58 @@ export default function BattleCoin() {
   const stateAppliedSeqRef = useRef(0)
   const lightRequestInFlightRef = useRef(false)
   const guestMarketPrimeDoneRef = useRef(false)
+  const marketBodyRef = useRef(null)
+  const marketScrollFrameRef = useRef(0)
+  const marketVirtualStartRef = useRef(0)
   const [marketScrollPriming, setMarketScrollPriming] = useState(false)
+  const [marketVirtualStart, setMarketVirtualStart] = useState(0)
 
   const hasActiveOrder = !!(activeOrder && activeOrder.status === 'OPEN')
+  const marketVirtualRange = useMemo(
+    () => getBattleCoinMarketVirtualRange({
+      symbolCount: symbols.length,
+      startIndex: marketVirtualStart,
+    }),
+    [symbols.length, marketVirtualStart]
+  )
+  const marketVirtualSymbols = useMemo(
+    () => symbols.slice(marketVirtualRange.start, marketVirtualRange.end),
+    [symbols, marketVirtualRange.end, marketVirtualRange.start]
+  )
+
+  const syncMarketVirtualWindow = useCallback((scrollTop, viewportHeight) => {
+    const nextStart = getBattleCoinMarketVirtualStart({
+      scrollTop,
+      viewportHeight,
+      symbolCount: symbols.length,
+      currentStart: marketVirtualStartRef.current,
+    })
+    if (nextStart === marketVirtualStartRef.current) return
+    marketVirtualStartRef.current = nextStart
+    setMarketVirtualStart(nextStart)
+  }, [symbols.length])
+
+  const handleMarketScroll = useCallback((event) => {
+    const node = event.currentTarget
+    if (!node || marketScrollFrameRef.current) return
+    marketScrollFrameRef.current = window.requestAnimationFrame(() => {
+      marketScrollFrameRef.current = 0
+      if (!node.isConnected) return
+      syncMarketVirtualWindow(node.scrollTop, node.clientHeight)
+    })
+  }, [syncMarketVirtualWindow])
+
+  useEffect(() => {
+    const node = marketBodyRef.current
+    syncMarketVirtualWindow(node?.scrollTop || 0, node?.clientHeight || 220)
+  }, [symbols.length, syncMarketVirtualWindow])
+
+  useEffect(() => () => {
+    if (marketScrollFrameRef.current) {
+      window.cancelAnimationFrame(marketScrollFrameRef.current)
+      marketScrollFrameRef.current = 0
+    }
+  }, [])
 
   const handleOpenQuantumWallet = useCallback(() => {
     try {
@@ -2289,50 +2419,67 @@ const filteredOrders = useMemo(() => {
                   )}
                 </div>
               </div>
-              <div className={['market-body', marketScrollPriming ? 'is-scroll-priming' : ''].filter(Boolean).join(' ')}>
-                {symbols.map((s, i) => {
-                  const ch = Number(s.change24h || 0)
-                  const isSelected = selectedSymbol === s.symbol
-                  return (
-                    <button
-                      key={s.symbol}
-                      type="button"
-                      className={[
-                        'market-row',
-                        isSelected ? 'is-selected' : '',
-                      ].join(' ')}
-                      onClick={() => handleSymbolClick(s.symbol)}
-                      disabled={!canChangeSymbol}
-                    >
-                      <div className="mb-col idx">{i + 1}</div>
-                      <div className="mb-col symbol">
-<PremiumCoinGlyph symbol={s.symbol} size="market" />
+              <div
+                ref={marketBodyRef}
+                className={['market-body', marketScrollPriming ? 'is-scroll-priming' : ''].filter(Boolean).join(' ')}
+                onScroll={handleMarketScroll}
+              >
+                <div
+                  className="market-virtual-space"
+                  style={{ height: `${marketVirtualRange.totalHeight}px` }}
+                >
+                  <div
+                    className="market-virtual-window"
+                    style={{ top: `${marketVirtualRange.offsetTop}px` }}
+                    data-market-virtual-start={marketVirtualRange.start}
+                    data-market-virtual-count={marketVirtualRange.renderedRows}
+                  >
+                    {marketVirtualSymbols.map((s, virtualIndex) => {
+                      const i = marketVirtualRange.start + virtualIndex
+                      const ch = Number(s.change24h || 0)
+                      const isSelected = selectedSymbol === s.symbol
+                      return (
+                        <button
+                          key={s.symbol}
+                          type="button"
+                          className={[
+                            'market-row',
+                            isSelected ? 'is-selected' : '',
+                          ].join(' ')}
+                          onClick={() => handleSymbolClick(s.symbol)}
+                          disabled={!canChangeSymbol}
+                        >
+                          <div className="mb-col idx">{i + 1}</div>
+                          <div className="mb-col symbol">
+                            <PremiumCoinGlyph symbol={s.symbol} size="market" />
 
-                        <span className="symbol-text">{s.symbol}</span>
-                      </div>
-                      <div className="mb-col price">
-                        {isSelected ? (
-                          <BattleCoinLivePriceText
-                            symbol={s.symbol}
-                            initialPrice={s.price}
-                          />
-                        ) : (
-                          formatNumber(s.price, 6)
-                        )}
-                      </div>
-                      <div
-                        className={[
-                          'mb-col change',
-                          ch > 0 ? 'is-pos' : '',
-                          ch < 0 ? 'is-neg' : '',
-                          'value-glow',
-                        ].join(' ')}
-                      >
-                        {formatNumber(ch, 2)}%
-                      </div>
-                    </button>
-                  )
-                })}
+                            <span className="symbol-text">{s.symbol}</span>
+                          </div>
+                          <div className="mb-col price">
+                            {isSelected ? (
+                              <BattleCoinLivePriceText
+                                symbol={s.symbol}
+                                initialPrice={s.price}
+                              />
+                            ) : (
+                              formatNumber(s.price, 6)
+                            )}
+                          </div>
+                          <div
+                            className={[
+                              'mb-col change',
+                              ch > 0 ? 'is-pos' : '',
+                              ch < 0 ? 'is-neg' : '',
+                              'value-glow',
+                            ].join(' ')}
+                          >
+                            {formatNumber(ch, 2)}%
+                          </div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -3564,6 +3711,7 @@ const filteredOrders = useMemo(() => {
           margin-top: 4px;
           max-height: 220px;
           overflow-y: auto;
+          overflow-anchor: none;
           padding-right: 2px;
         }
 
@@ -3571,8 +3719,22 @@ const filteredOrders = useMemo(() => {
           overflow-y: hidden;
         }
 
+        .market-virtual-space {
+          position: relative;
+          width: 100%;
+          min-width: 0;
+        }
+
+        .market-virtual-window {
+          position: absolute;
+          left: 0;
+          right: 0;
+        }
+
         .market-row {
           width: 100%;
+          height: 50px;
+          box-sizing: border-box;
           border: none;
           background: transparent;
           padding: 4px 6px;
