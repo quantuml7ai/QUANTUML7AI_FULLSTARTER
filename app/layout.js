@@ -25,6 +25,7 @@ const forumEarlyDiagFlags = JSON.stringify({
   perf: String(process.env.NEXT_PUBLIC_FORUM_PERF_TRACE || '') === '1',
 })
 import ScreenWakeLockRuntime from '../components/ScreenWakeLockRuntime'
+import GlobalMediaVisibilityRuntime from '../components/GlobalMediaVisibilityRuntime'
 const forumEarlyDiagBootstrap = `(function () {
   try {
     var flags = ${forumEarlyDiagFlags};
@@ -530,6 +531,7 @@ export default function RootLayout({ children }) {
           <I18nProvider>
             <GlobalVisualActivityRuntime />
             <ScreenWakeLockRuntime />
+            <GlobalMediaVisibilityRuntime />
             <RootLocaleRuntime />
             {/* фон/герой (клиент-рендер) */}
             <HeroAvatar />

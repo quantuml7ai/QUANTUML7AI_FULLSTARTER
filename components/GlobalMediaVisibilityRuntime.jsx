@@ -1,6 +1,5 @@
 'use client'
 
-// Dormant legacy implementation: intentionally not mounted in production.
 import { useEffect } from 'react'
 
 const GLOBAL_MEDIA_SUSPEND_EVENT = 'ql7:global-media-suspend'
