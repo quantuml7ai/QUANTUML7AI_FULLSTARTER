@@ -3811,15 +3811,10 @@ html[data-ql7-exchange-ios-flat-compositor-ab="1"] .scene .bg-video {
   filter: none !important;
 }
 
-/* R16 iOS Exchange TradingView compositor quarantine. Keep the widgets mounted and
-   interactive, but avoid clipping/shadow/filter host effects that can force large
-   iframe backing surfaces into the main async-scrolling raster path. */
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] .exchange-tv-panel {
-  overflow: visible !important;
-  box-shadow: none !important;
-}
-
-html[data-ql7-exchange-ios-flat-compositor-ab="1"] .exchange-tv-chart-wrap {
-  height: max(360px, 58svh) !important;
-  min-height: 360px !important;
+/* R17 iOS Exchange forensic A/B: keep the scrolling document out of one giant
+   positive-z stacking context. HeroAvatar is the preceding fixed z-index:0 sibling,
+   so page-content remains later in paint order while WebKit can tile its descendants
+   without a route-sized stacking-context boundary. No child geometry or interaction changes. */
+html[data-ql7-exchange-ios-flat-compositor-ab="1"] .page-content {
+  z-index: auto !important;
 }

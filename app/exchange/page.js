@@ -418,9 +418,8 @@ function onTVReady(cb){
 }
 
 /* ================================= UI atoms ================================= */
-function Panel({children, className = ''}){
-  const panelClassName = className ? `panel ${className}` : 'panel'
-  return <div className={panelClassName} data-ql7-visual-scope="panel" data-ql7-render-managed="1">{children}
+function Panel({children}){
+  return <div className="panel" data-ql7-visual-scope="panel" data-ql7-render-managed="1">{children}
     <style jsx>{`
       .panel{position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.08);
         border-radius:14px;padding:12px;background:rgba(0, 0, 0, 1); margin-bottom:12px}
@@ -510,7 +509,7 @@ function TVTicker({symbol}){
     script.innerHTML=JSON.stringify({ symbols:[{proName:MAP_TV(symbol),title:symbol}], isTransparent:true, showSymbolLogo:true, colorTheme:'dark', locale:'en', displayMode:'regular', width:'100%', height:52 })
     boxRef.current.appendChild(script)
   },[symbol])
-  return <Panel className="exchange-tv-panel exchange-tv-ticker-panel"><div ref={boxRef} /></Panel>
+  return <Panel><div ref={boxRef} /></Panel>
 }
 
 function TVChart({ symbol, tf }) {
@@ -583,8 +582,8 @@ function TVChart({ symbol, tf }) {
   }, [symbol, tf])
 
   return (
-    <Panel className="exchange-tv-panel exchange-tv-chart-panel">
-      <div className="tvWrap exchange-tv-chart-wrap">
+    <Panel>
+      <div className="tvWrap">
         <div id="tv_chart" ref={containerRef} />
       </div>
     <style jsx>{`.tvWrap{position:relative;width:100%;height:58vh;min-height:360px} .tvWrap :global(#tv_chart){position:absolute;inset:0}`}</style>
