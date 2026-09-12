@@ -49,4 +49,46 @@ describe('G6 global mobile animation budget', () => {
     expect(qcast).toContain('pool: mobileLean ? 6 : 24')
     expect(qcast).toContain('return { viz: false, boom: false, burst: 2, pool: 6, fullscreen: true }')
   })
+
+  test('keeps pooled post FX raster-cold while idle and restores the premium glow only for active particles', () => {
+    const styles = read('app/forum/styles/ForumStyles.jsx')
+    const qcoinStyles = read('app/forum/styles/modules/qcoinStyles.js')
+    const layer = read('app/forum/features/feed/components/PostFxLayer.jsx')
+
+    for (const source of [styles, qcoinStyles]) {
+      expect(source).toMatch(/\.postFx\{[\s\S]*?will-change:auto;[\s\S]*?filter:none;[\s\S]*?text-shadow:none;[\s\S]*?\}/)
+      expect(source).toMatch(/\.postFx\.isLive\{[\s\S]*?will-change:transform, opacity;[\s\S]*?hue-rotate\(var\(--hue\)\)[\s\S]*?drop-shadow\(0 0 calc\(12px \* var\(--glow\)\) rgba\(0,245,255,\.20\)\)[\s\S]*?text-shadow:/)
+      expect(source).toMatch(/\.postFx\.postFx--bad\.isLive\{[\s\S]*?rgba\(255,80,120,\.18\)[\s\S]*?rgba\(178,0,255,\.10\)[\s\S]*?text-shadow:/)
+      expect(source).toMatch(/\.postFx::after\{[\s\S]*?filter:none;[\s\S]*?animation:none;/)
+      expect(source).toMatch(/\.postFx\.isLive::after\{[\s\S]*?drop-shadow\(0 0 16px rgba\(255,255,255,\.10\)\)[\s\S]*?drop-shadow\(0 0 18px rgba\(178,0,255,\.12\)\)[\s\S]*?postFxTrail/)
+    }
+
+    expect(layer).toContain("classList?.remove?.('isLive')")
+    expect(layer).toContain("addEventListener('animationend', releaseFinishedPostFx)")
+    expect(layer).toContain('const postFxAnimationBoundNodes = new WeakSet()')
+    expect(layer).not.toContain('onAnimationEnd=')
+    expect(layer).not.toContain('animationName')
+  })
+
+  test('keeps forum and DM pulse rails animated while removing their moving blur filters', () => {
+    const styles = read('app/forum/styles/ForumStyles.jsx')
+    const dmStyles = read('app/forum/styles/modules/dmStyles.js')
+
+    expect(styles).toMatch(/article\[data-forum-post-card="1"\] \.forumDividerRail::after\{[\s\S]*?filter: none;[\s\S]*?animation: forumDividerPulse 2\.4s linear infinite;[\s\S]*?animation-delay: \.75s;/)
+    expect(styles).toMatch(/\.forumDividerRail::after\{[\s\S]*?filter: none;[\s\S]*?animation: forumDividerPulse 2\.3s linear infinite;/)
+    expect(styles).not.toMatch(/\.forumDividerRail::after\{[^}]*drop-shadow/)
+
+    expect((styles.match(/\.dmRowRail::after\{/g) || []).length).toBeGreaterThanOrEqual(2)
+    expect(styles).not.toMatch(/\.dmRowRail::after\{[^}]*drop-shadow/)
+    expect(styles).toContain('animation: dmRailPulse 2.3s linear infinite;')
+    expect(styles).toContain('animation: forumDividerPulse 2.3s linear infinite;')
+    expect(styles).toContain('.dmRowRailTop::after{ animation-delay: .2s; }')
+    expect(styles).toContain('.dmRowRailBottom::after{ animation-delay: .95s; }')
+
+    expect(dmStyles).not.toMatch(/\.dmRowRail::after\{[^}]*drop-shadow/)
+    expect(dmStyles).toContain('animation: dmRailPulse 2.3s linear infinite;')
+    expect(dmStyles).toContain('.dmRowRailTop::after{ animation-delay: .2s; }')
+    expect(dmStyles).toContain('.dmRowRailBottom::after{ animation-delay: .95s; }')
+  })
+
 })

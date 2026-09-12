@@ -1,7 +1,8 @@
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { act, render, renderHook } from '@testing-library/react'
+import { act, fireEvent, render, renderHook } from '@testing-library/react'
 import LoadMoreSentinel from '../../../app/forum/features/feed/components/LoadMoreSentinel'
+import PostFxLayer from '../../../app/forum/features/feed/components/PostFxLayer'
 import useForumNickBadgeFit from '../../../app/forum/shared/hooks/useForumNickBadgeFit'
 import useForumWindowing, { isForumWindowingMediaKeepaliveSensitive } from '../../../app/forum/shared/hooks/useForumWindowing'
 
@@ -124,6 +125,28 @@ describe('LoadMoreSentinel component progress lifecycle', () => {
       flushRaf()
     })
     expect(onVisible).toHaveBeenCalledTimes(1)
+  })
+})
+
+
+describe('PostFxLayer idle paint lifecycle', () => {
+  test('returns a finished pooled FX node to the raster-cold idle state on animation end', () => {
+    const view = render(
+      React.createElement(PostFxLayer, {
+        FX_POOL: 1,
+        BOOM_POOL: 0,
+        POST_BOOM_ENABLED: false,
+        setFxNodeRef: vi.fn(),
+        setBoomNodeRef: vi.fn(),
+      }),
+    )
+
+    const node = view.container.querySelector('.postFx')
+    expect(node).toBeTruthy()
+    node.classList.add('isLive')
+
+    fireEvent.animationEnd(node)
+    expect(node.classList.contains('isLive')).toBe(false)
   })
 })
 

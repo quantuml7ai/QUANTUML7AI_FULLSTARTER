@@ -5508,31 +5508,33 @@ padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
   --trail: "РІСљВ¦";
 
   opacity:0;
-  will-change: transform, opacity;
+  will-change:auto;
   backface-visibility:hidden;
 
 
   animation:none;
-  /* premium glow without blur */
-  filter:
-    hue-rotate(var(--hue))
-    drop-shadow(0 0 calc(12px * var(--glow)) rgba(0,245,255,.20))
-    drop-shadow(0 0 calc(14px * var(--glow)) rgba(178,0,255,.12));
-
-  text-shadow:
-    0 0 12px rgba(255,255,255,.08),
-    -8px 8px 16px rgba(0,245,255,.08),
-    10px -10px 18px rgba(178,0,255,.08);
+  /* Idle pooled nodes are raster-cold; the premium glow exists only while live. */
+  filter:none;
+  text-shadow:none;
   }
 
 
 .postFx.isLive{
+  will-change:transform, opacity;
+  filter:
+    hue-rotate(var(--hue))
+    drop-shadow(0 0 calc(12px * var(--glow)) rgba(0,245,255,.20))
+    drop-shadow(0 0 calc(14px * var(--glow)) rgba(178,0,255,.12));
+  text-shadow:
+    0 0 12px rgba(255,255,255,.08),
+    -8px 8px 16px rgba(0,245,255,.08),
+    10px -10px 18px rgba(178,0,255,.08);
   animation:
     postFxAlpha var(--dur) cubic-bezier(.16,.9,.22,1) forwards,
     postFxCore  var(--dur) cubic-bezier(.12,.95,.2,1) forwards;
   animation-delay: var(--delay), var(--delay);
 }
-.postFx--bad{
+.postFx.postFx--bad.isLive{
   filter:
     hue-rotate(var(--hue))
     drop-shadow(0 0 calc(12px * var(--glow)) rgba(255,80,120,.18))
@@ -5551,11 +5553,12 @@ padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
   font-size: .6em;
   opacity:0;
   pointer-events:none;
-  filter: drop-shadow(0 0 16px rgba(255,255,255,.10)) drop-shadow(0 0 18px rgba(178,0,255,.12));
+  filter:none;
 
   animation:none;
 }
 .postFx.isLive::after{
+  filter: drop-shadow(0 0 16px rgba(255,255,255,.10)) drop-shadow(0 0 18px rgba(178,0,255,.12));
   animation: postFxTrail var(--dur) cubic-bezier(.18,.86,.22,1) forwards;
   animation-delay: var(--delay);
 }
@@ -5670,6 +5673,8 @@ padding:11px; background:rgba(12,18,34,.96); border:1px solid rgba(170,200,255,.
 }
 @media (prefers-reduced-motion: reduce){
   .postFx, .postBoom{ animation:none !important; opacity:0 !important; }
+  .postFx{ filter:none !important; text-shadow:none !important; will-change:auto !important; }
+  .postFx::after{ filter:none !important; }
 }
 
 /* ---- VOICE dock ---- */
@@ -6721,7 +6726,7 @@ article[data-forum-post-card="1"] .forumDividerRail::after{
   left:-34%;
   width:34%;
   background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,236,166,.95), rgba(255,255,255,0));
-  filter: drop-shadow(0 0 8px rgba(255,205,100,.62));
+  filter: none;
   animation: forumDividerPulse 2.4s linear infinite;
   animation-delay: .75s;
 }
@@ -7571,7 +7576,7 @@ html[data-tma="1"] .inboxTabs{
   width:35%;
   height:100%;
   background:linear-gradient(90deg, rgba(100,210,255,0), rgba(100,210,255,.95), rgba(100,210,255,0));
-  filter: drop-shadow(0 0 7px rgba(100,210,255,.55));
+  filter: none;
   animation: dmRailPulse 2.3s linear infinite;
 }
 .dmRowRailTop::after{ animation-delay: .2s; }
@@ -8931,7 +8936,7 @@ html[data-tma="1"] .inboxTabs{
   width:36%;
   height:100%;
   background: linear-gradient(90deg, rgba(255,255,255,0), var(--rail-beam), rgba(255,255,255,0));
-  filter: drop-shadow(0 0 8px var(--rail-shadow));
+  filter: none;
   animation: forumDividerPulse 2.3s linear infinite;
 }
 .forumDividerRail--gold{
@@ -9098,7 +9103,7 @@ html[data-tma="1"] .inboxTabs{
 }
 .dmRowRail::after{
   background: linear-gradient(90deg, rgba(100,210,255,0), rgba(100,210,255,.95), rgba(100,210,255,0));
-  filter: drop-shadow(0 0 7px rgba(100,210,255,.55));
+  filter: none;
   animation: forumDividerPulse 2.3s linear infinite;
 }
 @keyframes forumDividerPulse{

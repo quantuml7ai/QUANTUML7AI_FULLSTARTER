@@ -716,7 +716,7 @@ html[data-tma="1"] .inboxHeader{
   width:35%;
   height:100%;
   background:linear-gradient(90deg, rgba(100,210,255,0), rgba(100,210,255,.95), rgba(100,210,255,0));
-  filter: drop-shadow(0 0 7px rgba(100,210,255,.55));
+  filter: none;
   animation: dmRailPulse 2.3s linear infinite;
 }
 .dmRowRailTop::after{ animation-delay: .2s; }
