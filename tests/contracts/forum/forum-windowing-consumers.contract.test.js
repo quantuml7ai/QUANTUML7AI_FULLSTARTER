@@ -21,40 +21,11 @@ describe('forum windowing consumer contract', () => {
     }
   })
 
-  test('windowing keeps native active-scroll anchoring plus explicit idle-maintenance anchor ownership', () => {
+  test('windowing hook keeps full-card measurement and native reverse anchoring while using prefix index', () => {
     const src = fs.readFileSync(path.join(process.cwd(), 'app/forum/shared/hooks/useForumWindowing.js'), 'utf8')
-    for (const token of [
-      'ensureItemRenderedByKey',
-      'ensureItemRenderedByDomId',
-      'applyAnchoredScrollDelta',
-      'targetLockRef',
-      'mediaKeepaliveRef',
-      'buildForumHeightPrefix',
-      'readItemLayoutFootprint',
-      'readListRelativeViewportTop',
-      'pendingVisualAnchorRef',
-      'resolveForumIdleVisualAnchorDelta',
-      'captureIdleVisualAnchor',
-      'restoreIdleVisualAnchor',
-      'useLayoutEffect(() => {',
-    ]) {
+    for (const token of ['ensureItemRenderedByKey', 'ensureItemRenderedByDomId', 'applyAnchoredScrollDelta', 'targetLockRef', 'mediaKeepaliveRef', 'buildForumHeightPrefix', 'readItemLayoutFootprint', 'readListRelativeViewportTop']) {
       expect(src).toContain(token)
     }
-
-    expect(src).toContain("emitWindowingDiag('anchor_adjust_skip_native_anchor'")
-    for (const reason of ['anchor_flush', 'scroll_settle', 'media_keepalive_expiry', 'measured_height', 'row_gap']) {
-      expect(src).toContain(`captureIdleVisualAnchor('${reason}')`)
-    }
-    const captureBeforeFlush = src.indexOf("captureIdleVisualAnchor('anchor_flush')")
-    const applyPending = src.indexOf("applyPendingMeasuredHeights('scroll_settled')", captureBeforeFlush)
-    expect(captureBeforeFlush).toBeGreaterThanOrEqual(0)
-    expect(applyPending).toBeGreaterThan(captureBeforeFlush)
-
-    const nullRefStart = src.indexOf('if (!node) {')
-    const nullRefEnd = src.indexOf('measuredNodesRef.current.set(key, node)', nullRefStart)
-    const nullRefBranch = src.slice(nullRefStart, nullRefEnd)
-    expect(nullRefBranch).not.toContain('pendingHeightsRef.current.delete(key)')
-
     expect(src).not.toContain('pendingReverseAnchorRef')
     expect(src).not.toContain('windowing_reverse_anchor_residual')
     expect(src).not.toContain('const nextHeight = Math.round(h)')

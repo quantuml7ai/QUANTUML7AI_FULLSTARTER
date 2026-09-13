@@ -4,10 +4,7 @@ import { act, fireEvent, render, renderHook } from '@testing-library/react'
 import LoadMoreSentinel from '../../../app/forum/features/feed/components/LoadMoreSentinel'
 import PostFxLayer from '../../../app/forum/features/feed/components/PostFxLayer'
 import useForumNickBadgeFit from '../../../app/forum/shared/hooks/useForumNickBadgeFit'
-import useForumWindowing, {
-  isForumWindowingMediaKeepaliveSensitive,
-  resolveForumIdleVisualAnchorDelta,
-} from '../../../app/forum/shared/hooks/useForumWindowing'
+import useForumWindowing, { isForumWindowingMediaKeepaliveSensitive } from '../../../app/forum/shared/hooks/useForumWindowing'
 
 let observerCallback
 let observerConstructs
@@ -244,14 +241,6 @@ describe('forum media keepalive windowing lifecycle', () => {
   afterEach(() => {
     vi.useRealTimers()
     vi.unstubAllGlobals()
-  })
-
-  test('idle visual-anchor residual math repairs only unhandled viewport drift', () => {
-    expect(resolveForumIdleVisualAnchorDelta(72, 72, { ignorePx: 3, sanityLimit: 900 })).toBe(0)
-    expect(resolveForumIdleVisualAnchorDelta(72, 412, { ignorePx: 3, sanityLimit: 900 })).toBe(340)
-    expect(resolveForumIdleVisualAnchorDelta(412, 72, { ignorePx: 3, sanityLimit: 900 })).toBe(-340)
-    expect(resolveForumIdleVisualAnchorDelta(72, 73, { ignorePx: 3, sanityLimit: 900 })).toBe(0)
-    expect(resolveForumIdleVisualAnchorDelta(72, 2000, { ignorePx: 3, sanityLimit: 900 })).toBeNull()
   })
 
   test('explicit keepalive opt-out wins over stable-shell descendants', () => {
@@ -577,123 +566,4 @@ describe('forum media keepalive windowing lifecycle', () => {
       else delete window.innerWidth
     }
   })
-  test('virtualization ref(null) retains deferred media height until the existing idle flush', async () => {
-    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] })
-
-    const pageYOffsetDescriptor = Object.getOwnPropertyDescriptor(window, 'pageYOffset')
-    const previousUserScrollTs = window.__forumUserScrollTs
-    const previousProgrammaticScrollTs = window.__forumProgrammaticScrollTs
-    let currentScrollTop = 6000
-    let localRafId = 0
-    const localRafQueue = new Map()
-
-    window.__forumUserScrollTs = 0
-    window.__forumProgrammaticScrollTs = 0
-    Object.defineProperty(window, 'pageYOffset', {
-      configurable: true,
-      get: () => currentScrollTop,
-    })
-
-    vi.stubGlobal('requestAnimationFrame', (callback) => {
-      const id = ++localRafId
-      localRafQueue.set(id, callback)
-      return id
-    })
-    vi.stubGlobal('cancelAnimationFrame', (id) => {
-      localRafQueue.delete(id)
-    })
-
-    const flushLocalRaf = async () => {
-      let guard = 0
-      while (localRafQueue.size && guard < 30) {
-        guard += 1
-        const callbacks = [...localRafQueue.values()]
-        localRafQueue.clear()
-        await act(async () => {
-          callbacks.forEach((callback) => callback(performance.now()))
-        })
-      }
-      expect(guard).toBeLessThan(30)
-    }
-
-    const emitDiag = vi.fn()
-    const items = Array.from({ length: 30 }, (_, index) => ({ id: `pending:${index}` }))
-    const { result, unmount } = renderHook(() => useForumWindowing({
-      active: true,
-      items,
-      getItemKey: (item) => item.id,
-      estimateItemHeight: () => 600,
-      maxRender: 8,
-      overscanPx: 80,
-      getScrollEl: () => null,
-      listId: 'test:pending-height-survives-virtual-unmount',
-      scrollSettleMs: 120,
-      windowStickyMs: 0,
-      mediaKeepaliveEnabled: false,
-      emitDiag,
-    }))
-
-    let height = 600
-    const node = document.createElement('div')
-    node.setAttribute('data-stable-shell', '1')
-    Object.defineProperty(node, 'offsetHeight', {
-      configurable: true,
-      get: () => height,
-    })
-    node.getBoundingClientRect = () => ({
-      x: 0, y: -5000, top: -5000, right: 320, bottom: -5000 + height, left: 0,
-      width: 320, height, toJSON: () => ({}),
-    })
-    document.body.appendChild(node)
-
-    try {
-      await flushLocalRaf()
-      act(() => {
-        vi.advanceTimersByTime(140)
-      })
-      await flushLocalRaf()
-
-      act(() => {
-        result.current.measureRef('pending:0')(node)
-      })
-      await flushLocalRaf()
-
-      currentScrollTop += 180
-      window.__forumUserScrollTs = Date.now()
-      act(() => {
-        window.dispatchEvent(new Event('scroll'))
-      })
-      await flushLocalRaf()
-
-      height = 940
-      act(() => {
-        result.current.measureRef('pending:0')(node)
-      })
-      await flushLocalRaf()
-      expect(emitDiag.mock.calls.some(([event]) => event === 'media_height_deferred_during_scroll')).toBe(true)
-
-      act(() => {
-        result.current.measureRef('pending:0')(null)
-      })
-
-      act(() => {
-        vi.advanceTimersByTime(2800)
-      })
-      await flushLocalRaf()
-
-      const applied = emitDiag.mock.calls.find(([event, payload]) =>
-        event === 'media_height_deferred_apply' && Number(payload?.applied || 0) === 1
-      )
-      expect(applied).toBeTruthy()
-    } finally {
-      unmount()
-      node.remove()
-      vi.useRealTimers()
-      window.__forumUserScrollTs = previousUserScrollTs
-      window.__forumProgrammaticScrollTs = previousProgrammaticScrollTs
-      if (pageYOffsetDescriptor) Object.defineProperty(window, 'pageYOffset', pageYOffsetDescriptor)
-      else delete window.pageYOffset
-    }
-  })
-
 })

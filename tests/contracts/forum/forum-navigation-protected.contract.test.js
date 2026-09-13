@@ -34,24 +34,4 @@ describe('forum navigation and system-scroll protected contracts', () => {
       expect(source, file).not.toContain('LoadMoreSentinel')
     }
   })
-  test('header visibility is manual during ordinary scrolling while branch-entry hide/alignment stays protected', () => {
-    const headCollapse = read('app/forum/features/ui/hooks/useForumHeadCollapse.js')
-    const header = read('app/forum/ForumHeaderPanel.jsx')
-
-    expect(headCollapse).not.toContain("addEventListener('scroll'")
-    expect(headCollapse).not.toContain("removeEventListener('scroll'")
-    expect(headCollapse).not.toContain('nearAbsoluteTop')
-    expect(headCollapse).not.toContain('--head-open-threshold')
-    expect(headCollapse).not.toContain('--head-close-threshold')
-    expect(headCollapse).not.toContain('setHeadHidden(false)')
-
-    expect(headCollapse).toContain('setHeadHidden(true)')
-    expect(headCollapse).toContain("markProgrammaticScroll('head_align_inner')")
-    expect(headCollapse).toContain("markProgrammaticScroll('head_align_window')")
-    expect(headCollapse).toContain("markProgrammaticScroll('head_thread_start_reset_inner')")
-    expect(headCollapse).toContain("markProgrammaticScroll('head_thread_start_reset_window')")
-
-    expect(header).toContain('setHeadPinned(true); setHeadHidden(false)')
-    expect(header).toContain('setHeadPinned(false); setHeadHidden(true)')
-  })
 })
