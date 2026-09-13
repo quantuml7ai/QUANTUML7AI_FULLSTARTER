@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { registerForumWindowingTarget } from '../utils/forumWindowingRegistry'
 import {
   buildForumHeightPrefix,
@@ -297,6 +297,23 @@ function readRecentScrollAgeMs() {
   }
 }
 
+export function resolveForumIdleVisualAnchorDelta(
+  previousViewportTop,
+  nextViewportTop,
+  { ignorePx = DEFAULT_ANCHOR_DELTA_IGNORE_PX, sanityLimit = Number.POSITIVE_INFINITY } = {},
+) {
+  const before = Number(previousViewportTop)
+  const after = Number(nextViewportTop)
+  const delta = after - before
+  const ignore = Math.max(0, Number(ignorePx || 0))
+  const limit = Math.max(ignore, Number(sanityLimit || 0))
+
+  if (!Number.isFinite(before) || !Number.isFinite(after) || !Number.isFinite(delta)) return null
+  if (Math.abs(delta) < ignore) return 0
+  if (Number.isFinite(limit) && Math.abs(delta) > limit) return null
+  return delta
+}
+
 const forumWindowingDiagRegistry = new Map()
 
 function updateForumWindowingDiag(listId, patch) {
@@ -379,6 +396,7 @@ export default function useForumWindowing({
   const scrollStateRef = useRef({ top: 0, ts: 0, velocity: 0, direction: 0 })
   const scrollActivityRef = useRef({ activeUntil: 0, settleTimer: 0 })
   const pendingAnchorDeltaRef = useRef(0)
+  const pendingVisualAnchorRef = useRef(null)
   const pendingHeightsRef = useRef(new Map())
   const stableShrinkRef = useRef(new Map())
   const mediaKeepaliveRef = useRef(new Map())
@@ -638,6 +656,144 @@ export default function useForumWindowing({
     }
   }, [])
 
+  const captureIdleVisualAnchor = useCallback((reason = 'maintenance') => {
+    if (pendingVisualAnchorRef.current?.key) return true
+    if (!active || !isBrowserFn() || targetLockRef.current?.key || isScrollActiveNow()) return false
+
+    try {
+      const el = readScrollEl()
+      const inner = hasInnerScrollable(el)
+      const hostTop = inner ? Number(el?.getBoundingClientRect?.()?.top || 0) : 0
+      const viewportHeight = inner
+        ? Number(el?.clientHeight || 0)
+        : Number(window.innerHeight || 0)
+      const hostBottom = hostTop + Math.max(1, viewportHeight)
+      let best = null
+
+      measuredNodesRef.current.forEach((node, key) => {
+        if (!node?.isConnected) return
+        const rect = node.getBoundingClientRect?.()
+        if (!rect) return
+        const top = Number(rect.top || 0)
+        const bottom = Number(rect.bottom || 0)
+        if (bottom <= hostTop + 1 || top >= hostBottom - 1) return
+
+        const index = Number(keyToIndexRef.current.get(key))
+        if (!Number.isFinite(index)) return
+        const distance = Math.abs(top - hostTop)
+        if (best && (best.distance < distance || (best.distance === distance && best.index <= index))) return
+        best = { key, index, distance, viewportTop: top - hostTop }
+      })
+
+      if (!best?.key) return false
+      pendingVisualAnchorRef.current = {
+        key: best.key,
+        viewportTop: best.viewportTop,
+        inner,
+        scrollEl: inner ? el : null,
+        reason,
+      }
+      emitWindowingDiag('idle_visual_anchor_capture', {
+        key: best.key,
+        reason,
+        viewportTop: Math.round(best.viewportTop),
+      })
+      return true
+    } catch {
+      pendingVisualAnchorRef.current = null
+      return false
+    }
+  }, [
+    active,
+    emitWindowingDiag,
+    hasInnerScrollable,
+    isBrowserFn,
+    isScrollActiveNow,
+    readScrollEl,
+  ])
+
+  const restoreIdleVisualAnchor = useCallback(() => {
+    const snapshot = pendingVisualAnchorRef.current
+    pendingVisualAnchorRef.current = null
+    if (!snapshot?.key || targetLockRef.current?.key || isScrollActiveNow()) return
+
+    try {
+      const node = measuredNodesRef.current.get(snapshot.key)
+      if (!node?.isConnected) return
+
+      const el = readScrollEl()
+      const inner = hasInnerScrollable(el)
+      if (inner !== snapshot.inner) return
+      if (inner && snapshot.scrollEl && el !== snapshot.scrollEl) return
+
+      const hostTop = inner ? Number(el?.getBoundingClientRect?.()?.top || 0) : 0
+      const rect = node.getBoundingClientRect?.()
+      if (!rect) return
+      const nextViewportTop = Number(rect.top || 0) - hostTop
+      const viewportHeight = inner
+        ? Number(el?.clientHeight || 0)
+        : Number(window.innerHeight || 0)
+      const sanityLimit = Math.max(
+        readAnchorDeltaLimit(anchorDeltaMaxPx),
+        Math.round(Math.max(1, viewportHeight) * 1.5),
+      )
+      const delta = resolveForumIdleVisualAnchorDelta(snapshot.viewportTop, nextViewportTop, {
+        ignorePx: anchorDeltaIgnorePx,
+        sanityLimit,
+      })
+      if (delta === null) {
+        emitWindowingDiag('idle_visual_anchor_large_delta_skip', {
+          key: snapshot.key,
+          reason: snapshot.reason,
+          delta: Math.round(nextViewportTop - Number(snapshot.viewportTop || 0)),
+          sanityLimit,
+        })
+        return
+      }
+      if (delta === 0) return
+
+      let applied = 0
+      const now = Date.now()
+      if (inner) {
+        const before = Number(el.scrollTop || 0)
+        const maxScroll = Math.max(0, Number(el.scrollHeight || 0) - Number(el.clientHeight || 0))
+        const next = clamp(before + delta, 0, maxScroll || before + delta)
+        el.scrollTop = next
+        applied = Number(el.scrollTop || 0) - before
+      } else {
+        const doc = document.documentElement
+        const body = document.body
+        const before = Number(window.scrollY || window.pageYOffset || 0)
+        const maxScroll = Math.max(
+          0,
+          Math.max(Number(doc?.scrollHeight || 0), Number(body?.scrollHeight || 0)) - Number(window.innerHeight || 0),
+        )
+        const next = clamp(before + delta, 0, maxScroll || before + delta)
+        window.__forumProgrammaticScrollTs = now
+        window.scrollTo(0, next)
+        applied = next - before
+      }
+
+      emitWindowingDiag('idle_visual_anchor_restore', {
+        key: snapshot.key,
+        reason: snapshot.reason,
+        delta: Math.round(delta),
+        applied: Math.round(applied),
+      })
+    } catch {}
+  }, [
+    anchorDeltaIgnorePx,
+    anchorDeltaMaxPx,
+    emitWindowingDiag,
+    hasInnerScrollable,
+    isScrollActiveNow,
+    readScrollEl,
+  ])
+
+  useLayoutEffect(() => {
+    restoreIdleVisualAnchor()
+  }, [restoreIdleVisualAnchor, win.bottom, win.end, win.start, win.top])
+
   const clearMediaKeepaliveExpiryTimer = useCallback(() => {
     const scheduled = mediaKeepaliveTimerRef.current
     if (scheduled?.id) {
@@ -688,12 +844,14 @@ export default function useForumWindowing({
           expired,
           remaining: mediaKeepaliveRef.current.size,
         })
+        captureIdleVisualAnchor('media_keepalive_expiry')
       }
       try { requestRecalc?.() } catch {}
     }, delay)
 
     mediaKeepaliveTimerRef.current = { id, deadline: nextDeadline }
   }, [
+    captureIdleVisualAnchor,
     clearMediaKeepaliveExpiryTimer,
     emitWindowingDiag,
     isBrowserFn,
@@ -1058,6 +1216,7 @@ export default function useForumWindowing({
             prev.top === next.top &&
             prev.bottom === next.bottom
           ) {
+            pendingVisualAnchorRef.current = null
             return prev
           }
 
@@ -1273,6 +1432,7 @@ export default function useForumWindowing({
           return
         }
 
+        captureIdleVisualAnchor('anchor_flush')
         applyPendingMeasuredHeights('scroll_settled')
 
         const pending = Number(pendingAnchorDeltaRef.current || 0)
@@ -1292,6 +1452,7 @@ export default function useForumWindowing({
     anchorDeltaIgnorePx,
     anchorFlushMs,
     applyAnchoredScrollDelta,
+    captureIdleVisualAnchor,
     applyPendingMeasuredHeights,
     isScrollActiveNow,
     scheduleRecalc,
@@ -1365,7 +1526,9 @@ export default function useForumWindowing({
           try { ro.disconnect() } catch {}
         }
         rosRef.current.delete(key)
-        pendingHeightsRef.current.delete(key)
+        // Virtualization also emits ref(null). Keep any deferred geometry for
+        // this dataset key until the existing idle flush; true dataset removal
+        // is owned by the itemKeys cleanup effect below.
         stableShrinkRef.current.delete(key)
         return
       }
@@ -1445,7 +1608,10 @@ export default function useForumWindowing({
 
           if (Number.isFinite(prev) && prev > 0 && Math.abs(prev - nextHeight) < heightDeltaIgnorePx) {
             pendingHeightsRef.current.delete(key)
-            if (rowGapChanged) scheduleRecalc()
+            if (rowGapChanged) {
+              captureIdleVisualAnchor('row_gap')
+              scheduleRecalc()
+            }
             return
           }
 
@@ -1489,6 +1655,9 @@ export default function useForumWindowing({
             }
           }
 
+          if (!isScrollActiveNow()) {
+            captureIdleVisualAnchor('measured_height')
+          }
           pendingHeightsRef.current.delete(key)
           heightsRef.current.set(key, nextHeight)
           markHeightIndexDirty()
@@ -1544,6 +1713,7 @@ export default function useForumWindowing({
     } catch {}
   }, [
     applyAnchoredScrollDelta,
+    captureIdleVisualAnchor,
     emitWindowingDiag,
     heightDeltaIgnorePx,
     isScrollActiveNow,
@@ -1669,6 +1839,7 @@ export default function useForumWindowing({
 
         scrollActivity.settleTimer = setTimeout(() => {
           scrollActivity.settleTimer = 0
+          scrollActivity.activeUntil = 0
           if (recalcOnScrollSettle) {
             // Preserve the canonical behavior for every existing consumer: once
             // scrolling settles, clear motion bias and perform the normal recalc.
@@ -1677,6 +1848,7 @@ export default function useForumWindowing({
               velocity: 0,
               direction: 0,
             }
+            captureIdleVisualAnchor('scroll_settle')
             scheduleRecalc()
           } else {
             // Video Feed already owns a bounded viewport-safe window on the last
@@ -1759,6 +1931,7 @@ export default function useForumWindowing({
       }
 
       pendingAnchorDeltaRef.current = 0
+      pendingVisualAnchorRef.current = null
       try { pendingHeights.clear() } catch {}
       try { stableShrinks.clear() } catch {}
       scrollActivity.activeUntil = 0
@@ -1766,6 +1939,7 @@ export default function useForumWindowing({
     }
   }, [
     active,
+    captureIdleVisualAnchor,
     clearMediaKeepaliveExpiryTimer,
     emitWindowingDiag,
     getLayoutKey,
