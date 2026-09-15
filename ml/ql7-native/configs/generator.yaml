@@ -1,0 +1,11 @@
+architecture: decoder_only_gqa_transformer
+vocab_size: 81920
+hidden_size: 3072
+layers: 32
+heads: 24
+kv_heads: 8
+intermediate_size: 8192
+max_seq_len: 16384
+target_parameter_class: 3B-8B
+sealed_plan_required: true
+activation_checkpointing: true

@@ -1,0 +1,59 @@
+{
+  "schema": "ql7.native.architecture-config",
+  "schemaVersion": 1,
+  "tokenizer": {
+    "vocab_size": 81920,
+    "algorithm": "byte_bpe",
+    "byte_fallback": true
+  },
+  "normalizer": {
+    "vocab_size": 384,
+    "hidden": 256
+  },
+  "understanding": {
+    "vocab_size": 81920,
+    "hidden_size": 1536,
+    "layers": 24,
+    "heads": 24,
+    "kv_heads": 8,
+    "intermediate_size": 4096,
+    "max_seq_len": 8192,
+    "dropout": 0.0,
+    "rope_theta": 10000.0,
+    "activation_checkpointing": true
+  },
+  "generator": {
+    "vocab_size": 81920,
+    "hidden_size": 3072,
+    "layers": 32,
+    "heads": 24,
+    "kv_heads": 8,
+    "intermediate_size": 8192,
+    "max_seq_len": 16384,
+    "dropout": 0.0,
+    "rope_theta": 10000.0,
+    "activation_checkpointing": true
+  },
+  "critic": {
+    "vocab_size": 81920,
+    "hidden_size": 1024,
+    "layers": 16,
+    "heads": 16,
+    "kv_heads": 4,
+    "intermediate_size": 2816,
+    "max_seq_len": 8192,
+    "dropout": 0.0,
+    "rope_theta": 10000.0,
+    "activation_checkpointing": true
+  },
+  "understandingHeads": {
+    "intents": 256,
+    "topics": 2048,
+    "entity_labels": 96,
+    "discourse": 32,
+    "emotions": 24,
+    "safety": 48,
+    "locale_labels": 32,
+    "embedding_dim": 1536
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ql7": "local-ffmpeg-v68",
+  "ffmpeg": "@ffmpeg/ffmpeg@0.12.15",
+  "core": "@ffmpeg/core@0.12.10",
+  "util": "not-used",
+  "runtimeBase": "/vendor/ffmpeg/ffmpeg.js",
+  "classWorkerVendor": "/vendor/ffmpeg/814.ffmpeg.js",
+  "classWorkerCompat": "/workers/814.ffmpeg.js",
+  "generatedAt": "2026-06-14T11:51:57.809Z"
+}

@@ -1,0 +1,7 @@
+{
+  "schema": "ql7.native.bootstrap-tokenizer",
+  "schemaVersion": 1,
+  "kind": "byte-fallback",
+  "vocabSize": 256,
+  "promotionStatus": "BOOTSTRAP_STRUCTURAL"
+}

@@ -1,0 +1,59 @@
+{
+  "createdAt": "2026-05-24T01:46:48.034Z",
+  "input": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ",
+  "output": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА",
+  "format": "webp",
+  "quality": 82,
+  "width": 350,
+  "height": 350,
+  "totalFiles": 4,
+  "converted": 4,
+  "skipped": 0,
+  "errors": 0,
+  "originalBytes": 8717567,
+  "optimizedBytes": 162844,
+  "savedBytes": 8554723,
+  "savedPercent": 98.13,
+  "files": [
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\On.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\On.webp",
+      "originalBytes": 2210213,
+      "optimizedBytes": 41024,
+      "format": "webp",
+      "width": 350,
+      "height": 350,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Quantum.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Quantum.webp",
+      "originalBytes": 2203511,
+      "optimizedBytes": 41126,
+      "format": "webp",
+      "width": 350,
+      "height": 350,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Si.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Si.webp",
+      "originalBytes": 2159956,
+      "optimizedBytes": 41708,
+      "format": "webp",
+      "width": 350,
+      "height": 350,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Vi.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Vi.webp",
+      "originalBytes": 2143887,
+      "optimizedBytes": 38986,
+      "format": "webp",
+      "width": 350,
+      "height": 350,
+      "keptOriginalBecauseLarger": false
+    }
+  ]
+}

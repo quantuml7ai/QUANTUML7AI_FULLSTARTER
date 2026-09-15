@@ -1,0 +1,41 @@
+# QL7 local Python / ML laboratory (never deployed)
+.venv-ql7/
+.venv/
+.venv-*/
+venv/
+venv-*/
+**/__pycache__/
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/*.py
+**/*.pyc
+**/*.pyo
+ml/ql7-native/
+services/ql7-model-runtime/
+models/ql7-native/
+
+# Model weights, checkpoints and raw calibration corpora
+**/*.pt
+**/*.pth
+**/*.ckpt
+**/*.safetensors
+**/*.onnx
+**/checkpoints/
+**/raw-datasets/
+**/raw_datasets/
+**/datasets/raw/
+
+# Local laboratory evidence and temporary artifacts
+reports/
+audit/
+coverage/
+.codex_tmp/
+.ql7-patch-temp/
+.ql7-patch-work/
+.ql7-backups/
+report.zip
+*.heapsnapshot
+
+# Support simulation runners are local calibration tools, not runtime code
+scripts/ql7-support/

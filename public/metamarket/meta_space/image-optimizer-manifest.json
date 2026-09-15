@@ -1,0 +1,569 @@
+{
+  "createdAt": "2026-05-21T00:29:48.348Z",
+  "input": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ",
+  "output": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА",
+  "format": "webp",
+  "quality": 88,
+  "width": 700,
+  "height": 700,
+  "totalFiles": 55,
+  "converted": 55,
+  "skipped": 0,
+  "errors": 0,
+  "originalBytes": 115919059,
+  "optimizedBytes": 9844572,
+  "savedBytes": 106074487,
+  "savedPercent": 91.51,
+  "files": [
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Abyssarion.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Abyssarion.webp",
+      "originalBytes": 2349015,
+      "optimizedBytes": 236480,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\AstralRelic.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\AstralRelic.webp",
+      "originalBytes": 2160709,
+      "optimizedBytes": 203688,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Aurionis.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Aurionis.webp",
+      "originalBytes": 1741537,
+      "optimizedBytes": 151468,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Azurion.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Azurion.webp",
+      "originalBytes": 2326266,
+      "optimizedBytes": 230184,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Cataclyra.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Cataclyra.webp",
+      "originalBytes": 2229934,
+      "optimizedBytes": 193810,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Celestara.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Celestara.webp",
+      "originalBytes": 2306172,
+      "optimizedBytes": 215474,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Comyra.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Comyra.webp",
+      "originalBytes": 1906065,
+      "optimizedBytes": 132236,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Corevian.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Corevian.webp",
+      "originalBytes": 2477966,
+      "optimizedBytes": 276016,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Coronae.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Coronae.webp",
+      "originalBytes": 2339278,
+      "optimizedBytes": 209808,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\CosmicStringX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\CosmicStringX.webp",
+      "originalBytes": 1765042,
+      "optimizedBytes": 106796,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Cryflame.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Cryflame.webp",
+      "originalBytes": 2360111,
+      "optimizedBytes": 248404,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Cryonix.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Cryonix.webp",
+      "originalBytes": 1819047,
+      "optimizedBytes": 103940,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Cryonys.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Cryonys.webp",
+      "originalBytes": 2298445,
+      "optimizedBytes": 219078,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Cryovex.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Cryovex.webp",
+      "originalBytes": 1988680,
+      "optimizedBytes": 126108,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\CrystalMoon.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\CrystalMoon.webp",
+      "originalBytes": 2023393,
+      "optimizedBytes": 133490,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\CrystalNebula.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\CrystalNebula.webp",
+      "originalBytes": 1862942,
+      "optimizedBytes": 134210,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Dualith.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Dualith.webp",
+      "originalBytes": 2515176,
+      "optimizedBytes": 276922,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Dyseron.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Dyseron.webp",
+      "originalBytes": 2334524,
+      "optimizedBytes": 206124,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Eclipsera.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Eclipsera.webp",
+      "originalBytes": 1460621,
+      "optimizedBytes": 122652,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Elyndros.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Elyndros.webp",
+      "originalBytes": 2331039,
+      "optimizedBytes": 220396,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Emberis.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Emberis.webp",
+      "originalBytes": 2215385,
+      "optimizedBytes": 192378,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Emberith.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Emberith.webp",
+      "originalBytes": 2319760,
+      "optimizedBytes": 253902,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Flareon.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Flareon.webp",
+      "originalBytes": 2164169,
+      "optimizedBytes": 194012,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Fractyra.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Fractyra.webp",
+      "originalBytes": 2023046,
+      "optimizedBytes": 168614,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Glacira.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Glacira.webp",
+      "originalBytes": 2254942,
+      "optimizedBytes": 189354,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Glacirion.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Glacirion.webp",
+      "originalBytes": 2200207,
+      "optimizedBytes": 162826,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\GlacirionPrime.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\GlacirionPrime.webp",
+      "originalBytes": 2507752,
+      "optimizedBytes": 264966,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Glaciron.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Glaciron.webp",
+      "originalBytes": 2203476,
+      "optimizedBytes": 181258,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\hardonix.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\hardonix.webp",
+      "originalBytes": 2399333,
+      "optimizedBytes": 205108,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Ignara.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Ignara.webp",
+      "originalBytes": 2131246,
+      "optimizedBytes": 177348,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\IgnarionPrime.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\IgnarionPrime.webp",
+      "originalBytes": 2400647,
+      "optimizedBytes": 280264,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Inferra.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Inferra.webp",
+      "originalBytes": 2239599,
+      "optimizedBytes": 176374,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Jovara.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Jovara.webp",
+      "originalBytes": 1789417,
+      "optimizedBytes": 92172,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Luminex.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Luminex.webp",
+      "originalBytes": 1696340,
+      "optimizedBytes": 121490,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\LunaCore.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\LunaCore.webp",
+      "originalBytes": 1936503,
+      "optimizedBytes": 105508,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\MagnetarX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\MagnetarX.webp",
+      "originalBytes": 1908445,
+      "optimizedBytes": 157772,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Molthera.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Molthera.webp",
+      "originalBytes": 1951005,
+      "optimizedBytes": 156056,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\NebulaX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\NebulaX.webp",
+      "originalBytes": 1900432,
+      "optimizedBytes": 127654,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Novyra.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Novyra.webp",
+      "originalBytes": 2118561,
+      "optimizedBytes": 188330,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Oblivara.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Oblivara.webp",
+      "originalBytes": 2336573,
+      "optimizedBytes": 204798,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Oceara.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Oceara.webp",
+      "originalBytes": 2284011,
+      "optimizedBytes": 200220,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Pyronyx.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Pyronyx.webp",
+      "originalBytes": 2175636,
+      "optimizedBytes": 139788,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Pyrragon.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Pyrragon.webp",
+      "originalBytes": 2365750,
+      "optimizedBytes": 220912,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Pyrrion.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Pyrrion.webp",
+      "originalBytes": 2105225,
+      "optimizedBytes": 179082,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Satyros.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Satyros.webp",
+      "originalBytes": 2005228,
+      "optimizedBytes": 153394,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\SingularityX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\SingularityX.webp",
+      "originalBytes": 1855057,
+      "optimizedBytes": 127690,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Solaris.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Solaris.webp",
+      "originalBytes": 1656416,
+      "optimizedBytes": 153506,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Solaryx.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Solaryx.webp",
+      "originalBytes": 1813441,
+      "optimizedBytes": 151686,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\SupernovaX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\SupernovaX.webp",
+      "originalBytes": 2111096,
+      "optimizedBytes": 182340,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\TerraPrime.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\TerraPrime.webp",
+      "originalBytes": 2278492,
+      "optimizedBytes": 148962,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Therionis.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Therionis.webp",
+      "originalBytes": 2470347,
+      "optimizedBytes": 275120,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\VoidSphereX.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\VoidSphereX.webp",
+      "originalBytes": 1766754,
+      "optimizedBytes": 123078,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Volcaris.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Volcaris.webp",
+      "originalBytes": 1962702,
+      "optimizedBytes": 137874,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Voltanys.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Voltanys.webp",
+      "originalBytes": 2092685,
+      "optimizedBytes": 185636,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    },
+    {
+      "source": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\ИЗ\\Xylarion.png",
+      "target": "C:\\Users\\staro\\Desktop\\quantuml7ai_fullstarter\\СЮДА\\Xylarion.webp",
+      "originalBytes": 1683419,
+      "optimizedBytes": 117816,
+      "format": "webp",
+      "width": 700,
+      "height": 700,
+      "keptOriginalBecauseLarger": false
+    }
+  ]
+}

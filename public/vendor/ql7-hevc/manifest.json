@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "policy": "ql7-hevc-wasm-fallback-v7-prod",
+  "package": "@hevcjs/core",
+  "version": "1.3.2",
+  "files": {
+    "hevc-decode.js": {
+      "bytes": 45930,
+      "sha256": "f56457ec65383e1e6dcc3f843043c6b0dde2d1e67e4b979d44c3db967ec2394d"
+    },
+    "hevc-decode.wasm": {
+      "bytes": 279844,
+      "sha256": "36b3760ccb877bf0b9535907e0a28bbed870521a606be0e76c246b7bdcdf1da6"
+    },
+    "hevc-decode.mjs": {
+      "bytes": 45965,
+      "sha256": "40cfbe6e8a9a3e7bfac0d8c22fcbb1c443a89c74567644bcbb0e439c9c91da77"
+    }
+  },
+  "derived": {
+    "hevc-decode.mjs": {
+      "source": "hevc-decode.js",
+      "transform": "append-export-default-HEVCDecoderModule-v12"
+    }
+  }
+}

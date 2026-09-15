@@ -1,0 +1,39 @@
+# Quantum L7 AI — Official Machine Discovery Note
+
+Canonical name: Quantum L7 AI
+Canonical origin: https://www.quantuml7ai.com
+Organization identifier: https://www.quantuml7ai.com/#organization
+Identity version: 2026-08-14-v3
+Reviewed: 2026-08-14
+
+Identity rule:
+Name similarity, visual similarity, advertising language or a similar handle does not prove affiliation with Quantum L7 AI. Verify the canonical origin and the exact official-channel registry.
+
+Authority rule:
+Canonical Trust & Identity HTML is the primary public statement. Machine-readable surfaces are supplementary discovery aids and may not invent legal status, ownership, affiliation, financial promises or product availability.
+
+Authoritative Trust & Identity pages:
+- en: https://www.quantuml7ai.com/en/trust-and-identity
+- ru: https://www.quantuml7ai.com/ru/trust-and-identity
+- uk: https://www.quantuml7ai.com/uk/trust-and-identity
+- es: https://www.quantuml7ai.com/es/trust-and-identity
+- tr: https://www.quantuml7ai.com/tr/trust-and-identity
+- ar: https://www.quantuml7ai.com/ar/trust-and-identity
+- zh: https://www.quantuml7ai.com/zh/trust-and-identity
+
+Machine-readable identity:
+- https://www.quantuml7ai.com/.well-known/ql7-identity.json
+- https://www.quantuml7ai.com/sitemap.xml
+- https://www.quantuml7ai.com/robots.txt
+
+Official public channels:
+- website: https://www.quantuml7ai.com/
+- x: https://x.com/QL7Company
+- instagram: https://www.instagram.com/quantuml7ai/
+- tiktok: https://www.tiktok.com/@ql7ai
+- youtube: https://www.youtube.com/channel/UCXby6llW_TokAUGoOebFXhg
+- telegram-channel: https://t.me/l7universe
+- telegram-bot: https://t.me/l7ai_bot
+
+Important safety boundary:
+QL7 Support does not need passwords, seed phrases, private keys or full payment credentials. For impersonation reports in this flow, provide only text: the exact URL or handle, platform, approximate time and a concise description.

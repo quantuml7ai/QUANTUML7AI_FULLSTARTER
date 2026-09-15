@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quantum L7 AI</string>
+    <string name="offline_title">الاتصال الكمي غير متاح</string>
+    <string name="offline_body">تحقق من الشبكة ثم عد إلى Quantum L7 AI دون فقدان جلسة الغلاف.</string>
+    <string name="retry">إعادة المحاولة</string>
+    <string name="blocked_url">يتم فتح هذا الرابط خارج الغلاف الآمن لـ Quantum L7 AI.</string>
+    <string name="maintenance_title">Quantum L7 AI في وضع الخدمة</string>
+    <string name="maintenance_body">الغلاف المحمول متصل، لكن المنصة تجهز مؤقتا حالة أكثر أمانا.</string>
+    <string name="force_update_title">التحديث مطلوب</string>
+    <string name="force_update_body">إصدار Android shell هذا قديم جدا لتشغيل Quantum L7 AI الحالي.</string>
+</resources>

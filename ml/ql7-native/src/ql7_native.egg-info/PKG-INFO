@@ -1,0 +1,5 @@
+Metadata-Version: 2.4
+Name: ql7-native
+Version: 0.1.0
+Summary: QL7-owned native multilingual intelligence training and evaluation stack
+Requires-Python: >=3.11

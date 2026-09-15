@@ -1,0 +1,6 @@
+algorithm: byte_bpe
+vocab_size: 81920
+byte_fallback: true
+normalization: NFKC
+min_frequency: 2
+locales: 32

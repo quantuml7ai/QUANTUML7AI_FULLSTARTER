@@ -1,0 +1,9 @@
+schema: ql7.native.calibration
+schema_version: 1
+methods: [temperature_scaling, platt, isotonic]
+selection_metrics: [nll, brier, ece]
+separate_holdout_required: true
+class_specific_allowed: true
+cost_sensitive_action_policy: true
+unknown_is_first_class: true
+promotion_requires_signed_artifact: true

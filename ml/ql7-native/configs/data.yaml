@@ -1,0 +1,10 @@
+schema: ql7.native.data-governance
+schema_version: 1
+locale_count: 32
+license_required: true
+provenance_required: true
+pii_redaction_required: true
+private_chat_requires_policy_and_consent: true
+near_duplicate_split_isolation: true
+acceptance_holdout_training_forbidden: true
+sampling: temperature_balanced_multilingual
