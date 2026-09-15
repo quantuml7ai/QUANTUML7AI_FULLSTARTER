@@ -7,6 +7,7 @@ import useDmRepliesSeen from './useDmRepliesSeen.js'
 import useDmUnreadState from './useDmUnreadState.js'
 import useDmLocalCache from './useDmLocalCache.js'
 import useDmLoadLifecycle from './useDmLoadLifecycle.js'
+import { patchInboxReplyReactionOverlay } from '../utils/inboxReplyReactionOverlay.js'
 import useDmSeenObservers from './useDmSeenObservers.js'
 import useDmDeleteController from './useDmDeleteController.js'
 import usePublishedPostsModel from '../../feed/hooks/usePublishedPostsModel.js'
@@ -615,6 +616,18 @@ export default function useForumDmRuntime({
   const [serverRepliesHasMore, setServerRepliesHasMore] = useState(false)
   const [serverRepliesLoading, setServerRepliesLoading] = useState(false)
   const [serverRepliesLoaded, setServerRepliesLoaded] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const onReactionOverlay = (event) => {
+      const detail = event?.detail && typeof event.detail === 'object' ? event.detail : null
+      if (!detail) return
+      setServerRepliesToMe((prev) => patchInboxReplyReactionOverlay(prev, detail))
+    }
+    window.addEventListener('forum:post-reaction-overlay', onReactionOverlay)
+    return () => window.removeEventListener('forum:post-reaction-overlay', onReactionOverlay)
+  }, [])
+
   const serverRepliesInFlightRef = useRef(false)
   const serverRepliesKeyRef = useRef('')
   const serverRepliesAutoAttemptKeyRef = useRef('')
